@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +5,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Clock, BookOpen, Target, Award } from "lucide-react";
+import { Clock, BookOpen, Target, Award, ArrowRight } from "lucide-react";
 
 interface Question {
   id: number;
@@ -27,6 +26,7 @@ const SpeedAssessment = ({ onComplete }: { onComplete: (results: any) => void })
   const [currentStep, setCurrentStep] = useState("subject-selection");
   const [timeLeft, setTimeLeft] = useState(0);
   const [startTime, setStartTime] = useState(0);
+  const [actualReadingTime, setActualReadingTime] = useState(0);
   const [answers, setAnswers] = useState<{ [key: number]: number }>({});
   const [currentAssessment, setCurrentAssessment] = useState<AssessmentData | null>(null);
 
@@ -107,6 +107,9 @@ const SpeedAssessment = ({ onComplete }: { onComplete: (results: any) => void })
       const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
       return () => clearTimeout(timer);
     } else if (currentStep === "reading" && timeLeft === 0) {
+      // Auto-advance when time runs out
+      const readingDuration = 60;
+      setActualReadingTime(readingDuration);
       setCurrentStep("questions");
     }
   }, [timeLeft, currentStep]);
@@ -127,6 +130,13 @@ const SpeedAssessment = ({ onComplete }: { onComplete: (results: any) => void })
     setCurrentStep("reading");
   };
 
+  const finishReading = () => {
+    const endTime = Date.now();
+    const readingDuration = (endTime - startTime) / 1000; // Convert to seconds
+    setActualReadingTime(readingDuration);
+    setCurrentStep("questions");
+  };
+
   const handleAnswerChange = (questionId: number, answerIndex: number) => {
     setAnswers({ ...answers, [questionId]: answerIndex });
   };
@@ -139,7 +149,8 @@ const SpeedAssessment = ({ onComplete }: { onComplete: (results: any) => void })
     ).length;
     
     const comprehensionScore = (correctAnswers / currentAssessment.questions.length) * 100;
-    const readingSpeed = currentAssessment.wordCount; // words per minute (1 minute test)
+    // Calculate reading speed based on actual reading time
+    const readingSpeed = Math.round((currentAssessment.wordCount / actualReadingTime) * 60); // words per minute
     
     const results = {
       subject: selectedSubject,
@@ -184,7 +195,7 @@ const SpeedAssessment = ({ onComplete }: { onComplete: (results: any) => void })
           <div className="text-center space-y-2">
             <BookOpen className="h-8 w-8 mx-auto text-purple-600" />
             <h3 className="font-semibold">Read</h3>
-            <p className="text-sm text-muted-foreground">1 minute reading time</p>
+            <p className="text-sm text-muted-foreground">Up to 1 minute reading time</p>
           </div>
           <div className="text-center space-y-2">
             <Target className="h-8 w-8 mx-auto text-blue-600" />
@@ -219,22 +230,26 @@ const SpeedAssessment = ({ onComplete }: { onComplete: (results: any) => void })
         <div className="space-y-4">
           <div className="flex items-start space-x-3">
             <div className="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">1</div>
-            <p>You will have <strong>1 minute</strong> to read a passage about {selectedSubject.toLowerCase()}</p>
+            <p>You will have <strong>up to 1 minute</strong> to read a passage about {selectedSubject.toLowerCase()}</p>
           </div>
           <div className="flex items-start space-x-3">
             <div className="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">2</div>
-            <p>After reading, you'll answer <strong>3 comprehension questions</strong></p>
+            <p>You can <strong>finish early</strong> by clicking "Continue to Questions" when done reading</p>
           </div>
           <div className="flex items-start space-x-3">
             <div className="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">3</div>
-            <p>We'll calculate your reading speed and comprehension score</p>
+            <p>After reading, you'll answer <strong>3 comprehension questions</strong></p>
+          </div>
+          <div className="flex items-start space-x-3">
+            <div className="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">4</div>
+            <p>We'll calculate your reading speed based on your actual reading time</p>
           </div>
         </div>
         
         <div className="bg-blue-50 p-4 rounded-lg">
           <p className="text-sm text-blue-800">
             <strong>Tip:</strong> Read at your normal pace and try to understand the content. 
-            This will help us create a personalized learning experience for you.
+            The faster you finish while maintaining comprehension, the higher your reading speed score.
           </p>
         </div>
         
@@ -259,9 +274,23 @@ const SpeedAssessment = ({ onComplete }: { onComplete: (results: any) => void })
         </div>
         <Progress value={((60 - timeLeft) / 60) * 100} className="mt-2" />
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-6">
         <div className="prose max-w-none">
           <p className="text-lg leading-relaxed">{currentAssessment?.passage}</p>
+        </div>
+        
+        <div className="flex justify-center">
+          <Button 
+            onClick={finishReading}
+            className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 text-lg"
+          >
+            <ArrowRight className="h-5 w-5 mr-2" />
+            Continue to Questions
+          </Button>
+        </div>
+        
+        <div className="text-center text-sm text-muted-foreground">
+          Click "Continue to Questions" when you're done reading, or wait for the timer to finish
         </div>
       </CardContent>
     </Card>
