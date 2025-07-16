@@ -131,6 +131,10 @@ const SpeedAssessment = ({ onComplete }: { onComplete: (results: any) => void })
     setAnswers({ ...answers, [questionId]: answerIndex });
   };
 
+  const proceedToQuestions = () => {
+    setCurrentStep("questions");
+  };
+
   const calculateResults = () => {
     if (!currentAssessment) return;
     
@@ -139,7 +143,12 @@ const SpeedAssessment = ({ onComplete }: { onComplete: (results: any) => void })
     ).length;
     
     const comprehensionScore = (correctAnswers / currentAssessment.questions.length) * 100;
-    const readingSpeed = currentAssessment.wordCount; // words per minute (1 minute test)
+    // Calculate actual reading time in seconds
+    const endTime = Date.now();
+    const actualReadingTimeSeconds = (endTime - startTime) / 1000;
+    const actualReadingTimeMinutes = actualReadingTimeSeconds / 60;
+    // Calculate words per minute based on actual reading time
+    const readingSpeed = Math.round(currentAssessment.wordCount / actualReadingTimeMinutes);
     
     const results = {
       subject: selectedSubject,
@@ -259,9 +268,18 @@ const SpeedAssessment = ({ onComplete }: { onComplete: (results: any) => void })
         </div>
         <Progress value={((60 - timeLeft) / 60) * 100} className="mt-2" />
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-6">
         <div className="prose max-w-none">
           <p className="text-lg leading-relaxed">{currentAssessment?.passage}</p>
+        </div>
+        
+        <div className="flex justify-center">
+          <Button 
+            onClick={proceedToQuestions}
+            className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+          >
+            Continue to Questions
+          </Button>
         </div>
       </CardContent>
     </Card>
