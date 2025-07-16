@@ -1,9 +1,10 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Book, Video, Star, Plus, BookOpen, Youtube } from "lucide-react";
+import { Book, Video, Star, Plus, BookOpen, Youtube, Clock } from "lucide-react";
 import { NotesUpload } from "@/components/NotesUpload";
 import { YouTubeAnalyzer } from "@/components/YouTubeAnalyzer";
 import { StudyGuides } from "@/components/StudyGuides";
@@ -20,7 +21,11 @@ const Index = () => {
     streak: 12,
     totalStudyTime: 45,
     completedSessions: 8,
-    isPremium: false
+    isPremium: false,
+    lastAssessment: {
+      readingSpeed: 185,
+      level: "Intermediate"
+    }
   };
 
   const features = [
@@ -43,6 +48,13 @@ const Index = () => {
       title: "Study Guides",
       description: "AI-generated personalized study guides",
       action: () => setActiveTab("guides"),
+      premium: false
+    },
+    {
+      icon: Clock,
+      title: "Speed Assessment",
+      description: "Test and improve your reading speed",
+      action: () => window.location.href = "/assessment",
       premium: false
     },
     {
@@ -78,7 +90,7 @@ const Index = () => {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
               <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-purple-700">Study Streak</CardTitle>
@@ -115,10 +127,20 @@ const Index = () => {
                   <div className="text-sm text-orange-700 mt-1">75% to next level</div>
                 </CardContent>
               </Card>
+
+              <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-indigo-700">Reading Speed</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-indigo-900">{user.lastAssessment.readingSpeed} WPM</div>
+                  <div className="text-sm text-indigo-700">{user.lastAssessment.level}</div>
+                </CardContent>
+              </Card>
             </div>
 
             {/* Feature Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {features.map((feature, index) => (
                 <Card 
                   key={index} 
