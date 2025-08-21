@@ -7,14 +7,64 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
   }
   public: {
     Tables: {
-      [_ in never]: never
+      notes: {
+        Row: {
+          ai_insights: string | null
+          content: string | null
+          created_at: string
+          difficulty_level: string | null
+          estimated_study_time: number | null
+          file_type: string
+          id: string
+          key_topics: string[] | null
+          original_filename: string
+          processed: boolean | null
+          summary: string | null
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          ai_insights?: string | null
+          content?: string | null
+          created_at?: string
+          difficulty_level?: string | null
+          estimated_study_time?: number | null
+          file_type: string
+          id?: string
+          key_topics?: string[] | null
+          original_filename: string
+          processed?: boolean | null
+          summary?: string | null
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          ai_insights?: string | null
+          content?: string | null
+          created_at?: string
+          difficulty_level?: string | null
+          estimated_study_time?: number | null
+          file_type?: string
+          id?: string
+          key_topics?: string[] | null
+          original_filename?: string
+          processed?: boolean | null
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
