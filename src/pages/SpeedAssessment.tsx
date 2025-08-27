@@ -22,7 +22,7 @@ interface AssessmentData {
   questions: Question[];
 }
 
-const SpeedAssessment = ({ onComplete }: { onComplete: (results: any) => void }) => {
+const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }) => {
   const [selectedSubject, setSelectedSubject] = useState("");
   const [currentStep, setCurrentStep] = useState("subject-selection");
   const [timeLeft, setTimeLeft] = useState(0);
@@ -159,7 +159,7 @@ const SpeedAssessment = ({ onComplete }: { onComplete: (results: any) => void })
       level: readingSpeed > 200 ? "Advanced" : readingSpeed > 150 ? "Intermediate" : "Beginner"
     };
     
-    onComplete(results);
+    onComplete?.(results);
   };
 
   const renderSubjectSelection = () => (

@@ -1,71 +1,165 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, Star, Plus, Check } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BookOpen, Star, Plus, Check, FileText, Video, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+
+interface StudyGuide {
+  id: string;
+  title: string;
+  subject: string;
+  difficulty: string;
+  estimatedTime: string;
+  learningObjectives: string[];
+  topics: Array<{
+    name: string;
+    summary: string;
+    keyPoints: string[];
+    practiceQuestions: string[];
+    completed?: boolean;
+  }>;
+  studyPlan: {
+    week1: string;
+    week2: string;
+    week3: string;
+  };
+  resources: string[];
+  aiInsights: string;
+  createdAt: string;
+  progress: number;
+  lastUpdated?: string;
+  totalTopics?: number;
+  completedTopics?: number;
+  aiRecommendation?: string;
+}
 
 export const StudyGuides = () => {
-  const [studyGuides, setStudyGuides] = useState([
-    {
-      id: 1,
-      title: "Psychology Fundamentals Mastery",
-      subject: "Psychology",
-      progress: 65,
-      totalTopics: 12,
-      completedTopics: 8,
-      estimatedTime: "3h 20m",
-      difficulty: "Intermediate",
-      lastUpdated: "2 days ago",
-      aiRecommendation: "Focus on cognitive biases section - detected knowledge gap",
-      topics: [
-        { name: "Introduction to Psychology", completed: true },
-        { name: "Research Methods", completed: true },
-        { name: "Biological Psychology", completed: true },
-        { name: "Sensation and Perception", completed: false },
-        { name: "Learning and Memory", completed: false }
-      ]
-    },
-    {
-      id: 2,
-      title: "Calculus Complete Guide",
-      subject: "Mathematics",
-      progress: 40,
-      totalTopics: 15,
-      completedTopics: 6,
-      estimatedTime: "5h 45m",
-      difficulty: "Advanced",
-      lastUpdated: "1 week ago",
-      aiRecommendation: "Practice more integration problems - low confidence detected",
-      topics: [
-        { name: "Limits and Continuity", completed: true },
-        { name: "Derivatives", completed: true },
-        { name: "Applications of Derivatives", completed: false },
-        { name: "Integration", completed: false },
-        { name: "Series and Sequences", completed: false }
-      ]
-    },
-    {
-      id: 3,
-      title: "World History Timeline",
-      subject: "History",
-      progress: 85,
-      totalTopics: 10,
-      completedTopics: 8,
-      estimatedTime: "2h 15m",
-      difficulty: "Beginner",
-      lastUpdated: "3 days ago",
-      aiRecommendation: "Excellent progress! Review Industrial Revolution for final mastery",
-      topics: [
-        { name: "Ancient Civilizations", completed: true },
-        { name: "Medieval Period", completed: true },
-        { name: "Renaissance", completed: true },
-        { name: "Industrial Revolution", completed: false },
-        { name: "Modern Era", completed: true }
-      ]
+  const [studyGuides, setStudyGuides] = useState<StudyGuide[]>([]);
+  const [sourceNotes, setSourceNotes] = useState<any[]>([]);
+  const [selectedSource, setSelectedSource] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const { toast } = useToast();
+
+  // Load user's notes and existing study guides
+  useEffect(() => {
+    loadSourceContent();
+    loadStudyGuides();
+  }, []);
+
+  const loadSourceContent = async () => {
+    try {
+      const { data: notes, error } = await supabase
+        .from('notes')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setSourceNotes(notes || []);
+    } catch (error) {
+      console.error('Error loading source content:', error);
     }
-  ]);
+  };
+
+  const loadStudyGuides = async () => {
+    // For now, use mock data. In production, this would load from database
+    const mockGuides: StudyGuide[] = [
+      {
+        id: "1",
+        title: "AI-Generated Study Guide",
+        subject: "Computer Science",
+        difficulty: "Intermediate", 
+        estimatedTime: "3h 30m",
+        learningObjectives: [
+          "Understand core AI concepts",
+          "Apply machine learning principles",
+          "Analyze algorithm performance"
+        ],
+        topics: [
+          {
+            name: "Machine Learning Basics",
+            summary: "Introduction to ML algorithms and concepts",
+            keyPoints: ["Supervised learning", "Unsupervised learning", "Model evaluation"],
+            practiceQuestions: ["What is overfitting?", "Compare classification vs regression"],
+            completed: false
+          }
+        ],
+        studyPlan: {
+          week1: "Master foundational concepts and terminology",
+          week2: "Practice implementing basic algorithms",
+          week3: "Work on real-world applications and case studies"
+        },
+        resources: ["Original uploaded notes", "Recommended online courses"],
+        aiInsights: "Focus on hands-on practice to reinforce theoretical concepts. Consider working through coding examples.",
+        createdAt: "2024-01-15",
+        progress: 45,
+        lastUpdated: "2 days ago",
+        totalTopics: 3,
+        completedTopics: 1,
+        aiRecommendation: "Focus on hands-on practice to reinforce theoretical concepts. Consider working through coding examples."
+      }
+    ];
+    setStudyGuides(mockGuides);
+  };
+
+  const generateStudyGuide = async () => {
+    if (!selectedSource) {
+      toast({
+        title: "Select source material",
+        description: "Please choose a note or content to generate a study guide from.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+
+    try {
+      const sourceNote = sourceNotes.find(note => note.id === selectedSource);
+      if (!sourceNote) throw new Error('Source note not found');
+
+      const { data, error } = await supabase.functions.invoke('generate-study-guide', {
+        body: {
+          content: sourceNote.content || sourceNote.summary,
+          title: sourceNote.title,
+          contentType: 'uploaded notes'
+        }
+      });
+
+      if (error) throw error;
+
+      const newGuide: StudyGuide = {
+        id: Date.now().toString(),
+        ...data,
+        createdAt: new Date().toISOString(),
+        progress: 0
+      };
+
+      setStudyGuides(prev => [newGuide, ...prev]);
+      setShowCreateForm(false);
+      setSelectedSource("");
+
+      toast({
+        title: "Study guide generated!",
+        description: "Your personalized study guide is ready for use."
+      });
+
+    } catch (error: any) {
+      console.error('Error generating study guide:', error);
+      toast({
+        title: "Generation failed",
+        description: "Failed to generate study guide. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -99,14 +193,65 @@ export const StudyGuides = () => {
           <div className="p-4 bg-gradient-to-br from-green-100 to-blue-100 rounded-full mb-4">
             <Plus className="h-6 w-6 text-green-600" />
           </div>
-          <h3 className="text-lg font-semibold mb-2">Create New Study Guide</h3>
-          <p className="text-muted-foreground text-center mb-4">
-            Generate a personalized study guide from your notes or choose a topic
-          </p>
-          <Button className="bg-gradient-to-r from-green-500 to-blue-500">
-            <Plus className="h-4 w-4 mr-2" />
-            Generate Guide
-          </Button>
+          {showCreateForm ? (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold mb-2">Generate Study Guide</h3>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Select source material:</label>
+                <Select value={selectedSource} onValueChange={setSelectedSource}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose from your uploaded notes" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sourceNotes.map((note) => (
+                      <SelectItem key={note.id} value={note.id}>
+                        <div className="flex items-center space-x-2">
+                          <FileText className="h-4 w-4" />
+                          <span>{note.title}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex space-x-2">
+                <Button 
+                  onClick={generateStudyGuide}
+                  className="bg-gradient-to-r from-green-500 to-blue-500"
+                  disabled={isGenerating || !selectedSource}
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Generate Guide
+                    </>
+                  )}
+                </Button>
+                <Button variant="outline" onClick={() => setShowCreateForm(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <h3 className="text-lg font-semibold mb-2">Create New Study Guide</h3>
+              <p className="text-muted-foreground text-center mb-4">
+                Generate a personalized study guide from your notes or choose a topic
+              </p>
+              <Button 
+                className="bg-gradient-to-r from-green-500 to-blue-500"
+                onClick={() => setShowCreateForm(true)}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Generate Guide
+              </Button>
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -128,7 +273,7 @@ export const StudyGuides = () => {
                       {guide.difficulty}
                     </Badge>
                     <span className="text-sm text-muted-foreground">
-                      Updated {guide.lastUpdated}
+                      Updated {guide.lastUpdated || 'Recently'}
                     </span>
                   </div>
                 </div>
@@ -142,7 +287,7 @@ export const StudyGuides = () => {
               {/* Progress Bar */}
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>Progress: {guide.completedTopics}/{guide.totalTopics} topics</span>
+                  <span>Progress: {guide.completedTopics || 0}/{guide.totalTopics || guide.topics.length} topics</span>
                   <span>Est. time: {guide.estimatedTime}</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
@@ -183,7 +328,7 @@ export const StudyGuides = () => {
                   <Star className="h-4 w-4 text-blue-600" />
                   <h4 className="font-medium text-blue-800">AI Recommendation</h4>
                 </div>
-                <p className="text-sm text-blue-700">{guide.aiRecommendation}</p>
+                <p className="text-sm text-blue-700">{guide.aiInsights}</p>
               </div>
 
               {/* Action Buttons */}

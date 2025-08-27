@@ -4,81 +4,55 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useState } from "react";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import Index from "./pages/Index";
-import SpeedAssessment from "./pages/SpeedAssessment";
-import AssessmentResults from "./components/AssessmentResults";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import SpeedAssessment from "./pages/SpeedAssessment";
 
 const queryClient = new QueryClient();
 
-const App = () => {
-  const [assessmentCompleted, setAssessmentCompleted] = useState(false);
-  const [assessmentResults, setAssessmentResults] = useState(null);
-  const [showResults, setShowResults] = useState(false);
+const AppRoutes = () => {
+  const { user, loading } = useAuth();
 
-  const handleAssessmentComplete = (results: any) => {
-    setAssessmentResults(results);
-    setShowResults(true);
-  };
-
-  const handleRetakeAssessment = () => {
-    setShowResults(false);
-    setAssessmentCompleted(false);
-    setAssessmentResults(null);
-  };
-
-  const handleContinueToDashboard = () => {
-    setAssessmentCompleted(true);
-    setShowResults(false);
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+          <p className="text-muted-foreground">Loading your learning dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route 
-              path="/" 
-              element={
-                !assessmentCompleted ? (
-                  showResults ? (
-                    <AssessmentResults 
-                      results={assessmentResults} 
-                      onRetakeAssessment={handleRetakeAssessment}
-                      onContinueToDashboard={handleContinueToDashboard}
-                    />
-                  ) : (
-                    <SpeedAssessment onComplete={handleAssessmentComplete} />
-                  )
-                ) : (
-                  <Index />
-                )
-              } 
-            />
-            <Route 
-              path="/assessment" 
-              element={
-                showResults ? (
-                  <AssessmentResults 
-                    results={assessmentResults} 
-                    onRetakeAssessment={handleRetakeAssessment}
-                    onContinueToDashboard={handleContinueToDashboard}
-                  />
-                ) : (
-                  <SpeedAssessment onComplete={handleAssessmentComplete} />
-                )
-              } 
-            />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <Routes>
+      {user ? (
+        <>
+          <Route path="/" element={<Index />} />
+          <Route path="/assessment" element={<SpeedAssessment />} />
+        </>
+      ) : (
+        <Route path="*" element={<Auth />} />
+      )}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 };
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <AuthProvider>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </AuthProvider>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
 export default App;

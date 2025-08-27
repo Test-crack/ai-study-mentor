@@ -4,20 +4,25 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Book, Video, Star, Plus, BookOpen, Youtube, Clock } from "lucide-react";
+import { Book, Video, Star, Plus, BookOpen, Youtube, Clock, LogOut } from "lucide-react";
 import { NotesUpload } from "@/components/NotesUpload";
 import { YouTubeAnalyzer } from "@/components/YouTubeAnalyzer";
 import { StudyGuides } from "@/components/StudyGuides";
 import { PremiumModal } from "@/components/PremiumModal";
 import { ProgressDashboard } from "@/components/ProgressDashboard";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const { user, signOut } = useAuth();
 
-  // Mock user data - in real app this would come from auth/database
-  const user = {
-    name: "Alex",
+  // Extract user name from email (first part before @)
+  const userName = user?.email?.split('@')[0] || 'Student';
+
+  // Mock user data for demo - in production this would come from database
+  const userData = {
+    name: userName,
     streak: 12,
     totalStudyTime: 45,
     completedSessions: 8,
@@ -82,7 +87,7 @@ const Index = () => {
             {/* Welcome Section */}
             <div className="text-center space-y-4">
               <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                Welcome back, {user.name}! 🎓
+                Welcome back, {userData.name}! 🎓
               </h1>
               <p className="text-xl text-muted-foreground">
                 Your AI-powered learning companion is ready to help you excel
@@ -96,7 +101,7 @@ const Index = () => {
                   <CardTitle className="text-sm font-medium text-purple-700">Study Streak</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-purple-900">{user.streak} days</div>
+                  <div className="text-2xl font-bold text-purple-900">{userData.streak} days</div>
                 </CardContent>
               </Card>
               
@@ -105,7 +110,7 @@ const Index = () => {
                   <CardTitle className="text-sm font-medium text-blue-700">Study Time</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-blue-900">{user.totalStudyTime}h</div>
+                  <div className="text-2xl font-bold text-blue-900">{userData.totalStudyTime}h</div>
                 </CardContent>
               </Card>
               
@@ -114,7 +119,7 @@ const Index = () => {
                   <CardTitle className="text-sm font-medium text-green-700">Sessions</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-900">{user.completedSessions}</div>
+                  <div className="text-2xl font-bold text-green-900">{userData.completedSessions}</div>
                 </CardContent>
               </Card>
               
@@ -133,8 +138,8 @@ const Index = () => {
                   <CardTitle className="text-sm font-medium text-indigo-700">Reading Speed</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-indigo-900">{user.lastAssessment.readingSpeed} WPM</div>
-                  <div className="text-sm text-indigo-700">{user.lastAssessment.level}</div>
+                  <div className="text-2xl font-bold text-indigo-900">{userData.lastAssessment.readingSpeed} WPM</div>
+                  <div className="text-sm text-indigo-700">{userData.lastAssessment.level}</div>
                 </CardContent>
               </Card>
             </div>
@@ -147,7 +152,7 @@ const Index = () => {
                   className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 relative overflow-hidden"
                   onClick={feature.action}
                 >
-                  {feature.premium && !user.isPremium && (
+                  {feature.premium && !userData.isPremium && (
                     <Badge className="absolute top-3 right-3 bg-gradient-to-r from-purple-500 to-pink-500">
                       Premium
                     </Badge>
@@ -243,7 +248,18 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              {!user.isPremium && (
+              <span className="text-sm text-muted-foreground">
+                {user?.email}
+              </span>
+              <Button 
+                variant="ghost" 
+                onClick={signOut}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+              {!userData.isPremium && (
                 <Button 
                   onClick={() => setShowPremiumModal(true)}
                   className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"

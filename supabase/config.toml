@@ -39,3 +39,6 @@ verify_jwt = false
 
 [functions.analyze-youtube]
 verify_jwt = false
+
+[functions.generate-study-guide]
+verify_jwt = false
