@@ -36,3 +36,6 @@ refresh_token_reuse_interval = 10
 
 [functions.analyze-document]
 verify_jwt = false
+
+[functions.analyze-youtube]
+verify_jwt = false

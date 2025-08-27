@@ -5,42 +5,48 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Youtube, Star, Video, Book } from "lucide-react";
+import { Youtube, Star, Video, Book, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+
+interface AnalyzedVideo {
+  id: string | number;
+  title: string;
+  url: string;
+  duration: string;
+  summary: string;
+  keyTopics: string[];
+  studyTime: string;
+  difficulty: string;
+  transcript: string;
+  aiInsights: string;
+  processing?: boolean;
+}
 
 export const YouTubeAnalyzer = () => {
   const [videoUrl, setVideoUrl] = useState("");
-  const [analyzedVideos, setAnalyzedVideos] = useState([
-    {
-      id: 1,
-      title: "MIT OpenCourseWare: Linear Algebra",
-      url: "https://youtube.com/watch?v=example1",
-      duration: "1h 23m",
-      summary: "Comprehensive introduction to linear algebra covering vector spaces, matrices, and eigenvalues.",
-      keyTopics: ["Vector Spaces", "Matrix Operations", "Eigenvalues"],
-      studyTime: "45 min",
-      difficulty: "Advanced",
-      transcript: "Available",
-      aiInsights: "Complex mathematical concepts detected. Recommend breaking into 3 study sessions."
-    },
-    {
-      id: 2,
-      title: "Crash Course: World History",
-      url: "https://youtube.com/watch?v=example2",
-      duration: "12m 34s",
-      summary: "Overview of major historical events and their interconnections through time.",
-      keyTopics: ["Ancient Civilizations", "Trade Routes", "Cultural Exchange"],
-      studyTime: "20 min",
-      difficulty: "Beginner",
-      transcript: "Available",
-      aiInsights: "Great for visual learners. Create timeline for better understanding."
-    }
-  ]);
+  const [analyzedVideos, setAnalyzedVideos] = useState<AnalyzedVideo[]>([]);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const { toast } = useToast();
 
-  const handleAnalyzeVideo = () => {
+  const handleAnalyzeVideo = async () => {
     if (!videoUrl) return;
+
+    // Validate YouTube URL
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/;
+    if (!youtubeRegex.test(videoUrl)) {
+      toast({
+        title: "Invalid URL",
+        description: "Please enter a valid YouTube URL",
+        variant: "destructive"
+      });
+      return;
+    }
     
-    // Simulate video analysis
-    const newVideo = {
+    setIsAnalyzing(true);
+    
+    // Add processing video to the list immediately
+    const processingVideo: AnalyzedVideo = {
       id: Date.now(),
       title: "Analyzing video...",
       url: videoUrl,
@@ -50,11 +56,65 @@ export const YouTubeAnalyzer = () => {
       studyTime: "Calculating...",
       difficulty: "TBD",
       transcript: "Extracting...",
-      aiInsights: "Please wait while we analyze the content and create your personalized study guide..."
+      aiInsights: "Please wait while we analyze the content and create your personalized study guide...",
+      processing: true
     };
     
-    setAnalyzedVideos([newVideo, ...analyzedVideos]);
+    setAnalyzedVideos(prev => [processingVideo, ...prev]);
+    const currentUrl = videoUrl;
     setVideoUrl("");
+
+    try {
+      // Call the Supabase edge function
+      const { data, error } = await supabase.functions.invoke('analyze-youtube', {
+        body: { videoUrl: currentUrl }
+      });
+
+      if (error) {
+        console.error('Analysis error:', error);
+        throw new Error(error.message || 'Failed to analyze video');
+      }
+
+      const analysis = data.error ? data.fallback : data;
+      
+      // Update the processing video with real analysis
+      const analyzedVideo: AnalyzedVideo = {
+        id: processingVideo.id,
+        title: analysis.title,
+        url: currentUrl,
+        duration: analysis.duration,
+        summary: analysis.summary,
+        keyTopics: analysis.keyTopics,
+        studyTime: analysis.studyTime,
+        difficulty: analysis.difficulty,
+        transcript: analysis.transcript,
+        aiInsights: analysis.aiInsights,
+        processing: false
+      };
+
+      setAnalyzedVideos(prev => prev.map(video => 
+        video.id === processingVideo.id ? analyzedVideo : video
+      ));
+
+      toast({
+        title: "Analysis complete!",
+        description: "Your video has been analyzed and study materials are ready.",
+      });
+
+    } catch (error) {
+      console.error('Error analyzing video:', error);
+      
+      // Remove the processing video and show error
+      setAnalyzedVideos(prev => prev.filter(video => video.id !== processingVideo.id));
+      
+      toast({
+        title: "Analysis failed",
+        description: "Failed to analyze the video. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   return (
@@ -90,9 +150,16 @@ export const YouTubeAnalyzer = () => {
             <Button 
               onClick={handleAnalyzeVideo}
               className="bg-gradient-to-r from-red-500 to-purple-500"
-              disabled={!videoUrl}
+              disabled={!videoUrl || isAnalyzing}
             >
-              Analyze
+              {isAnalyzing ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                "Analyze"
+              )}
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
@@ -104,7 +171,18 @@ export const YouTubeAnalyzer = () => {
       {/* Analyzed Videos */}
       <div className="space-y-4">
         <h3 className="text-xl font-semibold">Your Video Library</h3>
-        {analyzedVideos.map((video) => (
+        {analyzedVideos.length === 0 ? (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <Youtube className="h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground text-center">
+                No videos analyzed yet.<br />
+                Paste a YouTube URL above to get started!
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          analyzedVideos.map((video) => (
           <Card key={video.id} className="hover:shadow-lg transition-all duration-300">
             <CardHeader>
               <div className="flex justify-between items-start">
@@ -112,6 +190,9 @@ export const YouTubeAnalyzer = () => {
                   <CardTitle className="flex items-center space-x-2">
                     <Video className="h-5 w-5 text-red-500" />
                     <span>{video.title}</span>
+                    {video.processing && (
+                      <Loader2 className="h-4 w-4 animate-spin text-purple-600" />
+                    )}
                   </CardTitle>
                   <CardDescription className="mt-2">{video.summary}</CardDescription>
                 </div>
@@ -161,21 +242,22 @@ export const YouTubeAnalyzer = () => {
                 <span className="text-sm text-muted-foreground">
                   Recommended study time: {video.studyTime}
                 </span>
-                <div className="flex space-x-2">
-                  <Button variant="outline" size="sm">
-                    Create Notes
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    Generate Quiz
-                  </Button>
-                  <Button size="sm" className="bg-gradient-to-r from-red-500 to-purple-500">
-                    Start Learning
-                  </Button>
-                </div>
+                  <div className="flex space-x-2">
+                    <Button variant="outline" size="sm" disabled={video.processing}>
+                      Create Notes
+                    </Button>
+                    <Button variant="outline" size="sm" disabled={video.processing}>
+                      Generate Quiz
+                    </Button>
+                    <Button size="sm" className="bg-gradient-to-r from-red-500 to-purple-500" disabled={video.processing}>
+                      Start Learning
+                    </Button>
+                  </div>
               </div>
             </CardContent>
           </Card>
-        ))}
+          ))
+        )}
       </div>
 
       {/* Feature Highlights */}
