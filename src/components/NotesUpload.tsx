@@ -229,6 +229,11 @@ export const NotesUpload = () => {
             variant: "default"
           });
         }
+        console.log('About to update database with:', {
+  highlights: analysisResult.highlights,
+  keyConcepts: analysisResult.keyConcepts,
+  studyGuide: analysisResult.studyGuide
+});
 
         const { error: updateError } = await supabase
           .from('notes')
@@ -246,9 +251,16 @@ export const NotesUpload = () => {
           })
           .eq('id', noteRecord.id);
 
-        if (updateError) {
-          console.error('Update error:', updateError);
-        }
+       console.log('Database update result:', { updateError });
+
+if (updateError) {
+  console.error('Update error details:', updateError);
+  toast({
+    title: "Database Update Error",
+    description: updateError.message,
+    variant: "destructive"
+  });
+}
 
         await loadNotes();
       }
