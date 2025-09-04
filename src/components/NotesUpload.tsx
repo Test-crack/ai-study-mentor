@@ -194,12 +194,15 @@ export const NotesUpload = () => {
 
         let analysisResult;
         if (analysisError || !analysis) {
+          console.error('AI analysis failed:', analysisError);
+          
+          // Fallback analysis for demo purposes
           analysisResult = {
-            summary: "Document successfully uploaded and processed.",
-            keyTopics: ["Study Material", "Educational Content"],
+            summary: "Document successfully uploaded and processed. Contains educational content suitable for study.",
+            keyTopics: ["Study Material", "Educational Content", "Learning Resource"],
             difficultyLevel: "Intermediate",
             estimatedStudyTime: 15,
-            aiInsights: "Review the material systematically.",
+            aiInsights: "Review the material systematically. Break down complex concepts into smaller parts for better understanding.",
             highlights: [],
             keyConcepts: [],
             studyGuide: {
@@ -209,28 +212,23 @@ export const NotesUpload = () => {
               studyTips: ["Use active recall"]
             }
           };
+          
+          toast({
+            title: "Analysis completed with fallback",
+            description: "Document uploaded successfully, using basic analysis",
+            variant: "default"
+          });
         } else {
-          // Ensure the analysis has the expected structure
-          analysisResult = {
-            summary: analysis.summary || "Document analyzed successfully",
-            keyTopics: Array.isArray(analysis.keyTopics) ? analysis.keyTopics : ["Study Material"],
-            difficultyLevel: analysis.difficultyLevel || "Intermediate",
-            estimatedStudyTime: analysis.estimatedStudyTime || 15,
-            aiInsights: analysis.aiInsights || "Review systematically",
-            highlights: Array.isArray(analysis.highlights) ? analysis.highlights : [],
-            keyConcepts: Array.isArray(analysis.keyConcepts) ? analysis.keyConcepts : [],
-            studyGuide: analysis.studyGuide && typeof analysis.studyGuide === 'object' 
-              ? analysis.studyGuide 
-              : {
-                  quickReview: ["Review main concepts"],
-                  mustKnow: ["Key definitions"],
-                  commonMistakes: ["Don't skip examples"],
-                  studyTips: ["Use active recall"]
-                }
-          };
+          // USE THE EXACT DATA FROM EDGE FUNCTION
+          analysisResult = analysis;
+          console.log('Using Edge Function analysis:', analysisResult);
+          
+          toast({
+            title: "AI Analysis Complete!",
+            description: "Your document has been analyzed successfully",
+            variant: "default"
+          });
         }
-
-        console.log('Validated analysis result:', analysisResult);
 
         const { error: updateError } = await supabase
           .from('notes')
