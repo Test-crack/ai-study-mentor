@@ -210,8 +210,27 @@ export const NotesUpload = () => {
             }
           };
         } else {
-          analysisResult = analysis;
+          // Ensure the analysis has the expected structure
+          analysisResult = {
+            summary: analysis.summary || "Document analyzed successfully",
+            keyTopics: Array.isArray(analysis.keyTopics) ? analysis.keyTopics : ["Study Material"],
+            difficultyLevel: analysis.difficultyLevel || "Intermediate",
+            estimatedStudyTime: analysis.estimatedStudyTime || 15,
+            aiInsights: analysis.aiInsights || "Review systematically",
+            highlights: Array.isArray(analysis.highlights) ? analysis.highlights : [],
+            keyConcepts: Array.isArray(analysis.keyConcepts) ? analysis.keyConcepts : [],
+            studyGuide: analysis.studyGuide && typeof analysis.studyGuide === 'object' 
+              ? analysis.studyGuide 
+              : {
+                  quickReview: ["Review main concepts"],
+                  mustKnow: ["Key definitions"],
+                  commonMistakes: ["Don't skip examples"],
+                  studyTips: ["Use active recall"]
+                }
+          };
         }
+
+        console.log('Validated analysis result:', analysisResult);
 
         const { error: updateError } = await supabase
           .from('notes')
