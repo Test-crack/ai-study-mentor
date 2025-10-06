@@ -9,6 +9,8 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import SpeedAssessment from "./pages/SpeedAssessment";
+import PricingPage from "./components/payment/PricingPage";
+import PaymentSuccess from "./components/payment/PaymentSuccess";
 
 const queryClient = new QueryClient();
 
@@ -32,9 +34,15 @@ const AppRoutes = () => {
         <>
           <Route path="/" element={<Index />} />
           <Route path="/assessment" element={<SpeedAssessment />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/payment/success" element={<PaymentSuccess />} />
         </>
       ) : (
-        <Route path="*" element={<Auth />} />
+        <>
+          <Route path="/" element={<Auth />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="*" element={<Auth />} />
+        </>
       )}
       <Route path="*" element={<NotFound />} />
     </Routes>
