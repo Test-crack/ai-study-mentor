@@ -7,7 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Youtube, Star, Video, Book, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+
+interface TranscriptSegment {
+  text: string;
+  offset: number;
+  duration: number;
+}
 
 interface AnalyzedVideo {
   id: string | number;
@@ -18,9 +23,13 @@ interface AnalyzedVideo {
   keyTopics: string[];
   studyTime: string;
   difficulty: string;
-  transcript: string;
+  transcript: string; // "Available" | "Unavailable" for quick status display
   aiInsights: string;
   processing?: boolean;
+  transcriptSegments?: TranscriptSegment[]; // raw segments returned by backend
+  videoId?: string; // backend video identifier returned by /api/extract
+  notesMarkdown?: string; // generated study material markdown
+  notesProcessing?: boolean; // generation in progress
 }
 
 export const YouTubeAnalyzer = () => {
@@ -65,31 +74,46 @@ export const YouTubeAnalyzer = () => {
     setVideoUrl("");
 
     try {
-      // Call the Supabase edge function
-      const { data, error } = await supabase.functions.invoke('analyze-youtube', {
-        body: { videoUrl: currentUrl }
+      // Call the backend extract endpoint to fetch raw transcript
+      const backendUrl = (import.meta as any).env?.VITE_BACKEND_URL || 'http://localhost:4000';
+      const response = await fetch(`${backendUrl}/api/extract`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: currentUrl }),
       });
 
-      if (error) {
-        console.error('Analysis error:', error);
-        throw new Error(error.message || 'Failed to analyze video');
+      if (!response.ok) {
+        let errorMessage = `Request failed with status ${response.status}`;
+        try {
+          const errJson = await response.json();
+          if (errJson?.error) errorMessage = errJson.error;
+        } catch {}
+        console.error('Extract API error:', errorMessage);
+        throw new Error(errorMessage);
       }
 
-      const analysis = data.error ? data.fallback : data;
-      
-      // Update the processing video with real analysis
+      const data = await response.json();
+      // data is expected to be: { status, videoId, transcript: [{ text, offset, duration }], message }
+      const segments = Array.isArray(data?.transcript) ? data.transcript as TranscriptSegment[] : [];
+      const mergedText = segments.map(s => s?.text).filter(Boolean).join(' ');
+
+      // Update the processing video with transcript availability and raw segments for later use
       const analyzedVideo: AnalyzedVideo = {
         id: processingVideo.id,
-        title: analysis.title,
+        title: `YouTube Video (${data?.videoId ?? 'unknown'})`,
         url: currentUrl,
-        duration: analysis.duration,
-        summary: analysis.summary,
-        keyTopics: analysis.keyTopics,
-        studyTime: analysis.studyTime,
-        difficulty: analysis.difficulty,
-        transcript: analysis.transcript,
-        aiInsights: analysis.aiInsights,
-        processing: false
+        duration: 'Unknown',
+        summary: data?.message ?? 'Transcript fetched successfully.',
+        keyTopics: [],
+        studyTime: 'TBD',
+        difficulty: 'TBD',
+        transcript: mergedText ? 'Available' : 'Unavailable',
+        aiInsights: 'Transcript fetched successfully. Further analysis pending.',
+        processing: false,
+        transcriptSegments: segments,
+        videoId: data?.videoId,
       };
 
       setAnalyzedVideos(prev => prev.map(video => 
@@ -97,8 +121,8 @@ export const YouTubeAnalyzer = () => {
       ));
 
       toast({
-        title: "Analysis complete!",
-        description: "Your video has been analyzed and study materials are ready.",
+        title: "Transcript fetched",
+        description: "Raw transcript received from backend.",
       });
 
     } catch (error) {
@@ -114,6 +138,62 @@ export const YouTubeAnalyzer = () => {
       });
     } finally {
       setIsAnalyzing(false);
+    }
+  };
+
+  const handleCreateNotes = async (video: AnalyzedVideo) => {
+    if (!video.videoId || !video.transcriptSegments || video.transcriptSegments.length === 0) {
+      toast({
+        title: "Transcript not available",
+        description: "Please extract the transcript before generating notes.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Mark this video's notes as processing
+    setAnalyzedVideos(prev => prev.map(v => v.id === video.id ? { ...v, notesProcessing: true } : v));
+
+    try {
+      const backendUrl = (import.meta as any).env?.VITE_BACKEND_URL || 'http://localhost:4000';
+      const response = await fetch(`${backendUrl}/api/summarize`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          videoId: video.videoId,
+          transcript: video.transcriptSegments,
+          language: 'en',
+        }),
+      });
+
+      if (!response.ok) {
+        let errorMessage = `Request failed with status ${response.status}`;
+        try {
+          const errJson = await response.json();
+          if (errJson?.error) errorMessage = errJson.error;
+        } catch {}
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
+      const markdown: string = data?.markdown || '';
+
+      setAnalyzedVideos(prev => prev.map(v => v.id === video.id ? { ...v, notesMarkdown: markdown, notesProcessing: false } : v));
+
+      toast({
+        title: "Notes ready",
+        description: data?.message || "Study material generated successfully.",
+      });
+    } catch (err) {
+      console.error('Error generating notes:', err);
+      setAnalyzedVideos(prev => prev.map(v => v.id === video.id ? { ...v, notesProcessing: false } : v));
+      toast({
+        title: "Failed to generate notes",
+        description: err instanceof Error ? err.message : 'Unexpected error',
+        variant: "destructive",
+      });
     }
   };
 
@@ -237,14 +317,34 @@ export const YouTubeAnalyzer = () => {
                 <p className="text-sm text-purple-700">{video.aiInsights}</p>
               </div>
 
+              {/* Study Notes (Markdown) */}
+              {video.notesMarkdown && (
+                <div className="p-4 rounded-lg border bg-white">
+                  <h4 className="font-medium mb-2">Study Notes</h4>
+                  <pre className="whitespace-pre-wrap text-sm">{video.notesMarkdown}</pre>
+                </div>
+              )}
+
               {/* Study Actions */}
               <div className="flex justify-between items-center pt-4 border-t">
                 <span className="text-sm text-muted-foreground">
                   Recommended study time: {video.studyTime}
                 </span>
                   <div className="flex space-x-2">
-                    <Button variant="outline" size="sm" disabled={video.processing}>
-                      Create Notes
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      disabled={video.processing || video.notesProcessing || !(video.transcriptSegments && video.transcriptSegments.length > 0)}
+                      onClick={() => handleCreateNotes(video)}
+                    >
+                      {video.notesProcessing ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        'Create Notes'
+                      )}
                     </Button>
                     <Button variant="outline" size="sm" disabled={video.processing}>
                       Generate Quiz
