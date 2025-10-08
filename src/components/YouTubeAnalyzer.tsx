@@ -76,7 +76,7 @@ export const YouTubeAnalyzer = () => {
     try {
       // Call the backend extract endpoint to fetch raw transcript
       const backendUrl = (import.meta as any).env?.VITE_BACKEND_URL || 'http://localhost:4000';
-      const response = await fetch(`${backendUrl}/api/extract`, {
+      const response = await fetch(`${backendUrl}/api/yt-study/extract`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -156,7 +156,7 @@ export const YouTubeAnalyzer = () => {
 
     try {
       const backendUrl = (import.meta as any).env?.VITE_BACKEND_URL || 'http://localhost:4000';
-      const response = await fetch(`${backendUrl}/api/summarize`, {
+      const response = await fetch(`${backendUrl}/api/yt-study/summarize`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
