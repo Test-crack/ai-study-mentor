@@ -8,6 +8,14 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      '/api': {
+        target: 'https://study-material-backend.fly.dev',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path
+      }
+    },
   },
   plugins: [
     react(),

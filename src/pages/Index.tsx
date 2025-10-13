@@ -190,9 +190,8 @@ const Index = () => {
                   Upload Notes
                 </Button>
                 <Button 
-                  variant="outline" 
                   onClick={() => setActiveTab("youtube")}
-                  className="border-white text-white hover:bg-white hover:text-purple-600"
+                  className="border-2 border-white text-white hover:bg-white hover:text-purple-600 bg-transparent"
                 >
                   <Youtube className="h-4 w-4 mr-2" />
                   Analyze Video
@@ -262,7 +261,7 @@ const Index = () => {
               {!userData.isPremium && (
                 <Button 
                   onClick={() => setShowPremiumModal(true)}
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white hover:text-white"
                 >
                   <Star className="h-4 w-4 mr-2" />
                   Upgrade
