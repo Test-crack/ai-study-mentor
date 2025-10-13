@@ -86,7 +86,15 @@ export const YouTubeAnalyzer = () => {
 
     try {
       // Call the backend extract endpoint to fetch raw transcript
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+      const getBackendUrl = () => {
+        // In development, use relative URLs to leverage Vite's proxy
+        if (import.meta.env.DEV) {
+          return ''; // Use relative URLs, proxy will handle the routing
+        }
+        return import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+      };
+      
+      const backendUrl = getBackendUrl();
       console.log('Attempting to analyze video:', { url: currentUrl, backendUrl });
       
       const response = await fetch(`${backendUrl}/api/yt-study/extract`, {
@@ -176,7 +184,15 @@ export const YouTubeAnalyzer = () => {
     setAnalyzedVideos(prev => prev.map(v => v.id === video.id ? { ...v, notesProcessing: true } : v));
 
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+      const getBackendUrl = () => {
+        // In development, use relative URLs to leverage Vite's proxy
+        if (import.meta.env.DEV) {
+          return ''; // Use relative URLs, proxy will handle the routing
+        }
+        return import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+      };
+      
+      const backendUrl = getBackendUrl();
       const response = await fetch(`${backendUrl}/api/yt-study/summarize`, {
         method: 'POST',
         headers: {
