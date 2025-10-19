@@ -97,7 +97,7 @@ export const YouTubeAnalyzer = () => {
       const backendUrl = getBackendUrl();
       console.log('Attempting to analyze video:', { url: currentUrl, backendUrl });
       
-      const response = await fetch(`${backendUrl}/api/yt-study/extract`, {
+     const response = await fetch(`${backendUrl}/api/study/extract`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -193,7 +193,7 @@ export const YouTubeAnalyzer = () => {
       };
       
       const backendUrl = getBackendUrl();
-      const response = await fetch(`${backendUrl}/api/yt-study/summarize`, {
+      const response = await fetch(`${backendUrl}/api/study/summarize`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
