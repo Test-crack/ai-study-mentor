@@ -1,11 +1,7 @@
 // Reading Assessment API utilities
 
 const getBackendUrl = () => {
-  // In development, use relative URLs to leverage Vite's proxy
-  if (import.meta.env.DEV) {
-    return ''; // Use relative URLs, proxy will handle the routing
-  }
-  return import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+  return import.meta.env.VITE_READING_BACKEND_URL || 'https://study-material-backend.fly.dev';
 };
 
 export interface ReadingModule {
