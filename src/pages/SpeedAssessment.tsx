@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Clock, BookOpen, Target, Award, Play, Pause, Square, Loader2, Lightbulb, CheckCircle } from "lucide-react";
+import { Clock, BookOpen, Target, Award, Play, Pause, Square, Loader2, Lightbulb, CheckCircle, Eye, EyeOff } from "lucide-react";
 import { 
   fetchReadingModules, 
   fetchReadingPassage, 
@@ -20,6 +20,7 @@ import {
   type ReadingTimeError as ReadingTimeErrorType
 } from "@/lib/reading-api";
 import { ReadingTimeError } from "@/components/ReadingTimeError";
+import { usePageVisibility } from "@/hooks/usePageVisibility";
 
 const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }) => {
   const [modules, setModules] = useState<ReadingModule[]>([]);
@@ -40,6 +41,7 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
   const [currentTime, setCurrentTime] = useState(0); // current elapsed time
   
   const { toast } = useToast();
+  const { focusData, resetTracking, getFinalFocusData } = usePageVisibility();
 
   // API Functions
   const loadModules = async () => {
@@ -117,6 +119,9 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
     setReadingStartTime(startTime);
     setIsTimerRunning(true);
     setCurrentTime(0);
+    
+    // Reset focus tracking when starting to read
+    resetTracking();
     
     toast({
       title: "Timer started!",
@@ -208,6 +213,9 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
   const calculateResults = async () => {
     if (!currentPassage || totalReadingTime === 0) return;
     
+    // Get final focus data
+    const finalFocusData = getFinalFocusData();
+    
     // Prepare submission data
     const submissionAnswers = currentPassage.questions.map(question => ({
       questionId: question.id,
@@ -217,7 +225,13 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
     const submission = {
       passageId: currentPassage.id,
       readingTimeSeconds: totalReadingTime,
-      answers: submissionAnswers
+      answers: submissionAnswers,
+      focusData: {
+        focusTime: finalFocusData.focusTime,
+        totalSessionTime: finalFocusData.totalSessionTime,
+        focusRatio: finalFocusData.focusRatio,
+        tabSwitches: finalFocusData.tabSwitches
+      }
     };
     
     try {
@@ -440,6 +454,25 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
               {isTimerRunning && (
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
               )}
+              {/* Focus tracking indicator */}
+              <div className="flex items-center space-x-2">
+                {focusData.isCurrentlyFocused ? (
+                  <div className="flex items-center space-x-1 text-green-600">
+                    <Eye className="h-4 w-4" />
+                    <span className="text-sm font-medium">Focused</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-1 text-red-600">
+                    <EyeOff className="h-4 w-4" />
+                    <span className="text-sm font-medium">Tab Hidden</span>
+                  </div>
+                )}
+                {focusData.tabSwitches > 0 && (
+                  <Badge variant="outline" className="text-xs">
+                    {focusData.tabSwitches} switch{focusData.tabSwitches > 1 ? 'es' : ''}
+                  </Badge>
+                )}
+              </div>
             </div>
           </div>
         </CardHeader>
@@ -585,6 +618,20 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
               <p className="text-xs text-muted-foreground">
                 {currentPassage?.wordCount} words
               </p>
+              <div className="flex items-center justify-end space-x-2 mt-1">
+                <div className={`flex items-center space-x-1 text-xs ${
+                  focusData.focusRatio > 0.8 ? 'text-green-600' : 
+                  focusData.focusRatio > 0.6 ? 'text-yellow-600' : 'text-red-600'
+                }`}>
+                  <Eye className="h-3 w-3" />
+                  <span>Focus: {Math.round(focusData.focusRatio * 100)}%</span>
+                </div>
+                {focusData.tabSwitches > 0 && (
+                  <Badge variant="outline" className="text-xs">
+                    {focusData.tabSwitches} switch{focusData.tabSwitches > 1 ? 'es' : ''}
+                  </Badge>
+                )}
+              </div>
             </div>
           </div>
         </CardHeader>

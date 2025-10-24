@@ -36,6 +36,12 @@ export interface AssessmentSubmission {
   passageId: string;
   readingTimeSeconds: number;
   answers: SubmissionAnswer[];
+  focusData?: {
+    focusTime: number;
+    totalSessionTime: number;
+    focusRatio: number;
+    tabSwitches: number;
+  };
 }
 
 export interface AssessmentResult {
@@ -76,18 +82,32 @@ export interface ModulesResponse {
  */
 export const fetchReadingModules = async (): Promise<ModulesResponse> => {
   const backendUrl = getBackendUrl();
+  const fullUrl = `${backendUrl}/api/reading/modules`;
+  
+  console.log('Fetching modules from:', fullUrl);
   
   try {
-    const response = await fetch(`${backendUrl}/api/reading/modules`);
+    const response = await fetch(fullUrl);
     
     if (!response.ok) {
-      throw new Error(`Failed to fetch modules: ${response.status} ${response.statusText}`);
+      const errorText = await response.text().catch(() => 'Unknown error');
+      throw new Error(`Failed to fetch modules: ${response.status} ${response.statusText}. ${errorText}`);
     }
     
     return response.json();
   } catch (error) {
     if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-      throw new Error(`CORS_ERROR: Cannot connect to backend server at ${backendUrl}. This might be due to CORS policy or network issues.`);
+      const errorMessage = `CORS_ERROR: Cannot connect to backend server at ${backendUrl}. 
+      
+Possible solutions:
+1. Ensure the backend server is running
+2. Check if VITE_BACKEND_URL is set correctly in your .env file
+3. Verify CORS is configured on the backend
+4. Check if the backend URL is accessible
+
+Current backend URL: ${backendUrl}
+Full request URL: ${fullUrl}`;
+      throw new Error(errorMessage);
     }
     throw error;
   }
@@ -101,9 +121,12 @@ export const fetchReadingPassage = async (
   difficulty: string
 ): Promise<PassageData> => {
   const backendUrl = getBackendUrl();
+  const fullUrl = `${backendUrl}/api/reading/passage/random`;
+  
+  console.log('Fetching passage from:', fullUrl, { moduleId, difficulty });
   
   try {
-    const response = await fetch(`${backendUrl}/api/reading/passage/random`, {
+    const response = await fetch(fullUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -122,7 +145,17 @@ export const fetchReadingPassage = async (
     return response.json();
   } catch (error) {
     if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-      throw new Error(`CORS_ERROR: Cannot connect to backend server at ${backendUrl}. This might be due to CORS policy or network issues.`);
+      const errorMessage = `CORS_ERROR: Cannot connect to backend server at ${backendUrl}. 
+      
+Possible solutions:
+1. Ensure the backend server is running
+2. Check if VITE_BACKEND_URL is set correctly in your .env file
+3. Verify CORS is configured on the backend
+4. Check if the backend URL is accessible
+
+Current backend URL: ${backendUrl}
+Full request URL: ${fullUrl}`;
+      throw new Error(errorMessage);
     }
     throw error;
   }
@@ -133,9 +166,12 @@ export const fetchReadingPassage = async (
  */
 export const submitAssessmentResults = async (submission: AssessmentSubmission): Promise<AssessmentResult> => {
   const backendUrl = getBackendUrl();
+  const fullUrl = `${backendUrl}/api/reading/submit`;
+  
+  console.log('Submitting assessment to:', fullUrl);
   
   try {
-    const response = await fetch(`${backendUrl}/api/reading/submit`, {
+    const response = await fetch(fullUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -163,7 +199,17 @@ export const submitAssessmentResults = async (submission: AssessmentSubmission):
     return response.json();
   } catch (error) {
     if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-      throw new Error(`CORS_ERROR: Cannot connect to backend server at ${backendUrl}. This might be due to CORS policy or network issues.`);
+      const errorMessage = `CORS_ERROR: Cannot connect to backend server at ${backendUrl}. 
+      
+Possible solutions:
+1. Ensure the backend server is running
+2. Check if VITE_BACKEND_URL is set correctly in your .env file
+3. Verify CORS is configured on the backend
+4. Check if the backend URL is accessible
+
+Current backend URL: ${backendUrl}
+Full request URL: ${fullUrl}`;
+      throw new Error(errorMessage);
     }
     throw error;
   }

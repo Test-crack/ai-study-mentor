@@ -6,7 +6,14 @@
  * Defaults to localhost:4000 if not set
  */
 export const getBackendUrl = (): string => {
-  return import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  
+  if (!backendUrl) {
+    console.warn('VITE_BACKEND_URL not set in environment variables. Using default: http://localhost:4000');
+    console.warn('To fix this, create a .env file with: VITE_BACKEND_URL=your-backend-url');
+  }
+  
+  return backendUrl || 'http://localhost:4000';
 };
 
 /**
