@@ -16,8 +16,10 @@ import {
   type ReadingModule, 
   type PassageData, 
   type Question,
-  type AssessmentResult 
+  type AssessmentResult,
+  type ReadingTimeError as ReadingTimeErrorType
 } from "@/lib/reading-api";
+import { ReadingTimeError } from "@/components/ReadingTimeError";
 
 const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }) => {
   const [modules, setModules] = useState<ReadingModule[]>([]);
@@ -27,6 +29,7 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
   const [currentPassage, setCurrentPassage] = useState<PassageData | null>(null);
   const [answers, setAnswers] = useState<{ [key: string]: string }>({});
   const [assessmentResults, setAssessmentResults] = useState<AssessmentResult | null>(null);
+  const [readingTimeError, setReadingTimeError] = useState<ReadingTimeErrorType | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingModules, setLoadingModules] = useState(true);
   
@@ -167,6 +170,37 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
     setCurrentStep("reading");
   };
 
+  const handleRetryReading = () => {
+    // Reset timer and reading state for retry
+    setTotalReadingTime(0);
+    setCurrentTime(0);
+    setIsTimerRunning(false);
+    setReadingStartTime(null);
+    setAnswers({});
+    setReadingTimeError(null);
+    setCurrentStep("reading");
+    
+    toast({
+      title: "Ready to re-read",
+      description: "Take your time to read carefully and understand the content."
+    });
+  };
+
+  const handleStartOver = () => {
+    // Reset everything for a fresh start
+    setCurrentStep("module-selection");
+    setSelectedModule("");
+    setSelectedDifficulty("");
+    setCurrentPassage(null);
+    setAnswers({});
+    setAssessmentResults(null);
+    setReadingTimeError(null);
+    setTotalReadingTime(0);
+    setCurrentTime(0);
+    setIsTimerRunning(false);
+    setReadingStartTime(null);
+  };
+
   const handleAnswerChange = (questionId: string, selectedOption: string) => {
     setAnswers({ ...answers, [questionId]: selectedOption });
   };
@@ -211,6 +245,14 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
       
     } catch (error) {
       console.error('Results submission failed:', error);
+      
+      // Handle reading time error specifically
+      if (error && typeof error === 'object' && 'flag' in error && error.flag === 'too_fast') {
+        setReadingTimeError(error as ReadingTimeErrorType);
+        setCurrentStep("reading-time-error");
+        return;
+      }
+      
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       toast({
         title: "Failed to submit assessment",
@@ -926,6 +968,14 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
         {currentStep === "reading" && renderReading()}
         {currentStep === "questions" && renderQuestions()}
         {currentStep === "results" && renderResults()}
+        {currentStep === "reading-time-error" && readingTimeError && (
+          <ReadingTimeError
+            error={readingTimeError}
+            onRetry={handleRetryReading}
+            onStartOver={handleStartOver}
+            currentPassageTitle={currentPassage?.title}
+          />
+        )}
       </div>
     </div>
   );

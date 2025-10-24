@@ -2,14 +2,10 @@
 
 /**
  * Get the backend URL for API calls
- * In development, returns empty string to use relative URLs with Vite proxy
- * In production, returns the configured backend URL
+ * Reads from VITE_BACKEND_URL environment variable
+ * Defaults to localhost:4000 if not set
  */
 export const getBackendUrl = (): string => {
-  // In development, use relative URLs to leverage Vite's proxy
-  if (import.meta.env.DEV) {
-    return ''; // Use relative URLs, proxy will handle the routing
-  }
   return import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
 };
 

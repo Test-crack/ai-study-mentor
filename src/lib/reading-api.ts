@@ -1,12 +1,6 @@
 // Reading Assessment API utilities
 
-const getBackendUrl = () => {
-  // In development, use relative URLs to leverage Vite's proxy
-  if (import.meta.env.DEV) {
-    return ''; // Use relative URLs, proxy will handle the routing
-  }
-  return import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
-};
+import { getBackendUrl } from './api-utils';
 
 export interface ReadingModule {
   id: string;
@@ -63,6 +57,13 @@ export interface AssessmentResult {
     title: string;
     difficulty: string;
   };
+}
+
+export interface ReadingTimeError {
+  error: string;
+  flag: "too_fast";
+  suggestedMinTime: number;
+  actualTime: number;
 }
 
 export interface ModulesResponse {
@@ -144,6 +145,18 @@ export const submitAssessmentResults = async (submission: AssessmentSubmission):
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      
+      // Handle special reading time error
+      if (errorData.flag === "too_fast") {
+        const readingTimeError: ReadingTimeError = {
+          error: errorData.error,
+          flag: errorData.flag,
+          suggestedMinTime: errorData.suggestedMinTime,
+          actualTime: errorData.actualTime
+        };
+        throw readingTimeError;
+      }
+      
       throw new Error(errorData.error || `Failed to submit assessment: ${response.status} ${response.statusText}`);
     }
     
