@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Clock, BookOpen, Target, Award, Play, Pause, Square, Loader2, Lightbulb, CheckCircle, Eye, EyeOff } from "lucide-react";
+import { Clock, BookOpen, Target, Award, Play, Pause, Square, Loader2, Lightbulb, CheckCircle, Eye, EyeOff, AlertTriangle, Shield, ShieldAlert, TrendingUp, TrendingDown } from "lucide-react";
 import { 
   fetchReadingModules, 
   fetchReadingPassage, 
@@ -242,20 +242,20 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
       setAssessmentResults(assessmentResult);
       setCurrentStep("results");
       
-      // Also call the onComplete callback if provided (for compatibility)
-      onComplete?.({
-        moduleId: selectedModule,
-        moduleName: modules.find(m => m.id === selectedModule)?.name || selectedModule,
-        difficulty: selectedDifficulty,
-        readingSpeed: assessmentResult.metrics.wpm,
-        comprehensionScore: assessmentResult.metrics.accuracy,
-        totalQuestions: currentPassage.questions.length,
-        correctAnswers: assessmentResult.answerReview.filter(a => a.isCorrect).length,
-        readingTimeSeconds: totalReadingTime,
-        readingTimeFormatted: formatTime(totalReadingTime),
-        wordCount: currentPassage.wordCount,
-        level: assessmentResult.metrics.wpm > 200 ? "Advanced" : assessmentResult.metrics.wpm > 150 ? "Intermediate" : "Beginner"
-      });
+       // Also call the onComplete callback if provided (for compatibility)
+       onComplete?.({
+         moduleId: selectedModule,
+         moduleName: modules.find(m => m.id === selectedModule)?.name || selectedModule,
+         difficulty: selectedDifficulty,
+         readingSpeed: assessmentResult.metrics.weightedWPM,
+         comprehensionScore: assessmentResult.metrics.accuracy,
+         totalQuestions: currentPassage.questions.length,
+         correctAnswers: assessmentResult.answerReview.filter(a => a.isCorrect).length,
+         readingTimeSeconds: totalReadingTime,
+         readingTimeFormatted: formatTime(totalReadingTime),
+         wordCount: currentPassage.wordCount,
+         level: assessmentResult.metrics.weightedWPM > 200 ? "Advanced" : assessmentResult.metrics.weightedWPM > 150 ? "Intermediate" : "Beginner"
+       });
       
     } catch (error) {
       console.error('Results submission failed:', error);
@@ -765,9 +765,86 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
               </div>
             </div>
           </CardContent>
-        </Card>
+         </Card>
 
-        {/* Performance Metrics */}
+         {/* Integrity Status */}
+         {assessmentResults.integrityFlags && (
+           <Card className={`border-2 ${
+             assessmentResults.integrityFlags.integrityScore >= 0.8 
+               ? 'border-green-200 bg-green-50' 
+               : assessmentResults.integrityFlags.integrityScore >= 0.6 
+               ? 'border-yellow-200 bg-yellow-50' 
+               : 'border-red-200 bg-red-50'
+           }`}>
+             <CardHeader>
+               <CardTitle className={`flex items-center ${
+                 assessmentResults.integrityFlags.integrityScore >= 0.8 
+                   ? 'text-green-800' 
+                   : assessmentResults.integrityFlags.integrityScore >= 0.6 
+                   ? 'text-yellow-800' 
+                   : 'text-red-800'
+               }`}>
+                 <div className={`p-2 rounded-lg mr-3 ${
+                   assessmentResults.integrityFlags.integrityScore >= 0.8 
+                     ? 'bg-green-500' 
+                     : assessmentResults.integrityFlags.integrityScore >= 0.6 
+                     ? 'bg-yellow-500' 
+                     : 'bg-red-500'
+                 }`}>
+                   {assessmentResults.integrityFlags.integrityScore >= 0.8 ? (
+                     <Shield className="w-5 h-5 text-white" />
+                   ) : (
+                     <ShieldAlert className="w-5 h-5 text-white" />
+                   )}
+                 </div>
+                 Assessment Integrity
+               </CardTitle>
+             </CardHeader>
+             <CardContent>
+               <div className="space-y-4">
+                 <div className="flex items-center justify-between">
+                   <span className="text-sm font-medium">Integrity Score</span>
+                   <div className={`px-3 py-1 rounded-full text-sm font-bold ${
+                     assessmentResults.integrityFlags.integrityScore >= 0.8 
+                       ? 'bg-green-100 text-green-800' 
+                       : assessmentResults.integrityFlags.integrityScore >= 0.6 
+                       ? 'bg-yellow-100 text-yellow-800' 
+                       : 'bg-red-100 text-red-800'
+                   }`}>
+                     {Math.round(assessmentResults.integrityFlags.integrityScore * 100)}%
+                   </div>
+                 </div>
+                 
+                 <div className="space-y-2">
+                   {assessmentResults.integrityFlags.lowFocusRatio && (
+                     <div className="flex items-center space-x-2 text-red-700">
+                       <AlertTriangle className="w-4 h-4" />
+                       <span className="text-sm">Low focus ratio detected</span>
+                     </div>
+                   )}
+                   {assessmentResults.integrityFlags.excessiveTabSwitches && (
+                     <div className="flex items-center space-x-2 text-red-700">
+                       <AlertTriangle className="w-4 h-4" />
+                       <span className="text-sm">Excessive tab switching detected</span>
+                     </div>
+                   )}
+                   {assessmentResults.integrityFlags.suspiciousBehavior && (
+                     <div className="flex items-center space-x-2 text-red-700">
+                       <AlertTriangle className="w-4 h-4" />
+                       <span className="text-sm">Suspicious behavior patterns detected</span>
+                     </div>
+                   )}
+                 </div>
+                 
+                 <div className="bg-white p-4 rounded-lg border">
+                   <p className="text-sm text-gray-700">{assessmentResults.integrityFeedback}</p>
+                 </div>
+               </div>
+             </CardContent>
+           </Card>
+         )}
+
+         {/* Performance Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 hover:shadow-xl transition-shadow relative overflow-hidden">
             <div className="absolute top-0 right-0 w-16 h-16 bg-blue-200 rounded-bl-full opacity-50"></div>
@@ -776,13 +853,25 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
                 <div className="p-2 bg-blue-500 rounded-lg">
                   <Clock className="w-6 h-6 text-white" />
                 </div>
-                <div className="text-right">
-                  <div className="text-3xl font-bold text-blue-900 animate-pulse">{assessmentResults.metrics.wpm}</div>
-                  <div className="text-sm font-medium text-blue-700">WPM</div>
-                </div>
+                 <div className="text-right">
+                   <div className="text-3xl font-bold text-blue-900 animate-pulse">{assessmentResults.metrics.weightedWPM}</div>
+                   <div className="text-sm font-medium text-blue-700">WPM</div>
+                   {assessmentResults.baseMetrics && assessmentResults.baseMetrics.weightedWPM !== assessmentResults.metrics.weightedWPM && (
+                     <div className="flex items-center space-x-1 mt-1">
+                       {assessmentResults.metrics.weightedWPM > assessmentResults.baseMetrics.weightedWPM ? (
+                         <TrendingUp className="w-3 h-3 text-green-600" />
+                       ) : (
+                         <TrendingDown className="w-3 h-3 text-red-600" />
+                       )}
+                       <span className="text-xs text-gray-600">
+                         {assessmentResults.baseMetrics.weightedWPM} → {assessmentResults.metrics.weightedWPM}
+                       </span>
+                     </div>
+                   )}
+                 </div>
               </div>
               <div className="text-sm text-blue-600">Reading Speed</div>
-              <Progress value={Math.min((assessmentResults.metrics.wpm / 300) * 100, 100)} className="mt-2 h-2" />
+              <Progress value={Math.min((assessmentResults.metrics.weightedWPM / 300) * 100, 100)} className="mt-2 h-2" />
             </CardContent>
           </Card>
           
@@ -793,10 +882,22 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
                 <div className="p-2 bg-green-500 rounded-lg">
                   <Target className="w-6 h-6 text-white" />
                 </div>
-                <div className="text-right">
-                  <div className="text-3xl font-bold text-green-900 animate-pulse">{assessmentResults.metrics.accuracy}</div>
-                  <div className="text-sm font-medium text-green-700">%</div>
-                </div>
+                 <div className="text-right">
+                   <div className="text-3xl font-bold text-green-900 animate-pulse">{assessmentResults.metrics.accuracy}</div>
+                   <div className="text-sm font-medium text-green-700">%</div>
+                   {assessmentResults.baseMetrics && assessmentResults.baseMetrics.accuracy !== assessmentResults.metrics.accuracy && (
+                     <div className="flex items-center space-x-1 mt-1">
+                       {assessmentResults.metrics.accuracy > assessmentResults.baseMetrics.accuracy ? (
+                         <TrendingUp className="w-3 h-3 text-green-600" />
+                       ) : (
+                         <TrendingDown className="w-3 h-3 text-red-600" />
+                       )}
+                       <span className="text-xs text-gray-600">
+                         {assessmentResults.baseMetrics.accuracy} → {assessmentResults.metrics.accuracy}
+                       </span>
+                     </div>
+                   )}
+                 </div>
               </div>
               <div className="text-sm text-green-600">Accuracy</div>
               <Progress value={assessmentResults.metrics.accuracy} className="mt-2 h-2" />
@@ -810,10 +911,22 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
                 <div className="p-2 bg-purple-500 rounded-lg">
                   <BookOpen className="w-6 h-6 text-white" />
                 </div>
-                <div className="text-right">
-                  <div className="text-3xl font-bold text-purple-900 animate-pulse">{assessmentResults.metrics.retention}</div>
-                  <div className="text-sm font-medium text-purple-700">%</div>
-                </div>
+                 <div className="text-right">
+                   <div className="text-3xl font-bold text-purple-900 animate-pulse">{assessmentResults.metrics.retention}</div>
+                   <div className="text-sm font-medium text-purple-700">%</div>
+                   {assessmentResults.baseMetrics && assessmentResults.baseMetrics.retention !== assessmentResults.metrics.retention && (
+                     <div className="flex items-center space-x-1 mt-1">
+                       {assessmentResults.metrics.retention > assessmentResults.baseMetrics.retention ? (
+                         <TrendingUp className="w-3 h-3 text-green-600" />
+                       ) : (
+                         <TrendingDown className="w-3 h-3 text-red-600" />
+                       )}
+                       <span className="text-xs text-gray-600">
+                         {assessmentResults.baseMetrics.retention} → {assessmentResults.metrics.retention}
+                       </span>
+                     </div>
+                   )}
+                 </div>
               </div>
               <div className="text-sm text-purple-600">Retention</div>
               <Progress value={assessmentResults.metrics.retention} className="mt-2 h-2" />
@@ -827,10 +940,22 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
                 <div className="p-2 bg-orange-500 rounded-lg">
                   <Award className="w-6 h-6 text-white" />
                 </div>
-                <div className="text-right">
-                  <div className="text-3xl font-bold text-orange-900 animate-pulse">{assessmentResults.metrics.speedLearningScore}</div>
-                  <div className="text-sm font-medium text-orange-700">Score</div>
-                </div>
+                 <div className="text-right">
+                   <div className="text-3xl font-bold text-orange-900 animate-pulse">{assessmentResults.metrics.speedLearningScore}</div>
+                   <div className="text-sm font-medium text-orange-700">Score</div>
+                   {assessmentResults.baseMetrics && assessmentResults.baseMetrics.speedLearningScore !== assessmentResults.metrics.speedLearningScore && (
+                     <div className="flex items-center space-x-1 mt-1">
+                       {assessmentResults.metrics.speedLearningScore > assessmentResults.baseMetrics.speedLearningScore ? (
+                         <TrendingUp className="w-3 h-3 text-green-600" />
+                       ) : (
+                         <TrendingDown className="w-3 h-3 text-red-600" />
+                       )}
+                       <span className="text-xs text-gray-600">
+                         {assessmentResults.baseMetrics.speedLearningScore} → {assessmentResults.metrics.speedLearningScore}
+                       </span>
+                     </div>
+                   )}
+                 </div>
               </div>
               <div className="text-sm text-orange-600">Overall Score</div>
               <Progress value={assessmentResults.metrics.speedLearningScore} className="mt-2 h-2" />
@@ -851,9 +976,55 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
           <CardContent>
             <p className="text-lg text-indigo-800 leading-relaxed">{assessmentResults.feedback}</p>
           </CardContent>
-        </Card>
-        
-        {/* Reading Statistics */}
+         </Card>
+         
+         {/* Focus Data Section */}
+         {assessmentResults.focusData && (
+           <Card className="bg-gradient-to-r from-cyan-50 to-blue-50 border-cyan-200">
+             <CardHeader>
+               <CardTitle className="flex items-center text-cyan-800">
+                 <div className="p-2 bg-cyan-500 rounded-lg mr-3">
+                   <Eye className="w-5 h-5 text-white" />
+                 </div>
+                 Focus & Engagement Data
+               </CardTitle>
+             </CardHeader>
+             <CardContent>
+               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
+                 <div className="bg-white p-4 rounded-lg border border-cyan-200">
+                   <div className="text-3xl font-bold text-cyan-900 mb-1">
+                     {Math.round(assessmentResults.focusData.focusRatio * 100)}%
+                   </div>
+                   <div className="text-sm font-medium text-cyan-700">Focus Ratio</div>
+                   <div className="text-xs text-cyan-600 mt-1">Time focused vs total</div>
+                 </div>
+                 <div className="bg-white p-4 rounded-lg border border-cyan-200">
+                   <div className="text-3xl font-bold text-cyan-900 mb-1">
+                     {assessmentResults.focusData.tabSwitches}
+                   </div>
+                   <div className="text-sm font-medium text-cyan-700">Tab Switches</div>
+                   <div className="text-xs text-cyan-600 mt-1">Times switched away</div>
+                 </div>
+                 <div className="bg-white p-4 rounded-lg border border-cyan-200">
+                   <div className="text-3xl font-bold text-cyan-900 mb-1">
+                     {formatTime(Math.round(assessmentResults.focusData.focusTime / 1000))}
+                   </div>
+                   <div className="text-sm font-medium text-cyan-700">Focus Time</div>
+                   <div className="text-xs text-cyan-600 mt-1">Actual focused time</div>
+                 </div>
+                 <div className="bg-white p-4 rounded-lg border border-cyan-200">
+                   <div className="text-3xl font-bold text-cyan-900 mb-1">
+                     {formatTime(Math.round(assessmentResults.focusData.totalSessionTime / 1000))}
+                   </div>
+                   <div className="text-sm font-medium text-cyan-700">Total Session</div>
+                   <div className="text-xs text-cyan-600 mt-1">Total time tracked</div>
+                 </div>
+               </div>
+             </CardContent>
+           </Card>
+         )}
+
+         {/* Reading Statistics */}
         <Card className="bg-white shadow-lg">
           <CardHeader>
             <CardTitle className="text-center text-gray-800">Reading Statistics</CardTitle>

@@ -46,12 +46,31 @@ export interface AssessmentSubmission {
 
 export interface AssessmentResult {
   metrics: {
-    wpm: number;
+    weightedWPM: number;
+    accuracy: number;
+    retention: number;
+    speedLearningScore: number;
+  };
+  baseMetrics: {
+    weightedWPM: number;
     accuracy: number;
     retention: number;
     speedLearningScore: number;
   };
   feedback: string;
+  integrityFeedback: string;
+  integrityFlags: {
+    lowFocusRatio: boolean;
+    excessiveTabSwitches: boolean;
+    suspiciousBehavior: boolean;
+    integrityScore: number;
+  };
+  focusData: {
+    focusRatio: number;
+    tabSwitches: number;
+    focusTime: number;
+    totalSessionTime: number;
+  };
   answerReview: {
     questionId: string;
     selectedOption: string;
