@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Youtube, Star, Video, Book, Loader2, Clock, Target, Play, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ReactMarkdown from 'react-markdown';
+import { getBackendUrl } from "@/lib/api-utils";
 
 interface TranscriptSegment {
   text: string;
@@ -86,18 +87,10 @@ export const YouTubeAnalyzer = () => {
 
     try {
       // Call the backend extract endpoint to fetch raw transcript
-      const getBackendUrl = () => {
-        // In development, use relative URLs to leverage Vite's proxy
-        if (import.meta.env.DEV) {
-          return ''; // Use relative URLs, proxy will handle the routing
-        }
-        return import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
-      };
-      
       const backendUrl = getBackendUrl();
       console.log('Attempting to analyze video:', { url: currentUrl, backendUrl });
       
-     const response = await fetch(`${backendUrl}/api/study/extract`, {
+      const response = await fetch(`${backendUrl}/api/yt-study/extract`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -184,15 +177,8 @@ export const YouTubeAnalyzer = () => {
     setAnalyzedVideos(prev => prev.map(v => v.id === video.id ? { ...v, notesProcessing: true } : v));
 
     try {
-      const getBackendUrl = () => {
-  if (import.meta.env.DEV) {
-    return '';
-  }
-  return import.meta.env.VITE_YOUTUBE_BACKEND_URL || 'https://backend-study-mentor.fly.dev';
-};
-      
       const backendUrl = getBackendUrl();
-      const response = await fetch(`${backendUrl}/api/study/summarize`, {
+      const response = await fetch(`${backendUrl}/api/yt-study/summarize`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
