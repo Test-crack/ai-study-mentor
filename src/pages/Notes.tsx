@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { getBackendUrl } from "@/lib/api-utils";
 import UploadedFileCard from "@/components/UploadedFileCard";
+import GeneratedNotesDisplay from "@/components/GeneratedNotesDisplay";
 import { 
   Plus, 
   Upload, 
@@ -22,10 +23,19 @@ interface FileInfo {
   lastModified: number;
 }
 
+interface GeneratedNote {
+  materialType: 'overview' | 'standard' | 'detailed';
+  markdown: string;
+  fileName: string;
+  timestamp: number;
+}
+
 export default function Notes() {
   const [loading, setLoading] = useState(false);
   const [uploadingFiles, setUploadingFiles] = useState<Set<string>>(new Set());
   const [uploadedFiles, setUploadedFiles] = useState<FileInfo[]>([]);
+  const [generatedNotes, setGeneratedNotes] = useState<GeneratedNote[]>([]);
+  const [generatingNotes, setGeneratingNotes] = useState<Map<string, string>>(new Map());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -157,36 +167,108 @@ export default function Notes() {
     e.preventDefault();
   };
 
-  const handleGenerateOverview = (fileInfo: FileInfo) => {
+  const generateNotes = async (
+    fileInfo: FileInfo, 
+    materialType: 'overview' | 'standard' | 'detailed'
+  ) => {
+    const key = `${fileInfo.extractedPath}-${materialType}`;
+    
+    // Check if already generating
+    if (generatingNotes.has(key)) {
+      toast({
+        title: "Already generating",
+        description: `${materialType} notes for ${fileInfo.name} are already being generated`,
+        variant: "default"
+      });
+      return;
+    }
+
+    // Mark as generating
+    setGeneratingNotes(prev => new Map(prev).set(key, fileInfo.name));
+
     toast({
-      title: "Generating Quick Overview",
-      description: `Processing ${fileInfo.name}...`,
+      title: "Generating notes",
+      description: `Creating ${materialType} notes for ${fileInfo.name}...`,
     });
-    // TODO: Implement API call
+
+    try {
+      const backendUrl = getBackendUrl();
+      const response = await fetch(`${backendUrl}/api/smartNotes/generate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          extractedPath: fileInfo.extractedPath,
+          materialType: materialType
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Generation failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success && data.markdown) {
+        const newNote: GeneratedNote = {
+          materialType: data.materialType,
+          markdown: data.markdown,
+          fileName: fileInfo.name,
+          timestamp: Date.now()
+        };
+
+        setGeneratedNotes(prev => [newNote, ...prev]);
+
+        toast({
+          title: "Notes generated successfully",
+          description: `${materialType} notes for ${fileInfo.name} are ready`,
+        });
+      } else {
+        throw new Error('Invalid response format');
+      }
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error(`Generation error for ${fileInfo.name}:`, error);
+      
+      toast({
+        title: "Generation failed",
+        description: errorMessage,
+        variant: "destructive"
+      });
+    } finally {
+      // Remove from generating set
+      setGeneratingNotes(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(key);
+        return newMap;
+      });
+    }
+  };
+
+  const handleGenerateOverview = (fileInfo: FileInfo) => {
+    generateNotes(fileInfo, 'overview');
   };
 
   const handleGenerateStandardNotes = (fileInfo: FileInfo) => {
-    toast({
-      title: "Generating Standard Notes",
-      description: `Processing ${fileInfo.name}...`,
-    });
-    // TODO: Implement API call
+    generateNotes(fileInfo, 'standard');
   };
 
   const handleGenerateDeepDive = (fileInfo: FileInfo) => {
-    toast({
-      title: "Generating Deep Dive",
-      description: `Processing ${fileInfo.name}...`,
-    });
-    // TODO: Implement API call
+    generateNotes(fileInfo, 'detailed');
   };
 
   const handleGenerateQuiz = (fileInfo: FileInfo) => {
     toast({
-      title: "Generating Quiz",
-      description: `Processing ${fileInfo.name}...`,
+      title: "Coming soon",
+      description: "Quiz generation will be available soon!",
     });
-    // TODO: Implement API call
+  };
+
+  const handleCloseNote = (index: number) => {
+    setGeneratedNotes(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -269,20 +351,70 @@ export default function Notes() {
             </Card>
           )}
 
+          {/* Generating Status */}
+          {generatingNotes.size > 0 && (
+            <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center space-x-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Generating Notes</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {Array.from(generatingNotes.entries()).map(([key, fileName]) => {
+                    const materialType = key.split('-').pop();
+                    return (
+                      <div key={key} className="flex items-center space-x-2 text-sm">
+                        <Loader2 className="h-4 w-4 animate-spin text-purple-600" />
+                        <span className="text-muted-foreground">
+                          {materialType} notes for {fileName}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Generated Notes */}
+          {generatedNotes.length > 0 && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-semibold">Generated Notes</h2>
+              {generatedNotes.map((note, index) => (
+                <GeneratedNotesDisplay
+                  key={`${note.fileName}-${note.materialType}-${index}`}
+                  note={note}
+                  onClose={() => handleCloseNote(index)}
+                />
+              ))}
+            </div>
+          )}
+
           {/* Uploaded Files */}
           {uploadedFiles.length > 0 && (
             <div className="space-y-4">
               <h2 className="text-2xl font-semibold">Uploaded Files</h2>
-              {uploadedFiles.map((fileInfo, index) => (
-                <UploadedFileCard
-                  key={`${fileInfo.name}-${index}`}
-                  fileInfo={fileInfo}
-                  onGenerateOverview={() => handleGenerateOverview(fileInfo)}
-                  onGenerateStandardNotes={() => handleGenerateStandardNotes(fileInfo)}
-                  onGenerateDeepDive={() => handleGenerateDeepDive(fileInfo)}
-                  onGenerateQuiz={() => handleGenerateQuiz(fileInfo)}
-                />
-              ))}
+              {uploadedFiles.map((fileInfo, index) => {
+                const overviewKey = `${fileInfo.extractedPath}-overview`;
+                const standardKey = `${fileInfo.extractedPath}-standard`;
+                const detailedKey = `${fileInfo.extractedPath}-detailed`;
+                
+                return (
+                  <UploadedFileCard
+                    key={`${fileInfo.name}-${index}`}
+                    fileInfo={fileInfo}
+                    onGenerateOverview={() => handleGenerateOverview(fileInfo)}
+                    onGenerateStandardNotes={() => handleGenerateStandardNotes(fileInfo)}
+                    onGenerateDeepDive={() => handleGenerateDeepDive(fileInfo)}
+                    onGenerateQuiz={() => handleGenerateQuiz(fileInfo)}
+                    isGeneratingOverview={generatingNotes.has(overviewKey)}
+                    isGeneratingStandard={generatingNotes.has(standardKey)}
+                    isGeneratingDeepDive={generatingNotes.has(detailedKey)}
+                  />
+                );
+              })}
             </div>
           )}
 

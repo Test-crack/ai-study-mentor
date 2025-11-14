@@ -7,7 +7,8 @@ import {
   BookOpen, 
   Microscope, 
   Brain,
-  CheckCircle2
+  CheckCircle2,
+  Loader2
 } from "lucide-react";
 
 interface FileInfo {
@@ -25,6 +26,9 @@ interface UploadedFileCardProps {
   onGenerateStandardNotes: () => void;
   onGenerateDeepDive: () => void;
   onGenerateQuiz: () => void;
+  isGeneratingOverview?: boolean;
+  isGeneratingStandard?: boolean;
+  isGeneratingDeepDive?: boolean;
 }
 
 export default function UploadedFileCard({
@@ -32,7 +36,10 @@ export default function UploadedFileCard({
   onGenerateOverview,
   onGenerateStandardNotes,
   onGenerateDeepDive,
-  onGenerateQuiz
+  onGenerateQuiz,
+  isGeneratingOverview = false,
+  isGeneratingStandard = false,
+  isGeneratingDeepDive = false
 }: UploadedFileCardProps) {
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return bytes + ' B';
@@ -77,40 +84,55 @@ export default function UploadedFileCard({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Button
               onClick={onGenerateOverview}
-              className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 h-auto py-4 flex flex-col items-start space-y-1"
+              disabled={isGeneratingOverview}
+              className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 h-auto py-4 flex flex-col items-start space-y-1 disabled:opacity-70"
             >
               <div className="flex items-center space-x-2">
-                <Zap className="h-4 w-4" />
+                {isGeneratingOverview ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Zap className="h-4 w-4" />
+                )}
                 <span className="font-semibold">Quick Overview</span>
               </div>
               <span className="text-xs opacity-90 font-normal">
-                Fast summary of key points
+                {isGeneratingOverview ? 'Generating...' : 'Fast summary of key points'}
               </span>
             </Button>
 
             <Button
               onClick={onGenerateStandardNotes}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 h-auto py-4 flex flex-col items-start space-y-1"
+              disabled={isGeneratingStandard}
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 h-auto py-4 flex flex-col items-start space-y-1 disabled:opacity-70"
             >
               <div className="flex items-center space-x-2">
-                <BookOpen className="h-4 w-4" />
+                {isGeneratingStandard ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <BookOpen className="h-4 w-4" />
+                )}
                 <span className="font-semibold">Standard Notes</span>
               </div>
               <span className="text-xs opacity-90 font-normal">
-                Comprehensive study notes
+                {isGeneratingStandard ? 'Generating...' : 'Comprehensive study notes'}
               </span>
             </Button>
 
             <Button
               onClick={onGenerateDeepDive}
-              className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 h-auto py-4 flex flex-col items-start space-y-1"
+              disabled={isGeneratingDeepDive}
+              className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 h-auto py-4 flex flex-col items-start space-y-1 disabled:opacity-70"
             >
               <div className="flex items-center space-x-2">
-                <Microscope className="h-4 w-4" />
+                {isGeneratingDeepDive ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Microscope className="h-4 w-4" />
+                )}
                 <span className="font-semibold">Deep Dive</span>
               </div>
               <span className="text-xs opacity-90 font-normal">
-                In-depth analysis & insights
+                {isGeneratingDeepDive ? 'Generating...' : 'In-depth analysis & insights'}
               </span>
             </Button>
 
