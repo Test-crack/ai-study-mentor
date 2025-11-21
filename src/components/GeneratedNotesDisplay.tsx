@@ -65,33 +65,33 @@ export default function GeneratedNotesDisplay({ note, onClose }: GeneratedNotesD
 
   return (
     <Card className={`bg-gradient-to-br ${config.bgGradient} border-2 shadow-xl`}>
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-3">
-            <div className={`p-3 bg-gradient-to-r ${config.gradient} rounded-lg`}>
-              <Icon className="h-6 w-6 text-white" />
+      <CardHeader className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+          <div className="flex items-start gap-2 sm:gap-3 min-w-0 flex-1">
+            <div className={`p-2 sm:p-3 bg-gradient-to-r ${config.gradient} rounded-lg flex-shrink-0`}>
+              <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
-            <div>
-              <CardTitle className="text-xl">{config.title}</CardTitle>
-              <div className="flex items-center space-x-2 mt-1">
-                <Badge className={`bg-gradient-to-r ${config.gradient} text-white`}>
+            <div className="min-w-0 flex-1">
+              <CardTitle className="text-base sm:text-lg md:text-xl">{config.title}</CardTitle>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mt-1">
+                <Badge className={`bg-gradient-to-r ${config.gradient} text-white text-xs w-fit`}>
                   {config.badge}
                 </Badge>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-xs sm:text-sm text-muted-foreground truncate">
                   {note.fileName}
                 </span>
               </div>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2 self-end sm:self-start">
             <Button
               variant="outline"
               size="sm"
               onClick={handleDownload}
-              className="flex items-center space-x-1"
+              className="flex items-center gap-1 text-xs sm:text-sm"
             >
-              <Download className="h-4 w-4" />
-              <span>Download</span>
+              <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Download</span>
             </Button>
             <Button
               variant="ghost"
@@ -103,13 +103,13 @@ export default function GeneratedNotesDisplay({ note, onClose }: GeneratedNotesD
             </Button>
           </div>
         </div>
-        <div className="flex items-center space-x-2 text-xs text-muted-foreground mt-2">
-          <Clock className="h-3 w-3" />
-          <span>Generated {new Date(note.timestamp).toLocaleString()}</span>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2 sm:mt-3">
+          <Clock className="h-3 w-3 flex-shrink-0" />
+          <span className="truncate">Generated {new Date(note.timestamp).toLocaleString()}</span>
         </div>
       </CardHeader>
       
-      <CardContent>
+      <CardContent className="p-4 sm:p-6 pt-0">
         <MarkdownRenderer 
           content={note.markdown} 
           showTitle={false}

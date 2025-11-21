@@ -49,51 +49,49 @@ export default function UploadedFileCard({
 
   return (
     <Card className="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 border-2 border-green-200 shadow-lg">
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <CheckCircle2 className="h-6 w-6 text-green-600" />
-            </div>
-            <div>
-              <CardTitle className="text-lg">{fileInfo.name}</CardTitle>
-              <div className="flex items-center space-x-2 mt-1">
-                <Badge variant="secondary" className="bg-green-100 text-green-700">
-                  {fileInfo.type}
-                </Badge>
-                <span className="text-sm text-muted-foreground">
-                  {formatFileSize(fileInfo.size)}
-                </span>
-              </div>
+      <CardHeader className="p-4 sm:p-6">
+        <div className="flex items-start gap-2 sm:gap-3">
+          <div className="p-1.5 sm:p-2 bg-green-100 rounded-lg flex-shrink-0">
+            <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <CardTitle className="text-base sm:text-lg break-words">{fileInfo.name}</CardTitle>
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1">
+              <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
+                {fileInfo.type}
+              </Badge>
+              <span className="text-xs sm:text-sm text-muted-foreground">
+                {formatFileSize(fileInfo.size)}
+              </span>
             </div>
           </div>
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-4">
-        <div className="flex items-center space-x-2 text-sm text-green-700 bg-green-100 px-3 py-2 rounded-lg">
-          <FileText className="h-4 w-4" />
-          <span>Text extraction complete - Ready for AI processing</span>
+      <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6 pt-0">
+        <div className="flex items-center gap-2 text-xs sm:text-sm text-green-700 bg-green-100 px-3 py-2 rounded-lg">
+          <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+          <span className="leading-tight">Text extraction complete - Ready for AI processing</span>
         </div>
 
-        <div className="space-y-3">
-          <p className="text-sm font-medium text-muted-foreground">
+        <div className="space-y-2 sm:space-y-3">
+          <p className="text-xs sm:text-sm font-medium text-muted-foreground">
             Choose how you want to process this file:
           </p>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
             <Button
               onClick={onGenerateOverview}
               disabled={isGeneratingOverview}
-              className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 h-auto py-4 flex flex-col items-start space-y-1 disabled:opacity-70"
+              className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 h-auto py-3 sm:py-4 flex flex-col items-start gap-1 disabled:opacity-70 text-left"
             >
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 {isGeneratingOverview ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin flex-shrink-0" />
                 ) : (
-                  <Zap className="h-4 w-4" />
+                  <Zap className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
                 )}
-                <span className="font-semibold">Quick Overview</span>
+                <span className="font-semibold text-sm sm:text-base">Quick Overview</span>
               </div>
               <span className="text-xs opacity-90 font-normal">
                 {isGeneratingOverview ? 'Generating...' : 'Fast summary of key points'}
@@ -103,15 +101,15 @@ export default function UploadedFileCard({
             <Button
               onClick={onGenerateStandardNotes}
               disabled={isGeneratingStandard}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 h-auto py-4 flex flex-col items-start space-y-1 disabled:opacity-70"
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 h-auto py-3 sm:py-4 flex flex-col items-start gap-1 disabled:opacity-70 text-left"
             >
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 {isGeneratingStandard ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin flex-shrink-0" />
                 ) : (
-                  <BookOpen className="h-4 w-4" />
+                  <BookOpen className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
                 )}
-                <span className="font-semibold">Standard Notes</span>
+                <span className="font-semibold text-sm sm:text-base">Standard Notes</span>
               </div>
               <span className="text-xs opacity-90 font-normal">
                 {isGeneratingStandard ? 'Generating...' : 'Comprehensive study notes'}
@@ -121,15 +119,15 @@ export default function UploadedFileCard({
             <Button
               onClick={onGenerateDeepDive}
               disabled={isGeneratingDeepDive}
-              className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 h-auto py-4 flex flex-col items-start space-y-1 disabled:opacity-70"
+              className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 h-auto py-3 sm:py-4 flex flex-col items-start gap-1 disabled:opacity-70 text-left"
             >
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 {isGeneratingDeepDive ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin flex-shrink-0" />
                 ) : (
-                  <Microscope className="h-4 w-4" />
+                  <Microscope className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
                 )}
-                <span className="font-semibold">Deep Dive</span>
+                <span className="font-semibold text-sm sm:text-base">Deep Dive</span>
               </div>
               <span className="text-xs opacity-90 font-normal">
                 {isGeneratingDeepDive ? 'Generating...' : 'In-depth analysis & insights'}
@@ -138,11 +136,11 @@ export default function UploadedFileCard({
 
             <Button
               onClick={onGenerateQuiz}
-              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 h-auto py-4 flex flex-col items-start space-y-1"
+              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 h-auto py-3 sm:py-4 flex flex-col items-start gap-1 text-left"
             >
-              <div className="flex items-center space-x-2">
-                <Brain className="h-4 w-4" />
-                <span className="font-semibold">Quiz</span>
+              <div className="flex items-center gap-2">
+                <Brain className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span className="font-semibold text-sm sm:text-base">Quiz</span>
               </div>
               <span className="text-xs opacity-90 font-normal">
                 Test your knowledge

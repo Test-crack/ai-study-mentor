@@ -273,14 +273,14 @@ export default function Notes() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+        <div className="space-y-4 sm:space-y-6 md:space-y-8">
           {/* Header */}
-          <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          <div className="text-center space-y-2 sm:space-y-3 md:space-y-4 px-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
               Notes Management
             </h1>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-sm sm:text-base md:text-xl text-muted-foreground">
               Upload your study materials and let AI extract key insights
             </p>
           </div>
@@ -291,23 +291,25 @@ export default function Notes() {
             onDrop={handleDrop}
             onDragOver={handleDragOver}
           >
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <div className="p-4 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full mb-4">
+            <CardContent className="flex flex-col items-center justify-center py-8 sm:py-10 md:py-12 px-4">
+              <div className="p-3 sm:p-4 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full mb-3 sm:mb-4">
                 {loading ? (
-                  <Upload className="h-8 w-8 text-purple-600 animate-pulse" />
+                  <Upload className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-purple-600 animate-pulse" />
                 ) : (
-                  <Plus className="h-8 w-8 text-purple-600" />
+                  <Plus className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-purple-600" />
                 )}
               </div>
-              <h3 className="text-xl font-semibold mb-2">Upload Your Study Material</h3>
-              <p className="text-muted-foreground text-center mb-6">
-                AI will extract key concepts, create study guides, and build your learning path<br />
+              <h3 className="text-lg sm:text-xl font-semibold mb-2 text-center">Upload Your Study Material</h3>
+              <p className="text-xs sm:text-sm md:text-base text-muted-foreground text-center mb-4 sm:mb-6 max-w-2xl">
+                AI will extract key concepts, create study guides, and build your learning path
+                <span className="hidden sm:inline"><br /></span>
+                <span className="sm:hidden"> • </span>
                 Supports PDF, DOCX, TXT, and image files
               </p>
               <Button 
                 onClick={handleChooseFiles} 
                 disabled={loading}
-                className="bg-gradient-to-r from-purple-500 to-blue-500"
+                className="bg-gradient-to-r from-purple-500 to-blue-500 w-full sm:w-auto"
               >
                 {loading ? (
                   <>
@@ -335,15 +337,15 @@ export default function Notes() {
           {/* Upload Status */}
           {uploadingFiles.size > 0 && (
             <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
-              <CardHeader>
-                <CardTitle className="text-sm">Uploading Files</CardTitle>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-sm sm:text-base">Uploading Files</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 sm:p-6 pt-0">
                 <div className="space-y-2">
                   {Array.from(uploadingFiles).map((fileName) => (
-                    <div key={fileName} className="flex items-center space-x-2 text-sm">
-                      <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
-                      <span className="text-muted-foreground">{fileName}</span>
+                    <div key={fileName} className="flex items-center space-x-2 text-xs sm:text-sm">
+                      <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin text-blue-600 flex-shrink-0" />
+                      <span className="text-muted-foreground truncate">{fileName}</span>
                     </div>
                   ))}
                 </div>
@@ -354,20 +356,20 @@ export default function Notes() {
           {/* Generating Status */}
           {generatingNotes.size > 0 && (
             <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
-              <CardHeader>
-                <CardTitle className="text-sm flex items-center space-x-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-sm sm:text-base flex items-center space-x-2">
+                  <Loader2 className="h-4 w-4 animate-spin flex-shrink-0" />
                   <span>Generating Notes</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 sm:p-6 pt-0">
                 <div className="space-y-2">
                   {Array.from(generatingNotes.entries()).map(([key, fileName]) => {
                     const materialType = key.split('-').pop();
                     return (
-                      <div key={key} className="flex items-center space-x-2 text-sm">
-                        <Loader2 className="h-4 w-4 animate-spin text-purple-600" />
-                        <span className="text-muted-foreground">
+                      <div key={key} className="flex items-center space-x-2 text-xs sm:text-sm">
+                        <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin text-purple-600 flex-shrink-0" />
+                        <span className="text-muted-foreground truncate">
                           {materialType} notes for {fileName}
                         </span>
                       </div>
@@ -380,8 +382,8 @@ export default function Notes() {
 
           {/* Generated Notes */}
           {generatedNotes.length > 0 && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-semibold">Generated Notes</h2>
+            <div className="space-y-4 sm:space-y-6">
+              <h2 className="text-xl sm:text-2xl font-semibold px-1">Generated Notes</h2>
               {generatedNotes.map((note, index) => (
                 <GeneratedNotesDisplay
                   key={`${note.fileName}-${note.materialType}-${index}`}
@@ -394,8 +396,8 @@ export default function Notes() {
 
           {/* Uploaded Files */}
           {uploadedFiles.length > 0 && (
-            <div className="space-y-4">
-              <h2 className="text-2xl font-semibold">Uploaded Files</h2>
+            <div className="space-y-3 sm:space-y-4">
+              <h2 className="text-xl sm:text-2xl font-semibold px-1">Uploaded Files</h2>
               {uploadedFiles.map((fileInfo, index) => {
                 const overviewKey = `${fileInfo.extractedPath}-overview`;
                 const standardKey = `${fileInfo.extractedPath}-standard`;
@@ -421,10 +423,12 @@ export default function Notes() {
           {/* Info Section */}
           {uploadedFiles.length === 0 && (
             <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground text-center">
-                  Upload your files to begin text extraction<br />
+              <CardContent className="flex flex-col items-center justify-center py-8 sm:py-10 md:py-12 px-4">
+                <FileText className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mb-3 sm:mb-4" />
+                <p className="text-xs sm:text-sm md:text-base text-muted-foreground text-center max-w-md">
+                  Upload your files to begin text extraction
+                  <span className="hidden sm:inline"><br /></span>
+                  <span className="sm:hidden"> • </span>
                   Notes will be generated after text extraction is complete
                 </p>
               </CardContent>
