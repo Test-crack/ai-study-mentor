@@ -1,6 +1,7 @@
 // Reading Assessment API utilities
 
 import { getBackendUrl } from './api-utils';
+import { callBackend } from './auth';
 
 export interface ReadingModule {
   id: string;
@@ -98,14 +99,19 @@ export interface ModulesResponse {
 
 /**
  * Fetch available reading modules
+ * @param authenticated - If true, uses JWT authentication
  */
-export const fetchReadingModules = async (): Promise<ModulesResponse> => {
+export const fetchReadingModules = async (authenticated = false): Promise<ModulesResponse> => {
   const backendUrl = getBackendUrl();
   const fullUrl = `${backendUrl}/api/reading/modules`;
   
   console.log('Fetching modules from:', fullUrl);
   
   try {
+    if (authenticated) {
+      return await callBackend(fullUrl);
+    }
+    
     const response = await fetch(fullUrl);
     
     if (!response.ok) {
@@ -134,10 +140,12 @@ Full request URL: ${fullUrl}`;
 
 /**
  * Fetch a reading passage for assessment
+ * @param authenticated - If true, uses JWT authentication
  */
 export const fetchReadingPassage = async (
   moduleId: string, 
-  difficulty: string
+  difficulty: string,
+  authenticated = false
 ): Promise<PassageData> => {
   const backendUrl = getBackendUrl();
   const fullUrl = `${backendUrl}/api/reading/passage/random`;
@@ -145,15 +153,17 @@ export const fetchReadingPassage = async (
   console.log('Fetching passage from:', fullUrl, { moduleId, difficulty });
   
   try {
+    if (authenticated) {
+      return await callBackend(fullUrl, {
+        method: 'POST',
+        body: JSON.stringify({ module: moduleId, difficulty })
+      });
+    }
+    
     const response = await fetch(fullUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        module: moduleId,
-        difficulty
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ module: moduleId, difficulty })
     });
     
     if (!response.ok) {
@@ -182,19 +192,28 @@ Full request URL: ${fullUrl}`;
 
 /**
  * Submit assessment results
+ * @param authenticated - If true, uses JWT authentication
  */
-export const submitAssessmentResults = async (submission: AssessmentSubmission): Promise<AssessmentResult> => {
+export const submitAssessmentResults = async (
+  submission: AssessmentSubmission,
+  authenticated = false
+): Promise<AssessmentResult> => {
   const backendUrl = getBackendUrl();
   const fullUrl = `${backendUrl}/api/reading/submit`;
   
   console.log('Submitting assessment to:', fullUrl);
   
   try {
+    if (authenticated) {
+      return await callBackend(fullUrl, {
+        method: 'POST',
+        body: JSON.stringify(submission)
+      });
+    }
+    
     const response = await fetch(fullUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(submission)
     });
     
