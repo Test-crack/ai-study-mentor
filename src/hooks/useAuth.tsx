@@ -20,16 +20,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        // Only set user if email is confirmed
+        const verifiedUser = session?.user?.email_confirmed_at ? session.user : null;
         setSession(session);
-        setUser(session?.user ?? null);
+        setUser(verifiedUser);
         setLoading(false);
       }
     );
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      // Only set user if email is confirmed
+      const verifiedUser = session?.user?.email_confirmed_at ? session.user : null;
       setSession(session);
-      setUser(session?.user ?? null);
+      setUser(verifiedUser);
       setLoading(false);
     });
 

@@ -33,15 +33,26 @@ const Auth = () => {
 
         toast({
           title: "Success!",
-          description: "Please check your email to confirm your account.",
+          description: "Please check your email to confirm your account before signing in.",
         });
+        
+        // Clear form and switch to login
+        setEmail("");
+        setPassword("");
+        setIsSignUp(false);
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
         if (error) throw error;
+
+        // Check if email is verified
+        if (!data.user?.email_confirmed_at) {
+          await supabase.auth.signOut();
+          throw new Error("Please verify your email before signing in. Check your inbox for the confirmation link.");
+        }
 
         toast({
           title: "Welcome back!",
