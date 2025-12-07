@@ -9,6 +9,7 @@ import { Youtube, Star, Video, Book, Loader2, Clock, Target, Play, BookOpen } fr
 import { useToast } from "@/hooks/use-toast";
 import ReactMarkdown from 'react-markdown';
 import { getBackendUrl } from "@/lib/api-utils";
+import { callBackend } from "@/lib/auth";
 
 interface TranscriptSegment {
   text: string;
@@ -90,25 +91,10 @@ export const YouTubeAnalyzer = () => {
       const backendUrl = getBackendUrl();
       console.log('Attempting to analyze video:', { url: currentUrl, backendUrl });
       
-      const response = await fetch(`${backendUrl}/api/yt-study/extract`, {
+      const data = await callBackend(`${backendUrl}/api/yt-study/extract`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ url: currentUrl }),
       });
-
-      if (!response.ok) {
-        let errorMessage = `Request failed with status ${response.status}`;
-        try {
-          const errJson = await response.json();
-          if (errJson?.error) errorMessage = errJson.error;
-        } catch {}
-        console.error('Extract API error:', errorMessage);
-        throw new Error(errorMessage);
-      }
-
-      const data = await response.json();
       // data is expected to be: { status, videoId, transcript: [{ text, offset, duration }], message }
       const segments = Array.isArray(data?.transcript) ? data.transcript as TranscriptSegment[] : [];
       const mergedText = segments.map(s => s?.text).filter(Boolean).join(' ');
@@ -178,28 +164,14 @@ export const YouTubeAnalyzer = () => {
 
     try {
       const backendUrl = getBackendUrl();
-      const response = await fetch(`${backendUrl}/api/yt-study/summarize`, {
+      const data = await callBackend(`${backendUrl}/api/yt-study/summarize`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           videoId: video.videoId,
           transcript: video.transcriptSegments,
           language: 'en',
         }),
       });
-
-      if (!response.ok) {
-        let errorMessage = `Request failed with status ${response.status}`;
-        try {
-          const errJson = await response.json();
-          if (errJson?.error) errorMessage = errJson.error;
-        } catch {}
-        throw new Error(errorMessage);
-      }
-
-      const data = await response.json();
       const markdown: string = data?.markdown || '';
 
       setAnalyzedVideos(prev => prev.map(v => v.id === video.id ? { ...v, notesMarkdown: markdown, notesProcessing: false } : v));
