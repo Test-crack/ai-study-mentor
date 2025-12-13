@@ -1,0 +1,150 @@
+/* Enhanced Markdown Styles for Study Notes */
+
+.enhanced-markdown {
+  @apply text-gray-800;
+}
+
+/* Headings with gradient underlines */
+.enhanced-markdown h1 {
+  @apply text-3xl font-bold mt-8 mb-4 pb-3;
+  background: linear-gradient(to right, #9333ea, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  border-bottom: 3px solid #9333ea;
+}
+
+.enhanced-markdown h2 {
+  @apply text-2xl font-bold mt-6 mb-3 pb-2 text-gray-800;
+  border-bottom: 2px solid #3b82f6;
+}
+
+.enhanced-markdown h3 {
+  @apply text-xl font-semibold mt-5 mb-2 text-gray-800;
+}
+
+.enhanced-markdown h4 {
+  @apply text-lg font-semibold mt-4 mb-2 text-gray-700;
+}
+
+/* Paragraphs */
+.enhanced-markdown p {
+  @apply text-gray-700 leading-relaxed my-3 text-base;
+}
+
+/* Lists */
+.enhanced-markdown ul {
+  @apply space-y-2 my-4 ml-6;
+}
+
+.enhanced-markdown ol {
+  @apply space-y-2 my-4 ml-6;
+}
+
+.enhanced-markdown li {
+  @apply ml-2 pl-3 border-l-3 border-purple-300 text-gray-700;
+  position: relative;
+}
+
+.enhanced-markdown ul li::before {
+  content: "▸";
+  @apply text-purple-500 font-bold absolute -left-5;
+}
+
+.enhanced-markdown ol li {
+  @apply list-decimal;
+}
+
+/* Strong/Bold text */
+.enhanced-markdown strong {
+  @apply font-semibold text-gray-900;
+}
+
+/* Emphasis/Italic */
+.enhanced-markdown em {
+  @apply italic text-gray-700;
+}
+
+/* Code inline */
+.enhanced-markdown code {
+  @apply bg-gray-100 text-purple-700 px-2 py-1 rounded text-sm font-mono;
+}
+
+/* Code blocks */
+.enhanced-markdown pre {
+  @apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-4;
+}
+
+.enhanced-markdown pre code {
+  @apply bg-transparent text-gray-100 p-0;
+}
+
+/* Blockquotes */
+.enhanced-markdown blockquote {
+  @apply border-l-4 border-blue-500 bg-blue-50 pl-4 py-3 my-4 italic text-gray-700 rounded-r;
+}
+
+/* Links */
+.enhanced-markdown a {
+  @apply text-blue-600 hover:text-blue-800 underline;
+}
+
+/* Tables */
+.enhanced-markdown table {
+  @apply w-full border-collapse my-4;
+}
+
+.enhanced-markdown th {
+  @apply bg-purple-100 text-purple-900 font-semibold p-3 text-left border border-purple-200;
+}
+
+.enhanced-markdown td {
+  @apply p-3 border border-gray-200 text-gray-700;
+}
+
+.enhanced-markdown tr:nth-child(even) {
+  @apply bg-gray-50;
+}
+
+/* Horizontal rule */
+.enhanced-markdown hr {
+  @apply my-6 border-t-2 border-gray-300;
+}
+
+/* Highlighted keywords animations */
+.enhanced-markdown strong[class*="bg-red-100"] {
+  @apply transition-all duration-200;
+  animation: pulse-red 2s ease-in-out infinite;
+}
+
+.enhanced-markdown strong[class*="bg-yellow-100"] {
+  @apply transition-all duration-200;
+}
+
+@keyframes pulse-red {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .enhanced-markdown h1 {
+    @apply text-2xl;
+  }
+  
+  .enhanced-markdown h2 {
+    @apply text-xl;
+  }
+  
+  .enhanced-markdown h3 {
+    @apply text-lg;
+  }
+  
+  .enhanced-markdown p {
+    @apply text-sm;
+  }
+}

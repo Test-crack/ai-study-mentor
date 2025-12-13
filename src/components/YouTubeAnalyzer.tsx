@@ -7,15 +7,24 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Youtube, Star, Video, Book, Loader2, Clock, Target, Play, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import ReactMarkdown from 'react-markdown';
 import { getBackendUrl } from "@/lib/api-utils";
 import { callBackend } from "@/lib/auth";
 import { TranscriptViewer } from "./TranscriptViewer";
+import { EnhancedStudyNotes } from "./EnhancedStudyNotes";
 
 interface TranscriptSegment {
   text: string;
   offset: number;
   duration: number;
+}
+
+interface ConceptMetadata {
+  conceptId: string;
+  domain: string;
+  conceptSlug: string;
+  keywords: string[];
+  learningObjective: string;
+  userLinked: boolean;
 }
 
 interface AnalyzedVideo {
@@ -34,6 +43,7 @@ interface AnalyzedVideo {
   videoId?: string; // backend video identifier returned by /api/extract
   notesMarkdown?: string; // generated study material markdown
   notesProcessing?: boolean; // generation in progress
+  concept?: ConceptMetadata; // concept metadata from backend
 }
 
 export const YouTubeAnalyzer = () => {
@@ -175,8 +185,9 @@ export const YouTubeAnalyzer = () => {
         }),
       });
       const markdown: string = data?.markdown || '';
+      const concept: ConceptMetadata | undefined = data?.concept;
 
-      setAnalyzedVideos(prev => prev.map(v => v.id === video.id ? { ...v, notesMarkdown: markdown, notesProcessing: false } : v));
+      setAnalyzedVideos(prev => prev.map(v => v.id === video.id ? { ...v, notesMarkdown: markdown, concept, notesProcessing: false } : v));
 
       toast({
         title: "Notes ready",
@@ -375,30 +386,12 @@ export const YouTubeAnalyzer = () => {
                 <p className="text-xs sm:text-sm text-purple-800 leading-relaxed">{video.aiInsights}</p>
               </div>
 
-              {/* Study Notes (Markdown) */}
+              {/* Study Notes (Enhanced) */}
               {video.notesMarkdown && (
-                <div className="mt-4 sm:mt-6">
-                  <div className="bg-white rounded-lg border-2 border-green-200 shadow-lg">
-                    <div className="bg-gradient-to-r from-green-50 to-blue-50 px-4 sm:px-6 py-3 sm:py-4 border-b">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <div className="p-1.5 sm:p-2 bg-green-500 rounded-lg flex-shrink-0">
-                          <Book className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                        </div>
-                        <h3 className="text-base sm:text-xl font-semibold text-gray-800">📝 AI-Generated Study Notes</h3>
-                        <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
-                          Study Material
-                        </Badge>
-                      </div>
-                    </div>
-                    <div className="p-4 sm:p-6">
-                      <div className="prose prose-sm sm:prose-base lg:prose-lg max-w-none markdown-content">
-                        <ReactMarkdown>
-                          {video.notesMarkdown}
-                        </ReactMarkdown>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <EnhancedStudyNotes 
+                  markdown={video.notesMarkdown}
+                  concept={video.concept}
+                />
               )}
 
               {/* Study Actions */}
