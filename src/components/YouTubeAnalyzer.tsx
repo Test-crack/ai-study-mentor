@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import ReactMarkdown from 'react-markdown';
 import { getBackendUrl } from "@/lib/api-utils";
 import { callBackend } from "@/lib/auth";
+import { TranscriptViewer } from "./TranscriptViewer";
 
 interface TranscriptSegment {
   text: string;
@@ -39,6 +40,7 @@ export const YouTubeAnalyzer = () => {
   const [videoUrl, setVideoUrl] = useState("");
   const [analyzedVideos, setAnalyzedVideos] = useState<AnalyzedVideo[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [viewingTranscript, setViewingTranscript] = useState<AnalyzedVideo | null>(null);
   const { toast } = useToast();
 
   const handleAnalyzeVideo = async () => {
@@ -354,6 +356,7 @@ export const YouTubeAnalyzer = () => {
                   <Button 
                     variant="outline" 
                     size="sm" 
+                    onClick={() => setViewingTranscript(video)}
                     className="text-green-700 border-green-300 hover:bg-green-100 transition-colors w-full sm:w-auto text-xs sm:text-sm"
                   >
                     View Transcript
@@ -478,6 +481,19 @@ export const YouTubeAnalyzer = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Transcript Viewer Modal */}
+      {viewingTranscript && viewingTranscript.transcriptSegments && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 flex items-center justify-center p-4">
+          <div className="w-full max-w-4xl">
+            <TranscriptViewer
+              segments={viewingTranscript.transcriptSegments}
+              videoTitle={viewingTranscript.title}
+              onClose={() => setViewingTranscript(null)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
