@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import SpeedAssessment from "./pages/SpeedAssessment";
+import ReadingAssessment from "./pages/ReadingAssessment";
 import Notes from "./pages/Notes";
 import PricingPage from "./components/payment/PricingPage";
 import PaymentSuccess from "./components/payment/PaymentSuccess";
@@ -35,7 +36,8 @@ const AppRoutes = () => {
         <>
           <Route path="/" element={<Index />} />
           <Route path="/notes" element={<Notes />} />
-          <Route path="/assessment" element={<SpeedAssessment />} />
+          <Route path="/assessment" element={<ReadingAssessment />} />
+          <Route path="/assessment/legacy" element={<SpeedAssessment />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/payment/success" element={<PaymentSuccess />} />
         </>

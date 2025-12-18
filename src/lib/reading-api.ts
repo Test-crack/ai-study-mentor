@@ -253,3 +253,84 @@ Full request URL: ${fullUrl}`;
   }
 };
 
+// User Profile Types
+export interface UserReadingProfile {
+  current: {
+    weightedWPM: number;
+    retention: number;
+    speedLearning: number;
+    focusRatio: number;
+    integrityScore: number;
+  };
+  best: {
+    weightedWPM: number;
+    retention: number;
+    speedLearning: number;
+  };
+  stats: {
+    totalAssessments: number;
+    lastAssessmentAt: string | null;
+  };
+}
+
+export interface AssessmentHistoryItem {
+  id: string;
+  passageTitle?: string;
+  passageId?: string;
+  difficulty: string;
+  category: string;
+  wordCount?: number;
+  weightedWPM: number;
+  actualWPM?: number;
+  accuracy: number;
+  retention: number;
+  speedLearningScore: number;
+  integrityScore: number;
+  focusRatio: number;
+  tabSwitches?: number;
+  readingTimeSeconds: number;
+  completedAt?: string;
+  createdAt?: string;
+}
+
+export interface AssessmentHistoryResponse {
+  history: AssessmentHistoryItem[];
+  total: number;
+  filters: {
+    limit: number;
+    difficulty: string;
+    days: string | number;
+  };
+}
+
+/**
+ * Fetch user's reading profile
+ */
+export const getUserProfile = async (): Promise<UserReadingProfile> => {
+  const backendUrl = getBackendUrl();
+  const fullUrl = `${backendUrl}/api/reading/profile`;
+  
+  const response = await callBackend(fullUrl);
+  return response.profile || response;
+};
+
+/**
+ * Fetch user's assessment history
+ */
+export const getAssessmentHistory = async (
+  limit = 50,
+  difficulty?: string,
+  days?: number
+): Promise<AssessmentHistoryResponse> => {
+  const backendUrl = getBackendUrl();
+  const params = new URLSearchParams();
+  
+  params.append('limit', limit.toString());
+  if (difficulty) params.append('difficulty', difficulty);
+  if (days) params.append('days', days.toString());
+  
+  const fullUrl = `${backendUrl}/api/reading/history?${params.toString()}`;
+  
+  return await callBackend(fullUrl);
+};
+
