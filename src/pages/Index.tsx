@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,18 +12,48 @@ import { PremiumModal } from "@/components/PremiumModal";
 import { ProgressDashboard } from "@/components/ProgressDashboard";
 import { Navbar } from "@/components/Navbar";
 import { useAuth } from "@/hooks/useAuth";
+import { getBackendUrl } from "@/lib/api-utils";
+import { callBackend } from "@/lib/auth";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [displayName, setDisplayName] = useState<string>("");
   const { user } = useAuth();
+  const hasLoadedProfile = useRef(false);
 
-  // Extract user name from email (first part before @)
-  const userName = user?.email?.split('@')[0] || 'Student';
+  // Fetch user profile on mount
+  useEffect(() => {
+    if (hasLoadedProfile.current || !user) {
+      return;
+    }
+
+    const loadProfile = async () => {
+      try {
+        const backendUrl = getBackendUrl();
+        const data = await callBackend(`${backendUrl}/api/profile`, {
+          method: "GET",
+        });
+
+        if (data.user) {
+          // Use name if available, otherwise use email
+          setDisplayName(data.user.name || data.user.email);
+          hasLoadedProfile.current = true;
+        }
+      } catch (error) {
+        console.error("Error loading profile:", error);
+        // Fallback to email if profile fetch fails
+        setDisplayName(user?.email || "Student");
+      }
+    };
+
+    loadProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Mock user data for demo - in production this would come from database
   const userData = {
-    name: userName,
+    name: displayName || user?.email?.split('@')[0] || 'Student',
     streak: 12,
     totalStudyTime: 45,
     completedSessions: 8,

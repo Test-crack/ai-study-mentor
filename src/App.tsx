@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import SpeedAssessment from "./pages/SpeedAssessment";
 import ReadingAssessment from "./pages/ReadingAssessment";
 import Notes from "./pages/Notes";
+import Profile from "./pages/Profile";
 import PricingPage from "./components/payment/PricingPage";
 import PaymentSuccess from "./components/payment/PaymentSuccess";
 
@@ -36,6 +37,7 @@ const AppRoutes = () => {
         <>
           <Route path="/" element={<Index />} />
           <Route path="/notes" element={<Notes />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/assessment" element={<ReadingAssessment />} />
           <Route path="/assessment/legacy" element={<SpeedAssessment />} />
           <Route path="/pricing" element={<PricingPage />} />
