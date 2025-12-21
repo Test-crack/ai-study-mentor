@@ -4,13 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Youtube, Star, Video, Book, Loader2, Clock, Target, Play, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getBackendUrl } from "@/lib/api-utils";
 import { callBackend } from "@/lib/auth";
 import { TranscriptViewer } from "./TranscriptViewer";
 import { EnhancedStudyNotes } from "./EnhancedStudyNotes";
+import { TranscriptPermissionModal } from "./TranscriptPermissionModal";
+import { extractTranscriptFromBrowser } from "@/lib/youtube-transcript-extractor";
 
 interface TranscriptSegment {
   text: string;
@@ -51,6 +52,8 @@ export const YouTubeAnalyzer = () => {
   const [analyzedVideos, setAnalyzedVideos] = useState<AnalyzedVideo[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [viewingTranscript, setViewingTranscript] = useState<AnalyzedVideo | null>(null);
+  const [permissionModal, setPermissionModal] = useState<{ isOpen: boolean; videoId: string; videoDbId: string | number } | null>(null);
+  const [isImportingTranscript, setIsImportingTranscript] = useState(false);
   const { toast } = useToast();
 
   const handleAnalyzeVideo = async () => {
@@ -107,6 +110,38 @@ export const YouTubeAnalyzer = () => {
         method: 'POST',
         body: JSON.stringify({ url: currentUrl }),
       });
+
+      // Check if client fallback is required
+      if (data?.code === 'CLIENT_FALLBACK_REQUIRED') {
+        const fallbackVideo: AnalyzedVideo = {
+          id: processingVideo.id,
+          title: `YouTube Video (${data?.videoId ?? 'unknown'})`,
+          url: currentUrl,
+          duration: 'Unknown',
+          summary: 'We need your permission to import captions for this video once. After that, notes will be instant forever.',
+          keyTopics: ['Client assistance required'],
+          studyTime: 'TBD',
+          difficulty: 'TBD',
+          transcript: 'Permission Required',
+          aiInsights: data?.message || 'Server transcript methods failed. Please fetch transcript on client-side and resubmit.',
+          processing: false,
+          videoId: data?.videoId,
+        };
+
+        setAnalyzedVideos(prev => prev.map(video => 
+          video.id === processingVideo.id ? fallbackVideo : video
+        ));
+
+        // Open permission modal
+        setPermissionModal({
+          isOpen: true,
+          videoId: data?.videoId,
+          videoDbId: processingVideo.id,
+        });
+
+        return;
+      }
+
       // data is expected to be: { status, videoId, transcript: [{ text, offset, duration }], message }
       const segments = Array.isArray(data?.transcript) ? data.transcript as TranscriptSegment[] : [];
       const mergedText = segments.map(s => s?.text).filter(Boolean).join(' ');
@@ -159,6 +194,83 @@ export const YouTubeAnalyzer = () => {
     } finally {
       setIsAnalyzing(false);
     }
+  };
+
+  const handleImportTranscript = async () => {
+    if (!permissionModal) return;
+
+    const { videoId, videoDbId } = permissionModal;
+    setIsImportingTranscript(true);
+
+    try {
+      // Extract transcript from browser using YouTube's player response
+      const browserSegments = await extractTranscriptFromBrowser(videoId);
+
+      // Transform to backend format (offset instead of start)
+      const formattedTranscript = browserSegments.map((seg) => ({
+        text: seg.text,
+        offset: seg.start,
+        duration: seg.duration,
+      }));
+
+      // Submit to backend
+      const backendUrl = getBackendUrl();
+      const data = await callBackend(
+        `${backendUrl}/api/yt-study/submit-client-transcript`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            videoId,
+            transcript: formattedTranscript,
+          }),
+        }
+      );
+
+      const segments = Array.isArray(data?.transcript)
+        ? (data.transcript as TranscriptSegment[])
+        : [];
+      const mergedText = segments.map((s) => s?.text).filter(Boolean).join(" ");
+
+      // Update video with successful transcript
+      setAnalyzedVideos((prev) =>
+        prev.map((video) =>
+          video.id === videoDbId
+            ? {
+                ...video,
+                transcript: mergedText ? "Available" : "Unavailable",
+                transcriptSegments: segments,
+                summary: data?.message ?? "Transcript imported successfully.",
+                aiInsights: "Transcript imported successfully. Ready for analysis.",
+              }
+            : video
+        )
+      );
+
+      toast({
+        title: "Success!",
+        description: "Transcript imported successfully. You can now create study notes.",
+      });
+
+      // Close modal
+      setPermissionModal(null);
+    } catch (error) {
+      console.error("Error importing transcript:", error);
+
+      toast({
+        title: "Import failed",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to import transcript from browser",
+        variant: "destructive",
+      });
+    } finally {
+      setIsImportingTranscript(false);
+    }
+  };
+
+  const handleCancelImport = () => {
+    setPermissionModal(null);
   };
 
   const handleCreateNotes = async (video: AnalyzedVideo) => {
@@ -331,7 +443,9 @@ export const YouTubeAnalyzer = () => {
                 video.transcript === "Available" 
                   ? "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200" 
                   : video.transcript === "Extracting..." 
-                    ? "bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200" 
+                    ? "bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200"
+                  : video.transcript === "Permission Required"
+                    ? "bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200"
                     : "bg-gradient-to-r from-red-50 to-pink-50 border-red-200"
               }`}>
                 <div className="flex items-center space-x-2 min-w-0">
@@ -339,7 +453,9 @@ export const YouTubeAnalyzer = () => {
                     video.transcript === "Available" 
                       ? "bg-green-500" 
                       : video.transcript === "Extracting..." 
-                        ? "bg-yellow-500" 
+                        ? "bg-yellow-500"
+                      : video.transcript === "Permission Required"
+                        ? "bg-blue-500"
                         : "bg-red-500"
                   }`}>
                     <Book className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
@@ -349,7 +465,9 @@ export const YouTubeAnalyzer = () => {
                       video.transcript === "Available" 
                         ? "text-green-800" 
                         : video.transcript === "Extracting..." 
-                          ? "text-yellow-800" 
+                          ? "text-yellow-800"
+                        : video.transcript === "Permission Required"
+                          ? "text-blue-800"
                           : "text-red-800"
                     }`}>
                       Transcript: {video.transcript}
@@ -358,7 +476,9 @@ export const YouTubeAnalyzer = () => {
                       {video.transcript === "Available" 
                         ? "Ready for AI analysis" 
                         : video.transcript === "Extracting..." 
-                          ? "Processing video content..." 
+                          ? "Processing video content..."
+                        : video.transcript === "Permission Required"
+                          ? "We need your permission to import captions for this video once. After that, notes will be instant forever."
                           : "Unable to extract transcript"}
                     </p>
                   </div>
@@ -486,6 +606,17 @@ export const YouTubeAnalyzer = () => {
             />
           </div>
         </div>
+      )}
+
+      {/* Transcript Permission Modal */}
+      {permissionModal && (
+        <TranscriptPermissionModal
+          isOpen={permissionModal.isOpen}
+          videoId={permissionModal.videoId}
+          onImport={handleImportTranscript}
+          onCancel={handleCancelImport}
+          isImporting={isImportingTranscript}
+        />
       )}
     </div>
   );
