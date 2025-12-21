@@ -16,6 +16,8 @@ import { Instructions } from "@/components/speedAssessment/Instructions";
 import { ReadingView } from "@/components/speedAssessment/ReadingView";
 import { QuestionsView } from "@/components/speedAssessment/QuestionsView";
 import { ResultsView } from "@/components/speedAssessment/ResultsView";
+import { StepIndicator } from "@/components/speedAssessment/StepIndicator";
+
 
 const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }) => {
   const [modules, setModules] = useState<ReadingModule[]>([]);
@@ -37,6 +39,15 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
   
   const { toast } = useToast();
   const { focusData, resetTracking, getFinalFocusData } = usePageVisibility();
+
+  // Define assessment steps
+  const assessmentSteps = [
+    { id: "module-selection", label: "Select Module", shortLabel: "Select" },
+    { id: "instructions", label: "Instructions", shortLabel: "Info" },
+    { id: "reading", label: "Read Passage", shortLabel: "Read" },
+    { id: "questions", label: "Answer Questions", shortLabel: "Questions" },
+    { id: "results", label: "View Results", shortLabel: "Results" },
+  ];
 
   // Load modules on mount
   useEffect(() => {
@@ -165,6 +176,20 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
     setReadingStartTime(null);
   };
 
+  const handleStepNavigation = (stepId: string) => {
+    // Only allow navigation to completed steps or current step
+    const targetIndex = assessmentSteps.findIndex((s) => s.id === stepId);
+    const currentIndex = assessmentSteps.findIndex((s) => s.id === currentStep);
+
+    if (targetIndex <= currentIndex) {
+      setCurrentStep(stepId);
+      toast({
+        title: "Navigation",
+        description: `Moved to ${assessmentSteps[targetIndex].label}`,
+      });
+    }
+  };
+
   const calculateResults = async () => {
     if (!currentPassage || totalReadingTime === 0) return;
     
@@ -221,80 +246,93 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
   };
 
   return (
-    <div className="p-4">
-      <div className="mx-auto">
-        {currentStep === "module-selection" && (
-          <ModuleSelection
-            modules={modules}
-            selectedModule={selectedModule}
-            selectedDifficulty={selectedDifficulty}
-            loading={loading}
-            loadingModules={loadingModules}
-            onModuleChange={setSelectedModule}
-            onDifficultyChange={setSelectedDifficulty}
-            onStartAssessment={() => loadPassage(selectedModule, selectedDifficulty)}
-          />
-        )}
-        
-        {currentStep === "instructions" && (
-          <Instructions
-            moduleData={modules.find(m => m.id === selectedModule)}
-            selectedDifficulty={selectedDifficulty}
-            currentPassage={currentPassage}
-            onBeginReading={() => setCurrentStep("reading")}
-          />
-        )}
-        
-        {currentStep === "reading" && currentPassage && (
-          <ReadingView
-            moduleData={modules.find(m => m.id === selectedModule)}
-            currentPassage={currentPassage}
-            currentTime={currentTime}
-            isTimerRunning={isTimerRunning}
-            readingStartTime={readingStartTime}
-            focusData={focusData}
-            formatTime={formatTime}
-            onStartTimer={startTimer}
-            onPauseTimer={pauseTimer}
-            onResumeTimer={resumeTimer}
-            onStopTimer={stopTimer}
-          />
-        )}
-        
-        {currentStep === "questions" && currentPassage && (
-          <QuestionsView
-            moduleData={modules.find(m => m.id === selectedModule)}
-            currentPassage={currentPassage}
-            answers={answers}
-            totalReadingTime={totalReadingTime}
-            focusData={focusData}
-            formatTime={formatTime}
-            onAnswerChange={(questionId, selectedOption) => 
-              setAnswers({ ...answers, [questionId]: selectedOption })
-            }
-            onCalculateResults={calculateResults}
-          />
-        )}
-        
-        {currentStep === "results" && assessmentResults && currentPassage && (
-          <ResultsView
-            assessmentResults={assessmentResults}
-            currentPassage={currentPassage}
-            totalReadingTime={totalReadingTime}
-            formatTime={formatTime}
-            onTakeAnother={handleStartOver}
-            onBackToDashboard={() => window.location.href = "/"}
-          />
-        )}
-        
-        {currentStep === "reading-time-error" && readingTimeError && (
-          <ReadingTimeError
-            error={readingTimeError}
-            onRetry={handleRetryReading}
-            onStartOver={handleStartOver}
-            currentPassageTitle={currentPassage?.title}
-          />
-        )}
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
+      {/* Step Indicator */}
+      {currentStep !== "reading-time-error" && (
+        <StepIndicator
+          currentStep={currentStep}
+          steps={assessmentSteps}
+          onStepClick={handleStepNavigation}
+          allowNavigation={true}
+        />
+      )}
+
+      {/* Main Content */}
+      <div className="p-4">
+        <div className="mx-auto">
+          {currentStep === "module-selection" && (
+            <ModuleSelection
+              modules={modules}
+              selectedModule={selectedModule}
+              selectedDifficulty={selectedDifficulty}
+              loading={loading}
+              loadingModules={loadingModules}
+              onModuleChange={setSelectedModule}
+              onDifficultyChange={setSelectedDifficulty}
+              onStartAssessment={() => loadPassage(selectedModule, selectedDifficulty)}
+            />
+          )}
+          
+          {currentStep === "instructions" && (
+            <Instructions
+              moduleData={modules.find(m => m.id === selectedModule)}
+              selectedDifficulty={selectedDifficulty}
+              currentPassage={currentPassage}
+              onBeginReading={() => setCurrentStep("reading")}
+            />
+          )}
+          
+          {currentStep === "reading" && currentPassage && (
+            <ReadingView
+              moduleData={modules.find(m => m.id === selectedModule)}
+              currentPassage={currentPassage}
+              currentTime={currentTime}
+              isTimerRunning={isTimerRunning}
+              readingStartTime={readingStartTime}
+              focusData={focusData}
+              formatTime={formatTime}
+              onStartTimer={startTimer}
+              onPauseTimer={pauseTimer}
+              onResumeTimer={resumeTimer}
+              onStopTimer={stopTimer}
+            />
+          )}
+          
+          {currentStep === "questions" && currentPassage && (
+            <QuestionsView
+              moduleData={modules.find(m => m.id === selectedModule)}
+              currentPassage={currentPassage}
+              answers={answers}
+              totalReadingTime={totalReadingTime}
+              focusData={focusData}
+              formatTime={formatTime}
+              onAnswerChange={(questionId, selectedOption) => 
+                setAnswers({ ...answers, [questionId]: selectedOption })
+              }
+              onCalculateResults={calculateResults}
+            />
+          )}
+          
+          {currentStep === "results" && assessmentResults && currentPassage && (
+            <ResultsView
+              assessmentResults={assessmentResults}
+              currentPassage={currentPassage}
+              totalReadingTime={totalReadingTime}
+              formatTime={formatTime}
+              onTakeAnother={handleStartOver}
+              onBackToDashboard={() => window.location.href = "/"}
+            />
+          )}
+          
+          {currentStep === "reading-time-error" && readingTimeError && (
+            <ReadingTimeError
+              error={readingTimeError}
+              onRetry={handleRetryReading}
+              onStartOver={handleStartOver}
+              currentPassageTitle={currentPassage?.title}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

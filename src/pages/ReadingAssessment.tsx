@@ -1,17 +1,20 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { BookOpen, History, User, TrendingUp } from "lucide-react";
 import SpeedAssessment from "./SpeedAssessment";
 import { ReadingProfile } from "@/components/readingAssessment/ReadingProfile";
 import { AssessmentHistory } from "@/components/readingAssessment/AssessmentHistory";
+import { Navbar } from "@/components/Navbar";
 
 const ReadingAssessment = () => {
   const [activeTab, setActiveTab] = useState("profile");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
+      {/* Navbar */}
+      <Navbar showNavItems={true} />
+
       <div className="container mx-auto py-8 px-4">
         {/* Header */}
         <div className="mb-8">
