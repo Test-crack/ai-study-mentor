@@ -18,6 +18,7 @@ interface QuestionsViewProps {
   formatTime: (seconds: number) => string;
   onAnswerChange: (questionId: string, selectedOption: string) => void;
   onCalculateResults: () => void;
+  loading?: boolean; // Add loading prop
 }
 
 export const QuestionsView = ({
@@ -28,7 +29,8 @@ export const QuestionsView = ({
   focusData,
   formatTime,
   onAnswerChange,
-  onCalculateResults
+  onCalculateResults,
+  loading = false // Add loading with default
 }: QuestionsViewProps) => {
   return (
     <Card className="max-w-4xl mx-auto">
@@ -89,12 +91,12 @@ export const QuestionsView = ({
         <div className="flex flex-col items-center space-y-4">
           <Button 
             onClick={onCalculateResults}
-            disabled={Object.keys(answers).length !== currentPassage.questions.length || totalReadingTime === 0}
+            disabled={Object.keys(answers).length !== currentPassage.questions.length || totalReadingTime === 0 || loading}
             size="lg"
             className="w-full max-w-md bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg transform hover:scale-105 transition-all disabled:transform-none disabled:opacity-50"
           >
             <Award className="w-5 h-5 mr-2" />
-            Complete Assessment & Get Results
+            {loading ? "Submitting..." : "Complete Assessment & Get Results"}
           </Button>
           
           {totalReadingTime === 0 && (

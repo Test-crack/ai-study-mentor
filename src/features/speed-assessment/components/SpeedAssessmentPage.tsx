@@ -193,6 +193,8 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
   const calculateResults = async () => {
     if (!currentPassage || totalReadingTime === 0) return;
     
+    setLoading(true); // Add loading state
+    
     const finalFocusData = getFinalFocusData();
     const submissionAnswers = currentPassage.questions.map(question => ({
       questionId: question.id,
@@ -212,9 +214,18 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
     };
     
     try {
-      const assessmentResult = await submitAssessmentResults(submission, true); // Use authenticated call
+      console.log('Submitting assessment:', submission); // Debug log
+      const assessmentResult = await submitAssessmentResults(submission, true);
+      console.log('Assessment result received:', assessmentResult); // Debug log
+      
+      // Set results first
       setAssessmentResults(assessmentResult);
-      setCurrentStep("results");
+      
+      // Then change step - use setTimeout to ensure state is updated
+      setTimeout(() => {
+        setCurrentStep("results");
+        console.log('Step changed to results'); // Debug log
+      }, 0);
       
       onComplete?.({
         moduleId: selectedModule,
@@ -230,6 +241,11 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
         level: assessmentResult.metrics.weightedWPM > 200 ? "Advanced" : 
                assessmentResult.metrics.weightedWPM > 150 ? "Intermediate" : "Beginner"
       });
+      
+      toast({
+        title: "Assessment Complete!",
+        description: "Your results are ready.",
+      });
     } catch (error) {
       console.error('Results submission failed:', error);
       if (error && typeof error === 'object' && 'flag' in error && error.flag === 'too_fast') {
@@ -242,6 +258,8 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
         description: error instanceof Error ? error.message : 'Unknown error',
         variant: "destructive"
       });
+    } finally {
+      setLoading(false); // Clear loading state
     }
   };
 
@@ -306,6 +324,7 @@ const SpeedAssessment = ({ onComplete }: { onComplete?: (results: any) => void }
               totalReadingTime={totalReadingTime}
               focusData={focusData}
               formatTime={formatTime}
+              loading={loading}
               onAnswerChange={(questionId, selectedOption) => 
                 setAnswers({ ...answers, [questionId]: selectedOption })
               }
