@@ -1,8 +1,50 @@
-# Welcome to your Lovable project
+# AI Study Mentor
+
+An intelligent study companion with reading assessments, note generation, and speed reading tools.
 
 ## Project info
 
 **URL**: https://lovable.dev/projects/b93e2ae5-f700-4854-8902-1bbd8de0d71c
+
+## 📁 Project Structure
+
+This project follows a **feature-based modular architecture** for scalability:
+
+```
+src/
+├── core/              # App setup (App.tsx, router.tsx, main.tsx)
+├── features/          # Feature modules (auth, notes, assessments, etc.)
+│   ├── auth/
+│   ├── notes/
+│   ├── reading-assessment/
+│   ├── speed-assessment/
+│   ├── payment/
+│   ├── profile/
+│   └── home/
+├── shared/            # Shared code (UI, hooks, utils)
+│   ├── components/
+│   ├── hooks/
+│   ├── services/
+│   └── utils/
+├── config/            # Configuration & constants
+└── styles/            # Global styles
+```
+
+### 📚 Documentation
+
+- **[QUICK_START.md](./QUICK_START.md)** - Get started quickly with common tasks
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Detailed architecture documentation
+- **[MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)** - Migration from old structure
+
+## ✨ Features
+
+- 🔐 **Authentication** - Secure login/signup with Supabase
+- 📝 **Notes Generation** - AI-powered study notes from documents
+- 📺 **YouTube Transcripts** - Extract and analyze video transcripts
+- 📖 **Reading Assessment** - Comprehensive reading tests with metrics
+- ⚡ **Speed Assessment** - Timed reading with WPM tracking
+- 💳 **Payment Integration** - Razorpay & Stripe subscriptions
+- 📊 **Progress Dashboard** - Track learning progress
 
 ## How can I edit this code?
 

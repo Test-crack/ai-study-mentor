@@ -1,0 +1,23 @@
+// Central export for all UI components
+export * from '@/shared/components/ui/accordion';
+export * from '@/shared/components/ui/alert';
+export * from '@/shared/components/ui/alert-dialog';
+export * from '@/shared/components/ui/avatar';
+export * from '@/shared/components/ui/badge';
+export * from '@/shared/components/ui/button';
+export * from '@/shared/components/ui/card';
+export * from '@/shared/components/ui/checkbox';
+export * from '@/shared/components/ui/dialog';
+export * from '@/shared/components/ui/dropdown-menu';
+export * from '@/shared/components/ui/form';
+export * from '@/shared/components/ui/input';
+export * from '@/shared/components/ui/label';
+export * from '@/shared/components/ui/select';
+export * from '@/shared/components/ui/separator';
+export * from '@/shared/components/ui/sheet';
+export * from '@/shared/components/ui/table';
+export * from '@/shared/components/ui/tabs';
+export * from '@/shared/components/ui/textarea';
+export * from '@/shared/components/ui/toast';
+export * from '@/shared/components/ui/toaster';
+export { Toaster } from '@/shared/components/ui/sonner';

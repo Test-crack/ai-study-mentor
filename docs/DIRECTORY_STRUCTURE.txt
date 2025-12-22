@@ -1,0 +1,281 @@
+AI Study Mentor - Directory Structure
+=====================================
+
+src/
+│
+├── core/                                    # Application Bootstrap & Setup
+│   ├── App.tsx                             # Root component with RouterProvider
+│   ├── main.tsx                            # Application entry point
+│   ├── router.tsx                          # Centralized route configuration
+│   └── App.css                             # Core app styles
+│
+├── features/                                # Feature Modules (Domain-Driven)
+│   │
+│   ├── auth/                               # Authentication & Authorization
+│   │   ├── components/
+│   │   │   ├── AuthPage.tsx               # Login/Signup page
+│   │   │   └── index.ts                   # Component exports
+│   │   ├── hooks/
+│   │   │   ├── useAuth.tsx                # Auth state management
+│   │   │   ├── useAuthenticatedApi.ts     # Authenticated API calls
+│   │   │   └── index.ts
+│   │   ├── services/
+│   │   │   ├── authClient.ts              # Auth API client
+│   │   │   └── index.ts
+│   │   ├── types/
+│   │   │   └── index.ts                   # Auth types (User, Session)
+│   │   └── index.ts                       # Public API
+│   │
+│   ├── notes/                              # Note-taking & Study Materials
+│   │   ├── components/
+│   │   │   ├── NotesPage.tsx              # Main notes page
+│   │   │   ├── EnhancedStudyNotes.tsx     # AI-enhanced notes
+│   │   │   ├── NotesUpload.tsx            # File upload component
+│   │   │   ├── GeneratedNotesDisplay.tsx  # Display generated notes
+│   │   │   ├── StudyGuides.tsx            # Study guide generator
+│   │   │   ├── YouTubeAnalyzer.tsx        # YouTube video analyzer
+│   │   │   ├── TranscriptViewer.tsx       # Transcript display
+│   │   │   ├── TranscriptPermissionModal.tsx
+│   │   │   ├── UploadedFileCard.tsx       # File card component
+│   │   │   └── index.ts
+│   │   ├── services/
+│   │   │   ├── youtube-transcript.ts      # YouTube transcript extraction
+│   │   │   └── index.ts
+│   │   └── index.ts
+│   │
+│   ├── reading-assessment/                 # Reading Comprehension Assessment
+│   │   ├── components/
+│   │   │   ├── ReadingAssessmentPage.tsx  # Main assessment page
+│   │   │   ├── AssessmentHistory.tsx      # Assessment history view
+│   │   │   ├── HistoryChart.tsx           # Performance charts
+│   │   │   ├── HistoryTable.tsx           # History data table
+│   │   │   ├── ReadingProfile.tsx         # User reading profile
+│   │   │   ├── index.ts
+│   │   │   └── README.md
+│   │   ├── services/
+│   │   │   ├── reading-api.ts             # Reading assessment API
+│   │   │   └── index.ts
+│   │   ├── types/
+│   │   │   └── index.ts                   # Assessment types
+│   │   └── index.ts
+│   │
+│   ├── speed-assessment/                   # Speed Reading Assessment
+│   │   ├── components/
+│   │   │   ├── SpeedAssessmentPage.tsx    # Main speed test page
+│   │   │   ├── FocusIndicator.tsx         # Focus tracking indicator
+│   │   │   ├── Instructions.tsx           # Test instructions
+│   │   │   ├── ModuleSelection.tsx        # Module selector
+│   │   │   ├── QuestionCard.tsx           # Question display card
+│   │   │   ├── QuestionsView.tsx          # Questions view
+│   │   │   ├── ReadingPassage.tsx         # Passage display
+│   │   │   ├── ReadingView.tsx            # Reading interface
+│   │   │   ├── ResultsView.tsx            # Results display
+│   │   │   ├── StepIndicator.tsx          # Progress indicator
+│   │   │   ├── TimerControls.tsx          # Timer controls
+│   │   │   ├── AssessmentResults.tsx      # Results component
+│   │   │   ├── ReadingTimeError.tsx       # Error handling
+│   │   │   └── index.ts
+│   │   └── index.ts
+│   │
+│   ├── payment/                            # Payment & Subscription Management
+│   │   ├── components/
+│   │   │   ├── PricingPage.tsx            # Pricing plans page
+│   │   │   ├── PaymentSuccess.tsx         # Success confirmation
+│   │   │   ├── PremiumModal.tsx           # Premium upgrade modal
+│   │   │   └── index.ts
+│   │   ├── services/
+│   │   │   ├── payment-service.ts         # Payment processing (Razorpay/Stripe)
+│   │   │   └── index.ts
+│   │   ├── types/
+│   │   │   └── index.ts                   # Payment types
+│   │   └── index.ts
+│   │
+│   ├── profile/                            # User Profile & Dashboard
+│   │   ├── components/
+│   │   │   ├── ProfilePage.tsx            # User profile page
+│   │   │   ├── ProgressDashboard.tsx      # Progress tracking
+│   │   │   └── index.ts
+│   │   └── index.ts
+│   │
+│   ├── home/                               # Landing/Home Page
+│   │   ├── components/
+│   │   │   ├── HomePage.tsx               # Main landing page
+│   │   │   └── index.ts
+│   │   └── index.ts
+│   │
+│   ├── FEATURE_TEMPLATE.md                 # Template for new features
+│   └── README.md                           # Features documentation
+│
+├── shared/                                  # Shared Across Features
+│   │
+│   ├── components/
+│   │   ├── layout/                         # Layout Components
+│   │   │   ├── Navbar.tsx                 # Navigation bar
+│   │   │   ├── NotFoundPage.tsx           # 404 page
+│   │   │   └── index.ts
+│   │   │
+│   │   └── ui/                             # UI Library (shadcn/ui)
+│   │       ├── accordion.tsx
+│   │       ├── alert.tsx
+│   │       ├── alert-dialog.tsx
+│   │       ├── avatar.tsx
+│   │       ├── badge.tsx
+│   │       ├── button.tsx
+│   │       ├── card.tsx
+│   │       ├── checkbox.tsx
+│   │       ├── dialog.tsx
+│   │       ├── dropdown-menu.tsx
+│   │       ├── form.tsx
+│   │       ├── input.tsx
+│   │       ├── label.tsx
+│   │       ├── select.tsx
+│   │       ├── separator.tsx
+│   │       ├── sheet.tsx
+│   │       ├── table.tsx
+│   │       ├── tabs.tsx
+│   │       ├── textarea.tsx
+│   │       ├── toast.tsx
+│   │       ├── toaster.tsx
+│   │       ├── sonner.tsx
+│   │       ├── markdown-renderer.tsx
+│   │       ├── chart.tsx
+│   │       ├── ... (40+ UI components)
+│   │       └── index.ts
+│   │
+│   ├── hooks/                              # Reusable Hooks
+│   │   ├── use-toast.ts                   # Toast notifications
+│   │   ├── use-mobile.tsx                 # Mobile detection
+│   │   ├── usePageVisibility.ts           # Page visibility tracking
+│   │   ├── useSubscription.ts             # Subscription management
+│   │   └── index.ts
+│   │
+│   ├── services/                           # Shared Services
+│   │   ├── supabase.ts                    # Supabase client
+│   │   └── index.ts
+│   │
+│   ├── types/                              # Common Types
+│   │   └── index.ts                       # Shared TypeScript types
+│   │
+│   ├── utils/                              # Utility Functions
+│   │   └── index.ts                       # Helper functions (cn, etc.)
+│   │
+│   └── README.md                           # Shared code documentation
+│
+├── config/                                  # Configuration
+│   └── constants.ts                        # App constants & feature flags
+│
+├── styles/                                  # Global Styles
+│   ├── index.css                           # Main stylesheet
+│   └── enhanced-markdown.css               # Markdown styles
+│
+├── integrations/                            # External Integrations
+│   └── supabase/
+│       ├── client.ts                       # Supabase client setup
+│       └── types.ts                        # Supabase types
+│
+├── lib/                                     # Legacy (to be migrated)
+│   ├── api-utils.ts
+│   ├── reading-api.ts
+│   ├── stripe.ts
+│   ├── supabase.ts
+│   ├── utils.ts
+│   ├── youtube-transcript-extractor.ts
+│   ├── auth/
+│   └── payment/
+│
+├── components/                              # Legacy (to be migrated)
+│   ├── ui/
+│   ├── speedAssessment/
+│   ├── readingAssessment/
+│   ├── payment/
+│   └── ... (various components)
+│
+├── hooks/                                   # Legacy (to be migrated)
+│   ├── use-toast.ts
+│   ├── use-mobile.tsx
+│   ├── useAuth.tsx
+│   ├── usePageVisibility.ts
+│   └── useSubscription.ts
+│
+├── pages/                                   # Legacy (to be migrated)
+│   ├── Auth.tsx
+│   ├── Index.tsx
+│   ├── Notes.tsx
+│   ├── NotFound.tsx
+│   ├── Profile.tsx
+│   ├── ReadingAssessment.tsx
+│   └── SpeedAssessment.tsx
+│
+├── App.tsx                                  # Legacy (to be replaced)
+├── main.tsx                                 # Legacy (to be replaced)
+├── index.css                                # Legacy styles
+└── vite-env.d.ts                           # Vite types
+
+
+Documentation Files
+===================
+
+Root Level:
+├── ARCHITECTURE.md                          # Detailed architecture docs
+├── MIGRATION_GUIDE.md                       # Step-by-step migration
+├── QUICK_START.md                           # Quick reference guide
+├── MIGRATION_CHECKLIST.md                   # Migration progress tracker
+├── REORGANIZATION_SUMMARY.md                # This reorganization summary
+├── DIRECTORY_STRUCTURE.txt                  # This file
+└── README.md                                # Updated project README
+
+.github/
+└── CODEOWNERS                               # Code ownership definitions
+
+
+Key Principles
+==============
+
+1. Feature-Based Organization
+   - Code organized by business domain
+   - Each feature is self-contained
+   - Clear boundaries between features
+
+2. Barrel Exports
+   - Each feature exports through index.ts
+   - Import from feature, not internal files
+   - Example: import { useAuth } from '@/features/auth'
+
+3. Shared Code
+   - Truly shared code lives in shared/
+   - UI components, hooks, utilities
+   - No feature-specific logic
+
+4. Dependency Flow
+   Features → Shared → External Libraries
+   - Features can use shared code
+   - Shared cannot depend on features
+   - Features should not depend on each other
+
+5. Scalability
+   - Easy to add new features
+   - Clear ownership boundaries
+   - Independent development
+
+
+Import Patterns
+===============
+
+✅ CORRECT:
+import { useAuth, AuthPage } from '@/features/auth';
+import { Button, Card } from '@/shared/components/ui';
+import { useToast } from '@/shared/hooks';
+
+❌ INCORRECT:
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { Button } from '@/shared/components/ui/button';
+
+
+Migration Status
+================
+
+✅ Structure Created
+✅ Documentation Complete
+✅ Backward Compatibility Maintained
+🔄 Gradual Migration In Progress
+⏳ Full Migration Pending
