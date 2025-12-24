@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
 import { Button } from '@/shared/components/ui/button';
@@ -10,6 +11,7 @@ import { CoursesPagination } from './CoursesPagination';
 import { CoursesGridSkeleton } from './CourseCardSkeleton';
 
 export function CoursesList() {
+  const navigate = useNavigate();
   const [filters, setFilters] = useState<FiltersType>({
     page: 1,
     limit: 12,
@@ -29,6 +31,12 @@ export function CoursesList() {
     setFilters(newFilters);
     refetch(newFilters);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCourseClick = (slug: string | undefined, courseId: string) => {
+    // Use slug for URL (better UX), pass courseId via state for API call
+    const urlSlug = slug || courseId;
+    navigate(`/courses/${urlSlug}`, { state: { courseId } });
   };
 
   const getDifficultyColor = (difficulty: DifficultyType | null) => {
@@ -131,6 +139,7 @@ export function CoursesList() {
           <Card
             key={course.id}
             className="group cursor-pointer border border-gray-200 hover:shadow-xl transition-all duration-200 overflow-hidden flex flex-col"
+            onClick={() => handleCourseClick(course.slug, course.id)}
           >
             {/* Course Image Placeholder */}
             <div className="h-40 bg-gradient-to-br from-purple-500 to-indigo-600 relative overflow-hidden">
@@ -208,10 +217,10 @@ export function CoursesList() {
                   className="bg-purple-600 hover:bg-purple-700 text-white"
                   onClick={(e) => {
                     e.stopPropagation();
-                    console.log('Enroll in course:', course.id);
+                    handleCourseClick(course.slug, course.id);
                   }}
                 >
-                  Enroll Now
+                  View Course
                 </Button>
               </div>
             </CardContent>

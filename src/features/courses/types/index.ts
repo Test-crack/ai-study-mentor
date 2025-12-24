@@ -19,6 +19,7 @@ export interface Domain {
 export interface Course {
   id: string;
   title: string;
+  slug?: string;
   description: string | null;
   Domain: Domain | null;
   difficulty: DifficultyType | null;
@@ -31,6 +32,39 @@ export interface Course {
   };
 }
 
+export interface ModuleDetail {
+  id: string;
+  title: string;
+  description: string | null;
+  domain: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  order_index: number;
+  courseModuleId: string;
+  _count?: {
+    ModuleConcept: number;
+  };
+}
+
+export interface CourseDetail {
+  id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  Domain: Domain | null;
+  difficulty: DifficultyType | null;
+  duration_minutes: number | null;
+  price: number | null;
+  is_published: boolean | null;
+  created_at: string | null;
+  updated_at: string | null;
+  modules: ModuleDetail[];
+  _count?: {
+    CourseModule: number;
+    UserCourseEnrollment: number;
+  };
+}
+
 export interface CoursesResponse {
   data: Course[];
   pagination: {
@@ -40,6 +74,10 @@ export interface CoursesResponse {
     totalPages: number;
     hasMore: boolean;
   };
+}
+
+export interface CourseDetailResponse {
+  data: CourseDetail;
 }
 
 export interface CoursesFilters {

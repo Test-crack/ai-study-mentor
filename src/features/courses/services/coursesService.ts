@@ -1,4 +1,4 @@
-import { CoursesResponse, CoursesFilters, Course } from '../types';
+import { CoursesResponse, CoursesFilters, CourseDetailResponse } from '../types';
 import { callBackend } from '@/features/auth/services/authClient';
 import { getBackendUrl } from '@/shared/utils';
 
@@ -12,7 +12,7 @@ class CoursesService {
   async getCourses(filters?: CoursesFilters): Promise<CoursesResponse> {
     try {
       const params = new URLSearchParams();
-      
+
       if (filters?.page) params.append('page', filters.page.toString());
       if (filters?.limit) params.append('limit', filters.limit.toString());
       if (filters?.difficulty) params.append('difficulty', filters.difficulty);
@@ -35,13 +35,13 @@ class CoursesService {
     }
   }
 
-  async getCourseById(courseId: string): Promise<Course> {
+  async getCourseById(courseId: string): Promise<CourseDetailResponse> {
     try {
       const response = await callBackend(`${this.baseUrl}/api/courses/${courseId}`, {
         method: 'GET',
       });
 
-      return response.course;
+      return response;
     } catch (error) {
       console.error('Error fetching course:', error);
       throw new Error('Failed to fetch course details');
