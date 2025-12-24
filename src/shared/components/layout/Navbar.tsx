@@ -11,6 +11,7 @@ import {
   TrendingUp,
   Star,
   User,
+  GraduationCap,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -55,6 +56,7 @@ export function Navbar({
 
   const navItems = [
     { id: "dashboard", label: "Dashboard", icon: Home },
+    { id: "courses", label: "Courses", icon: GraduationCap, route: "/courses" },
     { id: "notes", label: "Notes", icon: FileText },
     { id: "youtube", label: "Videos", icon: Video },
     { id: "guides", label: "Study Guides", icon: BookMarked },
@@ -62,8 +64,11 @@ export function Navbar({
   ];
 
   const handleNavClick = (item: typeof navItems[0]) => {
-    // If we're on the home page and have onTabChange, use tab navigation
-    if (location.pathname === "/" && onTabChange) {
+    // If item has a route, navigate to it
+    if (item.route) {
+      navigate(item.route);
+    } else if (location.pathname === "/" && onTabChange) {
+      // If we're on the home page and have onTabChange, use tab navigation
       onTabChange(item.id);
     } else {
       // Otherwise navigate to home page

@@ -14,6 +14,7 @@ import NotesPage from "@/features/notes/components/NotesPage";
 import ProfilePage from "@/features/profile/components/ProfilePage";
 import PricingPage from "@/features/payment/components/PricingPage";
 import PaymentSuccess from "@/features/payment/components/PaymentSuccess";
+import CoursesPage from "@/features/courses/components/CoursesPage";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const AppRoutes = () => {
       {user ? (
         <>
           <Route path="/" element={<HomePage />} />
+          <Route path="/courses" element={<CoursesPage />} />
           <Route path="/notes" element={<NotesPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/assessment" element={<ReadingAssessmentPage />} />

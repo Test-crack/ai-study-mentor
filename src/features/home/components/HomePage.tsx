@@ -4,7 +4,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Progress } from "@/shared/components/ui/progress";
-import { Book, Video, Star, Plus, BookOpen, Youtube, Clock } from "lucide-react";
+import { Book, Video, Star, Plus, BookOpen, Youtube, Clock, GraduationCap, ArrowRight } from "lucide-react";
 import { NotesUpload } from "@/features/notes/components/NotesUpload";
 import { YouTubeAnalyzer } from "@/features/notes/components/YouTubeAnalyzer";
 import { StudyGuides } from "@/features/notes/components/StudyGuides";
@@ -176,6 +176,55 @@ const Index = () => {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Courses CTA Banner */}
+            <Card className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white border-0 shadow-xl overflow-hidden relative">
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIxLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNCA0LTEuNzkgNC00em0wLTEwYzAtMi4yMS0xLjc5LTQtNC00cy00IDEuNzktNCA0IDEuNzkgNCA0IDQgNC0xLjc5IDQtNHptMC0xMGMwLTIuMjEtMS43OS00LTQtNHMtNCAxLjc5LTQgNCAxLjc5IDQgNCA0IDQtMS43OSA0LTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20" />
+              <CardHeader className="p-4 sm:p-6 relative">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                      <GraduationCap className="h-8 w-8 text-white" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-white text-xl sm:text-2xl font-bold">
+                        Explore Our Courses
+                      </CardTitle>
+                      <CardDescription className="text-purple-100 text-sm sm:text-base mt-1">
+                        Structured learning paths designed by experts
+                      </CardDescription>
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-4 sm:p-6 pt-0 relative">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="space-y-2">
+                    <p className="text-purple-50 text-sm">
+                      Access comprehensive courses with modules, quizzes, and hands-on projects
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">
+                        Beginner Friendly
+                      </Badge>
+                      <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">
+                        Expert Curated
+                      </Badge>
+                      <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">
+                        Self-Paced
+                      </Badge>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={() => window.location.href = "/courses"}
+                    className="bg-white text-purple-600 hover:bg-purple-50 font-semibold px-6 py-6 text-base whitespace-nowrap shadow-lg hover:shadow-xl transition-all"
+                  >
+                    Browse Courses
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Feature Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
