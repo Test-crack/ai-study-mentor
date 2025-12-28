@@ -53,8 +53,8 @@ export function CourseDetailSidebar({
   };
 
   const handleStartCourse = () => {
-    // Navigate to course learning page (to be created)
-    navigate(`/learn/${course.slug}`);
+    // Navigate to course learning page with courseId in state
+    navigate(`/learn/${course.slug || course.id}`, { state: { courseId: course.id } });
   };
 
   const totalConcepts = course.modules.reduce(

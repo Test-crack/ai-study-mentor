@@ -60,6 +60,9 @@ export interface CourseDetail {
   updated_at: string | null;
   modules: ModuleDetail[];
   isEnrolled: boolean;
+  enrollmentStatus?: ProgressStatus | null;
+  progressPercent?: number;
+  moduleIndex?: number;
   enrollment?: {
     status: ProgressStatus;
     progress_percent: number;
@@ -111,3 +114,5 @@ export interface UserCourseEnrollment {
   progress_percent: number | null;
   enrolled_at: string | null;
 }
+
+export * from './learning';

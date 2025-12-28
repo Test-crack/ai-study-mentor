@@ -1,4 +1,9 @@
-import { CoursesResponse, CoursesFilters, CourseDetailResponse } from '../types';
+import {
+  CoursesResponse,
+  CoursesFilters,
+  CourseDetailResponse,
+  ModuleContentResponse,
+} from '../types';
 import { callBackend } from '@/features/auth/services/authClient';
 import { getBackendUrl } from '@/shared/utils';
 
@@ -54,6 +59,22 @@ class CoursesService {
     } catch (error) {
       console.error('Error fetching course:', error);
       throw new Error('Failed to fetch course details');
+    }
+  }
+
+  async getModuleContent(
+    courseId: string,
+    orderIndex: number
+  ): Promise<ModuleContentResponse> {
+    try {
+      const url = `${this.baseUrl}/api/courses/${courseId}/module/${orderIndex}`;
+      const response = await callBackend(url, {
+        method: 'GET',
+      });
+      return response;
+    } catch (error) {
+      console.error('Error fetching module content:', error);
+      throw new Error('Failed to fetch module content');
     }
   }
 

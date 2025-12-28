@@ -16,6 +16,7 @@ import PricingPage from "@/features/payment/components/PricingPage";
 import PaymentSuccess from "@/features/payment/components/PaymentSuccess";
 import CoursesPage from "@/features/courses/components/CoursesPage";
 import CourseDetailPage from "@/features/courses/components/CourseDetailPage";
+import LearningPage from "@/features/courses/components/learning/LearningPage";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const AppRoutes = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/courses" element={<CoursesPage />} />
           <Route path="/courses/:slug" element={<CourseDetailPage />} />
+          <Route path="/learn/:slug" element={<LearningPage />} />
           <Route path="/notes" element={<NotesPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/assessment" element={<ReadingAssessmentPage />} />
