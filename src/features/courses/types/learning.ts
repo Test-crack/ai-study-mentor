@@ -10,6 +10,8 @@ export interface MCQContent {
   question: string;
   options: MCQOption[];
   difficulty?: string;
+  correct_answer?: string;
+  explanation?: string;
 }
 
 export interface NoteContent {

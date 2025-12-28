@@ -33,13 +33,16 @@ interface ModuleContentProps {
   hasPrevModule: boolean;
 }
 
-// Flatten all content items from all concepts into a single list
+// Flatten all content items from all concepts into a single list (skip concepts with no content)
 function flattenContentItems(module: ModuleData): ContentItem[] {
   const items: ContentItem[] = [];
   module.concepts.forEach((concept) => {
-    concept.contentItems.forEach((item) => {
-      items.push(item);
-    });
+    // Only include concepts that have content items
+    if (concept.contentItems && concept.contentItems.length > 0) {
+      concept.contentItems.forEach((item) => {
+        items.push(item);
+      });
+    }
   });
   return items;
 }
