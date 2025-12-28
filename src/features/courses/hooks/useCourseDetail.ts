@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { CourseDetail } from '../types';
 import { coursesService } from '../services/coursesService';
+import { callBackend } from '@/features/auth/services/authClient';
+import { getBackendUrl } from '@/shared/utils';
 
 interface UseCourseDetailReturn {
   course: CourseDetail | null;
@@ -26,7 +28,20 @@ export function useCourseDetail(courseId: string): UseCourseDetailReturn {
     try {
       setLoading(true);
       setError(null);
-      const response = await coursesService.getCourseById(courseId);
+
+      // First get the backend user ID
+      let userId: string | undefined;
+      try {
+        const backendUrl = getBackendUrl();
+        const profileData = await callBackend(`${backendUrl}/api/profile`, {
+          method: 'GET',
+        });
+        userId = profileData.user?.id;
+      } catch {
+        // User might not be logged in, continue without userId
+      }
+
+      const response = await coursesService.getCourseById(courseId, userId);
       setCourse(response.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load course');

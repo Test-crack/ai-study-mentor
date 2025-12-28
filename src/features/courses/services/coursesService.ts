@@ -35,9 +35,18 @@ class CoursesService {
     }
   }
 
-  async getCourseById(courseId: string): Promise<CourseDetailResponse> {
+  async getCourseById(
+    courseId: string,
+    userId?: string
+  ): Promise<CourseDetailResponse> {
     try {
-      const response = await callBackend(`${this.baseUrl}/api/courses/${courseId}`, {
+      const params = new URLSearchParams();
+      if (userId) params.append('userId', userId);
+
+      const queryString = params.toString();
+      const url = `${this.baseUrl}/api/courses/${courseId}${queryString ? `?${queryString}` : ''}`;
+
+      const response = await callBackend(url, {
         method: 'GET',
       });
 
@@ -50,8 +59,9 @@ class CoursesService {
 
   async enrollInCourse(courseId: string): Promise<void> {
     try {
-      await callBackend(`${this.baseUrl}/api/courses/${courseId}/enroll`, {
+      await callBackend(`${this.baseUrl}/api/courses/enroll`, {
         method: 'POST',
+        body: JSON.stringify({ courseId }),
       });
     } catch (error) {
       console.error('Error enrolling in course:', error);

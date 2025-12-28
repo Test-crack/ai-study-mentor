@@ -14,7 +14,7 @@ const CourseDetailPage = () => {
   // Get courseId from navigation state, or use slug as fallback (for direct URL access)
   const courseId = (location.state as { courseId?: string })?.courseId || slug || '';
 
-  const { course, loading, error } = useCourseDetail(courseId);
+  const { course, loading, error, refetch } = useCourseDetail(courseId);
 
   if (loading) {
     return (
@@ -85,7 +85,7 @@ const CourseDetailPage = () => {
 
           {/* Right Sidebar - 30% */}
           <div className="w-full lg:w-[30%]">
-            <CourseDetailSidebar course={course} />
+            <CourseDetailSidebar course={course} onEnrollmentSuccess={refetch} />
           </div>
         </div>
       </div>

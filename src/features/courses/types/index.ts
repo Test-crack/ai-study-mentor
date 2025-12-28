@@ -59,6 +59,11 @@ export interface CourseDetail {
   created_at: string | null;
   updated_at: string | null;
   modules: ModuleDetail[];
+  isEnrolled: boolean;
+  enrollment?: {
+    status: ProgressStatus;
+    progress_percent: number;
+  };
   _count?: {
     CourseModule: number;
     UserCourseEnrollment: number;
