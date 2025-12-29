@@ -1,28 +1,41 @@
+import { useState, useEffect, useRef } from 'react';
+import { Button } from '@/shared/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/shared/components/ui/card';
+import { Badge } from '@/shared/components/ui/badge';
+import { Progress } from '@/shared/components/ui/progress';
+import {
+  Book,
+  Star,
+  Plus,
+  BookOpen,
+  Youtube,
+  Clock,
+  GraduationCap,
+  ArrowRight,
+} from 'lucide-react';
+import { NotesUpload } from '@/features/notes/components/NotesUpload';
+import { YouTubeAnalyzer } from '@/features/notes/components/YouTubeAnalyzer';
+import { StudyGuides } from '@/features/notes/components/StudyGuides';
+import { PremiumModal } from '@/features/payment/components/PremiumModal';
+import { ProgressDashboard } from '@/features/profile/components/ProgressDashboard';
+import { Navbar } from '@/shared/components/layout/Navbar';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { getBackendUrl } from '@/shared/utils';
+import { callBackend } from '@/features/auth/services/authClient';
 
-import { useState, useEffect, useRef } from "react";
-import { Button } from "@/shared/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
-import { Badge } from "@/shared/components/ui/badge";
-import { Progress } from "@/shared/components/ui/progress";
-import { Book, Video, Star, Plus, BookOpen, Youtube, Clock, GraduationCap, ArrowRight } from "lucide-react";
-import { NotesUpload } from "@/features/notes/components/NotesUpload";
-import { YouTubeAnalyzer } from "@/features/notes/components/YouTubeAnalyzer";
-import { StudyGuides } from "@/features/notes/components/StudyGuides";
-import { PremiumModal } from "@/features/payment/components/PremiumModal";
-import { ProgressDashboard } from "@/features/profile/components/ProgressDashboard";
-import { Navbar } from "@/shared/components/layout/Navbar";
-import { useAuth } from "@/features/auth/hooks/useAuth";
-import { getBackendUrl } from "@/shared/utils";
-import { callBackend } from "@/features/auth/services/authClient";
-
-const Index = () => {
-  const [activeTab, setActiveTab] = useState("dashboard");
+const DashboardPage = () => {
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [showPremiumModal, setShowPremiumModal] = useState(false);
-  const [displayName, setDisplayName] = useState<string>("");
+  const [displayName, setDisplayName] = useState<string>('');
   const { user } = useAuth();
   const hasLoadedProfile = useRef(false);
 
-  // Fetch user profile on mount
   useEffect(() => {
     if (hasLoadedProfile.current || !user) {
       return;
@@ -32,26 +45,22 @@ const Index = () => {
       try {
         const backendUrl = getBackendUrl();
         const data = await callBackend(`${backendUrl}/api/profile`, {
-          method: "GET",
+          method: 'GET',
         });
 
         if (data.user) {
-          // Use name if available, otherwise use email
           setDisplayName(data.user.name || data.user.email);
           hasLoadedProfile.current = true;
         }
       } catch (error) {
-        console.error("Error loading profile:", error);
-        // Fallback to email if profile fetch fails
-        setDisplayName(user?.email || "Student");
+        console.error('Error loading profile:', error);
+        setDisplayName(user?.email || 'Student');
       }
     };
 
     loadProfile();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
 
-  // Mock user data for demo - in production this would come from database
   const userData = {
     name: displayName || user?.email?.split('@')[0] || 'Student',
     streak: 12,
@@ -60,59 +69,57 @@ const Index = () => {
     isPremium: false,
     lastAssessment: {
       readingSpeed: 185,
-      level: "Intermediate"
-    }
+      level: 'Intermediate',
+    },
   };
-
-
 
   const features = [
     {
       icon: Book,
-      title: "Smart Notes",
-      description: "Upload and analyze your study materials with AI",
-      action: () => setActiveTab("notes"),
-      premium: false
+      title: 'Smart Notes',
+      description: 'Upload and analyze your study materials with AI',
+      action: () => setActiveTab('notes'),
+      premium: false,
     },
     {
       icon: Youtube,
-      title: "YouTube Learning",
-      description: "Extract and summarize video content instantly",
-      action: () => setActiveTab("youtube"),
-      premium: false
+      title: 'YouTube Learning',
+      description: 'Extract and summarize video content instantly',
+      action: () => setActiveTab('youtube'),
+      premium: false,
     },
     {
       icon: BookOpen,
-      title: "Study Guides",
-      description: "AI-generated personalized study guides",
-      action: () => setActiveTab("guides"),
-      premium: false
+      title: 'Study Guides',
+      description: 'AI-generated personalized study guides',
+      action: () => setActiveTab('guides'),
+      premium: false,
     },
     {
       icon: Clock,
-      title: "Speed Assessment",
-      description: "Test and improve your reading speed",
-      action: () => window.location.href = "/assessment",
-      premium: false
+      title: 'Speed Assessment',
+      description: 'Test and improve your reading speed',
+      action: () => (window.location.href = '/assessment'),
+      premium: false,
     },
     {
       icon: Star,
-      title: "AI Tutor Sessions",
-      description: "One-on-one AI tutoring with adaptive learning",
+      title: 'AI Tutor Sessions',
+      description: 'One-on-one AI tutoring with adaptive learning',
       action: () => setShowPremiumModal(true),
-      premium: true
-    }
+      premium: true,
+    },
   ];
 
   const renderContent = () => {
     switch (activeTab) {
-      case "notes":
+      case 'notes':
         return <NotesUpload />;
-      case "youtube":
+      case 'youtube':
         return <YouTubeAnalyzer />;
-      case "guides":
+      case 'guides':
         return <StudyGuides />;
-      case "progress":
+      case 'progress':
         return <ProgressDashboard />;
       default:
         return (
@@ -131,48 +138,70 @@ const Index = () => {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
               <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
                 <CardHeader className="pb-2 p-3 sm:p-4">
-                  <CardTitle className="text-xs sm:text-sm font-medium text-purple-700">Study Streak</CardTitle>
+                  <CardTitle className="text-xs sm:text-sm font-medium text-purple-700">
+                    Study Streak
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <div className="text-xl sm:text-2xl font-bold text-purple-900">{userData.streak} days</div>
+                  <div className="text-xl sm:text-2xl font-bold text-purple-900">
+                    {userData.streak} days
+                  </div>
                 </CardContent>
               </Card>
-              
+
               <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
                 <CardHeader className="pb-2 p-3 sm:p-4">
-                  <CardTitle className="text-xs sm:text-sm font-medium text-blue-700">Study Time</CardTitle>
+                  <CardTitle className="text-xs sm:text-sm font-medium text-blue-700">
+                    Study Time
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <div className="text-xl sm:text-2xl font-bold text-blue-900">{userData.totalStudyTime}h</div>
+                  <div className="text-xl sm:text-2xl font-bold text-blue-900">
+                    {userData.totalStudyTime}h
+                  </div>
                 </CardContent>
               </Card>
-              
+
               <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
                 <CardHeader className="pb-2 p-3 sm:p-4">
-                  <CardTitle className="text-xs sm:text-sm font-medium text-green-700">Sessions</CardTitle>
+                  <CardTitle className="text-xs sm:text-sm font-medium text-green-700">
+                    Sessions
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <div className="text-xl sm:text-2xl font-bold text-green-900">{userData.completedSessions}</div>
+                  <div className="text-xl sm:text-2xl font-bold text-green-900">
+                    {userData.completedSessions}
+                  </div>
                 </CardContent>
               </Card>
-              
+
               <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 col-span-2 sm:col-span-1">
                 <CardHeader className="pb-2 p-3 sm:p-4">
-                  <CardTitle className="text-xs sm:text-sm font-medium text-orange-700">Progress</CardTitle>
+                  <CardTitle className="text-xs sm:text-sm font-medium text-orange-700">
+                    Progress
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
                   <Progress value={75} className="mt-2" />
-                  <div className="text-xs sm:text-sm text-orange-700 mt-1">75% to next level</div>
+                  <div className="text-xs sm:text-sm text-orange-700 mt-1">
+                    75% to next level
+                  </div>
                 </CardContent>
               </Card>
 
               <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200 col-span-2 sm:col-span-1">
                 <CardHeader className="pb-2 p-3 sm:p-4">
-                  <CardTitle className="text-xs sm:text-sm font-medium text-indigo-700">Reading Speed</CardTitle>
+                  <CardTitle className="text-xs sm:text-sm font-medium text-indigo-700">
+                    Reading Speed
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <div className="text-xl sm:text-2xl font-bold text-indigo-900">{userData.lastAssessment.readingSpeed} WPM</div>
-                  <div className="text-xs sm:text-sm text-indigo-700">{userData.lastAssessment.level}</div>
+                  <div className="text-xl sm:text-2xl font-bold text-indigo-900">
+                    {userData.lastAssessment.readingSpeed} WPM
+                  </div>
+                  <div className="text-xs sm:text-sm text-indigo-700">
+                    {userData.lastAssessment.level}
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -201,7 +230,8 @@ const Index = () => {
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="space-y-2">
                     <p className="text-purple-50 text-sm">
-                      Access comprehensive courses with modules, quizzes, and hands-on projects
+                      Access comprehensive courses with modules, quizzes, and
+                      hands-on projects
                     </p>
                     <div className="flex flex-wrap gap-2">
                       <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">
@@ -215,8 +245,8 @@ const Index = () => {
                       </Badge>
                     </div>
                   </div>
-                  <Button 
-                    onClick={() => window.location.href = "/courses"}
+                  <Button
+                    onClick={() => (window.location.href = '/courses')}
                     className="bg-white text-purple-600 hover:bg-purple-50 font-semibold px-6 py-6 text-base whitespace-nowrap shadow-lg hover:shadow-xl transition-all"
                   >
                     Browse Courses
@@ -229,8 +259,8 @@ const Index = () => {
             {/* Feature Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {features.map((feature, index) => (
-                <Card 
-                  key={index} 
+                <Card
+                  key={index}
                   className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 active:scale-95 relative overflow-hidden"
                   onClick={feature.action}
                 >
@@ -245,8 +275,12 @@ const Index = () => {
                         <feature.icon className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <CardTitle className="text-base sm:text-lg">{feature.title}</CardTitle>
-                        <CardDescription className="text-xs sm:text-sm">{feature.description}</CardDescription>
+                        <CardTitle className="text-base sm:text-lg">
+                          {feature.title}
+                        </CardTitle>
+                        <CardDescription className="text-xs sm:text-sm">
+                          {feature.description}
+                        </CardDescription>
                       </div>
                     </div>
                   </CardHeader>
@@ -257,22 +291,24 @@ const Index = () => {
             {/* Quick Actions */}
             <Card className="bg-gradient-to-r from-purple-500 to-blue-600 text-white">
               <CardHeader className="p-4 sm:p-6">
-                <CardTitle className="text-white text-lg sm:text-xl">Ready to learn something new?</CardTitle>
+                <CardTitle className="text-white text-lg sm:text-xl">
+                  Ready to learn something new?
+                </CardTitle>
                 <CardDescription className="text-purple-100 text-sm sm:text-base">
                   Start with uploading your notes or analyzing a YouTube video
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col sm:flex-row gap-3 sm:gap-4 p-4 sm:p-6 pt-0">
-                <Button 
-                  variant="secondary" 
-                  onClick={() => setActiveTab("notes")}
+                <Button
+                  variant="secondary"
+                  onClick={() => setActiveTab('notes')}
                   className="bg-white text-purple-600 hover:bg-purple-50 w-full sm:w-auto"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Upload Notes
                 </Button>
-                <Button 
-                  onClick={() => setActiveTab("youtube")}
+                <Button
+                  onClick={() => setActiveTab('youtube')}
                   className="border-2 border-white text-white hover:bg-white hover:text-purple-600 bg-transparent w-full sm:w-auto"
                 >
                   <Youtube className="h-4 w-4 mr-2" />
@@ -287,7 +323,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-      {/* Navigation */}
       <Navbar
         showNavItems={true}
         activeTab={activeTab}
@@ -296,18 +331,16 @@ const Index = () => {
         onUpgradeClick={() => setShowPremiumModal(true)}
       />
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         {renderContent()}
       </main>
 
-      {/* Premium Modal */}
-      <PremiumModal 
-        isOpen={showPremiumModal} 
-        onClose={() => setShowPremiumModal(false)} 
+      <PremiumModal
+        isOpen={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
       />
     </div>
   );
 };
 
-export default Index;
+export default DashboardPage;

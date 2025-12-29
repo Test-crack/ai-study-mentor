@@ -3,9 +3,10 @@ import { Toaster } from "@/shared/components/ui/toaster";
 import { Toaster as Sonner } from "@/shared/components/ui/sonner";
 import { TooltipProvider } from "@/shared/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/features/auth/hooks/useAuth";
-import HomePage from "@/features/home/components/HomePage";
+import LandingPage from "@/features/home/components/LandingPage";
+import DashboardPage from "@/features/home/components/DashboardPage";
 import AuthPage from "@/features/auth/components/AuthPage";
 import NotFoundPage from "@/shared/components/layout/NotFoundPage";
 import SpeedAssessmentPage from "@/features/speed-assessment/components/SpeedAssessmentPage";
@@ -36,24 +37,32 @@ const AppRoutes = () => {
 
   return (
     <Routes>
+      {/* Public routes - accessible to everyone */}
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/auth" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage />} />
+      <Route path="/pricing" element={<PricingPage />} />
+      <Route path="/courses" element={<CoursesPage />} />
+      <Route path="/courses/:slug" element={<CourseDetailPage />} />
+      
+      {/* Protected routes - require authentication */}
       {user ? (
         <>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/courses" element={<CoursesPage />} />
-          <Route path="/courses/:slug" element={<CourseDetailPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/learn/:slug" element={<LearningPage />} />
           <Route path="/notes" element={<NotesPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/assessment" element={<ReadingAssessmentPage />} />
           <Route path="/assessment/legacy" element={<SpeedAssessmentPage />} />
-          <Route path="/pricing" element={<PricingPage />} />
           <Route path="/payment/success" element={<PaymentSuccess />} />
         </>
       ) : (
         <>
-          <Route path="/" element={<AuthPage />} />
-          <Route path="/pricing" element={<PricingPage />} />
-          <Route path="*" element={<AuthPage />} />
+          {/* Redirect unauthenticated users to auth page for protected routes */}
+          <Route path="/dashboard" element={<Navigate to="/auth" replace />} />
+          <Route path="/learn/:slug" element={<Navigate to="/auth" replace />} />
+          <Route path="/notes" element={<Navigate to="/auth" replace />} />
+          <Route path="/profile" element={<Navigate to="/auth" replace />} />
+          <Route path="/assessment" element={<Navigate to="/auth" replace />} />
         </>
       )}
       <Route path="*" element={<NotFoundPage />} />

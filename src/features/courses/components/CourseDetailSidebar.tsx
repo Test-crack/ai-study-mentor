@@ -15,9 +15,11 @@ import {
   Infinity,
   Play,
   ArrowRight,
+  LogIn,
 } from 'lucide-react';
 import { CourseDetail, ProgressStatus } from '../types';
 import { EnrollmentModal } from './EnrollmentModal';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 interface CourseDetailSidebarProps {
   course: CourseDetail;
@@ -30,6 +32,7 @@ export function CourseDetailSidebar({
 }: CourseDetailSidebarProps) {
   const [showEnrollModal, setShowEnrollModal] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const formatPrice = (price: number | null) => {
     if (!price || price === 0) return 'Free';
@@ -62,8 +65,21 @@ export function CourseDetailSidebar({
     0
   );
 
-  // Determine button state based on enrollment
+  // Determine button state based on enrollment and auth
   const getActionButton = () => {
+    // If user is not logged in, show sign in button
+    if (!user) {
+      return (
+        <Button
+          className="w-full bg-purple-600 hover:bg-purple-700 text-white py-6 text-lg font-semibold"
+          onClick={() => navigate('/auth')}
+        >
+          <LogIn className="h-5 w-5 mr-2" />
+          Sign in to Enroll
+        </Button>
+      );
+    }
+
     if (!course.isEnrolled) {
       return (
         <Button

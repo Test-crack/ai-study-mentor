@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Input } from "@/shared/components/ui/input";
@@ -15,6 +16,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
 
 
@@ -61,6 +63,9 @@ const Auth = () => {
           title: "Welcome back!",
           description: "You've been signed in successfully.",
         });
+        
+        // Redirect to dashboard after successful login
+        navigate('/dashboard');
       }
     } catch (error: any) {
       toast({
