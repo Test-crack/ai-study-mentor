@@ -16,10 +16,12 @@ import {
   Play,
   ArrowRight,
   LogIn,
+  Loader2,
 } from 'lucide-react';
 import { CourseDetail, ProgressStatus } from '../types';
 import { EnrollmentModal } from './EnrollmentModal';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { coursesService } from '../services/coursesService';
 
 interface CourseDetailSidebarProps {
   course: CourseDetail;
@@ -31,6 +33,7 @@ export function CourseDetailSidebar({
   onEnrollmentSuccess,
 }: CourseDetailSidebarProps) {
   const [showEnrollModal, setShowEnrollModal] = useState(false);
+  const [isResuming, setIsResuming] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -56,8 +59,42 @@ export function CourseDetailSidebar({
   };
 
   const handleStartCourse = () => {
-    // Navigate to course learning page with courseId in state
-    navigate(`/learn/${course.slug || course.id}`, { state: { courseId: course.id } });
+    // For new users, start at module 0, content 0
+    navigate(`/learn/${course.slug || course.id}`, {
+      state: {
+        courseId: course.id,
+        resumeModuleIndex: 0,
+        resumeContentId: null,
+      },
+    });
+  };
+
+  /**
+   * Resume course - fetches user's last position and navigates there
+   * Falls back to module 0 if no progress exists
+   */
+  const handleResumeCourse = async () => {
+    setIsResuming(true);
+    try {
+      const response = await coursesService.getResumeData(course.id);
+      const resumeData = response.data;
+
+      // Navigate to learning page with resume data
+      // If no progress, defaults will be module 0, content 0
+      navigate(`/learn/${course.slug || course.id}`, {
+        state: {
+          courseId: course.id,
+          resumeModuleIndex: resumeData.currentModuleIndex ?? 0,
+          resumeContentId: resumeData.lastContentItemId ?? null,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to get resume data:', error);
+      // Fallback to start from beginning
+      handleStartCourse();
+    } finally {
+      setIsResuming(false);
+    }
   };
 
   const totalConcepts = course.modules.reduce(
@@ -97,10 +134,15 @@ export function CourseDetailSidebar({
       return (
         <Button
           className="w-full bg-green-600 hover:bg-green-700 text-white py-6 text-lg font-semibold"
-          onClick={handleStartCourse}
+          onClick={handleResumeCourse}
+          disabled={isResuming}
         >
-          <Play className="h-5 w-5 mr-2" />
-          Start Learning
+          {isResuming ? (
+            <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+          ) : (
+            <Play className="h-5 w-5 mr-2" />
+          )}
+          {isResuming ? 'Loading...' : 'Start Learning'}
         </Button>
       );
     }
@@ -109,10 +151,15 @@ export function CourseDetailSidebar({
       return (
         <Button
           className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-lg font-semibold"
-          onClick={handleStartCourse}
+          onClick={handleResumeCourse}
+          disabled={isResuming}
         >
-          <ArrowRight className="h-5 w-5 mr-2" />
-          Continue Learning
+          {isResuming ? (
+            <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+          ) : (
+            <ArrowRight className="h-5 w-5 mr-2" />
+          )}
+          {isResuming ? 'Loading...' : 'Continue Learning'}
         </Button>
       );
     }
@@ -121,22 +168,32 @@ export function CourseDetailSidebar({
       return (
         <Button
           className="w-full bg-gray-600 hover:bg-gray-700 text-white py-6 text-lg font-semibold"
-          onClick={handleStartCourse}
+          onClick={handleResumeCourse}
+          disabled={isResuming}
         >
-          <CheckCircle className="h-5 w-5 mr-2" />
-          Review Course
+          {isResuming ? (
+            <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+          ) : (
+            <CheckCircle className="h-5 w-5 mr-2" />
+          )}
+          {isResuming ? 'Loading...' : 'Review Course'}
         </Button>
       );
     }
 
-    // Fallback for enrolled but unknown status
+    // Fallback for enrolled but unknown status - use resume
     return (
       <Button
         className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-lg font-semibold"
-        onClick={handleStartCourse}
+        onClick={handleResumeCourse}
+        disabled={isResuming}
       >
-        <ArrowRight className="h-5 w-5 mr-2" />
-        Go to Course
+        {isResuming ? (
+          <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+        ) : (
+          <ArrowRight className="h-5 w-5 mr-2" />
+        )}
+        {isResuming ? 'Loading...' : 'Go to Course'}
       </Button>
     );
   };

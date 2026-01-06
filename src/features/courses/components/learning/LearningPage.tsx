@@ -13,9 +13,16 @@ const LearningPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Get courseId from navigation state, or use slug as fallback
-  const courseId =
-    (location.state as { courseId?: string })?.courseId || slug || '';
+  // Get courseId and resume data from navigation state
+  const locationState = location.state as {
+    courseId?: string;
+    resumeModuleIndex?: number;
+    resumeContentId?: string | null;
+  } | null;
+
+  const courseId = locationState?.courseId || slug || '';
+  const resumeModuleIndex = locationState?.resumeModuleIndex;
+  const resumeContentId = locationState?.resumeContentId;
 
   const {
     course,
@@ -23,7 +30,7 @@ const LearningPage = () => {
     error: courseError,
   } = useCourseDetail(courseId);
 
-  // Initialize module index from course data (user's saved progress)
+  // Initialize module index from resume data or course data
   const [currentModuleIndex, setCurrentModuleIndex] = useState<number | null>(null);
   const [moduleData, setModuleData] = useState<ModuleData | null>(null);
   const [moduleLoading, setModuleLoading] = useState(false);
@@ -35,16 +42,29 @@ const LearningPage = () => {
   );
 
   const hasFetchedModule = useRef<number | null>(null);
+  const hasInitialized = useRef(false);
 
-  // Set initial module index from course data when loaded
+  // Set initial module index from resume data or course data when loaded
   useEffect(() => {
-    if (course && currentModuleIndex === null) {
-      // Start at user's saved module index, or 0 if not set
-      const savedIndex = course.moduleIndex || 0;
+    if (course && !hasInitialized.current) {
+      hasInitialized.current = true;
+
+      // Priority: resumeModuleIndex > course.moduleIndex > 0
+      let startIndex = 0;
+
+      if (resumeModuleIndex !== undefined) {
+        startIndex = resumeModuleIndex;
+      } else if (course.moduleIndex !== undefined) {
+        startIndex = course.moduleIndex;
+      }
+
       // Ensure the index is within bounds
-      const validIndex = Math.min(savedIndex, course.modules.length - 1);
-      setCurrentModuleIndex(Math.max(0, validIndex));
-      
+      const validIndex = Math.min(
+        Math.max(0, startIndex),
+        course.modules.length - 1
+      );
+      setCurrentModuleIndex(validIndex);
+
       // Mark all modules before the current one as completed
       if (validIndex > 0) {
         const completed = new Set<number>();
@@ -54,7 +74,7 @@ const LearningPage = () => {
         setCompletedModules(completed);
       }
     }
-  }, [course, currentModuleIndex]);
+  }, [course, resumeModuleIndex]);
 
   // Fetch module content when module index changes
   useEffect(() => {
@@ -231,6 +251,14 @@ const LearningPage = () => {
             onPrevModule={handlePrevModule}
             hasNextModule={currentModuleIndex < course.modules.length - 1}
             hasPrevModule={currentModuleIndex > 0}
+            courseId={course.id}
+            moduleIndex={currentModuleIndex}
+            resumeContentId={
+              currentModuleIndex === resumeModuleIndex ? resumeContentId : null
+            }
+            onProgressUpdate={(courseProgress, moduleProgress) => {
+              console.log('Progress updated:', { courseProgress, moduleProgress });
+            }}
           />
         </div>
       </div>

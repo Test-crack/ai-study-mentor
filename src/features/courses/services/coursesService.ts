@@ -61,6 +61,56 @@ async function callApiWithOptionalAuth(
   return res.json();
 }
 
+// ============================================================================
+// Types for Progress Tracking
+// ============================================================================
+
+export interface ContentAccessResponse {
+  message: string;
+  data: {
+    status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+    last_accessed_at: string;
+  };
+}
+
+export interface ContentCompleteResponse {
+  message: string;
+  data: {
+    contentProgress: {
+      status: 'COMPLETED';
+      completed_at: string;
+    };
+    moduleProgress: {
+      progress_percent: number;
+      status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+      completed_items: number;
+      total_required_items: number;
+    };
+    courseProgress: {
+      progress_percent: number;
+      status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+    };
+    moduleAdvanced: boolean;
+    nextModuleIndex: number | null;
+  };
+}
+
+export interface ResumeDataResponse {
+  data: {
+    currentModuleIndex: number;
+    courseStatus: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+    moduleProgress: number;
+    moduleStatus: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+    lastContentItemId: string | null;
+    lastContentStatus: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | null;
+    lastAccessedAt: string | null;
+  };
+}
+
+// ============================================================================
+// Courses Service
+// ============================================================================
+
 class CoursesService {
   private baseUrl: string;
 
@@ -68,7 +118,13 @@ class CoursesService {
     this.baseUrl = getBackendUrl();
   }
 
-  // Public API - no auth required
+  // ==========================================================================
+  // Public APIs
+  // ==========================================================================
+
+  /**
+   * Get list of courses (public - no auth required)
+   */
   async getCourses(filters?: CoursesFilters): Promise<CoursesResponse> {
     try {
       const params = new URLSearchParams();
@@ -84,7 +140,6 @@ class CoursesService {
       const queryString = params.toString();
       const url = `${this.baseUrl}/api/courses${queryString ? `?${queryString}` : ''}`;
 
-      // Use public API for course listing
       const response = await callPublicApi(url);
       return response;
     } catch (error) {
@@ -93,7 +148,9 @@ class CoursesService {
     }
   }
 
-  // Public API with optional auth - shows enrollment status if logged in
+  /**
+   * Get course details (public with optional auth for enrollment status)
+   */
   async getCourseById(
     courseId: string,
     userId?: string
@@ -105,7 +162,6 @@ class CoursesService {
       const queryString = params.toString();
       const url = `${this.baseUrl}/api/courses/${courseId}${queryString ? `?${queryString}` : ''}`;
 
-      // Use optional auth - will include enrollment info if logged in
       const response = await callApiWithOptionalAuth(url, { method: 'GET' });
       return response;
     } catch (error) {
@@ -114,7 +170,13 @@ class CoursesService {
     }
   }
 
-  // Protected API - requires auth
+  // ==========================================================================
+  // Protected APIs - Require Authentication
+  // ==========================================================================
+
+  /**
+   * Get module content (requires enrollment)
+   */
   async getModuleContent(
     courseId: string,
     orderIndex: number
@@ -131,7 +193,9 @@ class CoursesService {
     }
   }
 
-  // Protected API - requires auth
+  /**
+   * Enroll user in a course
+   */
   async enrollInCourse(courseId: string): Promise<void> {
     try {
       await callBackend(`${this.baseUrl}/api/courses/enroll`, {
@@ -141,6 +205,69 @@ class CoursesService {
     } catch (error) {
       console.error('Error enrolling in course:', error);
       throw new Error('Failed to enroll in course');
+    }
+  }
+
+  // ==========================================================================
+  // Progress Tracking APIs
+  // ==========================================================================
+
+  /**
+   * Track content access - marks content as IN_PROGRESS
+   * Call this when user opens/views a content item
+   */
+  async trackContentAccess(
+    courseId: string,
+    moduleIndex: number,
+    contentItemId: string
+  ): Promise<ContentAccessResponse> {
+    try {
+      const url = `${this.baseUrl}/api/courses/${courseId}/modules/${moduleIndex}/content/${contentItemId}/access`;
+      const response = await callBackend(url, {
+        method: 'POST',
+      });
+      return response;
+    } catch (error) {
+      console.error('Error tracking content access:', error);
+      throw new Error('Failed to track content access');
+    }
+  }
+
+  /**
+   * Mark content as complete
+   * Call this when user clicks "Mark Complete" or submits MCQ
+   */
+  async markContentComplete(
+    courseId: string,
+    moduleIndex: number,
+    contentItemId: string
+  ): Promise<ContentCompleteResponse> {
+    try {
+      const url = `${this.baseUrl}/api/courses/${courseId}/modules/${moduleIndex}/content/${contentItemId}/complete`;
+      const response = await callBackend(url, {
+        method: 'POST',
+      });
+      return response;
+    } catch (error) {
+      console.error('Error marking content complete:', error);
+      throw new Error('Failed to mark content as complete');
+    }
+  }
+
+  /**
+   * Get resume data for a course
+   * Returns user's current position to continue learning
+   */
+  async getResumeData(courseId: string): Promise<ResumeDataResponse> {
+    try {
+      const url = `${this.baseUrl}/api/courses/${courseId}/resume`;
+      const response = await callBackend(url, {
+        method: 'GET',
+      });
+      return response;
+    } catch (error) {
+      console.error('Error fetching resume data:', error);
+      throw new Error('Failed to fetch resume data');
     }
   }
 }

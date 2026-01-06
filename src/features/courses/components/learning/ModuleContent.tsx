@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { Badge } from '@/shared/components/ui/badge';
 import { Progress } from '@/shared/components/ui/progress';
@@ -22,6 +22,7 @@ import {
 import { NoteContent } from './NoteContent';
 import { MCQContent } from './MCQContent';
 import { cn } from '@/shared/utils/utils';
+import { coursesService } from '../../services/coursesService';
 
 interface ModuleContentProps {
   module: ModuleData | null;
@@ -31,6 +32,10 @@ interface ModuleContentProps {
   onPrevModule: () => void;
   hasNextModule: boolean;
   hasPrevModule: boolean;
+  courseId: string;
+  moduleIndex: number;
+  resumeContentId?: string | null;
+  onProgressUpdate?: (courseProgress: number, moduleProgress: number) => void;
 }
 
 // Flatten all content items from all concepts into a single list (skip concepts with no content)
@@ -55,9 +60,18 @@ export function ModuleContent({
   onPrevModule,
   hasNextModule,
   hasPrevModule,
+  courseId,
+  moduleIndex,
+  resumeContentId,
+  onProgressUpdate,
 }: ModuleContentProps) {
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
   const [completedItems, setCompletedItems] = useState<Set<string>>(new Set());
+  const [isMarkingComplete, setIsMarkingComplete] = useState(false);
+
+  // Track accessed content to prevent duplicate API calls
+  const accessedContentRef = useRef<Set<string>>(new Set());
+  const hasResumedRef = useRef(false);
 
   // Flatten content items
   const contentItems = useMemo(() => {
@@ -69,7 +83,57 @@ export function ModuleContent({
   useEffect(() => {
     setCurrentContentIndex(0);
     setCompletedItems(new Set());
+    accessedContentRef.current.clear();
+    hasResumedRef.current = false;
   }, [module?.id]);
+
+  // Navigate to resume content if provided
+  useEffect(() => {
+    if (
+      !hasResumedRef.current &&
+      resumeContentId &&
+      contentItems.length > 0
+    ) {
+      const resumeIndex = contentItems.findIndex(
+        (item) => item.id === resumeContentId
+      );
+      if (resumeIndex > 0) {
+        // Mark all items before resume point as completed (for navigation)
+        const completed = new Set<string>();
+        for (let i = 0; i < resumeIndex; i++) {
+          completed.add(contentItems[i].id);
+        }
+        setCompletedItems(completed);
+        setCurrentContentIndex(resumeIndex);
+      }
+      hasResumedRef.current = true;
+    }
+  }, [resumeContentId, contentItems]);
+
+  // Track content access when current content changes
+  useEffect(() => {
+    const currentItem = contentItems[currentContentIndex];
+    if (!currentItem || !courseId || moduleIndex === undefined) return;
+
+    // Skip if already accessed
+    if (accessedContentRef.current.has(currentItem.id)) return;
+
+    const trackAccess = async () => {
+      try {
+        await coursesService.trackContentAccess(
+          courseId,
+          moduleIndex,
+          currentItem.id
+        );
+        accessedContentRef.current.add(currentItem.id);
+      } catch (err) {
+        // Non-critical - just log
+        console.warn('Failed to track content access:', err);
+      }
+    };
+
+    trackAccess();
+  }, [currentContentIndex, contentItems, courseId, moduleIndex]);
 
   const currentItem = contentItems[currentContentIndex];
   const totalItems = contentItems.length;
@@ -77,11 +141,35 @@ export function ModuleContent({
   const allCompleted = completedCount === totalItems && totalItems > 0;
   const progressPercent = totalItems > 0 ? Math.round((completedCount / totalItems) * 100) : 0;
 
-  const markCurrentAsComplete = () => {
-    if (currentItem) {
+  const markCurrentAsComplete = useCallback(async () => {
+    const currentItem = contentItems[currentContentIndex];
+    if (!currentItem || completedItems.has(currentItem.id)) return;
+
+    setIsMarkingComplete(true);
+    try {
+      const response = await coursesService.markContentComplete(
+        courseId,
+        moduleIndex,
+        currentItem.id
+      );
+
       setCompletedItems((prev) => new Set(prev).add(currentItem.id));
+
+      // Update progress in parent
+      if (onProgressUpdate) {
+        onProgressUpdate(
+          response.data.courseProgress.progress_percent,
+          response.data.moduleProgress.progress_percent
+        );
+      }
+    } catch (err) {
+      console.error('Failed to mark content complete:', err);
+      // Still mark as complete locally for UX
+      setCompletedItems((prev) => new Set(prev).add(currentItem.id));
+    } finally {
+      setIsMarkingComplete(false);
     }
-  };
+  }, [contentItems, currentContentIndex, completedItems, courseId, moduleIndex, onProgressUpdate]);
 
   const handleNext = () => {
     // For Notes, user must mark complete first (button is disabled until then)
@@ -288,10 +376,15 @@ export function ModuleContent({
             {!completedItems.has(currentItem?.id) && currentItem?.type === 'NOTES' && (
               <Button
                 onClick={markCurrentAsComplete}
+                disabled={isMarkingComplete}
                 className="bg-green-600 hover:bg-green-700 text-white"
               >
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Mark Complete
+                {isMarkingComplete ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                )}
+                {isMarkingComplete ? 'Saving...' : 'Mark Complete'}
               </Button>
             )}
             {completedItems.has(currentItem?.id) && (
