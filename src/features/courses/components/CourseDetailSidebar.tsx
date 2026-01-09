@@ -71,25 +71,30 @@ export function CourseDetailSidebar({
 
   /**
    * Resume course - fetches user's last position and navigates there
+   * Uses lastAccessedContentItemId for "continue where you left off"
    * Falls back to module 0 if no progress exists
    */
   const handleResumeCourse = async () => {
+    console.log('[CourseDetailSidebar] handleResumeCourse called');
     setIsResuming(true);
     try {
       const response = await coursesService.getResumeData(course.id);
+      console.log('[CourseDetailSidebar] Resume data:', response.data);
       const resumeData = response.data;
 
       // Navigate to learning page with resume data
+      // Use lastAccessedContentItemId for "continue where you left off"
       // If no progress, defaults will be module 0, content 0
       navigate(`/learn/${course.slug || course.id}`, {
         state: {
           courseId: course.id,
           resumeModuleIndex: resumeData.currentModuleIndex ?? 0,
-          resumeContentId: resumeData.lastContentItemId ?? null,
+          resumeContentId: resumeData.lastAccessedContentItemId ?? null,
+          furthestContentId: resumeData.furthestContentItemId ?? null,
         },
       });
     } catch (error) {
-      console.error('Failed to get resume data:', error);
+      console.error('[CourseDetailSidebar] Failed to get resume data:', error);
       // Fallback to start from beginning
       handleStartCourse();
     } finally {
@@ -128,9 +133,9 @@ export function CourseDetailSidebar({
       );
     }
 
-    const status = course.enrollment?.status;
+    const status = course.enrollmentStatus ?? course.enrollment?.status;
 
-    if (status === ProgressStatus.NOT_STARTED) {
+    if (status === ProgressStatus.NOT_STARTED || status === null || status === undefined) {
       return (
         <Button
           className="w-full bg-green-600 hover:bg-green-700 text-white py-6 text-lg font-semibold"
@@ -225,16 +230,16 @@ export function CourseDetailSidebar({
 
           <CardContent className="p-6 space-y-6">
             {/* Progress (if enrolled) */}
-            {course.isEnrolled && course.enrollment && (
+            {course.isEnrolled && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">Your Progress</span>
                   <span className="font-semibold text-purple-600">
-                    {course.enrollment.progress_percent}%
+                    {course.progressPercent ?? course.enrollment?.progress_percent ?? 0}%
                   </span>
                 </div>
                 <Progress
-                  value={course.enrollment.progress_percent}
+                  value={course.progressPercent ?? course.enrollment?.progress_percent ?? 0}
                   className="h-2"
                 />
               </div>

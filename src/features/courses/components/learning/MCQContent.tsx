@@ -15,11 +15,12 @@ import { cn } from '@/shared/utils/utils';
 interface MCQContentProps {
   mcq: MCQContentType;
   onComplete?: () => void;
+  isAlreadyCompleted?: boolean;
 }
 
-export function MCQContent({ mcq, onComplete }: MCQContentProps) {
+export function MCQContent({ mcq, onComplete, isAlreadyCompleted = false }: MCQContentProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(isAlreadyCompleted);
 
   const isCorrect = isSubmitted && selectedAnswer === mcq.correct_answer;
   const isIncorrect = isSubmitted && selectedAnswer !== mcq.correct_answer;

@@ -4,7 +4,7 @@ import { Button } from '@/shared/components/ui/button';
 import { ArrowLeft, Menu, X } from 'lucide-react';
 import { useCourseDetail } from '../../hooks/useCourseDetail';
 import { coursesService } from '../../services/coursesService';
-import { ModuleData } from '../../types';
+import { ModuleData, ContentItem } from '../../types';
 import { LearningSidebar } from './LearningSidebar';
 import { ModuleContent } from './ModuleContent';
 
@@ -13,132 +13,123 @@ const LearningPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Get courseId and resume data from navigation state
+  // Get courseId from navigation state
   const locationState = location.state as {
     courseId?: string;
     resumeModuleIndex?: number;
-    resumeContentId?: string | null;
   } | null;
 
   const courseId = locationState?.courseId || slug || '';
   const resumeModuleIndex = locationState?.resumeModuleIndex;
-  const resumeContentId = locationState?.resumeContentId;
 
-  const {
-    course,
-    loading: courseLoading,
-    error: courseError,
-  } = useCourseDetail(courseId);
+  const { course, loading: courseLoading, error: courseError } = useCourseDetail(courseId);
 
-  // Initialize module index from resume data or course data
+  // Module state
   const [currentModuleIndex, setCurrentModuleIndex] = useState<number | null>(null);
   const [moduleData, setModuleData] = useState<ModuleData | null>(null);
+  const [contentItems, setContentItems] = useState<ContentItem[]>([]);
   const [moduleLoading, setModuleLoading] = useState(false);
   const [moduleError, setModuleError] = useState<string | null>(null);
+
+  // UI state
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [completedModules, setCompletedModules] = useState<Set<number>>(
-    new Set()
-  );
+  const [completedModules, setCompletedModules] = useState<Set<number>>(new Set());
 
-  const hasFetchedModule = useRef<number | null>(null);
-  const hasInitialized = useRef(false);
+  // Refs to prevent duplicate fetches
+  const fetchedModuleRef = useRef<number | null>(null);
+  const initializedRef = useRef(false);
 
-  // Set initial module index from resume data or course data when loaded
+  // Initialize module index when course loads
   useEffect(() => {
-    if (course && !hasInitialized.current) {
-      hasInitialized.current = true;
+    if (!course || initializedRef.current) return;
+    initializedRef.current = true;
 
-      // Priority: resumeModuleIndex > course.moduleIndex > 0
-      let startIndex = 0;
+    // Priority: resumeModuleIndex > course.moduleIndex > 0
+    let startIndex = 0;
+    if (resumeModuleIndex !== undefined) {
+      startIndex = resumeModuleIndex;
+    } else if (course.moduleIndex !== undefined) {
+      startIndex = course.moduleIndex;
+    }
 
-      if (resumeModuleIndex !== undefined) {
-        startIndex = resumeModuleIndex;
-      } else if (course.moduleIndex !== undefined) {
-        startIndex = course.moduleIndex;
+    // Ensure within bounds
+    const validIndex = Math.min(Math.max(0, startIndex), course.modules.length - 1);
+    setCurrentModuleIndex(validIndex);
+
+    // Mark previous modules as completed
+    if (validIndex > 0) {
+      const completed = new Set<number>();
+      for (let i = 0; i < validIndex; i++) {
+        completed.add(i);
       }
-
-      // Ensure the index is within bounds
-      const validIndex = Math.min(
-        Math.max(0, startIndex),
-        course.modules.length - 1
-      );
-      setCurrentModuleIndex(validIndex);
-
-      // Mark all modules before the current one as completed
-      if (validIndex > 0) {
-        const completed = new Set<number>();
-        for (let i = 0; i < validIndex; i++) {
-          completed.add(i);
-        }
-        setCompletedModules(completed);
-      }
+      setCompletedModules(completed);
     }
   }, [course, resumeModuleIndex]);
 
-  // Fetch module content when module index changes
+  // Fetch module content when index changes
   useEffect(() => {
-    if (!course || currentModuleIndex === null || hasFetchedModule.current === currentModuleIndex) return;
+    if (!course || currentModuleIndex === null) return;
+    if (fetchedModuleRef.current === currentModuleIndex) return;
 
-    const fetchModuleContent = async () => {
+    const fetchModule = async () => {
+      setModuleLoading(true);
+      setModuleError(null);
+      fetchedModuleRef.current = currentModuleIndex;
+
       try {
-        setModuleLoading(true);
-        setModuleError(null);
-        hasFetchedModule.current = currentModuleIndex;
-
-        const response = await coursesService.getModuleContent(
-          course.id,
-          currentModuleIndex
-        );
+        const response = await coursesService.getModuleContent(course.id, currentModuleIndex);
         setModuleData(response.data.module);
+        setContentItems(response.data.contentItems);
       } catch (err) {
-        setModuleError(
-          err instanceof Error ? err.message : 'Failed to load module'
-        );
+        setModuleError(err instanceof Error ? err.message : 'Failed to load module');
         console.error('Error fetching module:', err);
       } finally {
         setModuleLoading(false);
       }
     };
 
-    fetchModuleContent();
+    fetchModule();
   }, [course, currentModuleIndex]);
 
+  // Handlers
   const handleModuleSelect = (index: number) => {
     if (currentModuleIndex !== null && index !== currentModuleIndex) {
-      hasFetchedModule.current = null;
+      fetchedModuleRef.current = null;
       setCurrentModuleIndex(index);
       setMobileSidebarOpen(false);
     }
   };
 
   const handleNextModule = () => {
-    if (course && currentModuleIndex !== null && currentModuleIndex < course.modules.length - 1) {
-      // Mark current module as completed
+    if (!course || currentModuleIndex === null) return;
+    if (currentModuleIndex < course.modules.length - 1) {
       setCompletedModules((prev) => new Set(prev).add(currentModuleIndex));
-      hasFetchedModule.current = null;
-      setCurrentModuleIndex((prev) => (prev !== null ? prev + 1 : 0));
+      fetchedModuleRef.current = null;
+      setCurrentModuleIndex(currentModuleIndex + 1);
     }
   };
 
   const handlePrevModule = () => {
     if (currentModuleIndex !== null && currentModuleIndex > 0) {
-      hasFetchedModule.current = null;
-      setCurrentModuleIndex((prev) => (prev !== null ? prev - 1 : 0));
+      fetchedModuleRef.current = null;
+      setCurrentModuleIndex(currentModuleIndex - 1);
     }
   };
 
+  // Loading state
   if (courseLoading || currentModuleIndex === null) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto" />
           <p className="text-gray-600">Loading course...</p>
         </div>
       </div>
     );
   }
 
+  // Error state
   if (courseError || !course) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -154,6 +145,7 @@ const LearningPage = () => {
     );
   }
 
+  // Not enrolled
   if (!course.isEnrolled) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -175,21 +167,16 @@ const LearningPage = () => {
 
   return (
     <div className="h-screen flex flex-col bg-gray-100">
-      {/* Top Header */}
+      {/* Header */}
       <header className="bg-white border-b h-14 flex items-center px-4 flex-shrink-0 shadow-sm">
         <div className="flex items-center gap-4 flex-1">
-          {/* Mobile menu button */}
           <Button
             variant="ghost"
             size="sm"
             className="lg:hidden"
             onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
           >
-            {mobileSidebarOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
+            {mobileSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
 
           <Button
@@ -203,7 +190,6 @@ const LearningPage = () => {
           </Button>
 
           <div className="h-6 w-px bg-gray-200 hidden sm:block" />
-
           <h1 className="text-sm font-medium text-gray-900 truncate hidden sm:block">
             {course.title}
           </h1>
@@ -212,7 +198,7 @@ const LearningPage = () => {
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden relative">
-        {/* Mobile Sidebar Overlay */}
+        {/* Mobile Overlay */}
         {mobileSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -236,15 +222,16 @@ const LearningPage = () => {
             onModuleSelect={handleModuleSelect}
             isCollapsed={sidebarCollapsed}
             onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-            progressPercent={course.enrollment?.progress_percent || 0}
+            progressPercent={course.progressPercent ?? 0}
             completedModules={completedModules}
           />
         </div>
 
-        {/* Content Area */}
+        {/* Content */}
         <div className="flex-1 overflow-hidden">
           <ModuleContent
             module={moduleData}
+            contentItems={contentItems}
             loading={moduleLoading}
             error={moduleError}
             onNextModule={handleNextModule}
@@ -253,11 +240,8 @@ const LearningPage = () => {
             hasPrevModule={currentModuleIndex > 0}
             courseId={course.id}
             moduleIndex={currentModuleIndex}
-            resumeContentId={
-              currentModuleIndex === resumeModuleIndex ? resumeContentId : null
-            }
-            onProgressUpdate={(courseProgress, moduleProgress) => {
-              console.log('Progress updated:', { courseProgress, moduleProgress });
+            onProgressUpdate={(courseProgress) => {
+              console.log('Course progress:', courseProgress);
             }}
           />
         </div>

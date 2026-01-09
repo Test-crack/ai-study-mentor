@@ -98,11 +98,15 @@ export interface ContentCompleteResponse {
 export interface ResumeDataResponse {
   data: {
     currentModuleIndex: number;
-    courseStatus: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+    courseStatus: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | null;
     moduleProgress: number;
-    moduleStatus: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
-    lastContentItemId: string | null;
-    lastContentStatus: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | null;
+    moduleStatus: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | null;
+    // Furthest point in the course (by sequence)
+    furthestContentItemId: string | null;
+    furthestContentStatus: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | null;
+    // Last accessed (for "continue where you left off")
+    lastAccessedContentItemId: string | null;
+    lastAccessedContentStatus: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | null;
     lastAccessedAt: string | null;
   };
 }

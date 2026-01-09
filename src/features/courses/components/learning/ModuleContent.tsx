@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { Badge } from '@/shared/components/ui/badge';
 import { Progress } from '@/shared/components/ui/progress';
@@ -26,6 +26,7 @@ import { coursesService } from '../../services/coursesService';
 
 interface ModuleContentProps {
   module: ModuleData | null;
+  contentItems: ContentItem[];
   loading: boolean;
   error: string | null;
   onNextModule: () => void;
@@ -34,26 +35,12 @@ interface ModuleContentProps {
   hasPrevModule: boolean;
   courseId: string;
   moduleIndex: number;
-  resumeContentId?: string | null;
   onProgressUpdate?: (courseProgress: number, moduleProgress: number) => void;
-}
-
-// Flatten all content items from all concepts into a single list (skip concepts with no content)
-function flattenContentItems(module: ModuleData): ContentItem[] {
-  const items: ContentItem[] = [];
-  module.concepts.forEach((concept) => {
-    // Only include concepts that have content items
-    if (concept.contentItems && concept.contentItems.length > 0) {
-      concept.contentItems.forEach((item) => {
-        items.push(item);
-      });
-    }
-  });
-  return items;
 }
 
 export function ModuleContent({
   module,
+  contentItems,
   loading,
   error,
   onNextModule,
@@ -62,88 +49,90 @@ export function ModuleContent({
   hasPrevModule,
   courseId,
   moduleIndex,
-  resumeContentId,
   onProgressUpdate,
 }: ModuleContentProps) {
-  const [currentContentIndex, setCurrentContentIndex] = useState(0);
-  const [completedItems, setCompletedItems] = useState<Set<string>>(new Set());
+  const [currentIndex, setCurrentIndex] = useState<number | null>(null);
+  const [localCompletedIds, setLocalCompletedIds] = useState<Set<string>>(new Set());
   const [isMarkingComplete, setIsMarkingComplete] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
-  // Track accessed content to prevent duplicate API calls
-  const accessedContentRef = useRef<Set<string>>(new Set());
-  const hasResumedRef = useRef(false);
+  // Refs for tracking - these persist across renders
+  const accessedIdsRef = useRef<Set<string>>(new Set());
+  const lastModuleIdRef = useRef<string | null>(null);
 
-  // Flatten content items
-  const contentItems = useMemo(() => {
-    if (!module) return [];
-    return flattenContentItems(module);
-  }, [module]);
+  // Check if item is completed
+  const isItemCompleted = useCallback(
+    (item: ContentItem) => item.status === 'COMPLETED' || localCompletedIds.has(item.id),
+    [localCompletedIds]
+  );
 
-  // Reset when module changes
+  // Initialize when module data arrives - runs once per module
   useEffect(() => {
-    setCurrentContentIndex(0);
-    setCompletedItems(new Set());
-    accessedContentRef.current.clear();
-    hasResumedRef.current = false;
-  }, [module?.id]);
-
-  // Navigate to resume content if provided
-  useEffect(() => {
-    if (
-      !hasResumedRef.current &&
-      resumeContentId &&
-      contentItems.length > 0
-    ) {
-      const resumeIndex = contentItems.findIndex(
-        (item) => item.id === resumeContentId
-      );
-      if (resumeIndex > 0) {
-        // Mark all items before resume point as completed (for navigation)
-        const completed = new Set<string>();
-        for (let i = 0; i < resumeIndex; i++) {
-          completed.add(contentItems[i].id);
-        }
-        setCompletedItems(completed);
-        setCurrentContentIndex(resumeIndex);
-      }
-      hasResumedRef.current = true;
+    if (!module || contentItems.length === 0) {
+      setCurrentIndex(null);
+      setIsReady(false);
+      return;
     }
-  }, [resumeContentId, contentItems]);
 
-  // Track content access when current content changes
-  useEffect(() => {
-    const currentItem = contentItems[currentContentIndex];
-    if (!currentItem || !courseId || moduleIndex === undefined) return;
+    // Skip if same module
+    if (lastModuleIdRef.current === module.id) {
+      return;
+    }
 
-    // Skip if already accessed
-    if (accessedContentRef.current.has(currentItem.id)) return;
+    // New module - reset everything
+    lastModuleIdRef.current = module.id;
+    accessedIdsRef.current = new Set();
+    setLocalCompletedIds(new Set());
 
-    const trackAccess = async () => {
-      try {
-        await coursesService.trackContentAccess(
-          courseId,
-          moduleIndex,
-          currentItem.id
-        );
-        accessedContentRef.current.add(currentItem.id);
-      } catch (err) {
-        // Non-critical - just log
-        console.warn('Failed to track content access:', err);
+    // Find first incomplete item
+    let startIdx = 0;
+    for (let i = 0; i < contentItems.length; i++) {
+      if (contentItems[i].status !== 'COMPLETED') {
+        startIdx = i;
+        break;
       }
-    };
+    }
 
-    trackAccess();
-  }, [currentContentIndex, contentItems, courseId, moduleIndex]);
+    setCurrentIndex(startIdx);
+    setIsReady(true);
 
-  const currentItem = contentItems[currentContentIndex];
+    // Track access for the starting item (if not completed)
+    const startItem = contentItems[startIdx];
+    if (startItem && startItem.status !== 'COMPLETED') {
+      accessedIdsRef.current.add(startItem.id);
+      coursesService
+        .trackContentAccess(courseId, moduleIndex, startItem.id)
+        .catch((err) => console.warn('Failed to track initial access:', err));
+    }
+  }, [module?.id, contentItems, courseId, moduleIndex]);
+
+  // Track access when user navigates (not on initialization)
+  const trackAccessForItem = useCallback(
+    (item: ContentItem) => {
+      if (!item || accessedIdsRef.current.has(item.id)) return;
+      if (item.status === 'COMPLETED' || localCompletedIds.has(item.id)) return;
+
+      accessedIdsRef.current.add(item.id);
+      coursesService
+        .trackContentAccess(courseId, moduleIndex, item.id)
+        .catch((err) => console.warn('Failed to track access:', err));
+    },
+    [courseId, moduleIndex, localCompletedIds]
+  );
+
+  // Current item
+  const currentItem = currentIndex !== null ? contentItems[currentIndex] : null;
+  const isCurrentCompleted = currentItem ? isItemCompleted(currentItem) : false;
+
+  // Progress
   const totalItems = contentItems.length;
-  const completedCount = completedItems.size;
+  const completedCount = contentItems.filter(isItemCompleted).length;
   const allCompleted = completedCount === totalItems && totalItems > 0;
   const progressPercent = totalItems > 0 ? Math.round((completedCount / totalItems) * 100) : 0;
 
-  const markCurrentAsComplete = useCallback(async () => {
-    const currentItem = contentItems[currentContentIndex];
-    if (!currentItem || completedItems.has(currentItem.id)) return;
+  // Mark complete
+  const markComplete = useCallback(async () => {
+    if (!currentItem || isItemCompleted(currentItem)) return;
 
     setIsMarkingComplete(true);
     try {
@@ -152,56 +141,50 @@ export function ModuleContent({
         moduleIndex,
         currentItem.id
       );
-
-      setCompletedItems((prev) => new Set(prev).add(currentItem.id));
-
-      // Update progress in parent
-      if (onProgressUpdate) {
-        onProgressUpdate(
-          response.data.courseProgress.progress_percent,
-          response.data.moduleProgress.progress_percent
-        );
-      }
+      setLocalCompletedIds((prev) => new Set(prev).add(currentItem.id));
+      onProgressUpdate?.(
+        response.data.courseProgress.progress_percent,
+        response.data.moduleProgress.progress_percent
+      );
     } catch (err) {
-      console.error('Failed to mark content complete:', err);
-      // Still mark as complete locally for UX
-      setCompletedItems((prev) => new Set(prev).add(currentItem.id));
+      console.error('Failed to mark complete:', err);
+      setLocalCompletedIds((prev) => new Set(prev).add(currentItem.id));
     } finally {
       setIsMarkingComplete(false);
     }
-  }, [contentItems, currentContentIndex, completedItems, courseId, moduleIndex, onProgressUpdate]);
+  }, [currentItem, isItemCompleted, courseId, moduleIndex, onProgressUpdate]);
 
-  const handleNext = () => {
-    // For Notes, user must mark complete first (button is disabled until then)
-    // For MCQ, completion is handled by the MCQContent component
-    if (currentContentIndex < totalItems - 1) {
-      setCurrentContentIndex((prev) => prev + 1);
-    }
-  };
+  // Navigation - track access on navigate
+  const goNext = useCallback(() => {
+    if (currentIndex === null || currentIndex >= totalItems - 1) return;
+    const nextIdx = currentIndex + 1;
+    const nextItem = contentItems[nextIdx];
+    setCurrentIndex(nextIdx);
+    trackAccessForItem(nextItem);
+  }, [currentIndex, totalItems, contentItems, trackAccessForItem]);
 
-  const handlePrev = () => {
-    if (currentContentIndex > 0) {
-      setCurrentContentIndex((prev) => prev - 1);
-    }
-  };
+  const goPrev = useCallback(() => {
+    if (currentIndex === null || currentIndex <= 0) return;
+    setCurrentIndex(currentIndex - 1);
+    // Don't track access for going back - already accessed
+  }, [currentIndex]);
 
-  const handleNextModule = () => {
-    if (allCompleted && hasNextModule) {
-      onNextModule();
-    }
-  };
+  const goToIndex = useCallback(
+    (index: number) => {
+      if (currentIndex === null) return;
+      const targetItem = contentItems[index];
+      if (!targetItem) return;
+      // Can navigate to completed or previous items
+      if (index <= currentIndex || isItemCompleted(targetItem)) {
+        setCurrentIndex(index);
+        trackAccessForItem(targetItem);
+      }
+    },
+    [currentIndex, contentItems, isItemCompleted, trackAccessForItem]
+  );
 
-  const handleContentSelect = (index: number) => {
-    // Can only go to completed items or the next uncompleted one
-    const canNavigate =
-      index <= currentContentIndex ||
-      completedItems.has(contentItems[index]?.id);
-    if (canNavigate) {
-      setCurrentContentIndex(index);
-    }
-  };
-
-  if (loading) {
+  // Loading
+  if (loading || !isReady || currentIndex === null) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center space-y-4">
@@ -212,6 +195,7 @@ export function ModuleContent({
     );
   }
 
+  // Error
   if (error) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -224,6 +208,7 @@ export function ModuleContent({
     );
   }
 
+  // Empty
   if (!module || contentItems.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -235,15 +220,12 @@ export function ModuleContent({
     );
   }
 
-  const getContentTitle = (item: ContentItem) => {
-    if (item.type === 'NOTES' && item.title) {
-      return item.title;
-    }
-    if (item.type === 'MCQ') {
-      return 'Assessment';
-    }
-    return `Content ${currentContentIndex + 1}`;
+  const getTitle = (item: ContentItem) => {
+    if (item.type === 'NOTES' && item.title) return item.title;
+    if (item.type === 'MCQ') return 'Assessment';
+    return `Content ${item.index + 1}`;
   };
+
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -251,9 +233,7 @@ export function ModuleContent({
       <div className="border-b px-6 py-4 bg-gray-50">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <p className="text-sm text-gray-500 mb-1">
-              Module {module.order_index + 1}
-            </p>
+            <p className="text-sm text-gray-500 mb-1">Module {module.order_index + 1}</p>
             <h1 className="text-xl font-bold text-gray-900">{module.title}</h1>
           </div>
           <div className="text-right">
@@ -269,39 +249,35 @@ export function ModuleContent({
       {/* Content Navigation Pills */}
       <div className="border-b px-6 py-3 bg-white">
         <div className="flex items-center gap-2 overflow-x-auto pb-1">
-          {contentItems.map((item, index) => {
-            const isActive = index === currentContentIndex;
-            const isCompleted = completedItems.has(item.id);
-            const canAccess = index <= currentContentIndex || isCompleted;
+          {contentItems.map((item) => {
+            const isActive = item.index === currentIndex;
+            const itemCompleted = isItemCompleted(item);
+            const canAccess = item.index <= currentIndex || itemCompleted;
 
             return (
               <button
                 key={item.id}
-                onClick={() => handleContentSelect(index)}
+                onClick={() => goToIndex(item.index)}
                 disabled={!canAccess}
                 className={cn(
                   'flex items-center gap-2 px-3 py-2 rounded-full text-sm whitespace-nowrap transition-all',
                   isActive
                     ? 'bg-purple-600 text-white'
-                    : isCompleted
-                    ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                    : canAccess
-                    ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    : 'bg-gray-50 text-gray-400 cursor-not-allowed'
+                    : itemCompleted
+                      ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                      : canAccess
+                        ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        : 'bg-gray-50 text-gray-400 cursor-not-allowed'
                 )}
               >
-                {isCompleted ? (
-                  <CheckCircle className="h-4 w-4" />
-                ) : (
-                  <Circle className="h-4 w-4" />
-                )}
+                {itemCompleted ? <CheckCircle className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
                 <span>
                   {item.type === 'NOTES' ? (
                     <BookOpen className="h-3.5 w-3.5 inline mr-1" />
                   ) : (
                     <HelpCircle className="h-3.5 w-3.5 inline mr-1" />
                   )}
-                  {index + 1}
+                  {item.index + 1}
                 </span>
               </button>
             );
@@ -312,19 +288,18 @@ export function ModuleContent({
       {/* Content Area */}
       <ScrollArea className="flex-1">
         <div className="p-6 md:p-8 max-w-4xl mx-auto">
-          {/* Content Header */}
           <div className="mb-6">
             <div className="flex items-center gap-3 mb-2">
               <Badge
                 variant="outline"
                 className={cn(
                   'text-xs',
-                  currentItem.type === 'NOTES'
+                  currentItem?.type === 'NOTES'
                     ? 'border-blue-200 text-blue-700 bg-blue-50'
                     : 'border-purple-200 text-purple-700 bg-purple-50'
                 )}
               >
-                {currentItem.type === 'NOTES' ? (
+                {currentItem?.type === 'NOTES' ? (
                   <>
                     <BookOpen className="h-3 w-3 mr-1" />
                     Reading Material
@@ -337,23 +312,23 @@ export function ModuleContent({
                 )}
               </Badge>
               <span className="text-sm text-gray-500">
-                {currentContentIndex + 1} of {totalItems}
+                {currentIndex + 1} of {totalItems}
               </span>
             </div>
             <h2 className="text-2xl font-bold text-gray-900">
-              {getContentTitle(currentItem)}
+              {currentItem ? getTitle(currentItem) : 'Loading...'}
             </h2>
           </div>
 
-          {/* Render Content */}
-          {currentItem.type === 'NOTES' && currentItem.content && (
+          {currentItem?.type === 'NOTES' && currentItem.content && (
             <NoteContent note={currentItem.content as NoteType} />
           )}
 
-          {currentItem.type === 'MCQ' && currentItem.content && (
+          {currentItem?.type === 'MCQ' && currentItem.content && (
             <MCQContent
               mcq={currentItem.content as MCQType}
-              onComplete={markCurrentAsComplete}
+              onComplete={markComplete}
+              isAlreadyCompleted={isCurrentCompleted}
             />
           )}
         </div>
@@ -364,18 +339,17 @@ export function ModuleContent({
         <div className="flex items-center justify-between max-w-4xl mx-auto">
           <Button
             variant="outline"
-            onClick={hasPrevModule && currentContentIndex === 0 ? onPrevModule : handlePrev}
-            disabled={currentContentIndex === 0 && !hasPrevModule}
+            onClick={hasPrevModule && currentIndex === 0 ? onPrevModule : goPrev}
+            disabled={currentIndex === 0 && !hasPrevModule}
           >
             <ChevronLeft className="h-4 w-4 mr-2" />
-            {currentContentIndex === 0 ? 'Previous Module' : 'Previous'}
+            {currentIndex === 0 ? 'Previous Module' : 'Previous'}
           </Button>
 
-          {/* Mark Complete button for Notes - required before Next */}
           <div className="flex items-center gap-2">
-            {!completedItems.has(currentItem?.id) && currentItem?.type === 'NOTES' && (
+            {!isCurrentCompleted && currentItem?.type === 'NOTES' && (
               <Button
-                onClick={markCurrentAsComplete}
+                onClick={markComplete}
                 disabled={isMarkingComplete}
                 className="bg-green-600 hover:bg-green-700 text-white"
               >
@@ -387,7 +361,7 @@ export function ModuleContent({
                 {isMarkingComplete ? 'Saving...' : 'Mark Complete'}
               </Button>
             )}
-            {completedItems.has(currentItem?.id) && (
+            {isCurrentCompleted && (
               <span className="flex items-center gap-1 text-green-600 text-sm font-medium">
                 <CheckCircle className="h-4 w-4" />
                 Completed
@@ -395,12 +369,12 @@ export function ModuleContent({
             )}
           </div>
 
-          {currentContentIndex < totalItems - 1 ? (
+          {currentIndex < totalItems - 1 ? (
             <Button
-              onClick={handleNext}
-              disabled={!completedItems.has(currentItem?.id)}
+              onClick={goNext}
+              disabled={!isCurrentCompleted}
               className={cn(
-                !completedItems.has(currentItem?.id)
+                !isCurrentCompleted
                   ? 'bg-gray-300 cursor-not-allowed'
                   : 'bg-purple-600 hover:bg-purple-700'
               )}
@@ -410,7 +384,7 @@ export function ModuleContent({
             </Button>
           ) : (
             <Button
-              onClick={handleNextModule}
+              onClick={onNextModule}
               disabled={!allCompleted || !hasNextModule}
               className={cn(
                 allCompleted && hasNextModule
@@ -421,8 +395,8 @@ export function ModuleContent({
               {!hasNextModule
                 ? 'Module Complete'
                 : allCompleted
-                ? 'Next Module'
-                : 'Complete All First'}
+                  ? 'Next Module'
+                  : 'Complete All First'}
               <ChevronRight className="h-4 w-4 ml-2" />
             </Button>
           )}

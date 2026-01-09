@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { CourseDetail } from '../types';
 import { coursesService } from '../services/coursesService';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { callBackend } from '@/features/auth/services/authClient';
 import { getBackendUrl } from '@/shared/utils';
 
@@ -17,6 +18,7 @@ export function useCourseDetail(courseId: string): UseCourseDetailReturn {
   const [error, setError] = useState<string | null>(null);
   const hasFetchedRef = useRef(false);
   const currentIdRef = useRef(courseId);
+  const { user } = useAuth();
 
   const fetchCourse = async () => {
     if (!courseId) {
@@ -29,19 +31,22 @@ export function useCourseDetail(courseId: string): UseCourseDetailReturn {
       setLoading(true);
       setError(null);
 
-      // First get the backend user ID
-      let userId: string | undefined;
-      try {
-        const backendUrl = getBackendUrl();
-        const profileData = await callBackend(`${backendUrl}/api/profile`, {
-          method: 'GET',
-        });
-        userId = profileData.user?.id;
-      } catch {
-        // User might not be logged in, continue without userId
+      // If user is logged in, fetch their backend profile ID first
+      let backendUserId: string | undefined;
+      if (user) {
+        try {
+          const backendUrl = getBackendUrl();
+          const profileData = await callBackend(`${backendUrl}/api/profile`, {
+            method: 'GET',
+          });
+          backendUserId = profileData.user?.id;
+        } catch (profileErr) {
+          console.warn('Could not fetch profile for enrollment check:', profileErr);
+        }
       }
 
-      const response = await coursesService.getCourseById(courseId, userId);
+      // Fetch course with userId to check enrollment status
+      const response = await coursesService.getCourseById(courseId, backendUserId);
       setCourse(response.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load course');
@@ -63,7 +68,7 @@ export function useCourseDetail(courseId: string): UseCourseDetailReturn {
       fetchCourse();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [courseId]);
+  }, [courseId, user]);
 
   return { course, loading, error, refetch: fetchCourse };
 }

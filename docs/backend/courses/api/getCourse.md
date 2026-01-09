@@ -344,7 +344,7 @@ export const getModuleContent = async (req: Request, res: Response) => {
 
         const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
         if (!uuidRegex.test(courseId)) {
-            return res.status(400).json({ error: 'Invalid course ID format' });
+            return res.status(400).json({ error: 'Invalid courseId format' });
         }
 
         const idx = parseInt(orderIndex);
@@ -352,7 +352,7 @@ export const getModuleContent = async (req: Request, res: Response) => {
             return res.status(400).json({ error: 'orderIndex must be a number' });
         }
 
-        // 1. Verify Enrollment
+        // 1. Verify Enrollment and update last_accessed_at
         const enrollment = await prisma.userCourseEnrollment.findUnique({
             where: {
                 user_id_course_id: {
@@ -365,6 +365,19 @@ export const getModuleContent = async (req: Request, res: Response) => {
         if (!enrollment) {
             return res.status(403).json({ error: 'Access denied. You are not enrolled in this course.' });
         }
+
+        // Update last_accessed_at
+        await prisma.userCourseEnrollment.update({
+            where: {
+                user_id_course_id: {
+                    user_id: userId,
+                    course_id: courseId,
+                }
+            },
+            data: {
+                last_accessed_at: new Date(),
+            }
+        });
 
         // 2. Fetch Module, Concepts, and Content
         const courseModule = await prisma.courseModule.findUnique({
@@ -392,7 +405,8 @@ export const getModuleContent = async (req: Request, res: Response) => {
                                                         question: true,
                                                         options: true,
                                                         difficulty: true,
-                                                        // Explicitly excluding correct_answer and explanation
+                                                        correct_answer: true,
+                                                        explanation: true,
                                                     }
                                                 }
                                             }
@@ -410,7 +424,83 @@ export const getModuleContent = async (req: Request, res: Response) => {
             return res.status(404).json({ error: 'Module not found at this index for the specified course' });
         }
 
-        // 3. Transform data into an organized structure
+        // 3. Collect all content item IDs from this module
+        const allContentItemIds: string[] = [];
+        courseModule.Module.ModuleConcept.forEach(mc => {
+            mc.Concept.CourseContentItem.forEach(item => {
+                allContentItemIds.push(item.id);
+            });
+        });
+
+        // 4. Fetch user's content progress by content_item_id (more reliable than module_id)
+        const contentProgressMap = new Map<string, { status: string; completed_at: Date | null }>();
+        
+        if (allContentItemIds.length > 0) {
+            const userContentProgress = await prisma.userContentProgress.findMany({
+                where: {
+                    user_id: userId,
+                    content_item_id: { in: allContentItemIds },
+                },
+                select: {
+                    content_item_id: true,
+                    status: true,
+                    completed_at: true,
+                }
+            });
+
+            userContentProgress.forEach(cp => {
+                contentProgressMap.set(cp.content_item_id, {
+                    status: cp.status,
+                    completed_at: cp.completed_at,
+                });
+            });
+        }
+
+        // 5. Build flat ordered content list with global index
+        // Order: concepts by order_index, then content items by sequence_order within each concept
+        let globalIndex = 0;
+        const contentItems: Array<{
+            index: number;
+            id: string;
+            type: string;
+            title: string | null;
+            is_required: boolean | null;
+            concept_order: number;
+            sequence_order: number | null;
+            status: string;
+            completed_at: Date | null;
+            concept: {
+                id: string;
+                slug: string;
+                learningObjective: string;
+            };
+            content: any;
+        }> = [];
+
+        // Iterate in order: concepts sorted by order_index, items sorted by sequence_order
+        for (const mc of courseModule.Module.ModuleConcept) {
+            for (const item of mc.Concept.CourseContentItem) {
+                const progress = contentProgressMap.get(item.id);
+                contentItems.push({
+                    index: globalIndex++,
+                    id: item.id,
+                    type: item.content_kind,
+                    title: item.title,
+                    is_required: item.is_required,
+                    concept_order: mc.order_index,
+                    sequence_order: item.sequence_order,
+                    status: progress?.status || 'NOT_STARTED',
+                    completed_at: progress?.completed_at || null,
+                    concept: {
+                        id: mc.Concept.id,
+                        slug: mc.Concept.conceptSlug,
+                        learningObjective: mc.Concept.learningObjective,
+                    },
+                    content: item.content_kind === 'NOTES' ? item.Note : item.MCQ
+                });
+            }
+        }
+
         const result = {
             courseId,
             module: {
@@ -418,21 +508,10 @@ export const getModuleContent = async (req: Request, res: Response) => {
                 title: courseModule.Module.title,
                 description: courseModule.Module.description,
                 order_index: courseModule.order_index,
-                concepts: courseModule.Module.ModuleConcept.map(mc => ({
-                    id: mc.Concept.id,
-                    learningObjective: mc.Concept.learningObjective, // Using learningObjective or we could use a title if Concept had one
-                    slug: mc.Concept.conceptSlug,
-                    order_index: mc.order_index,
-                    contentItems: mc.Concept.CourseContentItem.map(item => ({
-                        id: item.id,
-                        type: item.content_kind,
-                        title: item.title,
-                        is_required: item.is_required,
-                        sequence_order: item.sequence_order,
-                        content: item.content_kind === 'NOTES' ? item.Note : item.MCQ
-                    }))
-                }))
-            }
+                total_items: contentItems.length,
+            },
+            // Flat ordered list - frontend just iterates index 0, 1, 2...
+            contentItems,
         };
 
         res.json({ data: result });
