@@ -31,6 +31,7 @@ interface ModuleContentProps {
   error: string | null;
   onNextModule: () => void;
   onPrevModule: () => void;
+  onCourseComplete: () => void;
   hasNextModule: boolean;
   hasPrevModule: boolean;
   courseId: string;
@@ -45,6 +46,7 @@ export function ModuleContent({
   error,
   onNextModule,
   onPrevModule,
+  onCourseComplete,
   hasNextModule,
   hasPrevModule,
   courseId,
@@ -382,22 +384,37 @@ export function ModuleContent({
               Next
               <ChevronRight className="h-4 w-4 ml-2" />
             </Button>
-          ) : (
+          ) : hasNextModule ? (
             <Button
               onClick={onNextModule}
-              disabled={!allCompleted || !hasNextModule}
+              disabled={!allCompleted}
               className={cn(
-                allCompleted && hasNextModule
+                allCompleted
                   ? 'bg-green-600 hover:bg-green-700'
                   : 'bg-gray-300 cursor-not-allowed'
               )}
             >
-              {!hasNextModule
-                ? 'Module Complete'
-                : allCompleted
-                  ? 'Next Module'
-                  : 'Complete All First'}
+              {allCompleted ? 'Next Module' : 'Complete All First'}
               <ChevronRight className="h-4 w-4 ml-2" />
+            </Button>
+          ) : (
+            <Button
+              onClick={onCourseComplete}
+              disabled={!allCompleted}
+              className={cn(
+                allCompleted
+                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700'
+                  : 'bg-gray-300 cursor-not-allowed'
+              )}
+            >
+              {allCompleted ? (
+                <>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Complete Course
+                </>
+              ) : (
+                'Complete All First'
+              )}
             </Button>
           )}
         </div>

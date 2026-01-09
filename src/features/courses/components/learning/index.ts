@@ -3,3 +3,4 @@ export { LearningSidebar } from './LearningSidebar';
 export { ModuleContent } from './ModuleContent';
 export { NoteContent } from './NoteContent';
 export { MCQContent } from './MCQContent';
+export { CourseCompletionPage } from './CourseCompletionPage';

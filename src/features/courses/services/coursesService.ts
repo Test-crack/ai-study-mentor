@@ -274,6 +274,23 @@ class CoursesService {
       throw new Error('Failed to fetch resume data');
     }
   }
+
+  /**
+   * Mark course as completed
+   * Call this when user finishes all modules
+   */
+  async completeCourse(courseId: string): Promise<{ message: string; data: { completedAt: string } }> {
+    try {
+      const url = `${this.baseUrl}/api/courses/${courseId}/complete`;
+      const response = await callBackend(url, {
+        method: 'POST',
+      });
+      return response;
+    } catch (error) {
+      console.error('Error completing course:', error);
+      throw new Error('Failed to complete course');
+    }
+  }
 }
 
 export const coursesService = new CoursesService();

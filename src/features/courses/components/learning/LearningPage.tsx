@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/shared/components/ui/button';
-import { ArrowLeft, Menu, X } from 'lucide-react';
+import { ArrowLeft, Menu, X, Loader2 } from 'lucide-react';
 import { useCourseDetail } from '../../hooks/useCourseDetail';
 import { coursesService } from '../../services/coursesService';
 import { ModuleData, ContentItem } from '../../types';
 import { LearningSidebar } from './LearningSidebar';
 import { ModuleContent } from './ModuleContent';
+import { CourseCompletionPage } from './CourseCompletionPage';
 
 const LearningPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -31,6 +32,11 @@ const LearningPage = () => {
   const [moduleLoading, setModuleLoading] = useState(false);
   const [moduleError, setModuleError] = useState<string | null>(null);
 
+  // Course completion state
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [completedAt, setCompletedAt] = useState<string | null>(null);
+
   // UI state
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -44,6 +50,13 @@ const LearningPage = () => {
   useEffect(() => {
     if (!course || initializedRef.current) return;
     initializedRef.current = true;
+
+    // Check if course is already completed
+    if (course.enrollmentStatus === 'COMPLETED') {
+      setIsCompleted(true);
+      setCompletedAt(new Date().toISOString());
+      return;
+    }
 
     // Priority: resumeModuleIndex > course.moduleIndex > 0
     let startIndex = 0;
@@ -69,7 +82,7 @@ const LearningPage = () => {
 
   // Fetch module content when index changes
   useEffect(() => {
-    if (!course || currentModuleIndex === null) return;
+    if (!course || currentModuleIndex === null || isCompleted) return;
     if (fetchedModuleRef.current === currentModuleIndex) return;
 
     const fetchModule = async () => {
@@ -90,7 +103,7 @@ const LearningPage = () => {
     };
 
     fetchModule();
-  }, [course, currentModuleIndex]);
+  }, [course, currentModuleIndex, isCompleted]);
 
   // Handlers
   const handleModuleSelect = (index: number) => {
@@ -117,8 +130,26 @@ const LearningPage = () => {
     }
   };
 
+  const handleCourseComplete = async () => {
+    if (!course || isCompleting) return;
+
+    setIsCompleting(true);
+    try {
+      const response = await coursesService.completeCourse(course.id);
+      setCompletedAt(response.data.completedAt);
+      setIsCompleted(true);
+    } catch (err) {
+      console.error('Failed to complete course:', err);
+      // Still show completion page even if API fails
+      setCompletedAt(new Date().toISOString());
+      setIsCompleted(true);
+    } finally {
+      setIsCompleting(false);
+    }
+  };
+
   // Loading state
-  if (courseLoading || currentModuleIndex === null) {
+  if (courseLoading || (currentModuleIndex === null && !isCompleted)) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -163,6 +194,23 @@ const LearningPage = () => {
         </div>
       </div>
     );
+  }
+
+  // Completing state
+  if (isCompleting) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin text-purple-600 mx-auto" />
+          <p className="text-gray-600">Completing your course...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Course completed - show completion page
+  if (isCompleted && completedAt) {
+    return <CourseCompletionPage course={course} completedAt={completedAt} />;
   }
 
   return (
@@ -218,7 +266,7 @@ const LearningPage = () => {
           <LearningSidebar
             courseTitle={course.title}
             modules={course.modules}
-            currentModuleIndex={currentModuleIndex}
+            currentModuleIndex={currentModuleIndex ?? 0}
             onModuleSelect={handleModuleSelect}
             isCollapsed={sidebarCollapsed}
             onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -236,10 +284,11 @@ const LearningPage = () => {
             error={moduleError}
             onNextModule={handleNextModule}
             onPrevModule={handlePrevModule}
-            hasNextModule={currentModuleIndex < course.modules.length - 1}
-            hasPrevModule={currentModuleIndex > 0}
+            onCourseComplete={handleCourseComplete}
+            hasNextModule={currentModuleIndex !== null && currentModuleIndex < course.modules.length - 1}
+            hasPrevModule={currentModuleIndex !== null && currentModuleIndex > 0}
             courseId={course.id}
-            moduleIndex={currentModuleIndex}
+            moduleIndex={currentModuleIndex ?? 0}
             onProgressUpdate={(courseProgress) => {
               console.log('Course progress:', courseProgress);
             }}
