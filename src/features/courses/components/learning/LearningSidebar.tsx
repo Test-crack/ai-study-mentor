@@ -8,6 +8,7 @@ import {
   Circle,
   Lock,
   BookOpen,
+  Award,
 } from 'lucide-react';
 import { ModuleDetail } from '../../types';
 import { cn } from '@/shared/utils/utils';
@@ -21,6 +22,8 @@ interface LearningSidebarProps {
   onToggleCollapse: () => void;
   progressPercent?: number;
   completedModules?: Set<number>;
+  isCourseCompleted?: boolean;
+  onViewCertificate?: () => void;
 }
 
 export function LearningSidebar({
@@ -32,6 +35,8 @@ export function LearningSidebar({
   onToggleCollapse,
   progressPercent = 0,
   completedModules = new Set(),
+  isCourseCompleted = false,
+  onViewCertificate,
 }: LearningSidebarProps) {
   const canAccessModule = (index: number) => {
     // Can access current module, completed modules, or the next one after completed
@@ -193,6 +198,31 @@ export function LearningSidebar({
           })}
         </div>
       </ScrollArea>
+
+      {/* Certificate Button - shown when course is completed */}
+      {isCourseCompleted && onViewCertificate && (
+        <div className="p-3 border-t bg-gradient-to-r from-yellow-50 to-amber-50">
+          {isCollapsed ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onViewCertificate}
+              className="w-full h-10 p-0 hover:bg-yellow-100"
+              title="View Certificate"
+            >
+              <Award className="h-5 w-5 text-yellow-600" />
+            </Button>
+          ) : (
+            <Button
+              onClick={onViewCertificate}
+              className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white"
+            >
+              <Award className="h-4 w-4 mr-2" />
+              View Certificate
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

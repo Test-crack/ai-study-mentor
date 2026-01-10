@@ -51,12 +51,8 @@ const LearningPage = () => {
     if (!course || initializedRef.current) return;
     initializedRef.current = true;
 
-    // Check if course is already completed
-    if (course.enrollmentStatus === 'COMPLETED') {
-      setIsCompleted(true);
-      setCompletedAt(new Date().toISOString());
-      return;
-    }
+    // For completed courses, allow users to review - don't redirect to completion page
+    // The completion page is only shown when user actively completes the course
 
     // Priority: resumeModuleIndex > course.moduleIndex > 0
     let startIndex = 0;
@@ -70,14 +66,19 @@ const LearningPage = () => {
     const validIndex = Math.min(Math.max(0, startIndex), course.modules.length - 1);
     setCurrentModuleIndex(validIndex);
 
-    // Mark previous modules as completed
-    if (validIndex > 0) {
-      const completed = new Set<number>();
+    // Mark previous modules as completed (or all modules if course is completed)
+    const completed = new Set<number>();
+    if (course.enrollmentStatus === 'COMPLETED') {
+      // Mark all modules as completed for review mode
+      for (let i = 0; i < course.modules.length; i++) {
+        completed.add(i);
+      }
+    } else if (validIndex > 0) {
       for (let i = 0; i < validIndex; i++) {
         completed.add(i);
       }
-      setCompletedModules(completed);
     }
+    setCompletedModules(completed);
   }, [course, resumeModuleIndex]);
 
   // Fetch module content when index changes
@@ -272,6 +273,11 @@ const LearningPage = () => {
             onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
             progressPercent={course.progressPercent ?? 0}
             completedModules={completedModules}
+            isCourseCompleted={course.enrollmentStatus === 'COMPLETED'}
+            onViewCertificate={() => {
+              setCompletedAt(course.enrollment?.completed_at || new Date().toISOString());
+              setIsCompleted(true);
+            }}
           />
         </div>
 
