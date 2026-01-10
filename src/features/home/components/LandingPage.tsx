@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
@@ -13,10 +14,80 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 const LandingPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [processingAuth, setProcessingAuth] = useState(false);
+
+  // Handle auth callbacks (email confirmation, password reset) that land on root URL
+  useEffect(() => {
+    const handleAuthCallback = async () => {
+      const hash = window.location.hash;
+      
+      if (!hash || !hash.includes("access_token")) {
+        return;
+      }
+
+      setProcessingAuth(true);
+      
+      const hashParams = new URLSearchParams(hash.substring(1));
+      const type = hashParams.get("type");
+      const accessToken = hashParams.get("access_token");
+      const refreshToken = hashParams.get("refresh_token");
+
+      console.log("Auth callback detected, type:", type);
+
+      if (!accessToken) {
+        setProcessingAuth(false);
+        return;
+      }
+
+      try {
+        // Set the session from URL tokens
+        const { data, error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken || "",
+        });
+
+        if (error) {
+          console.error("Error setting session:", error);
+          navigate("/auth?error=invalid_token");
+          return;
+        }
+
+        // Clear the hash from URL
+        window.history.replaceState(null, "", window.location.pathname);
+
+        // Redirect based on auth type
+        if (type === "recovery") {
+          navigate("/reset-password", { replace: true });
+        } else if (type === "signup" || type === "magiclink" || type === "email") {
+          navigate("/profile?welcome=true", { replace: true });
+        } else if (data.session) {
+          navigate("/dashboard", { replace: true });
+        }
+      } catch (err) {
+        console.error("Auth callback error:", err);
+        setProcessingAuth(false);
+      }
+    };
+
+    handleAuthCallback();
+  }, [navigate]);
+
+  // Show loading while processing auth callback
+  if (processingAuth) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+          <p className="text-gray-600">Verifying your account...</p>
+        </div>
+      </div>
+    );
+  }
 
   const features = [
     {
