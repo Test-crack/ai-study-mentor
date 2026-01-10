@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
@@ -39,6 +39,7 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -48,6 +49,20 @@ export default function ProfilePage() {
     phoneNo: '',
   });
   const hasLoadedProfile = useRef(false);
+  const hasShownWelcome = useRef(false);
+
+  // Show welcome message for new signups
+  useEffect(() => {
+    if (searchParams.get("welcome") === "true" && !hasShownWelcome.current) {
+      hasShownWelcome.current = true;
+      toast({
+        title: "Welcome to AI Study Mentor! 🎉",
+        description: "Your email has been verified. Complete your profile to get started.",
+      });
+      // Clean up the URL
+      navigate("/profile", { replace: true });
+    }
+  }, [searchParams, toast, navigate]);
 
   useEffect(() => {
     if (hasLoadedProfile.current || !user) {
