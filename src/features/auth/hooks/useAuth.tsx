@@ -20,7 +20,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        // Only set user if email is confirmed
+        // For password recovery, allow the session even if email isn't confirmed yet
+        // This is needed because the recovery flow creates a temporary session
+        if (event === 'PASSWORD_RECOVERY') {
+          setSession(session);
+          setUser(session?.user || null);
+          setLoading(false);
+          return;
+        }
+        
+        // Only set user if email is confirmed for normal auth flows
         const verifiedUser = session?.user?.email_confirmed_at ? session.user : null;
         setSession(session);
         setUser(verifiedUser);

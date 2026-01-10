@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { useToast } from "@/shared/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, EyeOff, GraduationCap } from "lucide-react";
+import { Eye, EyeOff, GraduationCap, CheckCircle } from "lucide-react";
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -17,6 +17,19 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Show success message if redirected from password reset
+  useEffect(() => {
+    if (searchParams.get("reset") === "success") {
+      toast({
+        title: "Password Reset Successful!",
+        description: "Your password has been updated. Please sign in with your new password.",
+      });
+      // Clean up the URL
+      navigate("/auth", { replace: true });
+    }
+  }, [searchParams, toast, navigate]);
 
 
 
@@ -94,14 +107,14 @@ const Auth = () => {
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/`,
+        redirectTo: `${window.location.origin}/reset-password`,
       });
 
       if (error) throw error;
 
       toast({
         title: "Check Your Email",
-        description: "We've sent you a password reset link. Click it to sign in and change your password from your profile.",
+        description: "We've sent you a password reset link. Click it to set your new password.",
       });
 
       // Switch back to login view

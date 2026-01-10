@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "@/features/auth/hooks/useAuth";
 import LandingPage from "@/features/home/components/LandingPage";
 import DashboardPage from "@/features/home/components/DashboardPage";
 import AuthPage from "@/features/auth/components/AuthPage";
+import ResetPasswordPage from "@/features/auth/components/ResetPasswordPage";
 import NotFoundPage from "@/shared/components/layout/NotFoundPage";
 import SpeedAssessmentPage from "@/features/speed-assessment/components/SpeedAssessmentPage";
 import ReadingAssessmentPage from "@/features/reading-assessment/components/ReadingAssessmentPage";
@@ -40,6 +41,7 @@ const AppRoutes = () => {
       {/* Public routes - accessible to everyone */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/auth" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/courses" element={<CoursesPage />} />
       <Route path="/courses/:slug" element={<CourseDetailPage />} />
