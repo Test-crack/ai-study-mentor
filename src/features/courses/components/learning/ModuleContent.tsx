@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { Badge } from '@/shared/components/ui/badge';
 import { Progress } from '@/shared/components/ui/progress';
-import { ScrollArea } from '@/shared/components/ui/scroll-area';
 import {
   ChevronLeft,
   ChevronRight,
@@ -12,6 +11,7 @@ import {
   AlertCircle,
   CheckCircle,
   Circle,
+  Award,
 } from 'lucide-react';
 import {
   ModuleData,
@@ -288,7 +288,7 @@ export function ModuleContent({
       </div>
 
       {/* Content Area */}
-      <ScrollArea className="flex-1">
+      <div className="flex-1 overflow-y-auto bg-white min-h-0">
         <div className="p-6 md:p-8 max-w-4xl mx-auto">
           <div className="mb-6">
             <div className="flex items-center gap-3 mb-2">
@@ -334,86 +334,107 @@ export function ModuleContent({
             />
           )}
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Navigation Footer */}
-      <div className="border-t bg-white px-6 py-4">
+      <div className="border-t bg-white px-6 py-4 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
         <div className="flex items-center justify-between max-w-4xl mx-auto">
           <Button
             variant="outline"
             onClick={hasPrevModule && currentIndex === 0 ? onPrevModule : goPrev}
             disabled={currentIndex === 0 && !hasPrevModule}
+            className="gap-2"
           >
-            <ChevronLeft className="h-4 w-4 mr-2" />
+            <ChevronLeft className="h-4 w-4" />
             {currentIndex === 0 ? 'Previous Module' : 'Previous'}
           </Button>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            {/* Progress indicator */}
+            <span className="text-sm text-gray-500 hidden sm:block">
+              {completedCount} of {totalItems} completed
+            </span>
+            
+            {/* Mark Complete button for notes only */}
             {!isCurrentCompleted && currentItem?.type === 'NOTES' && (
               <Button
                 onClick={markComplete}
                 disabled={isMarkingComplete}
-                className="bg-green-600 hover:bg-green-700 text-white"
+                className="bg-green-600 hover:bg-green-700 text-white gap-2"
               >
                 {isMarkingComplete ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <CheckCircle className="h-4 w-4 mr-2" />
+                  <CheckCircle className="h-4 w-4" />
                 )}
                 {isMarkingComplete ? 'Saving...' : 'Mark Complete'}
               </Button>
             )}
+            
+            {/* Completed badge */}
             {isCurrentCompleted && (
-              <span className="flex items-center gap-1 text-green-600 text-sm font-medium">
+              <span className="flex items-center gap-1.5 text-green-600 text-sm font-medium bg-green-50 px-3 py-1.5 rounded-full">
                 <CheckCircle className="h-4 w-4" />
                 Completed
               </span>
             )}
           </div>
 
+          {/* Next/Complete buttons */}
           {currentIndex < totalItems - 1 ? (
             <Button
               onClick={goNext}
               disabled={!isCurrentCompleted}
               className={cn(
-                !isCurrentCompleted
-                  ? 'bg-gray-300 cursor-not-allowed'
-                  : 'bg-purple-600 hover:bg-purple-700'
-              )}
-            >
-              Next
-              <ChevronRight className="h-4 w-4 ml-2" />
-            </Button>
-          ) : hasNextModule ? (
-            <Button
-              onClick={onNextModule}
-              disabled={!allCompleted}
-              className={cn(
-                allCompleted
-                  ? 'bg-green-600 hover:bg-green-700'
+                'gap-2 transition-all',
+                isCurrentCompleted
+                  ? 'bg-purple-600 hover:bg-purple-700 shadow-md hover:shadow-lg'
                   : 'bg-gray-300 cursor-not-allowed'
               )}
             >
-              {allCompleted ? 'Next Module' : 'Complete All First'}
-              <ChevronRight className="h-4 w-4 ml-2" />
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          ) : hasNextModule ? (
+            <Button
+              onClick={() => {
+                if (allCompleted) {
+                  onNextModule();
+                }
+              }}
+              disabled={!allCompleted}
+              className={cn(
+                'gap-2 transition-all',
+                allCompleted
+                  ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-md hover:shadow-lg'
+                  : 'bg-gray-300 cursor-not-allowed'
+              )}
+            >
+              {allCompleted ? 'Next Module' : `Complete ${totalItems - completedCount} more`}
+              <ChevronRight className="h-4 w-4" />
             </Button>
           ) : (
             <Button
-              onClick={onCourseComplete}
+              onClick={() => {
+                if (allCompleted) {
+                  onCourseComplete();
+                }
+              }}
               disabled={!allCompleted}
               className={cn(
+                'gap-2 transition-all',
                 allCompleted
-                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700'
+                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-lg hover:shadow-xl animate-pulse'
                   : 'bg-gray-300 cursor-not-allowed'
               )}
             >
               {allCompleted ? (
                 <>
-                  <CheckCircle className="h-4 w-4 mr-2" />
+                  <Award className="h-4 w-4" />
                   Complete Course
                 </>
               ) : (
-                'Complete All First'
+                `Complete ${totalItems - completedCount} more`
               )}
             </Button>
           )}

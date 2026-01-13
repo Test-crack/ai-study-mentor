@@ -10,10 +10,12 @@ import {
   Clock,
   CheckCircle,
   Download,
+  Star,
+  Sparkles,
 } from 'lucide-react';
 import { CourseDetail } from '../../types';
 import confetti from 'canvas-confetti';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 interface CourseCompletionPageProps {
   course: CourseDetail;
@@ -22,25 +24,39 @@ interface CourseCompletionPageProps {
 
 export function CourseCompletionPage({ course, completedAt }: CourseCompletionPageProps) {
   const navigate = useNavigate();
+  const [showContent, setShowContent] = useState(false);
 
-  // Trigger confetti on mount
+  // Trigger confetti and animate content on mount
   useEffect(() => {
-    const duration = 3000;
+    // Delay content appearance for dramatic effect
+    const contentTimer = setTimeout(() => setShowContent(true), 500);
+
+    // Confetti burst
+    const duration = 4000;
     const end = Date.now() + duration;
 
+    // Initial big burst
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#9333ea', '#6366f1', '#22c55e', '#f59e0b', '#ec4899'],
+    });
+
+    // Continuous side confetti
     const frame = () => {
       confetti({
-        particleCount: 3,
+        particleCount: 2,
         angle: 60,
         spread: 55,
-        origin: { x: 0 },
+        origin: { x: 0, y: 0.7 },
         colors: ['#9333ea', '#6366f1', '#22c55e'],
       });
       confetti({
-        particleCount: 3,
+        particleCount: 2,
         angle: 120,
         spread: 55,
-        origin: { x: 1 },
+        origin: { x: 1, y: 0.7 },
         colors: ['#9333ea', '#6366f1', '#22c55e'],
       });
 
@@ -50,6 +66,8 @@ export function CourseCompletionPage({ course, completedAt }: CourseCompletionPa
     };
 
     frame();
+
+    return () => clearTimeout(contentTimer);
   }, []);
 
   const formatDate = (dateString: string) => {
@@ -65,87 +83,118 @@ export function CourseCompletionPage({ course, completedAt }: CourseCompletionPa
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     if (hours === 0) return `${mins} minutes`;
-    return mins > 0 ? `${hours} hours ${mins} minutes` : `${hours} hours`;
+    return mins > 0 ? `${hours}h ${mins}m` : `${hours} hours`;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-800 overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-400/10 rounded-full blur-3xl" />
+      </div>
+
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-16">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-full mb-6">
-            <Trophy className="h-10 w-10 text-yellow-300" />
+      <div className="relative pt-12 pb-8 text-center">
+        <div className={`transition-all duration-1000 ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10'}`}>
+          <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-full mb-6 shadow-2xl shadow-yellow-500/30 animate-bounce">
+            <Trophy className="h-12 w-12 text-white" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+          <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
             Congratulations! 🎉
           </h1>
-          <p className="text-xl text-purple-100">
-            You've successfully completed this course
+          <p className="text-xl text-purple-200 max-w-md mx-auto">
+            You've successfully completed the course
           </p>
         </div>
       </div>
 
       {/* Certificate Card */}
-      <div className="max-w-3xl mx-auto px-4 -mt-8">
-        <Card className="bg-white shadow-2xl border-0 overflow-hidden">
+      <div className={`max-w-3xl mx-auto px-4 pb-12 transition-all duration-1000 delay-300 ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+        <Card className="bg-white shadow-2xl border-0 overflow-hidden relative">
+          {/* Decorative corner elements */}
+          <div className="absolute top-0 left-0 w-20 h-20 bg-gradient-to-br from-purple-500 to-transparent opacity-20" />
+          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-indigo-500 to-transparent opacity-20" />
+          <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-purple-500 to-transparent opacity-20" />
+          <div className="absolute bottom-0 right-0 w-20 h-20 bg-gradient-to-tl from-indigo-500 to-transparent opacity-20" />
+
           {/* Certificate Header */}
-          <div className="bg-gradient-to-r from-gray-900 to-gray-800 text-white p-8 text-center">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <Award className="h-6 w-6 text-yellow-400" />
-              <span className="text-sm font-medium tracking-wider uppercase text-gray-300">
-                Certificate of Completion
-              </span>
+          <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white p-8 text-center relative overflow-hidden">
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
+            <div className="relative">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <Sparkles className="h-5 w-5 text-yellow-400" />
+                <span className="text-sm font-medium tracking-widest uppercase text-gray-300">
+                  Certificate of Completion
+                </span>
+                <Sparkles className="h-5 w-5 text-yellow-400" />
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold">{course.title}</h2>
+              {course.Domain && (
+                <span className="inline-block mt-3 px-3 py-1 bg-white/10 rounded-full text-sm text-gray-300">
+                  {course.Domain.name}
+                </span>
+              )}
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold">{course.title}</h2>
           </div>
 
           {/* Certificate Body */}
           <div className="p-8 md:p-12">
+            {/* Achievement Stars */}
+            <div className="flex justify-center gap-1 mb-8">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="h-6 w-6 fill-yellow-400 text-yellow-400" />
+              ))}
+            </div>
+
             {/* Course Details */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-              <div className="text-center">
+              <div className="text-center p-4 bg-purple-50 rounded-xl">
                 <div className="inline-flex items-center justify-center w-12 h-12 bg-purple-100 rounded-full mb-2">
                   <BookOpen className="h-5 w-5 text-purple-600" />
                 </div>
                 <p className="text-sm text-gray-500">Modules</p>
-                <p className="font-semibold text-gray-900">{course.modules.length}</p>
+                <p className="font-bold text-gray-900 text-lg">{course.modules.length}</p>
               </div>
-              <div className="text-center">
+              <div className="text-center p-4 bg-blue-50 rounded-xl">
                 <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-2">
                   <Clock className="h-5 w-5 text-blue-600" />
                 </div>
                 <p className="text-sm text-gray-500">Duration</p>
-                <p className="font-semibold text-gray-900">
+                <p className="font-bold text-gray-900 text-lg">
                   {formatDuration(course.duration_minutes)}
                 </p>
               </div>
-              <div className="text-center">
+              <div className="text-center p-4 bg-green-50 rounded-xl">
                 <div className="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mb-2">
                   <CheckCircle className="h-5 w-5 text-green-600" />
                 </div>
                 <p className="text-sm text-gray-500">Status</p>
-                <p className="font-semibold text-green-600">Completed</p>
+                <p className="font-bold text-green-600 text-lg">Completed</p>
               </div>
-              <div className="text-center">
+              <div className="text-center p-4 bg-indigo-50 rounded-xl">
                 <div className="inline-flex items-center justify-center w-12 h-12 bg-indigo-100 rounded-full mb-2">
                   <Award className="h-5 w-5 text-indigo-600" />
                 </div>
                 <p className="text-sm text-gray-500">Completed On</p>
-                <p className="font-semibold text-gray-900">{formatDate(completedAt)}</p>
+                <p className="font-bold text-gray-900 text-lg">{formatDate(completedAt)}</p>
               </div>
             </div>
 
-            {/* Divider */}
-            <div className="border-t border-dashed border-gray-200 my-8" />
+            {/* Divider with seal */}
+            <div className="relative my-8">
+              <div className="border-t border-dashed border-gray-200" />
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
+                  <Award className="h-8 w-8 text-white" />
+                </div>
+              </div>
+            </div>
 
-            {/* Course Info */}
-            <div className="text-center mb-8">
-              {course.Domain && (
-                <span className="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium mb-4">
-                  {course.Domain.name}
-                </span>
-              )}
-              <p className="text-gray-600 max-w-xl mx-auto">
+            {/* Course Description */}
+            <div className="text-center mb-8 mt-12">
+              <p className="text-gray-600 max-w-xl mx-auto leading-relaxed">
                 {course.description}
               </p>
             </div>
@@ -154,7 +203,8 @@ export function CourseCompletionPage({ course, completedAt }: CourseCompletionPa
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button
                 variant="outline"
-                className="w-full sm:w-auto"
+                size="lg"
+                className="w-full sm:w-auto border-2 hover:bg-gray-50"
                 onClick={() => {
                   // TODO: Implement certificate download
                   alert('Certificate download coming soon!');
@@ -165,9 +215,9 @@ export function CourseCompletionPage({ course, completedAt }: CourseCompletionPa
               </Button>
               <Button
                 variant="outline"
-                className="w-full sm:w-auto"
+                size="lg"
+                className="w-full sm:w-auto border-2 hover:bg-gray-50"
                 onClick={() => {
-                  // TODO: Implement share functionality
                   if (navigator.share) {
                     navigator.share({
                       title: `I completed ${course.title}!`,
@@ -190,11 +240,12 @@ export function CourseCompletionPage({ course, completedAt }: CourseCompletionPa
         </Card>
 
         {/* Continue Learning */}
-        <div className="mt-8 text-center pb-12">
-          <p className="text-gray-600 mb-4">Ready for your next challenge?</p>
+        <div className="mt-8 text-center">
+          <p className="text-purple-200 mb-4">Ready for your next challenge?</p>
           <Button
+            size="lg"
             onClick={() => navigate('/courses')}
-            className="bg-purple-600 hover:bg-purple-700"
+            className="bg-white text-purple-700 hover:bg-purple-50 shadow-xl hover:shadow-2xl transition-all"
           >
             Explore More Courses
             <ArrowRight className="h-4 w-4 ml-2" />

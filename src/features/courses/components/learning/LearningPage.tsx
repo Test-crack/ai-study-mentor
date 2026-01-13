@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/shared/components/ui/button';
-import { ArrowLeft, Menu, X, Loader2 } from 'lucide-react';
+import { ArrowLeft, Menu, X } from 'lucide-react';
 import { useCourseDetail } from '../../hooks/useCourseDetail';
 import { coursesService } from '../../services/coursesService';
 import { ModuleData, ContentItem } from '../../types';
@@ -33,7 +33,6 @@ const LearningPage = () => {
   const [moduleError, setModuleError] = useState<string | null>(null);
 
   // Course completion state
-  const [isCompleting, setIsCompleting] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [completedAt, setCompletedAt] = useState<string | null>(null);
 
@@ -45,10 +44,12 @@ const LearningPage = () => {
   // Refs to prevent duplicate fetches
   const fetchedModuleRef = useRef<number | null>(null);
   const initializedRef = useRef(false);
+  const completingRef = useRef(false);
 
   // Initialize module index when course loads
   useEffect(() => {
-    if (!course || initializedRef.current) return;
+    // Don't reinitialize if we're completing or already completed
+    if (!course || initializedRef.current || completingRef.current || isCompleted) return;
     initializedRef.current = true;
 
     // For completed courses, allow users to review - don't redirect to completion page
@@ -131,22 +132,22 @@ const LearningPage = () => {
     }
   };
 
-  const handleCourseComplete = async () => {
-    if (!course || isCompleting) return;
+  const handleCourseComplete = () => {
+    if (!course || isCompleted || completingRef.current) return;
 
-    setIsCompleting(true);
-    try {
-      const response = await coursesService.completeCourse(course.id);
-      setCompletedAt(response.data.completedAt);
-      setIsCompleted(true);
-    } catch (err) {
-      console.error('Failed to complete course:', err);
-      // Still show completion page even if API fails
-      setCompletedAt(new Date().toISOString());
-      setIsCompleted(true);
-    } finally {
-      setIsCompleting(false);
-    }
+    // Set ref immediately to prevent any re-initialization
+    completingRef.current = true;
+    
+    // Show completion page immediately (optimistic UI)
+    const now = new Date().toISOString();
+    setCompletedAt(now);
+    setIsCompleted(true);
+    
+    // Fire API call in background - don't wait for it
+    coursesService.completeCourse(course.id).catch((err) => {
+      console.error('Failed to save course completion:', err);
+      // Already showing completion page, so just log the error
+    });
   };
 
   // Loading state
@@ -192,18 +193,6 @@ const LearningPage = () => {
           >
             View Course Details
           </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // Completing state
-  if (isCompleting) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <Loader2 className="h-12 w-12 animate-spin text-purple-600 mx-auto" />
-          <p className="text-gray-600">Completing your course...</p>
         </div>
       </div>
     );
@@ -282,7 +271,7 @@ const LearningPage = () => {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden bg-white">
           <ModuleContent
             module={moduleData}
             contentItems={contentItems}
