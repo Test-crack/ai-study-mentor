@@ -1,15 +1,12 @@
-import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
-import { Plus, Search, Filter, LayoutGrid, List } from "lucide-react";
-import { Navbar } from "@/shared/components/layout/Navbar";
+import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import { Plus, Search, Filter, Sparkles } from "lucide-react";
+import { AdminNavbar } from "./AdminNavbar";
 import { AdminStats } from "./AdminStats";
 import { AdminCourseCard, AdminCourse } from "./AdminCourseCard";
 
 const AdminDashboardPage = () => {
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  
   // Mock Data
   const mockCourses: AdminCourse[] = [
     {
@@ -75,25 +72,28 @@ const AdminDashboardPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-100">
-      <Navbar showNavItems activeTab="admin" />
+    <div className="min-h-screen bg-[#f8fafc]">
+      <div className="fixed inset-0 bg-gradient-to-tr from-indigo-50/20 via-white to-purple-50/20 pointer-events-none" />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <AdminNavbar />
+      
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10 relative z-10">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 animate-in fade-in slide-in-from-top-4 duration-700">
+          <div className="space-y-1">
+            <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center">
               Instructor Dashboard
+              <Sparkles className="h-6 w-6 ml-3 text-indigo-500 animate-pulse" />
             </h1>
-            <p className="text-muted-foreground mt-1">
-              Manage your courses, analyze performance, and create new content.
+            <p className="text-slate-500 font-medium text-lg">
+              Empower your students with world-class content and insights.
             </p>
           </div>
           <Button 
             size="lg" 
-            className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-xl shadow-indigo-200 h-14 px-8 rounded-2xl font-bold text-base transition-all hover:-translate-y-1 active:translate-y-0 active:shadow-md"
           >
-            <Plus className="mr-2 h-5 w-5" /> Create New Course
+            <Plus className="mr-2 h-5 w-5 stroke-[3px]" /> Create New Course
           </Button>
         </div>
 
@@ -101,55 +101,45 @@ const AdminDashboardPage = () => {
         <AdminStats />
 
         {/* Courses Management Section */}
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/50 p-4 rounded-xl border border-gray-100 shadow-sm backdrop-blur-sm">
-            <div className="flex items-center space-x-2 w-full sm:w-auto">
-              <div className="relative w-full sm:w-72">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  placeholder="Search your courses..." 
-                  className="pl-10 bg-white/80 border-gray-200 focus:border-indigo-500 focus:ring-indigo-500"
-                />
-              </div>
-              <Button variant="outline" size="icon" className="shrink-0">
-                <Filter className="h-4 w-4" />
-              </Button>
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-6 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm shadow-slate-200/50 backdrop-blur-sm">
+            <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
+                <div className="flex items-center space-x-2">
+                    <h2 className="text-xl font-black text-slate-800 whitespace-nowrap">My Courses</h2>
+                    <span className="bg-slate-100 text-slate-600 text-xs font-bold px-2.5 py-1 rounded-full">{mockCourses.length}</span>
+                </div>
+                
+                <div className="h-8 w-px bg-slate-100 hidden sm:block"></div>
+
+                <div className="flex items-center space-x-3 w-full sm:w-auto">
+                    <div className="relative w-full sm:w-72 group">
+                        <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                        <Input 
+                            placeholder="Search projects..." 
+                            className="pl-11 h-11 bg-slate-50/50 border-slate-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl text-sm font-medium transition-all"
+                        />
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-11 w-11 rounded-xl bg-slate-50/50 border border-slate-100 text-slate-500 hover:bg-white hover:text-indigo-600 transition-all">
+                        <Filter className="h-4 w-4" />
+                    </Button>
+                </div>
             </div>
             
-            <Tabs defaultValue="all" className="w-full sm:w-auto">
-              <TabsList className="grid w-full grid-cols-3 sm:w-[300px]">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="published">Published</TabsTrigger>
-                <TabsTrigger value="draft">Drafts</TabsTrigger>
+            <Tabs defaultValue="all" className="w-full lg:w-auto">
+              <TabsList className="grid w-full grid-cols-3 lg:w-[320px] h-11 p-1 bg-slate-100/50 rounded-xl border border-slate-100">
+                <TabsTrigger value="all" className="rounded-lg text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">All</TabsTrigger>
+                <TabsTrigger value="published" className="rounded-lg text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">Published</TabsTrigger>
+                <TabsTrigger value="draft" className="rounded-lg text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">Drafts</TabsTrigger>
               </TabsList>
             </Tabs>
-
-            <div className="hidden sm:flex border rounded-lg bg-white/50 p-1">
-              <Button 
-                variant={viewMode === 'grid' ? 'secondary' : 'ghost'} 
-                size="sm" 
-                className="px-2"
-                onClick={() => setViewMode('grid')}
-              >
-                <LayoutGrid className="h-4 w-4" />
-              </Button>
-              <Button 
-                variant={viewMode === 'list' ? 'secondary' : 'ghost'} 
-                size="sm" 
-                className="px-2"
-                onClick={() => setViewMode('list')}
-              >
-                <List className="h-4 w-4" />
-              </Button>
-            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {mockCourses.map((course, index) => (
               <div 
                 key={course.id} 
-                className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-backwards"
-                style={{ animationDelay: `${index * 100}ms` }}
+                className="animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-backwards"
+                style={{ animationDelay: `${index * 150}ms` }}
               >
                 <AdminCourseCard 
                   course={course}

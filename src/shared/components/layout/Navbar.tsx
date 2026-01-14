@@ -11,7 +11,6 @@ import {
   TrendingUp,
   Star,
   User,
-  Users,
   GraduationCap,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -62,7 +61,6 @@ export function Navbar({
     { id: "youtube", label: "Videos", icon: Video },
     { id: "guides", label: "Study Guides", icon: BookMarked },
     { id: "progress", label: "Progress", icon: TrendingUp },
-    { id: "admin", label: "Instructor", icon: Users, route: "/courses/admin/dashboard" },
   ];
 
   const handleNavClick = (item: typeof navItems[0]) => {
