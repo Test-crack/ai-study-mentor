@@ -19,6 +19,7 @@ import PaymentSuccess from "@/features/payment/components/PaymentSuccess";
 import CoursesPage from "@/features/courses/components/CoursesPage";
 import CourseDetailPage from "@/features/courses/components/CourseDetailPage";
 import LearningPage from "@/features/courses/components/learning/LearningPage";
+import AdminDashboardPage from "@/features/courses/components/admin/AdminDashboardPage";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,7 @@ const AppRoutes = () => {
           <Route path="/assessment" element={<ReadingAssessmentPage />} />
           <Route path="/assessment/legacy" element={<SpeedAssessmentPage />} />
           <Route path="/payment/success" element={<PaymentSuccess />} />
+          <Route path="/courses/admin/dashboard" element={<AdminDashboardPage />} />
         </>
       ) : (
         <>
@@ -65,6 +67,7 @@ const AppRoutes = () => {
           <Route path="/notes" element={<Navigate to="/auth" replace />} />
           <Route path="/profile" element={<Navigate to="/auth" replace />} />
           <Route path="/assessment" element={<Navigate to="/auth" replace />} />
+          <Route path="/courses/admin/dashboard" element={<Navigate to="/auth" replace />} />
         </>
       )}
       <Route path="*" element={<NotFoundPage />} />
