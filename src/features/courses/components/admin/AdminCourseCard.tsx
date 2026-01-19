@@ -39,7 +39,7 @@ interface AdminCourseCardProps {
 
 export const AdminCourseCard = ({ course, onEdit, onView, onDelete }: AdminCourseCardProps) => {
   return (
-    <div className="group bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 overflow-hidden flex flex-col h-full border-b-4 border-b-transparent hover:border-b-indigo-500">
+    <div className="group bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 overflow-hidden flex flex-col h-full border-b-4 border-b-transparent hover:border-b-indigo-500">
       {/* Thumbnail Container */}
       <div className="relative aspect-video overflow-hidden">
         <img 
@@ -89,7 +89,7 @@ export const AdminCourseCard = ({ course, onEdit, onView, onDelete }: AdminCours
 
       {/* Content */}
       <div className="p-6 flex flex-col flex-grow">
-        <h3 className="text-xl font-black text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors line-clamp-2 min-h-[3.5rem]">
+        <h3 className="text-xl font-bold text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors line-clamp-2 min-h-[3.5rem]">
           {course.title}
         </h3>
         
@@ -120,7 +120,7 @@ export const AdminCourseCard = ({ course, onEdit, onView, onDelete }: AdminCours
       {/* Footer / Price */}
       <div className="px-6 pb-6 mt-auto">
         <div className="flex items-center justify-between">
-            <div className="text-2xl font-black text-slate-900">
+            <div className="text-2xl font-bold text-slate-900">
                 ${course.price}
             </div>
             <Button 

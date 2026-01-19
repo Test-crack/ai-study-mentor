@@ -79,11 +79,10 @@ const AdminDashboardPage = () => {
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10 relative z-10">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 animate-in fade-in slide-in-from-top-4 duration-700">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-1">
-            <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center">
+            <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">
               Instructor Dashboard
-              <Sparkles className="h-6 w-6 ml-3 text-indigo-500 animate-pulse" />
             </h1>
             <p className="text-slate-500 font-medium text-lg">
               Empower your students with world-class content and insights.
@@ -101,11 +100,11 @@ const AdminDashboardPage = () => {
         <AdminStats />
 
         {/* Courses Management Section */}
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+        <div className="space-y-8">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-6 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm shadow-slate-200/50 backdrop-blur-sm">
             <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
                 <div className="flex items-center space-x-2">
-                    <h2 className="text-xl font-black text-slate-800 whitespace-nowrap">My Courses</h2>
+                    <h2 className="text-xl font-bold text-slate-800 whitespace-nowrap">My Courses</h2>
                     <span className="bg-slate-100 text-slate-600 text-xs font-bold px-2.5 py-1 rounded-full">{mockCourses.length}</span>
                 </div>
                 
@@ -135,12 +134,8 @@ const AdminDashboardPage = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {mockCourses.map((course, index) => (
-              <div 
-                key={course.id} 
-                className="animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-backwards"
-                style={{ animationDelay: `${index * 150}ms` }}
-              >
+            {mockCourses.map((course) => (
+              <div key={course.id}>
                 <AdminCourseCard 
                   course={course}
                   onEdit={handleEdit}

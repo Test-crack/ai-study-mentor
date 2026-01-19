@@ -32,10 +32,10 @@ export const AdminNavbar = () => {
               onClick={() => navigate("/")}
               className="flex flex-col items-start hover:opacity-80 transition-opacity group"
             >
-              <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="text-xl font-bold text-indigo-600">
                 TestCrack
               </span>
-              <span className="text-[10px] uppercase tracking-widest font-bold text-gray-400 -mt-1 group-hover:text-indigo-500 transition-colors">
+              <span className="text-[10px] uppercase tracking-widest font-bold text-slate-500 -mt-0.5 group-hover:text-indigo-700 transition-colors">
                 Instructor
               </span>
             </button>
