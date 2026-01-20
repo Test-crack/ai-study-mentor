@@ -37,12 +37,22 @@ export interface AdminCourse {
   description: string;
   students: number;
   rating: number;
-  duration: string;
+  duration: number; // Duration in minutes
   price: number;
   status: 'published' | 'draft';
   lastUpdated: string;
   thumbnail: string;
 }
+
+// Helper function to format minutes as "Xh Ym" or "Xm"
+const formatDuration = (minutes: number): string => {
+  if (!minutes || minutes <= 0) return '0m';
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (hours === 0) return `${mins}m`;
+  if (mins === 0) return `${hours}h`;
+  return `${hours}h ${mins}m`;
+};
 
 interface AdminCourseCardProps {
   course: AdminCourse;
@@ -109,7 +119,7 @@ export const AdminCourseCard = ({ course, onEdit, onView, onDelete }: AdminCours
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl shadow-2xl border-slate-100">
-              <DropdownMenuItem onClick={() => navigate(`/courses/${course.slug}`)} className="rounded-xl px-3 py-2.5 focus:bg-indigo-50 focus:text-indigo-600 font-medium transition-colors">
+              <DropdownMenuItem onClick={() => navigate(`/courses/${course.slug}`, { state: { courseId: course.id } })} className="rounded-xl px-3 py-2.5 focus:bg-indigo-50 focus:text-indigo-600 font-medium transition-colors">
                 <Eye className="mr-2 h-4 w-4" /> Preview
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate(`/courses/admin/manage/${course.id}`)} className="rounded-xl px-3 py-2.5 focus:bg-indigo-50 focus:text-indigo-600 font-medium transition-colors">
@@ -148,7 +158,7 @@ export const AdminCourseCard = ({ course, onEdit, onView, onDelete }: AdminCours
           </div>
           <div className="flex items-center space-x-2 text-slate-400">
             <Clock className="h-4 w-4 text-blue-400" />
-            <span className="text-xs font-bold text-slate-600">{course.duration} minutes</span>
+            <span className="text-xs font-bold text-slate-600">{formatDuration(course.duration)}</span>
           </div>
           <div className="flex items-center space-x-2 text-slate-400">
             <Calendar className="h-4 w-4 text-purple-400" />

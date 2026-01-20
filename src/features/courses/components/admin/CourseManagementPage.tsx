@@ -11,7 +11,10 @@ import {
   Trash2,
   ExternalLink,
   Eye,
-  AlertCircle
+  AlertCircle,
+  AlertTriangle,
+  Loader2,
+  Globe
 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -29,6 +32,16 @@ import {
   SelectValue 
 } from "@/shared/components/ui/select";
 import { Switch } from "@/shared/components/ui/switch";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/shared/components/ui/alert-dialog";
 import { coursesService } from "../../services/coursesService";
 import { toast } from "@/shared/hooks/use-toast";
 import { DifficultyType } from "../../types";
@@ -40,9 +53,10 @@ const CourseManagementPage = () => {
   const [activeTab, setActiveTab] = useState("general");
   const [isLoading, setIsLoading] = useState(!isCreationMode);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [domains, setDomains] = useState<{ id: string; name: string }[]>([]);
 
-  // Mock course data for UI development
   const [course, setCourse] = useState({
     id: isCreationMode ? "" : id,
     title: "",
@@ -52,6 +66,7 @@ const CourseManagementPage = () => {
     price: 0,
     domainId: "",
     is_published: false,
+    duration_minutes: 0,
     thumbnail: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60",
     modules: [] as any[]
   });
@@ -74,16 +89,16 @@ const CourseManagementPage = () => {
               price: res.data.price || 0,
               domainId: res.data.Domain?.id || "",
               is_published: res.data.is_published || false,
+              duration_minutes: res.data.duration_minutes || 0,
               thumbnail: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60",
               modules: res.data.modules || []
             });
           }
         }
       } catch (err) {
-        toast({
+        toast.error({
           title: "Error",
-          description: "Failed to load course details",
-          variant: "destructive"
+          description: "Failed to load course details"
         });
       } finally {
         setIsLoading(false);
@@ -93,12 +108,19 @@ const CourseManagementPage = () => {
     loadData();
   }, [id, isCreationMode]);
 
-  const handleSave = async () => {
+  const handleSaveGeneral = async () => {
     if (!course.title || !course.domainId) {
-      toast({
+      toast.warning({
         title: "Validation Error",
-        description: "Title and Domain are required",
-        variant: "destructive"
+        description: "Title and Domain are required"
+      });
+      return;
+    }
+
+    if (course.duration_minutes <= 0) {
+      toast.warning({
+        title: "Validation Error",
+        description: "Duration must be greater than 0 minutes"
       });
       return;
     }
@@ -112,21 +134,47 @@ const CourseManagementPage = () => {
           domainId: course.domainId,
           difficulty: course.difficulty,
           price: course.price,
+          duration_minutes: course.duration_minutes
         });
-        toast({ title: "Success", description: "Course created successfully" });
+        toast.success({ title: "Success", description: "Course created successfully" });
         navigate(`/courses/admin/manage/${newCourse.id}`, { replace: true });
       } else {
-        // Update logic would go here
-        toast({ title: "Updated", description: "Course update pending implementation (backend API)" });
+        await coursesService.updateCourse(course.id!, {
+          title: course.title,
+          description: course.description,
+          difficulty: course.difficulty,
+          price: course.price,
+          is_published: course.is_published,
+          domainId: course.domainId
+        });
+        toast.success({ title: "Saved", description: "Course details updated successfully" });
       }
     } catch (err) {
-      toast({
+      toast.error({
         title: "Error",
-        description: "Failed to save course",
-        variant: "destructive"
+        description: "Failed to save course"
       });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDeleteCourse = async () => {
+    if (!course.id) return;
+    
+    setIsDeleting(true);
+    try {
+      await coursesService.deleteCourse(course.id);
+      toast.success({ title: "Deleted", description: "Course has been permanently deleted" });
+      navigate("/courses/admin/dashboard", { replace: true });
+    } catch (err) {
+      toast.error({
+        title: "Error",
+        description: "Failed to delete course"
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
     }
   };
 
@@ -144,6 +192,40 @@ const CourseManagementPage = () => {
   return (
     <div className="min-h-screen bg-[#f8fafc]">
       <AdminNavbar />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent className="rounded-3xl border-slate-100 shadow-2xl">
+          <AlertDialogHeader>
+            <div className="h-12 w-12 rounded-2xl bg-rose-50 flex items-center justify-center mb-4">
+              <AlertTriangle className="h-6 w-6 text-rose-500" />
+            </div>
+            <AlertDialogTitle className="text-xl font-bold text-slate-900">Delete this course?</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-500">
+              This will permanently delete <span className="font-bold text-slate-900">"{course.title}"</span> and all its content, modules, student enrollments, and progress data. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-6">
+            <AlertDialogCancel className="rounded-xl font-bold border-slate-100 hover:bg-slate-50" disabled={isDeleting}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteCourse}
+              disabled={isDeleting}
+              className="rounded-xl font-bold bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-200"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete Course"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Header Section */}
@@ -160,7 +242,11 @@ const CourseManagementPage = () => {
               <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
                 {isCreationMode ? "Create New Course" : "Manage Course"}
               </h1>
-              <Badge variant="outline" className="bg-white text-indigo-600 border-indigo-100 font-bold px-3 py-1 rounded-full uppercase text-[10px] tracking-wider">
+              <Badge variant="outline" className={`font-bold px-3 py-1 rounded-full uppercase text-[10px] tracking-wider ${
+                course.is_published 
+                  ? "bg-emerald-50 text-emerald-600 border-emerald-200" 
+                  : "bg-amber-50 text-amber-600 border-amber-200"
+              }`}>
                 {course.is_published ? "Published" : "Draft"}
               </Badge>
             </div>
@@ -176,18 +262,11 @@ const CourseManagementPage = () => {
                 <Button 
                     variant="outline" 
                     className="rounded-xl font-bold border-slate-200 hover:bg-white hover:text-indigo-600 transition-all"
-                    onClick={() => navigate(`/courses/${course.slug}`)}
+                    onClick={() => navigate(`/courses/${course.slug}`, { state: { courseId: course.id } })}
                 >
                   <Eye className="mr-2 h-4 w-4" /> Preview
                 </Button>
             )}
-            <Button 
-                className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-100 rounded-xl px-6 font-bold transition-all hover:-translate-y-0.5"
-                onClick={handleSave}
-                disabled={isSaving}
-            >
-              <Save className="mr-2 h-4 w-4" /> {isSaving ? "Saving..." : isCreationMode ? "Create Course" : "Save Changes"}
-            </Button>
           </div>
         </div>
 
@@ -214,7 +293,7 @@ const CourseManagementPage = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="general" className="mt-0">
+          <TabsContent value="general" className="mt-0 space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <Card className="lg:col-span-2 rounded-3xl border-slate-100 shadow-sm overflow-hidden bg-white/50 backdrop-blur-xl">
                 <CardHeader className="border-b border-slate-50 bg-white/50">
@@ -281,19 +360,51 @@ const CourseManagementPage = () => {
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="price" className="text-sm font-bold text-slate-700">Price (INR)</Label>
-                      <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₹</span>
-                        <Input 
-                            id="price" 
-                            type="number" 
-                            value={course.price} 
-                            onChange={(e) => setCourse({...course, price: parseFloat(e.target.value) || 0})}
-                            className="pl-8 h-12 rounded-xl bg-white border-slate-100 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
-                        />
-                      </div>
+                      <Label htmlFor="duration" className="text-sm font-bold text-slate-700">Duration (Minutes)</Label>
+                      <Input 
+                        id="duration" 
+                        type="number" 
+                        min="0"
+                        value={course.duration_minutes === 0 ? '' : course.duration_minutes} 
+                        onChange={(e) => setCourse({...course, duration_minutes: e.target.value === '' ? 0 : parseInt(e.target.value) || 0})}
+                        className="h-12 rounded-xl bg-white border-slate-100 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                       <Label htmlFor="price" className="text-sm font-bold text-slate-700">Price (INR)</Label>
+                       <div className="relative">
+                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₹</span>
+                         <Input 
+                             id="price" 
+                             type="number" 
+                             min="0"
+                             value={course.price === 0 ? '' : course.price} 
+                             onChange={(e) => setCourse({...course, price: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0})}
+                             className="pl-8 h-12 rounded-xl bg-white border-slate-100 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
+                         />
+                       </div>
                     </div>
                   </div>
+
+                  {/* Publish Toggle in General Tab */}
+                  {!isCreationMode && (
+                    <div className="flex items-center justify-between p-5 rounded-2xl bg-gradient-to-r from-indigo-50/50 to-purple-50/50 border border-indigo-100/50">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-xl bg-indigo-100 flex items-center justify-center">
+                          <Globe className="h-5 w-5 text-indigo-600" />
+                        </div>
+                        <div className="space-y-0.5">
+                          <h4 className="font-bold text-slate-900">Course Visibility</h4>
+                          <p className="text-sm text-slate-500">Make visible on the marketplace</p>
+                        </div>
+                      </div>
+                      <Switch 
+                        checked={course.is_published} 
+                        onCheckedChange={(checked) => setCourse({...course, is_published: checked})}
+                      />
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -319,6 +430,27 @@ const CourseManagementPage = () => {
                   </p>
                 </CardContent>
               </Card>
+            </div>
+
+            {/* Save Button for General Tab */}
+            <div className="flex justify-end">
+              <Button 
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-100 rounded-xl px-8 font-bold transition-all hover:-translate-y-0.5"
+                  onClick={handleSaveGeneral}
+                  disabled={isSaving}
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    {isCreationMode ? "Create Course" : "Save Changes"}
+                  </>
+                )}
+              </Button>
             </div>
           </TabsContent>
 
@@ -425,7 +557,13 @@ const CourseManagementPage = () => {
                     <h4 className="font-bold text-slate-900">Delete this course</h4>
                     <p className="text-sm text-slate-500 font-medium">All content, student progress, and data will be permanently removed.</p>
                   </div>
-                  <Button variant="destructive" className="rounded-xl font-bold shadow-lg shadow-rose-200 min-w-[140px]">
+                  <Button 
+                    variant="destructive" 
+                    className="rounded-xl font-bold shadow-lg shadow-rose-200 min-w-[140px]"
+                    onClick={() => setShowDeleteDialog(true)}
+                    disabled={isCreationMode}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
                     Delete Course
                   </Button>
                 </div>

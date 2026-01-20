@@ -227,12 +227,70 @@ class CoursesService {
    */
   async getDomains(): Promise<{ id: string; name: string; slug: string }[]> {
     try {
-      const url = `${this.baseUrl}/api/domains`; // Assuming this exists or will exist
+      const url = `${this.baseUrl}/api/domains`;
       const response = await callPublicApi(url);
-      return response.data || [];
+      // Handle both { data: [...] } and directly [...]
+      return Array.isArray(response) ? response : response.data || [];
     } catch (error) {
       console.error('Error fetching domains:', error);
       return [];
+    }
+  }
+
+  /**
+   * Create a new domain
+   */
+  async createDomain(data: { name: string; description?: string }): Promise<any> {
+    try {
+      const url = `${this.baseUrl}/api/domains`;
+      const response = await callBackend(url, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      return response;
+    } catch (error) {
+      console.error('Error creating domain:', error);
+      throw new Error('Failed to create domain');
+    }
+  }
+
+  /**
+   * Update an existing course
+   */
+  async updateCourse(courseId: string, data: {
+    title?: string;
+    description?: string;
+    difficulty?: string;
+    price?: number;
+    is_published?: boolean;
+    domainId?: string;
+  }): Promise<any> {
+    try {
+      const url = `${this.baseUrl}/api/instructor/courses/${courseId}`;
+      const response = await callBackend(url, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+      return response;
+    } catch (error) {
+      console.error('Error updating course:', error);
+      throw new Error('Failed to update course');
+    }
+  }
+
+  /**
+   * Delete a course
+   */
+  async deleteCourse(courseId: string): Promise<{ message: string }> {
+    try {
+      const url = `${this.baseUrl}/api/instructor/courses/${courseId}`;
+      const response = await callBackend(url, {
+        method: 'DELETE',
+      });
+      return response;
+    } catch (error) {
+      console.error('Error deleting course:', error);
+      throw new Error('Failed to delete course');
     }
   }
 

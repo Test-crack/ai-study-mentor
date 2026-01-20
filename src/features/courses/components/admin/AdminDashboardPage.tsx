@@ -45,8 +45,8 @@ const AdminDashboardPage = () => {
     navigate(`/courses/admin/manage/${id}`);
   };
 
-  const handleView = (idOrSlug: string) => {
-    navigate(`/courses/${idOrSlug}`);
+  const handleView = (slug: string, id: string) => {
+    navigate(`/courses/${slug}`, { state: { courseId: id } });
   };
 
   const handleDelete = (id: string) => {
@@ -175,12 +175,12 @@ const AdminDashboardPage = () => {
                         status: course.is_published ? 'published' : 'draft',
                         students: course._count?.UserCourseEnrollment || 0,
                         rating: 4.8, // Mocked as not in schema for now
-                        duration: `${course.duration_minutes || 0}`,
+                        duration: course.duration_minutes || 0,
                         lastUpdated: new Date(course.created_at).toLocaleDateString(),
                         thumbnail: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60" // Mocked
                     }}
                     onEdit={handleEdit}
-                    onView={(id) => handleView(course.slug)}
+                    onView={() => handleView(course.slug, course.id)}
                     onDelete={handleDelete}
                   />
                 </div>

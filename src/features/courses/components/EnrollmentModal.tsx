@@ -11,7 +11,7 @@ import { Separator } from '@/shared/components/ui/separator';
 import { CheckCircle, Loader2, CreditCard, Shield } from 'lucide-react';
 import { CourseDetail } from '../types';
 import { coursesService } from '../services/coursesService';
-import { useToast } from '@/shared/hooks/use-toast';
+import { toast } from '@/shared/hooks/use-toast';
 
 interface EnrollmentModalProps {
   course: CourseDetail;
@@ -27,7 +27,6 @@ export function EnrollmentModal({
   onEnrollmentSuccess,
 }: EnrollmentModalProps) {
   const [enrolling, setEnrolling] = useState(false);
-  const { toast } = useToast();
 
   const formatPrice = (price: number | null) => {
     if (!price || price === 0) return 'Free';
@@ -40,7 +39,7 @@ export function EnrollmentModal({
       // userId is extracted from JWT token in backend middleware
       await coursesService.enrollInCourse(course.id);
 
-      toast({
+      toast.success({
         title: 'Successfully enrolled!',
         description: `You are now enrolled in "${course.title}"`,
       });
@@ -49,11 +48,10 @@ export function EnrollmentModal({
       onClose();
     } catch (error) {
       console.error('Enrollment failed:', error);
-      toast({
+      toast.error({
         title: 'Enrollment failed',
         description:
           error instanceof Error ? error.message : 'Please try again later.',
-        variant: 'destructive',
       });
     } finally {
       setEnrolling(false);

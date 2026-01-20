@@ -5,14 +5,17 @@ import type {
   ToastProps,
 } from "@/shared/components/ui/toast"
 
-const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_LIMIT = 3
+const TOAST_REMOVE_DELAY = 5000
+
+type ToastVariant = "default" | "success" | "destructive" | "warning" | "info"
 
 type ToasterToast = ToastProps & {
   id: string
   title?: React.ReactNode
   description?: React.ReactNode
   action?: ToastActionElement
+  variant?: ToastVariant
 }
 
 const actionTypes = {
@@ -33,21 +36,21 @@ type ActionType = typeof actionTypes
 
 type Action =
   | {
-      type: ActionType["ADD_TOAST"]
-      toast: ToasterToast
-    }
+    type: ActionType["ADD_TOAST"]
+    toast: ToasterToast
+  }
   | {
-      type: ActionType["UPDATE_TOAST"]
-      toast: Partial<ToasterToast>
-    }
+    type: ActionType["UPDATE_TOAST"]
+    toast: Partial<ToasterToast>
+  }
   | {
-      type: ActionType["DISMISS_TOAST"]
-      toastId?: ToasterToast["id"]
-    }
+    type: ActionType["DISMISS_TOAST"]
+    toastId?: ToasterToast["id"]
+  }
   | {
-      type: ActionType["REMOVE_TOAST"]
-      toastId?: ToasterToast["id"]
-    }
+    type: ActionType["REMOVE_TOAST"]
+    toastId?: ToasterToast["id"]
+  }
 
 interface State {
   toasts: ToasterToast[]
@@ -105,9 +108,9 @@ export const reducer = (state: State, action: Action): State => {
         toasts: state.toasts.map((t) =>
           t.id === toastId || toastId === undefined
             ? {
-                ...t,
-                open: false,
-              }
+              ...t,
+              open: false,
+            }
             : t
         ),
       }
@@ -167,6 +170,19 @@ function toast({ ...props }: Toast) {
     update,
   }
 }
+
+// Convenience methods for different toast types
+toast.success = (props: Omit<Toast, "variant">) =>
+  toast({ ...props, variant: "success" })
+
+toast.error = (props: Omit<Toast, "variant">) =>
+  toast({ ...props, variant: "destructive" })
+
+toast.warning = (props: Omit<Toast, "variant">) =>
+  toast({ ...props, variant: "warning" })
+
+toast.info = (props: Omit<Toast, "variant">) =>
+  toast({ ...props, variant: "info" })
 
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)

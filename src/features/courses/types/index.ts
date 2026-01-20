@@ -109,6 +109,7 @@ export interface CreateCourseRequest {
   domainId: string;
   difficulty?: DifficultyType;
   price?: number;
+  duration_minutes?: number;
 }
 
 export interface CourseDetailResponse {
