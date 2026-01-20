@@ -6,7 +6,8 @@ import {
   Eye, 
   Edit3, 
   Trash2,
-  Calendar
+  Calendar,
+  AlertTriangle
 } from "lucide-react";
 import { 
   DropdownMenu, 
@@ -14,12 +15,25 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/shared/components/ui/dropdown-menu";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/shared/components/ui/alert-dialog";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 export interface AdminCourse {
   id: string;
   title: string;
+  slug: string;
   description: string;
   students: number;
   rating: number;
@@ -38,8 +52,34 @@ interface AdminCourseCardProps {
 }
 
 export const AdminCourseCard = ({ course, onEdit, onView, onDelete }: AdminCourseCardProps) => {
+  const navigate = useNavigate();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
   return (
     <div className="group bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 overflow-hidden flex flex-col h-full border-b-4 border-b-transparent hover:border-b-indigo-500">
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent className="rounded-3xl border-slate-100 shadow-2xl">
+          <AlertDialogHeader>
+            <div className="h-12 w-12 rounded-2xl bg-rose-50 flex items-center justify-center mb-4">
+              <AlertTriangle className="h-6 w-6 text-rose-500" />
+            </div>
+            <AlertDialogTitle className="text-xl font-bold text-slate-900">Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-500">
+              This will permanently delete the course <span className="font-bold text-slate-900">"{course.title}"</span> and remove it from our servers. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-6">
+            <AlertDialogCancel className="rounded-xl font-bold border-slate-100 hover:bg-slate-50">Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => onDelete(course.id)}
+              className="rounded-xl font-bold bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-200"
+            >
+              Delete Course
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       {/* Thumbnail Container */}
       <div className="relative aspect-video overflow-hidden">
         <img 
@@ -69,15 +109,15 @@ export const AdminCourseCard = ({ course, onEdit, onView, onDelete }: AdminCours
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl shadow-2xl border-slate-100">
-              <DropdownMenuItem onClick={() => onView(course.id)} className="rounded-xl px-3 py-2.5 focus:bg-indigo-50 focus:text-indigo-600 font-medium transition-colors">
+              <DropdownMenuItem onClick={() => navigate(`/courses/${course.slug}`)} className="rounded-xl px-3 py-2.5 focus:bg-indigo-50 focus:text-indigo-600 font-medium transition-colors">
                 <Eye className="mr-2 h-4 w-4" /> Preview
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onEdit(course.id)} className="rounded-xl px-3 py-2.5 focus:bg-indigo-50 focus:text-indigo-600 font-medium transition-colors">
-                <Edit3 className="mr-2 h-4 w-4" /> Edit Course
+              <DropdownMenuItem onClick={() => navigate(`/courses/admin/manage/${course.id}`)} className="rounded-xl px-3 py-2.5 focus:bg-indigo-50 focus:text-indigo-600 font-medium transition-colors">
+                <Edit3 className="mr-2 h-4 w-4" /> Manage Course
               </DropdownMenuItem>
               <div className="h-px bg-slate-100 my-1 mx-1" />
               <DropdownMenuItem 
-                onClick={() => onDelete(course.id)} 
+                onClick={() => setShowDeleteDialog(true)} 
                 className="rounded-xl px-3 py-2.5 focus:bg-rose-50 focus:text-rose-600 font-medium transition-colors text-rose-500"
               >
                 <Trash2 className="mr-2 h-4 w-4" /> Delete Course
@@ -108,7 +148,7 @@ export const AdminCourseCard = ({ course, onEdit, onView, onDelete }: AdminCours
           </div>
           <div className="flex items-center space-x-2 text-slate-400">
             <Clock className="h-4 w-4 text-blue-400" />
-            <span className="text-xs font-bold text-slate-600">{course.duration}</span>
+            <span className="text-xs font-bold text-slate-600">{course.duration} minutes</span>
           </div>
           <div className="flex items-center space-x-2 text-slate-400">
             <Calendar className="h-4 w-4 text-purple-400" />
@@ -121,13 +161,13 @@ export const AdminCourseCard = ({ course, onEdit, onView, onDelete }: AdminCours
       <div className="px-6 pb-6 mt-auto">
         <div className="flex items-center justify-between">
             <div className="text-2xl font-bold text-slate-900">
-                ${course.price}
+                ₹{course.price}
             </div>
             <Button 
                 variant="ghost" 
                 size="sm" 
                 className="text-indigo-600 font-bold hover:bg-indigo-50 hover:text-indigo-700 rounded-xl px-4"
-                onClick={() => onEdit(course.id)}
+                onClick={() => navigate(`/courses/admin/manage/${course.id}`)}
             >
                 Management →
             </Button>

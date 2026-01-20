@@ -84,6 +84,33 @@ export interface CoursesResponse {
   };
 }
 
+export interface InstructorCoursesResponse {
+  data: Course[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export interface InstructorCoursesFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+  is_published?: boolean;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface CreateCourseRequest {
+  title: string;
+  description?: string;
+  domainId: string;
+  difficulty?: DifficultyType;
+  price?: number;
+}
+
 export interface CourseDetailResponse {
   data: CourseDetail;
 }

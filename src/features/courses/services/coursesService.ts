@@ -3,6 +3,9 @@ import {
   CoursesFilters,
   CourseDetailResponse,
   ModuleContentResponse,
+  InstructorCoursesResponse,
+  InstructorCoursesFilters,
+  CreateCourseRequest,
 } from '../types';
 import { callBackend } from '@/features/auth/services/authClient';
 import { getBackendUrl } from '@/shared/utils';
@@ -171,6 +174,65 @@ class CoursesService {
     } catch (error) {
       console.error('Error fetching course:', error);
       throw new Error('Failed to fetch course details');
+    }
+  }
+
+  // ==========================================================================
+  // Instructor APIs
+  // ==========================================================================
+
+  /**
+   * Get courses for the current instructor
+   */
+  async getInstructorCourses(filters?: InstructorCoursesFilters): Promise<InstructorCoursesResponse> {
+    try {
+      const params = new URLSearchParams();
+      if (filters?.page) params.append('page', filters.page.toString());
+      if (filters?.limit) params.append('limit', filters.limit.toString());
+      if (filters?.search) params.append('search', filters.search);
+      if (filters?.is_published !== undefined) params.append('is_published', filters.is_published.toString());
+      if (filters?.sortBy) params.append('sortBy', filters.sortBy);
+      if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder);
+
+      const queryString = params.toString();
+      const url = `${this.baseUrl}/api/instructor/courses${queryString ? `?${queryString}` : ''}`;
+
+      const response = await callBackend(url, { method: 'GET' });
+      return response;
+    } catch (error) {
+      console.error('Error fetching instructor courses:', error);
+      throw new Error('Failed to fetch instructor courses');
+    }
+  }
+
+  /**
+   * Create a new course
+   */
+  async createCourse(data: CreateCourseRequest): Promise<any> {
+    try {
+      const url = `${this.baseUrl}/api/instructor/courses`;
+      const response = await callBackend(url, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      return response;
+    } catch (error) {
+      console.error('Error creating course:', error);
+      throw new Error('Failed to create course');
+    }
+  }
+
+  /**
+   * Get all domains for course creation
+   */
+  async getDomains(): Promise<{ id: string; name: string; slug: string }[]> {
+    try {
+      const url = `${this.baseUrl}/api/domains`; // Assuming this exists or will exist
+      const response = await callPublicApi(url);
+      return response.data || [];
+    } catch (error) {
+      console.error('Error fetching domains:', error);
+      return [];
     }
   }
 

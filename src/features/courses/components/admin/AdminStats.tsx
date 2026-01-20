@@ -59,7 +59,7 @@ export const AdminStats = () => {
     },
     {
       title: "Total Revenue",
-      value: "$45,231",
+      value: "₹45,231",
       icon: DollarSign,
       trend: "+8.2%",
       trendUp: true,

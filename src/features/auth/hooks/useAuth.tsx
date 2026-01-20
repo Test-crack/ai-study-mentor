@@ -105,21 +105,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return;
         }
 
-        const verifiedUser = session?.user?.email_confirmed_at ? session.user : null;
-        setSession(session);
-        setUser(verifiedUser);
-        
-        if (verifiedUser) {
-          // If it's a new sign in or update, force a fresh profile fetch
-          fetchProfile(event === 'SIGNED_IN' || event === 'USER_UPDATED');
-        } else {
-          setProfile(null);
-          localStorage.removeItem(PROFILE_CACHE_KEY);
-        }
-        
-        setLoading(false);
-      }
-    );
+    const verifiedUser = session?.user?.email_confirmed_at ? session.user : null;
+    setSession(session);
+    setUser(verifiedUser);
+    
+    if (verifiedUser) {
+      // If it's a new sign in or profile is missing, force a refresh
+      const shouldForceRefresh = event === 'SIGNED_IN' || event === 'USER_UPDATED' || !profileRef.current;
+      fetchProfile(shouldForceRefresh);
+    } else {
+      setProfile(null);
+      localStorage.removeItem(PROFILE_CACHE_KEY);
+    }
+    
+    setLoading(false);
+  });
 
     return () => subscription.unsubscribe();
   }, [fetchProfile]);

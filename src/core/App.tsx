@@ -20,6 +20,7 @@ import CoursesPage from "@/features/courses/components/CoursesPage";
 import CourseDetailPage from "@/features/courses/components/CourseDetailPage";
 import LearningPage from "@/features/courses/components/learning/LearningPage";
 import AdminDashboardPage from "@/features/courses/components/admin/AdminDashboardPage";
+import CourseManagementPage from "@/features/courses/components/admin/CourseManagementPage";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,14 @@ const AppRoutes = () => {
         element={
           <RoleProtectedRoute allowedRoles={["INSTRUCTOR", "ADMIN"]}>
             <AdminDashboardPage />
+          </RoleProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/courses/admin/manage/:id" 
+        element={
+          <RoleProtectedRoute allowedRoles={["INSTRUCTOR", "ADMIN"]}>
+            <CourseManagementPage />
           </RoleProtectedRoute>
         } 
       />

@@ -14,9 +14,10 @@ export const RoleProtectedRoute = ({
   const { user, profile, loading, profileLoading } = useAuth();
   const location = useLocation();
 
-  // Always wait for basic auth state. 
-  // Only wait for profile if specific roles are required for this route.
-  if (loading || (allowedRoles && profileLoading)) {
+  // Only wait for profile if specific roles are required and we don't have a profile yet.
+  const profileIsRequiredButMissing = allowedRoles && !profile && profileLoading;
+
+  if (loading || profileIsRequiredButMissing) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="flex flex-col items-center gap-4">
