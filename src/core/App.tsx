@@ -23,19 +23,10 @@ import AdminDashboardPage from "@/features/courses/components/admin/AdminDashboa
 
 const queryClient = new QueryClient();
 
-const AppRoutes = () => {
-  const { user, loading } = useAuth();
+import { RoleProtectedRoute } from "@/shared/components/auth/ProtectedRoute";
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-          <p className="text-muted-foreground">Loading your learning dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+const AppRoutes = () => {
+  const { user } = useAuth();
 
   return (
     <Routes>
@@ -48,28 +39,24 @@ const AppRoutes = () => {
       <Route path="/courses/:slug" element={<CourseDetailPage />} />
       
       {/* Protected routes - require authentication */}
-      {user ? (
-        <>
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/learn/:slug" element={<LearningPage />} />
-          <Route path="/notes" element={<NotesPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/assessment" element={<ReadingAssessmentPage />} />
-          <Route path="/assessment/legacy" element={<SpeedAssessmentPage />} />
-          <Route path="/payment/success" element={<PaymentSuccess />} />
-          <Route path="/courses/admin/dashboard" element={<AdminDashboardPage />} />
-        </>
-      ) : (
-        <>
-          {/* Redirect unauthenticated users to auth page for protected routes */}
-          <Route path="/dashboard" element={<Navigate to="/auth" replace />} />
-          <Route path="/learn/:slug" element={<Navigate to="/auth" replace />} />
-          <Route path="/notes" element={<Navigate to="/auth" replace />} />
-          <Route path="/profile" element={<Navigate to="/auth" replace />} />
-          <Route path="/assessment" element={<Navigate to="/auth" replace />} />
-          <Route path="/courses/admin/dashboard" element={<Navigate to="/auth" replace />} />
-        </>
-      )}
+      <Route path="/dashboard" element={<RoleProtectedRoute><DashboardPage /></RoleProtectedRoute>} />
+      <Route path="/learn/:slug" element={<RoleProtectedRoute><LearningPage /></RoleProtectedRoute>} />
+      <Route path="/notes" element={<RoleProtectedRoute><NotesPage /></RoleProtectedRoute>} />
+      <Route path="/profile" element={<RoleProtectedRoute><ProfilePage /></RoleProtectedRoute>} />
+      <Route path="/assessment" element={<RoleProtectedRoute><ReadingAssessmentPage /></RoleProtectedRoute>} />
+      <Route path="/assessment/legacy" element={<RoleProtectedRoute><SpeedAssessmentPage /></RoleProtectedRoute>} />
+      <Route path="/payment/success" element={<RoleProtectedRoute><PaymentSuccess /></RoleProtectedRoute>} />
+      
+      {/* Instructor/Admin only routes */}
+      <Route 
+        path="/courses/admin/dashboard" 
+        element={
+          <RoleProtectedRoute allowedRoles={["INSTRUCTOR", "ADMIN"]}>
+            <AdminDashboardPage />
+          </RoleProtectedRoute>
+        } 
+      />
+
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
