@@ -14,7 +14,8 @@ import {
   AlertCircle,
   AlertTriangle,
   Loader2,
-  Globe
+  Globe,
+  Pencil
 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -44,7 +45,8 @@ import {
 } from "@/shared/components/ui/alert-dialog";
 import { coursesService } from "../../services/coursesService";
 import { toast } from "@/shared/hooks/use-toast";
-import { DifficultyType } from "../../types";
+import { DifficultyType, CourseModuleData, CreateModuleRequest, UpdateModuleRequest } from "../../types";
+import { ModuleDialog } from "./ModuleDialog";
 
 const CourseManagementPage = () => {
   const { id } = useParams();
@@ -57,6 +59,13 @@ const CourseManagementPage = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [domains, setDomains] = useState<{ id: string; name: string }[]>([]);
 
+  // Module Management State
+  const [modules, setModules] = useState<CourseModuleData[]>([]);
+  const [isModuleDialogOpen, setIsModuleDialogOpen] = useState(false);
+  const [selectedModule, setSelectedModule] = useState<CourseModuleData | null>(null);
+  const [isModuleLoading, setIsModuleLoading] = useState(false);
+  const [moduleToDelete, setModuleToDelete] = useState<CourseModuleData | null>(null);
+
   const [course, setCourse] = useState({
     id: isCreationMode ? "" : id,
     title: "",
@@ -68,8 +77,18 @@ const CourseManagementPage = () => {
     is_published: false,
     duration_minutes: 0,
     thumbnail: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60",
-    modules: [] as any[]
   });
+
+  const fetchModules = async () => {
+    if (isCreationMode || !id) return;
+    try {
+      const res = await coursesService.getCourseModules(id);
+      setModules(res.data);
+    } catch (err) {
+      console.error("Failed to fetch modules", err);
+      toast.error({ title: "Error", description: "Failed to load modules" });
+    }
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -91,8 +110,9 @@ const CourseManagementPage = () => {
               is_published: res.data.is_published || false,
               duration_minutes: res.data.duration_minutes || 0,
               thumbnail: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60",
-              modules: res.data.modules || []
             });
+            // Initial modules load
+            fetchModules();
           }
         }
       } catch (err) {
@@ -178,6 +198,64 @@ const CourseManagementPage = () => {
     }
   };
 
+  // Module Handlers
+  const handleAddModule = () => {
+    setSelectedModule(null);
+    setIsModuleDialogOpen(true);
+  };
+
+  const handleEditModule = (module: CourseModuleData) => {
+    setSelectedModule(module);
+    setIsModuleDialogOpen(true);
+  };
+
+  const handleModuleSubmit = async (data: CreateModuleRequest | UpdateModuleRequest) => {
+    if (!id) return;
+    
+    setIsModuleLoading(true);
+    try {
+      if (selectedModule) {
+        // Update existing module
+        await coursesService.updateCourseModule(id, selectedModule.id, data as UpdateModuleRequest);
+        toast.success({ title: "Success", description: "Module updated successfully" });
+      } else {
+        // Create new module
+        await coursesService.addCourseModule(id, data as CreateModuleRequest);
+        toast.success({ title: "Success", description: "Module created successfully" });
+      }
+      setIsModuleDialogOpen(false);
+      fetchModules(); // Refresh list
+    } catch (error) {
+      console.error("Module save error:", error);
+      toast.error({ 
+        title: "Error", 
+        description: selectedModule ? "Failed to update module" : "Failed to create module" 
+      });
+    } finally {
+      setIsModuleLoading(false);
+    }
+  };
+
+  const handleDeleteModule = async () => {
+    if (!id || !moduleToDelete) return;
+
+    setIsModuleLoading(true);
+    try {
+      // By default, we'll just unlink from course (deleteModule=false), 
+      // but if you want to hard delete content, you can pass true or ask user.
+      // For now, let's just use the API default which unlinks.
+      await coursesService.deleteCourseModule(id, moduleToDelete.id, true); 
+      toast.success({ title: "Deleted", description: "Module removed successfully" });
+      setModuleToDelete(null);
+      fetchModules();
+    } catch (error) {
+      console.error("Module delete error:", error);
+      toast.error({ title: "Error", description: "Failed to delete module" });
+    } finally {
+      setIsModuleLoading(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
@@ -193,7 +271,15 @@ const CourseManagementPage = () => {
     <div className="min-h-screen bg-[#f8fafc]">
       <AdminNavbar />
 
-      {/* Delete Confirmation Dialog */}
+      <ModuleDialog 
+        open={isModuleDialogOpen}
+        onOpenChange={setIsModuleDialogOpen}
+        onSubmit={handleModuleSubmit}
+        module={selectedModule}
+        isLoading={isModuleLoading}
+      />
+
+      {/* Delete Course Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent className="rounded-3xl border-slate-100 shadow-2xl">
           <AlertDialogHeader>
@@ -221,6 +307,40 @@ const CourseManagementPage = () => {
                 </>
               ) : (
                 "Delete Course"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Module Confirmation Dialog */}
+      <AlertDialog open={!!moduleToDelete} onOpenChange={(open) => !open && setModuleToDelete(null)}>
+        <AlertDialogContent className="rounded-3xl border-slate-100 shadow-2xl">
+          <AlertDialogHeader>
+            <div className="h-12 w-12 rounded-2xl bg-rose-50 flex items-center justify-center mb-4">
+              <Trash2 className="h-6 w-6 text-rose-500" />
+            </div>
+            <AlertDialogTitle className="text-xl font-bold text-slate-900">Delete Module?</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-500">
+              Are you sure you want to delete <span className="font-bold text-slate-900">"{moduleToDelete?.title}"</span>? This will remove it from the course curriculum.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-6">
+            <AlertDialogCancel className="rounded-xl font-bold border-slate-100 hover:bg-slate-50" disabled={isModuleLoading}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteModule}
+              disabled={isModuleLoading}
+              className="rounded-xl font-bold bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-200"
+            >
+              {isModuleLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete Module"
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -282,12 +402,14 @@ const CourseManagementPage = () => {
             <TabsTrigger 
               value="curriculum" 
               className="rounded-xl px-6 font-bold data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-md transition-all h-full"
+              disabled={isCreationMode}
             >
               <BookOpen className="mr-2 h-4 w-4" /> Curriculum
             </TabsTrigger>
             <TabsTrigger 
               value="settings" 
               className="rounded-xl px-6 font-bold data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-md transition-all h-full"
+              disabled={isCreationMode}
             >
               <Settings className="mr-2 h-4 w-4" /> Advanced Settings
             </TabsTrigger>
@@ -461,28 +583,50 @@ const CourseManagementPage = () => {
                     <CardTitle className="text-xl font-bold">Course Structure</CardTitle>
                     <CardDescription>Manage your course modules and content.</CardDescription>
                   </div>
-                  <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md rounded-xl font-bold">
+                  <Button 
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md rounded-xl font-bold"
+                    onClick={handleAddModule}
+                  >
                     <Plus className="mr-2 h-4 w-4" /> Add Module
                   </Button>
                 </CardHeader>
                 <CardContent className="p-8 space-y-4">
-                  {course.modules.length > 0 ? (
+                  {modules.length > 0 ? (
                     <div className="space-y-4">
-                      {course.modules.map((module) => (
+                      {modules.map((module) => (
                         <div 
                           key={module.id} 
                           className="flex items-center gap-4 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group"
                         >
                           <GripVertical className="h-5 w-5 text-slate-300 cursor-grab active:cursor-grabbing hover:text-indigo-400 transition-colors" />
                           <div className="flex-grow">
-                            <h4 className="font-bold text-slate-800">Module {module.order}: {module.title}</h4>
-                            <p className="text-xs text-slate-400 font-medium">3 lessons • 45 minutes</p>
+                            <h4 className="font-bold text-slate-800">
+                                {module.order_index !== -1 ? `Module ${module.order_index}: ` : ''}{module.title}
+                            </h4>
+                            <div className="flex items-center gap-3 mt-1">
+                                <Badge variant="secondary" className="bg-slate-50 text-slate-500 hover:bg-slate-100 border-none">
+                                    {module.domain || "No domain"}
+                                </Badge>
+                                <span className="text-xs text-slate-400 font-medium">
+                                    {module.conceptCount || 0} lessons
+                                </span>
+                            </div>
                           </div>
                           <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl">
-                              <ExternalLink className="h-4 w-4" />
+                            <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-10 w-10 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl"
+                                onClick={() => handleEditModule(module)}
+                            >
+                              <Pencil className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl">
+                            <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-10 w-10 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl"
+                                onClick={() => setModuleToDelete(module)}
+                            >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -498,7 +642,11 @@ const CourseManagementPage = () => {
                          <h3 className="text-lg font-bold text-slate-800">No modules yet</h3>
                          <p className="text-slate-500 font-medium mt-1">Start building your course curriculum by adding your first module.</p>
                        </div>
-                       <Button variant="outline" className="rounded-xl border-slate-200 font-bold hover:text-indigo-600 group">
+                       <Button 
+                        variant="outline" 
+                        className="rounded-xl border-slate-200 font-bold hover:text-indigo-600 group"
+                        onClick={handleAddModule}
+                       >
                          <Plus className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" /> Create First Module
                        </Button>
                     </div>

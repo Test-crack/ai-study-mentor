@@ -143,4 +143,46 @@ export interface UserCourseEnrollment {
   enrolled_at: string | null;
 }
 
+// Module Management Types
+export interface CourseModuleData {
+  id: string;
+  title: string;
+  description: string | null;
+  domain: string | null;
+  order_index: number;
+  courseModuleId: string;
+  conceptCount: number;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface ModuleListResponse {
+  data: CourseModuleData[];
+  meta: { total: number };
+}
+
+export interface ModuleResponse {
+  message: string;
+  data: CourseModuleData;
+}
+
+export interface CreateModuleRequest {
+  title: string;
+  description?: string;
+  domain?: string;
+  order_index?: number;
+}
+
+export interface UpdateModuleRequest {
+  title?: string;
+  description?: string;
+  domain?: string;
+  order_index?: number;
+}
+
+export interface DeleteModuleResponse {
+  message: string;
+  moduleDeleted: boolean;
+}
+
 export * from './learning';

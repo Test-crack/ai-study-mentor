@@ -6,6 +6,11 @@ import {
   InstructorCoursesResponse,
   InstructorCoursesFilters,
   CreateCourseRequest,
+  ModuleListResponse,
+  ModuleResponse,
+  CreateModuleRequest,
+  UpdateModuleRequest,
+  DeleteModuleResponse,
 } from '../types';
 import { callBackend } from '@/features/auth/services/authClient';
 import { getBackendUrl } from '@/shared/utils';
@@ -291,6 +296,83 @@ class CoursesService {
     } catch (error) {
       console.error('Error deleting course:', error);
       throw new Error('Failed to delete course');
+    }
+  }
+
+  // ==========================================================================
+  // Module Management APIs
+  // ==========================================================================
+
+  /**
+   * Get all modules for a course
+   */
+  async getCourseModules(courseId: string): Promise<ModuleListResponse> {
+    try {
+      const url = `${this.baseUrl}/api/instructor/courses/${courseId}/modules`;
+      const response = await callBackend(url, { method: 'GET' });
+      return response;
+    } catch (error) {
+      console.error('Error fetching course modules:', error);
+      throw new Error('Failed to fetch modules');
+    }
+  }
+
+  /**
+   * Add a new module to a course
+   */
+  async addCourseModule(courseId: string, data: CreateModuleRequest): Promise<ModuleResponse> {
+    try {
+      const url = `${this.baseUrl}/api/instructor/courses/${courseId}/modules`;
+      const response = await callBackend(url, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      return response;
+    } catch (error) {
+      console.error('Error adding module:', error);
+      throw new Error('Failed to add module');
+    }
+  }
+
+  /**
+   * Update a module in a course
+   */
+  async updateCourseModule(
+    courseId: string,
+    moduleId: string,
+    data: UpdateModuleRequest
+  ): Promise<ModuleResponse> {
+    try {
+      const url = `${this.baseUrl}/api/instructor/courses/${courseId}/modules/${moduleId}`;
+      const response = await callBackend(url, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+      return response;
+    } catch (error) {
+      console.error('Error updating module:', error);
+      throw new Error('Failed to update module');
+    }
+  }
+
+  /**
+   * Delete a module from a course
+   * @param deleteModule - If true, also delete the module if not linked to other courses
+   */
+  async deleteCourseModule(
+    courseId: string,
+    moduleId: string,
+    deleteModule: boolean = false
+  ): Promise<DeleteModuleResponse> {
+    try {
+      const url = `${this.baseUrl}/api/instructor/courses/${courseId}/modules/${moduleId}${deleteModule ? '?deleteModule=true' : ''}`;
+      const response = await callBackend(url, {
+        method: 'DELETE',
+      });
+      return response;
+    } catch (error) {
+      console.error('Error deleting module:', error);
+      throw new Error('Failed to delete module');
     }
   }
 
