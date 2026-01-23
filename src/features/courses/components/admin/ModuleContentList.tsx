@@ -4,7 +4,8 @@ import {
   MoreVertical, 
   Pencil, 
   Trash2, 
-  GripVertical 
+  GripVertical,
+  Eye
 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
@@ -20,13 +21,15 @@ interface ModuleContentListProps {
   contentItems: ContentItem[];
   onEdit: (item: ContentItem) => void;
   onDelete: (item: ContentItem) => void;
+  onPreview: (item: ContentItem) => void;
   isLoading?: boolean;
 }
 
 export const ModuleContentList = ({ 
   contentItems, 
   onEdit, 
-  onDelete, 
+  onDelete,
+  onPreview,
   isLoading = false 
 }: ModuleContentListProps) => {
   
@@ -81,6 +84,14 @@ export const ModuleContentList = ({
           </div>
 
           <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"
+                onClick={() => onPreview(item)}
+            >
+                <Eye className="h-3.5 w-3.5" />
+            </Button>
             <Button 
                 variant="ghost" 
                 size="icon" 

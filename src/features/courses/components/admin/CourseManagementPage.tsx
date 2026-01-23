@@ -49,6 +49,7 @@ import { DifficultyType, CourseModuleData, CreateModuleRequest, UpdateModuleRequ
 import { ModuleDialog } from "./ModuleDialog";
 import { ModuleContentList } from "./ModuleContentList";
 import { ContentDialog } from "./ContentDialog";
+import { ContentPreviewDialog } from "./ContentPreviewDialog";
 
 const CourseManagementPage = () => {
   const { id } = useParams();
@@ -71,6 +72,7 @@ const CourseManagementPage = () => {
   // Content Management State
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [isContentDialogOpen, setIsContentDialogOpen] = useState(false);
+  const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
   const [selectedContent, setSelectedContent] = useState<any | null>(null); // Type: ContentItem
   const [loadingModulesContent, setLoadingModulesContent] = useState<Set<string>>(new Set());
   const [moduleContentMap, setModuleContentMap] = useState<Record<string, any[]>>({}); // Map moduleId -> ContentItem[]
@@ -302,6 +304,11 @@ const CourseManagementPage = () => {
     setIsContentDialogOpen(true);
   };
 
+  const handlePreviewContent = (item: any) => {
+    setSelectedContent(item);
+    setIsPreviewDialogOpen(true);
+  };
+
   const handleEditContent = (moduleId: string, item: any) => {
     setActiveModuleId(moduleId);
     setSelectedContent(item);
@@ -313,8 +320,12 @@ const CourseManagementPage = () => {
 
     setIsContentSaving(true);
     try {
-      if (selectedContent) {
-        // Update
+      if (selectedContent && !isPreviewDialogOpen) {
+        // Update (ensure we are not in preview mode if reusing selectedContent, 
+        // though handlePreviewContent sets isPreviewDialogOpen)
+        // Actually selectedContent is shared. 
+        // If isPreviewDialogOpen is true, we probably shouldn't be here, but just in case.
+        
         await coursesService.updateModuleContent(
           id, 
           activeModuleId, 
@@ -337,7 +348,7 @@ const CourseManagementPage = () => {
       console.error("Content save error:", error);
       toast.error({ 
         title: "Error", 
-        description: selectedContent ? "Failed to update content" : "Failed to add content" 
+        description: "Failed to save content" 
       });
     } finally {
       setIsContentSaving(false);
@@ -462,6 +473,12 @@ const CourseManagementPage = () => {
         onSubmit={handleContentSubmit}
         content={selectedContent}
         isLoading={isContentSaving}
+      />
+
+      <ContentPreviewDialog
+        open={isPreviewDialogOpen}
+        onOpenChange={setIsPreviewDialogOpen}
+        content={selectedContent}
       />
 
       {/* Delete Content Confirmation Dialog */}
@@ -797,6 +814,7 @@ const CourseManagementPage = () => {
                                contentItems={moduleContentMap[module.id] || []}
                                onEdit={(item) => handleEditContent(module.id, item)}
                                onDelete={(item) => handleDeleteContent(module.id, item)}
+                               onPreview={handlePreviewContent}
                                isLoading={loadingModulesContent.has(module.id)}
                              />
                            </div>
