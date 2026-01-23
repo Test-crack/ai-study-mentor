@@ -11,6 +11,9 @@ import {
   CreateModuleRequest,
   UpdateModuleRequest,
   DeleteModuleResponse,
+  CreateContentRequest,
+  UpdateContentRequest,
+  ContentResponse
 } from '../types';
 import { callBackend } from '@/features/auth/services/authClient';
 import { getBackendUrl } from '@/shared/utils';
@@ -373,6 +376,87 @@ class CoursesService {
     } catch (error) {
       console.error('Error deleting module:', error);
       throw new Error('Failed to delete module');
+    }
+  }
+
+  // ==========================================================================
+  // Content Management APIs
+  // ==========================================================================
+
+  /**
+   * Get content items for a module (Instructor View)
+   */
+  async getInstructorModuleContent(courseId: string, moduleId: string): Promise<ContentResponse> {
+    try {
+      const url = `${this.baseUrl}/api/instructor/courses/${courseId}/modules/${moduleId}`;
+      const response = await callBackend(url, { method: 'GET' });
+      return response;
+    } catch (error) {
+      console.error('Error fetching module content:', error);
+      throw new Error('Failed to fetch module content');
+    }
+  }
+
+  /**
+   * Add new content (Note/MCQ) to a module
+   */
+  async addModuleContent(
+    courseId: string,
+    moduleId: string,
+    data: CreateContentRequest
+  ): Promise<ContentResponse> {
+    try {
+      const url = `${this.baseUrl}/api/instructor/courses/${courseId}/modules/${moduleId}/content`;
+      const response = await callBackend(url, {
+        method: 'POST',
+        body: JSON.stringify(data)
+      });
+      return response;
+    } catch (error) {
+      console.error('Error adding content:', error);
+      throw new Error('Failed to add content');
+    }
+  }
+
+  /**
+   * Update existing content
+   */
+  async updateModuleContent(
+    courseId: string,
+    moduleId: string,
+    contentId: string,
+    data: UpdateContentRequest
+  ): Promise<ContentResponse> {
+    try {
+      const url = `${this.baseUrl}/api/instructor/courses/${courseId}/modules/${moduleId}/content/${contentId}`;
+      const response = await callBackend(url, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+      });
+      return response;
+    } catch (error) {
+      console.error('Error updating content:', error);
+      throw new Error('Failed to update content');
+    }
+  }
+
+  /**
+   * Delete content
+   */
+  async deleteModuleContent(
+    courseId: string,
+    moduleId: string,
+    contentId: string
+  ): Promise<{ message: string }> {
+    try {
+      const url = `${this.baseUrl}/api/instructor/courses/${courseId}/modules/${moduleId}/content/${contentId}`;
+      const response = await callBackend(url, {
+        method: 'DELETE'
+      });
+      return response;
+    } catch (error) {
+      console.error('Error deleting content:', error);
+      throw new Error('Failed to delete content');
     }
   }
 

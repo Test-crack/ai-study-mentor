@@ -45,8 +45,10 @@ import {
 } from "@/shared/components/ui/alert-dialog";
 import { coursesService } from "../../services/coursesService";
 import { toast } from "@/shared/hooks/use-toast";
-import { DifficultyType, CourseModuleData, CreateModuleRequest, UpdateModuleRequest } from "../../types";
+import { DifficultyType, CourseModuleData, CreateModuleRequest, UpdateModuleRequest, ContentItem, CreateContentRequest, UpdateContentRequest } from "../../types";
 import { ModuleDialog } from "./ModuleDialog";
+import { ModuleContentList } from "./ModuleContentList";
+import { ContentDialog } from "./ContentDialog";
 
 const CourseManagementPage = () => {
   const { id } = useParams();
@@ -65,6 +67,15 @@ const CourseManagementPage = () => {
   const [selectedModule, setSelectedModule] = useState<CourseModuleData | null>(null);
   const [isModuleLoading, setIsModuleLoading] = useState(false);
   const [moduleToDelete, setModuleToDelete] = useState<CourseModuleData | null>(null);
+
+  // Content Management State
+  const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
+  const [isContentDialogOpen, setIsContentDialogOpen] = useState(false);
+  const [selectedContent, setSelectedContent] = useState<any | null>(null); // Type: ContentItem
+  const [loadingModulesContent, setLoadingModulesContent] = useState<Set<string>>(new Set());
+  const [moduleContentMap, setModuleContentMap] = useState<Record<string, any[]>>({}); // Map moduleId -> ContentItem[]
+  const [isContentSaving, setIsContentSaving] = useState(false);
+  const [contentToDelete, setContentToDelete] = useState<{moduleId: string, item: any} | null>(null);
 
   const [course, setCourse] = useState({
     id: isCreationMode ? "" : id,
@@ -256,6 +267,104 @@ const CourseManagementPage = () => {
     }
   };
 
+  // Content Handlers
+  const fetchModuleContent = async (moduleId: string) => {
+    if (!id) return;
+    setLoadingModulesContent(prev => new Set(prev).add(moduleId));
+    try {
+      const res = await coursesService.getInstructorModuleContent(id, moduleId);
+      setModuleContentMap(prev => ({
+        ...prev,
+        [moduleId]: res.data?.contentItems || []
+      }));
+    } catch (error) {
+      console.error("Failed to fetch content for module", moduleId, error);
+      toast.error({ title: "Error", description: "Failed to load module content" });
+    } finally {
+      setLoadingModulesContent(prev => {
+        const next = new Set(prev);
+        next.delete(moduleId);
+        return next;
+      });
+    }
+  };
+
+  useEffect(() => {
+    // Determine which modules need content loaded
+    if (modules.length > 0) {
+       modules.forEach(m => fetchModuleContent(m.id));
+    }
+  }, [modules]);
+
+  const handleAddContent = (moduleId: string) => {
+    setActiveModuleId(moduleId);
+    setSelectedContent(null);
+    setIsContentDialogOpen(true);
+  };
+
+  const handleEditContent = (moduleId: string, item: any) => {
+    setActiveModuleId(moduleId);
+    setSelectedContent(item);
+    setIsContentDialogOpen(true);
+  };
+
+  const handleContentSubmit = async (data: CreateContentRequest | UpdateContentRequest) => {
+    if (!id || !activeModuleId) return;
+
+    setIsContentSaving(true);
+    try {
+      if (selectedContent) {
+        // Update
+        await coursesService.updateModuleContent(
+          id, 
+          activeModuleId, 
+          selectedContent.id, 
+          data as UpdateContentRequest
+        );
+        toast.success({ title: "Success", description: "Content updated successfully" });
+      } else {
+        // Create
+        await coursesService.addModuleContent(
+          id, 
+          activeModuleId, 
+          data as CreateContentRequest
+        );
+        toast.success({ title: "Success", description: "Content added successfully" });
+      }
+      setIsContentDialogOpen(false);
+      fetchModuleContent(activeModuleId); // Refresh content for this module
+    } catch (error) {
+      console.error("Content save error:", error);
+      toast.error({ 
+        title: "Error", 
+        description: selectedContent ? "Failed to update content" : "Failed to add content" 
+      });
+    } finally {
+      setIsContentSaving(false);
+    }
+  };
+
+  const handleDeleteContent = async (moduleId: string, item: any) => {
+      setContentToDelete({ moduleId, item });
+  };
+
+  const confirmDeleteContent = async () => {
+    if (!id || !contentToDelete) return;
+
+    setIsContentSaving(true);
+    try {
+      await coursesService.deleteModuleContent(id, contentToDelete.moduleId, contentToDelete.item.id);
+      toast.success({ title: "Deleted", description: "Content deleted successfully" });
+      fetchModuleContent(contentToDelete.moduleId);
+    } catch (error) {
+       console.error("Content delete error:", error);
+       toast.error({ title: "Error", description: "Failed to delete content" });
+    } finally {
+      setIsContentSaving(false);
+      setContentToDelete(null);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
@@ -341,6 +450,48 @@ const CourseManagementPage = () => {
                 </>
               ) : (
                 "Delete Module"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      <ContentDialog 
+        open={isContentDialogOpen}
+        onOpenChange={setIsContentDialogOpen}
+        onSubmit={handleContentSubmit}
+        content={selectedContent}
+        isLoading={isContentSaving}
+      />
+
+      {/* Delete Content Confirmation Dialog */}
+      <AlertDialog open={!!contentToDelete} onOpenChange={(open) => !open && setContentToDelete(null)}>
+        <AlertDialogContent className="rounded-3xl border-slate-100 shadow-2xl">
+          <AlertDialogHeader>
+            <div className="h-12 w-12 rounded-2xl bg-rose-50 flex items-center justify-center mb-4">
+              <Trash2 className="h-6 w-6 text-rose-500" />
+            </div>
+            <AlertDialogTitle className="text-xl font-bold text-slate-900">Delete Content?</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-500">
+              Are you sure you want to delete <span className="font-bold text-slate-900">"{contentToDelete?.item.title}"</span>? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-6">
+            <AlertDialogCancel className="rounded-xl font-bold border-slate-100 hover:bg-slate-50" disabled={isContentSaving}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDeleteContent}
+              disabled={isContentSaving}
+              className="rounded-xl font-bold bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-200"
+            >
+              {isContentSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete Content"
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -594,43 +745,62 @@ const CourseManagementPage = () => {
                   {modules.length > 0 ? (
                     <div className="space-y-4">
                       {modules.map((module) => (
-                        <div 
-                          key={module.id} 
-                          className="flex items-center gap-4 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group"
-                        >
-                          <GripVertical className="h-5 w-5 text-slate-300 cursor-grab active:cursor-grabbing hover:text-indigo-400 transition-colors" />
-                          <div className="flex-grow">
-                            <h4 className="font-bold text-slate-800">
-                                {module.order_index !== -1 ? `Module ${module.order_index}: ` : ''}{module.title}
-                            </h4>
-                            <div className="flex items-center gap-3 mt-1">
-                                <Badge variant="secondary" className="bg-slate-50 text-slate-500 hover:bg-slate-100 border-none">
-                                    {module.domain || "No domain"}
-                                </Badge>
-                                <span className="text-xs text-slate-400 font-medium">
-                                    {module.conceptCount || 0} lessons
-                                </span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="h-10 w-10 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl"
-                                onClick={() => handleEditModule(module)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="h-10 w-10 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl"
-                                onClick={() => setModuleToDelete(module)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
+                        <Card key={module.id} className="border border-slate-100 shadow-sm hover:shadow-md transition-all overflow-hidden group">
+                           {/* Module Header */}
+                           <div className="flex items-center gap-4 bg-white p-5 border-b border-slate-50">
+                             <GripVertical className="h-5 w-5 text-slate-300 cursor-grab active:cursor-grabbing hover:text-indigo-400 transition-colors" />
+                             <div className="flex-grow">
+                               <h4 className="font-bold text-slate-800 text-lg">
+                                   {module.order_index !== -1 ? `Module ${module.order_index}: ` : ''}{module.title}
+                               </h4>
+                               <div className="flex items-center gap-3 mt-1.5">
+                                   <Badge variant="secondary" className="bg-slate-50 text-slate-500 hover:bg-slate-100 border-none font-medium">
+                                       {module.domain || "No domain"}
+                                   </Badge>
+                                   <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
+                                       <BookOpen className="h-3 w-3" />
+                                       {module.conceptCount || 0} lessons
+                                   </span>
+                               </div>
+                             </div>
+                             <div className="flex items-center gap-2">
+                               <Button 
+                                   variant="ghost" 
+                                   className="text-indigo-600 bg-indigo-50 hover:bg-indigo-100 font-bold rounded-xl h-9 text-xs"
+                                   onClick={() => handleAddContent(module.id)}
+                               >
+                                 <Plus className="mr-1.5 h-3.5 w-3.5" /> Add Content
+                               </Button>
+                               <div className="h-6 w-px bg-slate-100 mx-1"></div>
+                               <Button 
+                                   variant="ghost" 
+                                   size="icon" 
+                                   className="h-9 w-9 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl"
+                                   onClick={() => handleEditModule(module)}
+                               >
+                                 <Pencil className="h-4 w-4" />
+                               </Button>
+                               <Button 
+                                   variant="ghost" 
+                                   size="icon" 
+                                   className="h-9 w-9 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl"
+                                   onClick={() => setModuleToDelete(module)}
+                               >
+                                 <Trash2 className="h-4 w-4" />
+                               </Button>
+                             </div>
+                           </div>
+
+                           {/* Module Content List */}
+                           <div className="bg-slate-50/50 p-4">
+                             <ModuleContentList 
+                               contentItems={moduleContentMap[module.id] || []}
+                               onEdit={(item) => handleEditContent(module.id, item)}
+                               onDelete={(item) => handleDeleteContent(module.id, item)}
+                               isLoading={loadingModulesContent.has(module.id)}
+                             />
+                           </div>
+                        </Card>
                       ))}
                     </div>
                   ) : (

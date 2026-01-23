@@ -185,4 +185,83 @@ export interface DeleteModuleResponse {
   moduleDeleted: boolean;
 }
 
+// Content Management Types
+
+export enum ContentType {
+  NOTES = 'NOTES',
+  MCQ = 'MCQ'
+}
+
+export interface MCQOption {
+  id: string;
+  text: string;
+}
+
+export interface NoteData {
+  id: string;
+  body: string;
+  format: string;
+  version: number;
+}
+
+export interface MCQData {
+  id: string;
+  question: string;
+  options: MCQOption[];
+  correct_answer: string;
+  explanation: string | null;
+  difficulty: string;
+}
+
+export interface ContentItem {
+  index: number;
+  id: string;
+  type: ContentType;
+  title: string | null;
+  is_required: boolean | null;
+  concept_order: number;
+  sequence_order: number | null;
+  concept: {
+    id: string;
+    slug: string;
+    learningObjective: string;
+    keywords: string[];
+    domain: string;
+    baseConceptId: string;
+  };
+  content: NoteData | MCQData;
+}
+
+export interface CreateContentRequest {
+  type: ContentType;
+  title: string;
+  sequence_order?: number;
+  is_required?: boolean;
+  // Note specific
+  body?: string;
+  // MCQ specific
+  question?: string;
+  options?: Record<string, string>; // Sending as simple object/map
+  correct_answer?: string;
+  explanation?: string;
+  difficulty?: string;
+}
+
+export interface UpdateContentRequest {
+  title?: string;
+  sequence_order?: number;
+  is_required?: boolean;
+  body?: string;
+  question?: string;
+  options?: Record<string, string>;
+  correct_answer?: string;
+  explanation?: string;
+  difficulty?: string;
+}
+
+export interface ContentResponse {
+  message: string;
+  data: any;
+}
+
 export * from './learning';
