@@ -17,6 +17,8 @@ import { useInstructorCourses } from "../../hooks/useInstructorCourses";
 import { useDebounce } from "../../../../shared/hooks/useDebounce";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { CreateCourseDialog } from "./CreateCourseDialog";
+import { coursesService } from "../../services/coursesService";
+import { toast } from "@/shared/hooks/use-toast";
 
 const AdminDashboardPage = () => {
   const navigate = useNavigate();
@@ -38,7 +40,7 @@ const AdminDashboardPage = () => {
     };
   }, [debouncedSearch, activeTab, sortConfig]);
 
-  const { data: response, isLoading } = useInstructorCourses(filters);
+  const { data: response, isLoading, refetch } = useInstructorCourses(filters);
   const courses = response?.data || [];
 
   const handleEdit = (id: string) => {
@@ -49,9 +51,15 @@ const AdminDashboardPage = () => {
     navigate(`/courses/${slug}`, { state: { courseId: id } });
   };
 
-  const handleDelete = (id: string) => {
-    console.log("Course would be deleted:", id);
-    // In a real app, this would be an API call followed by a state update or refetch
+  const handleDelete = async (id: string) => {
+    try {
+      await coursesService.deleteCourse(id);
+      toast.success({ title: "Deleted", description: "Course deleted successfully" });
+      refetch();
+    } catch (error) {
+      console.error("Failed to delete course:", error);
+      toast.error({ title: "Error", description: "Failed to delete course" });
+    }
   };
 
   return (
