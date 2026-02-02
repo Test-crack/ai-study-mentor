@@ -48,10 +48,10 @@ export function MCQContent({ mcq, onComplete, isAlreadyCompleted = false, onCont
     }
   };
 
-  const handleRetry = () => {
-    setSelectedAnswer(null);
-    setIsSubmitted(false);
-  };
+  // const handleRetry = () => {
+  //   setSelectedAnswer(null);
+  //   setIsSubmitted(false);
+  // };
 
   const getOptionStyle = (optionId: string) => {
     if (!isSubmitted) {
@@ -249,14 +249,14 @@ export function MCQContent({ mcq, onComplete, isAlreadyCompleted = false, onCont
               </>
             ) : (
               <>
-                <Button 
+                {/* <Button 
                   variant="outline" 
                   onClick={handleRetry} 
                   className="gap-2"
                 >
                   <RotateCcw className="h-4 w-4" />
                   Try Again
-                </Button>
+                </Button> */}
                 
                 <span className={cn(
                   'flex items-center gap-2 text-sm font-medium px-3 py-1.5 rounded-full',
