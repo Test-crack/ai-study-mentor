@@ -12,6 +12,7 @@ import {
   Star,
   User,
   GraduationCap,
+  LayoutDashboard, // Added icon for Admin
 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -29,7 +30,6 @@ interface NavbarProps {
   onTabChange?: (tab: string) => void;
   showUpgradeButton?: boolean;
   onUpgradeClick?: () => void;
-  // Step indicator props
   showStepIndicator?: boolean;
   currentStep?: string;
   steps?: Step[];
@@ -50,9 +50,15 @@ export function Navbar({
   allowStepNavigation = false,
 }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  
+  // Destructure profile from useAuth
+  const { profile, signOut } = useAuth();
+  
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Role check based on your useAuth profile
+  const isInstructor = profile?.role === "INSTRUCTOR" || profile?.role === "ADMIN";
 
   const navItems = [
     { id: "dashboard", label: "Dashboard", icon: Home },
@@ -64,28 +70,17 @@ export function Navbar({
   ];
 
   const handleNavClick = (item: typeof navItems[0]) => {
-    // If item has a route, navigate to it
     if (item.route) {
       navigate(item.route);
     } else if (location.pathname === "/" && onTabChange) {
-      // If we're on the home page and have onTabChange, use tab navigation
       onTabChange(item.id);
     } else {
-      // Otherwise navigate to home page
       navigate("/");
     }
     setMobileMenuOpen(false);
   };
 
   const handleLogoClick = () => {
-    if (location.pathname === "/" && onTabChange) {
-      onTabChange("dashboard");
-    } else {
-      navigate("/");
-    }
-  };
-
-  const handleDashboardClick = () => {
     if (location.pathname === "/" && onTabChange) {
       onTabChange("dashboard");
     } else {
@@ -103,7 +98,6 @@ export function Navbar({
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16">
             <div className="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
-              {/* Mobile Menu Button */}
               {showNavItems && (
                 <Button
                   variant="ghost"
@@ -126,7 +120,6 @@ export function Navbar({
                 TestCrack
               </button>
 
-              {/* Desktop Navigation */}
               {showNavItems && (
                 <div className="hidden lg:flex space-x-2 xl:space-x-4">
                   {navItems.map((item) => (
@@ -144,7 +137,6 @@ export function Navbar({
             </div>
 
             <div className="flex items-center gap-1 sm:gap-2">
-              {/* Profile Button */}
               <Button
                 variant="ghost"
                 onClick={handleProfileClick}
@@ -154,7 +146,6 @@ export function Navbar({
                 <User className="h-4 w-4" />
               </Button>
 
-              {/* Logout Button */}
               <Button
                 variant="ghost"
                 onClick={signOut}
@@ -164,7 +155,6 @@ export function Navbar({
                 <LogOut className="h-4 w-4" />
               </Button>
 
-              {/* Upgrade Button */}
               {showUpgradeButton && (
                 <Button
                   onClick={onUpgradeClick}
@@ -175,6 +165,19 @@ export function Navbar({
                   <span className="hidden sm:inline text-xs">Upgrade</span>
                 </Button>
               )}
+
+              {/* ADMIN BUTTON - Placed after Upgrade button */}
+              {isInstructor && (
+                <Button
+                  onClick={() => navigate("/courses/admin/dashboard")}
+                  variant="outline"
+                  className="border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-2 sm:px-3 ml-1"
+                  size="sm"
+                >
+                  <LayoutDashboard className="h-4 w-4 sm:mr-1" />
+                  <span className="hidden sm:inline text-xs">Admin</span>
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -183,13 +186,11 @@ export function Navbar({
       {/* Mobile Menu Drawer */}
       {showNavItems && mobileMenuOpen && (
         <>
-          {/* Backdrop */}
           <div
             className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
             onClick={() => setMobileMenuOpen(false)}
           />
 
-          {/* Drawer */}
           <div className="fixed top-14 left-0 right-0 bg-white/95 backdrop-blur-md border-b shadow-lg z-40 lg:hidden animate-in slide-in-from-top duration-300">
             <div className="max-w-7xl mx-auto px-4 py-4">
               <div className="flex flex-col space-y-2">
@@ -205,14 +206,26 @@ export function Navbar({
                   </Button>
                 ))}
 
-                {/* Mobile User Info - Removed */}
+                {/* Mobile Admin Link */}
+                {isInstructor && (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      navigate("/courses/admin/dashboard");
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full justify-start text-base py-6 border-indigo-100 bg-indigo-50 text-indigo-700"
+                  >
+                    <LayoutDashboard className="h-5 w-5 mr-3" />
+                    Admin Dashboard
+                  </Button>
+                )}
               </div>
             </div>
           </div>
         </>
       )}
 
-      {/* Step Indicator */}
       {showStepIndicator && currentStep && steps.length > 0 && (
         <StepIndicator
           currentStep={currentStep}

@@ -7,6 +7,8 @@ import {
   HelpCircle,
   RotateCcw,
   Lightbulb,
+  Target,
+  Zap
 } from 'lucide-react';
 import { MCQContent as MCQContentType } from '../../types';
 import { cn } from '@/shared/utils/utils';
@@ -16,14 +18,24 @@ interface MCQContentProps {
   onComplete?: () => void;
   isAlreadyCompleted?: boolean;
   onContinue?: () => void;
+  // NEW: Focus Mode Props
+  isFocusMode?: boolean;
+  onToggleFocus?: () => void;
 }
 
-export function MCQContent({ mcq, onComplete, isAlreadyCompleted = false, onContinue }: MCQContentProps) {
+export function MCQContent({ 
+  mcq, 
+  onComplete, 
+  isAlreadyCompleted = false, 
+  onContinue,
+  isFocusMode = false,
+  onToggleFocus 
+}: MCQContentProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [hasCalledComplete, setHasCalledComplete] = useState(false);
 
-  // Reset state when MCQ changes
+  // Reset state when MCQ changes - Preserved from your Set 2 logic
   useEffect(() => {
     setSelectedAnswer(null);
     setIsSubmitted(isAlreadyCompleted);
@@ -41,18 +53,14 @@ export function MCQContent({ mcq, onComplete, isAlreadyCompleted = false, onCont
     if (!selectedAnswer) return;
     setIsSubmitted(true);
     
-    // Mark as complete on first submission (regardless of correct/incorrect)
+    // Mark as complete on first submission - Preserved from your Set 2 logic
     if (!hasCalledComplete && onComplete) {
       setHasCalledComplete(true);
       onComplete();
     }
   };
 
-  // const handleRetry = () => {
-  //   setSelectedAnswer(null);
-  //   setIsSubmitted(false);
-  // };
-
+  // Preserved Helper Styles from your Set 2 logic
   const getOptionStyle = (optionId: string) => {
     if (!isSubmitted) {
       return selectedAnswer === optionId
@@ -86,192 +94,199 @@ export function MCQContent({ mcq, onComplete, isAlreadyCompleted = false, onCont
   };
 
   return (
-    <Card className="border-2 border-purple-100 bg-gradient-to-br from-white to-purple-50/30">
-      <CardContent className="p-0">
-        {/* Question Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 text-white">
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-white/20 rounded-lg flex-shrink-0">
-              <HelpCircle className="h-5 w-5" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-lg font-medium leading-relaxed">
-                {mcq.question}
-              </p>
-              {mcq.difficulty && (
-                <span className="inline-block mt-3 text-xs px-2 py-1 bg-white/20 rounded">
-                  {mcq.difficulty} Level
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Options */}
-        <div className="p-6">
-          <div className="space-y-3" role="radiogroup" aria-label="Answer options">
-            {mcq.options.map((option, index) => {
-              const optionLabel = String.fromCharCode(65 + index);
-              const isThisCorrect = option.id === mcq.correct_answer;
-              const isThisSelected = selectedAnswer === option.id;
-
-              return (
-                <div
-                  key={option.id}
-                  role="radio"
-                  aria-checked={isThisSelected}
-                  tabIndex={isSubmitted ? -1 : 0}
-                  onClick={() => handleOptionSelect(option.id)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      handleOptionSelect(option.id);
-                    }
-                  }}
-                  className={cn(
-                    'flex items-center gap-4 p-4 rounded-xl border-2',
-                    isSubmitted ? 'cursor-default' : 'cursor-pointer',
-                    getOptionStyle(option.id)
-                  )}
-                >
-                  <div
-                    className={cn(
-                      'w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0',
-                      getOptionLabelStyle(option.id)
-                    )}
-                  >
-                    {isSubmitted && isThisCorrect ? (
-                      <CheckCircle className="h-5 w-5" />
-                    ) : isSubmitted && isThisSelected && !isThisCorrect ? (
-                      <XCircle className="h-5 w-5" />
-                    ) : (
-                      optionLabel
-                    )}
-                  </div>
-                  <span
-                    className={cn(
-                      'flex-1 text-base',
-                      isSubmitted && isThisCorrect
-                        ? 'text-green-800 font-semibold'
-                        : isSubmitted && isThisSelected && !isThisCorrect
-                        ? 'text-red-800 font-medium'
-                        : isThisSelected
-                        ? 'text-purple-900 font-medium'
-                        : 'text-gray-700'
-                    )}
-                  >
-                    {option.text}
-                  </span>
+    <div className={cn(
+      "transition-all duration-700 ease-in-out",
+      isFocusMode ? "max-w-3xl mx-auto py-12" : "w-full"
+    )}>
+      <Card className={cn(
+        "border-2 transition-all duration-500 overflow-hidden relative z-20",
+        isFocusMode 
+          ? "border-purple-500 shadow-[0_0_50px_-12px_rgba(147,51,234,0.4)] scale-[1.02] bg-white" 
+          : "border-purple-100 bg-gradient-to-br from-white to-purple-50/30"
+      )}>
+        <CardContent className="p-0">
+          {/* Question Header - Adapts to Focus Mode */}
+          <div className={cn(
+            "p-6 text-white transition-all duration-500",
+            isFocusMode ? "bg-slate-900" : "bg-gradient-to-r from-purple-600 to-indigo-600"
+          )}>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-white/20 rounded-lg flex-shrink-0">
+                  <HelpCircle className="h-5 w-5" />
                 </div>
-              );
-            })}
-          </div>
-
-          {/* Result Feedback */}
-          {isSubmitted && (
-            <div
-              className={cn(
-                'mt-6 p-5 rounded-xl border-2',
-                isCorrect
-                  ? 'bg-green-50 border-green-200'
-                  : 'bg-amber-50 border-amber-200'
-              )}
-            >
-              <div className="flex items-center gap-3 mb-3">
-                {isCorrect ? (
-                  <>
-                    <div className="p-2 bg-green-100 rounded-full flex-shrink-0">
-                      <CheckCircle className="h-6 w-6 text-green-600" />
-                    </div>
-                    <div>
-                      <span className="font-bold text-green-800 text-lg">
-                        Correct! 🎉
-                      </span>
-                      <p className="text-green-600 text-sm">Great job!</p>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="p-2 bg-amber-100 rounded-full flex-shrink-0">
-                      <XCircle className="h-6 w-6 text-amber-600" />
-                    </div>
-                    <div>
-                      <span className="font-bold text-amber-800 text-lg">
-                        Not quite right
-                      </span>
-                      <p className="text-amber-600 text-sm">Review the explanation below</p>
-                    </div>
-                  </>
-                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-lg font-medium leading-relaxed">
+                    {mcq.question}
+                  </p>
+                  {mcq.difficulty && (
+                    <span className="inline-block mt-3 text-xs px-2 py-1 bg-white/20 rounded">
+                      {mcq.difficulty} Level
+                    </span>
+                  )}
+                </div>
               </div>
 
-              {/* Explanation */}
-              {mcq.explanation && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <div className="flex items-start gap-3">
-                    <div className="p-1.5 bg-amber-100 rounded-lg flex-shrink-0">
-                      <Lightbulb className="h-4 w-4 text-amber-600" />
+              {/* Focus Mode Toggle Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onToggleFocus}
+                className={cn(
+                  "gap-2 border-white/20 border hover:bg-white/20 text-white transition-all",
+                  isFocusMode && "bg-purple-600 border-purple-400 hover:bg-purple-500"
+                )}
+              >
+                {isFocusMode ? <Zap className="h-4 w-4 fill-current text-amber-300" /> : <Target className="h-4 w-4" />}
+                <span className="text-[10px] font-black uppercase tracking-widest">
+                  {isFocusMode ? 'Focus On' : 'Focus Mode'}
+                </span>
+              </Button>
+            </div>
+          </div>
+
+          {/* Options Section - Full logic preserved */}
+          <div className="p-6">
+            <div className="space-y-3" role="radiogroup" aria-label="Answer options">
+              {mcq.options.map((option, index) => {
+                const optionLabel = String.fromCharCode(65 + index);
+                const isThisCorrect = option.id === mcq.correct_answer;
+                const isThisSelected = selectedAnswer === option.id;
+
+                return (
+                  <div
+                    key={option.id}
+                    role="radio"
+                    aria-checked={isThisSelected}
+                    tabIndex={isSubmitted ? -1 : 0}
+                    onClick={() => handleOptionSelect(option.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleOptionSelect(option.id);
+                      }
+                    }}
+                    className={cn(
+                      'flex items-center gap-4 p-4 rounded-xl border-2 transition-all',
+                      isSubmitted ? 'cursor-default' : 'cursor-pointer',
+                      getOptionStyle(option.id)
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        'w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 transition-colors',
+                        getOptionLabelStyle(option.id)
+                      )}
+                    >
+                      {isSubmitted && isThisCorrect ? (
+                        <CheckCircle className="h-5 w-5" />
+                      ) : isSubmitted && isThisSelected && !isThisCorrect ? (
+                        <XCircle className="h-5 w-5" />
+                      ) : (
+                        optionLabel
+                      )}
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-gray-700 mb-1">
-                        Explanation
-                      </p>
-                      <p className="text-sm text-gray-600 leading-relaxed">
-                        {mcq.explanation}
-                      </p>
+                    <span
+                      className={cn(
+                        'flex-1 text-base',
+                        isSubmitted && isThisCorrect
+                          ? 'text-green-800 font-semibold'
+                          : isSubmitted && isThisSelected && !isThisCorrect
+                          ? 'text-red-800 font-medium'
+                          : isThisSelected
+                          ? 'text-purple-900 font-medium'
+                          : 'text-gray-700'
+                      )}
+                    >
+                      {option.text}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Result Feedback Block */}
+            {isSubmitted && (
+              <div
+                className={cn(
+                  'mt-6 p-5 rounded-xl border-2 animate-in fade-in slide-in-from-top-2 duration-500',
+                  isCorrect
+                    ? 'bg-green-50 border-green-200'
+                    : 'bg-amber-50 border-amber-200'
+                )}
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  {isCorrect ? (
+                    <>
+                      <div className="p-2 bg-green-100 rounded-full flex-shrink-0">
+                        <CheckCircle className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div>
+                        <span className="font-bold text-green-800 text-lg">Correct! 🎉</span>
+                        <p className="text-green-600 text-sm">Great job!</p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="p-2 bg-amber-100 rounded-full flex-shrink-0">
+                        <XCircle className="h-6 w-6 text-amber-600" />
+                      </div>
+                      <div>
+                        <span className="font-bold text-amber-800 text-lg">Not quite right</span>
+                        <p className="text-amber-600 text-sm">Review the explanation below</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {mcq.explanation && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="flex items-start gap-3">
+                      <div className="p-1.5 bg-amber-100 rounded-lg flex-shrink-0">
+                        <Lightbulb className="h-4 w-4 text-amber-600" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-700 mb-1">Explanation</p>
+                        <p className="text-sm text-gray-600 leading-relaxed">{mcq.explanation}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
-          )}
+                )}
+              </div>
+            )}
 
-          {/* Actions */}
-          <div className="flex items-center justify-between mt-6 pt-4 border-t">
-            {!isSubmitted ? (
-              <>
-                <p className="text-sm text-gray-500">
-                  {selectedAnswer ? 'Ready to submit' : 'Select an answer to continue'}
-                </p>
-                <Button
-                  onClick={handleSubmit}
-                  disabled={!selectedAnswer}
-                  size="lg"
-                  className={cn(
-                    'px-8',
-                    selectedAnswer 
-                      ? 'bg-purple-600 hover:bg-purple-700' 
-                      : 'bg-gray-300'
-                  )}
-                >
-                  Submit Answer
-                </Button>
-              </>
-            ) : (
-              <>
-                {/* <Button 
-                  variant="outline" 
-                  onClick={handleRetry} 
-                  className="gap-2"
-                >
-                  <RotateCcw className="h-4 w-4" />
-                  Try Again
-                </Button> */}
-                
+            {/* Actions Footer */}
+            <div className="flex items-center justify-between mt-6 pt-4 border-t">
+              {!isSubmitted ? (
+                <>
+                  <p className="text-sm text-gray-500">
+                    {selectedAnswer ? 'Ready to submit' : 'Select an answer to continue'}
+                  </p>
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={!selectedAnswer}
+                    size="lg"
+                    className={cn(
+                      'px-8 font-bold transition-all',
+                      selectedAnswer ? 'bg-purple-600 hover:bg-purple-700 shadow-lg' : 'bg-gray-300'
+                    )}
+                  >
+                    Submit Answer
+                  </Button>
+                </>
+              ) : (
                 <span className={cn(
-                  'flex items-center gap-2 text-sm font-medium px-3 py-1.5 rounded-full',
-                  isCorrect 
-                    ? 'text-green-700 bg-green-100' 
-                    : 'text-amber-700 bg-amber-100'
+                  'flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-full border transition-all',
+                  isCorrect ? 'text-green-700 bg-green-50 border-green-100' : 'text-amber-700 bg-amber-50 border-amber-100'
                 )}>
                   <CheckCircle className="h-4 w-4" />
                   Completed
                 </span>
-              </>
-            )}
+              )}
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

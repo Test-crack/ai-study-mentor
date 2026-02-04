@@ -37,6 +37,9 @@ interface ModuleContentProps {
   courseId: string;
   moduleIndex: number;
   onProgressUpdate?: (courseProgress: number, moduleProgress: number) => void;
+  // FOCUS MODE PROPS
+  isFocusMode?: boolean;
+  onToggleFocus?: () => void;
 }
 
 export function ModuleContent({
@@ -52,13 +55,15 @@ export function ModuleContent({
   courseId,
   moduleIndex,
   onProgressUpdate,
+  isFocusMode = false,
+  onToggleFocus,
 }: ModuleContentProps) {
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
   const [localCompletedIds, setLocalCompletedIds] = useState<Set<string>>(new Set());
   const [isMarkingComplete, setIsMarkingComplete] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
-  // Refs for tracking - these persist across renders
+  // Refs for tracking - preserved from your original code
   const accessedIdsRef = useRef<Set<string>>(new Set());
   const lastModuleIdRef = useRef<string | null>(null);
 
@@ -108,7 +113,7 @@ export function ModuleContent({
     }
   }, [module?.id, contentItems, courseId, moduleIndex]);
 
-  // Track access when user navigates (not on initialization)
+  // Track access when user navigates
   const trackAccessForItem = useCallback(
     (item: ContentItem) => {
       if (!item || accessedIdsRef.current.has(item.id)) return;
@@ -126,13 +131,13 @@ export function ModuleContent({
   const currentItem = currentIndex !== null ? contentItems[currentIndex] : null;
   const isCurrentCompleted = currentItem ? isItemCompleted(currentItem) : false;
 
-  // Progress
+  // Progress calculations
   const totalItems = contentItems.length;
   const completedCount = contentItems.filter(isItemCompleted).length;
   const allCompleted = completedCount === totalItems && totalItems > 0;
   const progressPercent = totalItems > 0 ? Math.round((completedCount / totalItems) * 100) : 0;
 
-  // Mark complete
+  // Mark complete handler
   const markComplete = useCallback(async () => {
     if (!currentItem || isItemCompleted(currentItem)) return;
 
@@ -156,7 +161,7 @@ export function ModuleContent({
     }
   }, [currentItem, isItemCompleted, courseId, moduleIndex, onProgressUpdate]);
 
-  // Navigation - track access on navigate
+  // Navigation handlers
   const goNext = useCallback(() => {
     if (currentIndex === null || currentIndex >= totalItems - 1) return;
     const nextIdx = currentIndex + 1;
@@ -168,7 +173,6 @@ export function ModuleContent({
   const goPrev = useCallback(() => {
     if (currentIndex === null || currentIndex <= 0) return;
     setCurrentIndex(currentIndex - 1);
-    // Don't track access for going back - already accessed
   }, [currentIndex]);
 
   const goToIndex = useCallback(
@@ -176,7 +180,6 @@ export function ModuleContent({
       if (currentIndex === null) return;
       const targetItem = contentItems[index];
       if (!targetItem) return;
-      // Can navigate to completed or previous items
       if (index <= currentIndex || isItemCompleted(targetItem)) {
         setCurrentIndex(index);
         trackAccessForItem(targetItem);
@@ -185,7 +188,7 @@ export function ModuleContent({
     [currentIndex, contentItems, isItemCompleted, trackAccessForItem]
   );
 
-  // Loading
+  // Status screens
   if (loading || !isReady || currentIndex === null) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -197,7 +200,6 @@ export function ModuleContent({
     );
   }
 
-  // Error
   if (error) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -210,7 +212,6 @@ export function ModuleContent({
     );
   }
 
-  // Empty
   if (!module || contentItems.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -228,102 +229,110 @@ export function ModuleContent({
     return `Content ${item.index + 1}`;
   };
 
-
   return (
-    <div className="flex flex-col h-full bg-white">
-      {/* Module Header */}
-      <div className="border-b px-6 py-4 bg-gray-50">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <p className="text-sm text-gray-500 mb-1">Module {module.order_index + 1}</p>
-            <h1 className="text-xl font-bold text-gray-900">{module.title}</h1>
+    <div className="flex flex-col h-full bg-white transition-all duration-500">
+      {/* Header and Pill Navigation - Hidden in Focus Mode */}
+      {!isFocusMode && (
+        <>
+          <div className="border-b px-6 py-4 bg-gray-50 transition-all duration-500 animate-in fade-in slide-in-from-top-4">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Module {module.order_index + 1}</p>
+                <h1 className="text-xl font-bold text-gray-900">{module.title}</h1>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-gray-500">Progress</p>
+                <p className="text-lg font-semibold text-purple-600">
+                  {completedCount}/{totalItems}
+                </p>
+              </div>
+            </div>
+            <Progress value={progressPercent} className="h-2" />
           </div>
-          <div className="text-right">
-            <p className="text-sm text-gray-500">Progress</p>
-            <p className="text-lg font-semibold text-purple-600">
-              {completedCount}/{totalItems}
-            </p>
-          </div>
-        </div>
-        <Progress value={progressPercent} className="h-2" />
-      </div>
 
-      {/* Content Navigation Pills */}
-      <div className="border-b px-6 py-3 bg-white">
-        <div className="flex items-center gap-2 overflow-x-auto pb-1">
-          {contentItems.map((item) => {
-            const isActive = item.index === currentIndex;
-            const itemCompleted = isItemCompleted(item);
-            const canAccess = item.index <= currentIndex || itemCompleted;
+          <div className="border-b px-6 py-3 bg-white transition-all duration-500 animate-in fade-in">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+              {contentItems.map((item) => {
+                const isActive = item.index === currentIndex;
+                const itemCompleted = isItemCompleted(item);
+                const canAccess = item.index <= currentIndex || itemCompleted;
 
-            return (
-              <button
-                key={item.id}
-                onClick={() => goToIndex(item.index)}
-                disabled={!canAccess}
-                className={cn(
-                  'flex items-center gap-2 px-3 py-2 rounded-full text-sm whitespace-nowrap transition-all',
-                  isActive
-                    ? 'bg-purple-600 text-white'
-                    : itemCompleted
-                      ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                      : canAccess
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => goToIndex(item.index)}
+                    disabled={!canAccess}
+                    className={cn(
+                      'flex items-center gap-2 px-3 py-2 rounded-full text-sm whitespace-nowrap transition-all',
+                      isActive
+                        ? 'bg-purple-600 text-white'
+                        : itemCompleted
+                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                        : canAccess
                         ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         : 'bg-gray-50 text-gray-400 cursor-not-allowed'
-                )}
-              >
-                {itemCompleted ? <CheckCircle className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
-                <span>
-                  {item.type === 'NOTES' ? (
-                    <BookOpen className="h-3.5 w-3.5 inline mr-1" />
-                  ) : (
-                    <HelpCircle className="h-3.5 w-3.5 inline mr-1" />
-                  )}
-                  {item.index + 1}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Content Area */}
-      <div className="flex-1 overflow-y-auto bg-white min-h-0">
-        <div className="p-6 md:p-8 max-w-4xl mx-auto">
-          <div className="mb-6">
-            <div className="flex items-center gap-3 mb-2">
-              <Badge
-                variant="outline"
-                className={cn(
-                  'text-xs',
-                  currentItem?.type === 'NOTES'
-                    ? 'border-blue-200 text-blue-700 bg-blue-50'
-                    : 'border-purple-200 text-purple-700 bg-purple-50'
-                )}
-              >
-                {currentItem?.type === 'NOTES' ? (
-                  <>
-                    <BookOpen className="h-3 w-3 mr-1" />
-                    Reading Material
-                  </>
-                ) : (
-                  <>
-                    <HelpCircle className="h-3 w-3 mr-1" />
-                    Assessment
-                  </>
-                )}
-              </Badge>
-              <span className="text-sm text-gray-500">
-                {currentIndex + 1} of {totalItems}
-              </span>
+                    )}
+                  >
+                    {itemCompleted ? <CheckCircle className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
+                    <span>
+                      {item.type === 'NOTES' ? (
+                        <BookOpen className="h-3.5 w-3.5 inline mr-1" />
+                      ) : (
+                        <HelpCircle className="h-3.5 w-3.5 inline mr-1" />
+                      )}
+                      {item.index + 1}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
-            <h2 className="text-2xl font-bold text-gray-900">
-              {currentItem ? getTitle(currentItem) : 'Loading...'}
-            </h2>
           </div>
+        </>
+      )}
+
+      {/* Main Content Area */}
+      <div className={cn("flex-1 overflow-y-auto min-h-0 transition-all duration-500", isFocusMode ? "bg-slate-50/50" : "bg-white")}>
+        <div className={cn("p-6 md:p-8 max-w-4xl mx-auto transition-all", isFocusMode && "py-12 md:py-16")}>
+          {!isFocusMode && (
+            <div className="mb-6">
+              <div className="flex items-center gap-3 mb-2">
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    'text-xs',
+                    currentItem?.type === 'NOTES'
+                      ? 'border-blue-200 text-blue-700 bg-blue-50'
+                      : 'border-purple-200 text-purple-700 bg-purple-50'
+                  )}
+                >
+                  {currentItem?.type === 'NOTES' ? (
+                    <>
+                      <BookOpen className="h-3 w-3 mr-1" />
+                      Reading Material
+                    </>
+                  ) : (
+                    <>
+                      <HelpCircle className="h-3 w-3 mr-1" />
+                      Assessment
+                    </>
+                  )}
+                </Badge>
+                <span className="text-sm text-gray-500">
+                  {currentIndex + 1} of {totalItems}
+                </span>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {currentItem ? getTitle(currentItem) : 'Loading...'}
+              </h2>
+            </div>
+          )}
 
           {currentItem?.type === 'NOTES' && currentItem.content && (
-            <NoteContent note={currentItem.content as NoteType} />
+            <NoteContent 
+              note={currentItem.content as NoteType} 
+              isFocusMode={isFocusMode}
+              onToggleFocus={onToggleFocus}
+            />
           )}
 
           {currentItem?.type === 'MCQ' && currentItem.content && (
@@ -331,31 +340,36 @@ export function ModuleContent({
               mcq={currentItem.content as MCQType}
               onComplete={markComplete}
               isAlreadyCompleted={isCurrentCompleted}
+              isFocusMode={isFocusMode}
+              onToggleFocus={onToggleFocus}
             />
           )}
         </div>
       </div>
 
       {/* Navigation Footer */}
-      <div className="border-t bg-white px-6 py-4 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+      <div className={cn(
+        "border-t px-6 py-4 z-10 transition-all duration-500 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]", 
+        isFocusMode ? "bg-slate-900 text-white border-slate-800" : "bg-white"
+      )}>
         <div className="flex items-center justify-between max-w-4xl mx-auto">
           <Button
-            variant="outline"
+            variant={isFocusMode ? "ghost" : "outline"}
             onClick={hasPrevModule && currentIndex === 0 ? onPrevModule : goPrev}
             disabled={currentIndex === 0 && !hasPrevModule}
-            className="gap-2"
+            className={cn("gap-2", isFocusMode && "text-gray-400 hover:text-white hover:bg-white/10")}
           >
             <ChevronLeft className="h-4 w-4" />
             {currentIndex === 0 ? 'Previous Module' : 'Previous'}
           </Button>
 
           <div className="flex items-center gap-3">
-            {/* Progress indicator */}
-            <span className="text-sm text-gray-500 hidden sm:block">
-              {completedCount} of {totalItems} completed
-            </span>
+            {!isFocusMode && (
+              <span className="text-sm text-gray-500 hidden sm:block">
+                {completedCount} of {totalItems} completed
+              </span>
+            )}
             
-            {/* Mark Complete button for notes only */}
             {!isCurrentCompleted && currentItem?.type === 'NOTES' && (
               <Button
                 onClick={markComplete}
@@ -371,16 +385,20 @@ export function ModuleContent({
               </Button>
             )}
             
-            {/* Completed badge */}
             {isCurrentCompleted && (
-              <span className="flex items-center gap-1.5 text-green-600 text-sm font-medium bg-green-50 px-3 py-1.5 rounded-full">
+              <span className={cn(
+                "flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-full border",
+                isFocusMode 
+                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
+                  : "bg-green-50 border-green-100 text-green-600"
+              )}>
                 <CheckCircle className="h-4 w-4" />
                 Completed
               </span>
             )}
           </div>
 
-          {/* Next/Complete buttons */}
+          {/* Logic-dense Navigation Button */}
           {currentIndex < totalItems - 1 ? (
             <Button
               onClick={goNext}
@@ -397,11 +415,7 @@ export function ModuleContent({
             </Button>
           ) : hasNextModule ? (
             <Button
-              onClick={() => {
-                if (allCompleted) {
-                  onNextModule();
-                }
-              }}
+              onClick={() => { if (allCompleted) onNextModule(); }}
               disabled={!allCompleted}
               className={cn(
                 'gap-2 transition-all',
@@ -415,16 +429,12 @@ export function ModuleContent({
             </Button>
           ) : (
             <Button
-              onClick={() => {
-                if (allCompleted) {
-                  onCourseComplete();
-                }
-              }}
+              onClick={() => { if (allCompleted) onCourseComplete(); }}
               disabled={!allCompleted}
               className={cn(
                 'gap-2 transition-all',
                 allCompleted
-                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-lg hover:shadow-xl animate-pulse'
+                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-lg hover:shadow-xl'
                   : 'bg-gray-300 cursor-not-allowed'
               )}
             >
