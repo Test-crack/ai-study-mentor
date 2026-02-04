@@ -101,6 +101,7 @@ const LearningPage = () => {
 
       try {
         const response = await coursesService.getModuleContent(course.id, currentModuleIndex);
+        console.log("DEBUG: Full API Response", response.data);
         setModuleData(response.data.module);
         setContentItems(response.data.contentItems);
       } catch (err) {

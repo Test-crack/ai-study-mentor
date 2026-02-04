@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
 import {
   CheckCircle,
   XCircle,
   HelpCircle,
-  RotateCcw,
   Lightbulb,
   Target,
   Zap
@@ -18,7 +17,6 @@ interface MCQContentProps {
   onComplete?: () => void;
   isAlreadyCompleted?: boolean;
   onContinue?: () => void;
-  // NEW: Focus Mode Props
   isFocusMode?: boolean;
   onToggleFocus?: () => void;
 }
@@ -34,14 +32,31 @@ export function MCQContent({
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [hasCalledComplete, setHasCalledComplete] = useState(false);
+  
+  // Ref to track the current MCQ ID to detect real navigation vs. state updates
+  const lastIdRef = useRef<string>(mcq.id);
 
-  // Reset state when MCQ changes - Preserved from your Set 2 logic
+  // Optimized Effect to prevent flickering
   useEffect(() => {
-    setSelectedAnswer(null);
-    setIsSubmitted(isAlreadyCompleted);
-    setHasCalledComplete(isAlreadyCompleted);
+    const isNewQuestion = mcq.id !== lastIdRef.current;
+
+    if (isNewQuestion) {
+      // If the ID changed, reset everything for the new question
+      setSelectedAnswer(null);
+      setIsSubmitted(isAlreadyCompleted);
+      setHasCalledComplete(isAlreadyCompleted);
+      lastIdRef.current = mcq.id;
+    } else {
+      // If it's the same question but the parent prop updated (progress saved)
+      // Sync the submission status but DO NOT reset selectedAnswer
+      if (isAlreadyCompleted) {
+        setIsSubmitted(true);
+        setHasCalledComplete(true);
+      }
+    }
   }, [mcq.id, isAlreadyCompleted]);
 
+  // isCorrect calculation depends on local state being stable
   const isCorrect = isSubmitted && selectedAnswer === mcq.correct_answer;
 
   const handleOptionSelect = (optionId: string) => {
@@ -53,14 +68,12 @@ export function MCQContent({
     if (!selectedAnswer) return;
     setIsSubmitted(true);
     
-    // Mark as complete on first submission - Preserved from your Set 2 logic
     if (!hasCalledComplete && onComplete) {
       setHasCalledComplete(true);
       onComplete();
     }
   };
 
-  // Preserved Helper Styles from your Set 2 logic
   const getOptionStyle = (optionId: string) => {
     if (!isSubmitted) {
       return selectedAnswer === optionId
@@ -105,7 +118,6 @@ export function MCQContent({
           : "border-purple-100 bg-gradient-to-br from-white to-purple-50/30"
       )}>
         <CardContent className="p-0">
-          {/* Question Header - Adapts to Focus Mode */}
           <div className={cn(
             "p-6 text-white transition-all duration-500",
             isFocusMode ? "bg-slate-900" : "bg-gradient-to-r from-purple-600 to-indigo-600"
@@ -127,7 +139,6 @@ export function MCQContent({
                 </div>
               </div>
 
-              {/* Focus Mode Toggle Button */}
               <Button
                 variant="ghost"
                 size="sm"
@@ -145,7 +156,6 @@ export function MCQContent({
             </div>
           </div>
 
-          {/* Options Section - Full logic preserved */}
           <div className="p-6">
             <div className="space-y-3" role="radiogroup" aria-label="Answer options">
               {mcq.options.map((option, index) => {
@@ -160,12 +170,6 @@ export function MCQContent({
                     aria-checked={isThisSelected}
                     tabIndex={isSubmitted ? -1 : 0}
                     onClick={() => handleOptionSelect(option.id)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        handleOptionSelect(option.id);
-                      }
-                    }}
                     className={cn(
                       'flex items-center gap-4 p-4 rounded-xl border-2 transition-all',
                       isSubmitted ? 'cursor-default' : 'cursor-pointer',
@@ -186,18 +190,12 @@ export function MCQContent({
                         optionLabel
                       )}
                     </div>
-                    <span
-                      className={cn(
-                        'flex-1 text-base',
-                        isSubmitted && isThisCorrect
-                          ? 'text-green-800 font-semibold'
-                          : isSubmitted && isThisSelected && !isThisCorrect
-                          ? 'text-red-800 font-medium'
-                          : isThisSelected
-                          ? 'text-purple-900 font-medium'
-                          : 'text-gray-700'
-                      )}
-                    >
+                    <span className={cn(
+                      'flex-1 text-base',
+                      isSubmitted && isThisCorrect ? 'text-green-800 font-semibold' : 
+                      isSubmitted && isThisSelected && !isThisCorrect ? 'text-red-800 font-medium' :
+                      isThisSelected ? 'text-purple-900 font-medium' : 'text-gray-700'
+                    )}>
                       {option.text}
                     </span>
                   </div>
@@ -205,16 +203,11 @@ export function MCQContent({
               })}
             </div>
 
-            {/* Result Feedback Block */}
             {isSubmitted && (
-              <div
-                className={cn(
-                  'mt-6 p-5 rounded-xl border-2 animate-in fade-in slide-in-from-top-2 duration-500',
-                  isCorrect
-                    ? 'bg-green-50 border-green-200'
-                    : 'bg-amber-50 border-amber-200'
-                )}
-              >
+              <div className={cn(
+                'mt-6 p-5 rounded-xl border-2 animate-in fade-in slide-in-from-top-2 duration-500',
+                isCorrect ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'
+              )}>
                 <div className="flex items-center gap-3 mb-3">
                   {isCorrect ? (
                     <>
@@ -255,7 +248,6 @@ export function MCQContent({
               </div>
             )}
 
-            {/* Actions Footer */}
             <div className="flex items-center justify-between mt-6 pt-4 border-t">
               {!isSubmitted ? (
                 <>
