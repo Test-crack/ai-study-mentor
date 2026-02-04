@@ -175,7 +175,7 @@ export function Navbar({
                   size="sm"
                 >
                   <LayoutDashboard className="h-4 w-4 sm:mr-1" />
-                  <span className="hidden sm:inline text-xs">Admin</span>
+                  <span className="hidden sm:inline text-xs">Admin Dashboard</span>
                 </Button>
               )}
             </div>
