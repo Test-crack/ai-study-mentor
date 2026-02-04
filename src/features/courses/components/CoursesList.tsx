@@ -143,6 +143,15 @@ export function CoursesList() {
           >
             {/* Course Image Placeholder */}
             <div className="h-40 bg-gradient-to-br from-purple-500 to-indigo-600 relative overflow-hidden">
+               {course.thumbnail ? (
+                  <img 
+                    src={course.thumbnail} 
+                    alt={course.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+               ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-indigo-600" />
+               )}
               <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
               {course.difficulty && (
                 <Badge

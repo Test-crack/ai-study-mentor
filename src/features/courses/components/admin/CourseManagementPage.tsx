@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { 
   ChevronLeft, 
@@ -15,7 +15,8 @@ import {
   AlertTriangle,
   Loader2,
   Globe,
-  Pencil
+  Pencil,
+  Upload
 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -61,6 +62,10 @@ const CourseManagementPage = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [domains, setDomains] = useState<{ id: string; name: string }[]>([]);
+  
+  // Thumbnail State
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // Module Management State
   const [modules, setModules] = useState<CourseModuleData[]>([]);
@@ -89,7 +94,7 @@ const CourseManagementPage = () => {
     domainId: "",
     is_published: false,
     duration_minutes: 0,
-    thumbnail: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60",
+    thumbnail: null as string | null,
   });
 
   const fetchModules = async () => {
@@ -122,7 +127,7 @@ const CourseManagementPage = () => {
               domainId: res.data.Domain?.id || "",
               is_published: res.data.is_published || false,
               duration_minutes: res.data.duration_minutes || 0,
-              thumbnail: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60",
+              thumbnail: res.data.thumbnail || null,
             });
             // Initial modules load
             fetchModules();
@@ -251,7 +256,7 @@ const CourseManagementPage = () => {
 
   const handleDeleteModule = async () => {
     if (!id || !moduleToDelete) return;
-
+1
     setIsModuleLoading(true);
     try {
       // By default, we'll just unlink from course (deleteModule=false), 
@@ -266,6 +271,43 @@ const CourseManagementPage = () => {
       toast.error({ title: "Error", description: "Failed to delete module" });
     } finally {
       setIsModuleLoading(false);
+    }
+  };
+
+  const handleThumbnailUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !course.id) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error({ title: "Error", description: "Image must be less than 2MB" });
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const res = await coursesService.uploadCourseThumbnail(course.id, file);
+      setCourse(prev => ({ ...prev, thumbnail: res.thumbnail }));
+      toast.success({ title: "Success", description: "Thumbnail updated" });
+    } catch (error) {
+       toast.error({ title: "Error", description: "Failed to upload thumbnail" });
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleThumbnailRemove = async () => {
+    if (!course.id) return;
+
+    setUploadingImage(true);
+    try {
+      await coursesService.removeCourseThumbnail(course.id);
+      setCourse(prev => ({ ...prev, thumbnail: null }));
+      toast.success({ title: "Success", description: "Thumbnail removed" });
+    } catch (error) {
+      toast.error({ title: "Error", description: "Failed to remove thumbnail" });
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -703,20 +745,64 @@ const CourseManagementPage = () => {
                   <CardTitle className="text-xl font-bold">Course Image</CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 space-y-4">
-                  <div className="aspect-video rounded-2xl overflow-hidden bg-slate-100 border-2 border-dashed border-slate-200 group relative">
-                    <img 
-                        src={course.thumbnail} 
-                        alt="Preview" 
-                        className="w-full h-full object-cover transition-opacity group-hover:opacity-50"
+                  <div className="aspect-video rounded-2xl overflow-hidden bg-slate-100 border-2 border-dashed border-slate-200 group relative flex items-center justify-center">
+                    {uploadingImage ? (
+                      <div className="flex flex-col items-center gap-2 text-indigo-600">
+                        <Loader2 className="h-6 w-6 animate-spin" />
+                        <span className="text-sm font-medium">Uploading...</span>
+                      </div>
+                    ) : course.thumbnail ? (
+                      <>
+                        <img 
+                            src={course.thumbnail} 
+                            alt="Preview" 
+                            className="w-full h-full object-cover transition-opacity group-hover:opacity-50"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-2">
+                             <Button 
+                                variant="secondary" 
+                                size="sm" 
+                                className="rounded-xl font-bold bg-white text-indigo-600 shadow-xl"
+                                onClick={() => fileInputRef.current?.click()}
+                            >
+                                Change
+                            </Button>
+                            <Button 
+                                variant="destructive" 
+                                size="sm" 
+                                className="rounded-xl font-bold shadow-xl"
+                                onClick={handleThumbnailRemove}
+                            >
+                                Remove
+                            </Button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-center p-6 space-y-2 group-hover:opacity-100">
+                        <div className="h-12 w-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                          <Upload className="h-6 w-6" />
+                        </div>
+                         <Button 
+                              variant="ghost" 
+                              className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 font-bold"
+                              onClick={() => fileInputRef.current?.click()}
+                          >
+                            Upload Image
+                          </Button>
+                      </div>
+                    )}
+                    
+                    <input 
+                      type="file" 
+                      ref={fileInputRef}
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleThumbnailUpload}
+                      disabled={isCreationMode || uploadingImage} 
                     />
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button variant="secondary" size="sm" className="rounded-xl font-bold bg-white text-indigo-600 shadow-xl">
-                            Change Image
-                        </Button>
-                    </div>
                   </div>
                   <p className="text-xs text-slate-400 text-center font-medium">
-                    Recommended resolution: 1280x720px. Max size: 2MB.
+                     {isCreationMode ? "Save the course first to upload an image." : "Recommended: 1280x720px. Max: 2MB."}
                   </p>
                 </CardContent>
               </Card>

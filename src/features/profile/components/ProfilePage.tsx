@@ -11,7 +11,7 @@ import { Textarea } from '@/shared/components/ui/textarea';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useToast } from '@/shared/hooks/use-toast';
 import { getBackendUrl } from '@/shared/utils';
-import { callBackend } from '@/features/auth/services/authClient';
+import { callBackend, uploadFileToBackend } from '@/features/auth/services/authClient';
 import {
   User,
   Mail,
@@ -19,6 +19,8 @@ import {
   Globe,
   Save,
   Loader2,
+  Upload,
+  Trash2,
   ArrowLeft,
   Shield,
   Calendar,
@@ -53,6 +55,57 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<'profile' | 'instructor' | 'security' | 'notifications' | 'preferences'>('profile');
   const hasPopulatedForm = useRef(false);
   const hasShownWelcome = useRef(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Optional: Check file size (e.g., max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: 'File too large', description: 'Please upload an image smaller than 5MB.', variant: 'destructive' });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('profileImage', file);
+
+      const backendUrl = getBackendUrl();
+      // Using generic upload handler
+      await uploadFileToBackend(`${backendUrl}/api/profile/image`, formData, 'PUT');
+      
+      await refreshProfile();
+      toast({ title: 'Profile photo updated', description: 'Looking good!' });
+    } catch (error) {
+      console.error('Upload failed', error);
+      toast({ title: 'Upload failed', description: 'Could not upload image. Please try again.', variant: 'destructive' });
+    } finally {
+      setUploading(false);
+      // Reset input
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleImageRemove = async () => {
+    if (!profile?.profileImage) return;
+    
+    setUploading(true);
+    try {
+      const backendUrl = getBackendUrl();
+      await callBackend(`${backendUrl}/api/profile/image`, { method: 'DELETE' });
+      
+      await refreshProfile();
+      toast({ title: 'Photo removed', description: 'Profile photo has been reset.' });
+    } catch (error) {
+      toast({ title: 'Action failed', description: 'Could not remove image.', variant: 'destructive' });
+    } finally {
+      setUploading(false);
+    }
+  };
+
 
   // ... (Logic/useEffect/handleSave remain identical to your original code)
   useEffect(() => {
@@ -149,11 +202,51 @@ export default function ProfilePage() {
                 <div className="h-32 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700" />
                 <div className="px-8 pb-8">
                   <div className="flex flex-col sm:flex-row items-end -mt-12 gap-6">
-                    <Avatar className="h-28 w-28 border-4 border-white shadow-2xl">
-                      <AvatarFallback className="bg-purple-600 text-white text-3xl font-bold">
-                        {getInitials()}
-                      </AvatarFallback>
-                    </Avatar>
+                    <div className="relative group">
+                      <Avatar className="h-28 w-28 border-4 border-white shadow-2xl cursor-pointer transition-transform group-hover:scale-105" onClick={() => fileInputRef.current?.click()}>
+                        {uploading ? (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full z-10">
+                            <Loader2 className="h-8 w-8 text-white animate-spin" />
+                          </div>
+                        ) : null}
+                        {profile?.profileImage ? (
+                           <img src={profile.profileImage} alt="Profile" className="h-full w-full object-cover" />
+                        ) : (
+                          <AvatarFallback className="bg-purple-600 text-white text-3xl font-bold">
+                            {getInitials()}
+                          </AvatarFallback>
+                        )}
+                        
+                        {/* Overlay for Edit */}
+                        <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                          <Upload className="h-8 w-8 text-white" />
+                        </div>
+                      </Avatar>
+                      
+                      {/* Hidden Input */}
+                      <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        className="hidden" 
+                        accept="image/png, image/jpeg, image/jpg, image/webp"
+                        onChange={handleImageUpload}
+                      />
+                      
+                      {/* Remove Button (Small X or Trash) */}
+                      {profile?.profileImage && (
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full shadow-md z-20"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleImageRemove();
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                     <div className="flex-1 mb-2 text-center sm:text-left">
                       <h1 className="text-2xl font-bold text-gray-900">{formData.name || 'Set your name'}</h1>
                       <p className="text-gray-500 flex items-center justify-center sm:justify-start gap-2">

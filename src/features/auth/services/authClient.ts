@@ -35,7 +35,7 @@ async function getAccessToken(): Promise<string> {
  */
 export async function callBackend(path: string, options: RequestInit = {}): Promise<any> {
   const token = await getAccessToken();
-  
+
   const res = await fetch(path, {
     ...options,
     headers: {
@@ -44,11 +44,38 @@ export async function callBackend(path: string, options: RequestInit = {}): Prom
       Authorization: `Bearer ${token}`,
     },
   });
-  
+
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
     throw new Error(errorData.error || `API error: ${res.status}`);
   }
-  
+
+  return res.json();
+}
+
+/**
+ * Upload a file to the backend
+ * 
+ * @param path - API path
+ * @param formData - FormData object containing the file
+ * @param method - HTTP method (default PUT)
+ */
+export async function uploadFileToBackend(path: string, formData: FormData, method: string = 'PUT'): Promise<any> {
+  const token = await getAccessToken();
+
+  const res = await fetch(path, {
+    method,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      // Note: Content-Type is NOT set here so the browser can set it with the boundary for FormData
+    },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.error || `API error: ${res.status}`);
+  }
+
   return res.json();
 }

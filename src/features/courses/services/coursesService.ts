@@ -302,6 +302,45 @@ class CoursesService {
     }
   }
 
+  /**
+   * Upload course thumbnail
+   */
+  async uploadCourseThumbnail(courseId: string, file: File): Promise<{ message: string; thumbnail: string }> {
+    try {
+      const formData = new FormData();
+      formData.append('thumbnail', file);
+
+      const url = `${this.baseUrl}/api/instructor/courses/${courseId}/thumbnail`;
+
+      // We need to use the auth client but handle FormData specifically
+      // Since callBackend sets specific headers, we might need a custom approach or extend it
+      // Re-using the uploadFileToBackend from authClient which handles this perfectly
+      const { uploadFileToBackend } = await import('@/features/auth/services/authClient');
+      const response = await uploadFileToBackend(url, formData, 'PUT');
+
+      return response;
+    } catch (error) {
+      console.error('Error uploading thumbnail:', error);
+      throw new Error('Failed to upload thumbnail');
+    }
+  }
+
+  /**
+   * Remove course thumbnail
+   */
+  async removeCourseThumbnail(courseId: string): Promise<{ message: string }> {
+    try {
+      const url = `${this.baseUrl}/api/instructor/courses/${courseId}/thumbnail`;
+      const response = await callBackend(url, {
+        method: 'DELETE',
+      });
+      return response;
+    } catch (error) {
+      console.error('Error removing thumbnail:', error);
+      throw new Error('Failed to remove thumbnail');
+    }
+  }
+
   // ==========================================================================
   // Module Management APIs
   // ==========================================================================

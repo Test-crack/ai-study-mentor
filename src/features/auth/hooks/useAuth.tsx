@@ -9,6 +9,7 @@ export interface UserProfile {
   name: string | null;
   countryCode: string | null;
   phoneNo: string | null;
+  profileImage: string | null;
   role: 'STUDENT' | 'INSTRUCTOR' | 'ADMIN';
   Instructor?: {
     id: string;

@@ -185,7 +185,7 @@ const AdminDashboardPage = () => {
                         rating: 4.8, // Mocked as not in schema for now
                         duration: course.duration_minutes || 0,
                         lastUpdated: new Date(course.created_at).toLocaleDateString(),
-                        thumbnail: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60" // Mocked
+                        thumbnail: course.thumbnail || "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60" 
                     }}
                     onEdit={handleEdit}
                     onView={() => handleView(course.slug, course.id)}

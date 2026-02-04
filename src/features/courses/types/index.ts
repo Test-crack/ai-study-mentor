@@ -21,6 +21,7 @@ export interface Course {
   title: string;
   slug?: string;
   description: string | null;
+  thumbnail: string | null;
   Domain: Domain | null;
   difficulty: DifficultyType | null;
   duration_minutes: number | null;
@@ -51,6 +52,7 @@ export interface CourseDetail {
   title: string;
   slug: string;
   description: string | null;
+  thumbnail: string | null;
   Domain: Domain | null;
   difficulty: DifficultyType | null;
   duration_minutes: number | null;
