@@ -42,9 +42,16 @@ export function MCQContent({
 
     if (isNewQuestion) {
       // If the ID changed, reset everything for the new question
-      setSelectedAnswer(null);
-      setIsSubmitted(isAlreadyCompleted);
-      setHasCalledComplete(isAlreadyCompleted);
+      // Check for saved answer in localStorage
+      const savedAnswer = localStorage.getItem(`mcq_state_${mcq.id}`);
+      setSelectedAnswer(savedAnswer);
+      
+      // If we have a saved answer, we should treat it as submitted so the user sees their result immediately
+      // This handles the "come back" scenario
+      const shouldBeSubmitted = isAlreadyCompleted || !!savedAnswer;
+      setIsSubmitted(shouldBeSubmitted);
+      setHasCalledComplete(isAlreadyCompleted); // Only mark as completed if server says so (or we could infer it, but let's stick to server for progress tracking)
+      
       lastIdRef.current = mcq.id;
     } else {
       // If it's the same question but the parent prop updated (progress saved)
@@ -66,6 +73,10 @@ export function MCQContent({
 
   const handleSubmit = () => {
     if (!selectedAnswer) return;
+    
+    // Save to localStorage
+    localStorage.setItem(`mcq_state_${mcq.id}`, selectedAnswer);
+    
     setIsSubmitted(true);
     
     if (!hasCalledComplete && onComplete) {
@@ -206,7 +217,11 @@ export function MCQContent({
             {isSubmitted && (
               <div className={cn(
                 'mt-6 p-5 rounded-xl border-2 animate-in fade-in slide-in-from-top-2 duration-500',
-                isCorrect ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'
+                isCorrect 
+                  ? 'bg-green-50 border-green-200' 
+                  : !selectedAnswer 
+                    ? 'bg-blue-50 border-blue-200' 
+                    : 'bg-amber-50 border-amber-200'
               )}>
                 <div className="flex items-center gap-3 mb-3">
                   {isCorrect ? (
@@ -217,6 +232,16 @@ export function MCQContent({
                       <div>
                         <span className="font-bold text-green-800 text-lg">Correct! 🎉</span>
                         <p className="text-green-600 text-sm">Great job!</p>
+                      </div>
+                    </>
+                  ) : !selectedAnswer ? (
+                     <>
+                      <div className="p-2 bg-blue-100 rounded-full flex-shrink-0">
+                        <Lightbulb className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <div>
+                        <span className="font-bold text-blue-800 text-lg">Review Mode</span>
+                        <p className="text-blue-600 text-sm">Review the explanation below</p>
                       </div>
                     </>
                   ) : (
