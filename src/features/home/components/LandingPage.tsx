@@ -158,7 +158,7 @@ const LandingPage = () => {
                 <GraduationCap className="h-6 w-6 text-white" />
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                StudyMentor
+                Test Crack
               </span>
             </div>
             <div className="flex items-center gap-4">
@@ -401,10 +401,10 @@ const LandingPage = () => {
               <div className="p-2 bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl">
                 <GraduationCap className="h-5 w-5 text-white" />
               </div>
-              <span className="text-lg font-bold text-white">StudyMentor</span>
+              <span className="text-lg font-bold text-white">Test Crack</span>
             </div>
             <p className="text-sm">
-              © 2025 StudyMentor. All rights reserved.
+              © 2025 Test Crack. All rights reserved.
             </p>
           </div>
         </div>
