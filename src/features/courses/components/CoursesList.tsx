@@ -223,7 +223,7 @@ export function CoursesList() {
                 </div>
                 <Button
                   size="sm"
-                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                  className="bg-indigo-700 hover:bg-purple-700 text-white"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleCourseClick(course.slug, course.id);

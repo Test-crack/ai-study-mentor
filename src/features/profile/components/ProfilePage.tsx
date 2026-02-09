@@ -199,7 +199,7 @@ export default function ProfilePage() {
             {/* Main Header Card */}
             <Card className="border-none shadow-xl shadow-purple-900/5 overflow-hidden backdrop-blur-md bg-white/80">
               <CardContent className="p-0">
-                <div className="h-32 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700" />
+                <div className="h-32 bg-indigo-700" />
                 <div className="px-8 pb-8">
                   <div className="flex flex-col sm:flex-row items-end -mt-12 gap-6">
                     <div className="relative group">
@@ -254,7 +254,7 @@ export default function ProfilePage() {
                       </p>
                     </div>
                     <div className="mb-2">
-                      <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-100 px-4 py-1 rounded-full border-none">
+                      <Badge className="bg-white-700 text-indigo-700 hover:bg-purple-100 px-4 py-1 rounded-full border-none">
                         {profile?.role || 'STUDENT'}
                       </Badge>
                     </div>
@@ -396,7 +396,7 @@ export default function ProfilePage() {
               <Button
                 onClick={handleSave}
                 disabled={saving}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full px-8 h-12 shadow-lg shadow-indigo-200 transition-all hover:-translate-y-0.5"
+                className="bg-indigo-700 hover:bg-indigo-700 text-white rounded-full px-8 h-12 shadow-lg shadow-indigo-200 transition-all hover:-translate-y-0.5"
               >
                 {saving ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
