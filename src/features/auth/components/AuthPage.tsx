@@ -97,17 +97,17 @@ const Auth = () => {
       <div className="flex w-full max-w-5xl bg-white rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.1)] min-h-[650px] flex-col md:flex-row border border-slate-100">
         
         {/* LEFT SIDE: Visual Branding (The Cover) */}
-        <div className="w-full md:w-[45%] bg-indigo-700 p-10 md:p-14 flex flex-col justify-between relative overflow-hidden text-white">
-          {/* Decorative Blur Elements */}
-          <div className="absolute top-0 right-0 w-72 h-72 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-400/20 rounded-full -ml-12 -mb-12 blur-2xl" />
+        <div className="w-full md:w-[45%] bg-gradient-to-br from-indigo-900 to-blue-800 p-10 md:p-14 flex flex-col justify-between relative overflow-hidden text-white">
+          {/* Decorative Blur Elements - Enhanced for Depth */}
+          <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-32 -mt-32 blur-[100px] pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/20 rounded-full -ml-20 -mb-20 blur-[80px] pointer-events-none" />
           
           <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-12">
-              <div className="p-2.5 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-xl">
-                <GraduationCap className="h-8 w-8 text-white" />
+            <div className="flex items-center gap-3 mb-10">
+              <div className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-lg ring-1 ring-white/10">
+                <GraduationCap className="h-7 w-7 text-indigo-100" />
               </div>
-              <span className="text-2xl font-bold tracking-tight">TestCrack</span>
+              <span className="text-2xl font-bold tracking-tight text-white/95 drop-shadow-sm">TestCrack</span>
             </div>
             
             <div className="space-y-6">
@@ -120,12 +120,14 @@ const Auth = () => {
             </div>
           </div>
 
-          <div className="relative z-10 p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl">
+          <div className="relative z-10 p-6 bg-gradient-to-r from-white/10 to-indigo-500/10 backdrop-blur-md border border-white/10 rounded-2xl shadow-sm hover:bg-white/15 transition-colors duration-300">
             <div className="flex items-center gap-3 mb-2">
-              <Rocket className="h-5 w-5 text-blue-300" />
-              <span className="font-bold text-sm uppercase tracking-wider">Ready to Demo</span>
+              <div className="bg-amber-400/20 p-1.5 rounded-lg">
+                  <Rocket className="h-4 w-4 text-amber-300" />
+              </div>
+              <span className="font-bold text-xs uppercase tracking-widest text-indigo-100">Ready to Demo</span>
             </div>
-            <p className="text-sm text-indigo-100/80">
+            <p className="text-sm text-indigo-50/90 leading-relaxed">
               Sign up to test real AI-powered note analysis and YouTube learning features.
             </p>
           </div>

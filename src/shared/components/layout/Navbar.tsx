@@ -12,11 +12,14 @@ import {
   Star,
   User,
   GraduationCap,
-  LayoutDashboard, // Added icon for Admin
+  LayoutDashboard,
+  Sparkles,
+  LogIn,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
 import { StepIndicator } from "@/features/speed-assessment/components/StepIndicator";
+import { cn } from "@/shared/utils";
 
 interface Step {
   id: string;
@@ -51,16 +54,15 @@ export function Navbar({
 }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
-  // Destructure profile from useAuth
   const { profile, signOut } = useAuth();
-  
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Role check based on your useAuth profile
   const isInstructor = profile?.role === "INSTRUCTOR" || profile?.role === "ADMIN";
+  const isHomePage = location.pathname === "/";
+  const isLoggedIn = !!profile;
 
-  const navItems = [
+  const defaultNavItems = [
     { id: "dashboard", label: "Dashboard", icon: Home },
     { id: "courses", label: "Courses", icon: GraduationCap, route: "/courses" },
     { id: "notes", label: "Notes", icon: FileText },
@@ -69,7 +71,16 @@ export function Navbar({
     { id: "progress", label: "Progress", icon: TrendingUp },
   ];
 
-  const handleNavClick = (item: typeof navItems[0]) => {
+  // On Home Page, we might want a simplified list or no center list, 
+  // but let's strictly follow the "Buttons like courses, dash, login" request.
+  // We'll treat these as the main "nav items" for the mobile menu interaction as well.
+  const homeNavItems = [
+    { id: "courses", label: "Courses", icon: GraduationCap, route: "/courses" },
+  ];
+
+  const displayedNavItems = isHomePage ? homeNavItems : defaultNavItems;
+
+  const handleNavClick = (item: typeof defaultNavItems[0]) => {
     if (item.route) {
       navigate(item.route);
     } else if (location.pathname === "/" && onTabChange) {
@@ -81,11 +92,11 @@ export function Navbar({
   };
 
   const handleLogoClick = () => {
-    if (location.pathname === "/" && onTabChange) {
-      onTabChange("dashboard");
-    } else {
-      navigate("/");
-    }
+     if (isLoggedIn) {
+         navigate("/dashboard");
+     } else {
+         navigate("/");
+     }
   };
 
   const handleProfileClick = () => {
@@ -94,89 +105,150 @@ export function Navbar({
 
   return (
     <>
-      <nav className="bg-white/80 backdrop-blur-sm border-b sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
-          <div className="flex justify-between items-center h-14 sm:h-16">
-            <div className="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
+      <nav className="bg-white/90 backdrop-blur-xl border-b border-indigo-50/50 sticky top-0 z-50 shadow-sm transition-all duration-300">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20"> 
+            
+            {/* Left Section: Logo & Mobile Menu */}
+            <div className="flex items-center gap-6">
               {showNavItems && (
                 <Button
                   variant="ghost"
-                  size="sm"
-                  className="lg:hidden p-2"
+                  size="icon"
+                  className="lg:hidden text-slate-500 hover:text-indigo-600 hover:bg-indigo-50"
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 >
-                  {mobileMenuOpen ? (
-                    <X className="h-5 w-5" />
-                  ) : (
-                    <Menu className="h-5 w-5" />
-                  )}
+                  {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                 </Button>
               )}
 
+              {/* Brand Logo */}
               <button
                 onClick={handleLogoClick}
-                className="text-lg sm:text-2xl font-bold bg-indigo-700 bg-clip-text text-transparent whitespace-nowrap hover:opacity-80 transition-opacity"
+                className="group flex items-center gap-3 transition-transform active:scale-95"
               >
-                TestCrack
+                <div className="bg-gradient-to-br from-indigo-600 to-violet-600 text-white p-2 rounded-xl shadow-lg shadow-indigo-200 group-hover:shadow-indigo-300 transition-all duration-300">
+                  <GraduationCap className="h-6 w-6" />
+                </div>
+                <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 tracking-tight hidden sm:block">
+                  TestCrack
+                </span>
               </button>
 
-              {showNavItems && (
-                <div className="hidden lg:flex space-x-2 xl:space-x-4">
-                  {navItems.map((item) => (
-                    <Button
-                      key={item.id}
-                      variant={activeTab === item.id ? "default" : "ghost"}
-                      onClick={() => handleNavClick(item)}
-                      className="text-xs xl:text-sm"
-                    >
-                      {item.label}
-                    </Button>
-                  ))}
+              {/* Desktop Navigation */}
+              {showNavItems && !isHomePage && (
+                <div className="hidden lg:flex items-center space-x-1 ml-4">
+                  {displayedNavItems.map((item) => {
+                    const isActive = activeTab === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => handleNavClick(item)}
+                        className={cn(
+                          "px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2",
+                          isActive
+                            ? "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200"
+                            : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                        )}
+                      >
+                        <item.icon className={cn("h-4 w-4", isActive ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600")} />
+                        {item.label}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
 
-            <div className="flex items-center gap-1 sm:gap-2">
-              <Button
-                variant="ghost"
-                onClick={handleProfileClick}
-                className="text-gray-600 hover:text-gray-700 hover:bg-gray-100 p-2"
-                size="sm"
-              >
-                <User className="h-4 w-4" />
-              </Button>
+            {/* Right Section: Actions */}
+            <div className="flex items-center gap-3">
+              
+              {/* HOME PAGE SPECIFIC ACTIONS */}
+              {isHomePage ? (
+                <>
+                   <Button
+                      onClick={() => navigate("/courses")}
+                      variant="ghost"
+                      className="hidden sm:flex text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 font-medium"
+                   >
+                     Courses
+                   </Button>
 
-              <Button
-                variant="ghost"
-                onClick={signOut}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2"
-                size="sm"
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
+                  {isLoggedIn ? (
+                    <>
+                       <Button
+                          onClick={() => navigate("/dashboard")}
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200 rounded-full px-5 transition-all active:scale-95"
+                       >
+                         <LayoutDashboard className="h-4 w-4 mr-2" />
+                         Dashboard
+                       </Button>
+                        {/* Simplified User Menu for Home Home Page */}
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleProfileClick}
+                            className="rounded-full h-10 w-10 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50"
+                         >
+                            <User className="h-5 w-5" />
+                         </Button>
+                    </>
+                  ) : (
+                    <Button
+                      onClick={() => navigate("/auth")}
+                      className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-200 rounded-full px-6 transition-all active:scale-95"
+                    >
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Login
+                    </Button>
+                  )}
+                </>
+              ) : (
+                /* DEFAULT APP ACTIONS */
+                <>
+                   {showUpgradeButton && (
+                    <Button
+                      onClick={onUpgradeClick}
+                      className="hidden sm:flex bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white shadow-lg shadow-indigo-200 rounded-full px-5 py-5 transition-all hover:scale-105 active:scale-95"
+                    >
+                      <Sparkles className="h-4 w-4 mr-2 text-yellow-200" />
+                      <span className="font-semibold">Upgrade Plan</span>
+                    </Button>
+                  )}
 
-              {showUpgradeButton && (
-                <Button
-                  onClick={onUpgradeClick}
-                  className="bg-indigo-700 hover:to-pink-600 text-white hover:text-white px-2 sm:px-3"
-                  size="sm"
-                >
-                  <Star className="h-4 w-4 sm:mr-1" />
-                  <span className="hidden sm:inline text-xs">Upgrade</span>
-                </Button>
-              )}
+                  {isInstructor && (
+                    <Button
+                      onClick={() => navigate("/courses/admin/dashboard")}
+                      variant="outline"
+                      className="hidden sm:flex border-indigo-200 bg-indigo-50/50 text-indigo-700 hover:bg-indigo-100 rounded-full px-4"
+                    >
+                      <LayoutDashboard className="h-4 w-4 mr-2" />
+                      Instructor
+                    </Button>
+                  )}
 
-              {/* ADMIN BUTTON - Placed after Upgrade button */}
-              {isInstructor && (
-                <Button
-                  onClick={() => navigate("/courses/admin/dashboard")}
-                  variant="outline"
-                  className="border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-2 sm:px-3 ml-1"
-                  size="sm"
-                >
-                  <LayoutDashboard className="h-4 w-4 sm:mr-1" />
-                  <span className="hidden sm:inline text-xs">Admin Dashboard</span>
-                </Button>
+                  <div className="h-8 w-px bg-slate-200 mx-1 hidden sm:block" />
+
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleProfileClick}
+                      className="rounded-full h-10 w-10 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                    >
+                      <User className="h-5 w-5" />
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={signOut}
+                      className="rounded-full h-10 w-10 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <LogOut className="h-5 w-5" />
+                    </Button>
+                  </div>
+                </>
               )}
             </div>
           </div>
@@ -187,40 +259,83 @@ export function Navbar({
       {showNavItems && mobileMenuOpen && (
         <>
           <div
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
+            className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 lg:hidden animate-in fade-in duration-200"
             onClick={() => setMobileMenuOpen(false)}
           />
 
-          <div className="fixed top-14 left-0 right-0 bg-white/95 backdrop-blur-md border-b shadow-lg z-40 lg:hidden animate-in slide-in-from-top duration-300">
-            <div className="max-w-7xl mx-auto px-4 py-4">
-              <div className="flex flex-col space-y-2">
-                {navItems.map((item) => (
-                  <Button
-                    key={item.id}
-                    variant={activeTab === item.id ? "default" : "ghost"}
-                    onClick={() => handleNavClick(item)}
-                    className="w-full justify-start text-base py-6"
-                  >
-                    <item.icon className="h-5 w-5 mr-3" />
-                    {item.label}
-                  </Button>
-                ))}
-
-                {/* Mobile Admin Link */}
-                {isInstructor && (
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      navigate("/courses/admin/dashboard");
-                      setMobileMenuOpen(false);
-                    }}
-                    className="w-full justify-start text-base py-6 border-indigo-100 bg-indigo-50 text-indigo-700"
-                  >
-                    <LayoutDashboard className="h-5 w-5 mr-3" />
-                    Admin Dashboard
-                  </Button>
-                )}
+          <div className="fixed top-[80px] left-0 right-0 bg-white border-b shadow-xl z-40 lg:hidden animate-in slide-in-from-top-5 duration-300 rounded-b-3xl">
+            <div className="max-w-7xl mx-auto px-6 py-6 space-y-3">
+              <div className="grid grid-cols-1 gap-3">
+                {displayedNavItems.map((item) => {
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handleNavClick(item)}
+                      className={cn(
+                        "flex items-center gap-3 p-4 rounded-2xl text-sm font-medium transition-all duration-200 border",
+                        isActive
+                          ? "bg-indigo-50 border-indigo-100 text-indigo-700 shadow-sm"
+                          : "bg-white border-slate-100 text-slate-600 hover:bg-slate-50 hover:border-slate-200"
+                      )}
+                    >
+                      <item.icon className={cn("h-5 w-5", isActive ? "text-indigo-600" : "text-slate-400")} />
+                      {item.label}
+                    </button>
+                  );
+                })}
               </div>
+              
+              {/* Additional Mobile Actions for Home Page */}
+              {isHomePage && (
+                  !isLoggedIn ? (
+                    <button
+                        onClick={() => {
+                            navigate("/auth");
+                            setMobileMenuOpen(false);
+                        }}
+                        className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl bg-slate-900 text-white font-bold shadow-lg shadow-slate-200 active:scale-95 transition-transform"
+                    >
+                      <LogIn className="h-5 w-5" />
+                      Login
+                    </button>
+                  ) : (
+                    <button
+                        onClick={() => {
+                            navigate("/dashboard");
+                            setMobileMenuOpen(false);
+                        }}
+                         className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-200 active:scale-95 transition-transform"
+                    >
+                        <LayoutDashboard className="h-5 w-5" />
+                        Go to Dashboard
+                    </button>
+                  )
+              )}
+
+
+              {!isHomePage && isInstructor && (
+                 <button
+                   onClick={() => {
+                     navigate("/courses/admin/dashboard");
+                     setMobileMenuOpen(false);
+                   }}
+                   className="w-full flex items-center justify-center gap-2 p-4 mt-2 rounded-2xl bg-slate-900 text-white font-medium active:scale-95 transition-transform"
+                 >
+                   <LayoutDashboard className="h-5 w-5" />
+                   Instructor Dashboard
+                 </button>
+              )}
+              
+               {!isHomePage && showUpgradeButton && (
+                <button
+                  onClick={onUpgradeClick}
+                  className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold shadow-lg shadow-indigo-200 active:scale-95 transition-transform"
+                >
+                  <Sparkles className="h-5 w-5 text-yellow-200" />
+                  Upgrade to Pro
+                </button>
+               )}
             </div>
           </div>
         </>
