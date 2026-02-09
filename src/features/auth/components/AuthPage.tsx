@@ -97,7 +97,7 @@ const Auth = () => {
       <div className="flex w-full max-w-5xl bg-white rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.1)] min-h-[650px] flex-col md:flex-row border border-slate-100">
         
         {/* LEFT SIDE: Visual Branding (The Cover) */}
-        <div className="w-full md:w-[45%] bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-700 p-10 md:p-14 flex flex-col justify-between relative overflow-hidden text-white">
+        <div className="w-full md:w-[45%] bg-indigo-700 p-10 md:p-14 flex flex-col justify-between relative overflow-hidden text-white">
           {/* Decorative Blur Elements */}
           <div className="absolute top-0 right-0 w-72 h-72 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl" />
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-400/20 rounded-full -ml-12 -mb-12 blur-2xl" />
