@@ -254,7 +254,7 @@ export default function ProfilePage() {
                       </p>
                     </div>
                     <div className="mb-2">
-                      <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-100 px-4 py-1 rounded-full border-none">
+                      <Badge className="bg-white-700 text-indigo-700 hover:bg-purple-100 px-4 py-1 rounded-full border-none">
                         {profile?.role || 'STUDENT'}
                       </Badge>
                     </div>

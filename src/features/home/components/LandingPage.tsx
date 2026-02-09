@@ -154,25 +154,25 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-2">
-              <div className="p-2 bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl">
+              <div className="p-2 bg-indigo-700 rounded-xl">
                 <GraduationCap className="h-6 w-6 text-white" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                StudyMentor
+              <span className="text-xl font-bold bg-indigo-700 bg-clip-text text-transparent">
+               TestCrack
               </span>
             </div>
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
                 onClick={() => navigate('/courses')}
-                className="text-gray-600 hover:text-gray-900"
+                className="text-white  bg-indigo-700 hover:text-gray-900"
               >
                 Courses
               </Button>
               {user ? (
                 <Button
                   onClick={() => navigate('/dashboard')}
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  className="bg-indigo-700 hover:from-purple-700 hover:to-blue-700"
                 >
                   Dashboard
                 </Button>
@@ -181,13 +181,13 @@ const LandingPage = () => {
                   <Button
                     variant="ghost"
                     onClick={() => navigate('/auth')}
-                    className="text-gray-600 hover:text-gray-900"
+                    className="text-white bg-indigo-700 hover:text-gray-900"
                   >
                     Sign In
                   </Button>
                   <Button
                     onClick={() => navigate('/auth')}
-                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                    className="bg-indigo-700 hover:from-purple-700 hover:to-blue-700"
                   >
                     Get Started
                   </Button>
@@ -208,7 +208,7 @@ const LandingPage = () => {
             </Badge>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
               Learn Smarter, Not Harder with{' '}
-              <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              <span className="bg-indigo-700 bg-clip-text text-transparent">
                 AI
               </span>
             </h1>
@@ -220,7 +220,7 @@ const LandingPage = () => {
               <Button
                 size="lg"
                 onClick={() => navigate(user ? '/dashboard' : '/auth')}
-                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-lg px-8 py-6"
+                className="bg-indigo-700 hover:from-purple-700 hover:to-blue-700 text-lg px-8 py-6"
               >
                 {user ? 'Go to Dashboard' : 'Start Learning Free'}
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -371,7 +371,7 @@ const LandingPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-purple-600 to-blue-600">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-indigo-700">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
             Ready to Transform Your Learning?
@@ -398,7 +398,7 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center space-x-2">
-              <div className="p-2 bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl">
+              <div className="p-2 bg-indigo-700 rounded-xl">
                 <GraduationCap className="h-5 w-5 text-white" />
               </div>
               <span className="text-lg font-bold text-white">StudyMentor</span>
