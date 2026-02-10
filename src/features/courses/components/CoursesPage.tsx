@@ -1,13 +1,15 @@
 import { CoursesNavbar } from './CoursesNavbar';
 import { CoursesList } from './CoursesList';
 import { useState } from 'react';
-
+import { Navbar } from '@/shared/components/layout';
 const CoursesPage = () => {
   const [heroSearchQuery, setHeroSearchQuery] = useState('');
 
   return (
     <div className="min-h-screen bg-white">
-      <CoursesNavbar />
+       {/* Navbar */}
+            <Navbar showNavItems={true} />
+            
       
       {/* Hero Section */}
       <div className="bg-indigo-700 text-white">

@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BookOpen, Star, Plus, Check, FileText, Video, Loader2 } from "lucide-react";
 import { useToast } from "@/shared/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Navbar } from "@/shared/components/layout";
 
 interface StudyGuide {
   id: string;
@@ -178,6 +179,9 @@ export const StudyGuides = () => {
 
   return (
     <div className="space-y-6">
+       {/* Navbar */}
+            <Navbar showNavItems={true} />
+            
       <div className="text-center space-y-4">
         <h2 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
           Personalized Study Guides

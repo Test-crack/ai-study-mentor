@@ -21,10 +21,12 @@ import CourseDetailPage from "@/features/courses/components/CourseDetailPage";
 import LearningPage from "@/features/courses/components/learning/LearningPage";
 import AdminDashboardPage from "@/features/courses/components/admin/AdminDashboardPage";
 import CourseManagementPage from "@/features/courses/components/admin/CourseManagementPage";
-
 const queryClient = new QueryClient();
 
 import { RoleProtectedRoute } from "@/shared/components/auth/ProtectedRoute";
+import { StudyGuides, YouTubeAnalyzer } from "@/features/notes";
+import { ProgressDashboard } from "@/features/profile";
+import {PremiumModal}  from "@/features/payment/components";
 
 const AppRoutes = () => {
   const { user } = useAuth();
@@ -41,6 +43,10 @@ const AppRoutes = () => {
       
       {/* Protected routes - require authentication */}
       <Route path="/dashboard" element={<RoleProtectedRoute><DashboardPage /></RoleProtectedRoute>} />
+      <Route path="/youtube-ana" element={<RoleProtectedRoute><YouTubeAnalyzer/></RoleProtectedRoute>}/>
+      <Route path="/notes" element={<RoleProtectedRoute><NotesPage/></RoleProtectedRoute>}/>
+      <Route path="/study" element={<RoleProtectedRoute><StudyGuides/></RoleProtectedRoute>}/>
+      <Route path="/progress" element={<RoleProtectedRoute><ProgressDashboard/></RoleProtectedRoute>}/>
       <Route path="/learn/:slug" element={<RoleProtectedRoute><LearningPage /></RoleProtectedRoute>} />
       <Route path="/notes" element={<RoleProtectedRoute><NotesPage /></RoleProtectedRoute>} />
       <Route path="/profile" element={<RoleProtectedRoute><ProfilePage /></RoleProtectedRoute>} />

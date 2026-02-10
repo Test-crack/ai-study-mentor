@@ -111,8 +111,8 @@ const Auth = () => {
             </div>
             
             <div className="space-y-6">
-                <h2 className="text-4xl lg:text-5xl font-extrabold leading-[1.15]">
-                  {isForgotPassword ? "Protect Your Progress." : isSignUp ? "Start Your AI Journey." : "Welcome Back to Learning."}
+                <h2 style={{fontFamily:"sans-serif",fontWeight:"bold"}} className="text-4xl lg:text-5xl font-extrabold leading-[1.15]">
+                  {isForgotPassword ? "Protect Your Progress." : isSignUp ? "Start Your AI Journey." : "Welcome Back to TestCrack."}
                 </h2>
                 <p className="text-purple-100/80 text-lg leading-relaxed max-w-xs">
                   Access your personalized study companion and master your exams with ease.
@@ -120,7 +120,7 @@ const Auth = () => {
             </div>
           </div>
 
-          <div className="relative z-10 p-6 bg-gradient-to-r from-white/10 to-indigo-500/10 backdrop-blur-md border border-white/10 rounded-2xl shadow-sm hover:bg-white/15 transition-colors duration-300">
+          {/* <div className="relative z-10 p-6 bg-gradient-to-r from-white/10 to-indigo-500/10 backdrop-blur-md border border-white/10 rounded-2xl shadow-sm hover:bg-white/15 transition-colors duration-300">
             <div className="flex items-center gap-3 mb-2">
               <div className="bg-amber-400/20 p-1.5 rounded-lg">
                   <Rocket className="h-4 w-4 text-amber-300" />
@@ -130,7 +130,7 @@ const Auth = () => {
             <p className="text-sm text-indigo-50/90 leading-relaxed">
               Sign up to test real AI-powered note analysis and YouTube learning features.
             </p>
-          </div>
+          </div> */}
         </div>
 
         {/* RIGHT SIDE: The Form (The Page) */}
