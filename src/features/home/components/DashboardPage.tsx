@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/shared/components/ui/button';
 import {
   Card,
@@ -30,12 +31,25 @@ import { getBackendUrl } from '@/shared/utils';
 import { callBackend } from '@/features/auth/services/authClient';
 
 const DashboardPage = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const { tab } = useParams(); // URL parameter: /dashboard/:tab
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [displayName, setDisplayName] = useState<string>('');
   const { user } = useAuth();
   const hasLoadedProfile = useRef(false);
 
+  // 1. Listen for "openUpgrade" state from Navbar/Other pages
+  useEffect(() => {
+    if (location.state?.openUpgrade) {
+      setShowPremiumModal(true);
+      // Clean up the state so it doesn't pop up again on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
+  // 2. Profile Loading Logic
   useEffect(() => {
     if (hasLoadedProfile.current || !user) {
       return;
@@ -73,33 +87,34 @@ const DashboardPage = () => {
     },
   };
 
+  // 3. Updated features using navigate() for routing
   const features = [
     {
       icon: Book,
       title: 'Smart Notes',
       description: 'Upload and analyze your study materials with AI',
-      action: () => setActiveTab('notes'),
+      action: () => navigate('/dashboard/notes'),
       premium: false,
     },
     {
       icon: Youtube,
       title: 'YouTube Learning',
       description: 'Extract and summarize video content instantly',
-      action: () => setActiveTab('youtube'),
+      action: () => navigate('/dashboard/youtube'),
       premium: false,
     },
     {
       icon: BookOpen,
       title: 'Study Guides',
       description: 'AI-generated personalized study guides',
-      action: () => setActiveTab('guides'),
+      action: () => navigate('/dashboard/guides'),
       premium: false,
     },
     {
       icon: Clock,
       title: 'Speed Assessment',
       description: 'Test and improve your reading speed',
-      action: () => (window.location.href = '/assessment'),
+      action: () => navigate('/assessment'),
       premium: false,
     },
     {
@@ -113,13 +128,14 @@ const DashboardPage = () => {
       icon: Star,
       title: 'Daily Streak',
       description: 'Assessment of daily Streak You Have',
-      action: () => (window.location.href = '/404'),
+      action: () => navigate('/404'),
       premium: false,
     },
   ];
 
   const renderContent = () => {
-    switch (activeTab) {
+    // Switching content based on the :tab URL parameter
+    switch (tab) {
       case 'notes':
         return <NotesUpload />;
       case 'youtube':
@@ -129,6 +145,7 @@ const DashboardPage = () => {
       case 'progress':
         return <ProgressDashboard />;
       default:
+        // Default "Dashboard" Home View
         return (
           <div className="space-y-8">
             {/* Welcome Section */}
@@ -245,7 +262,7 @@ const DashboardPage = () => {
                 </div>
 
                 <Button
-                  onClick={() => (window.location.href = '/courses')}
+                  onClick={() => navigate('/courses')}
                   className="bg-white text-indigo-900 hover:bg-slate-100 h-16 px-10 rounded-2xl font-bold text-lg transition-all shadow-xl hover:shadow-2xl active:scale-95 whitespace-nowrap"
                 >
                   Browse Courses
@@ -299,7 +316,7 @@ const DashboardPage = () => {
               <CardContent className="flex flex-col sm:flex-row gap-3 sm:gap-4 p-4 sm:p-6 pt-0">
                 <Button
                   variant="secondary"
-                  onClick={() => setActiveTab('notes')}
+                  onClick={() => navigate('/dashboard/notes')}
                   className="border-2 border-white text-white hover:bg-white hover:text-purple-600 bg-transparent w-full sm:w-auto"
                 >
                   <Plus className="h-4 w-4 mr-2" />
@@ -307,7 +324,7 @@ const DashboardPage = () => {
                 </Button>
                 <Button
                   variant="secondary"
-                  onClick={() => setActiveTab('youtube')}
+                  onClick={() => navigate('/dashboard/youtube')}
                   className="border-2 border-white text-white hover:bg-white hover:text-purple-600 bg-transparent w-full sm:w-auto"
                 >
                   <Youtube className="h-4 w-4 mr-2" />
@@ -324,8 +341,6 @@ const DashboardPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
       <Navbar
         showNavItems={true}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
         showUpgradeButton={!userData.isPremium}
         onUpgradeClick={() => setShowPremiumModal(true)}
       />

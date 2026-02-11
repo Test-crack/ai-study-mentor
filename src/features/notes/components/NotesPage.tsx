@@ -6,7 +6,6 @@ import { useToast } from "@/shared/hooks/use-toast";
 import { getBackendUrl } from "@/shared/utils";
 import UploadedFileCard from "@/features/notes/components/UploadedFileCard";
 import GeneratedNotesDisplay from "./GeneratedNotesDisplay";
-import { Navbar } from "@/shared/components/layout/Navbar";
 import { 
   Plus, 
   Upload, 
@@ -274,8 +273,7 @@ export default function Notes() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-      {/* Navbar */}
-      <Navbar showNavItems={true} />
+  
       
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         <div className="space-y-4 sm:space-y-6 md:space-y-8">

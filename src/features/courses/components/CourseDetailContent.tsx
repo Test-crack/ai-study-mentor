@@ -16,12 +16,20 @@ import {
   FileText,
 } from 'lucide-react';
 import { CourseDetail, DifficultyType } from '../types';
+import { useEffect } from 'react';
 
 interface CourseDetailContentProps {
   course: CourseDetail;
 }
 
 export function CourseDetailContent({ course }: CourseDetailContentProps) {
+
+  useEffect(() => {
+    // This forces the laptop browser to start at the very top (0,0)
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, []);
+
+
   const formatDuration = (minutes: number | null) => {
     if (!minutes) return 'Self-paced';
     const hours = Math.floor(minutes / 60);

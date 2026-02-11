@@ -12,7 +12,6 @@ import { TranscriptViewer } from "./TranscriptViewer";
 import { EnhancedStudyNotes } from "./EnhancedStudyNotes";
 import { TranscriptPermissionModal } from "./TranscriptPermissionModal";
 import { extractTranscriptFromBrowser } from "../services/youtube-transcript";
-import { Navbar } from "@/shared/components/layout";
 
 interface TranscriptSegment {
   text: string;
@@ -319,8 +318,7 @@ export const YouTubeAnalyzer = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-       {/* Navbar */}
-            <Navbar showNavItems={true} />
+       
             
       <div className="text-center space-y-2 sm:space-y-4 px-2">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-red-500 to-purple-600 bg-clip-text text-transparent">

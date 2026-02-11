@@ -24,9 +24,7 @@ import CourseManagementPage from "@/features/courses/components/admin/CourseMana
 const queryClient = new QueryClient();
 
 import { RoleProtectedRoute } from "@/shared/components/auth/ProtectedRoute";
-import { StudyGuides, YouTubeAnalyzer } from "@/features/notes";
-import { ProgressDashboard } from "@/features/profile";
-import {PremiumModal}  from "@/features/payment/components";
+
 
 const AppRoutes = () => {
   const { user } = useAuth();
@@ -41,12 +39,14 @@ const AppRoutes = () => {
       <Route path="/courses" element={<CoursesPage />} />
       <Route path="/courses/:slug" element={<CourseDetailPage />} />
       
-      {/* Protected routes - require authentication */}
+{/* UPDATED DASHBOARD ROUTE 
+          The :tab? means it will match /dashboard, /dashboard/notes, /dashboard/youtube, etc.
+      */}
       <Route path="/dashboard" element={<RoleProtectedRoute><DashboardPage /></RoleProtectedRoute>} />
-      <Route path="/youtube-ana" element={<RoleProtectedRoute><YouTubeAnalyzer/></RoleProtectedRoute>}/>
-      <Route path="/notes" element={<RoleProtectedRoute><NotesPage/></RoleProtectedRoute>}/>
-      <Route path="/study" element={<RoleProtectedRoute><StudyGuides/></RoleProtectedRoute>}/>
-      <Route path="/progress" element={<RoleProtectedRoute><ProgressDashboard/></RoleProtectedRoute>}/>
+      <Route path="/dashboard/:tab" element={<RoleProtectedRoute><DashboardPage /></RoleProtectedRoute>} />
+
+
+      {/* Protected routes - require authentication */}
       <Route path="/learn/:slug" element={<RoleProtectedRoute><LearningPage /></RoleProtectedRoute>} />
       <Route path="/notes" element={<RoleProtectedRoute><NotesPage /></RoleProtectedRoute>} />
       <Route path="/profile" element={<RoleProtectedRoute><ProfilePage /></RoleProtectedRoute>} />

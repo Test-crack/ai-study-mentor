@@ -116,36 +116,36 @@ const LandingPage = () => {
     },
   ];
 
-  const stats = [
-    { value: '10K+', label: 'Active Learners' },
-    { value: '500+', label: 'Courses' },
-    { value: '95%', label: 'Satisfaction Rate' },
-    { value: '24/7', label: 'AI Support' },
-  ];
+  // const stats = [
+  //   { value: '10K+', label: 'Active Learners' },
+  //   { value: '500+', label: 'Courses' },
+  //   { value: '95%', label: 'Satisfaction Rate' },
+  //   { value: '24/7', label: 'AI Support' },
+  // ];
 
-  const testimonials = [
-    // {
-    //   name: 'Sarah M.',
-    //   role: 'Medical Student',
-    //   content:
-    //     'This platform transformed how I study. The AI summaries save me hours every week!',
-    //   rating: 5,
-    // },
-    // {
-    //   name: 'James K.',
-    //   role: 'Software Engineer',
-    //   content:
-    //     'The structured courses helped me transition into a new tech stack seamlessly.',
-    //   rating: 5,
-    // },
-    {
-      name: 'Priya R.',
-      role: 'Graduate Student',
-      content:
-        'Speed reading training improved my research efficiency by 3x. Highly recommend!',
-      rating: 5,
-    },
-  ];
+  // const testimonials = [
+  //   {
+  //     name: 'Sarah M.',
+  //     role: 'Medical Student',
+  //     content:
+  //       'This platform transformed how I study. The AI summaries save me hours every week!',
+  //     rating: 5,
+  //   },
+  //   {
+  //     name: 'James K.',
+  //     role: 'Software Engineer',
+  //     content:
+  //       'The structured courses helped me transition into a new tech stack seamlessly.',
+  //     rating: 5,
+  //   },
+  //   {
+  //     name: 'Priya R.',
+  //     role: 'Graduate Student',
+  //     content:
+  //       'Speed reading training improved my research efficiency by 3x. Highly recommend!',
+  //     rating: 5,
+  //   },
+  // ];
 
   return (
     <div className="min-h-screen bg-white">
@@ -161,94 +161,109 @@ const LandingPage = () => {
                TestCrack
               </span>
             </div>
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                onClick={() => navigate('/courses')}
-                className="text-white  bg-indigo-700 hover:text-gray-900"
-              >
-                Courses
-              </Button>
-              {user ? (
-                <Button
-                  onClick={() => navigate('/dashboard')}
-                  className="bg-indigo-700 hover:from-purple-700 hover:to-blue-700"
-                >
-                  Dashboard
-                </Button>
-              ) : (
-                <>
-                  <Button
-                    variant="ghost"
-                    onClick={() => navigate('/auth')}
-                    className="text-white bg-indigo-700 hover:text-gray-900"
-                  >
-                    Sign In
-                  </Button>
-                  <Button
-                    onClick={() => navigate('/auth')}
-                    className="bg-indigo-700 hover:from-purple-700 hover:to-blue-700"
-                  >
-                    Get Started
-                  </Button>
-                </>
-              )}
-            </div>
+         <div className="flex items-center gap-4">
+  <Button
+    variant="ghost"
+    onClick={() => navigate('/courses')}
+    className="hidden md:inline-flex text-white bg-indigo-700 hover:text-gray-900"//mobile hidden
+  >
+    Courses
+  </Button>
+
+  {user ? (
+    <Button
+      onClick={() => navigate('/dashboard')}
+      className="bg-indigo-700 hover:from-purple-700 hover:to-blue-700"
+    >
+      Dashboard
+    </Button>
+  ) : (
+    <>
+      <Button
+        variant="ghost"
+        onClick={() => navigate('/auth')}
+        className="text-white bg-indigo-700 hover:text-gray-900"
+      >
+        Sign In
+      </Button>
+      <Button
+        onClick={() => navigate('/auth')}
+        className="bg-indigo-700 hover:from-purple-700 hover:to-blue-700"
+      >
+        Get Started
+      </Button>
+    </>
+  )}
+</div>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-4xl mx-auto">
-            <Badge className="mb-6 bg-purple-100 text-purple-700 hover:bg-purple-100">
-              <Sparkles className="h-3 w-3 mr-1" />
-              AI-Powered Education Platform
-            </Badge>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              Learn Smarter with{' '}
-              <span className="bg-indigo-700 bg-clip-text text-transparent">
-                AI
-              </span>
-            </h1>
-            <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Transform your learning experience with personalized AI 
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button
-                size="lg"
-                onClick={() => navigate(user ? '/dashboard' : '/auth')}
-                className="bg-indigo-700 hover:from-purple-700 hover:to-blue-700 text-lg px-8 py-6"
-              >
-                {user ? 'Go to Dashboard' : 'Start Learning Free'}
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => navigate('/courses')}
-                className="text-lg px-8 py-6"
-              >
-                <BookOpen className="mr-2 h-5 w-5" />
-                Browse Courses
-              </Button>
-            </div>
-          </div>
+<section className="relative min-h-[80vh] flex items-center pt-24 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-50 via-white to-indigo-100 overflow-hidden ">
+  {/* Subtle Background Glows */}
+  <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
+    <div className="absolute top-[10%] left-[10%] w-64 h-64 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+    <div className="absolute bottom-[10%] right-[10%] w-64 h-64 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+  </div>
 
-          {/* Stats */}
-          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold text-gray-900">
-                  {stat.value}
-                </div>
-                <div className="text-gray-600 mt-1">{stat.label}</div>
-              </div>
-            ))}
+  <div className="max-w-7xl mx-auto w-full">
+    <div className="text-center max-w-4xl mx-auto">
+      <Badge className="mb-6 bg-purple-100 text-purple-700 hover:bg-purple-100 border-none px-3 py-1 mt-5">
+        <Sparkles className="h-3.5 w-3.5 mr-2" />
+        AI-Powered Education Platform
+      </Badge>
+      
+      <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight tracking-tight mt-5">
+        Learn Smarter with{' '}
+        <span className="bg-gradient-to-r from-indigo-700 to-purple-700 bg-clip-text text-transparent">
+          AI 
+        </span>
+      </h1>
+      
+      <p className="text-lg sm:text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+        Transform your learning experience with personalized AI.
+      </p>
+      
+      {/* Refined Button Sizes */}
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+        <Button
+          size="lg"
+          onClick={() => navigate(user ? '/dashboard' : '/auth')}
+          className="bg-indigo-700 hover:bg-indigo-800 text-white px-8 py-6 h-auto transition-all shadow-md active:scale-95"
+        >
+          {user ? 'Go to Dashboard' : 'Start Learning Free'}
+          <ArrowRight className="ml-2 h-5 w-5" />
+        </Button>
+        
+        <Button
+          size="lg"
+          variant="outline"
+          onClick={() => navigate('/courses')}
+          className="px-8 py-6 h-auto bg-white/50 backdrop-blur-sm transition-all shadow-sm active:scale-95"
+        >
+          <BookOpen className="mr-2 h-5 w-5 text-gray-600" />
+          Browse Courses
+        </Button>
+      </div>
+
+      {/* Clean Stats Section */}
+      {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto pt-10 border-t border-gray-200/60">
+        {[
+          { label: 'Learners', value: '50k+' },
+          { label: 'Courses', value: '200+' },
+          { label: 'Success', value: '98%' },
+          { label: 'Support', value: '24/7' },
+        ].map((stat, index) => (
+          <div key={index} className="text-center">
+            <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-widest">{stat.label}</div>
           </div>
-        </div>
-      </section>
+        ))}
+      </div> */}
+    </div>
+  </div>
+</section>
 
       {/* Features Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
@@ -332,7 +347,7 @@ const LandingPage = () => {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      {/* <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
@@ -346,10 +361,10 @@ const LandingPage = () => {
        <div className="flex flex-col gap-4 w-full">
   {testimonials.map((testimonial, index) => (
     <Card key={index} className="border-2 rounded-none w-full overflow-hidden">
-      <CardContent className="p-0"> {/* Removed default padding to control layout */}
+      <CardContent className="p-0"> 
         <div className="flex flex-col md:flex-row items-center">
           
-          {/* 1. The Rating Section */}
+
           <div className="p-6 border-b md:border-b-0 md:border-r border-gray-100 flex flex-shrink-0 items-center justify-center min-w-[140px]">
             <div className="flex gap-1">
               {[...Array(testimonial.rating)].map((_, i) => (
@@ -358,14 +373,12 @@ const LandingPage = () => {
             </div>
           </div>
 
-          {/* 2. The Quote Section (Takes up available space) */}
           <div className="p-6 flex-grow">
             <p className="text-gray-700 italic text-lg text-center md:text-left">
               "{testimonial.content}"
             </p>
           </div>
 
-          {/* 3. The User Section */}
           <div className="p-6 bg-slate-50 border-t md:border-t-0 md:border-l border-gray-100 min-w-[200px] text-center md:text-right">
             <p className="font-bold text-gray-900">{testimonial.name}</p>
             <p className="text-xs text-indigo-600 font-semibold uppercase tracking-widest">
@@ -379,7 +392,7 @@ const LandingPage = () => {
   ))}
 </div>
         </div>
-      </section>
+      </section> */}
 
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-indigo-700">

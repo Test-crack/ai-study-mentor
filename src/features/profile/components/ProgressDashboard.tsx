@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/sha
 import { Badge } from "@/shared/components/ui/badge";
 import { Progress } from "@/shared/components/ui/progress";
 import { Star, Book, Video, BookOpen, Check } from "lucide-react";
-import { Navbar } from "@/shared/components/layout";
 export const ProgressDashboard = () => {
   const weeklyStats = [
     { day: "Mon", studyTime: 45, sessions: 2 },
@@ -33,8 +32,7 @@ export const ProgressDashboard = () => {
 
   return (
     <div className="space-y-6">
-       {/* Navbar */}
-            <Navbar showNavItems={true} />
+   
             
       <div className="text-center space-y-4">
         <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
