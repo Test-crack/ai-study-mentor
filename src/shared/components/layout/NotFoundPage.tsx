@@ -37,7 +37,7 @@ const NotFoundPage = () => {
           </h1>
           
           <p className="text-lg md:text-xl text-slate-600 mb-10 max-w-sm mx-auto leading-relaxed">
-            We're polishing the <span className="font-semibold text-slate-800 italic">Daily Streak Results</span> experience. It’s going to be worth the wait.
+            We're polishing the <span className="font-semibold text-slate-800 italic">Work</span> experience. It’s going to be worth the wait.
           </p>
 
           {/* Action Button */}

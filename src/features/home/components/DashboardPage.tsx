@@ -112,7 +112,7 @@ const DashboardPage = () => {
     {
       icon: Star,
       title: 'Daily Streak',
-      description: 'Assesment of daily Streak You Have',
+      description: 'Assessment of daily Streak You Have',
       action: () => (window.location.href = '/404'),
       premium: false,
     },
@@ -213,54 +213,46 @@ const DashboardPage = () => {
               </Card>
             </div>
 
-         
-         {/* Courses CTA Banner \*/}
-<Card className="bg-indigo-700 border-none rounded-[24px] overflow-hidden relative group shadow-2xl">
-  {/* Glassy Gradient Overlay */}
-  <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 opacity-50 group-hover:opacity-70 transition-opacity" />
-  
-  {/* Subtle SVG Pattern from original code, kept for texture */}
-  <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIxLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNCA0LTEuNzkgNC00em0wLTEwYzAtMi4yMS0xLjc5LTQtNC00cy00IDEuNzktNCA0IDEuNzkgNCA0IDQgNC0xLjc5IDQtNHptMC0xMGMwLTIuMjEtMS43OS00LTQtNHMtNCAxLjc5LTQgNCAxLjc5IDQgNCA0IDQtMS43OSA0LTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-10" />
+            {/* Courses CTA Banner */}
+            <Card className="bg-indigo-700 border-none rounded-[24px] overflow-hidden relative group shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 opacity-50 group-hover:opacity-70 transition-opacity" />
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIxLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNCA0LTEuNzkgNC00em0wLTEwYzAtMi4yMS0xLjc5LTQtNC00cy00IDEuNzktNCA0IDEuNzkgNCA0IDQgNC0xLjc5IDQtNHptMC0xMGMwLTIuMjEtMS43OS00LTQtNHMtNCAxLjc5LTQgNCAxLjc5IDQgNCA0IDQtMS43OSA0LTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-10" />
 
-  <CardContent className="p-8 md:p-12 relative flex flex-col md:flex-row items-center justify-between gap-8">
-    <div className="space-y-4 text-center md:text-left">
-      <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-2">
-        <Badge className="bg-indigo-500/20 text-indigo-200 border-indigo-500/30">
-          New Courses Available
-        </Badge>
-        <Badge className="bg-white/10 text-white border-white/20">
-          Beginner Friendly
-        </Badge>
-      </div>
-      <div className="flex items-center justify-center md:justify-start space-x-4">
-        <div className="hidden sm:block p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10">
-          <GraduationCap className="h-8 w-8 text-white" />
-        </div>
-        <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-         Master New Skills Today
-        </h2>
-      </div>
+              <CardContent className="p-8 md:p-12 relative flex flex-col md:flex-row items-center justify-between gap-8">
+                <div className="space-y-4 text-center md:text-left">
+                  <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-2">
+                    <Badge className="bg-indigo-500/20 text-indigo-200 border-indigo-500/30">
+                      New Courses Available
+                    </Badge>
+                    <Badge className="bg-white/10 text-white border-white/20">
+                      Beginner Friendly
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-center md:justify-start space-x-4">
+                    <div className="hidden sm:block p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10">
+                      <GraduationCap className="h-8 w-8 text-white" />
+                    </div>
+                    <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+                      Master New Skills Today
+                    </h2>
+                  </div>
 
-      <div className="space-y-2">
-        <p className="text-indigo-100 font-medium text-lg">
-          Structured learning paths designed by experts to take you from beginner to proffessional
-        </p>
-        {/* <p className="text-slate-300 max-w-md text-sm sm:text-base leading-relaxed">
-          Access comprehensive courses with modules, quizzes, and hands-on projects 
-          designed to take you from beginner to professional.
-        </p> */}
-      </div>
-    </div>
+                  <div className="space-y-2">
+                    <p className="text-indigo-100 font-medium text-lg">
+                      Structured learning paths designed by experts to take you from beginner to professional
+                    </p>
+                  </div>
+                </div>
 
-    <Button
-      onClick={() => (window.location.href = '/courses')}
-      className="bg-white text-indigo-900 hover:bg-slate-100 h-16 px-10 rounded-2xl font-bold text-lg transition-all shadow-xl hover:shadow-2xl active:scale-95 whitespace-nowrap"
-    >
-      Browse Courses
-      <ArrowRight className="ml-2 h-6 w-6" />
-    </Button>
-  </CardContent>
-</Card>
+                <Button
+                  onClick={() => (window.location.href = '/courses')}
+                  className="bg-white text-indigo-900 hover:bg-slate-100 h-16 px-10 rounded-2xl font-bold text-lg transition-all shadow-xl hover:shadow-2xl active:scale-95 whitespace-nowrap"
+                >
+                  Browse Courses
+                  <ArrowRight className="ml-2 h-6 w-6" />
+                </Button>
+              </CardContent>
+            </Card>
 
             {/* Feature Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -314,6 +306,7 @@ const DashboardPage = () => {
                   Upload Notes
                 </Button>
                 <Button
+                  variant="secondary"
                   onClick={() => setActiveTab('youtube')}
                   className="border-2 border-white text-white hover:bg-white hover:text-purple-600 bg-transparent w-full sm:w-auto"
                 >

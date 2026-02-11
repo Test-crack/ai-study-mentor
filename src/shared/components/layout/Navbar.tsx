@@ -15,12 +15,13 @@ import {
   LayoutDashboard,
   Sparkles,
   LogIn,
+  Zap,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
 import { StepIndicator } from "@/features/speed-assessment/components/StepIndicator";
 import { cn } from "@/shared/utils";
-
+import { PremiumModal } from "@/features/payment";
 interface Step {
   id: string;
   label: string;
@@ -63,12 +64,13 @@ export function Navbar({
   const isLoggedIn = !!profile;
 
   const defaultNavItems = [
-    { id: "dashboard", label: "Dashboard", icon: Home },
+    { id: "dashboard", label: "Dashboard", icon: Home , },
     { id: "courses", label: "Courses", icon: GraduationCap, route: "/courses" },
-    { id: "notes", label: "Notes", icon: FileText },
-    { id: "youtube", label: "Videos", icon: Video },
-    { id: "guides", label: "Study Guides", icon: BookMarked },
-    { id: "progress", label: "Progress", icon: TrendingUp },
+    { id: "notes", label: "Notes", icon: FileText,route:"/notes" },
+    { id: "youtube", label: "Videos", icon: Video ,route:"/youtube-ana"},
+    { id: "guides", label: "Study Guides", icon: BookMarked  , route:"/study"},
+    { id: "progress", label: "Progress", icon: TrendingUp,route:"/progress" },
+    { id: "upgrage", label: "Upgrade", icon: Zap,route:"/pricing" },
   ];
 
   // On Home Page, we might want a simplified list or no center list, 
@@ -206,15 +208,7 @@ export function Navbar({
               ) : (
                 /* DEFAULT APP ACTIONS */
                 <>
-                   {showUpgradeButton && (
-                    <Button
-                      onClick={onUpgradeClick}
-                      className="hidden sm:flex bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white shadow-lg shadow-indigo-200 rounded-full px-5 py-5 transition-all hover:scale-105 active:scale-95"
-                    >
-                      <Sparkles className="h-4 w-4 mr-2 text-yellow-200" />
-                      <span className="font-semibold">Upgrade Plan</span>
-                    </Button>
-                  )}
+                   
 
                   {isInstructor && (
                     <Button
@@ -327,7 +321,7 @@ export function Navbar({
                  </button>
               )}
               
-               {!isHomePage && showUpgradeButton && (
+               {(
                 <button
                   onClick={onUpgradeClick}
                   className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold shadow-lg shadow-indigo-200 active:scale-95 transition-transform"

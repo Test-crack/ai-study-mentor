@@ -124,20 +124,20 @@ const LandingPage = () => {
   ];
 
   const testimonials = [
-    {
-      name: 'Sarah M.',
-      role: 'Medical Student',
-      content:
-        'This platform transformed how I study. The AI summaries save me hours every week!',
-      rating: 5,
-    },
-    {
-      name: 'James K.',
-      role: 'Software Engineer',
-      content:
-        'The structured courses helped me transition into a new tech stack seamlessly.',
-      rating: 5,
-    },
+    // {
+    //   name: 'Sarah M.',
+    //   role: 'Medical Student',
+    //   content:
+    //     'This platform transformed how I study. The AI summaries save me hours every week!',
+    //   rating: 5,
+    // },
+    // {
+    //   name: 'James K.',
+    //   role: 'Software Engineer',
+    //   content:
+    //     'The structured courses helped me transition into a new tech stack seamlessly.',
+    //   rating: 5,
+    // },
     {
       name: 'Priya R.',
       role: 'Graduate Student',
@@ -207,14 +207,13 @@ const LandingPage = () => {
               AI-Powered Education Platform
             </Badge>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              Learn Smarter, Not Harder with{' '}
+              Learn Smarter with{' '}
               <span className="bg-indigo-700 bg-clip-text text-transparent">
                 AI
               </span>
             </h1>
             <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Transform your learning experience with personalized AI tutoring,
-              smart notes, speed reading training, and expert-curated courses.
+              Transform your learning experience with personalized AI 
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button
@@ -344,29 +343,41 @@ const LandingPage = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="border-2">
-                <CardContent className="p-6">
-                  <div className="flex gap-1 mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className="h-5 w-5 fill-yellow-400 text-yellow-400"
-                      />
-                    ))}
-                  </div>
-                  <p className="text-gray-700 mb-4">"{testimonial.content}"</p>
-                  <div>
-                    <p className="font-semibold text-gray-900">
-                      {testimonial.name}
-                    </p>
-                    <p className="text-sm text-gray-500">{testimonial.role}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+       <div className="flex flex-col gap-4 w-full">
+  {testimonials.map((testimonial, index) => (
+    <Card key={index} className="border-2 rounded-none w-full overflow-hidden">
+      <CardContent className="p-0"> {/* Removed default padding to control layout */}
+        <div className="flex flex-col md:flex-row items-center">
+          
+          {/* 1. The Rating Section */}
+          <div className="p-6 border-b md:border-b-0 md:border-r border-gray-100 flex flex-shrink-0 items-center justify-center min-w-[140px]">
+            <div className="flex gap-1">
+              {[...Array(testimonial.rating)].map((_, i) => (
+                <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+              ))}
+            </div>
           </div>
+
+          {/* 2. The Quote Section (Takes up available space) */}
+          <div className="p-6 flex-grow">
+            <p className="text-gray-700 italic text-lg text-center md:text-left">
+              "{testimonial.content}"
+            </p>
+          </div>
+
+          {/* 3. The User Section */}
+          <div className="p-6 bg-slate-50 border-t md:border-t-0 md:border-l border-gray-100 min-w-[200px] text-center md:text-right">
+            <p className="font-bold text-gray-900">{testimonial.name}</p>
+            <p className="text-xs text-indigo-600 font-semibold uppercase tracking-widest">
+              {testimonial.role}
+            </p>
+          </div>
+
+        </div>
+      </CardContent>
+    </Card>
+  ))}
+</div>
         </div>
       </section>
 
@@ -401,10 +412,10 @@ const LandingPage = () => {
               <div className="p-2 bg-indigo-700 rounded-xl">
                 <GraduationCap className="h-5 w-5 text-white" />
               </div>
-              <span className="text-lg font-bold text-white">Test Crack</span>
+              <span className="text-lg font-bold text-white">TestCrack</span>
             </div>
             <p className="text-sm">
-              © 2025 Test Crack. All rights reserved.
+              © 2025 TestCrack. All rights reserved.
             </p>
           </div>
         </div>
