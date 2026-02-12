@@ -24,6 +24,8 @@ import AdminDashboardPage from "@/features/courses/components/admin/AdminDashboa
 import CourseManagementPage from "@/features/courses/components/admin/CourseManagementPage";
 import StudentDashboardPage from "@/features/student/components/StudentDashboardPage";
 import StudentProfilePage from "@/features/student/components/StudentProfilePage";
+import StudentCoursesPage from "@/features/student/components/StudentCoursesPage";
+import StudentSchedulePage from "@/features/student/components/StudentSchedulePage";
 import InstructorDashboardPage from "@/features/courses/components/admin/InstructorDashboardPage";
 const queryClient = new QueryClient();
 
@@ -73,7 +75,9 @@ const AppRoutes = () => {
       <Route path="/learn/:slug" element={<RoleProtectedRoute><LearningPage /></RoleProtectedRoute>} />
       <Route path="/notes" element={<RoleProtectedRoute><NotesPage /></RoleProtectedRoute>} />
       <Route path="/profile" element={<RoleProtectedRoute><ProfilePage /></RoleProtectedRoute>} />
-      <Route path="/student/profile" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentProfilePage /></RoleProtectedRoute>} />
+      <Route path="/student/settings" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentProfilePage /></RoleProtectedRoute>} />
+      <Route path="/student/courses" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentCoursesPage /></RoleProtectedRoute>} />
+      <Route path="/student/schedule" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentSchedulePage /></RoleProtectedRoute>} />
       <Route path="/assessment" element={<RoleProtectedRoute><ReadingAssessmentPage /></RoleProtectedRoute>} />
       <Route path="/assessment/legacy" element={<RoleProtectedRoute><SpeedAssessmentPage /></RoleProtectedRoute>} />
       <Route path="/payment/success" element={<RoleProtectedRoute><PaymentSuccess /></RoleProtectedRoute>} />

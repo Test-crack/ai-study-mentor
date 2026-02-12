@@ -89,7 +89,7 @@ export const StudentTopbar = ({ onUpgradeClick }: StudentTopbarProps) => {
           </div>
           <Avatar 
             className="h-9 w-9 border-2 border-white dark:border-slate-800 shadow-sm ring-1 ring-slate-100 dark:ring-slate-700 cursor-pointer hover:ring-indigo-100 transition-all"
-            onClick={() => navigate('/student/profile')}
+            onClick={() => navigate('/student/settings')}
           >
             <AvatarImage src={profile?.profileImage || ""} />
             <AvatarFallback className="bg-indigo-600 text-white font-bold">

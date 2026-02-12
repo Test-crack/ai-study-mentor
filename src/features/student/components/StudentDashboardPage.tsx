@@ -8,6 +8,7 @@ import { RecommendedInstructors } from "./dashboard/RecommendedInstructors";
 import { DailyNotices } from "./dashboard/DailyNotices";
 import { SpeedReadingWidget } from "./dashboard/SpeedReadingWidget";
 import { FeaturesGrid } from "./dashboard/FeaturesGrid";
+import { RecentCoursesWidget } from "./dashboard/RecentCoursesWidget";
 
 const StudentDashboardPage = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -52,6 +53,8 @@ const StudentDashboardPage = () => {
                    </div>
                    <SpeedReadingWidget />
                 </section>
+
+                <RecentCoursesWidget />
 
                 {/* Features Grid */}
                 <section>

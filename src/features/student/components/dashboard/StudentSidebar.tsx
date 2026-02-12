@@ -57,7 +57,13 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
         {menuItems.map((item) => (
           <button
             key={item.id}
-            onClick={() => onTabChange(item.id)}
+            onClick={() => {
+              if (item.id === 'dashboard') navigate('/student/dashboard');
+              else if (item.id === 'courses') navigate('/student/courses');
+              else if (item.id === 'settings') navigate('/student/settings');
+              else if (item.id === 'schedule') navigate('/student/schedule');
+              else onTabChange(item.id);
+            }}
             title={isCollapsed ? item.label : undefined}
             className={cn(
               "w-full flex items-center gap-3 rounded-xl transition-all duration-200 group relative",

@@ -504,6 +504,30 @@ class CoursesService {
   // ==========================================================================
 
   /**
+   * Get enrolled courses for the current user
+   */
+  async getEnrolledCourses(filters?: CoursesFilters): Promise<CoursesResponse> {
+    try {
+      const params = new URLSearchParams();
+
+      if (filters?.page) params.append('page', filters.page.toString());
+      if (filters?.limit) params.append('limit', filters.limit.toString());
+      if (filters?.search) params.append('search', filters.search);
+      if (filters?.sortBy) params.append('sortBy', filters.sortBy);
+      if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder);
+
+      const queryString = params.toString();
+      const url = `${this.baseUrl}/api/courses/enrolled${queryString ? `?${queryString}` : ''}`;
+
+      const response = await callBackend(url, { method: 'GET' });
+      return response;
+    } catch (error) {
+      console.error('Error fetching enrolled courses:', error);
+      throw new Error('Failed to fetch enrolled courses');
+    }
+  }
+
+  /**
    * Get module content (requires enrollment)
    */
   async getModuleContent(
