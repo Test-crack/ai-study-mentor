@@ -4,18 +4,26 @@ import {
   Calendar, 
   Settings, 
   LogOut, 
-  GraduationCap
+  GraduationCap,
+  ChevronLeft,
+  ChevronRight,
+  Home
 } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 interface SidebarProps {
   activeTab?: string;
   onTabChange: (tab: string) => void;
+  isCollapsed: boolean;
+  toggleCollapse: () => void;
+  className?: string;
 }
 
-export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange }: SidebarProps) => {
+export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollapsed, toggleCollapse, className }: SidebarProps) => {
   const { signOut } = useAuth();
+  const navigate = useNavigate();
   
   const menuItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -25,13 +33,23 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange }: Sidebar
   ];
 
   return (
-    <aside className="fixed left-4 top-4 bottom-4 w-64 bg-slate-900 rounded-2xl shadow-2xl flex flex-col justify-between py-6 px-4 z-40 hidden lg:flex">
+    <aside 
+      className={cn(
+        "fixed left-4 top-4 bottom-4 bg-slate-900 dark:bg-slate-950 rounded-2xl shadow-2xl flex flex-col justify-between py-6 z-40 hidden lg:flex transition-all duration-300 border border-slate-800",
+        isCollapsed ? "w-20 px-2" : "w-64 px-4",
+        className
+      )}
+    >
       {/* Brand */}
-      <div className="flex items-center gap-3 px-2 mb-10">
-        <div className="bg-indigo-600 p-2 rounded-lg">
+      <div className={cn("flex items-center gap-3 mb-10", isCollapsed ? "justify-center px-0" : "px-2")}>
+        <div className="bg-indigo-600 p-2 rounded-lg shrink-0">
           <GraduationCap className="h-6 w-6 text-white" />
         </div>
-        <span className="text-xl font-bold text-white tracking-wide">TestCrack</span>
+        {!isCollapsed && (
+          <span className="text-xl font-bold text-white tracking-wide animate-in fade-in duration-300">
+            TestCrack
+          </span>
+        )}
       </div>
 
       {/* Navigation */}
@@ -40,30 +58,59 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange }: Sidebar
           <button
             key={item.id}
             onClick={() => onTabChange(item.id)}
+            title={isCollapsed ? item.label : undefined}
             className={cn(
-              "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group",
+              "w-full flex items-center gap-3 rounded-xl transition-all duration-200 group relative",
+              isCollapsed ? "justify-center p-3" : "px-4 py-3",
               activeTab === item.id 
                 ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/20" 
-                : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                : "text-slate-400 hover:bg-slate-800 dark:hover:bg-slate-800 hover:text-white"
             )}
           >
             <item.icon className={cn(
-              "h-5 w-5 transition-transform group-hover:scale-105",
+              "h-5 w-5 transition-transform group-hover:scale-105 shrink-0",
               activeTab === item.id ? "text-white" : "text-slate-400 group-hover:text-white"
             )} />
-            <span className="font-medium text-sm">{item.label}</span>
+            {!isCollapsed && (
+              <span className="font-medium text-sm animate-in fade-in duration-200">{item.label}</span>
+            )}
           </button>
         ))}
       </nav>
 
+      {/* Collapse Toggle */}
+      <button
+        onClick={toggleCollapse}
+        className="absolute -right-3 top-1/2 -translate-y-1/2 bg-indigo-600 text-white p-1.5 rounded-full shadow-lg hover:bg-indigo-700 transition-colors z-50 border-2 border-[#F8FAFC] dark:border-slate-950"
+      >
+        {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
+      </button>
+
       {/* Bottom Actions */}
-      <div className="pt-6 border-t border-slate-800">
+      <div className={cn("pt-6 border-t border-slate-800 space-y-2", isCollapsed ? "px-0" : "px-0")}>
+        {/* Home Link */}
+        <button 
+          onClick={() => navigate('/')}
+          title={isCollapsed ? "Home Page" : undefined}
+          className={cn(
+            "w-full flex items-center gap-3 rounded-xl text-slate-400 hover:bg-slate-800 dark:hover:bg-slate-800 hover:text-white transition-all duration-200 group",
+            isCollapsed ? "justify-center p-3" : "px-4 py-3"
+          )}
+        >
+          <Home className="h-5 w-5 group-hover:scale-105 transition-transform shrink-0" />
+          {!isCollapsed && <span className="font-medium text-sm">Home Page</span>}
+        </button>
+
         <button 
           onClick={() => signOut()}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 group"
+          title={isCollapsed ? "Logout" : undefined}
+          className={cn(
+            "w-full flex items-center gap-3 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 group",
+             isCollapsed ? "justify-center p-3" : "px-4 py-3"
+          )}
         >
-          <LogOut className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-          <span className="font-medium text-sm">Logout</span>
+          <LogOut className="h-5 w-5 group-hover:translate-x-1 transition-transform shrink-0" />
+          {!isCollapsed && <span className="font-medium text-sm">Logout</span>}
         </button>
       </div>
     </aside>

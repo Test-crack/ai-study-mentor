@@ -1,5 +1,6 @@
 
 import { Toaster } from "@/shared/components/ui/toaster";
+import { ThemeProvider } from "@/features/theme/ThemeProvider";
 import { Toaster as Sonner } from "@/shared/components/ui/sonner";
 import { TooltipProvider } from "@/shared/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -22,6 +23,7 @@ import LearningPage from "@/features/courses/components/learning/LearningPage";
 import AdminDashboardPage from "@/features/courses/components/admin/AdminDashboardPage";
 import CourseManagementPage from "@/features/courses/components/admin/CourseManagementPage";
 import StudentDashboardPage from "@/features/student/components/StudentDashboardPage";
+import StudentProfilePage from "@/features/student/components/StudentProfilePage";
 import InstructorDashboardPage from "@/features/courses/components/admin/InstructorDashboardPage";
 const queryClient = new QueryClient();
 
@@ -71,7 +73,7 @@ const AppRoutes = () => {
       <Route path="/learn/:slug" element={<RoleProtectedRoute><LearningPage /></RoleProtectedRoute>} />
       <Route path="/notes" element={<RoleProtectedRoute><NotesPage /></RoleProtectedRoute>} />
       <Route path="/profile" element={<RoleProtectedRoute><ProfilePage /></RoleProtectedRoute>} />
-      <Route path="/student/profile" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><ProfilePage /></RoleProtectedRoute>} />
+      <Route path="/student/profile" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentProfilePage /></RoleProtectedRoute>} />
       <Route path="/assessment" element={<RoleProtectedRoute><ReadingAssessmentPage /></RoleProtectedRoute>} />
       <Route path="/assessment/legacy" element={<RoleProtectedRoute><SpeedAssessmentPage /></RoleProtectedRoute>} />
       <Route path="/payment/success" element={<RoleProtectedRoute><PaymentSuccess /></RoleProtectedRoute>} />
@@ -100,17 +102,19 @@ const AppRoutes = () => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AuthProvider>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AuthProvider>
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ThemeProvider>
 );
 
 export default App;

@@ -4,51 +4,70 @@ import { StudentTopbar } from "./dashboard/StudentTopbar";
 import { StudentHero } from "./dashboard/StudentHero";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { PremiumModal } from "@/features/payment/components/PremiumModal";
+import { RecommendedInstructors } from "./dashboard/RecommendedInstructors";
+import { DailyNotices } from "./dashboard/DailyNotices";
+import { SpeedReadingWidget } from "./dashboard/SpeedReadingWidget";
+import { FeaturesGrid } from "./dashboard/FeaturesGrid";
 
 const StudentDashboardPage = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const { user, profile } = useAuth();
   
   const displayName = profile?.name || user?.email?.split('@')[0] || "Student";
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
       {/* Sidebar - Desktop */}
-      <StudentSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+      <StudentSidebar 
+        activeTab={activeTab} 
+        onTabChange={setActiveTab} 
+        isCollapsed={isSidebarCollapsed}
+        toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      />
       
       {/* Main Content Area */}
-      <div className="lg:pl-72 min-h-screen flex flex-col transition-all duration-300">
+      <div 
+        className={`min-h-screen flex flex-col transition-all duration-300 ${
+          isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'
+        }`}
+      >
         <StudentTopbar onUpgradeClick={() => setShowPremiumModal(true)} />
         
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8">
-          {/* Hero Section */}
-          <section>
-            <StudentHero name={displayName} />
-          </section>
+           {/* Hero Section - Full Width */}
+           <section>
+             <StudentHero name={displayName} />
+           </section>
 
-          {/* Widgets Grid Placeholder */}
-          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* These will be replaced by actual widgets later */}
-            <div className="h-64 bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex flex-col hover:shadow-md transition-shadow">
-               <h3 className="text-lg font-bold text-slate-800 mb-4">Finance</h3>
-               <div className="flex-1 flex items-center justify-center bg-slate-50 rounded-xl">
-                 <span className="text-slate-400 font-medium">Coming Soon</span>
-               </div>
-            </div>
-             <div className="h-64 bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex flex-col hover:shadow-md transition-shadow">
-               <h3 className="text-lg font-bold text-slate-800 mb-4">Enrolled Courses</h3>
-               <div className="flex-1 flex items-center justify-center bg-slate-50 rounded-xl">
-                 <span className="text-slate-400 font-medium">Coming Soon</span>
-               </div>
-            </div>
-             <div className="h-64 bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex flex-col hover:shadow-md transition-shadow">
-               <h3 className="text-lg font-bold text-slate-800 mb-4">Course Instructors</h3>
-               <div className="flex-1 flex items-center justify-center bg-slate-50 rounded-xl">
-                 <span className="text-slate-400 font-medium">Coming Soon</span>
-               </div>
-            </div>
-          </section>
+           <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+             
+             {/* Left Main Column (Features) */}
+             <div className="xl:col-span-8 space-y-8">
+                {/* Speed Reading Assessment Callout */}
+                <section>
+                   <div className="mb-4 flex items-center justify-between">
+                     <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Quick Actions</h2>
+                   </div>
+                   <SpeedReadingWidget />
+                </section>
+
+                {/* Features Grid */}
+                <section>
+                   <div className="mb-4 flex items-center justify-between">
+                     <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Learning Tools</h2>
+                   </div>
+                   <FeaturesGrid />
+                </section>
+             </div>
+
+             {/* Right Sidebar Column (Instructors + Notices) */}
+             <div className="xl:col-span-4 space-y-8">
+                <RecommendedInstructors />
+                <DailyNotices />
+             </div>
+           </div>
         </main>
       </div>
 

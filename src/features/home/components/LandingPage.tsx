@@ -172,13 +172,7 @@ const LandingPage = () => {
 
   {user ? (
     <Button
-      onClick={() => {
-        if (profile?.role === 'INSTRUCTOR' || profile?.role === 'ADMIN') {
-          navigate('/instructor/dashboard');
-        } else {
-          navigate('/student/dashboard');
-        }
-      }}
+      onClick={() => navigate('/dashboard')}
       className="bg-indigo-700 hover:from-purple-700 hover:to-blue-700"
     >
       Dashboard
