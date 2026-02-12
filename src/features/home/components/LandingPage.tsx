@@ -18,7 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [processingAuth, setProcessingAuth] = useState(false);
 
   // Handle auth callbacks (email confirmation, password reset) that land on root URL
@@ -172,7 +172,13 @@ const LandingPage = () => {
 
   {user ? (
     <Button
-      onClick={() => navigate('/dashboard')}
+      onClick={() => {
+        if (profile?.role === 'INSTRUCTOR' || profile?.role === 'ADMIN') {
+          navigate('/instructor/dashboard');
+        } else {
+          navigate('/student/dashboard');
+        }
+      }}
       className="bg-indigo-700 hover:from-purple-700 hover:to-blue-700"
     >
       Dashboard
@@ -227,9 +233,24 @@ const LandingPage = () => {
       
       {/* Refined Button Sizes */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+
         <Button
           size="lg"
-          onClick={() => navigate(user ? '/dashboard' : '/auth')}
+          onClick={() => {
+            if (!user) {
+              navigate('/auth');
+              return;
+            }
+            // Check usage of profile from hook or localStorage if not available in context immediately
+            // But useAuth should provide it.
+            if (user) {
+               if (profile?.role === 'INSTRUCTOR' || profile?.role === 'ADMIN') {
+                 navigate('/instructor/dashboard');
+               } else {
+                 navigate('/student/dashboard');
+               }
+            }
+          }}
           className="bg-indigo-700 hover:bg-indigo-800 text-white px-8 py-6 h-auto transition-all shadow-md active:scale-95"
         >
           {user ? 'Go to Dashboard' : 'Start Learning Free'}

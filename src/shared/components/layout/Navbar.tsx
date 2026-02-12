@@ -65,7 +65,17 @@ export function Navbar({
               </Button>
             )}
 
-            <button onClick={() => navigate(isLoggedIn ? "/dashboard" : "/")} className="flex items-center gap-3 active:scale-95 transition-transform">
+            <button onClick={() => {
+              if (isLoggedIn) {
+                 if (profile?.role === 'INSTRUCTOR' || profile?.role === 'ADMIN') {
+                   navigate('/instructor/dashboard');
+                 } else {
+                   navigate('/student/dashboard');
+                 }
+              } else {
+                navigate('/');
+              }
+            }} className="flex items-center gap-3 active:scale-95 transition-transform">
               <div className="bg-gradient-to-br from-indigo-600 to-violet-600 text-white p-2 rounded-xl shadow-lg">
                 <GraduationCap className="h-6 w-6" />
               </div>
@@ -102,7 +112,7 @@ export function Navbar({
             {!isHomePage ? (
               <div className="flex items-center gap-2">
                 {isInstructor && (
-                  <Button onClick={() => navigate("/courses/admin/dashboard")} variant="outline" className="hidden sm:flex rounded-full">
+                  <Button onClick={() => navigate("/instructor/dashboard")} variant="outline" className="hidden sm:flex rounded-full">
                     Instructor
                   </Button>
                 )}
@@ -115,7 +125,17 @@ export function Navbar({
                 <Button variant="ghost" size="icon" onClick={signOut} className="text-slate-400 hover:text-red-600 rounded-full h-10 w-10 transition-colors"><LogOut className="h-5 w-5" /></Button>
               </div>
             ) : (
-              <Button onClick={() => navigate(isLoggedIn ? "/dashboard" : "/auth")} className="bg-indigo-600 text-white rounded-full px-6 shadow-md hover:shadow-lg transition-all">
+              <Button onClick={() => {
+                if (isLoggedIn) {
+                   if (profile?.role === 'INSTRUCTOR' || profile?.role === 'ADMIN') {
+                     navigate('/instructor/dashboard');
+                   } else {
+                     navigate('/student/dashboard');
+                   }
+                } else {
+                  navigate('/auth');
+                }
+              }} className="bg-indigo-600 text-white rounded-full px-6 shadow-md hover:shadow-lg transition-all">
                 {isLoggedIn ? "Dashboard" : "Login"}
               </Button>
             )}

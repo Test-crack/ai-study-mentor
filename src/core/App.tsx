@@ -21,6 +21,8 @@ import CourseDetailPage from "@/features/courses/components/CourseDetailPage";
 import LearningPage from "@/features/courses/components/learning/LearningPage";
 import AdminDashboardPage from "@/features/courses/components/admin/AdminDashboardPage";
 import CourseManagementPage from "@/features/courses/components/admin/CourseManagementPage";
+import StudentDashboardPage from "@/features/home/components/StudentDashboardPage";
+import InstructorDashboardPage from "@/features/courses/components/admin/InstructorDashboardPage";
 const queryClient = new QueryClient();
 
 import { RoleProtectedRoute } from "@/shared/components/auth/ProtectedRoute";
@@ -45,6 +47,25 @@ const AppRoutes = () => {
       <Route path="/dashboard" element={<RoleProtectedRoute><DashboardPage /></RoleProtectedRoute>} />
       <Route path="/dashboard/:tab" element={<RoleProtectedRoute><DashboardPage /></RoleProtectedRoute>} />
 
+
+
+      {/* Protected routes - require authentication */}
+      <Route 
+        path="/student/dashboard" 
+        element={
+          <RoleProtectedRoute allowedRoles={['STUDENT']}>
+            <StudentDashboardPage />
+          </RoleProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/instructor/dashboard" 
+        element={
+          <RoleProtectedRoute allowedRoles={['INSTRUCTOR', 'ADMIN']}>
+            <InstructorDashboardPage />
+          </RoleProtectedRoute>
+        } 
+      />
 
       {/* Protected routes - require authentication */}
       <Route path="/learn/:slug" element={<RoleProtectedRoute><LearningPage /></RoleProtectedRoute>} />
