@@ -28,7 +28,8 @@ import StudentCoursesPage from "@/features/student/components/StudentCoursesPage
 import StudentSchedulePage from "@/features/student/components/StudentSchedulePage";
 import StudentReadingAssessmentPage from "@/features/student/components/StudentReadingAssessmentPage";
 import StudentAssessmentHistoryPage from "@/features/student/components/StudentAssessmentHistoryPage";
-import InstructorDashboardPage from "@/features/courses/components/admin/InstructorDashboardPage";
+import InstructorDashboardPage from "@/features/instructor/components/InstructorDashboardPage";
+import InstructorAssessmentPage from "@/features/instructor/components/assessments/InstructorAssessmentPage";
 const queryClient = new QueryClient();
 
 import { RoleProtectedRoute } from "@/shared/components/auth/ProtectedRoute";
@@ -69,6 +70,14 @@ const AppRoutes = () => {
         element={
           <RoleProtectedRoute allowedRoles={['INSTRUCTOR', 'ADMIN']}>
             <InstructorDashboardPage />
+          </RoleProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/instructor/assessments" 
+        element={
+          <RoleProtectedRoute allowedRoles={['INSTRUCTOR', 'ADMIN']}>
+            <InstructorAssessmentPage />
           </RoleProtectedRoute>
         } 
       />
@@ -115,11 +124,11 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <AuthProvider>
-          <BrowserRouter>
+        <BrowserRouter>
+          <AuthProvider>
             <AppRoutes />
-          </BrowserRouter>
-        </AuthProvider>
+          </AuthProvider>
+        </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
   </ThemeProvider>

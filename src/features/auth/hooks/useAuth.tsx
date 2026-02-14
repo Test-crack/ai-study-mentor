@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { getUserProfile } from '../services/profile';
@@ -125,11 +126,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, [fetchProfile]);
 
+  const navigate = useNavigate();
+
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+    
     setProfile(null);
+    setSession(null);
+    setUser(null);
+    
+    // Clear all app specific keys
     localStorage.removeItem(PROFILE_CACHE_KEY);
-    window.location.href = '/auth';
+    
+    // Clear Supabase keys
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('sb-')) {
+        localStorage.removeItem(key);
+      }
+    });
+    
+    navigate('/auth', { replace: true });
   };
 
   const refreshProfile = async () => {
