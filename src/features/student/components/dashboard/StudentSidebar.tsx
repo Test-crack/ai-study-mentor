@@ -28,6 +28,7 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
   const menuItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { id: 'courses', icon: BookOpen, label: 'My Courses' },
+    { id: 'assessment', icon: BookOpen, label: 'Reading Assessment' },
     { id: 'schedule', icon: Calendar, label: 'Schedule' },
     { id: 'settings', icon: Settings, label: 'Settings' },
   ];
@@ -60,6 +61,7 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
             onClick={() => {
               if (item.id === 'dashboard') navigate('/student/dashboard');
               else if (item.id === 'courses') navigate('/student/courses');
+              else if (item.id === 'assessment') navigate('/student/reading-assessment');
               else if (item.id === 'settings') navigate('/student/settings');
               else if (item.id === 'schedule') navigate('/student/schedule');
               else onTabChange(item.id);

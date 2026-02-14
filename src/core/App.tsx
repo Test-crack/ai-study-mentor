@@ -26,6 +26,8 @@ import StudentDashboardPage from "@/features/student/components/StudentDashboard
 import StudentProfilePage from "@/features/student/components/StudentProfilePage";
 import StudentCoursesPage from "@/features/student/components/StudentCoursesPage";
 import StudentSchedulePage from "@/features/student/components/StudentSchedulePage";
+import StudentReadingAssessmentPage from "@/features/student/components/StudentReadingAssessmentPage";
+import StudentAssessmentHistoryPage from "@/features/student/components/StudentAssessmentHistoryPage";
 import InstructorDashboardPage from "@/features/courses/components/admin/InstructorDashboardPage";
 const queryClient = new QueryClient();
 
@@ -78,6 +80,8 @@ const AppRoutes = () => {
       <Route path="/student/settings" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentProfilePage /></RoleProtectedRoute>} />
       <Route path="/student/courses" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentCoursesPage /></RoleProtectedRoute>} />
       <Route path="/student/schedule" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentSchedulePage /></RoleProtectedRoute>} />
+      <Route path="/student/reading-assessment" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentReadingAssessmentPage /></RoleProtectedRoute>} />
+      <Route path="/student/reading-assessment/history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentAssessmentHistoryPage /></RoleProtectedRoute>} />
       <Route path="/assessment" element={<RoleProtectedRoute><ReadingAssessmentPage /></RoleProtectedRoute>} />
       <Route path="/assessment/legacy" element={<RoleProtectedRoute><SpeedAssessmentPage /></RoleProtectedRoute>} />
       <Route path="/payment/success" element={<RoleProtectedRoute><PaymentSuccess /></RoleProtectedRoute>} />
