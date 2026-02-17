@@ -159,3 +159,17 @@ All colors MUST be HSL.
 .markdown-content hr {
   @apply border-gray-200 my-6;
 }
+@keyframes data-flow {
+  0% { left: 0%; opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+
+.animate-data-flow {
+  position: absolute;
+  height: 2px;
+  width: 20px;
+  background: linear-gradient(to right, transparent, #4f46e5);
+  animation: data-flow 3s linear infinite;
+}
