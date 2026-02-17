@@ -266,55 +266,54 @@ const LandingPage = () => {
     </div>
 
     {/* --- PUBLIC SWITCHER START --- */}
-    <div className="flex flex-col items-center gap-12 mb-12">
-      {/* Glassmorphic Switcher */}
-      <div className="inline-flex p-1.5 bg-white/40 backdrop-blur-xl rounded-2xl border border-white/60 shadow-lg ring-1 ring-black/5">
-        {[
-          { id: 'students', label: 'Students', icon: GraduationCap },
-          { id: 'instructors', label: 'Instructors', icon: Users },
-          { id: 'universities', label: 'Universities', icon: Building2 },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
-              activeTab === tab.id 
-                ? "bg-indigo-700 text-white shadow-lg shadow-indigo-200" 
-                : "text-gray-500 hover:text-indigo-700 hover:bg-white/50"
-            }`}
-          >
-            <tab.icon className="h-4 w-4" />
-            {tab.label}
-          </button>
-        ))}
-      </div>
+    <div className="flex flex-col items-center gap-8 sm:gap-12 mb-12 px-2">
+  {/* Glassmorphic Switcher - Tightened for mobile fit */}
+  <div className="inline-flex p-1 sm:p-1.5 bg-white/40 backdrop-blur-xl rounded-2xl border border-white/60 shadow-lg ring-1 ring-black/5 max-w-full">
+    {[
+      { id: 'students', label: 'Students', icon: GraduationCap },
+      { id: 'instructors', label: 'Instructors', icon: Users },
+      { id: 'universities', label: 'Universities', icon: Building2 },
+    ].map((tab) => (
+      <button
+        key={tab.id}
+        onClick={() => setActiveTab(tab.id)}
+        className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-sm font-semibold transition-all duration-300 whitespace-nowrap ${
+          activeTab === tab.id 
+            ? "bg-indigo-700 text-white shadow-lg shadow-indigo-200" 
+            : "text-gray-500 hover:text-indigo-700 hover:bg-white/50"
+        }`}
+      >
+        <tab.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+        {tab.label}
+      </button>
+    ))}
+  </div>
 
-      {/* Glassmorphic Feature Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl">
-        {tabContent[activeTab].map((item, idx) => (
-          <Card 
-            key={`${activeTab}-${idx}`} 
-            className="group relative overflow-hidden border border-white/40 bg-white/30 backdrop-blur-md hover:bg-white/50 hover:border-white/80 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 animate-in fade-in slide-in-from-bottom-3"
-            style={{ animationDelay: `${idx * 100}ms` }}
-          >
-            {/* Subtle inner light effect for premium feel */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            
-            <CardContent className="p-6 text-left relative z-10">
-              <div className="p-2.5 bg-indigo-100/50 backdrop-blur-sm rounded-xl w-fit mb-4 group-hover:bg-indigo-600 transition-all duration-300">
-                <item.icon className="h-5 w-5 text-indigo-700 group-hover:text-white" />
-              </div>
-              <h4 className="font-bold text-gray-900 mb-2 group-hover:text-indigo-900 transition-colors">
-                {item.title}
-              </h4>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                {item.description}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
+  {/* Glassmorphic Feature Grid */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl">
+    {tabContent[activeTab].map((item, idx) => (
+      <Card 
+        key={`${activeTab}-${idx}`} 
+        className="group relative overflow-hidden border border-white/40 bg-white/30 backdrop-blur-md hover:bg-white/50 hover:border-white/80 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 animate-in fade-in slide-in-from-bottom-3"
+        style={{ animationDelay: `${idx * 100}ms` }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        
+        <CardContent className="p-6 text-left relative z-10">
+          <div className="p-2.5 bg-indigo-100/50 backdrop-blur-sm rounded-xl w-fit mb-4 group-hover:bg-indigo-600 transition-all duration-300">
+            <item.icon className="h-5 w-5 text-indigo-700 group-hover:text-white" />
+          </div>
+          <h4 className="font-bold text-gray-900 mb-2 group-hover:text-indigo-900 transition-colors">
+            {item.title}
+          </h4>
+          <p className="text-gray-600 text-sm leading-relaxed">
+            {item.description}
+          </p>
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+</div>
     {/* --- PUBLIC SWITCHER END --- */}
   </div>
 </section>
