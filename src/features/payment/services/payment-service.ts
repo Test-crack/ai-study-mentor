@@ -1,27 +1,7 @@
 // lib/payment/payment-service.ts
 import { loadStripe } from '@stripe/stripe-js';
 import { supabase } from '@/integrations/supabase/client';
-
-// Types
-export interface PaymentPlan {
-  id: string;
-  name: string;
-  price_inr: number;
-  price_usd: number;
-  period: 'monthly' | 'yearly';
-  features: string[];
-  credits: number;
-  popular?: boolean;
-}
-
-export interface PaymentSession {
-  id: string;
-  amount: number;
-  currency: string;
-  status: 'pending' | 'completed' | 'failed';
-  provider: 'razorpay' | 'stripe';
-  metadata?: Record<string, any>;
-}
+import { PaymentPlan, PaymentSession } from '../types';
 
 // Pricing Configuration
 export const PRICING_PLANS: Record<string, PaymentPlan> = {
@@ -101,7 +81,7 @@ export class RazorpayService {
 
   async createOrder(planId: string, userId: string) {
     const plan = PRICING_PLANS[planId];
-    
+
     // Call Supabase Edge Function
     const { data, error } = await supabase.functions.invoke('create-payment-session', {
       body: {
@@ -170,7 +150,7 @@ export class StripeService {
 
   async createCheckoutSession(planId: string, userId: string) {
     const plan = PRICING_PLANS[planId];
-    
+
     const { data, error } = await supabase.functions.invoke('create-payment-session', {
       body: {
         plan_id: planId,
@@ -188,7 +168,7 @@ export class StripeService {
   async redirectToCheckout(sessionId: string) {
     const stripe = await this.stripePromise;
     const { error } = await stripe.redirectToCheckout({ sessionId });
-    
+
     if (error) {
       console.error('Stripe checkout error:', error);
       throw error;

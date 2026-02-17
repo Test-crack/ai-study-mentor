@@ -3,3 +3,4 @@ export * from './components/PaymentSuccess';
 export * from './components/PremiumModal';
 export * from './services/payment-service';
 export * from './types';
+export * from './components/BuyNowButton';

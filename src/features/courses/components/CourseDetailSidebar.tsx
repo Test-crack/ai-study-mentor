@@ -22,6 +22,7 @@ import { CourseDetail, ProgressStatus } from '../types';
 import { EnrollmentModal } from './EnrollmentModal';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { coursesService } from '../services/coursesService';
+import { BuyNowButton } from '@/features/payment';
 
 interface CourseDetailSidebarProps {
   course: CourseDetail;
@@ -124,12 +125,24 @@ export function CourseDetailSidebar({
 
     if (!course.isEnrolled) {
       return (
-        <Button
-          className="w-full bg-purple-600 hover:bg-purple-700 text-white py-6 text-lg font-semibold"
-          onClick={() => setShowEnrollModal(true)}
-        >
-          {course.price && course.price > 0 ? 'Enroll Now' : 'Enroll for Free'}
-        </Button>
+        <div className="w-full">
+          {course.price && course.price > 0 ? (
+            <BuyNowButton
+              courseId={course.id}
+              price={course.price}
+              courseTitle={course.title}
+              onSuccess={handleEnrollmentSuccess}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white py-6 text-lg font-semibold"
+            />
+          ) : (
+            <Button
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white py-6 text-lg font-semibold"
+              onClick={() => setShowEnrollModal(true)}
+            >
+              Enroll for Free
+            </Button>
+          )}
+        </div>
       );
     }
 
