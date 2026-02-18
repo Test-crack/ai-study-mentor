@@ -75,7 +75,8 @@ export function Navbar({
               } else {
                 navigate('/');
               }
-            }} className="flex items-center gap-3 active:scale-95 transition-transform">
+            }}
+             className="flex items-center gap-3 active:scale-95 transition-transform">
               <div className="bg-gradient-to-br from-indigo-600 to-violet-600 text-white p-2 rounded-xl shadow-lg">
                 <GraduationCap className="h-6 w-6" />
               </div>
