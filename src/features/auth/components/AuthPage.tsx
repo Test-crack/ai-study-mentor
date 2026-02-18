@@ -60,7 +60,7 @@ const Auth = () => {
           throw new Error("Please verify your email before signing in. Check your inbox for the confirmation link.");
         }
         toast({ title: "Welcome back!", description: "You've been signed in successfully." });
-        navigate('/dashboard');
+        navigate('/auth');
       }
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -74,7 +74,7 @@ const Auth = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-            redirectTo: `${window.location.origin}/dashboard`
+            redirectTo: `${window.location.origin}/auth`
         }
       });
       if (error) throw error;
