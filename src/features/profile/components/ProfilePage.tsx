@@ -12,19 +12,16 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useToast } from '@/shared/hooks/use-toast';
 import { getBackendUrl } from '@/shared/utils';
 import { callBackend, uploadFileToBackend } from '@/features/auth/services/authClient';
+import { InstructorSidebar } from '@/features/instructor/components/dashboard/InstructorSidebar';
+import { InstructorTopbar } from '@/features/instructor/components/dashboard/InstructorTopbar';
 import {
   User,
   Mail,
-  Phone,
-  Globe,
-  Save,
   Loader2,
   Upload,
   Trash2,
-  ArrowLeft,
   Shield,
   Calendar,
-  LogOut,
   Settings,
   Bell,
   BookOpen,
@@ -34,14 +31,14 @@ import {
   CheckCircle2
 } from 'lucide-react';
 
-// ... (Interfaces remain identical to your original code)
-
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const { profile, loading, profileLoading, signOut, refreshProfile } = useAuth();
+  const { profile, loading, profileLoading, refreshProfile } = useAuth();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const [saving, setSaving] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  
   const [formData, setFormData] = useState({
     name: '',
     countryCode: '',
@@ -52,6 +49,7 @@ export default function ProfilePage() {
     twitter: '',
     github: '',
   });
+  
   const [activeTab, setActiveTab] = useState<'profile' | 'instructor' | 'security' | 'notifications' | 'preferences'>('profile');
   const hasPopulatedForm = useRef(false);
   const hasShownWelcome = useRef(false);
@@ -62,7 +60,6 @@ export default function ProfilePage() {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Optional: Check file size (e.g., max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast({ title: 'File too large', description: 'Please upload an image smaller than 5MB.', variant: 'destructive' });
       return;
@@ -74,7 +71,6 @@ export default function ProfilePage() {
       formData.append('profileImage', file);
 
       const backendUrl = getBackendUrl();
-      // Using generic upload handler
       await uploadFileToBackend(`${backendUrl}/api/profile/image`, formData, 'PUT');
       
       await refreshProfile();
@@ -84,7 +80,6 @@ export default function ProfilePage() {
       toast({ title: 'Upload failed', description: 'Could not upload image. Please try again.', variant: 'destructive' });
     } finally {
       setUploading(false);
-      // Reset input
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
@@ -106,8 +101,6 @@ export default function ProfilePage() {
     }
   };
 
-
-  // ... (Logic/useEffect/handleSave remain identical to your original code)
   useEffect(() => {
     if (searchParams.get("welcome") === "true" && !hasShownWelcome.current) {
       hasShownWelcome.current = true;
@@ -164,251 +157,246 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc]">
-      {/* Decorative Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-purple-100/50 rounded-full blur-3xl" />
-        <div className="absolute top-[60%] -right-[10%] w-[30%] h-[50%] bg-indigo-100/50 rounded-full blur-3xl" />
-      </div>
+    <div className="min-h-screen bg-slate-50 dark:bg-[#09090E] transition-colors duration-300 selection:bg-indigo-500/30 font-sans">
+      
+      {/* Sidebar Navigation */}
+      <InstructorSidebar
+        activeTab="settings"
+        isCollapsed={isSidebarCollapsed}
+        toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      />
 
-      <div className="relative max-w-4xl mx-auto px-4 py-12">
-        {/* Navigation Action */}
-        <div className="flex items-center justify-between mb-8">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate('/')}
-            className="text-gray-500 hover:text-purple-600 hover:bg-white/50 backdrop-blur-sm"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Return to Study Area
-          </Button>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={signOut} className="text-gray-500 border-gray-200">
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
-          </div>
-        </div>
+      {/* Main Content Area */}
+      <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-24' : 'lg:pl-72'} flex flex-col min-h-screen relative z-10`}>
+        
+        <InstructorTopbar />
 
-        {(loading || profileLoading) ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-10 w-10 animate-spin text-purple-600" />
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {/* Main Header Card */}
-            <Card className="border-none shadow-xl shadow-purple-900/5 overflow-hidden backdrop-blur-md bg-white/80">
-              <CardContent className="p-0">
-                <div className="h-32 bg-indigo-700" />
-                <div className="px-8 pb-8">
-                  <div className="flex flex-col sm:flex-row items-end -mt-12 gap-6">
-                    <div className="relative group">
-                      <Avatar className="h-28 w-28 border-4 border-white shadow-2xl cursor-pointer transition-transform group-hover:scale-105" onClick={() => fileInputRef.current?.click()}>
-                        {uploading ? (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full z-10">
-                            <Loader2 className="h-8 w-8 text-white animate-spin" />
+        <main className="flex-1 w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          
+          {(loading || profileLoading) ? (
+            <div className="flex items-center justify-center py-32">
+              <Loader2 className="h-10 w-10 animate-spin text-indigo-600 dark:text-indigo-400" />
+            </div>
+          ) : (
+            <div className="space-y-6">
+              
+              {/* Main Header Card */}
+              <Card className="border-slate-200 dark:border-[#1E1E2A] shadow-sm dark:shadow-none overflow-hidden bg-white dark:bg-[#12121A]">
+                <CardContent className="p-0">
+                  <div className="h-32 bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-900/80 dark:to-purple-900/80" />
+                  <div className="px-6 sm:px-8 pb-8">
+                    <div className="flex flex-col sm:flex-row items-end -mt-12 gap-6">
+                      <div className="relative group">
+                        <Avatar className="h-28 w-28 border-4 border-white dark:border-[#12121A] shadow-lg cursor-pointer transition-transform group-hover:scale-105" onClick={() => fileInputRef.current?.click()}>
+                          {uploading ? (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full z-10">
+                              <Loader2 className="h-8 w-8 text-white animate-spin" />
+                            </div>
+                          ) : null}
+                          {profile?.profileImage ? (
+                             <img src={profile.profileImage} alt="Profile" className="h-full w-full object-cover" />
+                          ) : (
+                            <AvatarFallback className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 text-3xl font-bold border border-indigo-200 dark:border-indigo-800">
+                              {getInitials()}
+                            </AvatarFallback>
+                          )}
+                          
+                          {/* Overlay for Edit */}
+                          <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                            <Upload className="h-8 w-8 text-white" />
                           </div>
-                        ) : null}
-                        {profile?.profileImage ? (
-                           <img src={profile.profileImage} alt="Profile" className="h-full w-full object-cover" />
-                        ) : (
-                          <AvatarFallback className="bg-purple-600 text-white text-3xl font-bold">
-                            {getInitials()}
-                          </AvatarFallback>
-                        )}
+                        </Avatar>
                         
-                        {/* Overlay for Edit */}
-                        <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                          <Upload className="h-8 w-8 text-white" />
-                        </div>
-                      </Avatar>
+                        {/* Hidden Input */}
+                        <input 
+                          type="file" 
+                          ref={fileInputRef} 
+                          className="hidden" 
+                          accept="image/png, image/jpeg, image/jpg, image/webp"
+                          onChange={handleImageUpload}
+                        />
+                        
+                        {/* Remove Button */}
+                        {profile?.profileImage && (
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full shadow-md z-20"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleImageRemove();
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                       
-                      {/* Hidden Input */}
-                      <input 
-                        type="file" 
-                        ref={fileInputRef} 
-                        className="hidden" 
-                        accept="image/png, image/jpeg, image/jpg, image/webp"
-                        onChange={handleImageUpload}
-                      />
-                      
-                      {/* Remove Button (Small X or Trash) */}
-                      {profile?.profileImage && (
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full shadow-md z-20"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleImageRemove();
-                          }}
+                      <div className="flex-1 mb-2 text-center sm:text-left">
+                        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{formData.name || 'Set your name'}</h1>
+                        <p className="text-slate-500 dark:text-slate-400 flex items-center justify-center sm:justify-start gap-2 font-medium mt-1">
+                          <Mail className="h-3.5 w-3.5" /> {profile?.email}
+                        </p>
+                      </div>
+                      <div className="mb-2">
+                        <Badge className="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 px-4 py-1.5 rounded-md border border-indigo-200 dark:border-indigo-500/20 shadow-none font-bold tracking-wide">
+                          {profile?.role || 'STUDENT'}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Horizontal Tabbed Nav */}
+                  <div className="px-6 sm:px-8 border-t border-slate-200 dark:border-[#1E1E2A] bg-slate-50 dark:bg-[#1A1A24]">
+                    <div className="flex overflow-x-auto no-scrollbar gap-8">
+                      {[
+                        { id: 'profile', label: 'General', icon: User },
+                        ...(profile?.role === 'INSTRUCTOR' ? [{ id: 'instructor', label: 'Instructor Profile', icon: BookOpen }] : []),
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'notifications', label: 'Alerts', icon: Bell },
+                        { id: 'preferences', label: 'Settings', icon: Settings },
+                      ].map((tab) => (
+                        <button
+                          key={tab.id}
+                          onClick={() => setActiveTab(tab.id as any)}
+                          className={`py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
+                            activeTab === tab.id 
+                              ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400' 
+                              : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                          }`}
                         >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                    <div className="flex-1 mb-2 text-center sm:text-left">
-                      <h1 className="text-2xl font-bold text-gray-900">{formData.name || 'Set your name'}</h1>
-                      <p className="text-gray-500 flex items-center justify-center sm:justify-start gap-2">
-                        <Mail className="h-3.5 w-3.5" /> {profile?.email}
-                      </p>
-                    </div>
-                    <div className="mb-2">
-                      <Badge className="bg-white-700 text-indigo-700 hover:bg-purple-100 px-4 py-1 rounded-full border-none">
-                        {profile?.role || 'STUDENT'}
-                      </Badge>
+                          <tab.icon className="h-4 w-4" />
+                          {tab.label}
+                        </button>
+                      ))}
                     </div>
                   </div>
-                </div>
+                </CardContent>
+              </Card>
 
-                {/* Horizontal Tabbed Nav */}
-                <div className="px-8 border-t bg-gray-50/50">
-                  <div className="flex overflow-x-auto no-scrollbar gap-8">
-                    {[
-                      { id: 'profile', label: 'General', icon: User },
-                      ...(profile?.role === 'INSTRUCTOR' ? [{ id: 'instructor', label: 'Instructor Profile', icon: BookOpen }] : []),
-                      { id: 'security', label: 'Security', icon: Shield },
-                      { id: 'notifications', label: 'Alerts', icon: Bell },
-                      { id: 'preferences', label: 'Settings', icon: Settings },
-                    ].map((tab) => (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id as any)}
-                        className={`py-4 text-sm font-semibold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
-                          activeTab === tab.id 
-                            ? 'border-purple-600 text-purple-600' 
-                            : 'border-transparent text-gray-400 hover:text-gray-600'
-                        }`}
-                      >
-                        <tab.icon className="h-4 w-4" />
-                        {tab.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Content Section */}
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              {activeTab === 'profile' && (
-                <Card className="border-none shadow-lg bg-white">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Account Information</CardTitle>
-                    <CardDescription>Basic details about your account identity.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label className="text-gray-500">Full Name</Label>
-                        <Input 
-                          value={formData.name} 
-                          onChange={(e) => handleInputChange('name', e.target.value)}
-                          className="bg-gray-50/50 border-gray-200 focus:bg-white"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-gray-500">Country Code</Label>
-                        <Input 
-                          value={formData.countryCode} 
-                          onChange={(e) => handleInputChange('countryCode', e.target.value.toUpperCase())}
-                          placeholder="+1"
-                          className="bg-gray-50/50 border-gray-200"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-gray-500">Phone Number</Label>
-                        <Input 
-                          value={formData.phoneNo} 
-                          onChange={(e) => handleInputChange('phoneNo', e.target.value)}
-                          className="bg-gray-50/50 border-gray-200"
-                        />
-                      </div>
-                      <div className="space-y-2 opacity-60">
-                        <Label>Registration Date</Label>
-                        <div className="h-10 flex items-center px-3 bg-gray-100 rounded-md text-sm text-gray-500">
-                          <Calendar className="h-4 w-4 mr-2" />
-                          {profile?.createdAt ? new Date(profile.createdAt).toDateString() : 'N/A'}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {activeTab === 'instructor' && profile?.role === 'INSTRUCTOR' && (
-                 <Card className="border-none shadow-lg bg-white">
+              {/* Content Section */}
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                {activeTab === 'profile' && (
+                  <Card className="border-slate-200 dark:border-[#1E1E2A] shadow-sm dark:shadow-none bg-white dark:bg-[#12121A]">
                     <CardHeader>
-                      <CardTitle className="text-lg">Instructor Workspace</CardTitle>
-                      <CardDescription>Professional data used for course listings.</CardDescription>
+                      <CardTitle className="text-lg text-slate-900 dark:text-white">Account Information</CardTitle>
+                      <CardDescription className="text-slate-500 dark:text-slate-400">Basic details about your account identity.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="space-y-2">
-                        <Label className="text-gray-500">Teaching Specialization</Label>
-                        <Input 
-                          value={formData.specialization} 
-                          onChange={(e) => handleInputChange('specialization', e.target.value)}
-                          placeholder="e.g. Advanced Mathematics"
-                          className="bg-gray-50/50 border-gray-200"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-gray-500">Biography</Label>
-                        <Textarea 
-                          value={formData.bio} 
-                          onChange={(e) => handleInputChange('bio', e.target.value)}
-                          className="min-h-[120px] bg-gray-50/50 border-gray-200"
-                        />
-                      </div>
-                      <Separator />
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                           <Label className="flex items-center gap-2"><Linkedin className="h-3 w-3" /> LinkedIn</Label>
-                           <Input value={formData.linkedin} onChange={(e) => handleInputChange('linkedin', e.target.value)} className="text-xs h-9" />
+                          <Label className="text-slate-700 dark:text-slate-300 font-semibold">Full Name</Label>
+                          <Input 
+                            value={formData.name} 
+                            onChange={(e) => handleInputChange('name', e.target.value)}
+                            className="bg-slate-50 dark:bg-[#1A1A24] border-slate-200 dark:border-[#2A2A3A] focus:bg-white dark:focus:bg-[#1A1A24] text-slate-900 dark:text-white transition-colors"
+                          />
                         </div>
                         <div className="space-y-2">
-                           <Label className="flex items-center gap-2"><Twitter className="h-3 w-3" /> Twitter</Label>
-                           <Input value={formData.twitter} onChange={(e) => handleInputChange('twitter', e.target.value)} className="text-xs h-9" />
+                          <Label className="text-slate-700 dark:text-slate-300 font-semibold">Country Code</Label>
+                          <Input 
+                            value={formData.countryCode} 
+                            onChange={(e) => handleInputChange('countryCode', e.target.value.toUpperCase())}
+                            placeholder="+1"
+                            className="bg-slate-50 dark:bg-[#1A1A24] border-slate-200 dark:border-[#2A2A3A] focus:bg-white dark:focus:bg-[#1A1A24] text-slate-900 dark:text-white transition-colors"
+                          />
                         </div>
                         <div className="space-y-2">
-                           <Label className="flex items-center gap-2"><Github className="h-3 w-3" /> GitHub</Label>
-                           <Input value={formData.github} onChange={(e) => handleInputChange('github', e.target.value)} className="text-xs h-9" />
+                          <Label className="text-slate-700 dark:text-slate-300 font-semibold">Phone Number</Label>
+                          <Input 
+                            value={formData.phoneNo} 
+                            onChange={(e) => handleInputChange('phoneNo', e.target.value)}
+                            className="bg-slate-50 dark:bg-[#1A1A24] border-slate-200 dark:border-[#2A2A3A] focus:bg-white dark:focus:bg-[#1A1A24] text-slate-900 dark:text-white transition-colors"
+                          />
+                        </div>
+                        <div className="space-y-2 opacity-70">
+                          <Label className="text-slate-700 dark:text-slate-300 font-semibold">Registration Date</Label>
+                          <div className="h-10 flex items-center px-3 bg-slate-100 dark:bg-[#1A1A24] border border-slate-200 dark:border-[#2A2A3A] rounded-md text-sm text-slate-500 dark:text-slate-400 font-medium">
+                            <Calendar className="h-4 w-4 mr-2" />
+                            {profile?.createdAt ? new Date(profile.createdAt).toDateString() : 'N/A'}
+                          </div>
                         </div>
                       </div>
                     </CardContent>
-                 </Card>
-              )}
-
-              {/* Placeholder for future sections */}
-              {(activeTab === 'security' || activeTab === 'notifications' || activeTab === 'preferences') && (
-                <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl shadow-sm border border-gray-100">
-                  <Settings className="h-12 w-12 text-gray-200 mb-4 animate-spin-slow" />
-<h3 className="text-lg font-bold text-gray-800">Feature Coming Soon</h3>
-                    <p className="text-sm text-gray-500 max-w-xs text-center">We're working hard to bring you more control over your experience.</p>                </div>
-              )}
-            </div>
-
-            {/* Bottom Floating Save Action */}
-            <div className="flex items-center justify-end gap-4 pt-4">
-              <p className="text-xs text-gray-400 italic">
-                {profile?.updatedAt && `Automatically synced on ${new Date(profile.updatedAt).toLocaleDateString()}`}
-              </p>
-              <Button
-                onClick={handleSave}
-                disabled={saving}
-                className="bg-indigo-700 hover:bg-indigo-700 text-white rounded-full px-8 h-12 shadow-lg shadow-indigo-200 transition-all hover:-translate-y-0.5"
-              >
-                {saving ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  </Card>
                 )}
-                {saving ? 'Updating...' : 'Save All Changes'}
-              </Button>
+
+                {activeTab === 'instructor' && profile?.role === 'INSTRUCTOR' && (
+                   <Card className="border-slate-200 dark:border-[#1E1E2A] shadow-sm dark:shadow-none bg-white dark:bg-[#12121A]">
+                      <CardHeader>
+                        <CardTitle className="text-lg text-slate-900 dark:text-white">Instructor Workspace</CardTitle>
+                        <CardDescription className="text-slate-500 dark:text-slate-400">Professional data used for your public course listings.</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                          <Label className="text-slate-700 dark:text-slate-300 font-semibold">Teaching Specialization</Label>
+                          <Input 
+                            value={formData.specialization} 
+                            onChange={(e) => handleInputChange('specialization', e.target.value)}
+                            placeholder="e.g. Advanced Mathematics"
+                            className="bg-slate-50 dark:bg-[#1A1A24] border-slate-200 dark:border-[#2A2A3A] focus:bg-white dark:focus:bg-[#1A1A24] text-slate-900 dark:text-white transition-colors"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-slate-700 dark:text-slate-300 font-semibold">Biography</Label>
+                          <Textarea 
+                            value={formData.bio} 
+                            onChange={(e) => handleInputChange('bio', e.target.value)}
+                            className="min-h-[120px] bg-slate-50 dark:bg-[#1A1A24] border-slate-200 dark:border-[#2A2A3A] focus:bg-white dark:focus:bg-[#1A1A24] text-slate-900 dark:text-white transition-colors resize-y"
+                          />
+                        </div>
+                        <Separator className="bg-slate-200 dark:bg-[#2A2A3A]" />
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="space-y-2">
+                             <Label className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-semibold"><Linkedin className="h-4 w-4 text-blue-500" /> LinkedIn</Label>
+                             <Input value={formData.linkedin} onChange={(e) => handleInputChange('linkedin', e.target.value)} className="bg-slate-50 dark:bg-[#1A1A24] border-slate-200 dark:border-[#2A2A3A] focus:bg-white dark:focus:bg-[#1A1A24] text-slate-900 dark:text-white text-sm" placeholder="URL..." />
+                          </div>
+                          <div className="space-y-2">
+                             <Label className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-semibold"><Twitter className="h-4 w-4 text-sky-500" /> Twitter</Label>
+                             <Input value={formData.twitter} onChange={(e) => handleInputChange('twitter', e.target.value)} className="bg-slate-50 dark:bg-[#1A1A24] border-slate-200 dark:border-[#2A2A3A] focus:bg-white dark:focus:bg-[#1A1A24] text-slate-900 dark:text-white text-sm" placeholder="@handle..." />
+                          </div>
+                          <div className="space-y-2">
+                             <Label className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-semibold"><Github className="h-4 w-4 text-slate-900 dark:text-slate-200" /> GitHub</Label>
+                             <Input value={formData.github} onChange={(e) => handleInputChange('github', e.target.value)} className="bg-slate-50 dark:bg-[#1A1A24] border-slate-200 dark:border-[#2A2A3A] focus:bg-white dark:focus:bg-[#1A1A24] text-slate-900 dark:text-white text-sm" placeholder="Username..." />
+                          </div>
+                        </div>
+                      </CardContent>
+                   </Card>
+                )}
+
+                {/* Placeholder for future sections */}
+                {(activeTab === 'security' || activeTab === 'notifications' || activeTab === 'preferences') && (
+                  <div className="flex flex-col items-center justify-center py-24 bg-white dark:bg-[#12121A] rounded-xl shadow-sm dark:shadow-none border border-slate-200 dark:border-[#1E1E2A]">
+                    <Settings className="h-12 w-12 text-slate-300 dark:text-slate-700 mb-4 animate-spin-slow" />
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Feature Coming Soon</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs text-center font-medium">We're working hard to bring you more control over your experience.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Bottom Floating Save Action */}
+              <div className="flex flex-col sm:flex-row items-center justify-between sm:justify-end gap-4 pt-4">
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                  {profile?.updatedAt && `Last synced on ${new Date(profile.updatedAt).toLocaleDateString()}`}
+                </p>
+                <Button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-8 py-6 font-bold shadow-md shadow-indigo-600/20 transition-all hover:-translate-y-0.5"
+                >
+                  {saving ? (
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="h-5 w-5 mr-2" />
+                  )}
+                  {saving ? 'Saving...' : 'Save All Changes'}
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </main>
       </div>
+
     </div>
   );
 }

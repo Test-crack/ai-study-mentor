@@ -28,9 +28,10 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
   
   const menuItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/instructor/dashboard' },
-    { id: 'courses', icon: BookOpen, label: 'Course Management', path: '/courses/admin/dashboard' },
+    { id: 'courses', icon: BookOpen, label: 'Course Management', path: '/instructor/coursemanagement' },
     { id: 'assessments', icon: FileText, label: 'Student Assessments', path: '/instructor/assessments' },
-    { id: 'students', icon: Users, label: 'Students', path: '/instructor/students' }, // Placeholder for now
+    { id: 'techprep', icon: FileText, label: 'Tech Prep', path: '/instructor/tech-pep' },
+    { id: 'alignment', icon: Users, label: 'Alignment', path: '/instructor/alignment' }, 
     { id: 'settings', icon: Settings, label: 'Settings', path: '/profile' },
   ];
 

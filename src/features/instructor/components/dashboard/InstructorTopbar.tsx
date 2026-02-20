@@ -31,13 +31,14 @@ export const InstructorTopbar = ({ onCreateCourse }: InstructorTopbarProps) => {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="p-0 bg-slate-900 border-none w-72">
-             <InstructorSidebar 
-               isCollapsed={false} 
-               toggleCollapse={() => {}} 
-               activeTab={activeTab}
-               onTabChange={setActiveTab}
-               className="static w-full h-full rounded-none shadow-none" 
-             />
+         <InstructorSidebar 
+   isCollapsed={false} 
+   toggleCollapse={() => {}} 
+   activeTab={activeTab}
+   onTabChange={setActiveTab}
+   // Add 'flex' here to override the 'hidden' class from the base component
+   className="flex static w-full h-full rounded-none shadow-none border-none" 
+/>
           </SheetContent>
         </Sheet>
       </div>

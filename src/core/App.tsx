@@ -32,6 +32,9 @@ import InstructorAssessmentPage from "@/features/instructor/components/assessmen
 import { RoleProtectedRoute } from "@/shared/components/auth/ProtectedRoute";
 import SpeakingPractice from "@/features/student/components/SpeakingPractice";
 import MyCurriculum from "@/features/student/components/MyCurriculum";
+import InstructorCourseManagementPage from "@/features/instructor/components/InstructorCourseManagementPage";
+import TechPrepPage from "@/features/instructor/components/TechPrepPage";
+import AlignmentPage from "@/features/instructor/components/Alignment";
 const queryClient = new QueryClient();
 
 /**
@@ -123,6 +126,9 @@ const AppRoutes = () => {
           </RoleProtectedRoute>
         } 
       />
+      <Route path="/instructor/coursemanagement" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorCourseManagementPage/></RoleProtectedRoute>} />
+      <Route path="/instructor/tech-pep" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><TechPrepPage/></RoleProtectedRoute>} />
+      <Route path="/instructor/alignment" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><AlignmentPage/></RoleProtectedRoute>} />
 
       {/* Protected routes */}
       <Route path="/learn/:slug" element={<RoleProtectedRoute><LearningPage /></RoleProtectedRoute>} />
