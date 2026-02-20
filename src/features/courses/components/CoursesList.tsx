@@ -42,13 +42,13 @@ export function CoursesList() {
   const getDifficultyColor = (difficulty: DifficultyType | null) => {
     switch (difficulty) {
       case DifficultyType.BEGINNER:
-        return 'bg-green-50 text-green-700 border-green-200';
+        return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800';
       case DifficultyType.INTERMEDIATE:
-        return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+        return 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800';
       case DifficultyType.ADVANCED:
-        return 'bg-orange-50 text-orange-700 border-orange-200';
+        return 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800';
       default:
-        return 'bg-gray-50 text-gray-700 border-gray-200';
+        return 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700';
     }
   };
 
@@ -80,8 +80,8 @@ export function CoursesList() {
         <CoursesFilters filters={filters} onFiltersChange={handleFiltersChange} />
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center space-y-4 max-w-md">
-            <div className="text-red-600 text-lg font-semibold">Error Loading Courses</div>
-            <p className="text-gray-600">{error}</p>
+            <div className="text-red-600 dark:text-red-400 text-lg font-semibold">Error Loading Courses</div>
+            <p className="text-gray-600 dark:text-gray-400">{error}</p>
             <Button onClick={() => refetch(filters)} variant="outline">
               Try Again
             </Button>
@@ -97,9 +97,9 @@ export function CoursesList() {
         <CoursesFilters filters={filters} onFiltersChange={handleFiltersChange} />
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center space-y-4 max-w-md">
-            <BookOpen className="h-16 w-16 text-gray-400 mx-auto" />
-            <div className="text-gray-900 text-lg font-semibold">No Courses Found</div>
-            <p className="text-gray-600">
+            <BookOpen className="h-16 w-16 text-gray-400 dark:text-gray-600 mx-auto" />
+            <div className="text-gray-900 dark:text-white text-lg font-semibold">No Courses Found</div>
+            <p className="text-gray-600 dark:text-gray-400">
               Try adjusting your filters or check back soon for new courses!
             </p>
             <Button
@@ -122,9 +122,9 @@ export function CoursesList() {
       {/* Results Summary */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">All Courses</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">All Courses</h2>
           {pagination && (
-            <p className="text-gray-600 mt-1">
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
               Showing {(pagination.page - 1) * pagination.limit + 1} -{' '}
               {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
               {pagination.total} courses
@@ -138,7 +138,7 @@ export function CoursesList() {
         {courses.map((course) => (
           <Card
             key={course.id}
-            className="group cursor-pointer border border-gray-200 hover:shadow-xl transition-all duration-200 overflow-hidden flex flex-col"
+            className="group cursor-pointer border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:shadow-xl dark:hover:shadow-indigo-900/10 transition-all duration-200 overflow-hidden flex flex-col"
             onClick={() => handleCourseClick(course.slug, course.id)}
           >
             {/* Course Image Placeholder */}
@@ -157,7 +157,7 @@ export function CoursesList() {
                 <Badge
                   className={`absolute top-3 right-3 ${getDifficultyColor(
                     course.difficulty
-                  )} border`}
+                  )} border backdrop-blur-sm`}
                 >
                   {course.difficulty}
                 </Badge>
@@ -172,23 +172,23 @@ export function CoursesList() {
             <CardContent className="p-4 space-y-3 flex-1 flex flex-col">
               {/* Domain Badge */}
               {course.Domain && (
-                <Badge variant="outline" className="text-xs font-normal w-fit">
+                <Badge variant="outline" className="text-xs font-normal w-fit dark:border-gray-700 dark:text-gray-300">
                   {course.Domain.name}
                 </Badge>
               )}
 
               {/* Title */}
-              <h3 className="font-bold text-gray-900 line-clamp-2 group-hover:text-purple-600 transition-colors min-h-[3rem]">
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 line-clamp-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors min-h-[3rem]">
                 {course.title}
               </h3>
 
               {/* Description */}
-              <p className="text-sm text-gray-600 line-clamp-2 min-h-[2.5rem] flex-1">
+              <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 min-h-[2.5rem] flex-1">
                 {course.description || 'Enhance your skills with this comprehensive course'}
               </p>
 
               {/* Meta Info */}
-              <div className="flex items-center gap-3 text-xs text-gray-500 pt-2">
+              <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 pt-2">
                 <div className="flex items-center gap-1">
                   <Clock className="h-3.5 w-3.5" />
                   <span>{formatDuration(course.duration_minutes)}</span>
@@ -211,19 +211,19 @@ export function CoursesList() {
               <div className="flex items-center gap-2 pt-1">
                 <div className="flex items-center gap-1">
                   <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  <span className="text-sm font-semibold text-gray-900">4.7</span>
+                  <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">4.7</span>
                 </div>
-                <span className="text-xs text-gray-500">(1.2k)</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">(1.2k)</span>
               </div>
 
               {/* Price & CTA */}
-              <div className="flex items-center justify-between pt-3 border-t mt-auto">
-                <div className="text-lg font-bold text-gray-900">
+              <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800 mt-auto">
+                <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
                   {formatPrice(course.price)}
                 </div>
                 <Button
                   size="sm"
-                  className="bg-indigo-700 hover:bg-purple-700 text-white"
+                  className="bg-indigo-700 hover:bg-purple-700 text-white dark:bg-indigo-600 dark:hover:bg-purple-600"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleCourseClick(course.slug, course.id);

@@ -28,15 +28,30 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
   const menuItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { id: 'courses', icon: BookOpen, label: 'My Courses' },
-    { id: 'assessment', icon: BookOpen, label: 'Reading Assessment' },
+    { id: 'assessment', icon: BookOpen, label: 'IELTS Reading' },
     { id: 'schedule', icon: Calendar, label: 'Schedule' },
+    { id: 'speaking-practice', icon: Calendar, label: 'Speaking-Anatomy' },
+    { id: 'my-curriculum', icon: Calendar, label: 'My-Curriculum' },
     { id: 'settings', icon: Settings, label: 'Settings' },
   ];
+
+  // Custom logout handler to reset the theme to light mode
+  const handleLogout = async () => {
+    // Force the theme back to light mode
+    document.documentElement.classList.remove('dark');
+    
+    // Clear theme preferences from local storage
+    localStorage.setItem('theme', 'light'); 
+    localStorage.setItem('vite-ui-theme', 'light'); 
+    
+    // Proceed with normal sign out
+    await signOut();
+  };
 
   return (
     <aside 
       className={cn(
-        "fixed left-4 top-4 bottom-4 bg-slate-900 dark:bg-slate-950 rounded-2xl shadow-2xl flex flex-col justify-between py-6 z-40 hidden lg:flex transition-all duration-300 border border-slate-800",
+        "fixed left-4 top-4 bottom-4 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl flex flex-col justify-between py-6 z-40 hidden lg:flex transition-all duration-300 border border-slate-200 dark:border-slate-800",
         isCollapsed ? "w-20 px-2" : "w-64 px-4",
         className
       )}
@@ -47,7 +62,7 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
           <GraduationCap className="h-6 w-6 text-white" />
         </div>
         {!isCollapsed && (
-          <span className="text-xl font-bold text-white tracking-wide animate-in fade-in duration-300">
+          <span className="text-xl font-bold text-slate-900 dark:text-white tracking-wide animate-in fade-in duration-300">
             TestCrack
           </span>
         )}
@@ -64,6 +79,8 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
               else if (item.id === 'assessment') navigate('/student/reading-assessment');
               else if (item.id === 'settings') navigate('/student/settings');
               else if (item.id === 'schedule') navigate('/student/schedule');
+              else if (item.id === 'speaking-practice') navigate('/student/speaking-practice');
+              else if (item.id === 'my-curriculum') navigate('/student/my-curriculum');
               else onTabChange(item.id);
             }}
             title={isCollapsed ? item.label : undefined}
@@ -72,12 +89,12 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
               isCollapsed ? "justify-center p-3" : "px-4 py-3",
               activeTab === item.id 
                 ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/20" 
-                : "text-slate-400 hover:bg-slate-800 dark:hover:bg-slate-800 hover:text-white"
+                : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 dark:hover:text-white"
             )}
           >
             <item.icon className={cn(
               "h-5 w-5 transition-transform group-hover:scale-105 shrink-0",
-              activeTab === item.id ? "text-white" : "text-slate-400 group-hover:text-white"
+              activeTab === item.id ? "text-white" : "text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-white"
             )} />
             {!isCollapsed && (
               <span className="font-medium text-sm animate-in fade-in duration-200">{item.label}</span>
@@ -95,13 +112,13 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
       </button>
 
       {/* Bottom Actions */}
-      <div className={cn("pt-6 border-t border-slate-800 space-y-2", isCollapsed ? "px-0" : "px-0")}>
+      <div className={cn("pt-6 border-t border-slate-200 dark:border-slate-800 space-y-2", isCollapsed ? "px-0" : "px-0")}>
         {/* Home Link */}
         <button 
           onClick={() => navigate('/')}
           title={isCollapsed ? "Home Page" : undefined}
           className={cn(
-            "w-full flex items-center gap-3 rounded-xl text-slate-400 hover:bg-slate-800 dark:hover:bg-slate-800 hover:text-white transition-all duration-200 group",
+            "w-full flex items-center gap-3 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 dark:hover:text-white transition-all duration-200 group",
             isCollapsed ? "justify-center p-3" : "px-4 py-3"
           )}
         >
@@ -109,11 +126,12 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
           {!isCollapsed && <span className="font-medium text-sm">Home Page</span>}
         </button>
 
+        {/* Updated Logout Button */}
         <button 
-          onClick={() => signOut()}
+          onClick={handleLogout}
           title={isCollapsed ? "Logout" : undefined}
           className={cn(
-            "w-full flex items-center gap-3 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 group",
+            "w-full flex items-center gap-3 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 transition-all duration-200 group",
              isCollapsed ? "justify-center p-3" : "px-4 py-3"
           )}
         >

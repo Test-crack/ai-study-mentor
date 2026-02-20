@@ -30,7 +30,8 @@ import StudentAssessmentHistoryPage from "@/features/student/components/StudentA
 import InstructorDashboardPage from "@/features/instructor/components/InstructorDashboardPage";
 import InstructorAssessmentPage from "@/features/instructor/components/assessments/InstructorAssessmentPage";
 import { RoleProtectedRoute } from "@/shared/components/auth/ProtectedRoute";
-
+import SpeakingPractice from "@/features/student/components/SpeakingPractice";
+import MyCurriculum from "@/features/student/components/MyCurriculum";
 const queryClient = new QueryClient();
 
 /**
@@ -102,6 +103,8 @@ const AppRoutes = () => {
       <Route path="/student/schedule" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentSchedulePage /></RoleProtectedRoute>} />
       <Route path="/student/reading-assessment" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentReadingAssessmentPage /></RoleProtectedRoute>} />
       <Route path="/student/reading-assessment/history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentAssessmentHistoryPage /></RoleProtectedRoute>} />
+      <Route path="/student/my-curriculum" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><MyCurriculum/></RoleProtectedRoute>} />
+      <Route path="/student/speaking-practice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><SpeakingPractice/></RoleProtectedRoute>} />
 
       {/* Instructor Dashboard & Routes */}
       <Route 

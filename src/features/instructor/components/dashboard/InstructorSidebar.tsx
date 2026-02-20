@@ -41,21 +41,34 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
     }
   };
 
+  // Custom logout handler to reset the theme
+  const handleLogout = async () => {
+    // 1. Force the theme back to light mode by removing the Tailwind 'dark' class
+    document.documentElement.classList.remove('dark');
+    
+    // 2. (Optional) Update local storage if your theme provider relies on it
+    localStorage.setItem('theme', 'light'); 
+    localStorage.setItem('vite-ui-theme', 'light'); // Common if using shadcn/vite standard theme providers
+    
+    // 3. Proceed with the normal sign out
+    await signOut();
+  };
+
   return (
     <aside 
       className={cn(
-        "fixed left-4 top-4 bottom-4 bg-slate-900 dark:bg-slate-950 rounded-2xl shadow-2xl flex flex-col justify-between py-6 z-40 hidden lg:flex transition-all duration-300 border border-slate-800",
+        "fixed left-4 top-4 bottom-4 bg-white dark:bg-[#12121A] rounded-2xl shadow-xl dark:shadow-2xl flex flex-col justify-between py-6 z-40 hidden lg:flex transition-all duration-300 border border-slate-200 dark:border-[#1E1E2A]",
         isCollapsed ? "w-20 px-2" : "w-64 px-4",
         className
       )}
     >
       {/* Brand */}
       <div className={cn("flex items-center gap-3 mb-10", isCollapsed ? "justify-center px-0" : "px-2")}>
-        <div className="bg-indigo-600 p-2 rounded-lg shrink-0">
+        <div className="bg-indigo-600 p-2 rounded-lg shrink-0 shadow-md shadow-indigo-500/20">
           <GraduationCap className="h-6 w-6 text-white" />
         </div>
         {!isCollapsed && (
-          <span className="text-xl font-bold text-white tracking-wide animate-in fade-in duration-300">
+          <span className="text-xl font-bold text-slate-900 dark:text-white tracking-wide animate-in fade-in duration-300">
             Instructor
           </span>
         )}
@@ -72,13 +85,13 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
               "w-full flex items-center gap-3 rounded-xl transition-all duration-200 group relative",
               isCollapsed ? "justify-center p-3" : "px-4 py-3",
               activeTab === item.id 
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/20" 
-                : "text-slate-400 hover:bg-slate-800 dark:hover:bg-slate-800 hover:text-white"
+                ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/20 dark:shadow-indigo-900/20" 
+                : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-[#1A1A24] hover:text-indigo-600 dark:hover:text-white"
             )}
           >
             <item.icon className={cn(
               "h-5 w-5 transition-transform group-hover:scale-105 shrink-0",
-              activeTab === item.id ? "text-white" : "text-slate-400 group-hover:text-white"
+              activeTab === item.id ? "text-white" : "text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-white"
             )} />
             {!isCollapsed && (
               <span className="font-medium text-sm animate-in fade-in duration-200">{item.label}</span>
@@ -90,19 +103,19 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
       {/* Collapse Toggle */}
       <button
         onClick={toggleCollapse}
-        className="absolute -right-3 top-1/2 -translate-y-1/2 bg-indigo-600 text-white p-1.5 rounded-full shadow-lg hover:bg-indigo-700 transition-colors z-50 border-2 border-[#F8FAFC] dark:border-slate-950"
+        className="absolute -right-3 top-1/2 -translate-y-1/2 bg-indigo-600 text-white p-1.5 rounded-full shadow-lg hover:bg-indigo-700 transition-colors z-50 border-2 border-slate-50 dark:border-[#09090E]"
       >
         {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
       </button>
 
       {/* Bottom Actions */}
-      <div className={cn("pt-6 border-t border-slate-800 space-y-2", isCollapsed ? "px-0" : "px-0")}>
+      <div className={cn("pt-6 border-t border-slate-200 dark:border-[#1E1E2A] space-y-2", isCollapsed ? "px-0" : "px-0")}>
         {/* Home Link */}
         <button 
           onClick={() => navigate('/')}
           title={isCollapsed ? "Home Page" : undefined}
           className={cn(
-            "w-full flex items-center gap-3 rounded-xl text-slate-400 hover:bg-slate-800 dark:hover:bg-slate-800 hover:text-white transition-all duration-200 group",
+            "w-full flex items-center gap-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-[#1A1A24] hover:text-indigo-600 dark:hover:text-white transition-all duration-200 group",
             isCollapsed ? "justify-center p-3" : "px-4 py-3"
           )}
         >
@@ -110,11 +123,12 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
           {!isCollapsed && <span className="font-medium text-sm">Home Page</span>}
         </button>
 
+        {/* Updated Logout Button */}
         <button 
-          onClick={() => signOut()}
+          onClick={handleLogout}
           title={isCollapsed ? "Logout" : undefined}
           className={cn(
-            "w-full flex items-center gap-3 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 group",
+            "w-full flex items-center gap-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200 group",
             isCollapsed ? "justify-center p-3" : "px-4 py-3"
           )}
         >

@@ -121,48 +121,48 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b transform-gpu">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-2">
-              <div className="p-2 bg-indigo-700 rounded-xl">
-                <GraduationCap className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-xl font-bold bg-indigo-700 bg-clip-text text-transparent">
-               TestCrack
-              </span>
-            </div>
-          <div className="flex items-center gap-4">
-  <Button
-    variant="ghost"
-    onClick={() => navigate('/courses')}
-    className="hidden md:inline-flex text-white bg-indigo-700 hover:text-gray-900"
-  >
-    Courses
-  </Button>
-
-  {user ? (
-    <Button
-      onClick={() => navigate('/dashboard')}
-      className="bg-indigo-700 hover:from-purple-700 hover:to-blue-700"
-    >
-      Dashboard
-    </Button>
-  ) : (
-    <>
-      <Button
-        variant="ghost"
-        onClick={() => navigate('/auth')}
-        className="text-white bg-indigo-700 hover:text-gray-900"
-      >
-        Sign In
-      </Button>
-    </>
-  )}
-</div>
-          </div>
+   <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md transform-gpu">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="flex items-center justify-between h-16">
+      <div className="flex items-center space-x-2">
+        <div className="p-2 bg-indigo-700 rounded-xl">
+          <GraduationCap className="h-6 w-6 text-white" />
         </div>
-      </nav>
+        <span className="text-xl font-bold bg-indigo-700 bg-clip-text text-transparent">
+          TestCrack
+        </span>
+      </div>
+      <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          onClick={() => navigate('/courses')}
+          className="hidden md:inline-flex text-white bg-indigo-700 hover:bg-indigo-900 hover:text-white"
+        >
+          Courses
+        </Button>
+
+        {user ? (
+          <Button
+            onClick={() => navigate('/dashboard')}
+            className="text-white bg-indigo-700 hover:bg-indigo-900"
+          >
+            Dashboard
+          </Button>
+        ) : (
+          <>
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/auth')}
+              className="text-white bg-indigo-700 hover:bg-indigo-900 hover:text-white"
+            >
+              Sign In
+            </Button>
+          </>
+        )}
+      </div>
+    </div>
+  </div>
+</nav>
 
       {/* Hero Section */}
 <section className="relative min-h-[80vh] flex items-center pt-24 pb-10 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-50 via-white to-indigo-100 overflow-hidden ">
@@ -231,10 +231,10 @@ const LandingPage = () => {
           size="lg"
           variant="outline"
           onClick={() => navigate('/courses')}
-          className="px-8 py-6 h-auto bg-white/50 backdrop-blur-sm transition-all shadow-sm active:scale-95"
+          className="px-8 py-6 h-auto bg-indigo-700 hover:bg-indigo-800 text-white px-8 py-6 h-auto transition-all shadow-md active:scale-95"
         >
-          <BookOpen className="mr-2 h-5 w-5 text-gray-600" />
-          Browse Courses
+          <BookOpen className="mr-2 h-5 w-5 text-white" />
+         <span className='text-white'> Browse Course</span>
         </Button>
       </div>
     </div>
