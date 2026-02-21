@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 
 interface SidebarProps {
   activeTab?: string;
-  onTabChange: (tab: string) => void;
+  onTabChange?: (tab: string) => void;
   isCollapsed: boolean;
   toggleCollapse: () => void;
   className?: string;
@@ -26,67 +26,64 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
   const navigate = useNavigate();
   
   const menuItems = [
-    { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { id: 'courses', icon: BookOpen, label: 'My Courses' },
-    { id: 'assessment', icon: BookOpen, label: 'IELTS Reading' },
-    { id: 'schedule', icon: Calendar, label: 'Schedule' },
-    { id: 'speaking-practice', icon: Calendar, label: 'Speaking-Anatomy' },
-    { id: 'my-curriculum', icon: Calendar, label: 'My-Curriculum' },
-    { id: 'settings', icon: Settings, label: 'Settings' },
+    { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/student/dashboard' },
+    { id: 'courses', icon: BookOpen, label: 'My Courses', path: '/student/courses' },
+    { id: 'assessment', icon: BookOpen, label: 'IELTS Reading', path: '/student/reading-assessment' },
+    { id: 'schedule', icon: Calendar, label: 'Schedule', path: '/student/schedule' },
+    { id: 'speaking-practice', icon: Calendar, label: 'Speaking-Anatomy', path: '/student/speaking-practice' },
+    { id: 'my-curriculum', icon: Calendar, label: 'My-Curriculum', path: '/student/my-curriculum' },
+    { id: 'settings', icon: Settings, label: 'Settings', path: '/student/settings' },
   ];
 
-  // Custom logout handler to reset the theme to light mode
+  const handleNavigation = (item: typeof menuItems[0]) => {
+    navigate(item.path);
+    if (onTabChange) {
+      onTabChange(item.id);
+    }
+  };
+
   const handleLogout = async () => {
-    // Force the theme back to light mode
     document.documentElement.classList.remove('dark');
-    
-    // Clear theme preferences from local storage
     localStorage.setItem('theme', 'light'); 
     localStorage.setItem('vite-ui-theme', 'light'); 
-    
-    // Proceed with normal sign out
     await signOut();
   };
 
   return (
     <aside 
       className={cn(
-        "fixed left-4 top-4 bottom-4 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl flex flex-col justify-between py-6 z-40 hidden lg:flex transition-all duration-300 border border-slate-200 dark:border-slate-800",
-        isCollapsed ? "w-20 px-2" : "w-64 px-4",
+        "fixed left-4 top-4 bottom-4 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl flex flex-col justify-between py-6 z-50 transition-all duration-300 ease-in-out border border-slate-200 dark:border-slate-800",
+        // THE FIX: Mobile slides off screen entirely. Desktop shrinks to w-20.
+        isCollapsed 
+          ? "-translate-x-[150%] lg:translate-x-0 w-64 lg:w-20 px-4 lg:px-2" 
+          : "translate-x-0 w-64 px-4",
         className
       )}
     >
       {/* Brand */}
-      <div className={cn("flex items-center gap-3 mb-10", isCollapsed ? "justify-center px-0" : "px-2")}>
+      <div className={cn("flex items-center gap-3 mb-10", isCollapsed ? "lg:justify-center px-0 lg:px-0" : "px-2")}>
         <div className="bg-indigo-600 p-2 rounded-lg shrink-0">
           <GraduationCap className="h-6 w-6 text-white" />
         </div>
-        {!isCollapsed && (
-          <span className="text-xl font-bold text-slate-900 dark:text-white tracking-wide animate-in fade-in duration-300">
-            TestCrack
-          </span>
-        )}
+        {/* Changed to CSS hiding (lg:hidden) for smooth slide-out animation on mobile */}
+        <span className={cn(
+          "text-xl font-bold text-slate-900 dark:text-white tracking-wide animate-in fade-in duration-300 whitespace-nowrap",
+          isCollapsed ? "lg:hidden" : "block"
+        )}>
+          TestCrack
+        </span>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-2">
+      <nav className="flex-1 space-y-2 overflow-y-auto overflow-x-hidden no-scrollbar">
         {menuItems.map((item) => (
           <button
             key={item.id}
-            onClick={() => {
-              if (item.id === 'dashboard') navigate('/student/dashboard');
-              else if (item.id === 'courses') navigate('/student/courses');
-              else if (item.id === 'assessment') navigate('/student/reading-assessment');
-              else if (item.id === 'settings') navigate('/student/settings');
-              else if (item.id === 'schedule') navigate('/student/schedule');
-              else if (item.id === 'speaking-practice') navigate('/student/speaking-practice');
-              else if (item.id === 'my-curriculum') navigate('/student/my-curriculum');
-              else onTabChange(item.id);
-            }}
+            onClick={() => handleNavigation(item)}
             title={isCollapsed ? item.label : undefined}
             className={cn(
               "w-full flex items-center gap-3 rounded-xl transition-all duration-200 group relative",
-              isCollapsed ? "justify-center p-3" : "px-4 py-3",
+              isCollapsed ? "lg:justify-center p-3 lg:p-3" : "px-4 py-3",
               activeTab === item.id 
                 ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/20" 
                 : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 dark:hover:text-white"
@@ -96,9 +93,12 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
               "h-5 w-5 transition-transform group-hover:scale-105 shrink-0",
               activeTab === item.id ? "text-white" : "text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-white"
             )} />
-            {!isCollapsed && (
-              <span className="font-medium text-sm animate-in fade-in duration-200">{item.label}</span>
-            )}
+            <span className={cn(
+              "font-medium text-sm animate-in fade-in duration-200 whitespace-nowrap",
+              isCollapsed ? "lg:hidden" : "block"
+            )}>
+              {item.label}
+            </span>
           </button>
         ))}
       </nav>
@@ -112,31 +112,29 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
       </button>
 
       {/* Bottom Actions */}
-      <div className={cn("pt-6 border-t border-slate-200 dark:border-slate-800 space-y-2", isCollapsed ? "px-0" : "px-0")}>
-        {/* Home Link */}
+      <div className={cn("pt-4 border-t border-slate-200 dark:border-slate-800 space-y-2", isCollapsed ? "px-0" : "px-0")}>
         <button 
           onClick={() => navigate('/')}
           title={isCollapsed ? "Home Page" : undefined}
           className={cn(
             "w-full flex items-center gap-3 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 dark:hover:text-white transition-all duration-200 group",
-            isCollapsed ? "justify-center p-3" : "px-4 py-3"
+            isCollapsed ? "lg:justify-center p-3 lg:p-3" : "px-4 py-3"
           )}
         >
           <Home className="h-5 w-5 group-hover:scale-105 transition-transform shrink-0" />
-          {!isCollapsed && <span className="font-medium text-sm">Home Page</span>}
+          <span className={cn("font-medium text-sm whitespace-nowrap", isCollapsed ? "lg:hidden" : "block")}>Home Page</span>
         </button>
 
-        {/* Updated Logout Button */}
         <button 
           onClick={handleLogout}
           title={isCollapsed ? "Logout" : undefined}
           className={cn(
             "w-full flex items-center gap-3 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 transition-all duration-200 group",
-             isCollapsed ? "justify-center p-3" : "px-4 py-3"
+             isCollapsed ? "lg:justify-center p-3 lg:p-3" : "px-4 py-3"
           )}
         >
           <LogOut className="h-5 w-5 group-hover:translate-x-1 transition-transform shrink-0" />
-          {!isCollapsed && <span className="font-medium text-sm">Logout</span>}
+          <span className={cn("font-medium text-sm whitespace-nowrap", isCollapsed ? "lg:hidden" : "block")}>Logout</span>
         </button>
       </div>
     </aside>
