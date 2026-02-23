@@ -10,6 +10,9 @@ import { Card, CardContent } from '@/shared/components/ui/card';
 import { StudentSidebar } from './dashboard/StudentSidebar';
 import { StudentTopbar } from './dashboard/StudentTopbar';
 import { cn } from "@/shared/utils";
+import { fetchIeltsReadingTopics, fetchIeltsReadingTopicById, IeltsReadingPractice, IeltsReadingPracticeList } from '../services/ieltsReadingService';
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 type Step = 1 | 2 | 3 | 4;
 type BandLevel = 'All' | 'Band 5' | 'Band 6' | 'Band 7' | 'Band 8';
@@ -18,95 +21,88 @@ export default function StudentReadingAssessmentPage() {
   const navigate = useNavigate();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeBand, setActiveBand] = useState<BandLevel>('All');
-  const [selectedTopic, setSelectedTopic] = useState<any>(null);
+  const [selectedTopic, setSelectedTopic] = useState<IeltsReadingPractice | null>(null);
+  const [topics, setTopics] = useState<IeltsReadingPracticeList[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isFetchingDetail, setIsFetchingDetail] = useState(false);
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const [showTips, setShowTips] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   
   // Recording & Simulation States
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [revealedCount, setRevealedCount] = useState(0);
 
-  // 1. Expanded Topics Database (6 Fully Functional Cards)
-  const topics = [
-    { 
-      id: 1, title: "Describe your hometown.", type: "Short Answer", words: 48, phrases: 5, band: "BAND 6", 
-      color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20", border: "border-blue-200 dark:border-blue-800", iconType: 'pencil',
-      modelAnswer: "I come from a small coastal town called Kochi in Kerala. It is known for its beautiful backwaters and vibrant fishing industry. Living there provides a peaceful atmosphere compared to major cities.",
-      keywords: ["coastal town", "known for", "vibrant", "peaceful atmosphere"],
-      keywordMap: [
-        { word: "coastal town", meaning: "Location descriptor" },
-        { word: "known for", meaning: "Fame/Reputation phrase" },
-        { word: "vibrant", meaning: "Strong adjective" },
-        { word: "peaceful atmosphere", meaning: "Environmental description" }
-      ],
-      tips: ["Use descriptive adjectives", "Mention specific locations", "Keep it personal yet formal"]
-    },
-    { 
-      id: 2, title: "Do you think social media has a positive or negative impact on society?", type: "Paragraph", words: 81, phrases: 6, band: "BAND 7", 
-      color: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-900/20", border: "border-orange-200 dark:border-orange-800", iconType: 'paper',
-      modelAnswer: "Social media is a double-edged sword. On the positive side, it connects people across the globe and provides a platform for voices that might otherwise be unheard. However, the negative impacts, such as the spread of misinformation, cannot be ignored. In my opinion, we must approach it with a critical eye.",
-      keywords: ["double-edged sword", "On the positive side", "otherwise be unheard", "misinformation", "critical eye"],
-      keywordMap: [
-        { word: "double-edged sword", meaning: "Idiomatic expression" },
-        { word: "On the positive side", meaning: "Transition phrase" },
-        { word: "misinformation", meaning: "Topic-specific vocabulary" },
-        { word: "critical eye", meaning: "Advanced collocation" }
-      ],
-      tips: ["Discuss both positive and negative aspects", "State your opinion clearly", "Use complex sentence structures"]
-    },
-    { 
-      id: 3, title: "What is your favorite season and why?", type: "Short Answer", words: 56, phrases: 5, band: "BAND 6", 
-      color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20", border: "border-blue-200 dark:border-blue-800", iconType: 'pencil',
-      modelAnswer: "My favorite season is autumn because of the comfortable temperature and the beautiful changing colors of the leaves. I enjoy the crisp air and the opportunity to wear cozy clothes without the extreme cold of winter.",
-      keywords: ["comfortable temperature", "changing colors", "crisp air", "extreme cold"],
-      keywordMap: [
-        { word: "comfortable temperature", meaning: "Weather description" },
-        { word: "crisp air", meaning: "Sensory detail" },
-        { word: "extreme cold", meaning: "Comparative state" }
-      ],
-      tips: ["Explain the 'why' in detail", "Use sensory language (crisp air, cozy clothes)", "Compare it briefly to other seasons"]
-    },
-    { 
-      id: 4, title: "Some people believe that technology makes life easier, while others think it creates more problems. Discuss both views and give your opinion.", type: "Paragraph", words: 93, phrases: 6, band: "BAND 7", 
-      color: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-900/20", border: "border-orange-200 dark:border-orange-800", iconType: 'paper',
-      modelAnswer: "Technology undoubtedly has both advantages and disadvantages in modern life. Those who support technology argue that it simplifies daily tasks. For instance, smartphones allow us to communicate instantly. This convenience saves time and increases productivity. On the other hand, critics point out that technology can lead to social isolation. In my view, technology is beneficial when used in moderation. The key is finding balance.",
-      keywords: ["both advantages and disadvantages", "For instance", "On the other hand", "social isolation", "in moderation", "finding balance"],
-      keywordMap: [
-        { word: "both advantages and disadvantages", meaning: "Thesis statement" },
-        { word: "For instance", meaning: "Example marker" },
-        { word: "On the other hand", meaning: "Contrast transition" },
-        { word: "social isolation", meaning: "Advanced vocabulary" },
-        { word: "finding balance", meaning: "Nuanced conclusion" }
-      ],
-      tips: ["Discuss both sides before giving opinion", "Use formal linking words", "Provide specific examples for each view", "End with balanced conclusion"]
-    },
-    { 
-      id: 5, title: "What do you do in your free time?", type: "Short Answer", words: 38, phrases: 4, band: "BAND 5", 
-      color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-900/20", border: "border-emerald-200 dark:border-emerald-800", iconType: 'pencil',
-      modelAnswer: "In my free time, I really enjoy reading books and playing outdoor sports. I find that these activities help me unwind after a long day. I also like spending quality time with my family.",
-      keywords: ["free time", "outdoor sports", "unwind", "quality time"],
-      keywordMap: [
-        { word: "outdoor sports", meaning: "Specific activity" },
-        { word: "unwind", meaning: "Synonym for relax" },
-        { word: "quality time", meaning: "Common collocation" }
-      ],
-      tips: ["Keep it simple and direct", "Use frequency adverbs", "Mention 2-3 different hobbies"]
-    },
-    { 
-      id: 6, title: "Some experts believe that it is better for children to begin learning a foreign language at primary school rather than secondary school.", type: "Paragraph", words: 102, phrases: 7, band: "BAND 8", 
-      color: "text-red-500", bg: "bg-red-50 dark:bg-red-900/20", border: "border-red-200 dark:border-red-800", iconType: 'scroll',
-      modelAnswer: "Early language acquisition is often seen as superior because children's brains are more receptive to new phonetic patterns. Learning a language at the primary level allows for a more natural integration into daily life, leading to better long-term fluency. While some argue this places too much pressure on young students, the cognitive benefits far outweigh the drawbacks.",
-      keywords: ["Early language acquisition", "receptive", "natural integration", "long-term fluency", "cognitive benefits", "outweigh the drawbacks"],
-      keywordMap: [
-        { word: "acquisition", meaning: "Academic vocabulary" },
-        { word: "receptive", meaning: "Advanced adjective" },
-        { word: "long-term fluency", meaning: "Specific goal" },
-        { word: "outweigh the drawbacks", meaning: "Complex evaluation" }
-      ],
-      tips: ["Use academic vocabulary (acquisition)", "Address counter-arguments", "Link cognitive benefits to learning"]
-    },
-  ];
+  // 1. Fetch Topics from Backend
+  useEffect(() => {
+    const loadTopics = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetchIeltsReadingTopics(activeBand, page);
+        setTopics(response.data);
+        setTotalPages(response.pagination.totalPages);
+      } catch (error) {
+        toast.error("Failed to load reading topics. Please try again later.");
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadTopics();
+  }, [activeBand, page]);
+
+  // Handle selecting a topic - fetch full details
+  const handleSelectTopic = async (topicId: string) => {
+    setIsFetchingDetail(true);
+    try {
+      const fullTopic = await fetchIeltsReadingTopicById(topicId);
+      setSelectedTopic(fullTopic);
+      setIsRecording(false);
+      setRevealedCount(0);
+      setRecordingTime(0);
+    } catch (error) {
+      toast.error("Failed to load topic details. Please try again.");
+      console.error(error);
+    } finally {
+      setIsFetchingDetail(false);
+    }
+  };
+
+  // Helper to get topic styles dynamically since they are no longer in DB
+  const getTopicStyle = (band: string, type: string) => {
+    const bandNum = band.split(' ')[1];
+    
+    // Default styles based on band
+    let color = "text-blue-500";
+    let bg = "bg-blue-50 dark:bg-blue-900/20";
+    let border = "border-blue-200 dark:border-blue-800";
+    let iconType = 'pencil';
+
+    if (bandNum === '5') {
+      color = "text-emerald-500";
+      bg = "bg-emerald-50 dark:bg-emerald-900/20";
+      border = "border-emerald-200 dark:border-emerald-800";
+    } else if (bandNum === '7') {
+      color = "text-orange-500";
+      bg = "bg-orange-50 dark:bg-orange-900/20";
+      border = "border-orange-200 dark:border-orange-800";
+    } else if (bandNum === '8') {
+      color = "text-red-500";
+      bg = "bg-red-50 dark:bg-red-900/20";
+      border = "border-red-200 dark:border-red-800";
+    }
+
+    // Icon type based on topic type
+    if (type === 'Paragraph') {
+      iconType = 'paper';
+    } else if (bandNum === '8') {
+      iconType = 'scroll';
+    }
+
+    return { color, bg, border, iconType };
+  };
 
   const filteredTopics = activeBand === 'All' ? topics : topics.filter(t => t.band.includes(activeBand.split(' ')[1]));
 
@@ -274,26 +270,65 @@ export default function StudentReadingAssessmentPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {filteredTopics.map((topic) => (
-                  <Card key={topic.id} className="border-none shadow-sm hover:shadow-md transition-all cursor-pointer rounded-2xl bg-white dark:bg-slate-900 group"
-                    onClick={() => { setSelectedTopic(topic); setIsRecording(false); setRevealedCount(0); }}>
-                    <CardContent className="p-8">
-                      <div className="flex justify-between items-start mb-6">
-                        <div className="text-2xl">{topic.iconType === 'paper' ? '📄' : topic.iconType === 'scroll' ? '📜' : '📝'}</div>
-                        <div className={cn("px-3 py-1 rounded-full text-[10px] font-bold tracking-widest border uppercase", topic.border, topic.color)}>{topic.band}</div>
-                      </div>
-                      <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-6 group-hover:text-violet-600 transition-colors">{topic.title}</h3>
-                      <div className="flex items-center gap-4 text-slate-400 text-xs font-semibold">
-                        <div className="flex items-center gap-1.5"><Target className="w-4 h-4 opacity-70" /> {topic.phrases} key phrases</div>
-                        <span className="w-1.5 h-1.5 rounded-full bg-slate-200 dark:bg-slate-700"></span>
-                        <div>{topic.type}</div>
-                        <span className="w-1.5 h-1.5 rounded-full bg-slate-200 dark:bg-slate-700"></span>
-                        <div className="flex items-center gap-1.5"><Clock className="w-4 h-4 opacity-70" /> {topic.words} words</div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                {isLoading ? (
+                  Array(6).fill(0).map((_, i) => (
+                    <Card key={i} className="border-none shadow-sm animate-pulse rounded-2xl bg-white dark:bg-slate-900 h-[220px]" />
+                  ))
+                ) : topics.map((topic) => {
+                  const styles = getTopicStyle(topic.band, topic.type);
+                  return (
+                    <Card key={topic.id} className="border-none shadow-sm hover:shadow-md transition-all cursor-pointer rounded-2xl bg-white dark:bg-slate-900 group relative overflow-hidden"
+                      onClick={() => handleSelectTopic(topic.id)}>
+                      {isFetchingDetail && selectedTopic?.id !== topic.id && (
+                        <div className="absolute inset-0 bg-white/50 dark:bg-slate-900/50 flex items-center justify-center z-10 backdrop-blur-[1px]">
+                          <Loader2 className="w-6 h-6 animate-spin text-violet-600" />
+                        </div>
+                      )}
+                      <CardContent className="p-8">
+                        <div className="flex justify-between items-start mb-6">
+                          <div className="text-2xl">{styles.iconType === 'paper' ? '📄' : styles.iconType === 'scroll' ? '📜' : '📝'}</div>
+                          <div className={cn("px-3 py-1 rounded-full text-[10px] font-bold tracking-widest border uppercase", styles.border, styles.color)}>{topic.band}</div>
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-6 group-hover:text-violet-600 transition-colors">{topic.title}</h3>
+                        <div className="flex items-center gap-4 text-slate-400 text-xs font-semibold">
+                          <div className="flex items-center gap-1.5"><Target className="w-4 h-4 opacity-70" /> {topic.phrases} key phrases</div>
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-200 dark:bg-slate-700"></span>
+                          <div>{topic.type}</div>
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-200 dark:bg-slate-700"></span>
+                          <div className="flex items-center gap-1.5"><Clock className="w-4 h-4 opacity-70" /> {topic.words} words</div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
+
+              {/* Pagination Controls */}
+              {!isLoading && totalPages > 1 && (
+                <div className="flex justify-center items-center gap-4 mt-8">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="rounded-xl"
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-sm font-medium text-slate-500">
+                    Page {page} of {totalPages}
+                  </span>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                    className="rounded-xl"
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
             </>
           ) : (
             /* ================= MULTI-STEP FLOW ================= */
