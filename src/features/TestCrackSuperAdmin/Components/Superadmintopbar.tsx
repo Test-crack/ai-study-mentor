@@ -6,12 +6,12 @@ import { useNavigate } from "react-router-dom";
 import { ThemeToggle } from "@/features/theme/components/ThemeToggle";
 import { Sheet, SheetContent, SheetTrigger } from "@/shared/components/ui/sheet";
 import { useState } from "react";
-import { InstituteSidebar } from "./InstituteSidebar";
+import { SuperAdminSidebar } from "./SuperadminSidebar";
 interface InstituteTopbarProps {
   onCreateCourse?: () => void;
 }
 
-export const InstituteTopbar = ({ onCreateCourse }: InstituteTopbarProps) => {
+export const SuperAdminTopbar = ({ onCreateCourse }: InstituteTopbarProps) => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -30,7 +30,7 @@ export const InstituteTopbar = ({ onCreateCourse }: InstituteTopbarProps) => {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="p-0 bg-slate-900 border-none w-72">
-     <InstituteSidebar
+     <SuperAdminSidebar
    isCollapsed={false} 
    toggleCollapse={() => {}} 
    activeTab={activeTab}
@@ -72,7 +72,7 @@ export const InstituteTopbar = ({ onCreateCourse }: InstituteTopbarProps) => {
         <div className="flex items-center gap-3 pl-2 border-l border-slate-100 dark:border-slate-800">
           <div className="text-right hidden md:block">
             <p className="text-sm font-bold text-slate-700 dark:text-slate-200 leading-none">{displayName}</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 uppercase tracking-wider">Institute</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 uppercase tracking-wider">Testcrack Super Admin</p>
           </div>
           <Avatar 
             className="h-9 w-9 border-2 border-white dark:border-slate-800 shadow-sm ring-1 ring-slate-100 dark:ring-slate-700 cursor-pointer hover:ring-indigo-100 transition-all"

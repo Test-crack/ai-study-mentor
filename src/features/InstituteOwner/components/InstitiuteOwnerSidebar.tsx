@@ -14,7 +14,7 @@ import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
-interface SidebarProps {
+interface InstituteOwnerSidebarProps {
   activeTab?: string;
   onTabChange?: (tab: string) => void;
   isCollapsed: boolean;
@@ -22,20 +22,20 @@ interface SidebarProps {
   className?: string;
 }
 
-export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isCollapsed, toggleCollapse, className }: SidebarProps) => {
+export const InstituteOwnerSidebar = ({ activeTab = 'dashboard', onTabChange, isCollapsed, toggleCollapse, className }: InstituteOwnerSidebarProps) => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
   
   const menuItems = [
-    { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/institute-dashboard' },
-    { id: 'batches', icon: BookOpen, label: 'Batch Allowcation', path: '/institute-batches' },
-    { id: 'tutor', icon: FileText, label: 'Tutor Accounts', path: '/institute-tutor' },
-    { id: 'tutor-onboard', icon: FileText, label: 'Tutor Onboarding', path: '/institute-tutorOnboarding' },
-    { id: 'students', icon: FileText, label: 'Students', path: '/institute-students' },
-    { id: 'students-onboard', icon: FileText, label: 'Student Onboarding', path: '/institute-studentOnboarding' },
-    { id: 'billings', icon: Users, label: 'Billings&Plans', path: '/institute-billings' }, 
-    { id: 'report', icon: Settings, label: 'Report', path: '/institute-reports' },
-    { id: 'settings', icon: Settings, label: 'Institute Setting', path: '/institute-Setting' },
+    { id: 'owner-dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/owner-dashboard' },
+    { id: 'performance', icon: BookOpen, label: 'Performancr Analytics', path: '/owner-performance'  },
+    { id: 'roi', icon: FileText, label: 'ROI Analytics', path: '/owner-roi' },
+    { id: 'insight', icon: FileText, label: 'Batch-Insight', path: '/owner-insight' },
+    { id: 'tutor-effect', icon: FileText, label: 'Tutor Effectiveness', path: '/owner-tuteffect' },
+    { id: 'strategic-reports', icon: FileText, label: 'Strategic Reports', path: '/owner-strategic' },
+    { id: 'calibration', icon: Users, label: 'AI Calibration', path: '/owner-calibration' }, 
+    // { id: 'report', icon: Settings, label: 'Report', path: '/institute-reports' },
+    // { id: 'settings', icon: Settings, label: 'Institute Settings', path: '/institute-Setting' },
   ];
 
   const handleNavigation = (item: typeof menuItems[0]) => {
@@ -73,7 +73,7 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
         </div>
         {!isCollapsed && (
           <span className="text-xl font-bold text-slate-900 dark:text-white tracking-wide animate-in fade-in duration-300">
-            Institute Admin Portal
+          Institute Owner
           </span>
         )}
       </div>

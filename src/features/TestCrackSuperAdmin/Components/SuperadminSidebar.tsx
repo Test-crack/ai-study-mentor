@@ -22,20 +22,18 @@ interface SidebarProps {
   className?: string;
 }
 
-export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isCollapsed, toggleCollapse, className }: SidebarProps) => {
+export const SuperAdminSidebar = ({ activeTab = 'dashboard', onTabChange, isCollapsed, toggleCollapse, className }: SidebarProps) => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
   
   const menuItems = [
-    { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/institute-dashboard' },
-    { id: 'batches', icon: BookOpen, label: 'Batch Allowcation', path: '/institute-batches' },
-    { id: 'tutor', icon: FileText, label: 'Tutor Accounts', path: '/institute-tutor' },
-    { id: 'tutor-onboard', icon: FileText, label: 'Tutor Onboarding', path: '/institute-tutorOnboarding' },
-    { id: 'students', icon: FileText, label: 'Students', path: '/institute-students' },
-    { id: 'students-onboard', icon: FileText, label: 'Student Onboarding', path: '/institute-studentOnboarding' },
-    { id: 'billings', icon: Users, label: 'Billings&Plans', path: '/institute-billings' }, 
-    { id: 'report', icon: Settings, label: 'Report', path: '/institute-reports' },
-    { id: 'settings', icon: Settings, label: 'Institute Setting', path: '/institute-Setting' },
+    { id: 'superadmin-dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/superadmin-dashboard' },
+    { id: 'institutes', icon: BookOpen, label: 'Institutes', path: '/Superadmin-institutes'  },
+    { id: 'superadmin-subscription', icon: FileText, label: 'Subscription', path: '/superadmin-subscription' },
+    { id: 'pricing-config', icon: FileText, label: 'Pricing-Config', path: '/superadmin-priceconfig' },
+    { id: 'support-tickets', icon: FileText, label: 'SupportTickets', path: '/superadmin-supportickets' },
+    { id: 'platform-analytics', icon: FileText, label: 'PlatformAnalytics', path: '/superadmin-platform' },
+    { id: 'users', icon: Users, label: 'All Users', path: '/superadmin-allusers' }, 
   ];
 
   const handleNavigation = (item: typeof menuItems[0]) => {
@@ -73,7 +71,7 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
         </div>
         {!isCollapsed && (
           <span className="text-xl font-bold text-slate-900 dark:text-white tracking-wide animate-in fade-in duration-300">
-            Institute Admin Portal
+            TestCrack Super Admin 
           </span>
         )}
       </div>
