@@ -35,6 +35,9 @@ import MyCurriculum from "@/features/student/components/MyCurriculum";
 import InstructorCourseManagementPage from "@/features/instructor/components/InstructorCourseManagementPage";
 import TechPrepPage from "@/features/instructor/components/TechPrepPage";
 import AlignmentPage from "@/features/instructor/components/Alignment";
+import MicTest from "@/features/student/components/MicTest";
+import { WebSocketProvider } from "@/shared/context/WebSocketContext";
+
 const queryClient = new QueryClient();
 
 /**
@@ -108,6 +111,7 @@ const AppRoutes = () => {
       <Route path="/student/reading-assessment/history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentAssessmentHistoryPage /></RoleProtectedRoute>} />
       <Route path="/student/my-curriculum" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><MyCurriculum/></RoleProtectedRoute>} />
       <Route path="/student/speaking-practice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><SpeakingPractice/></RoleProtectedRoute>} />
+      <Route path="/student/mic-test" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><MicTest /></RoleProtectedRoute>} />
 
       {/* Instructor Dashboard & Routes */}
       <Route 
@@ -169,7 +173,9 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
-            <AppRoutes />
+            <WebSocketProvider>
+              <AppRoutes />
+            </WebSocketProvider>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
