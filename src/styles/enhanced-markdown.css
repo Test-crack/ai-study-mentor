@@ -42,7 +42,7 @@
 }
 
 .enhanced-markdown li {
-  @apply ml-2 pl-3 border-l-3 border-purple-300 text-gray-700;
+  @apply ml-2 pl-3 border-l-2 border-purple-300 text-gray-700;
   position: relative;
 }
 
@@ -122,9 +122,12 @@
 }
 
 @keyframes pulse-red {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
   }
+
   50% {
     box-shadow: 0 0 0 4px rgba(239, 68, 68, 0);
   }
@@ -135,15 +138,15 @@
   .enhanced-markdown h1 {
     @apply text-2xl;
   }
-  
+
   .enhanced-markdown h2 {
     @apply text-xl;
   }
-  
+
   .enhanced-markdown h3 {
     @apply text-lg;
   }
-  
+
   .enhanced-markdown p {
     @apply text-sm;
   }

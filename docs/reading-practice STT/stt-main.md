@@ -16,10 +16,37 @@ We will build the real-time Speech-to-Text (STT) and metrics engine in 4 distinc
 
 ## 🟡 Stage 2: Google Speech-to-Text Integration
 
-**Goal:** Convert the audio stream into a live text transcript.
+**Goal:** Convert the audio stream into a live text transcript using Google Cloud STT.
 
-1. **Flow:** `Audio Chunks` → `Backend WebSocket` → `Google Streaming STT` → `Transcript` → `Frontend`
-2. **Success Criteria:** A live transcript appears on the frontend while speaking.
+### Technical Steps
+
+#### 1. Backend: Install Dependency
+
+```bash
+npm install @google-cloud/speech
+```
+
+#### 2. Backend: Configure Authentication
+
+- Create a Service Account in Google Cloud Console.
+- Enable **Cloud Speech-to-Text API**.
+- Download JSON key and save as `google-key.json` in the backend root.
+- Add to `.env`: `GOOGLE_APPLICATION_CREDENTIALS=google-key.json`
+
+#### 3. Backend: Implement Streaming Logic
+
+- In `wsServer.ts`, initialize `SpeechClient`.
+- Create a configuration object with `encoding: 'WEBM_OPUS'`, `sampleRateHertz: 48000`, `languageCode: 'en-US'`.
+- On connection, create a `recognizeStream`.
+- Pipe WebSocket bytes to `recognizeStream`.
+- Listen for `data` events and `ws.send(JSON.stringify({ transcript, isFinal }))`.
+
+#### 4. Frontend: Handle Transcripts
+
+- Update `MicTest.tsx` or `useSpeechToText.ts` to listen for `ws.onmessage`.
+- Append new transcript results to a local state display.
+
+**Success Criteria:** Spoken words appear on the screen in near real-time.
 
 ---
 

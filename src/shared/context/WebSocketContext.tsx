@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 
 type ConnectionStatus = 'CONNECTING' | 'OPEN' | 'CLOSED' | 'ERROR';
@@ -83,13 +83,16 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         };
     }, [profile?.id]);
 
-    const sendMessage = (data: string | ArrayBuffer | Blob) => {
+    const sendMessage = useCallback((data: string | ArrayBuffer | Blob) => {
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
             wsRef.current.send(data);
         } else {
-            console.warn("⚠️ WebSocket: Cannot send message, socket not open");
+            console.warn("⚠️ WebSocket: Cannot send message, socket not open", { 
+                readyState: wsRef.current?.readyState,
+                status 
+            });
         }
-    };
+    }, []);
 
     return (
         <WebSocketContext.Provider value={{ socket: wsRef.current, status, sendMessage }}>

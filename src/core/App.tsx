@@ -111,7 +111,6 @@ const AppRoutes = () => {
       <Route path="/student/reading-assessment/history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentAssessmentHistoryPage /></RoleProtectedRoute>} />
       <Route path="/student/my-curriculum" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><MyCurriculum/></RoleProtectedRoute>} />
       <Route path="/student/speaking-practice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><SpeakingPractice/></RoleProtectedRoute>} />
-      <Route path="/student/mic-test" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><MicTest /></RoleProtectedRoute>} />
 
       {/* Instructor Dashboard & Routes */}
       <Route 

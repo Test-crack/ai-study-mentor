@@ -13,6 +13,7 @@ import { cn } from "@/shared/utils";
 import { fetchIeltsReadingTopics, fetchIeltsReadingTopicById, IeltsReadingPractice, IeltsReadingPracticeList } from '../services/ieltsReadingService';
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useSpeechToText } from '../hooks/useSpeechToText';
 
 type Step = 1 | 2 | 3 | 4;
 type BandLevel = 'All' | 'Band 5' | 'Band 6' | 'Band 7' | 'Band 8';
@@ -30,10 +31,19 @@ export default function StudentReadingAssessmentPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   
-  // Recording & Simulation States
-  const [isRecording, setIsRecording] = useState(false);
+  // Recording & STT Logic
+  const { 
+    isListening, 
+    isSTTReady,
+    transcript: realTranscript, 
+    startListening, 
+    stopListening,
+    setTranscript: resetTranscript
+  } = useSpeechToText({
+    onError: (err) => toast.error(err)
+  });
+
   const [recordingTime, setRecordingTime] = useState(0);
-  const [revealedCount, setRevealedCount] = useState(0);
 
   // 1. Fetch Topics from Backend
   useEffect(() => {
@@ -59,8 +69,7 @@ export default function StudentReadingAssessmentPage() {
     try {
       const fullTopic = await fetchIeltsReadingTopicById(topicId);
       setSelectedTopic(fullTopic);
-      setIsRecording(false);
-      setRevealedCount(0);
+      stopListening();
       setRecordingTime(0);
     } catch (error) {
       toast.error("Failed to load topic details. Please try again.");
@@ -106,45 +115,24 @@ export default function StudentReadingAssessmentPage() {
 
   const filteredTopics = activeBand === 'All' ? topics : topics.filter(t => t.band.includes(activeBand.split(' ')[1]));
 
-  // 2. Timer & Transcript Reveal Simulation
+  // 2. Timer Logic - Only start when STT is actually ready
   useEffect(() => {
     let interval: any;
-    if (isRecording) {
+    if (isListening && isSTTReady) {
       interval = setInterval(() => setRecordingTime(prev => prev + 1), 1000);
     } else {
       clearInterval(interval);
     }
     return () => clearInterval(interval);
-  }, [isRecording]);
+  }, [isListening, isSTTReady]);
 
-  useEffect(() => {
-    let typeInterval: any;
-    if (isRecording && selectedTopic) {
-      typeInterval = setInterval(() => {
-        setRevealedCount(prev => {
-          const maxWords = selectedTopic.modelAnswer.split(' ').length + (currentStep === 2 ? 2 : 0); // +2 for simulated fillers
-          if (prev < maxWords) return prev + 1;
-          return prev;
-        });
-      }, 300); // Reveals a word every 300ms
-    }
-    return () => clearInterval(typeInterval);
-  }, [isRecording, selectedTopic, currentStep]);
 
-  // Generate words array (injects mistakes in First Pass to look realistic)
-  const simulatedWordsArray = useMemo(() => {
-    if (!selectedTopic) return [];
-    let words = selectedTopic.modelAnswer.split(' ');
-    if (currentStep === 2) {
-       words.splice(5, 0, "um,");
-       words.splice(12, 0, "uh,");
-    }
-    return words;
-  }, [selectedTopic, currentStep]);
-
-  const visibleWords = simulatedWordsArray.slice(0, revealedCount);
-  const currentFilters = visibleWords.filter((w: string) => w.includes('um') || w.includes('uh')).length;
-  const currentWPM = recordingTime > 0 ? Math.round((visibleWords.length / recordingTime) * 60) : 0;
+  const wordsArray = useMemo(() => realTranscript.split(' ').filter(w => w.length > 0), [realTranscript]);
+  const currentFilters = wordsArray.filter((w: string) => {
+    const clean = w.toLowerCase().replace(/[.,]/g, "");
+    return clean === 'um' || clean === 'uh' || clean === 'ah';
+  }).length;
+  const currentWPM = recordingTime > 0 ? Math.round((wordsArray.length / recordingTime) * 60) : 0;
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -154,43 +142,41 @@ export default function StudentReadingAssessmentPage() {
 
   const handleStartRecording = () => {
     setRecordingTime(0);
-    setRevealedCount(0);
-    setIsRecording(true);
+    resetTranscript('');
+    startListening();
   };
 
   const resetToLanding = () => {
     setSelectedTopic(null);
     setCurrentStep(1);
     setShowTips(false);
-    setIsRecording(false);
-    setRevealedCount(0);
+    stopListening();
   };
 
-  // 3. Render Simulated Live Transcript
+  // 3. Render Real Live Transcript
   const renderLiveTranscript = () => {
-    return visibleWords.map((word: string, i: number) => {
-      const cleanWord = word.replace(/[.,]/g, "").toLowerCase();
+    if (!realTranscript) return null;
+    
+    return wordsArray.map((word: string, i: number) => {
+      const cleanWord = word.replace(/[.,!?]/g, "").toLowerCase();
       
-      // First pass styling (Shows mistakes and fillers)
+      // First pass styling (Highlight fillers)
       if (currentStep === 2) {
-         if (cleanWord === "um" || cleanWord === "uh") {
+         if (cleanWord === "um" || cleanWord === "uh" || cleanWord === "ah") {
             return <span key={i} className="text-amber-500 font-bold mx-0.5">{word} </span>;
-         }
-         // Randomly marking long words as "unclear/mispronounced" in red for realism
-         if (cleanWord.length > 9 && i % 3 === 0) {
-            return <span key={i} className="bg-rose-500/20 text-rose-400 px-1 rounded mx-0.5">{word} </span>;
          }
          return <span key={i} className="text-emerald-500 mx-0.5">{word} </span>; // Fluent green
       }
       
-      // Second pass styling (Highlights keywords hit)
+      // Second pass styling (Highlight keywords hit)
       if (currentStep === 3) {
-         const isKeyword = selectedTopic.keywords.some((k: string) => k.toLowerCase().includes(cleanWord));
+         const isKeyword = selectedTopic?.keywords.some((k: string) => k.toLowerCase().includes(cleanWord));
          if (isKeyword && cleanWord.length > 3) {
             return <span key={i} className="bg-emerald-500/20 text-emerald-400 font-bold px-1 rounded mx-0.5">{word} </span>;
          }
          return <span key={i} className="mx-0.5">{word} </span>;
       }
+      return <span key={i} className="mx-0.5">{word} </span>;
     });
   };
 
@@ -391,9 +377,9 @@ export default function StudentReadingAssessmentPage() {
                 <StepContainer title="01. First Pass: Read Aloud" desc="Read the entire answer out loud at a natural pace. Your speech is captured live.">
                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                       <StatMini label="WPM" value={currentWPM} />
-                      <StatMini label="Words" value={visibleWords.length} />
+                      <StatMini label="Words" value={wordsArray.length} />
                       <StatMini label="Filters" value={currentFilters} />
-                      <StatMini label="Pauses" value={isRecording && recordingTime > 5 ? "1" : "0"} />
+                      <StatMini label="Pauses" value={isListening && recordingTime > 5 ? "1" : "0"} />
                    </div>
                    
                    <div className="p-8 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm mb-6">
@@ -407,7 +393,7 @@ export default function StudentReadingAssessmentPage() {
                      <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-4">
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-2 text-rose-500">
-                            <div className={cn("w-2 h-2 rounded-full", isRecording ? "bg-rose-500 animate-ping" : "bg-slate-600")} />
+                            <div className={cn("w-2 h-2 rounded-full", isListening ? "bg-rose-500 animate-ping" : "bg-slate-600")} />
                             <span className="text-xs font-bold uppercase tracking-widest text-slate-300">Live Transcript</span>
                           </div>
                           <div className="hidden sm:flex items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">
@@ -419,26 +405,37 @@ export default function StudentReadingAssessmentPage() {
                         <span className="text-xs font-mono text-slate-400">{formatTime(recordingTime)} / 00:45</span>
                      </div>
                      <div className="min-h-[120px] bg-slate-800/30 rounded-xl p-6 text-[1.1rem] font-medium leading-relaxed text-slate-400">
-                        {!isRecording && revealedCount === 0 ? (
+                        {isListening && !isSTTReady ? (
+                           <div className="h-full flex flex-col items-center justify-center text-violet-400 space-y-3 animate-pulse">
+                             <Sparkles className="w-8 h-8" />
+                             <span className="text-sm font-bold uppercase tracking-wider">Setting up voice engine...</span>
+                           </div>
+                        ) : !isListening && wordsArray.length === 0 ? (
                           <div className="h-full flex flex-col items-center justify-center text-slate-500 space-y-3">
                             <Mic className="w-8 h-8 opacity-50" />
                             <span className="text-sm">Click start to begin recording...</span>
                           </div>
                         ) : (
                           <div>
+                            {isSTTReady && wordsArray.length === 0 && (
+                               <div className="text-emerald-500 text-sm font-bold mb-4 animate-bounce flex items-center gap-2">
+                                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                                  READY! Start reading now...
+                               </div>
+                            )}
                             {renderLiveTranscript()}
-                            {isRecording && <span className="animate-pulse border-r-2 border-violet-500 ml-1"></span>}
+                            {isListening && <span className="animate-pulse border-r-2 border-violet-500 ml-1"></span>}
                           </div>
                         )}
                      </div>
                    </div>
 
-                   {!isRecording ? (
+                   {!isListening ? (
                      <Button size="lg" className="w-full bg-violet-600 h-14 rounded-2xl font-bold mt-6 shadow-lg shadow-violet-200 dark:shadow-none" onClick={handleStartRecording}>
                        <PlaySquare className="w-5 h-5 mr-2" /> Start Reading
                      </Button>
                    ) : (
-                     <Button size="lg" className="w-full bg-rose-500 hover:bg-rose-600 h-14 rounded-2xl font-bold mt-6" onClick={() => { setIsRecording(false); setCurrentStep(3); }}>
+                     <Button size="lg" className="w-full bg-rose-500 hover:bg-rose-600 h-14 rounded-2xl font-bold mt-6" onClick={() => { stopListening(); setCurrentStep(3); }}>
                        <Square className="w-5 h-5 mr-2" /> Done — Analyze My Reading
                      </Button>
                    )}
@@ -449,8 +446,11 @@ export default function StudentReadingAssessmentPage() {
               {currentStep === 3 && (
                 <StepContainer title="02. Second Pass: Keyword Focus" desc="Read again, paying attention to highlighted keywords. Watch your keyword tracker update in real-time!">
                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                      <StatMini label="Keyword Coverage" value={isRecording ? `${Math.min(selectedTopic.keywords.length, Math.floor(revealedCount / 8))}/${selectedTopic.keywords.length}` : `0/${selectedTopic.keywords.length}`} />
-                      <StatMini label="Words" value={visibleWords.length} />
+                      <StatMini 
+                        label="Keyword Coverage" 
+                        value={selectedTopic ? `${wordsArray.filter(w => selectedTopic.keywords.some(k => k.toLowerCase().includes(w.toLowerCase().replace(/[.,!?]/g, "")))).filter((v, i, a) => a.indexOf(v) === i).length}/${selectedTopic.keywords.length}` : '0/0'} 
+                      />
+                      <StatMini label="Words" value={wordsArray.length} />
                       <StatMini label="Filters" value="0" />
                       <StatMini label="Time" value={formatTime(recordingTime)} />
                    </div>
@@ -478,13 +478,17 @@ export default function StudentReadingAssessmentPage() {
                       <div className="bg-slate-900 dark:bg-slate-950 rounded-2xl p-6 border border-slate-800 shadow-lg">
                          <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-4">
                             <div className="flex items-center gap-2 text-rose-500">
-                              <div className={cn("w-2 h-2 rounded-full", isRecording ? "bg-rose-500 animate-ping" : "bg-slate-600")} />
+                              <div className={cn("w-2 h-2 rounded-full", isListening ? "bg-rose-500 animate-ping" : "bg-slate-600")} />
                               <span className="text-xs font-bold uppercase tracking-widest text-slate-300">Live Transcript</span>
                             </div>
                             <span className="text-xs font-mono text-slate-400">{formatTime(recordingTime)}</span>
                          </div>
                          <div className="min-h-[100px] bg-slate-800/30 rounded-xl p-6 text-[1.1rem] font-medium leading-relaxed text-slate-400">
-                           {!isRecording && revealedCount === 0 ? (
+                           {isListening && !isSTTReady ? (
+                              <div className="h-full flex flex-col items-center justify-center text-violet-400 space-y-3 animate-pulse">
+                                <span className="text-sm font-bold uppercase tracking-wider">Syncing keywords...</span>
+                              </div>
+                           ) : !isListening && wordsArray.length === 0 ? (
                               <div className="h-full flex flex-col items-center justify-center text-slate-500 space-y-3">
                                 <Mic className="w-8 h-8 opacity-50" />
                                 <span className="text-sm">Click start to see your keywords tracked live...</span>
@@ -492,19 +496,19 @@ export default function StudentReadingAssessmentPage() {
                            ) : (
                               <div>
                                 {renderLiveTranscript()}
-                                {isRecording && <span className="animate-pulse border-r-2 border-emerald-500 ml-1"></span>}
+                                {isListening && <span className="animate-pulse border-r-2 border-emerald-500 ml-1"></span>}
                               </div>
                            )}
                          </div>
                       </div>
                    </div>
 
-                   {!isRecording ? (
+                   {!isListening ? (
                      <Button size="lg" className="w-full bg-violet-600 h-14 rounded-2xl font-bold mt-6 shadow-lg shadow-violet-200 dark:shadow-none" onClick={handleStartRecording}>
                        <PlaySquare className="w-5 h-5 mr-2" /> Read Again (Focus on Keywords)
                      </Button>
                    ) : (
-                     <Button size="lg" className="w-full bg-rose-500 hover:bg-rose-600 h-14 rounded-2xl font-bold mt-6" onClick={() => setCurrentStep(4)}>
+                     <Button size="lg" className="w-full bg-rose-500 hover:bg-rose-600 h-14 rounded-2xl font-bold mt-6" onClick={() => { stopListening(); setCurrentStep(4); }}>
                        <Square className="w-5 h-5 mr-2" /> Finish & Analyze Results
                      </Button>
                    )}
