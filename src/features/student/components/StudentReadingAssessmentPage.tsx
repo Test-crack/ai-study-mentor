@@ -176,28 +176,33 @@ export default function StudentReadingAssessmentPage() {
     const counts: { [word: string]: number } = {};
     let total = 0;
 
+    // Create a Set of lowercase words from the model answer for fast lookup
+    const passageWords = new Set(
+      selectedTopic?.modelAnswer.toLowerCase().split(/\s+/).map(w => w.replace(/[.,!?]/g, "")) || []
+    );
+
     wordsArray.forEach((w: string) => {
       const clean = w.toLowerCase().replace(/[.,!?]/g, "");
-      if (fillerWords.includes(clean)) {
+      if (fillerWords.includes(clean) && !passageWords.has(clean)) {
         counts[clean] = (counts[clean] || 0) + 1;
         total++;
       }
     });
 
     return { total, fillerCounts: counts };
-  }, [wordsArray]);
+  }, [wordsArray, selectedTopic]);
 
   const currentWPM = recordingTime > 0 ? Math.round((wordsArray.length / recordingTime) * 60) : 0;
 
   const keywordCoverage = useMemo(() => {
     if (!selectedTopic || currentStep !== 3) return 0;
-    const uniqueSpoken = new Set(wordsArray.map(w => w.toLowerCase().replace(/[.,!?]/g, "")));
+    const lowerTranscript = realTranscript.toLowerCase();
     const count = selectedTopic.keywords.filter(k => {
-      const cleanK = k.toLowerCase().replace(/[.,!?]/g, "");
-      return uniqueSpoken.has(cleanK);
+      const cleanK = k.toLowerCase().trim();
+      return lowerTranscript.includes(cleanK);
     }).length;
     return count;
-  }, [wordsArray, selectedTopic, currentStep]);
+  }, [realTranscript, selectedTopic, currentStep]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -267,7 +272,12 @@ export default function StudentReadingAssessmentPage() {
 
   return (
     <div className="min-h-screen bg-[#F1F3F9] dark:bg-slate-950 transition-colors duration-300 font-sans text-slate-800 dark:text-slate-200">
-      <StudentSidebar activeTab="assessment" isCollapsed={isSidebarCollapsed} toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} />
+      <StudentSidebar 
+        activeTab="assessment" 
+        onTabChange={(tab) => navigate(`/${profile?.role?.toLowerCase()}/${tab}`)}
+        isCollapsed={isSidebarCollapsed} 
+        toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
+      />
 
       <div className={cn("transition-all duration-300 min-h-screen flex flex-col", isSidebarCollapsed ? 'lg:pl-24' : 'lg:pl-72')}>
         <StudentTopbar onUpgradeClick={() => {}} />

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useWebSocket } from '@/shared/context/WebSocketContext';
 
 interface UseSpeechToTextOptions {
@@ -11,10 +11,16 @@ export function useSpeechToText({ onTranscript, onError }: UseSpeechToTextOption
     const [isListening, setIsListening] = useState(false);
     const [isSTTReady, setIsSTTReady] = useState(false);
     const [transcript, setTranscript] = useState('');
+    const [interimTranscript, setInterimTranscript] = useState('');
     const [status, setStatus] = useState<'IDLE' | 'CONNECTING' | 'LISTENING' | 'ERROR'>('IDLE');
 
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const streamRef = useRef<MediaStream | null>(null);
+
+    // Combine final and interim transcripts for the UI
+    const fullTranscript = useMemo(() => {
+        return (transcript + " " + interimTranscript).trim();
+    }, [transcript, interimTranscript]);
 
     // We use a ref to track isListening for the cleanup function
     // to avoid re-running the cleanup effect when isListening changes.
@@ -43,8 +49,12 @@ export function useSpeechToText({ onTranscript, onError }: UseSpeechToTextOption
                     }
                 } else if (data.type === "transcript") {
                     if (data.isFinal) {
-                        setTranscript(prev => prev + " " + data.transcript);
+                        setTranscript(prev => (prev + " " + data.transcript).trim());
+                        setInterimTranscript('');
+                    } else {
+                        setInterimTranscript(data.transcript);
                     }
+
                     if (onTranscript) {
                         onTranscript(data.transcript, data.isFinal);
                     }
@@ -139,10 +149,13 @@ export function useSpeechToText({ onTranscript, onError }: UseSpeechToTextOption
     return {
         isListening,
         isSTTReady,
-        transcript,
+        transcript: fullTranscript,
         status,
         startListening,
         stopListening,
-        setTranscript
+        setTranscript: (val: string) => {
+            setTranscript(val);
+            setInterimTranscript('');
+        }
     };
 }
