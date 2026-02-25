@@ -68,3 +68,31 @@ export const fetchIeltsReadingTopicById = async (id: string): Promise<IeltsReadi
         throw error;
     }
 };
+
+/**
+ * Save and analyze IELTS reading practice results
+ */
+export const saveIeltsReadingAssessment = async (data: {
+    topicId: string;
+    userId: string;
+    band: string;
+    pass1: any;
+    pass2: any;
+}): Promise<any> => {
+    const backendUrl = getBackendUrl();
+    const fullUrl = `${backendUrl}/api/ielts-reading/save-assessment`;
+
+    try {
+        const response = await callBackend(fullUrl, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        return response;
+    } catch (error) {
+        console.error('Error saving reading assessment:', error);
+        throw error;
+    }
+};

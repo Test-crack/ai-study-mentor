@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   BookOpen, Mic, Target, Zap, Clock, CheckCircle, 
@@ -10,16 +10,18 @@ import { Card, CardContent } from '@/shared/components/ui/card';
 import { StudentSidebar } from './dashboard/StudentSidebar';
 import { StudentTopbar } from './dashboard/StudentTopbar';
 import { cn } from "@/shared/utils";
-import { fetchIeltsReadingTopics, fetchIeltsReadingTopicById, IeltsReadingPractice, IeltsReadingPracticeList } from '../services/ieltsReadingService';
+import { fetchIeltsReadingTopics, fetchIeltsReadingTopicById, saveIeltsReadingAssessment, IeltsReadingPractice, IeltsReadingPracticeList } from '../services/ieltsReadingService';
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useSpeechToText } from '../hooks/useSpeechToText';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 type Step = 1 | 2 | 3 | 4;
 type BandLevel = 'All' | 'Band 5' | 'Band 6' | 'Band 7' | 'Band 8';
 
 export default function StudentReadingAssessmentPage() {
   const navigate = useNavigate();
+  const { profile } = useAuth();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeBand, setActiveBand] = useState<BandLevel>('All');
   const [selectedTopic, setSelectedTopic] = useState<IeltsReadingPractice | null>(null);
@@ -44,6 +46,15 @@ export default function StudentReadingAssessmentPage() {
   });
 
   const [recordingTime, setRecordingTime] = useState(0);
+  const [pauseCount, setPauseCount] = useState(0);
+  const [isCurrentlyPausing, setIsCurrentlyPausing] = useState(false);
+  const lastTranscriptTimeRef = useRef<number>(Date.now());
+  const [sessionResults, setSessionResults] = useState<{
+    pass1?: any;
+    pass2?: any;
+  }>({});
+  const [isSaving, setIsSaving] = useState(false);
+  const [backendResults, setBackendResults] = useState<any>(null);
 
   // 1. Fetch Topics from Backend
   useEffect(() => {
@@ -71,6 +82,8 @@ export default function StudentReadingAssessmentPage() {
       setSelectedTopic(fullTopic);
       stopListening();
       setRecordingTime(0);
+      setCurrentStep(1);
+      setBackendResults(null);
     } catch (error) {
       toast.error("Failed to load topic details. Please try again.");
       console.error(error);
@@ -79,11 +92,9 @@ export default function StudentReadingAssessmentPage() {
     }
   };
 
-  // Helper to get topic styles dynamically since they are no longer in DB
+  // Helper to get topic styles
   const getTopicStyle = (band: string, type: string) => {
     const bandNum = band.split(' ')[1];
-    
-    // Default styles based on band
     let color = "text-blue-500";
     let bg = "bg-blue-50 dark:bg-blue-900/20";
     let border = "border-blue-200 dark:border-blue-800";
@@ -103,7 +114,6 @@ export default function StudentReadingAssessmentPage() {
       border = "border-red-200 dark:border-red-800";
     }
 
-    // Icon type based on topic type
     if (type === 'Paragraph') {
       iconType = 'paper';
     } else if (bandNum === '8') {
@@ -113,9 +123,9 @@ export default function StudentReadingAssessmentPage() {
     return { color, bg, border, iconType };
   };
 
-  const filteredTopics = activeBand === 'All' ? topics : topics.filter(t => t.band.includes(activeBand.split(' ')[1]));
+  const wordsArray = useMemo(() => realTranscript.split(' ').filter(w => w.length > 0), [realTranscript]);
 
-  // 2. Timer Logic - Only start when STT is actually ready
+  // 2. Timer Logic
   useEffect(() => {
     let interval: any;
     if (isListening && isSTTReady) {
@@ -127,12 +137,67 @@ export default function StudentReadingAssessmentPage() {
   }, [isListening, isSTTReady]);
 
 
-  const wordsArray = useMemo(() => realTranscript.split(' ').filter(w => w.length > 0), [realTranscript]);
-  const currentFilters = wordsArray.filter((w: string) => {
-    const clean = w.toLowerCase().replace(/[.,]/g, "");
-    return clean === 'um' || clean === 'uh' || clean === 'ah';
-  }).length;
+  // 3. Pause Detection Logic
+  useEffect(() => {
+    if (!isListening || !isSTTReady || wordsArray.length === 0) {
+      setIsCurrentlyPausing(false);
+      lastTranscriptTimeRef.current = Date.now();
+      return;
+    }
+
+    const checkPause = setInterval(() => {
+      const now = Date.now();
+      if (now - lastTranscriptTimeRef.current > 2000 && !isCurrentlyPausing) {
+        setPauseCount(prev => prev + 1);
+        setIsCurrentlyPausing(true);
+      }
+    }, 500);
+
+    return () => clearInterval(checkPause);
+  }, [isListening, isSTTReady, wordsArray.length, isCurrentlyPausing]);
+
+  useEffect(() => {
+    if (realTranscript) {
+      lastTranscriptTimeRef.current = Date.now();
+      setIsCurrentlyPausing(false);
+    }
+  }, [realTranscript]);
+
+  const currentFillers = useMemo(() => {
+    const fillerWords = [
+      "um", "uh", "ah", "err", "hmm", 
+      "like", "you know", "i mean", 
+      "sort of", "kind of", "actually", 
+      "basically", "literally", "so",
+      "right", "okay", "well", "you see",
+      "i guess", "suppose", "really", "just"
+    ];
+    
+    const counts: { [word: string]: number } = {};
+    let total = 0;
+
+    wordsArray.forEach((w: string) => {
+      const clean = w.toLowerCase().replace(/[.,!?]/g, "");
+      if (fillerWords.includes(clean)) {
+        counts[clean] = (counts[clean] || 0) + 1;
+        total++;
+      }
+    });
+
+    return { total, fillerCounts: counts };
+  }, [wordsArray]);
+
   const currentWPM = recordingTime > 0 ? Math.round((wordsArray.length / recordingTime) * 60) : 0;
+
+  const keywordCoverage = useMemo(() => {
+    if (!selectedTopic || currentStep !== 3) return 0;
+    const uniqueSpoken = new Set(wordsArray.map(w => w.toLowerCase().replace(/[.,!?]/g, "")));
+    const count = selectedTopic.keywords.filter(k => {
+      const cleanK = k.toLowerCase().replace(/[.,!?]/g, "");
+      return uniqueSpoken.has(cleanK);
+    }).length;
+    return count;
+  }, [wordsArray, selectedTopic, currentStep]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -142,6 +207,9 @@ export default function StudentReadingAssessmentPage() {
 
   const handleStartRecording = () => {
     setRecordingTime(0);
+    setPauseCount(0);
+    setIsCurrentlyPausing(false);
+    lastTranscriptTimeRef.current = Date.now();
     resetTranscript('');
     startListening();
   };
@@ -153,22 +221,16 @@ export default function StudentReadingAssessmentPage() {
     stopListening();
   };
 
-  // 3. Render Real Live Transcript
   const renderLiveTranscript = () => {
     if (!realTranscript) return null;
-    
     return wordsArray.map((word: string, i: number) => {
       const cleanWord = word.replace(/[.,!?]/g, "").toLowerCase();
-      
-      // First pass styling (Highlight fillers)
       if (currentStep === 2) {
-         if (cleanWord === "um" || cleanWord === "uh" || cleanWord === "ah") {
+         if (["um", "uh", "ah", "hmm", "err"].includes(cleanWord)) {
             return <span key={i} className="text-amber-500 font-bold mx-0.5">{word} </span>;
          }
-         return <span key={i} className="text-emerald-500 mx-0.5">{word} </span>; // Fluent green
+         return <span key={i} className="text-emerald-500 mx-0.5">{word} </span>;
       }
-      
-      // Second pass styling (Highlight keywords hit)
       if (currentStep === 3) {
          const isKeyword = selectedTopic?.keywords.some((k: string) => k.toLowerCase().includes(cleanWord));
          if (isKeyword && cleanWord.length > 3) {
@@ -180,7 +242,6 @@ export default function StudentReadingAssessmentPage() {
     });
   };
 
-  // Highlights keywords in the static Familiarization phase
   const renderHighlightedText = (text: string, keywords: string[]) => {
     let result: any[] = [text];
     keywords.forEach(keyword => {
@@ -206,12 +267,7 @@ export default function StudentReadingAssessmentPage() {
 
   return (
     <div className="min-h-screen bg-[#F1F3F9] dark:bg-slate-950 transition-colors duration-300 font-sans text-slate-800 dark:text-slate-200">
-      <StudentSidebar 
-        activeTab="assessment" 
-        onTabChange={(tab) => navigate(`/student/${tab}`)}
-        isCollapsed={isSidebarCollapsed}
-        toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-      />
+      <StudentSidebar activeTab="assessment" isCollapsed={isSidebarCollapsed} toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} />
 
       <div className={cn("transition-all duration-300 min-h-screen flex flex-col", isSidebarCollapsed ? 'lg:pl-24' : 'lg:pl-72')}>
         <StudentTopbar onUpgradeClick={() => {}} />
@@ -288,33 +344,6 @@ export default function StudentReadingAssessmentPage() {
                   );
                 })}
               </div>
-
-              {/* Pagination Controls */}
-              {!isLoading && totalPages > 1 && (
-                <div className="flex justify-center items-center gap-4 mt-8">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => setPage(p => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                    className="rounded-xl"
-                  >
-                    Previous
-                  </Button>
-                  <span className="text-sm font-medium text-slate-500">
-                    Page {page} of {totalPages}
-                  </span>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                    disabled={page === totalPages}
-                    className="rounded-xl"
-                  >
-                    Next
-                  </Button>
-                </div>
-              )}
             </>
           ) : (
             /* ================= MULTI-STEP FLOW ================= */
@@ -340,7 +369,6 @@ export default function StudentReadingAssessmentPage() {
                         <p className="text-xs font-bold text-slate-400 uppercase mb-3">Question</p>
                         <p className="text-lg font-semibold">{selectedTopic.title}</p>
                       </div>
-                      
                       <div className="p-8 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm relative">
                         <div className="flex justify-between items-center mb-5">
                            <p className="text-xs font-bold text-slate-400 uppercase flex items-center gap-2"><BookOpen className="w-4 h-4" /> Model Answer</p>
@@ -351,24 +379,17 @@ export default function StudentReadingAssessmentPage() {
                         </div>
                       </div>
                    </div>
-
                    <div className="pt-2">
-                      <button onClick={() => setShowTips(!showTips)} className="text-violet-600 dark:text-violet-400 text-sm font-bold flex items-center gap-2">
-                        <Info className="w-4 h-4" /> {showTips ? 'Hide Tips' : 'Show Tips for this question'}
-                      </button>
+                      <button onClick={() => setShowTips(!showTips)} className="text-violet-600 dark:text-violet-400 text-sm font-bold flex items-center gap-2"><Info className="w-4 h-4" /> {showTips ? 'Hide Tips' : 'Show Tips for this question'}</button>
                       {showTips && (
                         <ul className="mt-4 p-6 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-3 animate-in slide-in-from-top-2">
                           {selectedTopic.tips.map((tip: string, i: number) => (
-                            <li key={i} className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-3">
-                              <div className="w-1.5 h-1.5 rounded-full bg-violet-400" /> {tip}
-                            </li>
+                            <li key={i} className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-3"><div className="w-1.5 h-1.5 rounded-full bg-violet-400" /> {tip}</li>
                           ))}
                         </ul>
                       )}
                    </div>
-                   <Button size="lg" className="w-full bg-violet-600 hover:bg-violet-700 h-14 rounded-2xl text-lg font-bold mt-4" onClick={() => setCurrentStep(2)}>
-                     I'm Ready — Start Reading Practice
-                   </Button>
+                   <Button size="lg" className="w-full bg-violet-600 hover:bg-violet-700 h-14 rounded-2xl text-lg font-bold mt-4" onClick={() => setCurrentStep(2)}>I'm Ready — Start Reading Practice</Button>
                 </StepContainer>
               )}
 
@@ -378,66 +399,37 @@ export default function StudentReadingAssessmentPage() {
                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                       <StatMini label="WPM" value={currentWPM} />
                       <StatMini label="Words" value={wordsArray.length} />
-                      <StatMini label="Filters" value={currentFilters} />
-                      <StatMini label="Pauses" value={isListening && recordingTime > 5 ? "1" : "0"} />
+                      <StatMini label="Fillers" value={currentFillers.total} />
+                      <StatMini label="Pauses" value={pauseCount} />
                    </div>
-                   
                    <div className="p-8 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm mb-6">
                       <p className="text-xs font-bold text-slate-400 uppercase mb-4">Model Answer (read this aloud)</p>
-                      <p className="text-slate-700 dark:text-slate-300 leading-relaxed text-[1.1rem] opacity-70">
-                        {selectedTopic.modelAnswer}
-                      </p>
+                      <p className="text-slate-700 dark:text-slate-300 leading-relaxed text-[1.1rem] opacity-70">{selectedTopic.modelAnswer}</p>
                    </div>
-
-                   <div className="bg-slate-900 dark:bg-slate-950 rounded-2xl p-6 border border-slate-800 shadow-lg">
+                   <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-lg">
                      <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-4">
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-2 text-rose-500">
                             <div className={cn("w-2 h-2 rounded-full", isListening ? "bg-rose-500 animate-ping" : "bg-slate-600")} />
                             <span className="text-xs font-bold uppercase tracking-widest text-slate-300">Live Transcript</span>
                           </div>
-                          <div className="hidden sm:flex items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                             <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-emerald-500"/> Fluent</span>
-                             <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-amber-500"/> Filler</span>
-                             <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-rose-500"/> Unclear</span>
-                          </div>
                         </div>
                         <span className="text-xs font-mono text-slate-400">{formatTime(recordingTime)} / 00:45</span>
                      </div>
                      <div className="min-h-[120px] bg-slate-800/30 rounded-xl p-6 text-[1.1rem] font-medium leading-relaxed text-slate-400">
-                        {isListening && !isSTTReady ? (
-                           <div className="h-full flex flex-col items-center justify-center text-violet-400 space-y-3 animate-pulse">
-                             <Sparkles className="w-8 h-8" />
-                             <span className="text-sm font-bold uppercase tracking-wider">Setting up voice engine...</span>
-                           </div>
-                        ) : !isListening && wordsArray.length === 0 ? (
-                          <div className="h-full flex flex-col items-center justify-center text-slate-500 space-y-3">
-                            <Mic className="w-8 h-8 opacity-50" />
-                            <span className="text-sm">Click start to begin recording...</span>
-                          </div>
-                        ) : (
-                          <div>
-                            {isSTTReady && wordsArray.length === 0 && (
-                               <div className="text-emerald-500 text-sm font-bold mb-4 animate-bounce flex items-center gap-2">
-                                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                                  READY! Start reading now...
-                               </div>
-                            )}
-                            {renderLiveTranscript()}
-                            {isListening && <span className="animate-pulse border-r-2 border-violet-500 ml-1"></span>}
-                          </div>
-                        )}
+                        {isListening && !isSTTReady ? (<div className="h-full flex flex-col items-center justify-center text-violet-400 animate-pulse"><Sparkles className="w-8 h-8 mr-2" /><span>Setting up voice engine...</span></div>
+                        ) : !isListening && wordsArray.length === 0 ? (<div className="h-full flex flex-col items-center justify-center text-slate-500"><Mic className="w-8 h-8 opacity-50 mb-2" /><span>Click start to begin recording...</span></div>
+                        ) : (<div>{isSTTReady && wordsArray.length === 0 && (<div className="text-emerald-500 text-sm font-bold mb-4 animate-bounce flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />READY! Start reading now...</div>)}{renderLiveTranscript()}{isListening && <span className="animate-pulse border-r-2 border-violet-500 ml-1"></span>}</div>)}
                      </div>
                    </div>
-
                    {!isListening ? (
-                     <Button size="lg" className="w-full bg-violet-600 h-14 rounded-2xl font-bold mt-6 shadow-lg shadow-violet-200 dark:shadow-none" onClick={handleStartRecording}>
-                       <PlaySquare className="w-5 h-5 mr-2" /> Start Reading
-                     </Button>
+                     <Button size="lg" className="w-full bg-violet-600 h-14 rounded-2xl font-bold mt-6 shadow-lg shadow-violet-200 dark:shadow-none" onClick={handleStartRecording}><PlaySquare className="w-5 h-5 mr-2" /> Start Reading</Button>
                    ) : (
-                     <Button size="lg" className="w-full bg-rose-500 hover:bg-rose-600 h-14 rounded-2xl font-bold mt-6" onClick={() => { stopListening(); setCurrentStep(3); }}>
-                       <Square className="w-5 h-5 mr-2" /> Done — Analyze My Reading
-                     </Button>
+                     <Button size="lg" className="w-full bg-rose-500 hover:bg-rose-600 h-14 rounded-2xl font-bold mt-6" onClick={() => { 
+                        stopListening(); 
+                        setSessionResults(prev => ({ ...prev, pass1: { wpm: currentWPM, words: wordsArray.length, fillers: currentFillers.total, fillerCounts: currentFillers.fillerCounts, pauses: pauseCount } }));
+                        setCurrentStep(3); 
+                      }}><Square className="w-5 h-5 mr-2" /> Done — Analyze My Reading</Button>
                    )}
                 </StepContainer>
               )}
@@ -446,36 +438,16 @@ export default function StudentReadingAssessmentPage() {
               {currentStep === 3 && (
                 <StepContainer title="02. Second Pass: Keyword Focus" desc="Read again, paying attention to highlighted keywords. Watch your keyword tracker update in real-time!">
                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                      <StatMini 
-                        label="Keyword Coverage" 
-                        value={selectedTopic ? `${wordsArray.filter(w => selectedTopic.keywords.some(k => k.toLowerCase().includes(w.toLowerCase().replace(/[.,!?]/g, "")))).filter((v, i, a) => a.indexOf(v) === i).length}/${selectedTopic.keywords.length}` : '0/0'} 
-                      />
+                      <StatMini label="Keyword Coverage" value={selectedTopic ? `${keywordCoverage}/${selectedTopic.keywords.length}` : '0/0'} />
                       <StatMini label="Words" value={wordsArray.length} />
-                      <StatMini label="Filters" value="0" />
-                      <StatMini label="Time" value={formatTime(recordingTime)} />
+                      <StatMini label="Fillers" value={currentFillers.total} />
+                      <StatMini label="Pauses" value={pauseCount} />
                    </div>
-
-                   <div className="space-y-6">
-                      <div className="p-8 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                        <p className="text-xs font-bold text-slate-400 uppercase mb-4">Model Answer (Keywords Highlighted)</p>
-                        <div className="text-slate-700 dark:text-slate-300 leading-relaxed text-[1.1rem]">
-                          {renderHighlightedText(selectedTopic.modelAnswer, selectedTopic.keywords)}
-                        </div>
-                      </div>
-
-                      <div className="p-6 bg-slate-900 rounded-2xl border border-slate-800 text-slate-300">
-                        <p className="text-sm font-bold text-white mb-4 uppercase tracking-wider">Why these keywords matter:</p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
-                           {selectedTopic.keywordMap.map((km: any, idx: number) => (
-                             <div key={idx} className="flex items-start gap-3 text-sm">
-                               <span className="px-2 py-1 bg-violet-900/50 text-violet-300 rounded text-xs font-bold shrink-0">{km.word}</span>
-                               <span className="text-slate-400 mt-0.5">→ {km.meaning}</span>
-                             </div>
-                           ))}
-                        </div>
-                      </div>
-
-                      <div className="bg-slate-900 dark:bg-slate-950 rounded-2xl p-6 border border-slate-800 shadow-lg">
+                   <div className="p-8 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm mb-6">
+                      <p className="text-xs font-bold text-slate-400 uppercase mb-4">Model Answer (Keywords Highlighted)</p>
+                      <div className="text-slate-700 dark:text-slate-300 leading-relaxed text-[1.1rem]">{renderHighlightedText(selectedTopic.modelAnswer, selectedTopic.keywords)}</div>
+                   </div>
+                   <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-lg mb-6">
                          <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-4">
                             <div className="flex items-center gap-2 text-rose-500">
                               <div className={cn("w-2 h-2 rounded-full", isListening ? "bg-rose-500 animate-ping" : "bg-slate-600")} />
@@ -484,125 +456,68 @@ export default function StudentReadingAssessmentPage() {
                             <span className="text-xs font-mono text-slate-400">{formatTime(recordingTime)}</span>
                          </div>
                          <div className="min-h-[100px] bg-slate-800/30 rounded-xl p-6 text-[1.1rem] font-medium leading-relaxed text-slate-400">
-                           {isListening && !isSTTReady ? (
-                              <div className="h-full flex flex-col items-center justify-center text-violet-400 space-y-3 animate-pulse">
-                                <span className="text-sm font-bold uppercase tracking-wider">Syncing keywords...</span>
-                              </div>
-                           ) : !isListening && wordsArray.length === 0 ? (
-                              <div className="h-full flex flex-col items-center justify-center text-slate-500 space-y-3">
-                                <Mic className="w-8 h-8 opacity-50" />
-                                <span className="text-sm">Click start to see your keywords tracked live...</span>
-                              </div>
-                           ) : (
-                              <div>
-                                {renderLiveTranscript()}
-                                {isListening && <span className="animate-pulse border-r-2 border-emerald-500 ml-1"></span>}
-                              </div>
-                           )}
+                           {recordTranscripts()}
                          </div>
-                      </div>
                    </div>
-
                    {!isListening ? (
-                     <Button size="lg" className="w-full bg-violet-600 h-14 rounded-2xl font-bold mt-6 shadow-lg shadow-violet-200 dark:shadow-none" onClick={handleStartRecording}>
-                       <PlaySquare className="w-5 h-5 mr-2" /> Read Again (Focus on Keywords)
-                     </Button>
+                     <Button size="lg" className="w-full bg-violet-600 h-14 rounded-2xl font-bold mt-6 shadow-lg shadow-violet-200 dark:shadow-none" onClick={handleStartRecording}><PlaySquare className="w-5 h-5 mr-2" /> Read Again (Focus on Keywords)</Button>
                    ) : (
-                     <Button size="lg" className="w-full bg-rose-500 hover:bg-rose-600 h-14 rounded-2xl font-bold mt-6" onClick={() => { stopListening(); setCurrentStep(4); }}>
-                       <Square className="w-5 h-5 mr-2" /> Finish & Analyze Results
-                     </Button>
+                     <Button size="lg" className="w-full bg-rose-500 hover:bg-rose-600 h-14 rounded-2xl font-bold mt-6" disabled={isSaving}
+                        onClick={async () => { 
+                          stopListening(); 
+                          setIsSaving(true);
+                          const pass2 = { coverage: keywordCoverage, totalKeywords: selectedTopic.keywords.length, words: wordsArray.length, fillers: currentFillers.total, fillerCounts: currentFillers.fillerCounts, pauses: pauseCount, time: recordingTime, wpm: currentWPM };
+                          try {
+                            const res = await saveIeltsReadingAssessment({ topicId: selectedTopic.id, userId: profile?.id || '', band: selectedTopic.band, pass1: sessionResults.pass1, pass2: pass2 });
+                            if (res.success) { setBackendResults(res.data); setCurrentStep(4); }
+                            else { toast.error(res.error || "Failed to save results"); }
+                          } catch (err) { toast.error("Error connecting to server"); }
+                          finally { setIsSaving(false); }
+                        }}>
+                        {isSaving ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Analyzing stats...</> : <><Square className="w-5 h-5 mr-2" /> Finish & Analyze Results</>}
+                      </Button>
                    )}
                 </StepContainer>
               )}
 
               {/* ----- STEP 4: AI RESULTS ----- */}
-              {currentStep === 4 && (
+              {currentStep === 4 && backendResults && (
                 <div className="space-y-8 animate-in slide-in-from-bottom-4">
                   <div className="text-center space-y-2 mb-8">
                     <h2 className="text-3xl font-extrabold text-slate-800 dark:text-white">Reading Practice Results</h2>
-                    <span className="inline-block px-3 py-1 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded-full text-xs font-bold uppercase tracking-widest">Good • Band {selectedTopic.band.split(' ')[1]}</span>
+                    <span className="inline-block px-3 py-1 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded-full text-xs font-bold uppercase tracking-widest">Assessment Recorded • Band {selectedTopic.band.split(' ')[1]}</span>
                   </div>
 
-                  {/* Top Stats Row */}
                   <div className="grid grid-cols-3 gap-4">
                     <div className="text-center bg-white dark:bg-slate-900 rounded-[2rem] p-6 shadow-sm border border-slate-100 dark:border-slate-800">
-                      <div className="text-4xl font-black text-violet-600 dark:text-violet-400 mb-2">100</div>
-                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Fluency</div>
+                      <div className="text-4xl font-black text-emerald-500 mb-2">{backendResults.fluencyScore}</div>
+                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Fluency Score</div>
                     </div>
                     <div className="text-center bg-white dark:bg-slate-900 rounded-[2rem] p-6 shadow-sm border border-slate-100 dark:border-slate-800">
-                      <div className="text-4xl font-black text-violet-600 dark:text-violet-400 mb-2">86</div>
-                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pronunciation</div>
+                      <div className="text-4xl font-black text-violet-600 dark:text-violet-400 mb-2">{backendResults.weightedWpm}</div>
+                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Weighted Avg WPM</div>
                     </div>
                     <div className="text-center bg-white dark:bg-slate-900 rounded-[2rem] p-6 shadow-sm border border-slate-100 dark:border-slate-800">
-                      <div className="text-4xl font-black text-violet-600 dark:text-violet-400 mb-2">100</div>
-                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Keywords</div>
+                      <div className="text-4xl font-black text-violet-600 dark:text-violet-400 mb-2">{backendResults.keywordsHit}/{backendResults.totalKeywords}</div>
+                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Keywords Hit</div>
                     </div>
                   </div>
 
-                  {/* Sub Stats Row */}
-                  <div className="flex justify-around bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
-                    <div className="text-center"><div className="font-bold text-lg text-slate-800 dark:text-white">202</div><div className="text-[10px] uppercase text-slate-400 font-bold">Words/Min</div></div>
-                    <div className="text-center"><div className="font-bold text-lg text-slate-800 dark:text-white">2</div><div className="text-[10px] uppercase text-slate-400 font-bold">Filters Used</div></div>
-                    <div className="text-center"><div className="font-bold text-lg text-slate-800 dark:text-white">{selectedTopic.keywords.length}/{selectedTopic.keywords.length}</div><div className="text-[10px] uppercase text-slate-400 font-bold">Keywords Hit</div></div>
-                  </div>
-
-                  {/* Filter Words Breakdown */}
                   <div className="bg-amber-50 dark:bg-slate-900 p-6 rounded-2xl border border-amber-200 dark:border-amber-900/50">
                     <div className="flex items-center gap-2 mb-4">
                       <AlertTriangle className="w-5 h-5 text-amber-500" />
-                      <h3 className="font-bold text-amber-900 dark:text-amber-500">Filter Words Breakdown</h3>
+                      <h3 className="font-bold text-amber-900 dark:text-amber-500">Frequent Filler Words</h3>
                     </div>
-                    <p className="text-sm text-amber-800 dark:text-slate-400 mb-4">You used 2 filler words. Each one disrupts your flow and costs you marks in IELTS.</p>
-                    <div className="space-y-2 mb-4">
-                      <div className="flex justify-between items-center bg-white dark:bg-slate-800 p-3 rounded-xl border border-amber-100 dark:border-slate-700">
-                        <span className="font-mono text-rose-500 font-bold">"um"</span><span className="text-xs font-bold text-slate-400">1x</span>
-                      </div>
-                      <div className="flex justify-between items-center bg-white dark:bg-slate-800 p-3 rounded-xl border border-amber-100 dark:border-slate-700">
-                        <span className="font-mono text-rose-500 font-bold">"uh"</span><span className="text-xs font-bold text-slate-400">1x</span>
-                      </div>
-                    </div>
-                    <div className="text-xs font-semibold text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 p-3 rounded-lg flex items-start gap-2">
-                      <span>💡</span> Pro tip: Replace "like" with a silent pause. Pausing shows confidence; fillers show uncertainty.
-                    </div>
-                  </div>
-
-                  {/* Pronunciation Feedback */}
-                  <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                    <div className="flex items-center gap-2 mb-6">
-                      <Mic className="w-5 h-5 text-violet-600" />
-                      <h3 className="font-bold text-slate-800 dark:text-slate-200">Pronunciation & Emphasis Feedback</h3>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="p-4 rounded-xl border border-emerald-100 bg-emerald-50 dark:bg-emerald-900/10 dark:border-emerald-900/30">
-                        <div className="flex items-center gap-2 font-bold text-emerald-800 dark:text-emerald-400 mb-1"><Check className="w-4 h-4" /> {selectedTopic.keywords[0]}</div>
-                        <div className="text-xs text-emerald-600 dark:text-emerald-500">Great pronunciation of "{selectedTopic.keywords[0]}"!</div>
-                      </div>
-                      <div className="p-4 rounded-xl border border-rose-100 bg-rose-50 dark:bg-rose-900/10 dark:border-rose-900/30">
-                        <div className="flex items-center gap-2 font-bold text-rose-800 dark:text-rose-400 mb-1"><XCircle className="w-4 h-4" /> {selectedTopic.keywords[1] || "Example word"}</div>
-                        <div className="text-xs text-rose-600 dark:text-rose-500">You missed this keyword. Practice saying it clearly: break it into syllables first.</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* First vs Second Pass */}
-                  <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                    <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-6">First vs Second Pass</h3>
-                    <div className="space-y-6">
-                      <div>
-                        <div className="flex justify-between text-xs font-bold text-slate-400 mb-2"><span>Fluency</span><span className="text-emerald-500 font-mono">0%</span></div>
-                        <div className="flex h-8 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800">
-                          <div className="w-1/2 bg-violet-200 dark:bg-violet-900/40 flex items-center justify-center text-[10px] font-bold text-violet-700 dark:text-violet-300">1st: 100</div>
-                          <div className="w-1/2 bg-violet-500 flex items-center justify-center text-[10px] font-bold text-white border-l border-white/20">2nd: 100</div>
+                    <p className="text-sm text-amber-800 dark:text-slate-400 mb-4">Focus on reducing these specific fillers to improve your IELTS band score.</p>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {backendResults.frequentFillers.length > 0 ? backendResults.frequentFillers.map((f: any, i: number) => (
+                        <div key={i} className="bg-white dark:bg-slate-800 px-4 py-2 rounded-xl border border-amber-100 dark:border-slate-700 flex items-center gap-3">
+                           <span className="font-mono text-rose-500 font-bold uppercase">{f.word}</span>
+                           <span className="text-xs font-black text-slate-400">{f.count}x</span>
                         </div>
-                      </div>
-                      <div>
-                        <div className="flex justify-between text-xs font-bold text-slate-400 mb-2"><span>Hesitations</span><span className="text-emerald-500 font-mono">-1</span></div>
-                        <div className="flex h-8 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800">
-                          <div className="w-2/3 bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-600 dark:text-slate-300">1st: 3</div>
-                          <div className="w-1/3 bg-emerald-400 flex items-center justify-center text-[10px] font-bold text-white border-l border-white/20">2nd: 2</div>
-                        </div>
-                      </div>
+                      )) : <span className="text-emerald-600 font-bold">No frequent fillers found! Excellent fluency.</span>}
                     </div>
+                    <div className="text-xs font-semibold text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 p-3 rounded-lg flex items-start gap-2"><span>💡</span> Pro tip: Pauses are better than fillers. If you need a moment, take a breath instead of saying "{backendResults.frequentFillers[0]?.word || 'um'}".</div>
                   </div>
 
                   <div className="flex gap-4 pt-4">
@@ -617,32 +532,34 @@ export default function StudentReadingAssessmentPage() {
       </div>
     </div>
   );
+
+  function recordTranscripts() {
+    return (
+      <>
+        {isListening && !isSTTReady ? (
+          <div className="h-full flex flex-col items-center justify-center text-violet-400 animate-pulse"><span className="text-sm font-bold uppercase tracking-wider">Syncing keywords...</span></div>
+        ) : !isListening && wordsArray.length === 0 ? (
+          <div className="h-full flex flex-col items-center justify-center text-slate-500"><Mic className="w-8 h-8 opacity-50 mb-2" /><span>Click start to see your keywords tracked live...</span></div>
+        ) : (<div>{renderLiveTranscript()}{isListening && <span className="animate-pulse border-r-2 border-emerald-500 ml-1"></span>}</div>)}
+      </>
+    );
+  }
 }
 
-// Sub-components
 const PhaseStep = ({ icon, title, sub }: any) => (
   <div className="flex items-center gap-3 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-3 rounded-2xl pr-8 shadow-sm">
     <div className="p-2.5 rounded-xl bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400">{icon}</div>
-    <div className="flex flex-col">
-      <span className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-none">{title}</span>
-      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase mt-1 tracking-tight">{sub}</span>
-    </div>
+    <div className="flex flex-col"><span className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-none">{title}</span><span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase mt-1 tracking-tight">{sub}</span></div>
   </div>
 );
 
 const StepContainer = ({ title, desc, children }: any) => (
   <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
-    <div className="space-y-2 mb-8 text-center max-w-2xl mx-auto">
-      <h2 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">{title}</h2>
-      <p className="text-slate-500 text-[1.1rem] leading-relaxed">{desc}</p>
-    </div>
+    <div className="space-y-2 mb-8 text-center max-w-2xl mx-auto"><h2 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">{title}</h2><p className="text-slate-500 text-[1.1rem] leading-relaxed">{desc}</p></div>
     {children}
   </div>
 );
 
-const StatMini = ({ label, value }: any) => (
-  <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm text-center">
-    <div className="text-3xl font-black text-violet-600 dark:text-violet-400 mb-1">{value}</div>
-    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{label}</div>
-  </div>
+const StatMini = ({ label, value }: { label: string; value: string | number }) => (
+  <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm text-center"><div className="text-3xl font-black text-violet-600 dark:text-violet-400 mb-1">{value}</div><div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{label}</div></div>
 );
