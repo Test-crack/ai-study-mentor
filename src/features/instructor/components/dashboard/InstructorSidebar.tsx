@@ -32,7 +32,9 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
     { id: 'assessments', icon: FileText, label: 'Student Assessments', path: '/instructor/assessments' },
     { id: 'techprep', icon: FileText, label: 'Tech Prep', path: '/instructor/tech-pep' },
     { id: 'alignment', icon: Users, label: 'Alignment', path: '/instructor/alignment' }, 
+    { id: 'report', icon: Users, label: 'Report', path: '/instructor/reports' }, 
     { id: 'settings', icon: Settings, label: 'Settings', path: '/profile' },
+    { id: 'work', icon: Settings, label: 'Workflow', path: '/instructor/workflow' },
   ];
 
   const handleNavigation = (item: typeof menuItems[0]) => {

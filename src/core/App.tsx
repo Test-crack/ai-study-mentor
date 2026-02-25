@@ -59,6 +59,9 @@ import TutorEffective from "@/features/InstituteOwner/dashboard/TutorEffective";
 import StrategicReport from "@/features/InstituteOwner/dashboard/StrategicReport";
 import AiCalibration from "@/features/InstituteOwner/dashboard/AiCalibration";
 import VoiceLab from "@/features/student/components/VoiceLab";
+import SpeedReading from "@/features/student/components/SpeedReading";
+import InstructorReport from "@/features/instructor/components/InstructorReport";
+import Workflow from "@/features/instructor/components/Workflow";
 const queryClient = new QueryClient();
 
 /**
@@ -156,6 +159,7 @@ const AppRoutes = () => {
       <Route path="/student/courses" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentCoursesPage /></RoleProtectedRoute>} />
       <Route path="/student/schedule" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentSchedulePage /></RoleProtectedRoute>} />
       <Route path="/student/voice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><VoiceLab/></RoleProtectedRoute>} />
+      <Route path="/student/speed" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><SpeedReading/></RoleProtectedRoute>} />
       <Route path="/student/reading-assessment" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentReadingAssessmentPage /></RoleProtectedRoute>} />
       <Route path="/student/reading-assessment/history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentAssessmentHistoryPage /></RoleProtectedRoute>} />
       <Route path="/student/my-curriculum" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><MyCurriculum/></RoleProtectedRoute>} />
@@ -181,8 +185,10 @@ const AppRoutes = () => {
       <Route path="/instructor/coursemanagement" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorCourseManagementPage/></RoleProtectedRoute>} />
       <Route path="/instructor/tech-pep" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><TechPrepPage/></RoleProtectedRoute>} />
       <Route path="/instructor/alignment" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><AlignmentPage/></RoleProtectedRoute>} />
+      <Route path="/instructor/reports" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorReport/></RoleProtectedRoute>} />
+      <Route path="/instructor/workflow" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><Workflow/></RoleProtectedRoute>} />
 
-      {/* Protected routes */}
+      {/* Protected routes */}/instructor/report
       <Route path="/learn/:slug" element={<RoleProtectedRoute><LearningPage /></RoleProtectedRoute>} />
       <Route path="/notes" element={<RoleProtectedRoute><NotesPage /></RoleProtectedRoute>} />
       <Route path="/profile" element={<RoleProtectedRoute><ProfilePage /></RoleProtectedRoute>} />
