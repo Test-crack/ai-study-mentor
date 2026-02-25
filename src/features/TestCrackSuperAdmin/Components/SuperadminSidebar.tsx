@@ -22,19 +22,18 @@ interface SidebarProps {
   className?: string;
 }
 
-export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isCollapsed, toggleCollapse, className }: SidebarProps) => {
+export const SuperAdminSidebar = ({ activeTab = 'dashboard', onTabChange, isCollapsed, toggleCollapse, className }: SidebarProps) => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
   
   const menuItems = [
-    { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/instructor/dashboard' },
-    { id: 'courses', icon: BookOpen, label: 'Course Management', path: '/instructor/coursemanagement' },
-    { id: 'assessments', icon: FileText, label: 'Student Assessments', path: '/instructor/assessments' },
-    { id: 'techprep', icon: FileText, label: 'Tech Prep', path: '/instructor/tech-pep' },
-    { id: 'alignment', icon: Users, label: 'Alignment', path: '/instructor/alignment' }, 
-    { id: 'report', icon: Users, label: 'Report', path: '/instructor/reports' }, 
-    { id: 'settings', icon: Settings, label: 'Settings', path: '/profile' },
-    { id: 'work', icon: Settings, label: 'Workflow', path: '/instructor/workflow' },
+    { id: 'superadmin-dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/superadmin-dashboard' },
+    { id: 'institutes', icon: BookOpen, label: 'Institutes', path: '/Superadmin-institutes'  },
+    { id: 'superadmin-subscription', icon: FileText, label: 'Subscription', path: '/superadmin-subscription' },
+    { id: 'pricing-config', icon: FileText, label: 'Pricing-Config', path: '/superadmin-priceconfig' },
+    { id: 'support-tickets', icon: FileText, label: 'SupportTickets', path: '/superadmin-supportickets' },
+    { id: 'platform-analytics', icon: FileText, label: 'PlatformAnalytics', path: '/superadmin-platform' },
+    { id: 'users', icon: Users, label: 'All Users', path: '/superadmin-allusers' }, 
   ];
 
   const handleNavigation = (item: typeof menuItems[0]) => {
@@ -44,7 +43,7 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
     }
   };
 
-  // Custom logout handler to reset the theme
+  // Custom logout handler to reset the theme /institute-Setting
   const handleLogout = async () => {
     // 1. Force the theme back to light mode by removing the Tailwind 'dark' class
     document.documentElement.classList.remove('dark');
@@ -72,7 +71,7 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
         </div>
         {!isCollapsed && (
           <span className="text-xl font-bold text-slate-900 dark:text-white tracking-wide animate-in fade-in duration-300">
-            Instructor
+            TestCrack Super Admin 
           </span>
         )}
       </div>

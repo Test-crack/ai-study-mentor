@@ -53,7 +53,7 @@ type ChatMessage = {
 
 export default function MyCurriculum() {
   // Layout States
-  const [activeTab, setActiveTab] = useState("curriculum");
+const [activeTab, setActiveTab] = useState("my-curriculum");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
 
