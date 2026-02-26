@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Zap, Settings, Play, Pause, ArrowLeft, 
   BrainCircuit, Briefcase, BookOpen, Activity, CheckCircle2,
