@@ -123,7 +123,7 @@ export default function SpeedReading() {
       
       {/* Sidebar */}
       <StudentSidebar 
-        activeTab={activeTab} 
+        activeTab='speed' 
         onTabChange={setActiveTab} 
         isCollapsed={isSidebarCollapsed}
         toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
