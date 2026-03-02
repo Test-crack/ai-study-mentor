@@ -7,6 +7,7 @@ import {
   GraduationCap,
   ChevronLeft,
   ChevronRight,
+  BookText,Mic2,Zap,MessageSquare,
   Home
 } from "lucide-react";
 import { cn } from "@/shared/utils";
@@ -25,18 +26,17 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
   const { signOut } = useAuth();
   const navigate = useNavigate();
   
-  const menuItems = [
-    { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/student/dashboard' },
-    { id: 'courses', icon: BookOpen, label: 'My Courses', path: '/student/courses' },
-    { id: 'assessment', icon: BookOpen, label: 'IELTS Reading', path: '/student/reading-assessment' },
-    { id: 'voice', icon: BookOpen, label: 'Voice Lab', path: '/student/voice' },
-    { id: 'speed', icon: BookOpen, label: 'Speed Reading', path: '/student/speed' },
-    { id: 'schedule', icon: Calendar, label: 'Schedule', path: '/student/schedule' },
-    { id: 'speaking-practice', icon: Calendar, label: 'Speaking-Anatomy', path: '/student/speaking-practice' },
-    { id: 'my-curriculum', icon: Calendar, label: 'My-Curriculum', path: '/student/my-curriculum' },
-    { id: 'settings', icon: Settings, label: 'Settings', path: '/student/settings' },
-  ];
-
+ const menuItems = [
+  { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/student/dashboard' },
+  { id: 'courses', icon: BookOpen, label: 'My Courses', path: '/student/courses' },
+  { id: 'assessments', icon: BookText, label: 'IELTS Reading', path: '/student/reading-assessment' },
+  { id: 'voice', icon: Mic2, label: 'Voice Lab', path: '/student/voice' },
+  { id: 'speed', icon: Zap, label: 'Speed Reading', path: '/student/speed' },
+  { id: 'schedule', icon: Calendar, label: 'Schedule', path: '/student/schedule' },
+  { id: 'speaking-practice', icon: MessageSquare, label: 'Speaking-Anatomy', path: '/student/speaking-practice' },
+  { id: 'my-curriculum', icon: GraduationCap, label: 'My-Curriculum', path: '/student/my-curriculum' },
+  { id: 'settings', icon: Settings, label: 'Settings', path: '/student/settings' },
+];
   const handleNavigation = (item: typeof menuItems[0]) => {
     navigate(item.path);
     if (onTabChange) {

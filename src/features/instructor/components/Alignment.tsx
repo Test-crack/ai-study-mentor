@@ -9,22 +9,6 @@ import { InstructorSidebar } from "./dashboard/InstructorSidebar";
 import { InstructorTopbar } from "./dashboard/InstructorTopbar";
 
 // --- MOCK DATA ---
-const chartData = [
-  { month: 'Oct', manual: 810, ai: 103 },
-  { month: 'Nov', manual: 850, ai: 103 },
-  { month: 'Dec', manual: 880, ai: 103 },
-  { month: 'Jan', manual: 920, ai: 103 },
-  { month: 'Feb', manual: 840, ai: 103 },
-  { month: 'Mar', manual: 840, ai: 103 },
-];
-
-const outcomesData = [
-  { label: 'Placement Rate', manual: '52%', ai: '78%', width: '78%', isPositive: true },
-  { label: 'Avg Score Improvement', manual: '', ai: '18%', width: '60%', isPositive: true },
-  { label: 'Teacher Hrs Saved/Week', manual: '', ai: '12hrs', width: '50%', isPositive: true },
-  { label: 'Student Retention', manual: '72%', ai: '91%', width: '91%', isPositive: true },
-];
-
 const overGradedStudents = [
   { name: 'Arjun Mehta', teacher: 58, ai: 42, gap: 16, insight: 'AI detected recursive logic gaps teacher graded le...' },
   { name: 'Aditya Patel', teacher: 75, ai: 55, gap: 20, insight: 'Student memorized solutions — AI detected zero tra...' },
@@ -51,7 +35,6 @@ const tableData = [
 
 export default function AlignmentPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [hoveredMonth, setHoveredMonth] = useState<string | null>(null);
   const [showReport, setShowReport] = useState(false);
 
   const handleReassess = (name: string) => {
@@ -65,9 +48,6 @@ export default function AlignmentPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#09090E] font-sans text-slate-900 dark:text-slate-200 transition-colors duration-300 selection:bg-indigo-500/30">
       
-      {/* BUG FIX: Changed activeTab from "dashboard" to "alignment" 
-        This ensures the sidebar correctly highlights the Alignment menu item.
-      */}
       <InstructorSidebar
         activeTab="alignment" 
         isCollapsed={isSidebarCollapsed}
@@ -113,7 +93,7 @@ export default function AlignmentPage() {
                 </div>
               </div>
 
-              {/* Top 4 Stats */}
+              {/* Stats & Summary */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#1E1E2A] rounded-xl p-8 flex flex-col items-center text-center shadow-sm dark:shadow-none">
                   <Users className="w-8 h-8 text-purple-600 dark:text-purple-500 mb-4" />
@@ -137,15 +117,13 @@ export default function AlignmentPage() {
                 </div>
               </div>
 
-              {/* Executive Summary */}
               <div className="bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#1E1E2A] rounded-xl p-6 sm:p-8 shadow-sm dark:shadow-none">
                 <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-3">Executive Summary</h2>
                 <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-                  64 students averaged 24 sessions each, improving from 48% to 66.5% (<span className="text-emerald-600 dark:text-emerald-400 font-bold">+18.5%</span>). <strong className="text-slate-900 dark:text-white">42 (65.6%)</strong> meet placement thresholds. Top improver: <strong className="text-slate-900 dark:text-white">Sneha Reddy</strong> (+34%).
+                  64 students averaged 24 sessions each, improving from 48% to 66.5% (<span className="text-emerald-600 dark:text-emerald-400 font-bold">+18.5%</span>). <strong className="text-slate-900 dark:text-white">42 (65.6%)</strong> meet placement thresholds.
                 </p>
               </div>
 
-              {/* Grading Alignment Quality */}
               <div className="bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#1E1E2A] rounded-xl p-6 sm:p-8 shadow-sm dark:shadow-none">
                 <div className="flex justify-between items-end mb-4">
                   <h2 className="text-lg font-bold text-slate-900 dark:text-white">Grading Alignment Quality</h2>
@@ -153,29 +131,6 @@ export default function AlignmentPage() {
                 </div>
                 <div className="w-full bg-slate-100 dark:bg-[#1A1A24] h-4 rounded-full mb-4 overflow-hidden border border-slate-200 dark:border-[#2A2A3A]">
                   <div className="bg-indigo-600 h-full rounded-full shadow-[0_0_12px_rgba(79,70,229,0.5)]" style={{ width: '42%' }}></div>
-                </div>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  4 students were over-graded (teacher bias: +5%), 3 were under-graded.
-                </p>
-              </div>
-
-              {/* Topic Performance */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#1E1E2A] rounded-xl p-6 shadow-sm dark:shadow-none">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Strongest Topics</h3>
-                  <div className="flex flex-wrap gap-2.5">
-                    <span className="px-3.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-sm font-bold">Arrays</span>
-                    <span className="px-3.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-sm font-bold">Sorting</span>
-                    <span className="px-3.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-sm font-bold">Hash Tables</span>
-                  </div>
-                </div>
-                <div className="bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#1E1E2A] rounded-xl p-6 shadow-sm dark:shadow-none">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Requires Attention</h3>
-                  <div className="flex flex-wrap gap-2.5">
-                    <span className="px-3.5 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-600 dark:text-rose-400 text-sm font-bold">Pointer Arithmetic</span>
-                    <span className="px-3.5 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-600 dark:text-rose-400 text-sm font-bold">Backtracking</span>
-                    <span className="px-3.5 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-600 dark:text-rose-400 text-sm font-bold">Graphs</span>
-                  </div>
                 </div>
               </div>
 
@@ -185,14 +140,8 @@ export default function AlignmentPage() {
             /* --- MAIN DASHBOARD VIEW --- */
             <div className="space-y-6">
               
-              {/* Header Hero Section */}
-              <div className="bg-white dark:bg-transparent dark:bg-gradient-to-r dark:from-indigo-900/40 dark:via-indigo-900/10 dark:to-transparent border border-slate-200 dark:border-indigo-500/20 rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row justify-between items-start gap-6 shadow-sm dark:shadow-none">
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold mb-3 text-slate-900 dark:text-white">Your Institute's Return on Investment</h1>
-                  <p className="text-slate-600 dark:text-slate-300 text-sm max-w-3xl leading-relaxed">
-                    TestCrack saves your institute <strong className="text-slate-900 dark:text-white font-semibold">₹738K/month</strong> compared to manual assessments while delivering <strong className="text-slate-900 dark:text-white font-semibold">88% cost reduction</strong> and measurably better student outcomes.
-                  </p>
-                </div>
+              {/* Top Action Bar (Replacing the Hero ROI section) */}
+              <div className="flex justify-end mb-4">
                 <button 
                   onClick={() => setShowReport(true)}
                   className="flex items-center gap-2 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-lg shadow-purple-900/20 shrink-0"
@@ -201,132 +150,8 @@ export default function AlignmentPage() {
                 </button>
               </div>
 
-              {/* Top 4 Stats */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#1E1E2A] rounded-xl p-6 flex flex-col items-center text-center shadow-sm dark:shadow-none">
-                  <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mb-2 flex items-center justify-center">
-                    <DollarSign className="w-6 h-6 mr-1" /> ₹738K
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Monthly Savings</div>
-                </div>
-                <div className="bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#1E1E2A] rounded-xl p-6 flex flex-col items-center text-center shadow-sm dark:shadow-none">
-                  <div className="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-2 flex items-center justify-center">
-                    <Percent className="w-6 h-6 mr-1" /> 88%
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Cost Reduction</div>
-                </div>
-                <div className="bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#1E1E2A] rounded-xl p-6 flex flex-col items-center text-center shadow-sm dark:shadow-none">
-                  <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2 flex items-center justify-center">
-                    <Clock className="w-6 h-6 mr-1" /> 12 hrs
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Teacher Hrs Saved/Wk</div>
-                </div>
-                <div className="bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#1E1E2A] rounded-xl p-6 flex flex-col items-center text-center shadow-sm dark:shadow-none">
-                  <div className="text-3xl font-bold text-orange-600 dark:text-orange-400 mb-2 flex items-center justify-center">
-                    <TrendingUp className="w-6 h-6 mr-1" /> +26%
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Placement Rate !</div>
-                </div>
-              </div>
-
-              {/* Charts Section */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
-                {/* Cost Comparison Chart */}
-                <div className="bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#1E1E2A] rounded-xl p-6 shadow-sm dark:shadow-none">
-                  <h2 className="text-sm font-bold flex items-center mb-1 text-slate-900 dark:text-white">
-                    <BookOpen className="w-4 h-4 mr-2 text-slate-500 dark:text-slate-400" /> Cost: Manual vs AI-Powered
-                  </h2>
-                  <p className="text-xs text-slate-500 mb-8 font-medium">Monthly cost comparison across 6 months. AI assessments scale without linear cost increase.</p>
-                  
-                  <div className="h-52 relative flex items-end justify-between pl-12 pr-4 pb-6 mt-4">
-                    {/* Y-axis labels */}
-                    <div className="absolute left-0 top-0 bottom-6 flex flex-col justify-between text-[10px] text-slate-500 font-medium">
-                      <span>₹1000K -</span>
-                      <span>₹750K -</span>
-                      <span>₹500K -</span>
-                      <span>₹250K -</span>
-                      <span>₹0K -</span>
-                    </div>
-                    
-                    {/* Grid lines */}
-                    <div className="absolute left-12 right-4 top-0 bottom-6 flex flex-col justify-between pointer-events-none">
-                      {[1,2,3,4,5].map((_, i) => (
-                        <div key={i} className="w-full border-t border-slate-100 dark:border-[#1E1E2A] h-0"></div>
-                      ))}
-                    </div>
-
-                    {/* Bars */}
-                    {chartData.map((data, idx) => (
-                      <div 
-                        key={idx} 
-                        className="relative group w-12 flex justify-center h-full items-end cursor-pointer"
-                        onMouseEnter={() => setHoveredMonth(data.month)}
-                        onMouseLeave={() => setHoveredMonth(null)}
-                      >
-                        {/* Red Manual Bar */}
-                        <div 
-                          className="absolute bottom-0 w-8 bg-rose-500 dark:bg-rose-600 rounded-t-sm transition-all duration-300" 
-                          style={{ height: `${(data.manual / 1000) * 100}%` }}
-                        ></div>
-                        {/* Green AI Bar (overlaid) */}
-                        <div 
-                          className="absolute bottom-0 w-4 bg-emerald-500 rounded-t-sm z-10 transition-all duration-300 shadow-[0_0_8px_rgba(16,185,129,0.3)]" 
-                          style={{ height: `${(data.ai / 1000) * 100}%` }}
-                        ></div>
-
-                        {/* X-axis label */}
-                        <div className="absolute -bottom-6 text-[10px] text-slate-500 font-bold w-full text-center">
-                          {data.month}
-                        </div>
-
-                        {/* Tooltip */}
-                        {hoveredMonth === data.month && (
-                          <div className="absolute bottom-full mb-3 bg-slate-800 dark:bg-white text-white dark:text-slate-900 text-xs p-2.5 rounded-lg shadow-xl z-20 whitespace-nowrap font-bold flex flex-col gap-1.5 items-center transform -translate-x-1/2 left-1/2">
-                            <span className="text-slate-400 dark:text-slate-500 text-[10px] uppercase tracking-wider">{data.month}</span>
-                            <span className="flex items-center text-rose-400 dark:text-rose-600"><span className="w-2 h-2 rounded-sm bg-rose-500 dark:bg-rose-600 mr-1.5"></span> ₹{data.manual}K</span>
-                            <span className="flex items-center text-emerald-400 dark:text-emerald-600"><span className="w-2 h-2 rounded-sm bg-emerald-500 mr-1.5"></span> ₹{data.ai}K</span>
-                            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-slate-800 dark:bg-white rotate-45" />
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <div className="flex items-center justify-center gap-6 mt-6 text-xs font-bold text-slate-500 dark:text-slate-400">
-                    <span className="flex items-center"><div className="w-3 h-3 bg-rose-500 dark:bg-rose-600 rounded-sm mr-2"></div> Manual Cost</span>
-                    <span className="flex items-center"><div className="w-3 h-3 bg-emerald-500 rounded-sm mr-2"></div> TestCrack Cost</span>
-                  </div>
-                </div>
-
-                {/* Measurable Outcomes */}
-                <div className="bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#1E1E2A] rounded-xl p-6 shadow-sm dark:shadow-none flex flex-col justify-center">
-                  <h2 className="text-sm font-bold flex items-center mb-1 text-slate-900 dark:text-white">
-                    <TrendingUp className="w-4 h-4 mr-2 text-emerald-600 dark:text-emerald-400" /> Measurable Outcomes
-                  </h2>
-                  <p className="text-xs text-slate-500 mb-8 font-medium">Before vs After adopting TestCrack — hard data for stakeholder review.</p>
-                  
-                  <div className="space-y-7">
-                    {outcomesData.map((item, idx) => (
-                      <div key={idx}>
-                        <div className="flex justify-between items-end mb-2">
-                          <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{item.label}</span>
-                          <div className="text-sm font-bold flex items-center gap-2">
-                            {item.manual && <span className="text-emerald-600 dark:text-emerald-500">{item.manual} <span className="text-slate-400 dark:text-slate-500 font-normal mx-1">→</span></span>}
-                            <span className="text-emerald-600 dark:text-emerald-400">{item.ai}</span>
-                          </div>
-                        </div>
-                        <div className="w-full bg-slate-100 dark:bg-[#1A1A24] rounded-full h-2 overflow-hidden border border-slate-200 dark:border-transparent">
-                          <div className="bg-emerald-500 h-2 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)]" style={{ width: item.width }}></div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
               {/* Teacher-AI Calibration Header */}
-              <div className="pt-4 mb-2">
+              <div className="pt-2 mb-2">
                 <h2 className="text-xl font-bold flex items-center mb-2 text-slate-900 dark:text-white">
                   <Eye className="w-5 h-5 mr-2 text-indigo-600 dark:text-indigo-400" /> Teacher-AI Calibration
                 </h2>
@@ -377,7 +202,7 @@ export default function AlignmentPage() {
                         </div>
                         <button 
                           onClick={() => handleReassess(student.name)}
-                          className="flex items-center text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-colors whitespace-nowrap bg-slate-50 dark:bg-[#1A1A24] border border-slate-200 dark:border-transparent px-3 py-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-[#2A2A3A]"
+                          className="flex items-center text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-colors bg-slate-50 dark:bg-[#1A1A24] border border-slate-200 dark:border-transparent px-3 py-1.5 rounded-md"
                         >
                           Re-assess <ChevronRight className="w-3.5 h-3.5 ml-1" />
                         </button>
@@ -405,42 +230,12 @@ export default function AlignmentPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
-                        <div className="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold px-3 py-1.5 rounded border border-emerald-200 dark:border-emerald-500/20 flex items-center max-w-sm">
+                        <div className="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold px-3 py-1.5 rounded border border-emerald-200 dark:border-emerald-500/20 flex items-center">
                           <TrendingUp className="w-3.5 h-3.5 mr-1.5 flex-shrink-0" /> {student.insight}
                         </div>
                       </div>
                     </div>
                   ))}
-                </div>
-              </div>
-
-              {/* Calibration Recommendations */}
-              <div className="pt-4">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center">
-                  <BookOpen className="w-4 h-4 mr-2 text-indigo-600 dark:text-indigo-400" /> Calibration Recommendations
-                </h3>
-                <div className="space-y-3.5 bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#1E1E2A] rounded-xl p-6 shadow-sm dark:shadow-none">
-                  <div className="flex items-start">
-                    <div className="bg-slate-100 dark:bg-[#1A1A24] border border-slate-200 dark:border-[#2A2A3A] text-slate-700 dark:text-slate-300 w-6 h-6 rounded flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0">1</div>
-                    <div>
-                      <span className="text-sm font-bold text-slate-900 dark:text-white">Add transfer-learning questions:</span>
-                      <span className="text-sm text-slate-600 dark:text-slate-400 ml-2 font-medium">Some students scored high by memorizing answers.</span>
-                    </div>
-                  </div>
-                  <div className="flex items-start">
-                    <div className="bg-slate-100 dark:bg-[#1A1A24] border border-slate-200 dark:border-[#2A2A3A] text-slate-700 dark:text-slate-300 w-6 h-6 rounded flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0">2</div>
-                    <div>
-                      <span className="text-sm font-bold text-slate-900 dark:text-white">Offer untimed assessments:</span>
-                      <span className="text-sm text-slate-600 dark:text-slate-400 ml-2 font-medium">Students with exam anxiety show up to 20% higher accuracy untimed.</span>
-                    </div>
-                  </div>
-                  <div className="flex items-start">
-                    <div className="bg-slate-100 dark:bg-[#1A1A24] border border-slate-200 dark:border-[#2A2A3A] text-slate-700 dark:text-slate-300 w-6 h-6 rounded flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0">3</div>
-                    <div>
-                      <span className="text-sm font-bold text-slate-900 dark:text-white">Monthly calibration sessions:</span>
-                      <span className="text-sm text-slate-600 dark:text-slate-400 ml-2 font-medium">Schedule teacher-AI alignment reviews. Current alignment: 42%.</span>
-                    </div>
-                  </div>
                 </div>
               </div>
 

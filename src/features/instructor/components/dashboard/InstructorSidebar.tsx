@@ -1,14 +1,11 @@
 import { 
   LayoutDashboard, 
-  BookOpen, 
-  Users, 
-  Settings, 
   LogOut, 
-  GraduationCap,
+  GraduationCap,ClipboardCheck,
   ChevronLeft,
-  ChevronRight,
-  Home,
-  FileText
+  ChevronRight,Laptop,
+  Home,GitMerge,Workflow,
+  Settings,BarChart3
 } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -26,16 +23,16 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
   const { signOut } = useAuth();
   const navigate = useNavigate();
   
-  const menuItems = [
-    { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/instructor/dashboard' },
-    { id: 'courses', icon: BookOpen, label: 'Course Management', path: '/instructor/coursemanagement' },
-    { id: 'assessments', icon: FileText, label: 'Student Assessments', path: '/instructor/assessments' },
-    { id: 'techprep', icon: FileText, label: 'Tech Prep', path: '/instructor/tech-pep' },
-    { id: 'alignment', icon: Users, label: 'Alignment', path: '/instructor/alignment' }, 
-    { id: 'report', icon: Users, label: 'Report', path: '/instructor/reports' }, 
-    { id: 'settings', icon: Settings, label: 'Settings', path: '/profile' },
-    { id: 'work', icon: Settings, label: 'Workflow', path: '/instructor/workflow' },
-  ];
+const menuItems = [
+  { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/instructor/dashboard' },
+  { id: 'courses', icon: GraduationCap, label: 'Course Management', path: '/instructor/coursemanagement' },
+  { id: 'assessments', icon: ClipboardCheck, label: 'Student Assessments', path: '/instructor/assessments' },
+  { id: 'techprep', icon: Laptop, label: 'Tech Prep', path: '/instructor/tech-pep' },
+  { id: 'alignment', icon: GitMerge, label: 'Alignment', path: '/instructor/alignment' }, 
+  { id: 'report', icon: BarChart3, label: 'Report', path: '/instructor/reports' }, 
+  { id: 'settings', icon: Settings, label: 'Settings', path: '/profile' },
+  { id: 'work', icon: Workflow, label: 'Workflow', path: '/instructor/workflow' },
+];
 
   const handleNavigation = (item: typeof menuItems[0]) => {
     navigate(item.path);

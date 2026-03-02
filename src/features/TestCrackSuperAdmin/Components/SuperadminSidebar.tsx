@@ -1,14 +1,16 @@
 import { 
   LayoutDashboard, 
-  BookOpen, 
+  Coins, 
+  LifeBuoy,
   Users, 
-  Settings, 
+  Building2,
   LogOut, 
   GraduationCap,
   ChevronLeft,
   ChevronRight,
   Home,
-  FileText
+  Activity,
+  CreditCard
 } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -26,15 +28,15 @@ export const SuperAdminSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
   const { signOut } = useAuth();
   const navigate = useNavigate();
   
-  const menuItems = [
-    { id: 'superadmin-dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/superadmin-dashboard' },
-    { id: 'institutes', icon: BookOpen, label: 'Institutes', path: '/Superadmin-institutes'  },
-    { id: 'superadmin-subscription', icon: FileText, label: 'Subscription', path: '/superadmin-subscription' },
-    { id: 'pricing-config', icon: FileText, label: 'Pricing-Config', path: '/superadmin-priceconfig' },
-    { id: 'support-tickets', icon: FileText, label: 'SupportTickets', path: '/superadmin-supportickets' },
-    { id: 'platform-analytics', icon: FileText, label: 'PlatformAnalytics', path: '/superadmin-platform' },
-    { id: 'users', icon: Users, label: 'All Users', path: '/superadmin-allusers' }, 
-  ];
+ const menuItems = [
+  { id: 'superadmin-dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/superadmin-dashboard' },
+  { id: 'institutes', icon: Building2, label: 'Institutes', path: '/Superadmin-institutes' },
+  { id: 'superadmin-subscription', icon: CreditCard, label: 'Subscription', path: '/superadmin-subscription' },
+  { id: 'pricing-config', icon: Coins, label: 'Pricing-Config', path: '/superadmin-priceconfig' },
+  { id: 'support-tickets', icon: LifeBuoy, label: 'Support Tickets', path: '/superadmin-supportickets' },
+  { id: 'platform-analytics', icon: Activity, label: 'Platform Analytics', path: '/superadmin-platform' },
+  { id: 'users', icon: Users, label: 'All Users', path: '/superadmin-allusers' }, 
+];
 
   const handleNavigation = (item: typeof menuItems[0]) => {
     navigate(item.path);

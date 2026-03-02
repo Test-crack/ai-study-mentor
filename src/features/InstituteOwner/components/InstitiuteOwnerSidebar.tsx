@@ -1,14 +1,11 @@
 import { 
   LayoutDashboard, 
-  BookOpen, 
-  Users, 
-  Settings, 
-  LogOut, 
-  GraduationCap,
-  ChevronLeft,
-  ChevronRight,
+BarChart3,
+  LogOut, TrendingUp,
+  GraduationCap,Lightbulb,
+  ChevronLeft,UserCheck,
+  ChevronRight,ClipboardCheck,Cpu,
   Home,
-  FileText
 } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -26,17 +23,15 @@ export const InstituteOwnerSidebar = ({ activeTab = 'dashboard', onTabChange, is
   const { signOut } = useAuth();
   const navigate = useNavigate();
   
-  const menuItems = [
-    { id: 'owner-dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/owner-dashboard' },
-    { id: 'performance', icon: BookOpen, label: 'Performancr Analytics', path: '/owner-performance'  },
-    { id: 'roi', icon: FileText, label: 'ROI Analytics', path: '/owner-roi' },
-    { id: 'insight', icon: FileText, label: 'Batch-Insight', path: '/owner-insight' },
-    { id: 'tutor-effect', icon: FileText, label: 'Tutor Effectiveness', path: '/owner-tuteffect' },
-    { id: 'strategic-reports', icon: FileText, label: 'Strategic Reports', path: '/owner-strategic' },
-    { id: 'calibration', icon: Users, label: 'AI Calibration', path: '/owner-calibration' }, 
-    // { id: 'report', icon: Settings, label: 'Report', path: '/institute-reports' },
-    // { id: 'settings', icon: Settings, label: 'Institute Settings', path: '/institute-Setting' },
-  ];
+const menuItems = [
+  { id: 'owner-dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/owner-dashboard' },
+  { id: 'performance', icon: BarChart3, label: 'Performance Analytics', path: '/owner-performance' },
+  { id: 'roi', icon: TrendingUp, label: 'ROI Analytics', path: '/owner-roi' },
+  { id: 'insight', icon: Lightbulb, label: 'Batch-Insight', path: '/owner-insight' },
+  { id: 'tutor-effect', icon: UserCheck, label: 'Tutor Effectiveness', path: '/owner-tuteffect' },
+  { id: 'strategic-reports', icon: ClipboardCheck, label: 'Strategic Reports', path: '/owner-strategic' },
+  { id: 'calibration', icon: Cpu, label: 'AI Calibration', path: '/owner-calibration' }, 
+];
 
   const handleNavigation = (item: typeof menuItems[0]) => {
     navigate(item.path);

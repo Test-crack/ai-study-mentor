@@ -251,7 +251,7 @@ export default function StudentReadingAssessmentPage() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300 font-sans text-slate-800 dark:text-slate-200">
       <StudentSidebar 
-        activeTab="assessment" 
+        activeTab="assessments" 
         onTabChange={(tab) => navigate(`/${profile?.role?.toLowerCase()}/${tab}`)}
         isCollapsed={isSidebarCollapsed} 
         toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
