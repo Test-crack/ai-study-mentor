@@ -1,23 +1,25 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   Play, Scissors, Mic, Square, Activity, Sparkles,
-  Radio, ChevronLeft, BarChart3, CheckCircle2, XCircle,
-  RotateCcw, AlertTriangle, Target, Zap
+  Radio, ChevronLeft, BarChart3, CheckCircle2,
+  RotateCcw, AlertTriangle, Target, Zap, Loader2
 } from 'lucide-react';
 import { StudentSidebar } from './dashboard/StudentSidebar';
 import { StudentTopbar } from './dashboard/StudentTopbar';
 import { useSpeechToText } from '../hooks/useSpeechToText';
-import { getRandomPrompt, ALL_BANDS } from '@/shared/data/anatomyPrompts';
-import type { AnatomyBand, AnatomyPrompt } from '@/shared/data/anatomyPrompts';
+import { fetchRandomVoicePrompt } from '../services/voiceLabService';
+import type { VoicePrompt } from '../services/voiceLabService';
 import { FILLER_SET } from '@/shared/data/fillers';
 import { cn } from '@/shared/utils';
-import { useAuth } from '@/features/auth/hooks/useAuth';
 import { toast } from 'sonner';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type ViewState = 'dashboard' | 'anatomy' | 'resonance';
 type AnatomyPhase = 'setup' | 'recording' | 'results';
 type WordStatus = 'clean' | 'filter' | 'weak';
+type AnatomyBand = 'Band 5' | 'Band 6' | 'Band 7' | 'Band 8';
+
+const ALL_BANDS: AnatomyBand[] = ['Band 5', 'Band 6', 'Band 7', 'Band 8'];
 
 interface DissectedWord { word: string; status: WordStatus; confidence?: number; }
 
@@ -129,7 +131,12 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
   // ── Phase state ──────────────────────────────────────────────────────────
   const [phase, setPhase] = useState<AnatomyPhase>('setup');
   const [selectedBand, setSelectedBand] = useState<AnatomyBand>('Band 7');
-  const [prompt, setPrompt] = useState<AnatomyPrompt>(() => getRandomPrompt('Band 7'));
+  const [prompt, setPrompt] = useState<VoicePrompt | null>(null);
+  const [isLoadingPrompt, setIsLoadingPrompt] = useState(false);
+  const seenPromptIdsRef = useRef<string[]>([]);
+
+  // Fetch initial prompt on mount
+  useEffect(() => { loadPrompt('Band 7'); }, []);
 
   // ── Recording state ───────────────────────────────────────────────────────
   const [recordingTime, setRecordingTime]     = useState(0);
@@ -175,7 +182,7 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
 
       if (isFinal && words.length > 0) {
         const promptTokens = new Set(
-          prompt.question.toLowerCase().split(/\s+/).map(w => w.replace(/[^a-z]/g, ''))
+          (prompt?.question ?? '').toLowerCase().split(/\s+/).map(w => w.replace(/[^a-z]/g, ''))
         );
 
         // Accumulate word confidence
@@ -197,7 +204,7 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
 
         setDissectedWords(prev => [...prev, ...newWords]);
       }
-    }, [prompt.question]),
+    }, [prompt]),
     onError: useCallback((err: string) => toast.error(err), []),
   });
 
@@ -232,10 +239,26 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
     return () => clearInterval(check);
   }, [isListening, isSTTReady, wordsArray.length, isCurrentlyPausing]);
 
+  // ── API prompt loader ─────────────────────────────────────────────────────
+  const loadPrompt = async (band: AnatomyBand, exclude: string[] = []) => {
+    setIsLoadingPrompt(true);
+    try {
+      const p = await fetchRandomVoicePrompt(band, 'anatomy', exclude);
+      setPrompt(p);
+      // Track seen ID to avoid repeats until all are shown
+      seenPromptIdsRef.current = [...seenPromptIdsRef.current, p.id].slice(-20);
+    } catch (err) {
+      toast.error('Could not load prompt. Check your connection.');
+    } finally {
+      setIsLoadingPrompt(false);
+    }
+  };
+
   // ── Handlers ───────────────────────────────────────────────────────────────
   const handleBandSelect = (band: AnatomyBand) => {
     setSelectedBand(band);
-    setPrompt(getRandomPrompt(band));
+    seenPromptIdsRef.current = [];
+    loadPrompt(band);
   };
 
   const handleStartRecording = () => {
@@ -284,7 +307,7 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
   const handleTryAgain = () => {
     setResults(null);
     setPhase('setup');
-    setPrompt(getRandomPrompt(selectedBand));
+    loadPrompt(selectedBand, seenPromptIdsRef.current);
   };
 
   const formatTime = (s: number) =>
@@ -354,36 +377,60 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
 
           {/* Prompt card */}
           <div className="bg-white dark:bg-[#0c0c0e] border border-slate-200 dark:border-[#27272a] rounded-2xl p-8 shadow-sm">
-            <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center justify-between mb-6">
               <p className="text-[11px] font-bold tracking-widest uppercase text-slate-400 dark:text-[#52525b] flex items-center gap-2">
                 <Target size={12} /> Your Speaking Prompt
               </p>
               <button
-                onClick={() => setPrompt(getRandomPrompt(selectedBand))}
-                className="text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1"
+                onClick={() => loadPrompt(selectedBand, seenPromptIdsRef.current)}
+                disabled={isLoadingPrompt || !prompt}
+                className="text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1 disabled:opacity-50"
               >
-                <RotateCcw size={11} /> New prompt
+                {isLoadingPrompt ? <Loader2 size={11} className="animate-spin" /> : <RotateCcw size={11} />} New prompt
               </button>
             </div>
-            <p className="text-slate-900 dark:text-white text-xl md:text-2xl font-bold leading-relaxed mb-5">
-              "{prompt.question}"
-            </p>
-            <div className="flex flex-wrap items-center gap-4 p-4 bg-purple-500/5 border border-purple-500/10 rounded-xl">
-              <div className="flex items-center gap-2 text-[11px] text-purple-600 dark:text-purple-400 font-bold">
-                <Zap size={12} /> Target: {prompt.targetWpm.min}–{prompt.targetWpm.max} WPM
+
+            {/* Loading skeleton */}
+            {(isLoadingPrompt || !prompt) ? (
+              <div className="space-y-4 animate-pulse">
+                <div className="h-9 bg-slate-100 dark:bg-[#1f1f23] rounded-xl w-full" />
+                <div className="h-9 bg-slate-100 dark:bg-[#1f1f23] rounded-xl w-4/5" />
+                <div className="h-16 bg-slate-50 dark:bg-[#121214] rounded-xl mt-2 border border-slate-100 dark:border-[#27272a]" />
               </div>
-              <div className="text-[11px] text-slate-500 dark:text-[#a1a1aa]">
-                💡 {prompt.hint}
-              </div>
-            </div>
+            ) : (
+              <>
+                {/* Big prominent quote */}
+                <div className="border-l-4 border-purple-500 pl-5 mb-6">
+                  <p className="text-slate-900 dark:text-white text-2xl md:text-3xl font-extrabold leading-snug tracking-tight">
+                    {prompt.question}
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-start gap-3">
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-500/10 border border-purple-500/20 rounded-full text-[11px] text-purple-600 dark:text-purple-300 font-bold">
+                    <Zap size={11} /> {prompt.targetWpmMin}–{prompt.targetWpmMax} WPM target
+                  </div>
+                  {prompt.hint && (
+                    <div className="flex-1 text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                      💡 {prompt.hint}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
 
           {/* Start button */}
           <button
             onClick={handleStartRecording}
-            className="flex items-center justify-center gap-3 w-full py-5 bg-purple-600 hover:bg-purple-500 text-white rounded-2xl font-bold text-lg transition-all shadow-xl shadow-purple-600/25 active:scale-[.99]"
+            disabled={!prompt || isLoadingPrompt}
+            className={cn(
+              'flex items-center justify-center gap-3 w-full py-5 rounded-2xl font-bold text-lg transition-all shadow-xl active:scale-[.99]',
+              prompt && !isLoadingPrompt
+                ? 'bg-purple-600 hover:bg-purple-500 text-white shadow-purple-600/25'
+                : 'bg-slate-200 dark:bg-[#1f1f23] text-slate-400 cursor-not-allowed shadow-none'
+            )}
           >
-            <Mic size={22} /> Start Speech Analysis
+            <Mic size={22} /> {isLoadingPrompt ? 'Loading prompt...' : 'Start Speech Analysis'}
           </button>
         </div>
       )}
@@ -396,17 +443,19 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
 
           {/* Live stat cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <LiveStatCard label="WPM"    value={currentWPM}   good={currentWPM >= prompt.targetWpm.min && currentWPM <= prompt.targetWpm.max} />
+            <LiveStatCard label="WPM"    value={currentWPM}   good={!!prompt && currentWPM >= prompt.targetWpmMin && currentWPM <= prompt.targetWpmMax} />
             <LiveStatCard label="Words"  value={wordsArray.length} />
             <LiveStatCard label="Fillers" value={fillerCount}  good={fillerCount === 0} bad={fillerCount > 3} />
             <LiveStatCard label="Pauses" value={pauseCount}   good={pauseCount <= 1}   bad={pauseCount > 4} />
           </div>
 
-          {/* Prompt reminder */}
-          <div className="bg-slate-50 dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl p-5">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Prompt</p>
-            <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed opacity-80">"{prompt.question}"</p>
-          </div>
+          {/* Prompt reminder — accent banner */}
+          {prompt && (
+            <div className="flex items-start gap-3 bg-purple-500/5 border border-purple-500/15 rounded-xl px-5 py-4">
+              <div className="w-1 self-stretch rounded-full bg-purple-500 shrink-0" />
+              <p className="text-slate-800 dark:text-slate-200 text-sm font-semibold leading-relaxed">{prompt.question}</p>
+            </div>
+          )}
 
           {/* Live transcript */}
           <div className="bg-[#0c0c0e] rounded-2xl border border-[#1f1f23] shadow-xl overflow-hidden">
@@ -418,7 +467,7 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
               <span className="text-xs font-mono text-slate-500">{formatTime(recordingTime)}</span>
             </div>
 
-            <div className="min-h-[180px] p-6 flex flex-wrap content-start gap-x-1 gap-y-2">
+            <div className="min-h-[200px] p-6 flex flex-wrap content-start gap-x-2 gap-y-3">
               {isListening && !isSTTReady && (
                 <div className="w-full h-full flex flex-col items-center justify-center text-purple-400 animate-pulse gap-2 py-8">
                   <Sparkles className="w-8 h-8" />
@@ -426,16 +475,19 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
                 </div>
               )}
               {isSTTReady && dissectedWords.length === 0 && (
-                <div className="w-full flex flex-col items-center justify-center text-emerald-500 py-8 gap-2 animate-bounce">
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-                  <span className="text-sm font-bold">READY — start speaking now!</span>
+                <div className="w-full flex flex-col items-center justify-center py-10 gap-3">
+                  <div className="relative">
+                    <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                    <div className="w-3 h-3 rounded-full bg-emerald-500 animate-ping absolute inset-0" />
+                  </div>
+                  <span className="text-sm font-bold text-emerald-400 tracking-wide">LIVE — start speaking now</span>
                 </div>
               )}
               {dissectedWords.map((w, i) => (
                 <WordPill key={i} word={w.word} status={w.status} />
               ))}
               {isListening && dissectedWords.length > 0 && (
-                <span className="animate-pulse border-r-2 border-purple-500 h-5 self-center" />
+                <span className="animate-pulse border-r-2 border-purple-400 h-6 self-center" />
               )}
             </div>
           </div>
@@ -478,9 +530,23 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
             <ScoreRing label="Delivery"      score={results.deliveryScore}      color="green"  />
           </div>
 
+          {/* Dimension explanation strip */}
+          <div className="grid grid-cols-3 gap-3 -mt-2">
+            {([
+              { label: 'Confidence', sub: 'Fluency · Pauses · Fillers', color: 'text-purple-500' },
+              { label: 'Pronunciation', sub: 'Word clarity · STT confidence', color: 'text-blue-500' },
+              { label: 'Delivery', sub: 'Pace · Rhythm · Tempo', color: 'text-emerald-500' },
+            ] as const).map(d => (
+              <div key={d.label} className="text-center">
+                <p className={`text-[10px] font-bold uppercase tracking-widest ${d.color}`}>{d.label}</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">{d.sub}</p>
+              </div>
+            ))}
+          </div>
+
           {/* Breakdown stats */}
           <div className="grid grid-cols-3 gap-4">
-            <MetricCard icon={<Activity size={14}/>} label="WPM"    value={results.wpm}            target={`${prompt.targetWpm.min}–${prompt.targetWpm.max}`} />
+            <MetricCard icon={<Activity size={14}/>} label="WPM"    value={results.wpm}            target={prompt ? `${prompt.targetWpmMin}–${prompt.targetWpmMax}` : '130–160'} />
             <MetricCard icon={<Target size={14}/>}   label="Pauses" value={results.pauseCount}      target="< 3 ideal" />
             <MetricCard icon={<AlertTriangle size={14}/>} label="Fillers" value={results.fillersDetected} target="0 ideal" />
           </div>
@@ -508,23 +574,23 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
             </div>
           )}
 
-          {/* Word dissection (mini) */}
+          {/* Word dissection */}
           {dissectedWords.length > 0 && (
-            <div className="bg-slate-50 dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-2xl p-6">
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200 dark:border-[#27272a]">
-                <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Word-Level Dissection</h3>
-                <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                  <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500"/><span>Clean</span></span>
-                  <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-orange-500"/><span>Filler</span></span>
-                  <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-yellow-500"/><span>Unclear</span></span>
+            <div className="bg-[#060608] border border-[#1f1f23] rounded-2xl overflow-hidden">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-[#1f1f23]">
+                <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Word-Level Dissection</h3>
+                <div className="flex items-center gap-4">
+                  <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400"><span className="w-2 h-2 rounded-full bg-emerald-500"/>Clean</span>
+                  <span className="flex items-center gap-1.5 text-[10px] font-bold text-orange-400"><span className="w-2 h-2 rounded-full bg-orange-500"/>Filler</span>
+                  <span className="flex items-center gap-1.5 text-[10px] font-bold text-yellow-400"><span className="w-2 h-2 rounded-full bg-yellow-500"/>Unclear</span>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {dissectedWords.slice(0, 80).map((w, i) => (
+              <div className="p-6 flex flex-wrap gap-x-2 gap-y-3">
+                {dissectedWords.slice(0, 100).map((w, i) => (
                   <WordPill key={i} word={w.word} status={w.status} />
                 ))}
-                {dissectedWords.length > 80 && (
-                  <span className="text-xs text-slate-400 self-center">+{dissectedWords.length - 80} more</span>
+                {dissectedWords.length > 100 && (
+                  <span className="text-xs text-slate-500 self-center">+{dissectedWords.length - 100} more</span>
                 )}
               </div>
             </div>
@@ -675,14 +741,26 @@ function ResonanceView({ onExit, onNavigate, isSidebarCollapsed }: { onExit: () 
 
 function WordPill({ word, status }: { word: string; status: WordStatus }) {
   const cfg = {
-    clean:  { text: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-500/10 dark:bg-emerald-500/10', border: 'border-emerald-500/20' },
-    filter: { text: 'text-orange-600 dark:text-orange-400',   bg: 'bg-orange-500/10',   border: 'border-orange-500/20' },
-    weak:   { text: 'text-yellow-600 dark:text-yellow-400',   bg: 'bg-yellow-500/10',   border: 'border-yellow-500/20' },
+    clean:  {
+      text: 'text-emerald-300',
+      bg:   'bg-emerald-500/20',
+      border: 'border-emerald-500/40',
+    },
+    filter: {
+      text: 'text-orange-300',
+      bg:   'bg-orange-500/25',
+      border: 'border-orange-500/50',
+    },
+    weak: {
+      text: 'text-yellow-300',
+      bg:   'bg-yellow-500/20',
+      border: 'border-yellow-500/40',
+    },
   }[status];
 
   return (
     <span className={cn(
-      'px-2.5 py-1 rounded-lg text-sm font-semibold border transition-all',
+      'px-3 py-1.5 rounded-lg text-base font-semibold border transition-all select-none',
       cfg.bg, cfg.text, cfg.border
     )}>
       {word}
