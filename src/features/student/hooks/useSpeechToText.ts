@@ -1,8 +1,13 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useWebSocket } from '@/shared/context/WebSocketContext';
 
+export interface WordChunk {
+    word: string;
+    confidence: number; // 0–1 from Google STT
+}
+
 interface UseSpeechToTextOptions {
-    onTranscript?: (transcript: string, isFinal: boolean) => void;
+    onTranscript?: (transcript: string, isFinal: boolean, words: WordChunk[]) => void;
     onError?: (error: string) => void;
 }
 
@@ -22,8 +27,6 @@ export function useSpeechToText({ onTranscript, onError }: UseSpeechToTextOption
         return (transcript + " " + interimTranscript).trim();
     }, [transcript, interimTranscript]);
 
-    // We use a ref to track isListening for the cleanup function
-    // to avoid re-running the cleanup effect when isListening changes.
     const isListeningRef = useRef(false);
     useEffect(() => {
         isListeningRef.current = isListening;
@@ -43,11 +46,13 @@ export function useSpeechToText({ onTranscript, onError }: UseSpeechToTextOption
                     setIsSTTReady(true);
                     setStatus('LISTENING');
 
-                    // Start recording only after backend is ready
                     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'inactive') {
                         mediaRecorderRef.current.start(250);
                     }
                 } else if (data.type === "transcript") {
+                    // words[] is populated for final results (from enableWordConfidence)
+                    const words: WordChunk[] = data.words ?? [];
+
                     if (data.isFinal) {
                         setTranscript(prev => (prev + " " + data.transcript).trim());
                         setInterimTranscript('');
@@ -56,14 +61,14 @@ export function useSpeechToText({ onTranscript, onError }: UseSpeechToTextOption
                     }
 
                     if (onTranscript) {
-                        onTranscript(data.transcript, data.isFinal);
+                        onTranscript(data.transcript, data.isFinal, words);
                     }
                 } else if (data.error) {
                     setStatus('ERROR');
                     if (onError) onError(data.error);
                 }
             } catch (e) {
-                // Ignore non-JSON messages (likely binary feedback or other app data)
+                // Ignore non-JSON messages (binary feedback etc.)
             }
         };
 
@@ -81,7 +86,6 @@ export function useSpeechToText({ onTranscript, onError }: UseSpeechToTextOption
             streamRef.current.getTracks().forEach(track => track.stop());
         }
 
-        // Use the ref here to check if we should send STOP_STT
         if (isListeningRef.current) {
             console.log("📤 useSpeechToText: Sending STOP_STT during cleanup...");
             sendMessage(JSON.stringify({ type: "STOP_STT" }));
@@ -90,7 +94,7 @@ export function useSpeechToText({ onTranscript, onError }: UseSpeechToTextOption
         setIsListening(false);
         setIsSTTReady(false);
         setStatus('IDLE');
-    }, [sendMessage]); // Dependency list is now stable!
+    }, [sendMessage]);
 
     const startListening = useCallback(async () => {
         try {
@@ -107,16 +111,12 @@ export function useSpeechToText({ onTranscript, onError }: UseSpeechToTextOption
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             streamRef.current = stream;
 
-            // 1. Tell backend to start Google STT stream
             console.log("📤 useSpeechToText: Sending START_STT...");
             sendMessage(JSON.stringify({ type: "START_STT" }));
 
             setIsListening(true);
 
-            // 2. Prepare MediaRecorder but WAIT for STT_READY to start sending data
-            const mediaRecorder = new MediaRecorder(stream, {
-                mimeType: 'audio/webm'
-            });
+            const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
             mediaRecorderRef.current = mediaRecorder;
 
             mediaRecorder.ondataavailable = (event) => {
@@ -125,7 +125,7 @@ export function useSpeechToText({ onTranscript, onError }: UseSpeechToTextOption
                 }
             };
 
-            // mediaRecorder.start(250) is called in handleMessage when STT_READY is received
+            // mediaRecorder.start(250) is called when STT_READY arrives
 
         } catch (err) {
             console.error('Error starting STT:', err);
@@ -138,13 +138,13 @@ export function useSpeechToText({ onTranscript, onError }: UseSpeechToTextOption
         cleanup();
     }, [cleanup]);
 
-    // Handle component unmount ONLY
+    // Cleanup on unmount only
     useEffect(() => {
         return () => {
             console.log("🔌 useSpeechToText: Hook unmounting...");
             cleanup();
         };
-    }, []); // Empty dependency array ensures this ONLY runs on unmount
+    }, []);
 
     return {
         isListening,
