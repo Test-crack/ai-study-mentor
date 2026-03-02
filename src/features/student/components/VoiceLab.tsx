@@ -2,11 +2,13 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import {
   Play, Scissors, Mic, Square, Activity, Sparkles,
   Radio, ChevronLeft, BarChart3, CheckCircle2,
-  RotateCcw, AlertTriangle, Target, Zap, Loader2
+  RotateCcw, AlertTriangle, Target, Zap, Loader2, StopCircle
 } from 'lucide-react';
 import { StudentSidebar } from './dashboard/StudentSidebar';
 import { StudentTopbar } from './dashboard/StudentTopbar';
 import { useSpeechToText } from '../hooks/useSpeechToText';
+import { useVocalResonance } from '../hooks/useVocalResonance';
+import ResonanceCanvas from './ResonanceCanvas';
 import { fetchRandomVoicePrompt } from '../services/voiceLabService';
 import type { VoicePrompt } from '../services/voiceLabService';
 import { FILLER_SET } from '@/shared/data/fillers';
@@ -72,7 +74,6 @@ export default function VoiceLab() {
             {activeTab === 'dashboard' && <HomeView onNavigate={setActiveTab} />}
             {activeTab === 'resonance' && (
               <ResonanceView
-                isSidebarCollapsed={isSidebarCollapsed}
                 onExit={() => setActiveTab('dashboard')}
                 onNavigate={setActiveTab}
               />
@@ -399,9 +400,9 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
               </div>
             ) : (
               <>
-                {/* Big prominent quote */}
-                <div className="border-l-4 border-purple-500 pl-5 mb-6">
-                  <p className="text-slate-900 dark:text-white text-2xl md:text-3xl font-extrabold leading-snug tracking-tight">
+                {/* Prompt quote */}
+                <div className="border-l-4 border-purple-500 pl-5 mb-5">
+                  <p className="text-slate-900 dark:text-white text-xl md:text-2xl font-semibold leading-relaxed">
                     {prompt.question}
                   </p>
                 </div>
@@ -618,117 +619,283 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// RESONANCE VIEW (unchanged from original — kept as-is)
+// RESONANCE VIEW — Live mic DSP implementation
 // ─────────────────────────────────────────────────────────────────────────────
-function ResonanceView({ onExit, onNavigate, isSidebarCollapsed }: { onExit: () => void, onNavigate: (view: ViewState) => void, isSidebarCollapsed: boolean }) {
-  const [activeIdx, setActiveIdx] = useState(0);
-  const [phraseProgress, setPhraseProgress] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [unlocked, setUnlocked] = useState<number[]>([]);
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
-  const [isFinalized, setIsFinalized] = useState(false);
-  const [metrics, setMetrics] = useState({ res:0, pitch:0, tempo:0, stress:0, over:0 });
+function ResonanceView({ onExit, onNavigate }: { onExit: () => void, onNavigate: (view: ViewState) => void }) {
+  const [selectedBand, setSelectedBand] = useState<AnatomyBand>('Band 7');
+  const [prompt, setPrompt]             = useState<VoicePrompt | null>(null);
+  const [isLoadingPrompt, setIsLoadingPrompt] = useState(false);
+  const seenPromptIdsRef = useRef<string[]>([]);
+  const [showResults, setShowResults]   = useState(false);
 
-  useEffect(() => {
-    let interval: any;
-    if (isPlaying && !isFinalized) {
-      interval = setInterval(() => setPhraseProgress(p => p >= 100 ? 100 : p + 1.5), 50);
+  const {
+    start, stop, isListening,
+    metrics, heatmapHistory, pitchHistory, finalResults,
+  } = useVocalResonance({ band: selectedBand });
+
+  // Load initial prompt
+  useEffect(() => { loadPrompt(selectedBand); }, []);
+
+  const loadPrompt = async (band: AnatomyBand, exclude: string[] = []) => {
+    setIsLoadingPrompt(true);
+    try {
+      const p = await fetchRandomVoicePrompt(band, 'resonance', exclude);
+      setPrompt(p);
+      seenPromptIdsRef.current = [...seenPromptIdsRef.current, p.id].slice(-20);
+    } catch {
+      toast.error('Could not load prompt.');
+    } finally {
+      setIsLoadingPrompt(false);
     }
-    return () => clearInterval(interval);
-  }, [isPlaying, isFinalized]);
+  };
 
-  useEffect(() => {
-    if (phraseProgress >= 100 && !unlocked.includes(activeIdx)) {
-      setUnlocked(prev => [...prev, activeIdx]);
-      setToastMsg("Power frequency matched! Level unlocked.");
-      setTimeout(() => {
-        setToastMsg(null);
-        if (activeIdx < RESONANCE_PHRASES.length - 1) { setActiveIdx(i => i+1); setPhraseProgress(0); }
-        else { setIsFinalized(true); setToastMsg("Demo complete! Your Vocal Resonance profile is ready."); }
-      }, 1500);
+  const handleBandSelect = (band: AnatomyBand) => {
+    setSelectedBand(band);
+    seenPromptIdsRef.current = [];
+    loadPrompt(band);
+  };
+
+  const handleStart = async () => {
+    if (!prompt) return;
+    setShowResults(false);
+    try {
+      await start();
+    } catch {
+      toast.error('Microphone access denied. Please allow mic permission.');
     }
-  }, [phraseProgress, activeIdx, unlocked]);
+  };
 
-  useEffect(() => {
-    const target = RESONANCE_PHRASES[activeIdx].scores;
-    const factor = Math.min(phraseProgress / 90, 1);
-    setMetrics({
-      res: Math.floor(target.res*factor+(Math.random()*2)),
-      pitch: Math.floor(target.pitch*factor+(Math.random()*2)),
-      tempo: Math.floor(target.tempo*factor+(Math.random()*2)),
-      stress: Math.floor(target.stress*factor+(Math.random()*2)),
-      over: Math.floor(target.over*factor+(Math.random()*2))
-    });
-  }, [phraseProgress, activeIdx]);
+  const handleStop = () => {
+    stop();
+    setShowResults(true);
+  };
 
-  const totalBarWidth = (activeIdx * 20) + (phraseProgress * 0.2);
+  const handleTryAgain = () => {
+    setShowResults(false);
+    loadPrompt(selectedBand, seenPromptIdsRef.current);
+  };
+
+  // Grade label helper
+  const grade = (s: number) => s >= 85 ? 'A' : s >= 70 ? 'B' : s >= 55 ? 'C' : 'D';
+  const gradeColor = (s: number) => s >= 85 ? 'text-emerald-400' : s >= 70 ? 'text-blue-400' : s >= 55 ? 'text-yellow-400' : 'text-rose-400';
 
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in duration-500 relative pb-40">
-      <div className="flex justify-between items-center mb-2">
+    <div className="flex flex-col gap-5 animate-in fade-in duration-500 pb-10">
+
+      {/* Nav */}
+      <div className="flex justify-between items-center">
         <button onClick={onExit} className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-purple-600 transition-colors">
           <ChevronLeft size={18}/> Back to Dashboard
         </button>
-        <button onClick={() => onNavigate('anatomy')} className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-purple-600 hover:text-white transition-all border border-slate-200 dark:border-slate-700 shadow-sm">
-          <BarChart3 size={14}/> Anatomy Analytics
+        <button onClick={() => onNavigate('anatomy')} className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-purple-600 hover:text-white transition-all border border-slate-200 dark:border-slate-700">
+          <BarChart3 size={14}/> Anatomy
         </button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 bg-slate-50 dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl p-6 md:divide-x divide-slate-200 dark:divide-[#27272a] shadow-sm">
-        {[['RESONANCE',metrics.res,'text-purple-600 dark:text-purple-400'],['PITCH',metrics.pitch,'text-green-600 dark:text-green-400'],['TEMPO',metrics.tempo,'text-yellow-600 dark:text-yellow-400'],['STRESS',metrics.stress,'text-purple-600 dark:text-purple-400'],['OVERALL',metrics.over,'text-slate-900 dark:text-white']].map(([t,v,c]:any)=>(
-          <div key={t} className="flex flex-col items-center justify-center p-4">
-            <span className={`text-2xl md:text-3xl font-black mb-2 ${c}`}>{v}%</span>
-            <span className="text-[9px] font-bold tracking-widest text-slate-400 dark:text-[#52525b] uppercase">{t}</span>
+      {/* Header */}
+      <div>
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[11px] font-bold uppercase tracking-widest mb-2">
+          <Radio size={12} /> Vocal Resonance
+        </div>
+        <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Live Voice Analysis</h2>
+        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Speak the phrase — your pitch, resonance, stress and tempo are measured in real time.</p>
+      </div>
+
+      {/* Band selector */}
+      <div className="flex flex-wrap gap-2">
+        {ALL_BANDS.map(band => (
+          <button
+            key={band}
+            onClick={() => handleBandSelect(band)}
+            disabled={isListening}
+            className={cn(
+              'px-4 py-2 rounded-xl font-bold text-sm transition-all border disabled:opacity-40',
+              selectedBand === band
+                ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-600/20'
+                : 'bg-white dark:bg-[#09090b] border-slate-200 dark:border-[#27272a] text-slate-500 hover:border-indigo-500/50'
+            )}
+          >{band}</button>
+        ))}
+      </div>
+
+      {/* Prompt banner */}
+      <div className="bg-white dark:bg-[#0c0c0e] border border-slate-200 dark:border-[#27272a] rounded-2xl p-6 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-[11px] font-bold tracking-widest uppercase text-slate-400 flex items-center gap-2">
+            <Mic size={11}/> Speak This Phrase
+          </p>
+          <button
+            onClick={() => loadPrompt(selectedBand, seenPromptIdsRef.current)}
+            disabled={isLoadingPrompt || isListening}
+            className="text-[11px] font-bold text-indigo-500 hover:underline flex items-center gap-1 disabled:opacity-40"
+          >
+            {isLoadingPrompt ? <Loader2 size={11} className="animate-spin" /> : <RotateCcw size={11} />} New
+          </button>
+        </div>
+
+        {isLoadingPrompt || !prompt ? (
+          <div className="space-y-3 animate-pulse">
+            <div className="h-8 bg-slate-100 dark:bg-[#1f1f23] rounded-xl w-full" />
+            <div className="h-8 bg-slate-100 dark:bg-[#1f1f23] rounded-xl w-3/4" />
+          </div>
+        ) : (
+          <>
+            <div className="border-l-4 border-indigo-500 pl-4 mb-4">
+              <p className="text-slate-900 dark:text-white text-xl md:text-2xl font-semibold leading-relaxed">{prompt.question}</p>
+            </div>
+            <p className="text-sm text-slate-500 dark:text-slate-400">💡 {prompt.hint}</p>
+          </>
+        )}
+      </div>
+
+      {/* Live metrics strip */}
+      <div className="grid grid-cols-4 gap-3">
+        {([
+          { label: 'Pitch',     value: metrics.pitch,     sub: `${metrics.pitchHz}Hz`,     color: 'text-violet-400',  ring: '#7c3aed' },
+          { label: 'Resonance', value: metrics.resonance, sub: `${metrics.centroidHz}Hz`,  color: 'text-indigo-400',  ring: '#4f46e5' },
+          { label: 'Stress',    value: metrics.stress,    sub: 'dynamics',                 color: 'text-pink-400',    ring: '#db2777' },
+          { label: 'Tempo',     value: metrics.tempo,     sub: 'rhythm',                   color: 'text-cyan-400',    ring: '#0891b2' },
+        ] as const).map(m => (
+          <div key={m.label} className="bg-[#0c0c0e] border border-[#27272a] rounded-2xl p-4 text-center">
+            <div className={`text-3xl font-black ${m.color} tabular-nums leading-none`}>{isListening || showResults ? m.value : '--'}</div>
+            <div className="text-[10px] text-slate-500 mt-0.5">{m.sub}</div>
+            <div className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mt-1">{m.label}</div>
           </div>
         ))}
       </div>
 
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <span className="text-[10px] text-purple-600 dark:text-purple-400 font-bold uppercase tracking-widest">Speak This Phrase</span>
-          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">{RESONANCE_PHRASES[activeIdx].text}</h2>
+      {/* Canvas heatmap */}
+      <div className="bg-[#040406] border border-[#1f1f23] rounded-2xl overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-[#1f1f23]">
+          <div className="flex items-center gap-2">
+            <div className={cn('w-2 h-2 rounded-full', isListening ? 'bg-rose-500 animate-ping' : 'bg-slate-600')} />
+            <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Vocal Frequency Heatmap</span>
+          </div>
+          <div className="flex items-center gap-3 text-[10px] text-slate-500 font-bold">
+            <span className="flex items-center gap-1"><span className="w-3 h-1.5 rounded-full inline-block bg-white/80" /> White = pitch</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-1.5 rounded-full inline-block bg-cyan-400" /> Cyan = mid</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-1.5 rounded-full inline-block bg-amber-400" /> Amber = loud</span>
+          </div>
         </div>
+        <div className="p-3">
+          {!isListening && heatmapHistory.length === 0 ? (
+            <div className="h-48 flex flex-col items-center justify-center gap-2 text-slate-700">
+              <Radio size={28} className="opacity-30" />
+              <span className="text-sm font-bold">Start speaking to see your vocal spectrum</span>
+            </div>
+          ) : (
+            <ResonanceCanvas
+              heatmapHistory={heatmapHistory}
+              pitchHistory={pitchHistory}
+              height={200}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Overall score pulse */}
+      {isListening && (
+        <div className="flex items-center justify-between bg-indigo-500/5 border border-indigo-500/15 rounded-2xl px-6 py-4">
+          <span className="text-[11px] font-bold uppercase tracking-widest text-indigo-400">Live Overall Score</span>
+          <span className="text-4xl font-black text-white tabular-nums">{metrics.overall}<span className="text-lg text-indigo-400">%</span></span>
+        </div>
+      )}
+
+      {/* Start / Stop */}
+      {!showResults && (
         <button
-          onClick={() => { if(isFinalized){setActiveIdx(0);setPhraseProgress(0);setUnlocked([]);setIsFinalized(false);}else{setIsPlaying(!isPlaying);} }}
-          className={`w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all shadow-lg ${isFinalized?'bg-purple-600 text-white':isPlaying?'bg-red-500/10 text-red-600 dark:text-red-500 border border-red-500/20':'bg-green-500/10 text-green-600 dark:text-green-500 border border-green-500/20'}`}
+          onClick={isListening ? handleStop : handleStart}
+          disabled={!prompt || isLoadingPrompt}
+          className={cn(
+            'flex items-center justify-center gap-3 w-full py-5 rounded-2xl font-bold text-lg transition-all shadow-xl active:scale-[.99] disabled:opacity-40 disabled:cursor-not-allowed',
+            isListening
+              ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/25'
+              : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/25'
+          )}
         >
-          {isFinalized?<><RotateCcw size={16}/>Restart</>:isPlaying?<><Square size={16} fill="currentColor"/>Stop</>:<><Play size={16} fill="currentColor"/>Start</>}
+          {isListening
+            ? <><StopCircle size={22} /> Stop & See Results</>
+            : <><Mic size={22} /> Start Voice Analysis</>}
         </button>
-      </div>
+      )}
 
-      <div className="bg-slate-50 dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-2xl p-4 md:p-8">
-        <h3 className="text-[11px] font-bold tracking-widest uppercase text-slate-500 dark:text-[#a1a1aa] mb-8">Vocal Frequency Heatmap</h3>
-        <div className="h-32 flex items-center gap-[2px] md:gap-[4px] w-full bg-slate-100 dark:bg-[#070708] rounded-xl p-4 md:p-6 border border-slate-200 dark:border-[#1f1f23] relative overflow-hidden">
-          {Array.from({length:60}).map((_,i)=>{
-            const masterH=Math.sin(i*0.15+activeIdx)*35+45;
-            const active=(i/60)*100<phraseProgress;
-            return (
-              <div key={i} className="relative flex-1 h-full flex items-center justify-center">
-                <div className="absolute w-full rounded-full bg-slate-300 dark:bg-white/5" style={{height:`${masterH}%`}}/>
-                {active&&<div className={`absolute w-full rounded-full z-10 ${Math.random()>0.3?'bg-yellow-400 dark:bg-[#fde047] shadow-[0_0_8px_#fde047]':'bg-red-500'}`} style={{height:`${masterH+(Math.random()*4-2)}%`}}/>}
+      {/* Results overlay */}
+      {showResults && finalResults && (
+        <div className="flex flex-col gap-5 animate-in slide-in-from-bottom-4 duration-500">
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[11px] font-bold uppercase tracking-widest mb-2">
+              <Activity size={12}/> Analysis Complete
+            </div>
+            <h3 className="text-2xl font-extrabold text-white">Your Vocal Resonance</h3>
+            <p className="text-slate-400 text-sm mt-1">Band target: {selectedBand} · Session: {finalResults.durationSec}s</p>
+          </div>
+
+          {/* 4 score rings */}
+          <div className="grid grid-cols-4 gap-3">
+            {([
+              { label: 'Pitch',     score: finalResults.pitch,     color: 'purple' },
+              { label: 'Resonance', score: finalResults.resonance, color: 'blue'   },
+              { label: 'Stress',    score: finalResults.stress,    color: 'green'  },
+              { label: 'Tempo',     score: finalResults.tempo,     color: 'green'  },
+            ] as const).map(r => (
+              <ScoreRing key={r.label} label={r.label} score={r.score} color={r.color} />
+            ))}
+          </div>
+
+          {/* Overall big score */}
+          <div className="bg-gradient-to-br from-indigo-600/20 to-purple-600/10 border border-indigo-500/20 rounded-2xl p-6 text-center">
+            <div className="text-[11px] font-bold uppercase tracking-widest text-indigo-400 mb-1">Overall Resonance Score</div>
+            <div className="text-6xl font-black text-white">{finalResults.overall}<span className="text-2xl text-indigo-400">%</span></div>
+            <div className={`text-lg font-bold mt-1 ${gradeColor(finalResults.overall)}`}>Grade {grade(finalResults.overall)}</div>
+          </div>
+
+          {/* Dimension coaching tips */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {([
+              { label: 'Pitch', score: finalResults.pitch,
+                tip: finalResults.pitch >= 70
+                  ? 'Great pitch range! Your voice sits in a natural speaking frequency.'
+                  : 'Try speaking in a slightly lower or higher register to match the band target range.' },
+              { label: 'Resonance', score: finalResults.resonance,
+                tip: finalResults.resonance >= 70
+                  ? 'Good vocal resonance — your voice has a forward, bright quality.'
+                  : 'Project your voice forward. Imagine speaking from your chest, not your throat.' },
+              { label: 'Stress', score: finalResults.stress,
+                tip: finalResults.stress >= 70
+                  ? 'Natural stress patterns — good amplitude contrast across syllables.'
+                  : 'Vary your volume more. Strongly stress key words and soften unstressed syllables.' },
+              { label: 'Tempo', score: finalResults.tempo,
+                tip: finalResults.tempo >= 70
+                  ? 'Excellent pacing — your syllable rate matches the target band.'
+                  : 'Adjust your speaking speed. Aim for a more even, deliberate syllable rhythm.' },
+            ]).map(d => (
+              <div key={d.label} className={cn(
+                'rounded-xl p-4 border text-sm',
+                d.score >= 70
+                  ? 'bg-emerald-900/40 border-emerald-500/30 text-emerald-200'
+                  : 'bg-amber-900/40  border-amber-500/30  text-amber-200'
+              )}>
+                <div className="font-bold mb-1 text-white">{d.label}: {d.score}%</div>
+                <div className="text-[13px] leading-relaxed opacity-90">{d.tip}</div>
               </div>
-            );
-          })}
-          <div className="absolute top-0 bottom-0 w-[2px] bg-red-500 shadow-[0_0_15px_#ef4444] z-20" style={{left:`${phraseProgress}%`}}/>
-        </div>
-      </div>
-
-      <div className={`fixed bottom-0 right-0 bg-white/90 dark:bg-[#0c0c0e]/90 backdrop-blur-xl border-t border-slate-200 dark:border-[#1f1f23] p-6 md:p-8 z-40 transition-all duration-300 ${isSidebarCollapsed?'left-0 lg:left-28':'left-0 lg:left-72'}`}>
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-[#a1a1aa] mb-4 font-bold uppercase tracking-widest">
-            <span>Resonance Progress</span>
-            <span>→ <span className="text-slate-900 dark:text-white font-bold">Next at {Math.min((activeIdx+1)*20,100)}%</span></span>
+            ))}
           </div>
-          <div className="h-3 w-full bg-slate-200 dark:bg-[#1f1f23] rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-purple-600 to-indigo-500 transition-all duration-300 shadow-[0_0_15px_rgba(147,51,234,0.4)]" style={{width:`${totalBarWidth}%`}}/>
-          </div>
-        </div>
-      </div>
 
-      {toastMsg && (
-        <div className="fixed top-24 right-4 md:right-10 bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl p-4 shadow-2xl animate-in slide-in-from-right-10 flex items-center gap-3 z-[60]">
-          <div className="bg-green-500/20 p-2 rounded-full text-green-600 dark:text-green-500"><CheckCircle2 size={18}/></div>
-          <span className="text-sm font-bold text-slate-900 dark:text-white">{toastMsg}</span>
+          {/* Actions */}
+          <div className="flex gap-4">
+            <button
+              onClick={handleTryAgain}
+              className="flex-1 py-4 rounded-2xl font-bold border-2 border-slate-700 text-white hover:border-indigo-500 transition-all"
+            >
+              <RotateCcw size={16} className="inline mr-2" /> Try Again
+            </button>
+            <button
+              onClick={onExit}
+              className="flex-1 py-4 rounded-2xl font-bold bg-indigo-600 text-white hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20"
+            >
+              Back to Dashboard
+            </button>
+          </div>
         </div>
       )}
     </div>
