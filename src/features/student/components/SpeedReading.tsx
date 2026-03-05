@@ -1,102 +1,78 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Zap, Play, Pause, ArrowLeft, ArrowRight,
-  BrainCircuit, Briefcase, BookOpen,
-  Clock, Loader2, AlertCircle, Settings,
-  ChevronLeft, ChevronRight, CheckCircle, XCircle,
-  Trophy, Brain, Target, RefreshCcw, Sparkles, Activity, Hash
+  Play, Pause, ArrowLeft, AlertTriangle, CheckCircle, XCircle, Brain, Target,
+  ChevronLeft, ChevronRight, Check, Settings, Loader2, AlertCircle, Clock, Hash, BookOpen, Briefcase, BrainCircuit
 } from 'lucide-react';
-
 import { StudentSidebar } from "./dashboard/StudentSidebar";
 import { StudentTopbar } from "./dashboard/StudentTopbar";
 import { PremiumModal } from "@/features/payment/components/PremiumModal";
 
 import {
-  fetchSpeedReadingReports,
-  fetchSpeedReadingReportById,
-  submitSpeedReadingSession,
-  SpeedReadingReportSummary,
-  SpeedReadingReport,
-  SpeedReadingQuestion,
-  SessionEvaluation,
+  fetchSpeedReadingReports, fetchSpeedReadingReportById, submitSpeedReadingSession,
+  SpeedReadingReportSummary, SpeedReadingReport, SpeedReadingQuestion, SessionEvaluation
 } from '../services/speedReadingService';
 
-// ─── Helpers ───────────────────────────────────────────────────────────────────
 const CATEGORY_META: Record<string, { label: string; icon: React.ReactNode }> = {
-  tech:       { label: 'Tech & VC',         icon: <BrainCircuit size={15} className="mr-1.5" /> },
-  business:   { label: 'Business Strategy', icon: <Briefcase size={15} className="mr-1.5" /> },
-  literature: { label: 'Literature',        icon: <BookOpen size={15} className="mr-1.5" /> },
+  tech: { label: 'Tech & VC', icon: <BrainCircuit size={15} className="mr-1.5 shrink-0" /> },
+  business: { label: 'Business Strategy', icon: <Briefcase size={15} className="mr-1.5 shrink-0" /> },
+  literature: { label: 'Literature', icon: <BookOpen size={15} className="mr-1.5 shrink-0" /> },
 };
+
 function getCategoryMeta(cat: string) {
-  return CATEGORY_META[cat] ?? { label: cat, icon: <BookOpen size={15} className="mr-1.5" /> };
+  return CATEGORY_META[cat] ?? { label: cat, icon: <BookOpen size={15} className="mr-1.5 shrink-0" /> };
 }
+
 function getCategories(r: SpeedReadingReportSummary[]) {
   const seen = new Set<string>();
   return r.map(x => x.category).filter(c => { if (seen.has(c)) return false; seen.add(c); return true; });
 }
 
-// ORP pivot word renderer
 function renderWord(word: string) {
   if (!word) return null;
   const pivot = Math.max(0, Math.ceil(word.length * 0.35) - 1);
   return (
-    <div className="flex items-center text-4xl md:text-6xl font-medium tracking-wide">
-      <span className="text-slate-400 dark:text-gray-300 text-right w-[150px] md:w-[250px]">{word.substring(0, pivot)}</span>
-      <span className="text-red-500 w-[20px] md:w-[30px] text-center">{word.substring(pivot, pivot + 1)}</span>
-      <span className="text-slate-400 dark:text-gray-300 text-left w-[150px] md:w-[250px]">{word.substring(pivot + 1)}</span>
+    <div className="flex items-center text-4xl sm:text-5xl md:text-6xl font-medium tracking-wide">
+      <span className="text-slate-400 dark:text-gray-300 text-right w-[120px] sm:w-[150px] md:w-[250px]">{word.substring(0, pivot)}</span>
+      <span className="text-red-500 w-[15px] sm:w-[20px] md:w-[30px] text-center">{word.substring(pivot, pivot + 1)}</span>
+      <span className="text-slate-400 dark:text-gray-300 text-left w-[120px] sm:w-[150px] md:w-[250px]">{word.substring(pivot + 1)}</span>
     </div>
   );
 }
 
-// Small stat card used in reader footers and analysis
-const StatCard = ({ value, label, color = 'text-purple-600 dark:text-purple-400' }: {
-  value: React.ReactNode; label: string; color?: string;
-}) => (
-  <div className="bg-white dark:bg-[#121118] rounded-xl p-4 shadow-sm border border-slate-100 dark:border-gray-800 text-center">
-    <div className={`text-2xl font-bold mb-0.5 ${color}`}>{value}</div>
-    <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest">{label}</div>
+const StatCard = ({ value, label, color = 'text-[#8a42f5]' }: { value: React.ReactNode; label: string; color?: string; }) => (
+  <div className="bg-white dark:bg-slate-900 rounded-2xl md:rounded-3xl p-6 md:p-8 shadow-sm flex flex-col items-center justify-center">
+    <div className={`text-3xl md:text-5xl font-black mb-1 md:mb-2 ${color}`}>{value}</div>
+    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center">{label}</div>
   </div>
 );
 
 type View = 'dashboard' | 'reader' | 'quiz' | 'analysis';
 
-// ─── Main Component ────────────────────────────────────────────────────────────
 export default function SpeedReading() {
-  const [activeTab, setActiveTab]               = useState("speed-reading");
+  const [activeTab, setActiveTab] = useState("speed-reading");
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-
-  // Listing
-  const [reports, setReports]               = useState<SpeedReadingReportSummary[]>([]);
+  const [reports, setReports] = useState<SpeedReadingReportSummary[]>([]);
   const [loadingReports, setLoadingReports] = useState(true);
-  const [reportsError, setReportsError]     = useState<string | null>(null);
+  const [reportsError, setReportsError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState('');
-
-  // Reader
-  const [view, setView]       = useState<View>('dashboard');
-  const [wpm, setWpm]         = useState(400);
-  const [words, setWords]     = useState<string[]>([]);
+  const [view, setView] = useState<View>('dashboard');
+  const [wpm, setWpm] = useState(400);
+  const [words, setWords] = useState<string[]>([]);
   const [wordIdx, setWordIdx] = useState(0);
-  const [isPlaying, setIsPlaying]   = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const startRef = useRef<number>(0);
-
-  // Report selection
-  const [fullReport, setFullReport]       = useState<SpeedReadingReport | null>(null);
+  const [fullReport, setFullReport] = useState<SpeedReadingReport | null>(null);
   const [loadingReport, setLoadingReport] = useState(false);
-  const [selected, setSelected]           = useState<SpeedReadingReportSummary | null>(null);
-  const [repIdx, setRepIdx]               = useState(0);
-  const [showSettings, setShowSettings]   = useState(false);
-
-  // Quiz
-  const [quizIdx, setQuizIdx]       = useState(0);
-  const [answers, setAnswers]       = useState<Record<string, string>>({});
+  const [selected, setSelected] = useState<SpeedReadingReportSummary | null>(null);
+  const [repIdx, setRepIdx] = useState(0);
+  const [showSettings, setShowSettings] = useState(false);
+  const [quizIdx, setQuizIdx] = useState(0);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
-
-  // Analysis (from backend)
   const [evaluation, setEvaluation] = useState<SessionEvaluation | null>(null);
 
-  // ─── Effects ─────────────────────────────────────────────────────────────────
   useEffect(() => {
     let gone = false;
     setLoadingReports(true);
@@ -108,7 +84,6 @@ export default function SpeedReading() {
   }, []);
 
   useEffect(() => { setRepIdx(0); }, [activeCategory]);
-
   useEffect(() => {
     const inCat = reports.filter(r => r.category === activeCategory);
     setSelected(inCat[repIdx] ?? null);
@@ -127,7 +102,6 @@ export default function SpeedReading() {
     return () => clearInterval(t);
   }, [isPlaying, wpm, words.length, isFinished]);
 
-  // ─── Handlers ────────────────────────────────────────────────────────────────
   const handleStartReading = async (rep?: SpeedReadingReportSummary) => {
     const target = rep ?? selected;
     if (!target) return;
@@ -140,7 +114,7 @@ export default function SpeedReading() {
       setView('reader');
       startRef.current = Date.now();
       setTimeout(() => setIsPlaying(true), 500);
-    } catch { /* silent */ }
+    } catch { }
     finally { setLoadingReport(false); }
   };
 
@@ -153,21 +127,17 @@ export default function SpeedReading() {
     setSubmitting(true);
     try {
       const result = await submitSpeedReadingSession({
-        reportId: fullReport.id,
-        readingTimeSeconds,
-        wpm,
+        reportId: fullReport.id, readingTimeSeconds, wpm,
         answers: qs.map(q => ({ questionId: q.id, selectedOption: answers[q.id] ?? '' })),
       });
       setEvaluation(result);
       setView('analysis');
     } catch (err) {
       console.error('Submit failed:', err);
-      // Fallback: compute locally so user isn't stuck
       const correct = qs.filter(q => answers[q.id] === q.answer).length;
       const ret = qs.length ? Math.round((correct / qs.length) * 100) : 0;
       setEvaluation({
-        retentionScore: ret, wpm, readingTimeSeconds, correct,
-        total: qs.length,
+        retentionScore: ret, wpm, readingTimeSeconds, correct, total: qs.length,
         grade: ret >= 80 ? 'A' : ret >= 60 ? 'B' : ret >= 50 ? 'C' : 'F',
         speedCategory: wpm >= 550 ? 'Advanced' : wpm >= 400 ? 'Proficient' : 'Developing',
         speedScore: Math.round((wpm - 200) / 6),
@@ -189,7 +159,6 @@ export default function SpeedReading() {
     setFullReport(null); setWords([]); setWordIdx(0); setIsFinished(false); setEvaluation(null);
   };
 
-  // ─── Derived ─────────────────────────────────────────────────────────────────
   const pct = words.length > 0 ? ((wordIdx + (isFinished ? 1 : 0)) / words.length) * 100 : 0;
   const cats = getCategories(reports);
   const qs = (fullReport?.questions ?? []) as SpeedReadingQuestion[];
@@ -197,108 +166,93 @@ export default function SpeedReading() {
   const allAnswered = qs.length > 0 && qs.every(q => answers[q.id]);
   const hasQuiz = qs.length > 0;
 
-  // ─── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
-      <StudentSidebar activeTab={activeTab} onTabChange={setActiveTab} isCollapsed={isSidebarCollapsed} toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} />
+    <div className="min-h-screen bg-[#f1f3f9] dark:bg-slate-950 transition-colors duration-300 font-sans text-slate-800 dark:text-slate-200">
+      <StudentSidebar activeTab='speed' onTabChange={setActiveTab} isCollapsed={isSidebarCollapsed} toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} />
 
       <div className={`min-h-screen flex flex-col transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
         <StudentTopbar onUpgradeClick={() => setShowPremiumModal(true)} />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 flex justify-center items-start">
-          <div className="w-full max-w-5xl">
+        <main className="flex-1 p-4 md:p-6 lg:p-8 flex justify-center items-start animate-in fade-in duration-500 w-full">
+          <div className="w-full max-w-7xl">
 
-            {/* ════════════════════ DASHBOARD ══════════════════════════════════ */}
             {view === 'dashboard' && (
-              <div className="w-full mt-4 bg-white dark:bg-[#121118] text-slate-900 dark:text-white border border-slate-200 dark:border-gray-800 rounded-2xl p-8 relative overflow-hidden shadow-sm dark:shadow-xl transition-colors duration-300">
-                <Zap className="absolute -top-10 -right-10 text-purple-500/10 dark:text-purple-900/20" size={240} strokeWidth={1} />
-                <div className="relative z-10">
-                  <div className="inline-flex items-center space-x-2 bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 px-3 py-1 rounded-full text-xs font-semibold mb-6">
-                    <Sparkles size={13} /><span>RSVP • Speed Reading</span>
+              <>
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 md:mb-8">
+                  <div>
+                    <h1 className="text-2xl md:text-3xl font-bold text-[#0b132b] dark:text-white">Speed Reading</h1>
+                    <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 mt-1">Read faster and improve comprehension with RSVP technology.</p>
                   </div>
-                  <h1 className="text-3xl md:text-5xl font-bold mb-4 leading-tight">
-                    Read a Full Report in<br />
-                    <span className="text-purple-600 dark:text-purple-400">15 Minutes</span> with 90% Retention
-                  </h1>
-                  <p className="text-slate-500 dark:text-gray-400 max-w-2xl mb-8 text-sm md:text-base leading-relaxed">
-                    Rapid Serial Visual Presentation flashes words at <strong className="text-slate-800 dark:text-gray-200">200–800 WPM</strong> calibrated to your comprehension. Finish with a quiz to measure retention.
-                  </p>
+                </div>
 
-                  {loadingReports && (
+                <div className="w-full bg-white dark:bg-slate-900 rounded-xl md:rounded-2xl p-4 md:p-8 shadow-sm transition-colors duration-300">
+                  {loadingReports ? (
                     <div className="flex items-center gap-3 text-slate-500 dark:text-gray-400 mb-6">
                       <Loader2 size={17} className="animate-spin" /><span className="text-sm">Loading reports…</span>
                     </div>
-                  )}
-                  {reportsError && (
+                  ) : reportsError ? (
                     <div className="flex items-center gap-3 text-red-500 mb-6 bg-red-50 dark:bg-red-900/20 rounded-xl px-4 py-3">
                       <AlertCircle size={17} /><span className="text-sm">{reportsError}</span>
                     </div>
-                  )}
-
-                  {!loadingReports && !reportsError && (
+                  ) : (
                     <>
-                      {/* Category tabs */}
-                      <div className="flex flex-wrap gap-2 mb-6">
+                      {/* Mobile scrollable tabs */}
+                      <div className="flex overflow-x-auto gap-2 mb-6 border-b border-slate-200 dark:border-slate-800 pb-4 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
                         {cats.map(cat => {
                           const m = getCategoryMeta(cat);
                           return (
                             <button key={cat} onClick={() => setActiveCategory(cat)}
-                              className={`flex items-center px-4 py-2 rounded-md text-sm font-medium transition-all ${activeCategory === cat ? 'bg-purple-600 text-white shadow-md' : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-gray-800'}`}
+                              className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${activeCategory === cat ? 'bg-[#0b132b] text-white dark:bg-white dark:text-[#0b132b]' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 border border-slate-200 dark:border-slate-800'}`}
                             >{m.icon}{m.label}</button>
                           );
                         })}
                       </div>
 
-                      {/* Report card */}
                       {selected && (() => {
                         const inCat = reports.filter(r => r.category === activeCategory);
                         const estMin = Math.max(1, Math.ceil(selected.wordCount / wpm));
                         return (
-                          <div className="mb-8 w-full max-w-md">
-                            <div className="bg-slate-50 dark:bg-[#1C1A24] border border-slate-200 dark:border-gray-700/50 rounded-xl p-5 transition-colors">
-                              <p className="text-xs text-purple-600 dark:text-purple-400 font-semibold mb-1 tracking-wider uppercase">{selected.source}</p>
-                              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3 leading-snug">{selected.title}</h3>
-                              <div className="flex items-center justify-between">
-                                <p className="text-xs text-slate-500 dark:text-gray-500 flex items-center gap-3">
-                                  <span className="flex items-center gap-1"><Hash size={11} /> {selected.wordCount} words</span>
-                                  <span>•</span>
-                                  <span className="flex items-center gap-1"><Clock size={11} /> ~{estMin} min at {wpm} WPM</span>
-                                </p>
-                                {inCat.length > 1 && (
-                                  <div className="flex items-center gap-0.5">
-                                    <button onClick={() => setRepIdx(i => (i - 1 + inCat.length) % inCat.length)} className="p-1 rounded text-slate-400 hover:text-purple-600 transition-colors"><ChevronLeft size={15} /></button>
-                                    <span className="text-xs text-slate-400 min-w-[28px] text-center">{repIdx + 1}/{inCat.length}</span>
-                                    <button onClick={() => setRepIdx(i => (i + 1) % inCat.length)} className="p-1 rounded text-slate-400 hover:text-purple-600 transition-colors"><ChevronRight size={15} /></button>
-                                  </div>
-                                )}
+                          <div className="mb-6 md:mb-8 w-full max-w-2xl bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 md:p-6 border border-slate-200 dark:border-slate-700">
+                            <p className="text-[10px] md:text-xs text-[#8a42f5] dark:text-[#a874f7] font-semibold mb-1 md:mb-2 tracking-wider uppercase">{selected.source}</p>
+                            <h3 className="text-lg md:text-xl font-bold text-[#0b132b] dark:text-white mb-3 md:mb-4 leading-snug">{selected.title}</h3>
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+                              <div className="flex items-center gap-3 md:gap-4 text-xs md:text-sm text-slate-500 dark:text-slate-400">
+                                <span className="flex items-center gap-1.5"><Hash size={14} /> {selected.wordCount} words</span>
+                                <span className="flex items-center gap-1.5"><Clock size={14} /> ~{estMin} min at {wpm} WPM</span>
                               </div>
+                              {inCat.length > 1 && (
+                                <div className="flex items-center gap-2 bg-white dark:bg-slate-900 rounded-md border border-slate-200 dark:border-slate-700 p-1 w-full sm:w-auto justify-between sm:justify-start">
+                                  <button onClick={() => setRepIdx(i => (i - 1 + inCat.length) % inCat.length)} className="p-2 sm:p-1 rounded text-slate-400 hover:text-[#8a42f5] transition-colors"><ChevronLeft size={16} /></button>
+                                  <span className="text-xs font-medium text-slate-500 min-w-[30px] text-center">{repIdx + 1}/{inCat.length}</span>
+                                  <button onClick={() => setRepIdx(i => (i + 1) % inCat.length)} className="p-2 sm:p-1 rounded text-slate-400 hover:text-[#8a42f5] transition-colors"><ChevronRight size={16} /></button>
+                                </div>
+                              )}
                             </div>
                           </div>
                         );
                       })()}
 
-                      {/* Buttons */}
-                      <div className="flex flex-col sm:flex-row gap-4 items-start">
+                      <div className="flex flex-col sm:flex-row gap-3 md:gap-4 items-stretch sm:items-start">
                         <button onClick={() => handleStartReading()} disabled={loadingReport || !selected}
-                          className="flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-60 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md w-full sm:w-auto">
-                          {loadingReport ? <Loader2 size={17} className="animate-spin" /> : <Play size={17} fill="currentColor" />}
-                          Start Speed Reading
+                          className="flex items-center justify-center gap-2 bg-[#6366f1] hover:bg-[#7b3be6] disabled:opacity-60 disabled:cursor-not-allowed text-white px-6 md:px-8 py-3 rounded-xl font-semibold transition-colors w-full sm:w-auto">
+                          {loadingReport ? <Loader2 size={18} className="animate-spin" /> : <Play size={18} fill="currentColor" />}
+                          Start Reading
                         </button>
                         <button onClick={() => setShowSettings(!showSettings)}
-                          className="flex items-center justify-center gap-2 bg-white dark:bg-[#1C1A24] hover:bg-slate-50 dark:hover:bg-gray-700 border border-slate-200 dark:border-gray-700 text-slate-700 dark:text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-sm w-full sm:w-auto">
-                          <Settings size={17} /><span>Settings</span>
+                          className="flex items-center justify-center gap-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-white px-6 py-3 rounded-xl font-semibold transition-colors w-full sm:w-auto">
+                          <Settings size={18} /><span>Settings</span>
                         </button>
                       </div>
 
                       {showSettings && (
-                        <div className="mt-4 p-5 bg-slate-50 dark:bg-[#1C1A24] border border-slate-200 dark:border-gray-700 rounded-xl max-w-md shadow-sm">
-                          <div className="flex justify-between items-center mb-3">
-                            <span className="text-sm font-medium text-slate-700 dark:text-gray-300">Reading Speed (WPM)</span>
-                            <span className="text-purple-600 dark:text-purple-400 font-bold text-sm">{wpm} WPM</span>
+                        <div className="mt-4 md:mt-6 p-4 md:p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl max-w-md shadow-sm">
+                          <div className="flex justify-between items-center mb-4">
+                            <span className="text-sm font-semibold text-slate-700 dark:text-gray-300">Reading Speed</span>
+                            <span className="text-[#8a42f5] font-bold text-sm bg-[#f5f0ff] dark:bg-[#8a42f5]/10 px-3 py-1 rounded-md">{wpm} WPM</span>
                           </div>
                           <input type="range" min="200" max="800" step="25" value={wpm} onChange={e => setWpm(Number(e.target.value))}
-                            className="w-full h-2 bg-slate-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-600" />
-                          <div className="flex justify-between text-xs text-slate-400 mt-2">
+                            className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-[#8a42f5]" />
+                          <div className="flex justify-between text-xs text-slate-400 font-medium mt-3">
                             <span>200</span><span>500</span><span>800</span>
                           </div>
                         </div>
@@ -306,133 +260,140 @@ export default function SpeedReading() {
                     </>
                   )}
                 </div>
-              </div>
+              </>
             )}
 
-            {/* ════════════════════ READER ═════════════════════════════════════ */}
             {view === 'reader' && fullReport && (
-              <div className="w-full flex flex-col h-[80vh] min-h-[600px] justify-between text-slate-900 dark:text-white">
-                {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-[#121118] border border-slate-200 dark:border-gray-800 p-4 rounded-xl shadow-sm transition-colors">
-                  <div>
-                    <h2 className="text-base font-semibold text-slate-800 dark:text-white">{fullReport.title}</h2>
-                    <p className="text-xs text-slate-400 dark:text-gray-500">{fullReport.source}</p>
-                  </div>
-                  <div className="flex items-center gap-4 w-full md:w-auto">
-                    <div className="flex items-center gap-2 flex-1 md:flex-none">
-                      <span className="text-xs text-slate-400 font-semibold tracking-wider hidden sm:block">SPEED</span>
+              <div className="w-full flex flex-col h-[calc(100vh-120px)] md:h-[80vh] min-h-[500px] md:min-h-[600px] justify-between text-slate-900 dark:text-white max-w-4xl mx-auto">
+                {/* Mobile-optimized Reader Header */}
+                <div className="flex flex-col gap-3 md:gap-4 mb-2 md:mb-4">
+                  {/* Top row: Back button & WPM slider */}
+                  <div className="flex items-center justify-between w-full">
+                    <button onClick={handleBack} className="p-2 md:px-4 md:py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-lg text-sm font-medium transition-colors shrink-0">
+                      <ArrowLeft size={18} className="md:mr-2 inline" /><span className="hidden md:inline">Back</span>
+                    </button>
+
+                    <div className="flex items-center gap-2 md:gap-3 bg-white dark:bg-slate-900 px-3 md:px-4 py-2 rounded-lg border border-slate-200 shadow-sm flex-1 md:flex-none max-w-[200px] md:max-w-none ml-2 md:ml-0">
                       <input type="range" min="200" max="800" step="25" value={wpm} onChange={e => setWpm(Number(e.target.value))}
-                        className="w-24 h-1 bg-slate-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-600" />
-                      <span className="text-xs font-bold text-slate-800 dark:text-white w-14 text-right">{wpm} WPM</span>
+                        className="w-full md:w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#8a42f5]" />
+                      <span className="text-xs md:text-sm font-bold text-slate-800 dark:text-white w-12 md:w-14 text-right shrink-0">{wpm} WPM</span>
                     </div>
-                    <button onClick={handleBack} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-600 dark:text-white text-sm font-medium transition-colors">
-                      <ArrowLeft size={15} /> Back
-                    </button>
-                    <button onClick={() => setIsPlaying(!isPlaying)} disabled={isFinished}
-                      className={`flex items-center gap-1 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${isPlaying ? 'bg-slate-100 dark:bg-gray-800 hover:bg-slate-200 dark:hover:bg-gray-700 text-slate-700 dark:text-white' : 'bg-purple-600 hover:bg-purple-700 text-white shadow-md'}`}>
-                      {isPlaying ? <Pause size={15} fill="currentColor" /> : <Play size={15} fill="currentColor" />}
-                      {isPlaying ? 'Pause' : 'Resume'}
-                    </button>
+                  </div>
+
+                  {/* Bottom row: Title & Play/Pause */}
+                  <div className="flex items-center justify-between w-full gap-2">
+                     <div className="flex-1 min-w-0">
+                       <h2 className="text-sm md:text-lg font-bold text-[#0b132b] dark:text-white truncate">{fullReport.title}</h2>
+                       <p className="text-[10px] md:text-xs text-slate-500 mt-0.5 uppercase tracking-wider truncate">{fullReport.source}</p>
+                     </div>
+                     <button onClick={() => setIsPlaying(!isPlaying)} disabled={isFinished}
+                       className="flex items-center justify-center gap-1.5 md:gap-2 px-4 md:px-6 py-2 md:py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-colors disabled:opacity-50 shrink-0 bg-[#8a42f5] hover:bg-[#7b3be6] text-white">
+                       {isPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
+                       <span className="hidden sm:inline">{isPlaying ? 'Pause' : 'Resume'}</span>
+                     </button>
                   </div>
                 </div>
 
-                {/* RSVP */}
-                <div className="flex-1 my-4 bg-white dark:bg-[#0B0A0F] border border-slate-200 dark:border-gray-800 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden shadow-inner">
+                {/* RSVP Display */}
+                <div className="flex-1 my-2 md:my-4 bg-white dark:bg-slate-900 rounded-xl md:rounded-2xl flex flex-col items-center justify-center relative overflow-hidden shadow-sm">
                   {isFinished ? (
-                    <div className="text-center px-6 space-y-4 animate-in zoom-in-95 duration-500">
-                      <div className="inline-block px-3 py-1.5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 text-xs font-semibold tracking-wide">Reading Complete ✓</div>
-                      <div>
-                        <span className="text-5xl font-bold text-slate-800 dark:text-white">{words.length}</span>
-                        <span className="text-xl font-medium text-purple-500 ml-2">words</span>
+                    <div className="text-center px-4 md:px-6 space-y-4 md:space-y-6 animate-in zoom-in-95 duration-500">
+                      <div className="inline-flex items-center gap-1.5 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-[#10b981]/10 text-[#10b981] text-xs md:text-sm font-bold uppercase tracking-widest">
+                         <CheckCircle size={14} className="md:w-4 md:h-4" /> Reading Complete
                       </div>
-                      <p className="text-sm text-slate-500">at <span className="font-bold text-slate-700 dark:text-gray-300">{wpm} WPM</span></p>
+                      <div>
+                        <span className="text-5xl md:text-6xl font-black text-[#0b132b] dark:text-white">{words.length}</span>
+                        <span className="text-lg md:text-xl font-bold text-slate-400 ml-1.5 md:ml-2">words</span>
+                      </div>
+                      <p className="text-sm md:text-base text-slate-500">read at <span className="font-bold text-[#8a42f5]">{wpm} WPM</span></p>
                       {hasQuiz ? (
-                        <button onClick={handleGoToQuiz}
-                          className="flex items-center gap-2 mx-auto bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md">
-                          <Brain size={17} /> Take Comprehension Quiz <ArrowRight size={17} />
+                        <button onClick={handleGoToQuiz} className="flex items-center justify-center gap-2 w-full md:w-auto md:mx-auto bg-[#8a42f5] hover:bg-[#7b3be6] text-white px-6 md:px-8 py-3 md:py-4 rounded-xl font-bold transition-colors shadow-sm mt-2 md:mt-4">
+                          <Brain size={18} /> Take Comprehension Quiz
                         </button>
                       ) : (
-                        <button onClick={handleBack} className="flex items-center gap-2 mx-auto bg-slate-100 dark:bg-gray-800 hover:bg-slate-200 text-slate-700 dark:text-white px-5 py-2.5 rounded-lg font-medium transition-colors">
-                          <ArrowLeft size={17} /> Back to Reports
+                        <button onClick={handleBack} className="flex items-center justify-center gap-2 w-full md:w-auto md:mx-auto bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-white px-6 py-3 rounded-xl font-semibold transition-colors mt-2 md:mt-4">
+                           Back to Reports
                         </button>
                       )}
                     </div>
                   ) : renderWord(words[wordIdx])}
                 </div>
 
-                {/* Footer stats */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-slate-400 w-14">Progress</span>
-                    <div className="flex-1 h-1.5 bg-slate-200 dark:bg-gray-800 rounded-full overflow-hidden">
-                      <div className="h-full bg-purple-600 transition-all duration-150 ease-linear" style={{ width: `${pct}%` }} />
+                {/* Mobile-optimized Footer stats */}
+                <div className="space-y-3 md:space-y-4">
+                  <div className="flex items-center gap-2 md:gap-4 px-1 md:px-2">
+                    <span className="text-[10px] md:text-xs font-semibold text-slate-400 uppercase tracking-wider w-12 md:w-16">Progress</span>
+                    <div className="flex-1 h-1.5 md:h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                      <div className="h-full bg-[#8a42f5] transition-all duration-150 ease-linear" style={{ width: `${pct}%` }} />
                     </div>
-                    <span className="text-xs text-slate-400 w-20 text-right">{wordIdx + (isFinished ? 1 : 0)}/{words.length}</span>
+                    <span className="text-[10px] md:text-xs font-bold text-slate-500 w-12 md:w-16 text-right">{wordIdx + (isFinished ? 1 : 0)} / {words.length}</span>
                   </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    <StatCard value={wpm} label="WPM" />
-                    <StatCard value={wordIdx + (isFinished ? 1 : 0)} label="Words Read" color="text-green-500" />
-                    <StatCard value={`~${Math.max(1, Math.ceil(fullReport.wordCount / wpm))} min`} label="Est. Duration" color="text-blue-500" />
+
+                  <div className="grid grid-cols-3 gap-2 md:gap-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-xl md:rounded-2xl p-2 md:p-4 shadow-sm flex flex-col items-center justify-center">
+                      <div className="text-lg md:text-2xl font-bold text-[#8a42f5] mb-0.5 md:mb-1">{wpm}</div>
+                      <div className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">WPM</div>
+                    </div>
+                    <div className="bg-white dark:bg-slate-900 rounded-xl md:rounded-2xl p-2 md:p-4 shadow-sm flex flex-col items-center justify-center">
+                      <div className="text-lg md:text-2xl font-bold text-[#10b981] mb-0.5 md:mb-1">{wordIdx + (isFinished ? 1 : 0)}</div>
+                      <div className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Words</div>
+                    </div>
+                    <div className="bg-white dark:bg-slate-900 rounded-xl md:rounded-2xl p-2 md:p-4 shadow-sm flex flex-col items-center justify-center">
+                      <div className="text-lg md:text-2xl font-bold text-blue-500 mb-0.5 md:mb-1">~{Math.max(1, Math.ceil(fullReport.wordCount / wpm))}m</div>
+                      <div className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Duration</div>
+                    </div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* ════════════════════ QUIZ ═══════════════════════════════════════ */}
             {view === 'quiz' && fullReport && curQ && (
-              <div className="w-full mt-4 max-w-3xl mx-auto space-y-5">
-                {/* Header */}
-                <div className="flex items-center justify-between bg-white dark:bg-[#121118] border border-slate-200 dark:border-gray-800 p-4 rounded-xl shadow-sm transition-colors">
-                  <div>
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs font-semibold mb-1.5">
-                      <Brain size={11} /> Comprehension Quiz
+              <div className="w-full mt-2 md:mt-4 max-w-3xl mx-auto space-y-4 md:space-y-6">
+                <div className="flex flex-row justify-between items-center gap-2 md:gap-4 mb-2 md:mb-4">
+                    <button onClick={handleBack} className="p-2 md:py-1 md:px-0 flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-900 bg-white md:bg-transparent rounded-lg md:rounded-none shadow-sm md:shadow-none">
+                      <ChevronLeft size={18} className="md:w-4 md:h-4" /> <span className="hidden md:inline">Back</span>
+                    </button>
+                    <span className="inline-flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1 md:py-1.5 rounded-md bg-[#f5f0ff] dark:bg-[#8a42f5]/10 text-[#8a42f5] text-[10px] md:text-xs font-bold uppercase tracking-widest shadow-sm">
+                      <Brain size={12} className="md:w-3.5 md:h-3.5" /> Quiz
                     </span>
-                    <h2 className="text-sm font-semibold text-slate-800 dark:text-white">{fullReport.title}</h2>
-                  </div>
-                  <button onClick={handleBack} className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-700 dark:hover:text-white font-medium transition-colors">
-                    <ArrowLeft size={14} /> Back
-                  </button>
                 </div>
 
-                {/* Step circles */}
-                <div className="flex items-center justify-center gap-2.5">
+                {/* Mobile scrollable step circles */}
+                <div className="flex overflow-x-auto items-center justify-start md:justify-center gap-2 md:gap-3 mb-4 md:mb-8 pb-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
                   {qs.map((q, i) => (
                     <button key={q.id} onClick={() => setQuizIdx(i)}
-                      className={`h-9 w-9 rounded-full flex items-center justify-center font-bold text-sm transition-all ${
-                        i === quizIdx ? 'bg-purple-600 text-white ring-4 ring-purple-100 dark:ring-purple-900/50 scale-110'
-                        : answers[q.id] ? 'bg-emerald-500 text-white'
-                        : 'bg-white dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-gray-700'
+                      className={`h-8 w-8 md:h-10 md:w-10 shrink-0 rounded-full flex items-center justify-center font-bold text-xs md:text-sm transition-all ${
+                        i === quizIdx ? 'bg-[#0b132b] text-white scale-110'
+                        : answers[q.id] ? 'bg-[#10b981] text-white'
+                        : 'bg-white text-slate-400 border border-slate-200'
                       }`}>
-                      {answers[q.id] && i !== quizIdx ? <CheckCircle size={14} /> : i + 1}
+                      {answers[q.id] && i !== quizIdx ? <Check size={14} className="md:w-4 md:h-4" strokeWidth={3} /> : i + 1}
                     </button>
                   ))}
                 </div>
 
-                {/* Question card */}
-                <div className="bg-white dark:bg-[#121118] border border-slate-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-sm transition-colors animate-in slide-in-from-right-4 duration-300">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
-                      curQ.type === 'MCQ'
-                        ? 'bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400'
-                        : 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                <div className="bg-white dark:bg-slate-900 rounded-2xl md:rounded-3xl p-5 md:p-10 shadow-sm transition-colors animate-in slide-in-from-right-4 duration-300">
+                  <div className="flex items-center justify-between mb-4 md:mb-6">
+                    <span className={`inline-flex items-center px-2 md:px-3 py-1 rounded-md text-[10px] md:text-xs font-bold uppercase tracking-widest ${
+                      curQ.type === 'MCQ' ? 'bg-[#f5f0ff] text-[#8a42f5]' : 'bg-blue-50 text-blue-600'
                     }`}>
-                      {curQ.type === 'MCQ' ? 'Multiple Choice' : 'True / False / Not Given'}
+                      {curQ.type === 'MCQ' ? 'Multiple Choice' : 'T / F / NG'}
                     </span>
-                    <span className="text-xs text-slate-400 font-medium">{quizIdx + 1}/{qs.length}</span>
+                    <span className="text-xs md:text-sm text-slate-400 font-bold">{quizIdx + 1} of {qs.length}</span>
                   </div>
 
-                  <h3 className="text-xl md:text-2xl font-semibold text-slate-800 dark:text-white leading-snug mb-7">{curQ.stem}</h3>
+                  <h3 className="text-xl md:text-3xl font-bold text-[#0b132b] dark:text-white leading-tight mb-6 md:mb-8">{curQ.stem}</h3>
 
                   {curQ.type === 'MCQ' && (
-                    <div className="space-y-3">
+                    <div className="space-y-3 md:space-y-4">
                       {curQ.options.map((opt, oi) => {
                         const letter = String.fromCharCode(65 + oi);
                         const sel = answers[curQ.id] === opt;
                         return (
                           <button key={oi} onClick={() => setAnswers(p => ({ ...p, [curQ.id]: opt }))}
-                            className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all ${sel ? 'border-purple-500 bg-purple-50 dark:bg-purple-500/10' : 'border-slate-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 bg-white dark:bg-[#1C1A24]'}`}>
-                            <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${sel ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-gray-800 text-slate-500'}`}>{letter}</span>
-                            <span className={`text-sm font-medium ${sel ? 'text-purple-700 dark:text-purple-300' : 'text-slate-700 dark:text-gray-300'}`}>{opt}</span>
+                            className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-5 rounded-xl md:rounded-2xl border-2 text-left transition-all ${sel ? 'border-[#8a42f5] bg-[#f5f0ff]' : 'border-slate-100 hover:border-slate-300 bg-white'}`}>
+                            <span className={`w-6 h-6 md:w-8 md:h-8 rounded-md flex items-center justify-center text-xs md:text-sm font-bold shrink-0 ${sel ? 'bg-[#8a42f5] text-white' : 'bg-slate-100 text-slate-500'}`}>{letter}</span>
+                            <span className={`text-sm md:text-base font-semibold ${sel ? 'text-[#8a42f5]' : 'text-slate-700'}`}>{opt}</span>
                           </button>
                         );
                       })}
@@ -440,17 +401,17 @@ export default function SpeedReading() {
                   )}
 
                   {curQ.type === 'TRUE_FALSE_NOT_GIVEN' && (
-                    <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
                       {curQ.options.map(opt => {
                         const sel = answers[curQ.id] === opt;
                         const look: Record<string, string> = {
-                          True:        sel ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'border-slate-200 dark:border-gray-700 hover:border-emerald-400 text-slate-700 dark:text-gray-300',
-                          False:       sel ? 'border-red-500 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-300' : 'border-slate-200 dark:border-gray-700 hover:border-red-400 text-slate-700 dark:text-gray-300',
-                          'Not Given': sel ? 'border-amber-500 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300' : 'border-slate-200 dark:border-gray-700 hover:border-amber-400 text-slate-700 dark:text-gray-300',
+                          True: sel ? 'border-[#10b981] bg-[#10b981]/10 text-[#10b981]' : 'border-slate-100 hover:border-[#10b981] text-slate-700',
+                          False: sel ? 'border-rose-500 bg-rose-500/10 text-rose-600' : 'border-slate-100 hover:border-rose-400 text-slate-700',
+                          'Not Given': sel ? 'border-amber-500 bg-amber-500/10 text-amber-600' : 'border-slate-100 hover:border-amber-400 text-slate-700',
                         };
                         return (
                           <button key={opt} onClick={() => setAnswers(p => ({ ...p, [curQ.id]: opt }))}
-                            className={`flex-1 py-4 px-5 rounded-xl border-2 font-semibold text-base transition-all text-center bg-white dark:bg-[#1C1A24] ${look[opt] ?? look['Not Given']}`}>
+                            className={`flex-1 py-3 md:py-5 px-4 md:px-6 rounded-xl md:rounded-2xl border-2 font-bold text-base md:text-lg transition-all text-center bg-white ${look[opt] ?? look['Not Given']}`}>
                             {opt}
                           </button>
                         );
@@ -459,102 +420,89 @@ export default function SpeedReading() {
                   )}
                 </div>
 
-                {/* Nav */}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-row items-center justify-between gap-3 md:gap-4 mt-6 md:mt-8">
                   <button onClick={() => setQuizIdx(i => Math.max(0, i - 1))} disabled={quizIdx === 0}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white dark:bg-[#1C1A24] border border-slate-200 dark:border-gray-700 text-slate-600 dark:text-white text-sm font-medium disabled:opacity-40 hover:bg-slate-50 transition-colors">
-                    <ChevronLeft size={15} /> Previous
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-4 md:px-6 py-3 rounded-xl bg-white shadow-sm text-slate-600 font-semibold disabled:opacity-40 text-sm md:text-base">
+                    <ChevronLeft size={16} className="md:w-[18px] md:h-[18px]" /> <span className="hidden sm:inline">Previous</span>
                   </button>
                   {quizIdx < qs.length - 1 ? (
                     <button onClick={() => setQuizIdx(i => i + 1)}
-                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-colors shadow-sm">
-                      Next <ChevronRight size={15} />
+                      className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 md:gap-2 px-4 md:px-8 py-3 rounded-xl bg-[#0b132b] text-white font-semibold shadow-sm text-sm md:text-base">
+                      Next <ChevronRight size={16} className="md:w-[18px] md:h-[18px]" />
                     </button>
                   ) : (
-                    <button onClick={handleSubmitQuiz} disabled={!allAnswered || submitting}
-                      className="flex items-center gap-2 px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors shadow-sm">
-                      {submitting ? <Loader2 size={15} className="animate-spin" /> : <Target size={15} />}
-                      {submitting ? 'Submitting…' : 'Submit & See Results'}
-                    </button>
+                    <div className="flex-1 sm:flex-none flex flex-col items-center w-full sm:w-auto">
+                        <button onClick={handleSubmitQuiz} disabled={!allAnswered || submitting}
+                        className="w-full flex items-center justify-center gap-1.5 md:gap-2 px-4 md:px-8 py-3 rounded-xl bg-[#8a42f5] hover:bg-[#7b3be6] disabled:opacity-50 text-white font-bold shadow-sm text-sm md:text-base">
+                        {submitting ? <Loader2 size={16} className="animate-spin md:w-[18px] md:h-[18px]" /> : <Target size={16} className="md:w-[18px] md:h-[18px]" />}
+                        {submitting ? 'Wait...' : 'Submit'}
+                        </button>
+                    </div>
                   )}
                 </div>
-                {!allAnswered && (
-                  <p className="text-center text-xs text-slate-400">Answer all {qs.length} questions to submit</p>
-                )}
               </div>
             )}
 
-            {/* ════════════════════ ANALYSIS ═══════════════════════════════════ */}
             {view === 'analysis' && evaluation && fullReport && (
-              <div className="w-full mt-4 space-y-5 max-w-3xl mx-auto animate-in fade-in duration-500">
-                {/* Title */}
-                <div className="text-center space-y-1.5">
-                  <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Session Results</h2>
-                  <span className="inline-block px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full text-xs font-semibold">
-                    {fullReport.source} · {evaluation.speedCategory} Reader
-                  </span>
+              <div className="w-full mt-2 md:mt-4 space-y-6 md:space-y-8 max-w-4xl mx-auto animate-in fade-in duration-500 flex flex-col items-center">
+                <div className="text-center space-y-1 md:space-y-2 mb-2 w-full">
+                    <h2 className="text-2xl md:text-3xl font-extrabold text-[#0b132b] dark:text-white">Results</h2>
+                    <span className="inline-block px-2 md:px-3 py-1 bg-[#8a42f5]/10 text-[#8a42f5] rounded-full text-[8px] md:text-[10px] font-bold uppercase tracking-widest mt-1 md:mt-2">{evaluation.speedCategory}</span>
                 </div>
 
-                {/* Score cards */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <StatCard
-                    value={`${evaluation.retentionScore}%`} label="Retention"
-                    color={evaluation.retentionScore >= 80 ? 'text-emerald-500' : evaluation.retentionScore >= 60 ? 'text-amber-500' : 'text-red-500'}
-                  />
-                  <StatCard value={evaluation.grade} label="Grade" />
-                  <StatCard value={evaluation.efficiencyScore} label="Efficiency" />
-                  <StatCard value={`${evaluation.correct}/${evaluation.total}`} label="Correct" color="text-emerald-500" />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 w-full">
+                  <StatCard value={`${evaluation.retentionScore}%`} label="Retention" color={evaluation.retentionScore >= 80 ? 'text-[#10b981]' : evaluation.retentionScore >= 60 ? 'text-amber-500' : 'text-rose-500'} />
+                  <StatCard value={evaluation.wpm} label="Avg WPM" color="text-[#8a42f5]" />
+                  <StatCard value={`${evaluation.correct}/${evaluation.total}`} label="Correct Answers" color="text-[#8a42f5]" />
                 </div>
 
-                {/* Detail row */}
-                <div className="grid grid-cols-3 gap-3">
-                  <StatCard value={evaluation.wpm} label="WPM" />
-                  <StatCard value={evaluation.idealWpmSuggestion} label="Next Target WPM" color="text-purple-600 dark:text-purple-400" />
-                  <StatCard value={`${Math.floor(evaluation.readingTimeSeconds / 60)}m ${evaluation.readingTimeSeconds % 60}s`} label="Session Time" color="text-blue-500" />
-                </div>
-
-                {/* Feedback */}
                 {evaluation.feedback.length > 0 && (
-                  <div className="bg-white dark:bg-[#121118] border border-slate-200 dark:border-gray-800 rounded-xl p-5 shadow-sm space-y-2">
-                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">AI Feedback</p>
-                    {evaluation.feedback.map((f, i) => (
-                      <div key={i} className="flex gap-2.5 text-sm text-slate-700 dark:text-gray-300 leading-relaxed">
-                        <span className="text-purple-500 shrink-0">💡</span> {f}
-                      </div>
-                    ))}
+                  <div className="w-full bg-[#fffbf0] border border-amber-100 rounded-xl md:rounded-2xl p-4 md:p-6">
+                    <div className="flex items-center gap-2 mb-2 md:mb-3">
+                        <AlertTriangle size={16} className="text-amber-500 md:w-[18px] md:h-[18px]" />
+                        <h3 className="font-bold text-sm md:text-base text-[#8a6a24]">AI Feedback</h3>
+                    </div>
+                    <div className="space-y-2 md:space-y-3 mb-3 md:mb-4">
+                        {evaluation.feedback.map((f, i) => (
+                        <div key={i} className="text-xs md:text-sm text-[#8a6a24]/80">{f}</div>
+                        ))}
+                    </div>
+                    <div className="text-[10px] md:text-xs font-semibold text-[#8a6a24] bg-amber-100/50 p-2 md:p-3 rounded-lg flex items-start gap-2">
+                        <span className="opacity-80 mt-0.5">💡</span>
+                        <span>Tip: Next target speed should be around {evaluation.idealWpmSuggestion} WPM.</span>
+                    </div>
                   </div>
                 )}
 
-                {/* Per-question breakdown */}
-                <div className="bg-white dark:bg-[#121118] border border-slate-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
-                  <h3 className="font-semibold text-base text-slate-800 dark:text-white mb-5 flex items-center gap-2">
-                    <Activity size={17} className="text-purple-500" /> Question Breakdown
-                  </h3>
-                  <div className="space-y-3">
+                <div className="w-full bg-white dark:bg-slate-900 rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-sm">
+                  <h3 className="font-bold text-base md:text-lg text-[#0b132b] dark:text-white mb-4 md:mb-6 uppercase tracking-wider text-center">Question Breakdown</h3>
+                  <div className="space-y-3 md:space-y-4">
                     {evaluation.scoredAnswers.map((a, i) => (
-                      <div key={a.questionId} className={`rounded-xl border p-4 ${a.isCorrect ? 'border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/50 dark:bg-emerald-900/10' : 'border-red-200 dark:border-red-800/40 bg-red-50/50 dark:bg-red-900/10'}`}>
-                        <div className="flex gap-3">
-                          <div className="shrink-0 mt-0.5">
-                            {a.isCorrect ? <CheckCircle size={18} className="text-emerald-500" /> : <XCircle size={18} className="text-red-500" />}
+                      <div key={a.questionId} className={`rounded-xl md:rounded-2xl border-2 p-3 md:p-6 ${a.isCorrect ? 'border-[#10b981]/20 bg-[#10b981]/5' : 'border-rose-500/20 bg-rose-500/5'}`}>
+                        <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+                          <div className="shrink-0 hidden sm:block">
+                            {a.isCorrect ? <div className="bg-[#10b981] p-1.5 rounded-full text-white"><Check size={14} className="md:w-4 md:h-4" strokeWidth={3} /></div> : <div className="bg-rose-500 p-1.5 rounded-full text-white"><XCircle size={14} className="md:w-4 md:h-4" /></div>}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xs font-semibold text-slate-400">Q{i + 1}</span>
-                              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${a.type === 'MCQ' ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-600' : 'bg-blue-100 dark:bg-blue-500/20 text-blue-600'}`}>
+                            <div className="flex items-center justify-between sm:justify-start gap-3 mb-2">
+                              <div className="flex items-center gap-2">
+                                <span className="sm:hidden">{a.isCorrect ? <Check size={14} className="text-[#10b981]" strokeWidth={3}/> : <XCircle size={14} className="text-rose-500"/>}</span>
+                                <span className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Q{i + 1}</span>
+                              </div>
+                              <span className={`text-[8px] md:text-[10px] px-2 py-0.5 rounded-sm font-bold uppercase tracking-widest ${a.type === 'MCQ' ? 'bg-[#f5f0ff] text-[#8a42f5]' : 'bg-blue-50 text-blue-600'}`}>
                                 {a.type === 'MCQ' ? 'MCQ' : 'T/F/NG'}
                               </span>
                             </div>
-                            <p className="font-medium text-slate-800 dark:text-white text-sm mb-2 leading-snug">{a.stem}</p>
-                            <div className="text-xs space-y-1">
+                            <p className="font-bold text-[#0b132b] dark:text-white text-sm md:text-base mb-2 md:mb-3 leading-relaxed">{a.stem}</p>
+                            <div className="text-xs md:text-sm space-y-1.5 md:space-y-2 bg-white dark:bg-slate-950 p-3 md:p-4 rounded-lg md:rounded-xl border border-slate-100">
                               {!a.isCorrect && (
-                                <p className="text-red-600 dark:text-red-400">Your answer: <span className="font-semibold">{a.userAnswer || '—'}</span></p>
+                                <p className="text-rose-600 flex justify-between border-b border-slate-100 pb-1.5 md:pb-2">
+                                  <span>Your answer:</span> <span className="font-bold text-right ml-2">{a.userAnswer || '—'}</span>
+                                </p>
                               )}
-                              <p className={a.isCorrect ? 'text-emerald-600 dark:text-emerald-400' : 'text-emerald-700 dark:text-emerald-400'}>
-                                {a.isCorrect ? '✓ ' : 'Correct: '}<span className="font-semibold">{a.correctAnswer}</span>
+                              <p className={`flex justify-between ${a.isCorrect ? 'text-[#10b981]' : 'text-slate-700 pt-0.5 md:pt-1'}`}>
+                                <span>Correct Answer:</span> <span className="font-bold text-right ml-2">{a.correctAnswer}</span>
                               </p>
-                              {a.explanation && (
-                                <p className="text-slate-400 italic pt-1 border-t border-slate-200 dark:border-gray-700 mt-1">{a.explanation}</p>
-                              )}
                             </div>
                           </div>
                         </div>
@@ -563,20 +511,16 @@ export default function SpeedReading() {
                   </div>
                 </div>
 
-                {/* CTAs */}
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <button onClick={handleBack}
-                    className="flex items-center justify-center gap-2 flex-1 py-3 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-[#1C1A24] hover:bg-slate-50 dark:hover:bg-gray-800 text-slate-700 dark:text-white font-medium transition-colors text-sm">
-                    <ArrowLeft size={16} /> Back to Reports
+                <div className="flex flex-col sm:flex-row gap-3 md:gap-4 w-full">
+                  <button onClick={handleBack} className="flex-1 h-12 md:h-14 rounded-xl md:rounded-2xl font-bold border-2 text-[#0b132b] bg-white text-sm md:text-base">
+                    Back to Reports
                   </button>
-                  <button onClick={() => { setView('reader'); setWordIdx(0); setIsFinished(false); setIsPlaying(false); }}
-                    className="flex items-center justify-center gap-2 flex-1 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-medium transition-colors shadow-md text-sm">
-                    <RefreshCcw size={16} /> Read Again
+                  <button onClick={() => { setView('reader'); setWordIdx(0); setIsFinished(false); setIsPlaying(false); }} className="flex-1 h-12 md:h-14 rounded-xl md:rounded-2xl font-bold bg-[#8a42f5] text-white text-sm md:text-base">
+                    Read Again
                   </button>
                 </div>
               </div>
             )}
-
           </div>
         </main>
       </div>

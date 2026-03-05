@@ -28,11 +28,13 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
   const menuItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/student/dashboard' },
     { id: 'courses', icon: BookOpen, label: 'My Courses', path: '/student/courses' },
-    { id: 'assessment', icon: BookOpen, label: 'IELTS Reading', path: '/student/reading-assessment' },
+    { id: 'assessment', icon: BookOpen, label: 'Speaking Practice', path: '/student/reading-assessment' },
     { id: 'voice', icon: BookOpen, label: 'Voice Lab', path: '/student/voice' },
     { id: 'speed', icon: BookOpen, label: 'Speed Reading', path: '/student/speed' },
-    { id: 'schedule', icon: Calendar, label: 'Schedule', path: '/student/schedule' },
-    { id: 'speaking-practice', icon: Calendar, label: 'Speaking-Anatomy', path: '/student/speaking-practice' },
+    { id: 'writing', icon: BookOpen, label: 'IELTS Writing', path: '/student/writing' },
+    { id: 'listening', icon: BookOpen, label: 'Listening Practice', path: '/student/listening' },
+    // { id: 'schedule', icon: Calendar, label: 'Schedule', path: '/student/schedule' },
+    // { id: 'speaking-practice', icon: Calendar, label: 'Speaking-Anatomy', path: '/student/speaking-practice' },
     { id: 'my-curriculum', icon: Calendar, label: 'My-Curriculum', path: '/student/my-curriculum' },
     { id: 'settings', icon: Settings, label: 'Settings', path: '/student/settings' },
   ];
