@@ -216,6 +216,7 @@ model User {
   phoneNo                  String?                    @db.VarChar(20)
   role                     UserRoleType               @default(STUDENT)
   profileImage             String?
+  // Legacy course-level instructor relation (kept for course relations)
   Instructor               Instructor?
   ReadingAssessmentHistory ReadingAssessmentHistory[]
   UserConcept              UserConcept[]
@@ -224,6 +225,12 @@ model User {
   UserModuleProgress       UserModuleProgress[]
   UserReadingProfile       UserReadingProfile?
   CourseOrder              CourseOrder[]
+  // Institute back-relations
+  CreatedInstitutes        Institute[]                @relation("InstituteCreatedBy")
+  InstituteOwner           InstituteOwner?
+  InstituteAdmin           InstituteAdmin?
+  InstituteInstructor      InstituteInstructor?
+  InstituteStudent         InstituteStudent?
 
   @@index([email])
 }
@@ -390,5 +397,94 @@ enum PurchaseStatus {
 enum UserRoleType {
   STUDENT
   INSTRUCTOR
+  SUPERADMIN
+  INSTITUTE_OWNER
+  INSTITUTE_ADMIN
+  // NOTE: ADMIN kept in DB enum only for migration compatibility; no longer used in app code
   ADMIN
+}
+
+// ============================================================
+// MULTI-TENANT INSTITUTE SCHEMA (New - Fresh Start)
+// All roles are institute-centric. The Institute is the hub.
+// ============================================================
+
+model Institute {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String   @db.VarChar(255)
+  address   String?
+  logoUrl   String?  @map("logo_url")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdBy String?  @map("created_by") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  CreatedByUser     User?              @relation("InstituteCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  InstituteOwners   InstituteOwner[]
+  InstituteAdmins   InstituteAdmin[]
+  Instructors       Instructor2[]
+  InstituteStudents InstituteStudent[]
+
+  @@index([isActive])
+  @@map("institutes")
+}
+
+model InstituteOwner {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @unique @map("user_id") @db.Uuid
+  instituteId String   @map("institute_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  User      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Institute Institute @relation(fields: [instituteId], references: [id], onDelete: Cascade)
+
+  @@index([instituteId])
+  @@map("institute_owners")
+}
+
+model InstituteAdmin {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @unique @map("user_id") @db.Uuid
+  instituteId String   @map("institute_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  User      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Institute Institute @relation(fields: [instituteId], references: [id], onDelete: Cascade)
+
+  @@index([instituteId])
+  @@map("institute_admins")
+}
+
+// Single go-forward instructors table (will link to courses at institute level later)
+model InstituteInstructor {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String   @unique @map("user_id") @db.Uuid
+  instituteId    String   @map("institute_id") @db.Uuid
+  bio            String?
+  specialization String?  @db.VarChar(255)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  User      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Institute Institute @relation(fields: [instituteId], references: [id], onDelete: Cascade)
+
+  @@index([instituteId])
+  @@map("institute_instructors")
+}
+
+model InstituteStudent {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String   @unique @map("user_id") @db.Uuid
+  instituteId    String   @map("institute_id") @db.Uuid
+  enrollmentDate DateTime @default(now()) @map("enrollment_date") @db.Date
+  isActive       Boolean  @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  User      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Institute Institute @relation(fields: [instituteId], references: [id], onDelete: Cascade)
+
+  @@index([instituteId])
+  @@index([isActive])
+  @@map("institute_students")
 }

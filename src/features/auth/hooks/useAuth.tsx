@@ -11,7 +11,8 @@ export interface UserProfile {
   countryCode: string | null;
   phoneNo: string | null;
   profileImage: string | null;
-  role: 'STUDENT' | 'INSTRUCTOR' | 'ADMIN';
+  username: string | null;
+  role: 'STUDENT' | 'INSTRUCTOR' | 'SUPERADMIN' | 'INSTITUTE_OWNER' | 'INSTITUTE_ADMIN';
   Instructor?: {
     id: string;
     bio: string | null;
@@ -149,7 +150,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     });
     
-    navigate('/auth', { replace: true });
+    navigate('/login', { replace: true });
   };
 
   const refreshProfile = async () => {

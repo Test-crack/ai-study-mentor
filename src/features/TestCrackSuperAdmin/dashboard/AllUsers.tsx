@@ -1,83 +1,106 @@
-import React, { useState } from 'react';
-import { Search, MoreVertical, Shield, UserCog, BookOpen, GraduationCap } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Search, MoreVertical, Shield, UserCog, BookOpen, GraduationCap, ShieldCheck, Loader2, RefreshCw } from 'lucide-react';
 import { SuperAdminSidebar } from '../Components/SuperadminSidebar';
 import { SuperAdminTopbar } from '../Components/Superadmintopbar';
+import { fetchAllUsers, UserRecord, UserRoleFilter } from '../services/superadminService';
+import { useToast } from '@/shared/hooks/use-toast';
 
-// --- Types & Mock Data ---
-type Role = 'Owner' | 'Admin' | 'Tutor' | 'Student';
-type Status = 'active' | 'inactive';
+// ─── Role config ──────────────────────────────────────────────────────────────
 
-type User = {
-  id: string;
-  name: string;
-  email: string;
-  role: Role;
-  institute: string;
-  status: Status;
-  lastActive: string;
-  initials: string;
-};
+type TabKey = 'ALL' | 'SUPERADMIN' | 'INSTITUTE_OWNER' | 'INSTITUTE_ADMIN' | 'INSTRUCTOR' | 'STUDENT';
 
-const initialUsers: User[] = [
-  { id: '1', name: 'Vikram Patel', email: 'vikram@prestige.edu', role: 'Owner', institute: 'Prestige University', status: 'active', lastActive: '2 hrs ago', initials: 'VP' },
-  { id: '2', name: 'Ananya Sharma', email: 'ananya@ace.edu', role: 'Owner', institute: 'Ace English Academy', status: 'active', lastActive: '1 hr ago', initials: 'AS' },
-  { id: '3', name: 'Rajesh Nair', email: 'rajesh@prestige.edu', role: 'Admin', institute: 'Prestige University', status: 'active', lastActive: '30 min ago', initials: 'RN' },
-  { id: '4', name: 'Meera Iyer', email: 'meera@speakwell.in', role: 'Admin', institute: 'SpeakWell Coaching', status: 'active', lastActive: '5 hrs ago', initials: 'MI' },
-  { id: '5', name: 'Sarah Khan', email: 'sarah@ace.edu', role: 'Tutor', institute: 'Ace English Academy', status: 'active', lastActive: '1 hr ago', initials: 'SK' },
-  { id: '6', name: 'Ravi Kumar', email: 'ravi@speakwell.in', role: 'Tutor', institute: 'SpeakWell Coaching', status: 'active', lastActive: '3 hrs ago', initials: 'RK' },
-  { id: '7', name: 'Deepak Sharma', email: 'deepak@techbridge.in', role: 'Tutor', institute: 'TechBridge Institute', status: 'inactive', lastActive: '2 days ago', initials: 'DS' },
-  { id: '8', name: 'Priya Menon', email: 'priya@ace.edu', role: 'Tutor', institute: 'Ace English Academy', status: 'active', lastActive: '4 hrs ago', initials: 'PM' },
-  { id: '9', name: 'Arjun Reddy', email: 'arjun@student.com', role: 'Student', institute: 'Prestige University', status: 'active', lastActive: '10 min ago', initials: 'AR' },
-  { id: '10', name: 'Neha Gupta', email: 'neha@student.com', role: 'Student', institute: 'Ace English Academy', status: 'active', lastActive: '1 hr ago', initials: 'NG' },
-  { id: '11', name: 'Karan Singh', email: 'karan@student.com', role: 'Student', institute: 'SpeakWell Coaching', status: 'active', lastActive: '20 min ago', initials: 'KS' },
-  { id: '12', name: 'Divya Joshi', email: 'divya@student.com', role: 'Student', institute: 'TechBridge Institute', status: 'inactive', lastActive: '1 week ago', initials: 'DJ' },
+const TABS: { label: string; value: TabKey }[] = [
+  { label: 'All',              value: 'ALL' },
+  { label: 'Super Admin',      value: 'SUPERADMIN' },
+  { label: 'Institute Owners', value: 'INSTITUTE_OWNER' },
+  { label: 'Institute Admins', value: 'INSTITUTE_ADMIN' },
+  { label: 'Instructors',      value: 'INSTRUCTOR' },
+  { label: 'Students',         value: 'STUDENT' },
 ];
 
+const getRoleConfig = (role: string) => {
+  switch (role) {
+    case 'SUPERADMIN':      return { icon: ShieldCheck, color: 'text-violet-600', label: 'Super Admin' };
+    case 'INSTITUTE_OWNER': return { icon: Shield,      color: 'text-purple-600', label: 'Owner' };
+    case 'INSTITUTE_ADMIN': return { icon: UserCog,     color: 'text-amber-600',  label: 'Institute Admin' };
+    case 'INSTRUCTOR':      return { icon: BookOpen,    color: 'text-blue-600',   label: 'Instructor' };
+    case 'STUDENT':         return { icon: GraduationCap, color: 'text-emerald-600', label: 'Student' };
+    default:                return { icon: UserCog,     color: 'text-slate-500',  label: role };
+  }
+};
+
+const getInitials = (name: string | null, email: string) => {
+  if (name) return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+  return email.slice(0, 2).toUpperCase();
+};
+
+const formatDate = (iso: string) => {
+  try {
+    return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch {
+    return '—';
+  }
+};
+
+// ─── Component ─────────────────────────────────────────────────────────────────
+
 export default function AllUsers() {
+  const { toast } = useToast();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabKey>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'All' | Role>('All');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
-  // Dynamically calculate counts for tabs
-  const counts = {
-    All: initialUsers.length,
-    Owners: initialUsers.filter(u => u.role === 'Owner').length,
-    Admins: initialUsers.filter(u => u.role === 'Admin').length,
-    Tutors: initialUsers.filter(u => u.role === 'Tutor').length,
-    Students: initialUsers.filter(u => u.role === 'Student').length,
-  };
+  const [users, setUsers] = useState<UserRecord[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const LIMIT = 50;
 
-  // Filter Logic
-  const filteredUsers = initialUsers.filter(user => {
-    const matchesTab = activeTab === 'All' || user.role === activeTab;
-    const searchLower = searchQuery.toLowerCase();
-    const matchesSearch = 
-      user.name.toLowerCase().includes(searchLower) ||
-      user.email.toLowerCase().includes(searchLower) ||
-      user.institute.toLowerCase().includes(searchLower);
-    
-    return matchesTab && matchesSearch;
-  });
+  // Debounce search input by 400ms
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 400);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
-  // Role Specific Styling & Icons
-  const getRoleConfig = (role: Role) => {
-    switch (role) {
-      case 'Owner': return { icon: Shield, color: 'text-purple-600 dark:text-[#D97CFF]' };
-      case 'Admin': return { icon: UserCog, color: 'text-amber-600 dark:text-[#F59E0B]' };
-      case 'Tutor': return { icon: BookOpen, color: 'text-blue-600 dark:text-[#7CBAFF]' };
-      case 'Student': return { icon: GraduationCap, color: 'text-emerald-600 dark:text-[#10B981]' };
+  // Reset to page 1 when tab or search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, debouncedSearch]);
+
+  const loadUsers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const result = await fetchAllUsers({
+        role: activeTab as UserRoleFilter,
+        search: debouncedSearch || undefined,
+        page: currentPage,
+        limit: LIMIT,
+      });
+      setUsers(result.data);
+      setTotal(result.meta.total);
+    } catch (err: any) {
+      toast({ title: 'Failed to load users', description: err.message, variant: 'destructive' });
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [activeTab, debouncedSearch, currentPage, toast]);
+
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
+
+  const totalPages = Math.ceil(total / LIMIT);
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0A10] font-sans text-slate-900 dark:text-slate-200 transition-colors duration-300">
       
       {/* Sidebar */}
       <div className="hidden lg:block">
-        <SuperAdminSidebar 
-          activeTab="users" // Adjust as needed to match your sidebar's active item
-          isCollapsed={isSidebarCollapsed} 
-          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
+        <SuperAdminSidebar
+          activeTab="users"
+          isCollapsed={isSidebarCollapsed}
+          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         />
       </div>
 
@@ -89,141 +112,169 @@ export default function AllUsers() {
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <div className="max-w-[1400px] mx-auto space-y-6">
             
-            {/* Tabs */}
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">All Users</h1>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                  {loading ? '...' : `${total.toLocaleString()} users total`}
+                </p>
+              </div>
+              <button
+                onClick={loadUsers}
+                className="flex items-center gap-2 text-sm text-slate-500 hover:text-indigo-600 dark:hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5"
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                Refresh
+              </button>
+            </div>
+
+            {/* Role Tabs */}
             <div className="flex flex-wrap items-center gap-2 sm:gap-6 border-b border-slate-200 dark:border-[#26252D] pb-2">
-              {[
-                { label: 'All', value: 'All', count: counts.All },
-                { label: 'Owners', value: 'Owner', count: counts.Owners },
-                { label: 'Admins', value: 'Admin', count: counts.Admins },
-                { label: 'Tutors', value: 'Tutor', count: counts.Tutors },
-                { label: 'Students', value: 'Student', count: counts.Students },
-              ].map((tab) => (
+              {TABS.map((tab) => (
                 <button
-                  key={tab.label}
-                  onClick={() => setActiveTab(tab.value as any)}
+                  key={tab.value}
+                  onClick={() => setActiveTab(tab.value)}
                   className={`pb-3 px-1 text-sm font-medium transition-all relative ${
-                    activeTab === tab.value 
-                      ? 'text-indigo-600 dark:text-white' 
+                    activeTab === tab.value
+                      ? 'text-indigo-600 dark:text-white'
                       : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                   }`}
                 >
-                  {tab.label} ({tab.count})
+                  {tab.label}
                   {activeTab === tab.value && (
-                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 dark:bg-white rounded-t-full"></div>
+                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 dark:bg-white rounded-t-full" />
                   )}
                 </button>
               ))}
             </div>
 
-            {/* Container for Search and Table */}
-            <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl shadow-sm overflow-hidden transition-colors">
+            {/* Table Card */}
+            <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl shadow-sm overflow-hidden">
               
-              {/* Search Bar */}
+              {/* Search */}
               <div className="p-4 border-b border-slate-100 dark:border-[#26252D]">
-                <div className="relative w-full">
+                <div className="relative w-full max-w-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search className="h-4 w-4 text-slate-400 dark:text-gray-500" />
+                    <Search className="h-4 w-4 text-slate-400" />
                   </div>
                   <input
                     type="text"
-                    placeholder="Search by name, email, or institute..."
+                    placeholder="Search name or email..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-indigo-500 dark:focus:border-[#8B5CF6] transition-all text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-500"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-indigo-500 dark:focus:border-[#8B5CF6] transition-all text-slate-900 dark:text-white placeholder-slate-400"
                   />
                 </div>
               </div>
 
-              {/* Users Table */}
+              {/* Table */}
               <div className="w-full overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[900px]">
+                <table className="w-full text-left border-collapse min-w-[700px]">
                   <thead>
                     <tr className="text-slate-500 dark:text-gray-400 text-sm border-b border-slate-100 dark:border-gray-800/50">
                       <th className="py-4 pl-6 font-medium">User</th>
                       <th className="py-4 font-medium">Role</th>
-                      <th className="py-4 font-medium">Institute</th>
-                      <th className="py-4 font-medium">Status</th>
-                      <th className="py-4 font-medium">Last Active</th>
+                      <th className="py-4 font-medium">Joined</th>
                       <th className="py-4 pr-6 text-right font-medium"></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-gray-800/50">
-                    {filteredUsers.map((user) => {
-                      const RoleIcon = getRoleConfig(user.role).icon;
-                      const roleColor = getRoleConfig(user.role).color;
+                    
+                    {loading && (
+                      <tr>
+                        <td colSpan={4} className="py-16 text-center">
+                          <Loader2 className="w-6 h-6 animate-spin text-indigo-500 mx-auto" />
+                        </td>
+                      </tr>
+                    )}
 
+                    {!loading && users.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="py-12 text-center text-slate-500 dark:text-gray-500 text-sm">
+                          No users found{debouncedSearch ? ` for "${debouncedSearch}"` : ''}.
+                        </td>
+                      </tr>
+                    )}
+
+                    {!loading && users.map((user) => {
+                      const cfg = getRoleConfig(user.role);
+                      const RoleIcon = cfg.icon;
                       return (
                         <tr key={user.id} className="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors group">
                           
-                          {/* User Column */}
+                          {/* User */}
                           <td className="py-3 pl-6">
                             <div className="flex items-center gap-3">
-                              <div className="w-9 h-9 rounded bg-indigo-50 dark:bg-[#2D1F4D] text-indigo-700 dark:text-[#A67CFF] flex items-center justify-center text-xs font-bold shrink-0">
-                                {user.initials}
-                              </div>
+                              {user.profileImage ? (
+                                <img src={user.profileImage} alt="" className="w-9 h-9 rounded object-cover" />
+                              ) : (
+                                <div className="w-9 h-9 rounded bg-indigo-50 dark:bg-[#2D1F4D] text-indigo-700 dark:text-[#A67CFF] flex items-center justify-center text-xs font-bold shrink-0">
+                                  {getInitials(user.name, user.email)}
+                                </div>
+                              )}
                               <div>
-                                <div className="font-semibold text-sm text-slate-900 dark:text-gray-200">{user.name}</div>
+                                <div className="font-semibold text-sm text-slate-900 dark:text-gray-200">
+                                  {user.name ?? '—'}
+                                </div>
                                 <div className="text-[11px] text-slate-500 dark:text-gray-500">{user.email}</div>
                               </div>
                             </div>
                           </td>
 
-                          {/* Role Column */}
+                          {/* Role */}
                           <td className="py-3">
-                            <div className={`flex items-center gap-2 text-sm font-medium ${roleColor}`}>
+                            <div className={`flex items-center gap-2 text-sm font-medium ${cfg.color}`}>
                               <RoleIcon className="w-4 h-4" />
-                              {user.role}
+                              {cfg.label}
                             </div>
                           </td>
 
-                          {/* Institute Column */}
-                          <td className="py-3">
-                            <span className="text-sm text-slate-700 dark:text-slate-300">
-                              {user.institute}
-                            </span>
-                          </td>
-
-                          {/* Status Column */}
-                          <td className="py-3">
-                            <span className={`text-[13px] font-medium ${
-                              user.status === 'active' 
-                                ? 'text-emerald-600 dark:text-[#10B981]' 
-                                : 'text-slate-500 dark:text-slate-500'
-                            }`}>
-                              {user.status}
-                            </span>
-                          </td>
-
-                          {/* Last Active Column */}
+                          {/* Joined */}
                           <td className="py-3">
                             <span className="text-sm text-slate-600 dark:text-slate-400">
-                              {user.lastActive}
+                              {formatDate(user.createdAt)}
                             </span>
                           </td>
 
-                          {/* Actions Column */}
+                          {/* Actions */}
                           <td className="py-3 pr-6 text-right">
                             <button className="p-1.5 text-slate-400 hover:text-slate-700 dark:text-gray-500 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
                               <MoreVertical className="w-4 h-4" />
                             </button>
                           </td>
-
                         </tr>
                       );
                     })}
-
-                    {filteredUsers.length === 0 && (
-                      <tr>
-                        <td colSpan={6} className="py-12 text-center text-slate-500 dark:text-gray-500">
-                          No users found matching "{searchQuery}"
-                        </td>
-                      </tr>
-                    )}
                   </tbody>
                 </table>
               </div>
-            </div>
 
+              {/* Pagination */}
+              {!loading && totalPages > 1 && (
+                <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 dark:border-[#26252D]">
+                  <span className="text-sm text-slate-500 dark:text-slate-400">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage(p => p - 1)}
+                      className="px-3 py-1.5 text-sm rounded-lg border border-slate-200 dark:border-[#26252D] disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage(p => p + 1)}
+                      className="px-3 py-1.5 text-sm rounded-lg border border-slate-200 dark:border-[#26252D] disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </main>
       </div>

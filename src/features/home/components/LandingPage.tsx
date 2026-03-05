@@ -64,7 +64,7 @@ const LandingPage = () => {
         });
 
         if (error) {
-          navigate("/auth?error=invalid_token");
+          navigate("/login?error=invalid_token");
           return;
         }
 
@@ -152,7 +152,7 @@ const LandingPage = () => {
           <>
             <Button
               variant="ghost"
-              onClick={() => navigate('/auth')}
+              onClick={() => navigate('/login')}
               className="text-white bg-indigo-700 hover:bg-indigo-900 hover:text-white"
             >
               Sign In
@@ -210,12 +210,18 @@ const LandingPage = () => {
           size="lg"
           onClick={() => {
             if (!user) {
-              navigate('/auth');
+              navigate('/login');
               return;
             }
             if (user) {
-               if (profile?.role === 'INSTRUCTOR' || profile?.role === 'ADMIN') {
+               if (profile?.role === 'INSTRUCTOR') {
                  navigate('/instructor/dashboard');
+               } else if (profile?.role === 'SUPERADMIN') {
+                 navigate('/superadmin-dashboard');
+               } else if (profile?.role === 'INSTITUTE_OWNER') {
+                 navigate('/owner-dashboard');
+               } else if (profile?.role === 'INSTITUTE_ADMIN') {
+                 navigate('/institute-dashboard');
                } else {
                  navigate('/student/dashboard');
                }
@@ -508,7 +514,7 @@ Our engine doesn't just track your mistakes; it benchmarks your performance agai
         <div className="flex flex-col items-center gap-6">
           <Button
             size="lg"
-            onClick={() => navigate(user ? '/dashboard' : '/auth')}
+            onClick={() => navigate(user ? '/dashboard' : '/login')}
             className="bg-white text-indigo-700 hover:bg-indigo-50 px-12 py-8 h-auto transition-all duration-300 rounded-full shadow-[0_20px_40px_-10px_rgba(0,0,0,0.3)] hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] hover:-translate-y-1 active:scale-95 text-lg font-bold group"
           >
             {user ? 'Go to Dashboard' : 'Get Started for Free'}

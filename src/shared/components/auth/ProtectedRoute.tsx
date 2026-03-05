@@ -4,7 +4,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 
 interface RoleProtectedRouteProps {
   children: ReactNode;
-  allowedRoles?: ("STUDENT" | "INSTRUCTOR" | "ADMIN")[];
+  allowedRoles?: ("STUDENT" | "INSTRUCTOR" | "SUPERADMIN" | "INSTITUTE_OWNER" | "INSTITUTE_ADMIN")[];
 }
 
 export const RoleProtectedRoute = ({ 
@@ -34,7 +34,7 @@ export const RoleProtectedRoute = ({
   }
 
   if (!user) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   if (allowedRoles && profile && !allowedRoles.includes(profile.role)) {

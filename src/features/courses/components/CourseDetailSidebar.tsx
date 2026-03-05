@@ -114,7 +114,7 @@ export function CourseDetailSidebar({
       return (
         <Button
           className="w-full bg-purple-600 hover:bg-purple-700 text-white py-6 text-lg font-semibold"
-          onClick={() => navigate('/auth')}
+          onClick={() => navigate('/login')}
         >
           <LogIn className="h-5 w-5 mr-2" />
           Sign in to Enroll

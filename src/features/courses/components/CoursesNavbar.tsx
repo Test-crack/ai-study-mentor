@@ -85,7 +85,7 @@ export function CoursesNavbar() {
             </DropdownMenu>
           ) : (
             <Button
-              onClick={() => navigate('/auth')}
+              onClick={() => navigate('/login')}
               className="bg-purple-600 hover:bg-purple-700 text-white"
             >
               <LogIn className="h-4 w-4 mr-2" />
