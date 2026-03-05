@@ -2,12 +2,13 @@ import {
   LayoutDashboard, 
   BookOpen, 
   Users, 
-  Settings, 
+  Layers,UserPlus,UserCheck,
+  Settings, CreditCard,
   LogOut, 
   GraduationCap,
   ChevronLeft,
   ChevronRight,
-  Home,
+  Home,BarChart3,
   FileText
 } from "lucide-react";
 import { cn } from "@/shared/utils";
@@ -26,17 +27,17 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
   const { signOut } = useAuth();
   const navigate = useNavigate();
   
-  const menuItems = [
-    { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/institute-dashboard' },
-    { id: 'batches', icon: BookOpen, label: 'Batch Allowcation', path: '/institute-batches' },
-    { id: 'tutor', icon: FileText, label: 'Tutor Accounts', path: '/institute-tutor' },
-    { id: 'tutor-onboard', icon: FileText, label: 'Tutor Onboarding', path: '/institute-tutorOnboarding' },
-    { id: 'students', icon: FileText, label: 'Students', path: '/institute-students' },
-    { id: 'students-onboard', icon: FileText, label: 'Student Onboarding', path: '/institute-studentOnboarding' },
-    { id: 'billings', icon: Users, label: 'Billings&Plans', path: '/institute-billings' }, 
-    { id: 'report', icon: Settings, label: 'Report', path: '/institute-reports' },
-    { id: 'settings', icon: Settings, label: 'Institute Setting', path: '/institute-Setting' },
-  ];
+ const menuItems = [
+  { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/institute-dashboard' },
+  { id: 'batches', icon: Layers, label: 'Batch Allocation', path: '/institute-batches' },
+  { id: 'tutor', icon: Users, label: 'Tutor Accounts', path: '/institute-tutor' },
+  { id: 'tutor-onboard', icon: UserPlus, label: 'Tutor Onboarding', path: '/institute-tutorOnboarding' },
+  { id: 'students', icon: GraduationCap, label: 'Students', path: '/institute-students' },
+  { id: 'students-onboard', icon: UserCheck, label: 'Student Onboarding', path: '/institute-studentOnboarding' },
+  { id: 'billings', icon: CreditCard, label: 'Billings & Plans', path: '/institute-billings' }, 
+  { id: 'report', icon: BarChart3, label: 'Report', path: '/institute-reports' },
+  { id: 'settings', icon: Settings, label: 'Institute Setting', path: '/institute-Setting' },
+];
 
   const handleNavigation = (item: typeof menuItems[0]) => {
     navigate(item.path);

@@ -5,7 +5,11 @@ import {
   Download, 
   Eye, 
   ArrowLeft,
-  GraduationCap,FileText,BookOpen
+  GraduationCap,
+  FileText,
+  BookOpen,
+  Plus,
+  X
 } from "lucide-react";
 import { InstructorSidebar } from "../dashboard/InstructorSidebar";
 import { InstructorTopbar } from "../dashboard/InstructorTopbar";
@@ -27,13 +31,19 @@ const MOCK_ASSESSMENTS = [
 ];
 
 export default function InstructorAssessmentPage() {
+  const [studentsData, setStudentsData] = useState<any[]>(MOCK_ASSESSMENTS);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("ALL STUDENTS");
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
 
+  // Modal States
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [studentToEdit, setStudentToEdit] = useState<any>(null);
+  const [offlineMarks, setOfflineMarks] = useState({ speaking: "", reading: "", writing: "" });
+
   // --- FILTER LOGIC ---
-  const filteredAssessments = MOCK_ASSESSMENTS.filter((assessment) => {
+  const filteredAssessments = studentsData.filter((assessment) => {
     const matchesSearch = assessment.name.toLowerCase().includes(searchTerm.toLowerCase());
     let matchesFilter = true;
     
@@ -44,14 +54,13 @@ export default function InstructorAssessmentPage() {
     return matchesSearch && matchesFilter;
   });
 
-  // Color helper for Accuracy
+  // --- HELPER FUNCTIONS ---
   const getAccuracyColor = (acc: number) => {
     if (acc >= 70) return "text-emerald-500";
     if (acc >= 50) return "text-amber-500";
     return "text-red-500";
   };
 
-  // Badge Style Helper
   const getStatusBadge = (status: string) => {
     switch(status) {
       case "On Track":
@@ -65,7 +74,67 @@ export default function InstructorAssessmentPage() {
     }
   };
 
-  // Render SVG Radar Chart (Hexagon)
+  // NEW: Calculate Percentage and Letter Grade based on IELTS Max Score (27)
+  const calculateOfflineGrade = (grades: any) => {
+    if (!grades) return null;
+    
+    const s = parseFloat(grades.speaking) || 0;
+    const r = parseFloat(grades.reading) || 0;
+    const w = parseFloat(grades.writing) || 0;
+    
+    // Check if there are actual inputs to avoid rendering a "0% (F)" empty state by default
+    if (s === 0 && r === 0 && w === 0 && !grades.speaking && !grades.reading && !grades.writing) return null;
+
+    // Max possible score for 3 IELTS sections is 27 (9 + 9 + 9)
+    const maxTotal = 27;
+    const totalScore = s + r + w;
+    const percentage = Math.round((totalScore / maxTotal) * 100);
+
+    let letterGrade = 'F';
+    let colorClass = 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+
+    if (percentage >= 90) {
+      letterGrade = 'A+';
+      colorClass = 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400';
+    } else if (percentage >= 80) {
+      letterGrade = 'A';
+      colorClass = 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400';
+    } else if (percentage >= 70) {
+      letterGrade = 'B';
+      colorClass = 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+    } else if (percentage >= 60) {
+      letterGrade = 'C';
+      colorClass = 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
+    } else if (percentage >= 50) {
+      letterGrade = 'D';
+      colorClass = 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400';
+    }
+
+    return { percentage, letterGrade, colorClass };
+  };
+
+  // Handle Modal Open
+  const handleOpenModal = (student: any) => {
+    setStudentToEdit(student);
+    setOfflineMarks(student.offlineGrades || { speaking: "", reading: "", writing: "" });
+    setIsModalOpen(true);
+  };
+
+  // Handle Save Offline Marks
+  const handleSaveMarks = () => {
+    const updatedStudents = studentsData.map(s => 
+      s.id === studentToEdit.id ? { ...s, offlineGrades: offlineMarks } : s
+    );
+    setStudentsData(updatedStudents);
+    
+    if (selectedStudent && selectedStudent.id === studentToEdit.id) {
+      setSelectedStudent({ ...selectedStudent, offlineGrades: offlineMarks });
+    }
+    
+    setIsModalOpen(false);
+  };
+
+  // Render SVG Radar Chart
   const renderSkillRadar = () => {
     return (
       <svg viewBox="0 0 200 200" className="w-full h-48 max-w-[250px] mx-auto mt-4 overflow-visible">
@@ -96,7 +165,7 @@ export default function InstructorAssessmentPage() {
         <line x1="100" y1="100" x2="31" y2="140" className="stroke-slate-200 dark:stroke-slate-700" strokeWidth="1" />
         <line x1="100" y1="100" x2="31" y2="60" className="stroke-slate-200 dark:stroke-slate-700" strokeWidth="1" />
 
-        {/* Dynamic Data Polygon (Simulated Shape) - WITH ANIMATION CLASS */}
+        {/* Dynamic Data Polygon */}
         <polygon 
           points="100,30 150,70 120,130 100,160 60,110 80,50" 
           fill="#8b5cf6" fillOpacity="0.2" 
@@ -239,6 +308,32 @@ export default function InstructorAssessmentPage() {
                   </div>
                 </div>
 
+                {/* --- OFFLINE IELTS SCORES SECTION --- */}
+                {selectedStudent.offlineGrades && (
+                  <div className="bg-white dark:bg-[#111111] rounded-2xl p-6 border border-slate-100 dark:border-gray-800 shadow-sm lg:col-span-2">
+                    <h3 className="font-bold flex items-center text-slate-800 dark:text-slate-200 mb-6">
+                      <div className="bg-indigo-100 dark:bg-indigo-900/30 p-1 rounded mr-2">
+                        <FileText className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                      </div>
+                      Offline IELTS Scores
+                    </h3>
+                    <div className="grid grid-cols-3 gap-6">
+                      <div className="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-gray-800/30 rounded-xl border border-slate-100 dark:border-gray-800">
+                        <div className="text-3xl font-bold text-slate-900 dark:text-white mb-1">{selectedStudent.offlineGrades.speaking || "-"}</div>
+                        <div className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Speaking</div>
+                      </div>
+                      <div className="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-gray-800/30 rounded-xl border border-slate-100 dark:border-gray-800">
+                        <div className="text-3xl font-bold text-slate-900 dark:text-white mb-1">{selectedStudent.offlineGrades.reading || "-"}</div>
+                        <div className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Reading</div>
+                      </div>
+                      <div className="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-gray-800/30 rounded-xl border border-slate-100 dark:border-gray-800">
+                        <div className="text-3xl font-bold text-slate-900 dark:text-white mb-1">{selectedStudent.offlineGrades.writing || "-"}</div>
+                        <div className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Writing</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* AI Assessment Summary */}
                 <div className="bg-white dark:bg-[#111111] rounded-2xl p-6 border border-slate-100 dark:border-gray-800 shadow-sm lg:col-span-2">
                   <h3 className="font-bold flex items-center text-slate-800 dark:text-slate-200 mb-4">
@@ -316,47 +411,73 @@ export default function InstructorAssessmentPage() {
                 <table className="w-full text-left border-collapse min-w-[800px]">
                   <thead>
                     <tr className="border-b border-slate-100 dark:border-gray-800 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-[#171722]">
-                      <th className="p-4 py-4 w-1/4">STUDENT</th>
+                      <th className="p-4 py-4 w-1/5">STUDENT</th>
                       <th className="p-4 py-4">ACCURACY</th>
                       <th className="p-4 py-4">IELTS BAND</th>
+                      <th className="p-4 py-4">OFFLINE GRADE</th> {/* NEW COLUMN */}
                       <th className="p-4 py-4">STRUGGLE</th>
                       <th className="p-4 py-4">STATUS</th>
-                      <th className="p-4 py-4">LAST ACTIVE</th>
                       <th className="p-4 py-4 text-right">ACTION</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 dark:divide-gray-800/50">
                     {filteredAssessments.length > 0 ? (
-                      filteredAssessments.map((row) => (
-                        <tr key={row.id} className="hover:bg-slate-50 dark:hover:bg-gray-800/30 transition-colors group">
-                          <td className="p-4 flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-bold font-sans tracking-tight">
-                              {row.initials}
-                            </div>
-                            <span className="font-bold text-sm text-slate-900 dark:text-white">{row.name}</span>
-                          </td>
-                          <td className={`p-4 text-sm font-bold ${getAccuracyColor(row.accuracy)}`}>
-                            {row.accuracy}%
-                          </td>
-                          <td className="p-4 text-sm font-medium text-slate-500">{row.ieltsBand}</td>
-                          <td className="p-4 text-sm font-medium text-slate-600 dark:text-slate-400">{row.struggle}</td>
-                          <td className="p-4">
-                            {getStatusBadge(row.status)}
-                          </td>
-                          <td className="p-4 text-sm font-medium text-slate-500">{row.lastActive}</td>
-                          <td className="p-4 text-right">
-                            <button 
-                              onClick={() => setSelectedStudent(row)}
-                              className="inline-flex items-center text-xs font-bold text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                            >
-                              <Eye className="w-4 h-4 mr-1.5" /> View
-                            </button>
-                          </td>
-                        </tr>
-                      ))
+                      filteredAssessments.map((row) => {
+                        const offlineGradeInfo = calculateOfflineGrade(row.offlineGrades);
+
+                        return (
+                          <tr key={row.id} className="hover:bg-slate-50 dark:hover:bg-gray-800/30 transition-colors group">
+                            <td className="p-4 flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-bold font-sans tracking-tight">
+                                {row.initials}
+                              </div>
+                              <span className="font-bold text-sm text-slate-900 dark:text-white">{row.name}</span>
+                            </td>
+                            <td className={`p-4 text-sm font-bold ${getAccuracyColor(row.accuracy)}`}>
+                              {row.accuracy}%
+                            </td>
+                            <td className="p-4 text-sm font-medium text-slate-500">{row.ieltsBand}</td>
+                            
+                            {/* --- NEW DATA CELL FOR OFFLINE GRADE --- */}
+                            <td className="p-4 text-sm font-medium">
+                              {offlineGradeInfo ? (
+                                <div className="flex items-center gap-2">
+                                  <span className="text-slate-900 dark:text-white font-bold">{offlineGradeInfo.percentage}%</span>
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${offlineGradeInfo.colorClass}`}>
+                                    {offlineGradeInfo.letterGrade}
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="text-slate-400">—</span>
+                              )}
+                            </td>
+
+                            <td className="p-4 text-sm font-medium text-slate-600 dark:text-slate-400">{row.struggle}</td>
+                            <td className="p-4">
+                              {getStatusBadge(row.status)}
+                            </td>
+                            <td className="p-4 text-right">
+                              <div className="flex items-center justify-end gap-4">
+                                <button 
+                                  onClick={() => handleOpenModal(row)}
+                                  className="inline-flex items-center text-xs font-bold text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                                >
+                                  <Plus className="w-4 h-4 mr-1.5" /> Add Marks
+                                </button>
+                                <button 
+                                  onClick={() => setSelectedStudent(row)}
+                                  className="inline-flex items-center text-xs font-bold text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                                >
+                                  <Eye className="w-4 h-4 mr-1.5" /> View
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
                     ) : (
                       <tr>
-                        <td colSpan={7} className="p-8 text-center text-slate-500 font-medium">
+                        <td colSpan={8} className="p-8 text-center text-slate-500 font-medium">
                           No students found matching your criteria.
                         </td>
                       </tr>
@@ -370,6 +491,82 @@ export default function InstructorAssessmentPage() {
 
         </main>
       </div>
+
+      {/* --- ADD OFFLINE MARKS MODAL --- */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#111111] rounded-2xl p-6 w-full max-w-md shadow-2xl border border-slate-100 dark:border-gray-800 relative">
+            
+            <button 
+              onClick={() => setIsModalOpen(false)} 
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            
+            <h2 className="text-xl font-bold mb-1 text-slate-900 dark:text-white">Add Offline Marks</h2>
+            <p className="text-sm text-slate-500 mb-6">Enter offline IELTS scores (0-9) for <span className="font-semibold text-slate-700 dark:text-slate-300">{studentToEdit?.name}</span></p>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Speaking Score</label>
+                <input 
+                  type="number" 
+                  step="0.5" 
+                  min="0" 
+                  max="9" 
+                  value={offlineMarks.speaking} 
+                  onChange={e => setOfflineMarks({...offlineMarks, speaking: e.target.value})} 
+                  className="w-full px-4 py-2 bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 text-slate-900 dark:text-white"
+                  placeholder="e.g. 7.5"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Reading Score</label>
+                <input 
+                  type="number" 
+                  step="0.5" 
+                  min="0" 
+                  max="9" 
+                  value={offlineMarks.reading} 
+                  onChange={e => setOfflineMarks({...offlineMarks, reading: e.target.value})} 
+                  className="w-full px-4 py-2 bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 text-slate-900 dark:text-white"
+                  placeholder="e.g. 8.0"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Writing Score</label>
+                <input 
+                  type="number" 
+                  step="0.5" 
+                  min="0" 
+                  max="9" 
+                  value={offlineMarks.writing} 
+                  onChange={e => setOfflineMarks({...offlineMarks, writing: e.target.value})} 
+                  className="w-full px-4 py-2 bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 text-slate-900 dark:text-white"
+                  placeholder="e.g. 6.5"
+                />
+              </div>
+            </div>
+            
+            <div className="mt-8 flex justify-end gap-3">
+              <button 
+                onClick={() => setIsModalOpen(false)} 
+                className="px-4 py-2.5 rounded-lg text-sm font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-gray-800 hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleSaveMarks} 
+                className="px-4 py-2.5 rounded-lg text-sm font-bold text-white bg-purple-600 hover:bg-purple-700 transition-colors shadow-sm"
+              >
+                Save Marks
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

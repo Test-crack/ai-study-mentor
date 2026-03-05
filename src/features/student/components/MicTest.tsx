@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Mic, Square, Play, Sparkles } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
