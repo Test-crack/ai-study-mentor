@@ -1,13 +1,20 @@
 import { 
-  LayoutDashboard, 
-  BookOpen, 
-  Calendar, 
-  Settings, 
-  LogOut, 
-  GraduationCap,
+ LayoutDashboard, 
+  GraduationCap, 
+  Mic, 
+  Activity,
+  Home,
+   LogOut,
+  Timer, 
   ChevronLeft,
+  PenTool, 
+  Headphones, 
+  BookOpen, 
   ChevronRight,
-  Home
+  Calendar, 
+  MessageCircle, 
+  Library, 
+  Settings
 } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -25,20 +32,20 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
   const { signOut } = useAuth();
   const navigate = useNavigate();
   
-  const menuItems = [
-    { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/student/dashboard' },
-    { id: 'courses', icon: BookOpen, label: 'My Courses', path: '/student/courses' },
-    { id: 'assessment', icon: BookOpen, label: 'Speaking Practice', path: '/student/reading-assessment' },
-    { id: 'voice', icon: BookOpen, label: 'Voice Lab', path: '/student/voice' },
-    { id: 'speed', icon: BookOpen, label: 'Speed Reading', path: '/student/speed' },
-    { id: 'writing', icon: BookOpen, label: 'IELTS Writing', path: '/student/writing' },
-    { id: 'listening', icon: BookOpen, label: 'Listening Practice', path: '/student/listening' },
-    // { id: 'schedule', icon: Calendar, label: 'Schedule', path: '/student/schedule' },
-    // { id: 'speaking-practice', icon: Calendar, label: 'Speaking-Anatomy', path: '/student/speaking-practice' },
-    { id: 'my-curriculum', icon: Calendar, label: 'My-Curriculum', path: '/student/my-curriculum' },
-    { id: 'settings', icon: Settings, label: 'Settings', path: '/student/settings' },
-  ];
-
+ const menuItems = [
+  { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/student/dashboard' },
+  { id: 'courses', icon: GraduationCap, label: 'My Courses', path: '/student/courses' },
+  { id: 'assessment', icon: Mic, label: 'Speaking Practice', path: '/student/reading-assessment' },
+  { id: 'voice', icon: Activity, label: 'Voice Lab', path: '/student/voice' },
+  { id: 'speed', icon: Timer, label: 'Speed Reading', path: '/student/speed' },
+  { id: 'writing', icon: PenTool, label: 'IELTS Writing', path: '/student/writing' },
+  { id: 'listening', icon: Headphones, label: 'Listening Practice', path: '/student/listening' },
+  { id: 'reading', icon: BookOpen, label: 'Reading Practice', path: '/student/reading' },
+  { id: 'schedule', icon: Calendar, label: 'Schedule', path: '/student/schedule' },
+  { id: 'speaking-practice', icon: MessageCircle, label: 'Speaking-Anatomy', path: '/student/speaking-practice' },
+  { id: 'my-curriculum', icon: Library, label: 'My-Curriculum', path: '/student/my-curriculum' },
+  { id: 'settings', icon: Settings, label: 'Settings', path: '/student/settings' },
+];
   const handleNavigation = (item: typeof menuItems[0]) => {
     navigate(item.path);
     if (onTabChange) {
