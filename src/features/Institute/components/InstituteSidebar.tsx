@@ -9,7 +9,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Home,BarChart3,
-  FileText
+  FileText, ArrowLeftRight
 } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -24,7 +24,7 @@ interface SidebarProps {
 }
 
 export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isCollapsed, toggleCollapse, className }: SidebarProps) => {
-  const { signOut } = useAuth();
+  const { signOut, profile } = useAuth();
   const navigate = useNavigate();
   
  const menuItems = [
@@ -104,6 +104,27 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
           </button>
         ))}
       </nav>
+
+      {/* Back to Owner Portal — only visible to INSTITUTE_OWNER users who switched into Admin View */}
+      {profile?.role === 'INSTITUTE_OWNER' && (
+        <div className={cn("mt-2 mb-2")}>
+          <button
+            onClick={() => navigate('/owner-dashboard')}
+            title={isCollapsed ? "Back to Owner Portal" : undefined}
+            className={cn(
+              "w-full flex items-center gap-3 rounded-xl transition-all duration-200 group",
+              isCollapsed ? "justify-center p-3" : "px-4 py-3",
+              "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300",
+              "hover:bg-indigo-100 dark:hover:bg-indigo-800/30 border border-indigo-200 dark:border-indigo-700/40"
+            )}
+          >
+            <ArrowLeftRight className="h-4 w-4 shrink-0" />
+            {!isCollapsed && (
+              <span className="font-semibold text-sm">Back to Owner Portal</span>
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Collapse Toggle */}
       <button

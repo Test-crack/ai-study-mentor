@@ -5,7 +5,7 @@ BarChart3,
   GraduationCap,Lightbulb,
   ChevronLeft,UserCheck,
   ChevronRight,ClipboardCheck,Cpu,
-  Home, ShieldCheck,
+  Home, ShieldCheck, ArrowLeftRight,
 } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -99,6 +99,25 @@ const menuItems = [
           </button>
         ))}
       </nav>
+
+      {/* Switch to Admin Portal — for owners who also manage day-to-day admin tasks */}
+      <div className={cn("mt-2 mb-2", isCollapsed ? "px-0" : "px-0")}>
+        <button
+          onClick={() => navigate('/institute-dashboard')}
+          title={isCollapsed ? "Switch to Admin Portal" : undefined}
+          className={cn(
+            "w-full flex items-center gap-3 rounded-xl transition-all duration-200 group",
+            isCollapsed ? "justify-center p-3" : "px-4 py-3",
+            "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400",
+            "hover:bg-amber-100 dark:hover:bg-amber-800/30 border border-amber-200 dark:border-amber-700/40"
+          )}
+        >
+          <ArrowLeftRight className="h-4 w-4 shrink-0" />
+          {!isCollapsed && (
+            <span className="font-semibold text-sm">Switch to Admin Portal</span>
+          )}
+        </button>
+      </div>
 
       {/* Collapse Toggle */}
       <button

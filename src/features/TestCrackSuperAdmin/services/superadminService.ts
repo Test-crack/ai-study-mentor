@@ -10,6 +10,8 @@ export interface UserRecord {
     role: string;
     createdAt: string;
     profileImage: string | null;
+    instituteId: string | null;
+    instituteName: string | null;
 }
 
 export interface UsersMeta {

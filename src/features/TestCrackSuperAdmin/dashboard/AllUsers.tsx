@@ -175,6 +175,9 @@ export default function AllUsers() {
                     <tr className="text-slate-500 dark:text-gray-400 text-sm border-b border-slate-100 dark:border-gray-800/50">
                       <th className="py-4 pl-6 font-medium">User</th>
                       <th className="py-4 font-medium">Role</th>
+                      {activeTab !== 'SUPERADMIN' && (
+                        <th className="py-4 font-medium">Institute</th>
+                      )}
                       <th className="py-4 font-medium">Joined</th>
                       <th className="py-4 pr-6 text-right font-medium"></th>
                     </tr>
@@ -229,6 +232,19 @@ export default function AllUsers() {
                               {cfg.label}
                             </div>
                           </td>
+
+                          {/* Institute */}
+                          {activeTab !== 'SUPERADMIN' && (
+                            <td className="py-3">
+                              {user.instituteName ? (
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800/40 max-w-[180px] truncate">
+                                  {user.instituteName}
+                                </span>
+                              ) : (
+                                <span className="text-slate-400 dark:text-slate-600 text-sm">—</span>
+                              )}
+                            </td>
+                          )}
 
                           {/* Joined */}
                           <td className="py-3">

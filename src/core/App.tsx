@@ -136,16 +136,16 @@ const AppRoutes = () => {
             <Route path="/superadmin-allusers" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><AllUsers/></RoleProtectedRoute>} />
 
 
-      {/*Institute routes  */}'/superadmin-allusers
-            <Route path="/institute-dashboard" element={<InstituteDashboard/>} />
-            <Route path="/institute-batches" element={<InstituteBatches/>} />
-            <Route path="/institute-tutor" element={<InstituteTutor/>} />
-            <Route path="/institute-students" element={<InstituteStudents/>} />
-            <Route path="/institute-billings" element={<InstituteBillings/>} />
-            <Route path="/institute-reports" element={<InstituteReports/>} />
-            <Route path="/institute-studentonboarding" element={<StudentOnboarding/>} />
-            <Route path="/institute-tutoronboarding" element={<TutorOnboarding/>}/>
-            <Route path="/institute-Setting" element={<InstituteSettings/>}/>
+      {/* Institute Admin routes — RBAC: INSTITUTE_ADMIN + INSTITUTE_OWNER */}
+            <Route path="/institute-dashboard" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteDashboard/></RoleProtectedRoute>} />
+            <Route path="/institute-batches" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteBatches/></RoleProtectedRoute>} />
+            <Route path="/institute-tutor" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteTutor/></RoleProtectedRoute>} />
+            <Route path="/institute-students" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteStudents/></RoleProtectedRoute>} />
+            <Route path="/institute-billings" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteBillings/></RoleProtectedRoute>} />
+            <Route path="/institute-reports" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteReports/></RoleProtectedRoute>} />
+            <Route path="/institute-studentOnboarding" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><StudentOnboarding/></RoleProtectedRoute>} />
+            <Route path="/institute-tutorOnboarding" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><TutorOnboarding/></RoleProtectedRoute>}/>
+            <Route path="/institute-Setting" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteSettings/></RoleProtectedRoute>}/>
       {/* Login Route: On login, LoginRedirect forces role-based dashboards */}
       <Route path="/login" element={user ? <LoginRedirect /> : <LoginPage />} />
       {/* Legacy redirect – keeps old /auth links working */}
@@ -156,7 +156,7 @@ const AppRoutes = () => {
       <Route path="/courses" element={<CoursesPage />} />
       <Route path="/courses/:slug" element={<CourseDetailPage />} />
       
-      {/* Manual Dashboard Access: Handled by ManualDashboardAccess logic */}/institute-studentOnboarding
+      {/* Manual Dashboard Access: Handled by ManualDashboardAccess logic */}
       <Route path="/dashboard" element={<ManualDashboardAccess />} />
       <Route path="/dashboard/:tab" element={<ManualDashboardAccess />} />
 
