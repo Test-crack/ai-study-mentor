@@ -5,7 +5,7 @@ BarChart3,
   GraduationCap,Lightbulb,
   ChevronLeft,UserCheck,
   ChevronRight,ClipboardCheck,Cpu,
-  Home,
+  Home, ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -30,7 +30,8 @@ const menuItems = [
   { id: 'insight', icon: Lightbulb, label: 'Batch-Insight', path: '/owner-insight' },
   { id: 'tutor-effect', icon: UserCheck, label: 'Tutor Effectiveness', path: '/owner-tuteffect' },
   { id: 'strategic-reports', icon: ClipboardCheck, label: 'Strategic Reports', path: '/owner-strategic' },
-  { id: 'calibration', icon: Cpu, label: 'AI Calibration', path: '/owner-calibration' }, 
+  { id: 'calibration', icon: Cpu, label: 'AI Calibration', path: '/owner-calibration' },
+  { id: 'admins', icon: ShieldCheck, label: 'Manage Admins', path: '/owner-admins' },
 ];
 
   const handleNavigation = (item: typeof menuItems[0]) => {

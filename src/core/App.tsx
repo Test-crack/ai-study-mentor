@@ -61,6 +61,7 @@ import BatchInsight from "@/features/InstituteOwner/dashboard/BatchInsight";
 import TutorEffective from "@/features/InstituteOwner/dashboard/TutorEffective";
 import StrategicReport from "@/features/InstituteOwner/dashboard/StrategicReport";
 import AiCalibration from "@/features/InstituteOwner/dashboard/AiCalibration";
+import InstituteAdmins from "@/features/InstituteOwner/dashboard/InstituteAdmins";
 import VoiceLab from "@/features/student/components/VoiceLab";
 import SpeedReading from "@/features/student/components/SpeedReading";
 import InstructorReport from "@/features/instructor/components/InstructorReport";
@@ -116,14 +117,15 @@ const AppRoutes = () => {
     <Routes>
       {/* Public routes */}
       <Route path="/" element={<LandingPage />} />
-{/* Institute Owner Routes */}
-<Route path="/owner-dashboard" element={<InstituteOwnerDashboard/>}/>
-<Route path="/owner-performance" element={<Performance/>}/>
-<Route path="/owner-roi" element={<RoiAnalytics/>}/>
-<Route path="/owner-insight" element={<BatchInsight/>}/>
-<Route path="/owner-tuteffect" element={<TutorEffective/>}/>
-<Route path="/owner-strategic" element={<StrategicReport/>}/>
-<Route path="/owner-calibration" element={<AiCalibration/>}/>
+{/* Institute Owner Routes — RBAC: INSTITUTE_OWNER only */}
+<Route path="/owner-dashboard" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteOwnerDashboard/></RoleProtectedRoute>}/>
+<Route path="/owner-performance" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><Performance/></RoleProtectedRoute>}/>
+<Route path="/owner-roi" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><RoiAnalytics/></RoleProtectedRoute>}/>
+<Route path="/owner-insight" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><BatchInsight/></RoleProtectedRoute>}/>
+<Route path="/owner-tuteffect" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><TutorEffective/></RoleProtectedRoute>}/>
+<Route path="/owner-strategic" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><StrategicReport/></RoleProtectedRoute>}/>
+<Route path="/owner-calibration" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><AiCalibration/></RoleProtectedRoute>}/>
+<Route path="/owner-admins" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteAdmins/></RoleProtectedRoute>}/>
 {/* Testcrack SuperAdmin — RBAC: SUPERADMIN only */}
             <Route path="/superadmin-dashboard" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SuperAdminDashboard/></RoleProtectedRoute>} />
             <Route path="/superadmin-institutes" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SuperAdminInstitutes/></RoleProtectedRoute>} />
