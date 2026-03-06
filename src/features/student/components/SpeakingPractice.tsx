@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Mic, Activity, Volume2, Clock } from 'lucide-react'; 
 import { StudentSidebar } from './dashboard/StudentSidebar';
 // 1. Import Topbar and PremiumModal

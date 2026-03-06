@@ -1,23 +1,41 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   BookOpen, Mic, Target, Zap, Clock, CheckCircle, 
   Sparkles, ChevronRight, Info, AlertTriangle, 
-  XCircle, Check, PlaySquare, Square
+  XCircle, Check, PlaySquare, Square, Loader2,
+  ChevronLeft, RotateCcw
 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent } from '@/shared/components/ui/card';
 import { StudentSidebar } from './dashboard/StudentSidebar';
 import { StudentTopbar } from './dashboard/StudentTopbar';
 import { cn } from "@/shared/utils";
-import { fetchIeltsReadingTopics, fetchIeltsReadingTopicById, saveIeltsReadingAssessment, IeltsReadingPractice, IeltsReadingPracticeList } from '../services/ieltsReadingService';
+import { 
+  fetchIeltsReadingTopics, 
+  fetchIeltsReadingTopicById, 
+  saveIeltsReadingAssessment, 
+  IeltsReadingPractice, 
+  IeltsReadingPracticeList 
+} from '../services/ieltsReadingService';
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
 import { useSpeechToText } from '../hooks/useSpeechToText';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 
 type Step = 1 | 2 | 3 | 4;
 type BandLevel = 'All' | 'Band 5' | 'Band 6' | 'Band 7' | 'Band 8';
+
+const FILLER_WORDS_LIST = [
+  "um", "uh", "ah", "err", "hmm", "hmmm", "uh-huh", "mhm",
+  "like", "you know", "i mean", "actually", "basically", 
+  "literally", "so", "right", "okay", "well", "you see", 
+  "i guess", "i suppose", "really", "just", "anyway", 
+  "anyhow", "mind you", "to be honest", "frankly", 
+  "believe me", "tell you what", "by the way", "incidentally",
+  "sort of", "kind of", "type of", "around", "about", 
+  "somewhat", "somehow", "more or less", "stuff like that", "what do i say",
+  "and things", "and so on", "gonna", "wanna", "gotta", "outta", "innit", "dunno"
+];
 
 export default function StudentReadingAssessmentPage() {
   const navigate = useNavigate();
@@ -29,9 +47,9 @@ export default function StudentReadingAssessmentPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isFetchingDetail, setIsFetchingDetail] = useState(false);
   const [currentStep, setCurrentStep] = useState<Step>(1);
-  const [showTips, setShowTips] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [showTips, setShowTips] = useState(false); // FIXED: Added missing state
   
   // Recording & STT Logic
   const { 
@@ -42,7 +60,7 @@ export default function StudentReadingAssessmentPage() {
     stopListening,
     setTranscript: resetTranscript
   } = useSpeechToText({
-    onError: (err) => toast.error(err)
+    onError: (err: string) => toast.error(err)
   });
 
   const [recordingTime, setRecordingTime] = useState(0);
@@ -56,7 +74,19 @@ export default function StudentReadingAssessmentPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [backendResults, setBackendResults] = useState<any>(null);
 
-  // 1. Fetch Topics from Backend
+  // Memoized Passage Word Set for efficient lookup
+  const passageWordsSet = useMemo(() => {
+    if (!selectedTopic?.modelAnswer) return new Set<string>();
+    return new Set(
+      selectedTopic.modelAnswer
+        .toLowerCase()
+        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
+        .split(/\s+/)
+        .filter(w => w.length > 0)
+    );
+  }, [selectedTopic]);
+
+  // Fetch Topics
   useEffect(() => {
     const loadTopics = async () => {
       setIsLoading(true);
@@ -65,8 +95,7 @@ export default function StudentReadingAssessmentPage() {
         setTopics(response.data);
         setTotalPages(response.pagination.totalPages);
       } catch (error) {
-        toast.error("Failed to load reading topics. Please try again later.");
-        console.error(error);
+        toast.error("Failed to load reading topics.");
       } finally {
         setIsLoading(false);
       }
@@ -74,7 +103,6 @@ export default function StudentReadingAssessmentPage() {
     loadTopics();
   }, [activeBand, page]);
 
-  // Handle selecting a topic - fetch full details
   const handleSelectTopic = async (topicId: string) => {
     setIsFetchingDetail(true);
     try {
@@ -84,16 +112,16 @@ export default function StudentReadingAssessmentPage() {
       setRecordingTime(0);
       setCurrentStep(1);
       setBackendResults(null);
+      resetTranscript('');
     } catch (error) {
-      toast.error("Failed to load topic details. Please try again.");
-      console.error(error);
+      toast.error("Failed to load topic details.");
     } finally {
       setIsFetchingDetail(false);
     }
   };
 
-  // Helper to get topic styles
-  const getTopicStyle = (band: string, type: string) => {
+  // FIXED: Merged into a single helper function with an optional 'type' parameter
+  const getTopicStyle = (band: string, type?: string) => {
     const bandNum = band.split(' ')[1];
     let color = "text-[#8a42f5] dark:text-[#a874f7]";
     let bg = "bg-[#f5f0ff] dark:bg-[#8a42f5]/20";
@@ -125,7 +153,7 @@ export default function StudentReadingAssessmentPage() {
 
   const wordsArray = useMemo(() => realTranscript.split(' ').filter(w => w.length > 0), [realTranscript]);
 
-  // 2. Timer Logic
+  // Timer Logic
   useEffect(() => {
     let interval: any;
     if (isListening && isSTTReady) {
@@ -136,15 +164,13 @@ export default function StudentReadingAssessmentPage() {
     return () => clearInterval(interval);
   }, [isListening, isSTTReady]);
 
-
-  // 3. Pause Detection Logic
+  // Pause Detection
   useEffect(() => {
     if (!isListening || !isSTTReady || wordsArray.length === 0) {
       setIsCurrentlyPausing(false);
       lastTranscriptTimeRef.current = Date.now();
       return;
     }
-
     const checkPause = setInterval(() => {
       const now = Date.now();
       if (now - lastTranscriptTimeRef.current > 2000 && !isCurrentlyPausing) {
@@ -152,7 +178,6 @@ export default function StudentReadingAssessmentPage() {
         setIsCurrentlyPausing(true);
       }
     }, 500);
-
     return () => clearInterval(checkPause);
   }, [isListening, isSTTReady, wordsArray.length, isCurrentlyPausing]);
 
@@ -164,44 +189,24 @@ export default function StudentReadingAssessmentPage() {
   }, [realTranscript]);
 
   const currentFillers = useMemo(() => {
-    const fillerWords = [
-      "um", "uh", "ah", "err", "hmm", 
-      "like", "you know", "i mean", 
-      "sort of", "kind of", "actually", 
-      "basically", "literally", "so",
-      "right", "okay", "well", "you see",
-      "i guess", "suppose", "really", "just"
-    ];
-    
     const counts: { [word: string]: number } = {};
     let total = 0;
-
-    // Create a Set of lowercase words from the model answer for fast lookup
-    const passageWords = new Set(
-      selectedTopic?.modelAnswer.toLowerCase().split(/\s+/).map(w => w.replace(/[.,!?]/g, "")) || []
-    );
-
     wordsArray.forEach((w: string) => {
-      const clean = w.toLowerCase().replace(/[.,!?]/g, "");
-      if (fillerWords.includes(clean) && !passageWords.has(clean)) {
+      const clean = w.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
+      if (FILLER_WORDS_LIST.includes(clean) && !passageWordsSet.has(clean)) {
         counts[clean] = (counts[clean] || 0) + 1;
         total++;
       }
     });
-
     return { total, fillerCounts: counts };
-  }, [wordsArray, selectedTopic]);
+  }, [wordsArray, passageWordsSet]);
 
   const currentWPM = recordingTime > 0 ? Math.round((wordsArray.length / recordingTime) * 60) : 0;
 
   const keywordCoverage = useMemo(() => {
     if (!selectedTopic || currentStep !== 3) return 0;
     const lowerTranscript = realTranscript.toLowerCase();
-    const count = selectedTopic.keywords.filter(k => {
-      const cleanK = k.toLowerCase().trim();
-      return lowerTranscript.includes(cleanK);
-    }).length;
-    return count;
+    return selectedTopic.keywords.filter(k => lowerTranscript.includes(k.toLowerCase().trim())).length;
   }, [realTranscript, selectedTopic, currentStep]);
 
   const formatTime = (seconds: number) => {
@@ -222,20 +227,24 @@ export default function StudentReadingAssessmentPage() {
   const resetToLanding = () => {
     setSelectedTopic(null);
     setCurrentStep(1);
-    setShowTips(false);
     stopListening();
   };
 
   const renderLiveTranscript = () => {
-    if (!realTranscript) return null;
+    if (!realTranscript) return <span className="text-slate-500 italic">Listening for speech...</span>;
+
     return wordsArray.map((word: string, i: number) => {
       const cleanWord = word.replace(/[.,!?]/g, "").toLowerCase();
+
+      // Highlight Fillers in Step 2
       if (currentStep === 2) {
          if (["um", "uh", "ah", "hmm", "err"].includes(cleanWord)) {
             return <span key={i} className="text-amber-500 font-medium mx-0.5">{word} </span>;
          }
          return <span key={i} className="text-teal-600 dark:text-teal-400 mx-0.5">{word} </span>;
       }
+
+      // Highlight Keywords in Step 3
       if (currentStep === 3) {
          const isKeyword = selectedTopic?.keywords.some((k: string) => k.toLowerCase().includes(cleanWord));
          if (isKeyword && cleanWord.length > 3) {
@@ -243,6 +252,7 @@ export default function StudentReadingAssessmentPage() {
          }
          return <span key={i} className="text-slate-600 dark:text-slate-300 mx-0.5">{word} </span>;
       }
+
       return <span key={i} className="mx-0.5">{word} </span>;
     });
   };
@@ -261,19 +271,30 @@ export default function StudentReadingAssessmentPage() {
               newResult.push(part);
             }
           });
-        } else {
-          newResult.push(chunk);
-        }
+        } else newResult.push(chunk);
       });
       result = newResult;
     });
     return result;
   };
 
+  // FIXED: Moved this helper above the return statement
+  const recordTranscripts = () => {
+    return (
+      <>
+        {isListening && !isSTTReady ? (
+          <div className="flex items-center text-slate-500"><Loader2 className="w-4 h-4 mr-2 animate-spin" /><span>Initializing...</span></div>
+        ) : !isListening && wordsArray.length === 0 ? (
+          <div className="text-slate-400 italic">Ready to record.</div>
+        ) : (<div>{renderLiveTranscript()}{isListening && <span className="animate-pulse border-r-2 border-[#8a42f5] ml-1"></span>}</div>)}
+      </>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-[#f1f3f9] dark:bg-slate-950 transition-colors duration-300 font-sans text-slate-800 dark:text-slate-200">
       <StudentSidebar 
-        activeTab="assessment" 
+        activeTab="assessments" 
         onTabChange={(tab) => navigate(`/${profile?.role?.toLowerCase()}/${tab}`)}
         isCollapsed={isSidebarCollapsed} 
         toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
@@ -284,7 +305,7 @@ export default function StudentReadingAssessmentPage() {
 
         <main className="p-6 md:p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 w-full">
           {!selectedTopic ? (
-            /* ================= PHASE 0: LANDING UI ================= */
+            /* LANDING VIEW */
             <>
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                   <div>
@@ -314,7 +335,7 @@ export default function StudentReadingAssessmentPage() {
                     <Card key={i} className="border-none shadow-sm animate-pulse rounded-2xl bg-white dark:bg-slate-900 h-[200px]" />
                   ))
                 ) : topics.map((topic) => {
-                  const styles = getTopicStyle(topic.band, topic.type);
+                  const styles = getTopicStyle(topic.band);
                   return (
                     <Card key={topic.id} className="border-none shadow-sm hover:shadow-md transition-shadow cursor-pointer rounded-2xl bg-white dark:bg-slate-900 overflow-hidden"
                       onClick={() => handleSelectTopic(topic.id)}>
@@ -340,6 +361,15 @@ export default function StudentReadingAssessmentPage() {
                   );
                 })}
               </div>
+
+              {/* Pagination UI */}
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-4 pt-4">
+                   <Button variant="outline" size="icon" disabled={page === 1} onClick={() => setPage(p => p - 1)}><ChevronLeft className="w-4 h-4" /></Button>
+                   <span className="text-sm font-bold">Page {page} of {totalPages}</span>
+                   <Button variant="outline" size="icon" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}><ChevronRight className="w-4 h-4" /></Button>
+                </div>
+              )}
             </>
           ) : (
             /* ================= MULTI-STEP FLOW ================= */
@@ -359,7 +389,6 @@ export default function StudentReadingAssessmentPage() {
                   </div>
               </div>
 
-              {/* ----- STEP 1: FAMILIARIZATION ----- */}
               {currentStep === 1 && (
                 <StepContainer title="Familiarization" desc="Review the question and model answer before starting.">
                    <div className="space-y-6">
@@ -390,7 +419,6 @@ export default function StudentReadingAssessmentPage() {
                 </StepContainer>
               )}
 
-              {/* ----- STEP 2: FIRST PASS ----- */}
               {currentStep === 2 && (
                 <StepContainer title="First Pass" desc="Read the passage clearly and naturally.">
                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
@@ -428,7 +456,6 @@ export default function StudentReadingAssessmentPage() {
                 </StepContainer>
               )}
 
-              {/* ----- STEP 3: SECOND PASS ----- */}
               {currentStep === 3 && (
                 <StepContainer title="Second Pass" desc="Read again, focusing on the highlighted keywords.">
                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
@@ -473,7 +500,6 @@ export default function StudentReadingAssessmentPage() {
                 </StepContainer>
               )}
 
-              {/* ----- STEP 4: AI RESULTS ----- */}
               {currentStep === 4 && backendResults && (
                 <div className="space-y-8 animate-in fade-in flex flex-col items-center">
                   <div className="text-center space-y-2 mb-4">
@@ -531,18 +557,6 @@ export default function StudentReadingAssessmentPage() {
       </div>
     </div>
   );
-
-  function recordTranscripts() {
-    return (
-      <>
-        {isListening && !isSTTReady ? (
-          <div className="flex items-center text-slate-500"><Loader2 className="w-4 h-4 mr-2 animate-spin" /><span>Initializing...</span></div>
-        ) : !isListening && wordsArray.length === 0 ? (
-          <div className="text-slate-400 italic">Ready to record.</div>
-        ) : (<div>{renderLiveTranscript()}{isListening && <span className="animate-pulse border-r-2 border-[#8a42f5] ml-1"></span>}</div>)}
-      </>
-    );
-  }
 }
 
 const StepContainer = ({ title, desc, children }: any) => (
