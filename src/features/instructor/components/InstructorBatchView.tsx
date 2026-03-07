@@ -2,8 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Layers, Users, RefreshCw, Loader2, GraduationCap,
   ChevronDown, ChevronUp, Mail, Phone, Building2,
-  CheckCircle2, Clock, XCircle, Search,
+  CheckCircle2, Clock, XCircle, Search, BarChart3,
 } from 'lucide-react';
+import StudentProgressModal from './StudentProgressModal';
 import { InstructorSidebar } from '../components/dashboard/InstructorSidebar';
 import { callBackend } from '@/features/auth/services/authClient';
 import { getBackendUrl } from '@/shared/utils';
@@ -59,7 +60,7 @@ const STATUS_CONFIG = {
 
 // ─── Student Row ──────────────────────────────────────────────────────────────
 
-function StudentRow({ student }: { student: BatchStudent }) {
+function StudentRow({ student, onAnalyze }: { student: BatchStudent, onAnalyze: (s: BatchStudent) => void }) {
   return (
     <div className="flex items-center gap-3 py-3 px-4 rounded-xl hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors group">
       {student.profileImage ? (
@@ -84,16 +85,25 @@ function StudentRow({ student }: { student: BatchStudent }) {
           )}
         </div>
       </div>
-      <span className="text-xs text-slate-400 dark:text-slate-500 shrink-0 hidden sm:block">
-        Enrolled {formatDate(student.enrolledAt)}
-      </span>
+      <div className="flex items-center gap-4 shrink-0">
+        <span className="text-xs text-slate-400 dark:text-slate-500 hidden sm:block">
+          Enrolled {formatDate(student.enrolledAt)}
+        </span>
+        <button
+          onClick={(e) => { e.stopPropagation(); onAnalyze(student); }}
+          className="flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-full text-xs font-semibold shadow-md shadow-indigo-500/20 hover:shadow-lg hover:shadow-indigo-500/30 transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 transform hover:-translate-y-0.5"
+        >
+          <BarChart3 className="w-3.5 h-3.5" />
+          Analyze Progress
+        </button>
+      </div>
     </div>
   );
 }
 
 // ─── Batch Card ───────────────────────────────────────────────────────────────
 
-function BatchCard({ batch }: { batch: InstructorBatch }) {
+function BatchCard({ batch, onAnalyzeStudent }: { batch: InstructorBatch, onAnalyzeStudent: (s: BatchStudent) => void }) {
   const [expanded, setExpanded] = useState(false);
   const [search, setSearch] = useState('');
   const cfg = STATUS_CONFIG[batch.status] ?? STATUS_CONFIG.ACTIVE;
@@ -220,7 +230,7 @@ function BatchCard({ batch }: { batch: InstructorBatch }) {
                 </p>
               </div>
             ) : (
-              filtered.map(s => <StudentRow key={s.userId} student={s} />)
+              filtered.map(s => <StudentRow key={s.userId} student={s} onAnalyze={onAnalyzeStudent} />)
             )}
           </div>
         </div>
@@ -236,6 +246,7 @@ export default function InstructorBatchView() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [batches, setBatches] = useState<InstructorBatch[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeStudent, setActiveStudent] = useState<BatchStudent | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -321,12 +332,19 @@ export default function InstructorBatchView() {
               </div>
             ) : (
               <div className="space-y-4">
-                {batches.map(batch => <BatchCard key={batch.id} batch={batch} />)}
+                {batches.map(batch => <BatchCard key={batch.id} batch={batch} onAnalyzeStudent={setActiveStudent} />)}
               </div>
             )}
           </div>
         </main>
       </div>
+
+      {activeStudent && (
+        <StudentProgressModal 
+          student={activeStudent} 
+          onClose={() => setActiveStudent(null)} 
+        />
+      )}
     </div>
   );
 }
