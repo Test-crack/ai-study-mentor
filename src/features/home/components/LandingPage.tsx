@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import GraduationCap from 'lucide-react/dist/esm/icons/graduation-cap';
 import BookOpen from 'lucide-react/dist/esm/icons/book-open';
 import Zap from 'lucide-react/dist/esm/icons/zap';
-import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
+import User from 'lucide-react/dist/esm/icons/User';
 import Target from 'lucide-react/dist/esm/icons/target';
 import Cpu from 'lucide-react/dist/esm/icons/cpu';
 import Briefcase from 'lucide-react/dist/esm/icons/briefcase';
@@ -26,7 +26,7 @@ import LineChart from 'lucide-react/dist/esm/icons/line-chart';
 import MessageSquareText from 'lucide-react/dist/esm/icons/message-square-text';
 import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
 import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
-import FileDown from 'lucide-react/dist/esm/icons/file-down';
+import { UserRound } from 'lucide-react';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -120,46 +120,25 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation */}
-   <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md transform-gpu">
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  {/* Navigation */}
+<nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 transform-gpu">
+  {/* Changed max-w-7xl mx-auto to w-full */}
+  <div className="w-full px-4 sm:px-6 lg:px-8">
     <div className="flex items-center justify-between h-16">
+      
+      {/* Logo Section - Now stays at the far left */}
       <div className="flex items-center space-x-2">
         <div className="p-2 bg-indigo-700 rounded-xl">
-          <GraduationCap className="h-6 w-6 text-white" />
+          {/* Replaced GraduationCap with UserRound */}
+          <UserRound className="h-6 w-6 text-white" />
         </div>
-        <span className="text-xl font-bold bg-indigo-700 bg-clip-text text-transparent">
+        <span className="text-xl font-bold text-indigo-700">
           TestCrack
         </span>
       </div>
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/courses')}
-          className="hidden md:inline-flex text-white bg-indigo-700 hover:bg-indigo-900 hover:text-white"
-        >
-          Courses
-        </Button>
 
-        {user ? (
-          <Button
-            onClick={() => navigate('/dashboard')}
-            className="text-white bg-indigo-700 hover:bg-indigo-900"
-          >
-            Dashboard
-          </Button>
-        ) : (
-          <>
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/auth')}
-              className="text-white bg-indigo-700 hover:bg-indigo-900 hover:text-white"
-            >
-              Sign In
-            </Button>
-          </>
-        )}
-      </div>
+  
+      
     </div>
   </div>
 </nav>
@@ -206,7 +185,7 @@ const LandingPage = () => {
 
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
 
-        <Button
+        {/* <Button
           size="lg"
           onClick={() => {
             if (!user) {
@@ -225,16 +204,25 @@ const LandingPage = () => {
         >
           {user ? 'Go to Dashboard' : 'Start Learning Free'}
           <ArrowRight className="ml-2 h-5 w-5" />
-        </Button>
+        </Button> */}
         
         <Button
           size="lg"
           variant="outline"
-          onClick={() => navigate('/courses')}
+          onClick={() => navigate('/dashdemo')}
           className="px-8 py-6 h-auto bg-indigo-700 hover:bg-indigo-800 text-white px-8 py-6 h-auto transition-all shadow-md active:scale-95"
         >
           <BookOpen className="mr-2 h-5 w-5 text-white" />
-         <span className='text-white'> Browse Course</span>
+         <span className='text-white'> View Demo</span>
+        </Button>
+        <Button
+          size="lg"
+          variant="outline"
+          onClick={() => navigate('/Contact')}
+          className="px-8 py-6 h-auto bg-indigo-700 hover:bg-indigo-800 text-white px-8 py-6 h-auto transition-all shadow-md active:scale-95"
+        >
+          <BookOpen className="mr-2 h-5 w-5 text-white" />
+         <span className='text-white'>Contact us</span>
         </Button>
       </div>
     </div>
@@ -325,11 +313,11 @@ const LandingPage = () => {
               
               <div className="flex flex-col items-center gap-4 z-10">
                 <div className="w-20 h-20 rounded-2xl bg-white shadow-xl flex items-center justify-center border border-slate-100 group-hover:scale-105 transition-transform duration-500">
-                  <MonitorPlay className="h-10 w-10 text-indigo-600" />
+<User className="h-10 w-10 text-purple-600" /> 
                 </div>
                 <div className="text-center">
-                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Capture</span>
-                  <p className="text-sm font-bold text-slate-700">Video/Text</p>
+                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Level</span>
+                  <p className="text-sm font-bold text-slate-700">Beginner</p>
                 </div>
               </div>
 
@@ -352,11 +340,11 @@ const LandingPage = () => {
 
               <div className="flex flex-col items-center gap-4 z-10">
                 <div className="w-20 h-20 rounded-2xl bg-white shadow-xl flex items-center justify-center border border-slate-100 group-hover:scale-105 transition-transform duration-500">
-                  <FileDown className="h-10 w-10 text-purple-600" />
-                </div>
+<User className="h-10 w-10 text-purple-600" /> 
+               </div>
                 <div className="text-center">
-                  <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest">Generate</span>
-                  <p className="text-sm font-bold text-slate-700">Insights</p>
+                  <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest">Level</span>
+                  <p className="text-sm font-bold text-slate-700">Expert</p>
                 </div>
               </div>
             </div>
@@ -501,24 +489,22 @@ Our engine doesn't just track your mistakes; it benchmarks your performance agai
             <span className="text-indigo-200">Your Learning?</span>
           </h2>
           <p className="text-xl text-indigo-100/80 max-w-2xl mx-auto leading-relaxed font-medium">
-            Join thousands of learners mastering IELTS, PTE, and SAT with the power of TestCrack AI.
+            Join us for mastering IELTS, PTE, and SAT with the power of TestCrack AI.
           </p>
         </div>
 
         <div className="flex flex-col items-center gap-6">
-          <Button
+          {/* <Button
             size="lg"
             onClick={() => navigate(user ? '/dashboard' : '/auth')}
             className="bg-white text-indigo-700 hover:bg-indigo-50 px-12 py-8 h-auto transition-all duration-300 rounded-full shadow-[0_20px_40px_-10px_rgba(0,0,0,0.3)] hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] hover:-translate-y-1 active:scale-95 text-lg font-bold group"
           >
             {user ? 'Go to Dashboard' : 'Get Started for Free'}
             <ArrowRight className="ml-2 h-6 w-6 transition-transform group-hover:translate-x-1" />
-          </Button>
+          </Button> */}
           
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-2">
             {[
-              { icon: ShieldCheck, text: 'No credit card required' },
-              { icon: Sparkles, text: 'Free plan available' },
               { icon: Zap, text: 'Instant Setup' }
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-2 text-indigo-100/60 text-sm font-medium">

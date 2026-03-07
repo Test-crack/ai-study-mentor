@@ -68,6 +68,9 @@ import Workflow from "@/features/instructor/components/Workflow";
 import IeltsWriting from "@/features/student/components/IeltsWriting";
 import ListeningPractice from "@/features/student/components/ListeningPractice";
 import ReadingPractice from "@/features/student/components/ReadingPractice";
+import Dashdemo from "@/features/home/components/Dashdemo";
+import Contactpage from "@/features/home/components/ContactPage";
+import CourseSection from "@/features/student/components/CourseSection";
 const queryClient = new QueryClient();
 
 /**
@@ -111,7 +114,12 @@ const AppRoutes = () => {
   return (
     <Routes>
       {/* Public routes */}
+
+
       <Route path="/" element={<LandingPage />} />
+      <Route path="/dashdemo" element={< Dashdemo/>} />
+      <Route path="/Contact" element={< Contactpage/>} />
+
 {/* Institute Owner Routes */}
 <Route path="/owner-dashboard" element={<InstituteOwnerDashboard/>}/>
 <Route path="/owner-performance" element={<Performance/>}/>
@@ -166,13 +174,14 @@ const AppRoutes = () => {
       <Route path="/student/schedule" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentSchedulePage /></RoleProtectedRoute>} />
       <Route path="/student/voice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><VoiceLab/></RoleProtectedRoute>} />
       <Route path="/student/speed" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><SpeedReading/></RoleProtectedRoute>} />
-      <Route path="/student/reading-assessment" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentReadingAssessmentPage /></RoleProtectedRoute>} />
+      <Route path="/student/speaking-assessment" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentReadingAssessmentPage /></RoleProtectedRoute>} />
       <Route path="/student/writing" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><IeltsWriting/></RoleProtectedRoute>} />
       <Route path="/student/listening" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><ListeningPractice/></RoleProtectedRoute>} />
       <Route path="/student/reading" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><ReadingPractice/></RoleProtectedRoute>} />
+      <Route path="/student/courses-section" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><CourseSection/></RoleProtectedRoute>} />
       <Route path="/student/reading-assessment/history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentAssessmentHistoryPage /></RoleProtectedRoute>} />
       <Route path="/student/my-curriculum" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><MyCurriculum/></RoleProtectedRoute>} />
-      <Route path="/student/speaking-practice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><SpeakingPractice/></RoleProtectedRoute>} />
+      <Route path="/student/speaking" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><SpeakingPractice/></RoleProtectedRoute>} />
 
       {/* Instructor Dashboard & Routes */}
       <Route 

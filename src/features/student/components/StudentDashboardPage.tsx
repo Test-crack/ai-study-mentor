@@ -39,7 +39,7 @@ const StudentDashboardPage = () => {
               <p className="mt-2 text-indigo-100 max-w-xl">
                 You're on a 5-day streak! Keep it up. Your predicted IELTS band is 8.5 — practice speaking and reading to push for 7+.
               </p>
-              <div className="mt-6 flex gap-3">
+              {/* <div className="mt-6 flex gap-3">
                 <button 
                   onClick={() => navigate('/student/speaking-practice')}
                   className="rounded-lg bg-white px-4 py-2 text-sm font-bold text-indigo-600 hover:bg-indigo-50 transition-colors"
@@ -52,7 +52,7 @@ const StudentDashboardPage = () => {
                 >
                   Reading Practice
                 </button>
-              </div>
+              </div> */}
             </div>
           </section>
 

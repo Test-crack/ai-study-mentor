@@ -53,7 +53,7 @@ const SpeakingPractice = () => {
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
       {/* Sidebar */}
       <StudentSidebar 
-        activeTab={activeTab} 
+        activeTab='assessment' 
         onTabChange={setActiveTab} 
         isCollapsed={isSidebarCollapsed}
         toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}

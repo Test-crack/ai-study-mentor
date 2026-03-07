@@ -49,7 +49,7 @@ export default function StudentReadingAssessmentPage() {
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [showTips, setShowTips] = useState(false); // FIXED: Added missing state
+  const [showTips, setShowTips] = useState(false);
   
   // Recording & STT Logic
   const { 
@@ -120,12 +120,11 @@ export default function StudentReadingAssessmentPage() {
     }
   };
 
-  // FIXED: Merged into a single helper function with an optional 'type' parameter
   const getTopicStyle = (band: string, type?: string) => {
     const bandNum = band.split(' ')[1];
-    let color = "text-[#8a42f5] dark:text-[#a874f7]";
-    let bg = "bg-[#f5f0ff] dark:bg-[#8a42f5]/20";
-    let border = "border-[#d9c4f9] dark:border-[#8a42f5]/40";
+    let color = "text-[#7B61FF] dark:text-[#9b86ff]";
+    let bg = "bg-indigo-50 dark:bg-[#7B61FF]/20";
+    let border = "border-indigo-100 dark:border-[#7B61FF]/40";
     let iconType = 'pencil';
 
     if (bandNum === '5') {
@@ -266,7 +265,7 @@ export default function StudentReadingAssessmentPage() {
           const parts = chunk.split(new RegExp(`(${keyword})`, 'gi'));
           parts.forEach(part => {
             if (part.toLowerCase() === keyword.toLowerCase()) {
-              newResult.push(<span key={Math.random()} className="text-[#8a42f5] dark:text-[#a874f7] font-semibold bg-[#f5f0ff] dark:bg-[#8a42f5]/20 px-1 rounded">{part}</span>);
+              newResult.push(<span key={Math.random()} className="text-[#7B61FF] dark:text-[#9b86ff] font-semibold bg-indigo-50 dark:bg-[#7B61FF]/20 px-1 rounded">{part}</span>);
             } else if (part) {
               newResult.push(part);
             }
@@ -278,7 +277,6 @@ export default function StudentReadingAssessmentPage() {
     return result;
   };
 
-  // FIXED: Moved this helper above the return statement
   const recordTranscripts = () => {
     return (
       <>
@@ -286,7 +284,7 @@ export default function StudentReadingAssessmentPage() {
           <div className="flex items-center text-slate-500"><Loader2 className="w-4 h-4 mr-2 animate-spin" /><span>Initializing...</span></div>
         ) : !isListening && wordsArray.length === 0 ? (
           <div className="text-slate-400 italic">Ready to record.</div>
-        ) : (<div>{renderLiveTranscript()}{isListening && <span className="animate-pulse border-r-2 border-[#8a42f5] ml-1"></span>}</div>)}
+        ) : (<div>{renderLiveTranscript()}{isListening && <span className="animate-pulse border-r-2 border-[#7B61FF] ml-1"></span>}</div>)}
       </>
     );
   };
@@ -294,7 +292,7 @@ export default function StudentReadingAssessmentPage() {
   return (
     <div className="min-h-screen bg-[#f1f3f9] dark:bg-slate-950 transition-colors duration-300 font-sans text-slate-800 dark:text-slate-200">
       <StudentSidebar 
-        activeTab="assessments" 
+        activeTab="speaking-assessment" 
         onTabChange={(tab) => navigate(`/${profile?.role?.toLowerCase()}/${tab}`)}
         isCollapsed={isSidebarCollapsed} 
         toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
@@ -307,11 +305,24 @@ export default function StudentReadingAssessmentPage() {
           {!selectedTopic ? (
             /* LANDING VIEW */
             <>
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-                  <div>
-                      <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Speaking Practice</h1>
-                      <p className="text-slate-500 dark:text-slate-400 mt-1">Practice and improve your speaking fluency.</p>
-                  </div>
+              {/* --- NEW COLORED BANNER --- */}
+              <div className="bg-[#7B61FF] rounded-2xl p-8 md:p-10 text-white shadow-md relative overflow-hidden mb-8">
+                <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
+                
+                <div className="relative z-10">
+                  <h1 className="text-3xl font-bold mb-3 flex items-center gap-2">
+                    Speaking Practice <Sparkles className="h-6 w-6 text-yellow-300" fill="currentColor" />
+                  </h1>
+                  <p className="text-indigo-50 max-w-2xl text-base md:text-lg leading-relaxed mb-6">
+                    Practice and improve your speaking fluency. Select a topic, record your response, and get instant feedback on your pacing, filler words, and keyword usage.
+                  </p>
+                  
+                  {/* <div className="flex gap-3">
+                     <button className="bg-white text-[#7B61FF] hover:bg-slate-100 font-semibold rounded-full px-6 py-2 shadow-sm text-sm">
+                       Review Past Sessions
+                     </button>
+                  </div> */}
+                </div>
               </div>
 
               <div className="flex flex-wrap gap-2 mb-8 border-b border-slate-200 dark:border-slate-800 pb-4">
@@ -337,11 +348,11 @@ export default function StudentReadingAssessmentPage() {
                 ) : topics.map((topic) => {
                   const styles = getTopicStyle(topic.band);
                   return (
-                    <Card key={topic.id} className="border-none shadow-sm hover:shadow-md transition-shadow cursor-pointer rounded-2xl bg-white dark:bg-slate-900 overflow-hidden"
+                    <Card key={topic.id} className="border-none shadow-sm hover:shadow-md hover:border-[#7B61FF]/50 transition-all cursor-pointer rounded-2xl bg-white dark:bg-slate-900 overflow-hidden group"
                       onClick={() => handleSelectTopic(topic.id)}>
                       {isFetchingDetail && selectedTopic?.id !== topic.id && (
                         <div className="absolute inset-0 bg-white/50 dark:bg-slate-900/50 flex items-center justify-center z-10 backdrop-blur-sm">
-                          <Loader2 className="w-6 h-6 animate-spin text-[#8a42f5]" />
+                          <Loader2 className="w-6 h-6 animate-spin text-[#7B61FF]" />
                         </div>
                       )}
                       <CardContent className="p-6">
@@ -351,7 +362,7 @@ export default function StudentReadingAssessmentPage() {
                           </div>
                           <span className={cn("px-2.5 py-1 rounded-md text-xs font-semibold border", styles.border, styles.color, styles.bg)}>{topic.band}</span>
                         </div>
-                        <h3 className="text-base font-semibold text-[#0b132b] dark:text-slate-100 mb-4 line-clamp-2">{topic.title}</h3>
+                        <h3 className="text-base font-semibold text-[#0b132b] dark:text-slate-100 mb-4 line-clamp-2 group-hover:text-[#7B61FF] transition-colors">{topic.title}</h3>
                         <div className="flex items-center gap-4 text-slate-500 text-sm">
                           <div className="flex items-center gap-1.5"><Target className="w-4 h-4" /> {topic.phrases}</div>
                           <div className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> {topic.words}w</div>
@@ -382,7 +393,7 @@ export default function StudentReadingAssessmentPage() {
                   <div className="flex gap-2">
                     {[1, 2, 3, 4].map(s => (
                       <div key={s} className={cn("h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors",
-                        currentStep === s ? "bg-[#8a42f5] text-white ring-4 ring-[#8a42f5]/20 dark:ring-[#8a42f5]/40" : s < currentStep ? "bg-[#10b981] text-white" : "bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-400")}>
+                        currentStep === s ? "bg-[#7B61FF] text-white ring-4 ring-[#7B61FF]/20 dark:ring-[#7B61FF]/40" : s < currentStep ? "bg-[#10b981] text-white" : "bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-400")}>
                         {s < currentStep ? <Check className="h-4 w-4" /> : s}
                       </div>
                     ))}
@@ -406,7 +417,7 @@ export default function StudentReadingAssessmentPage() {
                       </div>
                    </div>
                    <div className="pt-4">
-                      <button onClick={() => setShowTips(!showTips)} className="text-[#8a42f5] dark:text-[#a874f7] text-sm font-medium flex items-center gap-1.5 hover:underline"><Info className="w-4 h-4" /> {showTips ? 'Hide Tips' : 'View Practice Tips'}</button>
+                      <button onClick={() => setShowTips(!showTips)} className="text-[#7B61FF] dark:text-[#9b86ff] text-sm font-medium flex items-center gap-1.5 hover:underline"><Info className="w-4 h-4" /> {showTips ? 'Hide Tips' : 'View Practice Tips'}</button>
                       {showTips && (
                         <ul className="mt-4 p-5 bg-white dark:bg-slate-900 rounded-2xl border-none shadow-sm space-y-2">
                           {selectedTopic.tips.map((tip: string, i: number) => (
@@ -415,7 +426,7 @@ export default function StudentReadingAssessmentPage() {
                         </ul>
                       )}
                    </div>
-                   <Button size="lg" className="w-full mt-8 bg-[#8a42f5] hover:bg-[#7b3be6] text-white rounded-xl h-12" onClick={() => setCurrentStep(2)}>Start Practice</Button>
+                   <Button size="lg" className="w-full mt-8 bg-[#7B61FF] hover:bg-[#6a50e5] text-white rounded-xl h-12 shadow-sm" onClick={() => setCurrentStep(2)}>Start Practice</Button>
                 </StepContainer>
               )}
 
@@ -441,11 +452,11 @@ export default function StudentReadingAssessmentPage() {
                      <div className="min-h-[100px] text-base leading-relaxed text-slate-700 dark:text-slate-300">
                         {isListening && !isSTTReady ? (<div className="flex items-center text-slate-500"><Loader2 className="w-4 h-4 mr-2 animate-spin" /><span>Initializing...</span></div>
                         ) : !isListening && wordsArray.length === 0 ? (<div className="text-slate-400 italic">Ready to record.</div>
-                        ) : (<div>{renderLiveTranscript()}{isListening && <span className="animate-pulse border-r-2 border-[#8a42f5] ml-1"></span>}</div>)}
+                        ) : (<div>{renderLiveTranscript()}{isListening && <span className="animate-pulse border-r-2 border-[#7B61FF] ml-1"></span>}</div>)}
                      </div>
                    </div>
                    {!isListening ? (
-                     <Button size="lg" className="w-full mt-8 bg-[#8a42f5] hover:bg-[#7b3be6] text-white rounded-xl h-12" onClick={handleStartRecording}><Mic className="w-4 h-4 mr-2" /> Start Recording</Button>
+                     <Button size="lg" className="w-full mt-8 bg-[#7B61FF] hover:bg-[#6a50e5] text-white rounded-xl h-12 shadow-sm" onClick={handleStartRecording}><Mic className="w-4 h-4 mr-2" /> Start Recording</Button>
                    ) : (
                      <Button size="lg" variant="destructive" className="w-full mt-8 rounded-xl h-12" onClick={() => { 
                         stopListening(); 
@@ -480,7 +491,7 @@ export default function StudentReadingAssessmentPage() {
                          </div>
                    </div>
                    {!isListening ? (
-                     <Button size="lg" className="w-full mt-8 bg-[#8a42f5] hover:bg-[#7b3be6] text-white rounded-xl h-12" onClick={handleStartRecording}><Mic className="w-4 h-4 mr-2" /> Start Recording</Button>
+                     <Button size="lg" className="w-full mt-8 bg-[#7B61FF] hover:bg-[#6a50e5] text-white rounded-xl h-12 shadow-sm" onClick={handleStartRecording}><Mic className="w-4 h-4 mr-2" /> Start Recording</Button>
                    ) : (
                      <Button size="lg" variant="destructive" className="w-full mt-8 rounded-xl h-12" disabled={isSaving}
                         onClick={async () => { 
@@ -504,7 +515,7 @@ export default function StudentReadingAssessmentPage() {
                 <div className="space-y-8 animate-in fade-in flex flex-col items-center">
                   <div className="text-center space-y-2 mb-4">
                     <h2 className="text-3xl font-extrabold text-[#0b132b] dark:text-white">Reading Practice Results</h2>
-                    <span className="inline-block px-3 py-1 bg-[#8a42f5]/10 text-[#8a42f5] rounded-full text-[10px] font-bold uppercase tracking-widest mt-2">Assessment Recorded • Band {selectedTopic.band.split(' ')[1]}</span>
+                    <span className="inline-block px-3 py-1 bg-indigo-50 dark:bg-[#7B61FF]/10 text-[#7B61FF] rounded-full text-[10px] font-bold uppercase tracking-widest mt-2">Assessment Recorded • Band {selectedTopic.band.split(' ')[1]}</span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full max-w-4xl">
@@ -513,11 +524,11 @@ export default function StudentReadingAssessmentPage() {
                       <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Fluency Score</div>
                     </div>
                     <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border-none shadow-[0_2px_10px_rgba(0,0,0,0.04)] flex flex-col items-center justify-center">
-                      <div className="text-5xl font-black text-[#8a42f5] dark:text-[#a874f7] mb-2">{backendResults.weightedWpm}</div>
+                      <div className="text-5xl font-black text-[#7B61FF] dark:text-[#9b86ff] mb-2">{backendResults.weightedWpm}</div>
                       <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Weighted Avg WPM</div>
                     </div>
                     <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border-none shadow-[0_2px_10px_rgba(0,0,0,0.04)] flex flex-col items-center justify-center">
-                      <div className="text-5xl font-black text-[#8a42f5] dark:text-[#a874f7] mb-2">{backendResults.keywordsHit}/{backendResults.totalKeywords}</div>
+                      <div className="text-5xl font-black text-[#7B61FF] dark:text-[#9b86ff] mb-2">{backendResults.keywordsHit}/{backendResults.totalKeywords}</div>
                       <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Keywords Hit</div>
                     </div>
                   </div>
@@ -547,7 +558,7 @@ export default function StudentReadingAssessmentPage() {
 
                   <div className="flex flex-col sm:flex-row gap-4 pt-8 w-full max-w-4xl">
                     <Button variant="outline" className="flex-1 h-14 rounded-2xl font-bold border-2 text-[#0b132b] bg-white hover:bg-slate-50" onClick={() => setCurrentStep(1)}>Try Again</Button>
-                    <Button className="flex-1 h-14 rounded-2xl font-bold bg-[#8a42f5] text-white hover:bg-[#7b3be6]" onClick={resetToLanding}>Back to Dashboard</Button>
+                    <Button className="flex-1 h-14 rounded-2xl font-bold bg-[#7B61FF] text-white hover:bg-[#6a50e5] shadow-sm" onClick={resetToLanding}>Back to Dashboard</Button>
                   </div>
                 </div>
               )}
@@ -573,7 +584,7 @@ const StepContainer = ({ title, desc, children }: any) => (
 
 const StatMini = ({ label, value }: { label: string; value: string | number }) => (
   <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border-none shadow-sm flex flex-col items-center justify-center">
-      <div className="text-3xl font-black text-[#8a42f5] dark:text-[#a874f7] mb-1">{value}</div>
+      <div className="text-3xl font-black text-[#7B61FF] dark:text-[#9b86ff] mb-1">{value}</div>
       <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</div>
   </div>
 );

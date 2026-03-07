@@ -4,7 +4,7 @@ import { StudentSidebar } from './dashboard/StudentSidebar';
 import { StudentTopbar } from './dashboard/StudentTopbar';
 import { Button } from '@/shared/components/ui/button';
 import { useToast } from '@/shared/hooks/use-toast';
-import { ArrowLeft, Send, Headphones, PlayCircle, Info, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Send, Headphones, PlayCircle, Info, CheckCircle2, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
 
@@ -157,9 +157,26 @@ export default function ListeningPractice() {
           {/* --- VIEW 1: Card Selection Screen --- */}
           {!selectedTask ? (
             <div className="space-y-8 h-full">
-              <div>
-                <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Listening Practice</h1>
-                <p className="text-slate-500 dark:text-slate-400">Select an audio module to begin your practice test.</p>
+              
+              {/* --- NEW COLORED BANNER --- */}
+              <div className="bg-[#7B61FF] rounded-2xl p-8 md:p-10 text-white shadow-md relative overflow-hidden">
+                {/* Decorative element */}
+                <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
+                
+                <div className="relative z-10">
+                  <h1 className="text-3xl font-bold mb-3 flex items-center gap-2">
+                    IELTS Listening Practice <Sparkles className="h-6 w-6 text-yellow-300" fill="currentColor" />
+                  </h1>
+                  <p className="text-indigo-50 max-w-2xl text-base md:text-lg leading-relaxed mb-6">
+                    Improve your listening skills with authentic audio tracks. Select a module below to practice your comprehension of accents, specific details, and overall meaning to aim for a band 7+.
+                  </p>
+                  
+                  {/* <div className="flex gap-3">
+                     <Button className="bg-white text-[#7B61FF] hover:bg-slate-100 font-semibold rounded-full px-6 shadow-sm">
+                       Review Past Tests
+                     </Button>
+                  </div> */}
+                </div>
               </div>
 
               {MOCK_TASKS.length === 0 ? (
@@ -174,15 +191,15 @@ export default function ListeningPractice() {
                     <Card 
                       key={task.id}
                       onClick={() => setSelectedTask(task)}
-                      className="border border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900 hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-700 transition-all cursor-pointer flex flex-col h-64 group"
+                      className="border border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900 hover:shadow-md hover:border-[#7B61FF] dark:hover:border-[#7B61FF] transition-all cursor-pointer flex flex-col h-64 group"
                     >
                       <CardHeader className="pb-3 flex-none">
                         <div className="flex justify-between items-start gap-4">
-                          <CardTitle className="text-lg font-bold text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
+                          <CardTitle className="text-lg font-bold text-slate-800 dark:text-slate-100 group-hover:text-[#7B61FF] dark:group-hover:text-[#9b86ff] transition-colors line-clamp-2">
                             {task.title}
                           </CardTitle>
                           <div className="flex flex-col items-end gap-2">
-                            <Badge className="bg-indigo-100 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/50 dark:text-indigo-300 flex-shrink-0">
+                            <Badge className="bg-indigo-50 text-[#7B61FF] hover:bg-indigo-100 dark:bg-[#7B61FF]/20 dark:text-[#9b86ff] flex-shrink-0">
                               New
                             </Badge>
                             <span className="text-xs font-semibold text-slate-400 flex items-center">
@@ -197,7 +214,7 @@ export default function ListeningPractice() {
                         </p>
                         <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-xs font-medium text-slate-500 dark:text-slate-500">
                           <span>{task.questions.length} Questions</span>
-                          <span className="text-indigo-600 dark:text-indigo-400 flex items-center group-hover:translate-x-1 transition-transform">
+                          <span className="text-[#7B61FF] dark:text-[#9b86ff] flex items-center group-hover:translate-x-1 transition-transform">
                             Start Listening <ArrowLeft className="h-3 w-3 ml-1 rotate-180" />
                           </span>
                         </div>
@@ -225,7 +242,7 @@ export default function ListeningPractice() {
                 <Button 
                   onClick={handleSubmit} 
                   disabled={submitting}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm w-full sm:w-auto"
+                  className="bg-[#7B61FF] hover:bg-[#6a50e5] text-white shadow-sm w-full sm:w-auto"
                 >
                   {submitting ? (
                     <span className="flex items-center">Submitting...</span>
@@ -242,7 +259,7 @@ export default function ListeningPractice() {
                 <div className="w-full lg:w-[40%] flex flex-col gap-6 overflow-y-auto pr-1">
                   <Card className="border-none shadow-sm bg-white dark:bg-slate-900 flex-shrink-0">
                     <CardHeader className="pb-4">
-                      <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 mb-2">
+                      <div className="flex items-center gap-2 text-[#7B61FF] dark:text-[#9b86ff] mb-2">
                         <Headphones className="h-5 w-5" />
                         <span className="text-sm font-bold uppercase tracking-wider">Audio Player</span>
                       </div>
@@ -316,19 +333,19 @@ export default function ListeningPractice() {
                                 className={`
                                   relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 flex items-center
                                   ${isSelected 
-                                    ? 'border-indigo-600 bg-indigo-50 dark:border-indigo-500 dark:bg-indigo-900/20' 
-                                    : 'border-slate-200 bg-white hover:border-indigo-300 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-indigo-700'
+                                    ? 'border-[#7B61FF] bg-indigo-50 dark:border-[#7B61FF] dark:bg-[#7B61FF]/10' 
+                                    : 'border-slate-200 bg-white hover:border-[#7B61FF]/50 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-[#7B61FF]/50'
                                   }
                                 `}
                               >
                                 <div className={`
                                   w-5 h-5 rounded-full border-2 mr-4 flex items-center justify-center flex-shrink-0 transition-colors
                                   ${isSelected 
-                                    ? 'border-indigo-600 dark:border-indigo-400' 
+                                    ? 'border-[#7B61FF] dark:border-[#7B61FF]' 
                                     : 'border-slate-300 dark:border-slate-600'
                                   }
                                 `}>
-                                  {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400" />}
+                                  {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-[#7B61FF] dark:bg-[#7B61FF]" />}
                                 </div>
                                 <span className={`text-sm ${isSelected ? 'text-indigo-900 font-medium dark:text-indigo-200' : 'text-slate-700 dark:text-slate-300'}`}>
                                   {option.text}

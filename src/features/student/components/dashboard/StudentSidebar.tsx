@@ -34,16 +34,16 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
   
  const menuItems = [
   { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/student/dashboard' },
-  { id: 'courses', icon: GraduationCap, label: 'My Courses', path: '/student/courses' },
-  { id: 'assessment', icon: Mic, label: 'Speaking Practice', path: '/student/reading-assessment' },
-  { id: 'voice', icon: Activity, label: 'Voice Lab', path: '/student/voice' },
-  { id: 'speed', icon: Timer, label: 'Speed Reading', path: '/student/speed' },
-  { id: 'writing', icon: PenTool, label: 'IELTS Writing', path: '/student/writing' },
-  { id: 'listening', icon: Headphones, label: 'Listening Practice', path: '/student/listening' },
+  { id: 'speaking-assessment', icon: Mic, label: 'Speaking Practice', path: '/student/speaking-assessment' },
+  { id: 'writing', icon: PenTool, label: 'Writing Practice', path: '/student/writing' },
   { id: 'reading', icon: BookOpen, label: 'Reading Practice', path: '/student/reading' },
-  { id: 'schedule', icon: Calendar, label: 'Schedule', path: '/student/schedule' },
-  { id: 'speaking-practice', icon: MessageCircle, label: 'Speaking-Anatomy', path: '/student/speaking-practice' },
-  { id: 'my-curriculum', icon: Library, label: 'My-Curriculum', path: '/student/my-curriculum' },
+  { id: 'listening', icon: Headphones, label: 'Listening Practice', path: '/student/listening' },
+  { id: 'speed', icon: Timer, label: 'Speed Reading', path: '/student/speed' },
+  { id: 'voice', icon: Activity, label: 'Voice Lab', path: '/student/voice' },
+  // { id: 'schedule', icon: Calendar, label: 'Schedule', path: '/student/schedule' },
+  // { id: 'speaking-practice', icon: MessageCircle, label: 'Speaking-Anatomy', path: '/student/speaking-practice' },
+  // { id: 'my-curriculum', icon: Library, label: 'My-Curriculum', path: '/student/my-curriculum' },
+  { id: 'courses-section', icon: GraduationCap, label: 'My Courses', path: '/student/courses-section' },
   { id: 'settings', icon: Settings, label: 'Settings', path: '/student/settings' },
 ];
   const handleNavigation = (item: typeof menuItems[0]) => {
