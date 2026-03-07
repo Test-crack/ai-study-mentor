@@ -8,7 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
   BookText,Mic2,Zap,MessageSquare,
-  Home
+  Home,Layers
 } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -27,8 +27,9 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
   const navigate = useNavigate();
   
  const menuItems = [
-  { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/student/dashboard' },
-  { id: 'courses', icon: BookOpen, label: 'My Courses', path: '/student/courses' },
+  { id: 'dashboard',  icon: LayoutDashboard, label: 'Dashboard',   path: '/student/dashboard' },
+  { id: 'courses',    icon: BookOpen,        label: 'My Courses',  path: '/student/courses' },
+  { id: 'batches',    icon: Layers,          label: 'My Batch',    path: '/student/batches' },
   { id: 'assessments', icon: BookText, label: 'IELTS Reading', path: '/student/reading-assessment' },
   { id: 'voice', icon: Mic2, label: 'Voice Lab', path: '/student/voice' },
   { id: 'speed', icon: Zap, label: 'Speed Reading', path: '/student/speed' },

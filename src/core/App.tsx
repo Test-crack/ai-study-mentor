@@ -27,8 +27,10 @@ import StudentCoursesPage from "@/features/student/components/StudentCoursesPage
 import StudentSchedulePage from "@/features/student/components/StudentSchedulePage";
 import StudentReadingAssessmentPage from "@/features/student/components/StudentReadingAssessmentPage";
 import StudentAssessmentHistoryPage from "@/features/student/components/StudentAssessmentHistoryPage";
+import StudentBatchView from "@/features/student/components/StudentBatchView";
 import InstructorDashboardPage from "@/features/instructor/components/InstructorDashboardPage";
 import InstructorAssessmentPage from "@/features/instructor/components/assessments/InstructorAssessmentPage";
+import InstructorBatchView from "@/features/instructor/components/InstructorBatchView";
 import { RoleProtectedRoute } from "@/shared/components/auth/ProtectedRoute";
 import SpeakingPractice from "@/features/student/components/SpeakingPractice";
 import MyCurriculum from "@/features/student/components/MyCurriculum";
@@ -39,7 +41,7 @@ import MicTest from "@/features/student/components/MicTest";
 import { WebSocketProvider } from "@/shared/context/WebSocketContext";
 
 import InstituteDashboard from "@/features/Institute/dashboard/InstituteDashboard";
-import InstituteBatches from "@/features/Institute/dashboard/InstituteBatches";
+import InstituteBatches from "@/features/Institute/dashboard/BatchAllocation";
 import InstituteTutor from "@/features/Institute/dashboard/InstituteTutor";
 import InstituteStudents from "@/features/Institute/dashboard/InstituteStudents";
 import InstituteBillings from "@/features/Institute/dashboard/InstituteBillings";
@@ -177,6 +179,7 @@ const AppRoutes = () => {
       <Route path="/student/reading-assessment" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentReadingAssessmentPage /></RoleProtectedRoute>} />
       <Route path="/student/reading-assessment/history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentAssessmentHistoryPage /></RoleProtectedRoute>} />
       <Route path="/student/my-curriculum" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><MyCurriculum/></RoleProtectedRoute>} />
+      <Route path="/student/batches" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentBatchView/></RoleProtectedRoute>} />
       <Route path="/student/speaking-practice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><SpeakingPractice/></RoleProtectedRoute>} />
 
       {/* Instructor Dashboard & Routes */}
@@ -197,6 +200,7 @@ const AppRoutes = () => {
         } 
       />
       <Route path="/instructor/coursemanagement" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorCourseManagementPage/></RoleProtectedRoute>} />
+      <Route path="/instructor/batches" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorBatchView/></RoleProtectedRoute>} />
       <Route path="/instructor/tech-pep" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><TechPrepPage/></RoleProtectedRoute>} />
       <Route path="/instructor/alignment" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><AlignmentPage/></RoleProtectedRoute>} />
       <Route path="/instructor/reports" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorReport/></RoleProtectedRoute>} />
