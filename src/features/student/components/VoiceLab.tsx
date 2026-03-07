@@ -59,18 +59,18 @@ export default function VoiceLab() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   return (
-    <div className="flex h-screen bg-white dark:bg-[#09090b] text-slate-900 dark:text-white font-sans transition-colors duration-300 overflow-hidden">
+    <div className="flex h-screen bg-[#f1f3f9] dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-sans transition-colors duration-300 overflow-hidden">
       <StudentSidebar
         activeTab="voice"
         isCollapsed={isSidebarCollapsed}
         toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
 
-      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${isSidebarCollapsed ? 'lg:ml-28' : 'lg:ml-72'}`}>
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
         <StudentTopbar onUpgradeClick={() => {}} />
 
-        <main className="flex-1 flex flex-col relative overflow-y-auto p-4 md:p-8 lg:p-12">
-          <div className="max-w-6xl mx-auto w-full">
+        <main className="flex-1 flex flex-col relative overflow-y-auto p-6 md:p-8">
+          <div className="max-w-7xl mx-auto w-full">
             {activeTab === 'dashboard' && <HomeView onNavigate={setActiveTab} />}
             {activeTab === 'resonance' && (
               <ResonanceView
@@ -89,44 +89,62 @@ export default function VoiceLab() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HOME VIEW (unchanged from original)
+// HOME VIEW 
 // ─────────────────────────────────────────────────────────────────────────────
 function HomeView({ onNavigate }: { onNavigate: (v: ViewState) => void }) {
   return (
-    <div className="max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-600 dark:text-purple-300 text-xs font-semibold tracking-wide mb-8">
-        <Activity size={14} /> Two Engines. One Lab.
+    <div className="max-w-4xl animate-in fade-in duration-500">
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#8a42f5]/10 text-[#8a42f5] dark:text-[#a874f7] text-xs font-semibold tracking-wide mb-8">
+        <Activity size={14} /> Voice Analysis Lab
       </div>
-      <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
-        Your Voice, Under The<br />
-        <span className="bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-500 dark:from-purple-400 dark:via-purple-300 dark:to-indigo-300 bg-clip-text text-transparent">
-          Microscope &amp; Waveform
-        </span>
+      <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-[#0b132b] dark:text-white">
+        Improve Your <span className="text-[#4338ca] dark:text-[#4338ca]">Vocal Delivery</span>
       </h1>
-      <p className="text-slate-500 dark:text-[#a1a1aa] text-lg mb-12 max-w-2xl leading-relaxed">
-        <strong className="text-slate-900 dark:text-gray-200 font-semibold">Vocal Resonance</strong> trains your pitch, tempo, and stress to match a native speaker.{' '}
-        <strong className="text-slate-900 dark:text-gray-200 font-semibold">Speech Anatomy</strong> dissects word confidence and filler gaps.
+      <p className="text-slate-500 dark:text-slate-400 text-lg mb-10 max-w-2xl">
+        Practice your speaking skills with two focused tools. Work on pitch and rhythm, or analyze your fluency and filler words.
       </p>
-      <div className="flex flex-col sm:flex-row gap-4">
-        <button
-          onClick={() => onNavigate('resonance')}
-          className="bg-purple-600 hover:bg-purple-500 text-white px-8 py-4 rounded-xl font-bold transition-all shadow-lg shadow-purple-600/20 flex items-center justify-center gap-2"
-        >
-          <Play size={18} fill="currentColor" /> Demo Resonance
-        </button>
-        <button
-          onClick={() => onNavigate('anatomy')}
-          className="bg-slate-100 dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] hover:bg-slate-200 dark:hover:bg-[#1c1c1f] px-8 py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 text-slate-900 dark:text-white"
-        >
-          <Scissors size={18} /> Speech Anatomy
-        </button>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+  {/* Vocal Resonance Card */}
+<div className="bg-indigo-100 dark:bg-slate-900 rounded-2xl p-8 shadow-sm border-none flex flex-col items-start gap-6 hover:shadow-md transition-shadow">
+  <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-xl">
+    <Radio size={24} />
+  </div>
+  <div>
+    <h3 className="text-xl font-bold text-[#0b132b] dark:text-white mb-2">Vocal Resonance</h3>
+    <p className="text-slate-500 dark:text-slate-400 text-sm">Train your pitch, tempo, and stress to match native speakers in real-time.</p>
+  </div>
+  <button
+    onClick={() => onNavigate('resonance')}
+    className="mt-auto bg-indigo-700 hover:bg-indigo-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-indigo-700 px-6 py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 w-full"
+  >
+    <Play size={16} fill="currentColor" /> Start Resonance Practice
+  </button>
+</div>
+
+{/* Speech Anatomy Card */}
+<div className="bg-indigo-100 dark:bg-slate-900 rounded-2xl p-8 shadow-sm border-none flex flex-col items-start gap-6 hover:shadow-md transition-shadow">
+  <div className="p-3 bg-[#f5f0ff] dark:bg-[#8a42f5]/20 text-[#8a42f5] dark:text-[#a874f7] rounded-xl">
+    <Scissors size={24} />
+  </div>
+  <div>
+    <h3 className="text-xl font-bold text-[#0b132b] dark:text-white mb-2">Speech Anatomy</h3>
+    <p className="text-slate-500 dark:text-slate-400 text-sm">Dissect your speech patterns, detect filler words, and measure speaking pace.</p>
+  </div>
+  <button
+    onClick={() => onNavigate('anatomy')}
+    className="mt-auto bg-indigo-700 hover:bg-indigo-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-indigo-700 px-6 py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 w-full"
+  >
+    <Scissors size={16} /> Start Speech Anatomy
+  </button>
+</div>
       </div>
     </div>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ANATOMY VIEW — FULL 3-PHASE IMPLEMENTATION
+// ANATOMY VIEW
 // ─────────────────────────────────────────────────────────────────────────────
 function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (v: ViewState) => void }) {
   // ── Phase state ──────────────────────────────────────────────────────────
@@ -318,105 +336,95 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
   // RENDER
   // ─────────────────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in duration-500 pb-12">
+    <div className="flex flex-col gap-6 animate-in fade-in duration-300 max-w-5xl mx-auto">
 
       {/* ── Header ── */}
-      <div className="flex justify-between items-center">
-        <button onClick={onExit} className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-purple-600 transition-colors">
-          <ChevronLeft size={18} /> Back to Dashboard
+      {phase !== 'results' && (
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+        <button onClick={onExit} className="flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
+          <ChevronLeft size={16} /> Back
         </button>
-        <button onClick={() => onNavigate('resonance')} className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-purple-600 hover:text-white transition-all border border-slate-200 dark:border-slate-700">
-          <Radio size={14} /> Vocal Resonance
+        <button onClick={() => onNavigate('resonance')} className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-800 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700 shadow-sm">
+          Switch to Resonance <Radio size={14} />
         </button>
       </div>
+      )}
 
       {/* ── Page title ── */}
       {phase !== 'results' && (
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 text-[11px] font-bold uppercase tracking-widest mb-3">
-            <Activity size={12} /> Speech Anatomy
-          </div>
-          <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-            {phase === 'setup' ? 'Configure Your Session' : 'Real-time Analysis'}
+        <div className="mb-2">
+          <h2 className="text-2xl font-bold text-[#0b132b] dark:text-white">
+            {phase === 'setup' ? 'Speech Anatomy Setup' : 'Live Analysis'}
           </h2>
-          <p className="text-slate-500 dark:text-[#a1a1aa] text-sm mt-1">
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
             {phase === 'setup'
-              ? 'Pick a target band, read your prompt, then start the microphone.'
-              : 'Speak clearly. Filler words appear in orange. Uncertain words in yellow.'}
+              ? 'Select your target band and review the prompt before starting.'
+              : 'Speak clearly. Your words are analyzed in real-time.'}
           </p>
         </div>
       )}
 
       {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/*  PHASE 1 — SETUP                                                   */}
+      {/* PHASE 1 — SETUP                                                    */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
       {phase === 'setup' && (
-        <div className="flex flex-col gap-6 animate-in slide-in-from-right-4 duration-400">
+        <div className="flex flex-col gap-6">
 
           {/* Band selector */}
-          <div className="bg-slate-50 dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-2xl p-6">
-            <p className="text-[11px] font-bold tracking-widest uppercase text-slate-500 dark:text-[#a1a1aa] mb-4">
-              Select Target Band
-            </p>
-            <div className="flex flex-wrap gap-3">
-              {ALL_BANDS.map(band => (
-                <button
-                  key={band}
-                  onClick={() => handleBandSelect(band)}
-                  className={cn(
-                    'px-5 py-2.5 rounded-xl font-bold text-sm transition-all border',
-                    selectedBand === band
-                      ? 'bg-purple-600 text-white border-purple-600 shadow-lg shadow-purple-600/20'
-                      : 'bg-white dark:bg-[#09090b] border-slate-200 dark:border-[#27272a] text-slate-500 dark:text-[#a1a1aa] hover:border-purple-500/50'
-                  )}
-                >
-                  {band}
-                </button>
-              ))}
-            </div>
+          <div className="flex flex-wrap gap-2 border-b border-slate-200 dark:border-slate-800 pb-4">
+            {ALL_BANDS.map(band => (
+              <button
+                key={band}
+                onClick={() => handleBandSelect(band)}
+                className={cn(
+                  'px-4 py-2 rounded-md text-sm font-medium transition-colors',
+                  selectedBand === band
+                    ? 'bg-[#0b132b] text-white dark:bg-white dark:text-[#0b132b]'
+                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 border border-slate-200 dark:border-slate-800'
+                )}
+              >
+                {band}
+              </button>
+            ))}
           </div>
 
           {/* Prompt card */}
-          <div className="bg-white dark:bg-[#0c0c0e] border border-slate-200 dark:border-[#27272a] rounded-2xl p-8 shadow-sm">
+          <div className="bg-white dark:bg-slate-900 border-none rounded-2xl p-6 md:p-8 shadow-sm">
             <div className="flex items-center justify-between mb-6">
-              <p className="text-[11px] font-bold tracking-widest uppercase text-slate-400 dark:text-[#52525b] flex items-center gap-2">
-                <Target size={12} /> Your Speaking Prompt
+              <p className="text-sm font-medium text-slate-500 flex items-center gap-2">
+                 Prompt
               </p>
               <button
                 onClick={() => loadPrompt(selectedBand, seenPromptIdsRef.current)}
                 disabled={isLoadingPrompt || !prompt}
-                className="text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1 disabled:opacity-50"
+                className="text-xs font-semibold text-[#8a42f5] dark:text-[#a874f7] hover:underline flex items-center gap-1 disabled:opacity-50"
               >
-                {isLoadingPrompt ? <Loader2 size={11} className="animate-spin" /> : <RotateCcw size={11} />} New prompt
+                {isLoadingPrompt ? <Loader2 size={12} className="animate-spin" /> : <RotateCcw size={12} />} Refresh
               </button>
             </div>
 
             {/* Loading skeleton */}
             {(isLoadingPrompt || !prompt) ? (
-              <div className="space-y-4 animate-pulse">
-                <div className="h-9 bg-slate-100 dark:bg-[#1f1f23] rounded-xl w-full" />
-                <div className="h-9 bg-slate-100 dark:bg-[#1f1f23] rounded-xl w-4/5" />
-                <div className="h-16 bg-slate-50 dark:bg-[#121214] rounded-xl mt-2 border border-slate-100 dark:border-[#27272a]" />
+              <div className="space-y-4 animate-pulse py-2">
+                <div className="h-6 bg-slate-100 dark:bg-slate-800 rounded-md w-full" />
+                <div className="h-6 bg-slate-100 dark:bg-slate-800 rounded-md w-4/5" />
               </div>
             ) : (
-              <>
-                {/* Prompt quote */}
-                <div className="border-l-4 border-purple-500 pl-5 mb-5">
-                  <p className="text-slate-900 dark:text-white text-xl md:text-2xl font-semibold leading-relaxed">
-                    {prompt.question}
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-start gap-3">
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-500/10 border border-purple-500/20 rounded-full text-[11px] text-purple-600 dark:text-purple-300 font-bold">
-                    <Zap size={11} /> {prompt.targetWpmMin}–{prompt.targetWpmMax} WPM target
+              <div className="space-y-6">
+                <p className="text-[#0b132b] dark:text-white text-lg md:text-xl font-medium leading-relaxed">
+                  {prompt.question}
+                </p>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl">
+                  <div className="flex items-center gap-1.5 px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300">
+                    <Target size={14} className="text-slate-400" /> {prompt.targetWpmMin}-{prompt.targetWpmMax} WPM target
                   </div>
                   {prompt.hint && (
-                    <div className="flex-1 text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                    <div className="text-sm text-slate-500 dark:text-slate-400">
                       💡 {prompt.hint}
                     </div>
                   )}
                 </div>
-              </>
+              </div>
             )}
           </div>
 
@@ -425,22 +433,22 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
             onClick={handleStartRecording}
             disabled={!prompt || isLoadingPrompt}
             className={cn(
-              'flex items-center justify-center gap-3 w-full py-5 rounded-2xl font-bold text-lg transition-all shadow-xl active:scale-[.99]',
+              'flex items-center justify-center gap-2 w-full py-4 rounded-xl font-semibold text-base transition-colors mt-2',
               prompt && !isLoadingPrompt
-                ? 'bg-purple-600 hover:bg-purple-500 text-white shadow-purple-600/25'
-                : 'bg-slate-200 dark:bg-[#1f1f23] text-slate-400 cursor-not-allowed shadow-none'
+                ? 'bg-[#8a42f5] hover:bg-[#7b3be6] text-white'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
             )}
           >
-            <Mic size={22} /> {isLoadingPrompt ? 'Loading prompt...' : 'Start Speech Analysis'}
+            <Mic size={18} /> {isLoadingPrompt ? 'Loading prompt...' : 'Start Recording'}
           </button>
         </div>
       )}
 
       {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/*  PHASE 2 — RECORDING                                               */}
+      {/* PHASE 2 — RECORDING                                                */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
       {phase === 'recording' && (
-        <div className="flex flex-col gap-6 animate-in slide-in-from-right-4 duration-400">
+        <div className="flex flex-col gap-6">
 
           {/* Live stat cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -450,45 +458,40 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
             <LiveStatCard label="Pauses" value={pauseCount}   good={pauseCount <= 1}   bad={pauseCount > 4} />
           </div>
 
-          {/* Prompt reminder — accent banner */}
+          {/* Prompt reminder */}
           {prompt && (
-            <div className="flex items-start gap-3 bg-purple-500/5 border border-purple-500/15 rounded-xl px-5 py-4">
-              <div className="w-1 self-stretch rounded-full bg-purple-500 shrink-0" />
-              <p className="text-slate-800 dark:text-slate-200 text-sm font-semibold leading-relaxed">{prompt.question}</p>
+            <div className="bg-white dark:bg-slate-900 border-none shadow-sm rounded-xl px-6 py-5">
+              <p className="text-slate-700 dark:text-slate-300 text-base font-medium">{prompt.question}</p>
             </div>
           )}
 
           {/* Live transcript */}
-          <div className="bg-[#0c0c0e] rounded-2xl border border-[#1f1f23] shadow-xl overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[#1f1f23]">
-              <div className="flex items-center gap-3">
-                <div className={cn('w-2.5 h-2.5 rounded-full', isListening ? 'bg-rose-500 animate-ping' : 'bg-slate-600')} />
-                <span className="text-[11px] font-bold uppercase tracking-widest text-slate-300">Live Transcript</span>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border-none shadow-sm overflow-hidden flex flex-col h-[300px]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2 text-rose-600 dark:text-rose-500">
+                <div className={cn('w-2 h-2 rounded-full', isListening ? 'bg-rose-600 dark:bg-rose-500 animate-pulse' : 'bg-slate-400')} />
+                <span className="text-xs font-semibold uppercase tracking-wider">Live Transcript</span>
               </div>
-              <span className="text-xs font-mono text-slate-500">{formatTime(recordingTime)}</span>
+              <span className="text-sm font-mono text-slate-500">{formatTime(recordingTime)}</span>
             </div>
 
-            <div className="min-h-[200px] p-6 flex flex-wrap content-start gap-x-2 gap-y-3">
+            <div className="flex-1 p-6 flex flex-wrap content-start gap-x-2 gap-y-3 overflow-y-auto">
               {isListening && !isSTTReady && (
-                <div className="w-full h-full flex flex-col items-center justify-center text-purple-400 animate-pulse gap-2 py-8">
-                  <Sparkles className="w-8 h-8" />
-                  <span className="text-sm font-bold">Connecting voice engine...</span>
+                <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span className="text-sm">Connecting microphone...</span>
                 </div>
               )}
               {isSTTReady && dissectedWords.length === 0 && (
-                <div className="w-full flex flex-col items-center justify-center py-10 gap-3">
-                  <div className="relative">
-                    <div className="w-3 h-3 rounded-full bg-emerald-500" />
-                    <div className="w-3 h-3 rounded-full bg-emerald-500 animate-ping absolute inset-0" />
-                  </div>
-                  <span className="text-sm font-bold text-emerald-400 tracking-wide">LIVE — start speaking now</span>
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-slate-400 italic">Ready. Start speaking...</span>
                 </div>
               )}
               {dissectedWords.map((w, i) => (
                 <WordPill key={i} word={w.word} status={w.status} />
               ))}
               {isListening && dissectedWords.length > 0 && (
-                <span className="animate-pulse border-r-2 border-purple-400 h-6 self-center" />
+                <span className="animate-pulse border-r-2 border-[#8a42f5] h-5 self-center ml-1" />
               )}
             </div>
           </div>
@@ -498,116 +501,101 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
             onClick={handleStopRecording}
             disabled={!isSTTReady}
             className={cn(
-              'flex items-center justify-center gap-3 w-full py-5 rounded-2xl font-bold text-lg transition-all',
+              'flex items-center justify-center gap-2 w-full py-4 rounded-xl font-semibold text-base transition-colors mt-2',
               isSTTReady
-                ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-500/20 active:scale-[.99]'
-                : 'bg-slate-200 dark:bg-[#1f1f23] text-slate-400 cursor-not-allowed'
+                ? 'bg-rose-500 hover:bg-rose-600 text-white'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
             )}
           >
-            <Square size={20} fill="currentColor" /> Stop &amp; Analyse
+            <Square size={18} fill="currentColor" /> Stop Analysis
           </button>
         </div>
       )}
 
       {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/*  PHASE 3 — RESULTS                                                 */}
+      {/* PHASE 3 — RESULTS                                                  */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
       {phase === 'results' && results && (
-        <div className="flex flex-col gap-6 animate-in slide-in-from-bottom-4 duration-500">
+        <div className="flex flex-col gap-6 animate-in fade-in flex items-center mt-4 w-full">
 
-          {/* Header */}
-          <div className="text-center space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 text-[11px] font-bold uppercase tracking-widest">
+          <div className="text-center space-y-2 mb-4 w-full">
+            <div className="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-full bg-[#f5f0ff] dark:bg-[#8a42f5]/10 text-[#8a42f5] dark:text-[#a874f7] text-[10px] font-bold uppercase tracking-widest mb-2">
               <Activity size={12} /> Analysis Complete
             </div>
-            <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white">Speech Anatomy Results</h2>
-            <p className="text-slate-400 text-sm">Band target: {selectedBand}</p>
+            <h2 className="text-3xl font-extrabold text-[#0b132b] dark:text-white">Speech Anatomy Results</h2>
+            <p className="text-slate-500 text-sm">Band target: {selectedBand}</p>
           </div>
 
-          {/* 3 Score rings */}
-          <div className="grid grid-cols-3 gap-4">
-            <ScoreRing label="Confidence"    score={results.confidenceScore}    color="purple" />
-            <ScoreRing label="Pronunciation" score={results.pronunciationScore} color="blue"   />
-            <ScoreRing label="Delivery"      score={results.deliveryScore}      color="green"  />
-          </div>
-
-          {/* Dimension explanation strip */}
-          <div className="grid grid-cols-3 gap-3 -mt-2">
-            {([
-              { label: 'Confidence', sub: 'Fluency · Pauses · Fillers', color: 'text-purple-500' },
-              { label: 'Pronunciation', sub: 'Word clarity · STT confidence', color: 'text-blue-500' },
-              { label: 'Delivery', sub: 'Pace · Rhythm · Tempo', color: 'text-emerald-500' },
-            ] as const).map(d => (
-              <div key={d.label} className="text-center">
-                <p className={`text-[10px] font-bold uppercase tracking-widest ${d.color}`}>{d.label}</p>
-                <p className="text-[10px] text-slate-400 mt-0.5">{d.sub}</p>
-              </div>
-            ))}
+          {/* 3 Score areas */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full">
+            <ScoreRing label="Confidence" sublabel="Fluency · Pauses · Fillers" score={results.confidenceScore} color="purple" />
+            <ScoreRing label="Pronunciation" sublabel="Word clarity · STT confidence" score={results.pronunciationScore} color="blue" />
+            <ScoreRing label="Delivery" sublabel="Pace · Rhythm · Tempo" score={results.deliveryScore} color="green" />
           </div>
 
           {/* Breakdown stats */}
-          <div className="grid grid-cols-3 gap-4">
-            <MetricCard icon={<Activity size={14}/>} label="WPM"    value={results.wpm}            target={prompt ? `${prompt.targetWpmMin}–${prompt.targetWpmMax}` : '130–160'} />
-            <MetricCard icon={<Target size={14}/>}   label="Pauses" value={results.pauseCount}      target="< 3 ideal" />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full mt-2">
+            <MetricCard icon={<Activity size={14}/>} label="WPM" value={results.wpm} target={prompt ? `${prompt.targetWpmMin}–${prompt.targetWpmMax}` : '130–160'} />
+            <MetricCard icon={<Target size={14}/>} label="Pauses" value={results.pauseCount} target="< 3 ideal" />
             <MetricCard icon={<AlertTriangle size={14}/>} label="Fillers" value={results.fillersDetected} target="0 ideal" />
           </div>
 
           {/* Filler breakdown */}
           {Object.keys(results.fillerDetails).length > 0 && (
-            <div className="bg-amber-50 dark:bg-[#121214] border border-amber-200 dark:border-amber-900/50 rounded-2xl p-6">
+            <div className="w-full bg-[#fffcf2] dark:bg-amber-900/10 p-6 rounded-2xl border border-amber-200 dark:border-amber-900/30 mt-2">
               <div className="flex items-center gap-2 mb-4">
-                <AlertTriangle size={16} className="text-amber-500" />
-                <h3 className="font-bold text-amber-900 dark:text-amber-400 text-sm">Filler Words Detected</h3>
+                <AlertTriangle size={18} className="text-amber-500" />
+                <h3 className="font-bold text-[#8a6a24] dark:text-amber-500">Filler Words Detected</h3>
               </div>
-              <div className="flex flex-wrap gap-2 mb-4">
+              
+              <div className="flex flex-wrap gap-2 mb-6">
                 {Object.entries(results.fillerDetails)
                   .sort(([,a],[,b]) => b - a)
                   .map(([word, count]) => (
-                    <div key={word} className="bg-white dark:bg-[#09090b] px-4 py-2 rounded-xl border border-amber-100 dark:border-[#27272a] flex items-center gap-2">
-                      <span className="font-mono text-rose-500 font-bold text-sm">{word}</span>
-                      <span className="text-xs font-black text-slate-400">{count}×</span>
+                    <div key={word} className="bg-white dark:bg-slate-800 px-4 py-2 rounded-xl border border-amber-200 dark:border-slate-700 flex items-center gap-3">
+                       <span className="font-mono text-rose-500 font-bold">{word}</span>
+                       <span className="text-xs font-black text-slate-400">{count}x</span>
                     </div>
                   ))}
               </div>
-              <p className="text-xs text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/20 p-3 rounded-lg">
-                💡 Tip: A brief pause is always better than a filler word. Take a breath instead.
-              </p>
+              
+              <div className="text-sm font-medium text-[#8a6a24] dark:text-amber-400 bg-amber-100/60 dark:bg-amber-900/30 p-4 rounded-xl flex items-start gap-2">
+                <span className="opacity-80">💡</span> 
+                Tip: A brief pause is always better than a filler word. Take a breath instead.
+              </div>
             </div>
           )}
 
           {/* Word dissection */}
           {dissectedWords.length > 0 && (
-            <div className="bg-[#060608] border border-[#1f1f23] rounded-2xl overflow-hidden">
-              <div className="flex items-center justify-between px-6 py-4 border-b border-[#1f1f23]">
-                <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Word-Level Dissection</h3>
-                <div className="flex items-center gap-4">
-                  <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400"><span className="w-2 h-2 rounded-full bg-emerald-500"/>Clean</span>
-                  <span className="flex items-center gap-1.5 text-[10px] font-bold text-orange-400"><span className="w-2 h-2 rounded-full bg-orange-500"/>Filler</span>
-                  <span className="flex items-center gap-1.5 text-[10px] font-bold text-yellow-400"><span className="w-2 h-2 rounded-full bg-yellow-500"/>Unclear</span>
+            <div className="w-full bg-[#0b132b] dark:bg-[#060608] border-none shadow-sm rounded-3xl overflow-hidden mt-2">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-8 py-5 border-b border-white/10 gap-4">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-300">Word-Level Dissection</h3>
+                <div className="flex items-center gap-5">
+                  <span className="flex items-center gap-2 text-xs font-bold text-[#10b981]"><span className="w-2 h-2 rounded-full bg-[#10b981]"/>Clean</span>
+                  <span className="flex items-center gap-2 text-xs font-bold text-[#f59e0b]"><span className="w-2 h-2 rounded-full bg-[#f59e0b]"/>Filler</span>
+                  <span className="flex items-center gap-2 text-xs font-bold text-[#eab308]"><span className="w-2 h-2 rounded-full bg-[#eab308]"/>Unclear</span>
                 </div>
               </div>
-              <div className="p-6 flex flex-wrap gap-x-2 gap-y-3">
-                {dissectedWords.slice(0, 100).map((w, i) => (
-                  <WordPill key={i} word={w.word} status={w.status} />
+              <div className="p-8 flex flex-wrap gap-x-2 gap-y-3 max-h-[400px] overflow-y-auto">
+                {dissectedWords.map((w, i) => (
+                  <DarkWordPill key={i} word={w.word} status={w.status} />
                 ))}
-                {dissectedWords.length > 100 && (
-                  <span className="text-xs text-slate-500 self-center">+{dissectedWords.length - 100} more</span>
-                )}
               </div>
             </div>
           )}
 
           {/* Actions */}
-          <div className="flex gap-4 pt-2">
+          <div className="flex flex-col sm:flex-row gap-4 pt-4 w-full">
             <button
               onClick={handleTryAgain}
-              className="flex-1 py-4 rounded-2xl font-bold border-2 border-slate-200 dark:border-[#27272a] text-slate-700 dark:text-white hover:border-purple-500 transition-all"
+              className="flex-1 h-14 rounded-2xl font-bold border-2 text-[#0b132b] bg-white hover:bg-slate-50 transition-colors"
             >
-              <RotateCcw size={16} className="inline mr-2" /> Try Again
+              Try Again
             </button>
             <button
               onClick={onExit}
-              className="flex-1 py-4 rounded-2xl font-bold bg-purple-600 text-white hover:bg-purple-500 transition-all shadow-lg shadow-purple-600/20"
+              className="flex-1 h-14 rounded-2xl font-bold bg-[#8a42f5] text-white hover:bg-[#7b3be6] transition-colors"
             >
               Back to Dashboard
             </button>
@@ -619,7 +607,7 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// RESONANCE VIEW — Live mic DSP implementation
+// RESONANCE VIEW 
 // ─────────────────────────────────────────────────────────────────────────────
 function ResonanceView({ onExit, onNavigate }: { onExit: () => void, onNavigate: (view: ViewState) => void }) {
   const [selectedBand, setSelectedBand] = useState<AnatomyBand>('Band 7');
@@ -677,111 +665,103 @@ function ResonanceView({ onExit, onNavigate }: { onExit: () => void, onNavigate:
 
   // Grade label helper
   const grade = (s: number) => s >= 85 ? 'A' : s >= 70 ? 'B' : s >= 55 ? 'C' : 'D';
-  const gradeColor = (s: number) => s >= 85 ? 'text-emerald-400' : s >= 70 ? 'text-blue-400' : s >= 55 ? 'text-yellow-400' : 'text-rose-400';
-
+  
   return (
-    <div className="flex flex-col gap-5 animate-in fade-in duration-500 pb-10">
+    <div className="flex flex-col gap-6 animate-in fade-in duration-300 max-w-4xl mx-auto">
 
       {/* Nav */}
-      <div className="flex justify-between items-center">
-        <button onClick={onExit} className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-purple-600 transition-colors">
-          <ChevronLeft size={18}/> Back to Dashboard
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+        <button onClick={onExit} className="flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
+          <ChevronLeft size={16}/> Back
         </button>
-        <button onClick={() => onNavigate('anatomy')} className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-purple-600 hover:text-white transition-all border border-slate-200 dark:border-slate-700">
-          <BarChart3 size={14}/> Anatomy
+        <button onClick={() => onNavigate('anatomy')} className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-800 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700 shadow-sm">
+          Switch to Anatomy <Scissors size={14}/>
         </button>
       </div>
 
       {/* Header */}
-      <div>
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[11px] font-bold uppercase tracking-widest mb-2">
-          <Radio size={12} /> Vocal Resonance
-        </div>
-        <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Live Voice Analysis</h2>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Speak the phrase — your pitch, resonance, stress and tempo are measured in real time.</p>
+      <div className="mb-2">
+        <h2 className="text-2xl font-bold text-[#0b132b] dark:text-white">Vocal Resonance</h2>
+        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Speak the phrase to analyze your pitch, stress, and rhythm.</p>
       </div>
 
       {/* Band selector */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 border-b border-slate-200 dark:border-slate-800 pb-4">
         {ALL_BANDS.map(band => (
           <button
             key={band}
             onClick={() => handleBandSelect(band)}
             disabled={isListening}
             className={cn(
-              'px-4 py-2 rounded-xl font-bold text-sm transition-all border disabled:opacity-40',
+              'px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50',
               selectedBand === band
-                ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-600/20'
-                : 'bg-white dark:bg-[#09090b] border-slate-200 dark:border-[#27272a] text-slate-500 hover:border-indigo-500/50'
+                ? 'bg-[#0b132b] text-white dark:bg-white dark:text-[#0b132b]'
+                : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 border border-slate-200 dark:border-slate-800'
             )}
           >{band}</button>
         ))}
       </div>
 
       {/* Prompt banner */}
-      <div className="bg-white dark:bg-[#0c0c0e] border border-slate-200 dark:border-[#27272a] rounded-2xl p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-[11px] font-bold tracking-widest uppercase text-slate-400 flex items-center gap-2">
-            <Mic size={11}/> Speak This Phrase
+      <div className="bg-white dark:bg-slate-900 border-none rounded-2xl p-6 md:p-8 shadow-sm">
+        <div className="flex items-center justify-between mb-6">
+          <p className="text-sm font-medium text-slate-500 flex items-center gap-2">
+            Prompt
           </p>
           <button
             onClick={() => loadPrompt(selectedBand, seenPromptIdsRef.current)}
             disabled={isLoadingPrompt || isListening}
-            className="text-[11px] font-bold text-indigo-500 hover:underline flex items-center gap-1 disabled:opacity-40"
+            className="text-xs font-semibold text-[#8a42f5] dark:text-[#a874f7] hover:underline flex items-center gap-1 disabled:opacity-50"
           >
-            {isLoadingPrompt ? <Loader2 size={11} className="animate-spin" /> : <RotateCcw size={11} />} New
+            {isLoadingPrompt ? <Loader2 size={12} className="animate-spin" /> : <RotateCcw size={12} />} Refresh
           </button>
         </div>
 
         {isLoadingPrompt || !prompt ? (
-          <div className="space-y-3 animate-pulse">
-            <div className="h-8 bg-slate-100 dark:bg-[#1f1f23] rounded-xl w-full" />
-            <div className="h-8 bg-slate-100 dark:bg-[#1f1f23] rounded-xl w-3/4" />
+          <div className="space-y-4 animate-pulse py-2">
+            <div className="h-6 bg-slate-100 dark:bg-slate-800 rounded-md w-full" />
+            <div className="h-6 bg-slate-100 dark:bg-slate-800 rounded-md w-3/4" />
           </div>
         ) : (
-          <>
-            <div className="border-l-4 border-indigo-500 pl-4 mb-4">
-              <p className="text-slate-900 dark:text-white text-xl md:text-2xl font-semibold leading-relaxed">{prompt.question}</p>
-            </div>
-            <p className="text-sm text-slate-500 dark:text-slate-400">💡 {prompt.hint}</p>
-          </>
+          <div className="space-y-6">
+            <p className="text-[#0b132b] dark:text-white text-lg md:text-xl font-medium leading-relaxed">{prompt.question}</p>
+            {prompt.hint && (
+              <div className="text-sm text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl">
+                💡 {prompt.hint}
+              </div>
+            )}
+          </div>
         )}
       </div>
 
       {/* Live metrics strip */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {([
-          { label: 'Pitch',     value: metrics.pitch,     sub: `${metrics.pitchHz}Hz`,     color: 'text-violet-400',  ring: '#7c3aed' },
-          { label: 'Resonance', value: metrics.resonance, sub: `${metrics.centroidHz}Hz`,  color: 'text-indigo-400',  ring: '#4f46e5' },
-          { label: 'Stress',    value: metrics.stress,    sub: 'dynamics',                 color: 'text-pink-400',    ring: '#db2777' },
-          { label: 'Tempo',     value: metrics.tempo,     sub: 'rhythm',                   color: 'text-cyan-400',    ring: '#0891b2' },
+          { label: 'Pitch',     value: metrics.pitch,     sub: `${metrics.pitchHz}Hz`,     color: 'text-violet-500' },
+          { label: 'Resonance', value: metrics.resonance, sub: `${metrics.centroidHz}Hz`,  color: 'text-indigo-500' },
+          { label: 'Stress',    value: metrics.stress,    sub: 'dynamics',                 color: 'text-pink-500' },
+          { label: 'Tempo',     value: metrics.tempo,     sub: 'rhythm',                   color: 'text-cyan-500' },
         ] as const).map(m => (
-          <div key={m.label} className="bg-[#0c0c0e] border border-[#27272a] rounded-2xl p-4 text-center">
-            <div className={`text-3xl font-black ${m.color} tabular-nums leading-none`}>{isListening || showResults ? m.value : '--'}</div>
-            <div className="text-[10px] text-slate-500 mt-0.5">{m.sub}</div>
-            <div className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mt-1">{m.label}</div>
+          <div key={m.label} className="bg-white dark:bg-slate-900 border-none rounded-xl p-5 text-center shadow-sm">
+            <div className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">{m.label}</div>
+            <div className={`text-2xl font-bold ${m.color} tabular-nums`}>{isListening || showResults ? m.value : '--'}</div>
+            <div className="text-xs text-slate-400 mt-1">{m.sub}</div>
           </div>
         ))}
       </div>
 
       {/* Canvas heatmap */}
-      <div className="bg-[#040406] border border-[#1f1f23] rounded-2xl overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-[#1f1f23]">
+      <div className="bg-white dark:bg-slate-900 border-none rounded-2xl overflow-hidden shadow-sm">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2">
-            <div className={cn('w-2 h-2 rounded-full', isListening ? 'bg-rose-500 animate-ping' : 'bg-slate-600')} />
-            <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Vocal Frequency Heatmap</span>
-          </div>
-          <div className="flex items-center gap-3 text-[10px] text-slate-500 font-bold">
-            <span className="flex items-center gap-1"><span className="w-3 h-1.5 rounded-full inline-block bg-white/80" /> White = pitch</span>
-            <span className="flex items-center gap-1"><span className="w-3 h-1.5 rounded-full inline-block bg-cyan-400" /> Cyan = mid</span>
-            <span className="flex items-center gap-1"><span className="w-3 h-1.5 rounded-full inline-block bg-amber-400" /> Amber = loud</span>
+            <div className={cn('w-2 h-2 rounded-full', isListening ? 'bg-rose-500 animate-pulse' : 'bg-slate-400')} />
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Spectrum</span>
           </div>
         </div>
-        <div className="p-3">
+        <div className="p-4 bg-slate-50 dark:bg-slate-950/50">
           {!isListening && heatmapHistory.length === 0 ? (
-            <div className="h-48 flex flex-col items-center justify-center gap-2 text-slate-700">
-              <Radio size={28} className="opacity-30" />
-              <span className="text-sm font-bold">Start speaking to see your vocal spectrum</span>
+            <div className="h-48 flex flex-col items-center justify-center gap-2 text-slate-400">
+              <span className="text-sm">Start recording to see visualization</span>
             </div>
           ) : (
             <ResonanceCanvas
@@ -795,9 +775,9 @@ function ResonanceView({ onExit, onNavigate }: { onExit: () => void, onNavigate:
 
       {/* Overall score pulse */}
       {isListening && (
-        <div className="flex items-center justify-between bg-indigo-500/5 border border-indigo-500/15 rounded-2xl px-6 py-4">
-          <span className="text-[11px] font-bold uppercase tracking-widest text-indigo-400">Live Overall Score</span>
-          <span className="text-4xl font-black text-white tabular-nums">{metrics.overall}<span className="text-lg text-indigo-400">%</span></span>
+        <div className="flex items-center justify-between bg-[#f5f0ff] dark:bg-[#8a42f5]/10 border border-[#8a42f5]/20 rounded-xl px-6 py-4">
+          <span className="text-sm font-semibold text-[#8a42f5] dark:text-[#a874f7]">Live Score</span>
+          <span className="text-2xl font-bold text-[#8a42f5] dark:text-[#a874f7]">{metrics.overall}%</span>
         </div>
       )}
 
@@ -807,31 +787,35 @@ function ResonanceView({ onExit, onNavigate }: { onExit: () => void, onNavigate:
           onClick={isListening ? handleStop : handleStart}
           disabled={!prompt || isLoadingPrompt}
           className={cn(
-            'flex items-center justify-center gap-3 w-full py-5 rounded-2xl font-bold text-lg transition-all shadow-xl active:scale-[.99] disabled:opacity-40 disabled:cursor-not-allowed',
+            'flex items-center justify-center gap-2 w-full py-4 rounded-xl font-semibold text-base transition-colors mt-2 disabled:opacity-50 disabled:cursor-not-allowed',
             isListening
-              ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/25'
-              : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/25'
+              ? 'bg-rose-500 hover:bg-rose-600 text-white'
+              : 'bg-[#8a42f5] hover:bg-[#7b3be6] text-white'
           )}
         >
           {isListening
-            ? <><StopCircle size={22} /> Stop & See Results</>
-            : <><Mic size={22} /> Start Voice Analysis</>}
+            ? <><Square size={18} fill="currentColor" /> Stop Analysis</>
+            : <><Mic size={18} /> Start Recording</>}
         </button>
       )}
 
       {/* Results overlay */}
       {showResults && finalResults && (
-        <div className="flex flex-col gap-5 animate-in slide-in-from-bottom-4 duration-500">
-          <div className="text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[11px] font-bold uppercase tracking-widest mb-2">
-              <Activity size={12}/> Analysis Complete
-            </div>
-            <h3 className="text-2xl font-extrabold text-white">Your Vocal Resonance</h3>
-            <p className="text-slate-400 text-sm mt-1">Band target: {selectedBand} · Session: {finalResults.durationSec}s</p>
+        <div className="flex flex-col gap-6 animate-in fade-in duration-300 mt-4">
+          <div className="text-center mb-2">
+            <h3 className="text-2xl font-bold text-[#0b132b] dark:text-white">Resonance Results</h3>
+            <p className="text-slate-500 text-sm mt-1">Session duration: {finalResults.durationSec}s</p>
+          </div>
+
+          {/* Overall big score */}
+          <div className="bg-white dark:bg-slate-900 border-none rounded-2xl p-8 text-center shadow-sm">
+            <div className="text-sm font-medium text-slate-500 mb-2">Overall Score</div>
+            <div className="text-5xl font-black text-[#8a42f5] dark:text-[#a874f7] mb-2">{finalResults.overall}%</div>
+            <div className="text-lg font-medium text-slate-700 dark:text-slate-300">Grade {grade(finalResults.overall)}</div>
           </div>
 
           {/* 4 score rings */}
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {([
               { label: 'Pitch',     score: finalResults.pitch,     color: 'purple' },
               { label: 'Resonance', score: finalResults.resonance, color: 'blue'   },
@@ -842,56 +826,17 @@ function ResonanceView({ onExit, onNavigate }: { onExit: () => void, onNavigate:
             ))}
           </div>
 
-          {/* Overall big score */}
-          <div className="bg-gradient-to-br from-indigo-600/20 to-purple-600/10 border border-indigo-500/20 rounded-2xl p-6 text-center">
-            <div className="text-[11px] font-bold uppercase tracking-widest text-indigo-400 mb-1">Overall Resonance Score</div>
-            <div className="text-6xl font-black text-white">{finalResults.overall}<span className="text-2xl text-indigo-400">%</span></div>
-            <div className={`text-lg font-bold mt-1 ${gradeColor(finalResults.overall)}`}>Grade {grade(finalResults.overall)}</div>
-          </div>
-
-          {/* Dimension coaching tips */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {([
-              { label: 'Pitch', score: finalResults.pitch,
-                tip: finalResults.pitch >= 70
-                  ? 'Great pitch range! Your voice sits in a natural speaking frequency.'
-                  : 'Try speaking in a slightly lower or higher register to match the band target range.' },
-              { label: 'Resonance', score: finalResults.resonance,
-                tip: finalResults.resonance >= 70
-                  ? 'Good vocal resonance — your voice has a forward, bright quality.'
-                  : 'Project your voice forward. Imagine speaking from your chest, not your throat.' },
-              { label: 'Stress', score: finalResults.stress,
-                tip: finalResults.stress >= 70
-                  ? 'Natural stress patterns — good amplitude contrast across syllables.'
-                  : 'Vary your volume more. Strongly stress key words and soften unstressed syllables.' },
-              { label: 'Tempo', score: finalResults.tempo,
-                tip: finalResults.tempo >= 70
-                  ? 'Excellent pacing — your syllable rate matches the target band.'
-                  : 'Adjust your speaking speed. Aim for a more even, deliberate syllable rhythm.' },
-            ]).map(d => (
-              <div key={d.label} className={cn(
-                'rounded-xl p-4 border text-sm',
-                d.score >= 70
-                  ? 'bg-emerald-900/40 border-emerald-500/30 text-emerald-200'
-                  : 'bg-amber-900/40  border-amber-500/30  text-amber-200'
-              )}>
-                <div className="font-bold mb-1 text-white">{d.label}: {d.score}%</div>
-                <div className="text-[13px] leading-relaxed opacity-90">{d.tip}</div>
-              </div>
-            ))}
-          </div>
-
           {/* Actions */}
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 pt-4">
             <button
               onClick={handleTryAgain}
-              className="flex-1 py-4 rounded-2xl font-bold border-2 border-slate-700 text-white hover:border-indigo-500 transition-all"
+              className="flex-1 py-4 rounded-xl font-semibold border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
             >
-              <RotateCcw size={16} className="inline mr-2" /> Try Again
+              <RotateCcw size={16} /> Try Again
             </button>
             <button
               onClick={onExit}
-              className="flex-1 py-4 rounded-2xl font-bold bg-indigo-600 text-white hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20"
+              className="flex-1 py-4 rounded-xl font-semibold bg-[#8a42f5] text-white hover:bg-[#7b3be6] transition-colors"
             >
               Back to Dashboard
             </button>
@@ -909,25 +854,51 @@ function ResonanceView({ onExit, onNavigate }: { onExit: () => void, onNavigate:
 function WordPill({ word, status }: { word: string; status: WordStatus }) {
   const cfg = {
     clean:  {
-      text: 'text-emerald-300',
-      bg:   'bg-emerald-500/20',
-      border: 'border-emerald-500/40',
+      text: 'text-slate-700 dark:text-slate-300',
+      bg:   'bg-slate-100 dark:bg-slate-800',
     },
     filter: {
-      text: 'text-orange-300',
-      bg:   'bg-orange-500/25',
-      border: 'border-orange-500/50',
+      text: 'text-amber-700 dark:text-amber-400',
+      bg:   'bg-amber-100 dark:bg-amber-900/30',
     },
     weak: {
-      text: 'text-yellow-300',
-      bg:   'bg-yellow-500/20',
-      border: 'border-yellow-500/40',
+      text: 'text-slate-400 dark:text-slate-500',
+      bg:   'bg-transparent',
     },
   }[status];
 
   return (
     <span className={cn(
-      'px-3 py-1.5 rounded-lg text-base font-semibold border transition-all select-none',
+      'px-2 py-1 rounded text-base font-medium transition-colors',
+      cfg.bg, cfg.text
+    )}>
+      {word}
+    </span>
+  );
+}
+
+function DarkWordPill({ word, status }: { word: string; status: WordStatus }) {
+  const cfg = {
+    clean:  {
+      text: 'text-[#10b981]',
+      bg:   'bg-transparent',
+      border: 'border-[#10b981]/50 bg-[#10b981]/10'
+    },
+    filter: {
+      text: 'text-[#f59e0b]',
+      bg:   'bg-[#f59e0b]/10',
+      border: 'border-[#f59e0b]/50'
+    },
+    weak: {
+      text: 'text-[#eab308]',
+      bg:   'bg-[#eab308]/10',
+      border: 'border-[#eab308]/50'
+    },
+  }[status];
+
+  return (
+    <span className={cn(
+      'px-4 py-2 rounded-full text-sm font-semibold border transition-all',
       cfg.bg, cfg.text, cfg.border
     )}>
       {word}
@@ -935,53 +906,59 @@ function WordPill({ word, status }: { word: string; status: WordStatus }) {
   );
 }
 
+
 function LiveStatCard({ label, value, good, bad }: { label: string; value: number; good?: boolean; bad?: boolean }) {
-  const color = bad ? 'text-rose-500' : good ? 'text-emerald-500' : 'text-purple-600 dark:text-purple-400';
+  const color = bad ? 'text-rose-500' : good ? 'text-emerald-500' : 'text-[#8a42f5] dark:text-[#a874f7]';
   return (
-    <div className="bg-white dark:bg-[#121214] rounded-2xl p-5 border border-slate-200 dark:border-[#27272a] shadow-sm text-center">
-      <div className={`text-3xl font-black mb-1 ${color}`}>{value}</div>
-      <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{label}</div>
+    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border-none shadow-sm flex flex-col items-center justify-center">
+      <div className={`text-2xl font-bold mb-1 ${color}`}>{value}</div>
+      <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">{label}</div>
     </div>
   );
 }
 
-function ScoreRing({ label, score, color }: { label: string; score: number; color: 'purple' | 'blue' | 'green' }) {
+function ScoreRing({ label, sublabel, score, color }: { label: string; sublabel?: string; score: number; color: 'purple' | 'blue' | 'green' }) {
   const colorMap = {
-    purple: { text: 'text-purple-600 dark:text-purple-400', ring: '#9333ea', bg: 'bg-purple-500/10' },
-    blue:   { text: 'text-blue-600 dark:text-blue-400',     ring: '#2563eb', bg: 'bg-blue-500/10'   },
-    green:  { text: 'text-emerald-600 dark:text-emerald-400', ring: '#10b981', bg: 'bg-emerald-500/10' },
+    purple: { text: 'text-[#8a42f5] dark:text-[#a874f7]', ring: '#8a42f5' },
+    blue:   { text: 'text-[#3b82f6] dark:text-[#60a5fa]', ring: '#3b82f6' }, 
+    green:  { text: 'text-[#10b981] dark:text-[#34d399]', ring: '#10b981' },
   }[color];
 
-  const radius = 42;
+  const radius = 36;
   const circumference = 2 * Math.PI * radius;
   const strokeDash = (score / 100) * circumference;
 
   return (
-    <div className="bg-white dark:bg-[#0c0c0e] border border-slate-200 dark:border-[#27272a] rounded-2xl p-6 flex flex-col items-center gap-3 shadow-sm">
-      <svg width="100" height="100" className="-rotate-90">
-        <circle cx="50" cy="50" r={radius} strokeWidth="8" fill="none" stroke="currentColor" className="text-slate-100 dark:text-[#1f1f23]" />
-        <circle
-          cx="50" cy="50" r={radius} strokeWidth="8" fill="none"
-          stroke={colorMap.ring}
-          strokeDasharray={`${strokeDash} ${circumference}`}
-          strokeLinecap="round"
-          style={{ transition: 'stroke-dasharray 1s ease' }}
-        />
-      </svg>
-      <div className={`-mt-2 text-3xl font-black ${colorMap.text}`}>{score}<span className="text-base font-bold opacity-60">%</span></div>
-      <div className="text-[11px] font-bold uppercase tracking-widest text-slate-400">{label}</div>
+    <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-8 flex flex-col items-center gap-2 shadow-sm w-full">
+      <div className="relative flex items-center justify-center mb-2">
+        <svg width="84" height="84" className="-rotate-90">
+          <circle cx="42" cy="42" r={radius} strokeWidth="6" fill="none" stroke="currentColor" className="text-slate-100 dark:text-slate-800" />
+          <circle
+            cx="42" cy="42" r={radius} strokeWidth="6" fill="none"
+            stroke={colorMap.ring}
+            strokeDasharray={`${strokeDash} ${circumference}`}
+            strokeLinecap="round"
+            style={{ transition: 'stroke-dasharray 1s ease' }}
+          />
+        </svg>
+        <div className={`absolute text-3xl font-black ${colorMap.text}`}>
+          {score}<span className="text-lg">%</span>
+        </div>
+      </div>
+      <div className={`text-xs font-bold uppercase tracking-widest ${colorMap.text}`}>{label}</div>
+      {sublabel && <div className="text-[10px] text-slate-400">{sublabel}</div>}
     </div>
   );
 }
 
 function MetricCard({ icon, label, value, target }: { icon: React.ReactNode; label: string; value: number; target: string }) {
   return (
-    <div className="bg-slate-50 dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-2xl p-5 text-center">
-      <div className="flex items-center justify-center gap-1.5 text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-3">
+    <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-6 text-center shadow-sm flex flex-col items-center justify-center w-full">
+      <div className="flex items-center justify-center gap-1.5 text-slate-400 text-[11px] font-bold uppercase tracking-widest mb-3">
         {icon} {label}
       </div>
-      <div className="text-2xl font-black text-slate-900 dark:text-white mb-1">{value}</div>
-      <div className="text-[10px] text-slate-400">{target}</div>
+      <div className="text-3xl font-black text-[#0b132b] dark:text-white mb-1">{value}</div>
+      <div className="text-xs text-slate-400">{target}</div>
     </div>
   );
 }

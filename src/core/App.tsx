@@ -68,6 +68,9 @@ import VoiceLab from "@/features/student/components/VoiceLab";
 import SpeedReading from "@/features/student/components/SpeedReading";
 import InstructorReport from "@/features/instructor/components/InstructorReport";
 import Workflow from "@/features/instructor/components/Workflow";
+import IeltsWriting from "@/features/student/components/IeltsWriting";
+import ListeningPractice from "@/features/student/components/ListeningPractice";
+import ReadingPractice from "@/features/student/components/ReadingPractice";
 const queryClient = new QueryClient();
 
 /**
@@ -177,6 +180,9 @@ const AppRoutes = () => {
       <Route path="/student/voice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><VoiceLab/></RoleProtectedRoute>} />
       <Route path="/student/speed" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><SpeedReading/></RoleProtectedRoute>} />
       <Route path="/student/reading-assessment" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentReadingAssessmentPage /></RoleProtectedRoute>} />
+      <Route path="/student/writing" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><IeltsWriting/></RoleProtectedRoute>} />
+      <Route path="/student/listening" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><ListeningPractice/></RoleProtectedRoute>} />
+      <Route path="/student/reading" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><ReadingPractice/></RoleProtectedRoute>} />
       <Route path="/student/reading-assessment/history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentAssessmentHistoryPage /></RoleProtectedRoute>} />
       <Route path="/student/my-curriculum" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><MyCurriculum/></RoleProtectedRoute>} />
       <Route path="/student/batches" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentBatchView/></RoleProtectedRoute>} />

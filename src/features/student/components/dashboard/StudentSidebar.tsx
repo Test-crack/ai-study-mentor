@@ -1,14 +1,20 @@
 import { 
-  LayoutDashboard, 
-  BookOpen, 
-  Calendar, 
-  Settings, 
-  LogOut, 
-  GraduationCap,
+ LayoutDashboard, 
+  GraduationCap, 
+  Mic, 
+  Activity,
+  Home,
+   LogOut,
+  Timer, 
   ChevronLeft,
+  PenTool, 
+  Headphones, 
+  BookOpen, 
   ChevronRight,
-  BookText,Mic2,Zap,MessageSquare,
-  Home,Layers
+  Calendar, 
+  MessageCircle, 
+  Library, 
+  Settings,Layers
 } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -27,15 +33,17 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
   const navigate = useNavigate();
   
  const menuItems = [
-  { id: 'dashboard',  icon: LayoutDashboard, label: 'Dashboard',   path: '/student/dashboard' },
-  { id: 'courses',    icon: BookOpen,        label: 'My Courses',  path: '/student/courses' },
-  { id: 'batches',    icon: Layers,          label: 'My Batch',    path: '/student/batches' },
-  { id: 'assessments', icon: BookText, label: 'IELTS Reading', path: '/student/reading-assessment' },
-  { id: 'voice', icon: Mic2, label: 'Voice Lab', path: '/student/voice' },
-  { id: 'speed', icon: Zap, label: 'Speed Reading', path: '/student/speed' },
+  { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/student/dashboard' },
+  { id: 'courses', icon: GraduationCap, label: 'My Courses', path: '/student/courses' },
+  { id: 'assessment', icon: Mic, label: 'Speaking Practice', path: '/student/reading-assessment' },
+  { id: 'voice', icon: Activity, label: 'Voice Lab', path: '/student/voice' },
+  { id: 'speed', icon: Timer, label: 'Speed Reading', path: '/student/speed' },
+  { id: 'writing', icon: PenTool, label: 'IELTS Writing', path: '/student/writing' },
+  { id: 'listening', icon: Headphones, label: 'Listening Practice', path: '/student/listening' },
+  { id: 'reading', icon: BookOpen, label: 'Reading Practice', path: '/student/reading' },
   { id: 'schedule', icon: Calendar, label: 'Schedule', path: '/student/schedule' },
-  { id: 'speaking-practice', icon: MessageSquare, label: 'Speaking-Anatomy', path: '/student/speaking-practice' },
-  { id: 'my-curriculum', icon: GraduationCap, label: 'My-Curriculum', path: '/student/my-curriculum' },
+  { id: 'speaking-practice', icon: MessageCircle, label: 'Speaking-Anatomy', path: '/student/speaking-practice' },
+  { id: 'my-curriculum', icon: Library, label: 'My-Curriculum', path: '/student/my-curriculum' },
   { id: 'settings', icon: Settings, label: 'Settings', path: '/student/settings' },
 ];
   const handleNavigation = (item: typeof menuItems[0]) => {

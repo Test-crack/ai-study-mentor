@@ -88,7 +88,7 @@ const Auth = () => {
     if (!email) {
       toast({ title: "Email Required", description: "Please enter your email address.", variant: "destructive" });
       return;
-    }
+    } 
     setLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
