@@ -96,3 +96,19 @@ export const saveIeltsReadingAssessment = async (data: {
         throw error;
     }
 };
+
+/**
+ * Fetch student's personal speaking history
+ */
+export const fetchSpeakingHistory = async (): Promise<any> => {
+    const backendUrl = getBackendUrl();
+    const fullUrl = `${backendUrl}/api/student/speaking-history`;
+
+    try {
+        const response = await callBackend(fullUrl);
+        return response;
+    } catch (error) {
+        console.error('Error fetching speaking history:', error);
+        throw error;
+    }
+};

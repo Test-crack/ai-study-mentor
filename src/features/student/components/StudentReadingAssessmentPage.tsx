@@ -4,7 +4,7 @@ import {
   BookOpen, Mic, Target, Zap, Clock, CheckCircle, 
   Sparkles, ChevronRight, Info, AlertTriangle, 
   XCircle, Check, PlaySquare, Square, Loader2,
-  ChevronLeft, RotateCcw
+  ChevronLeft, RotateCcw, Activity
 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent } from '@/shared/components/ui/card';
@@ -312,6 +312,14 @@ export default function StudentReadingAssessmentPage() {
                       <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Speaking Practice</h1>
                       <p className="text-slate-500 dark:text-slate-400 mt-1">Practice and improve your speaking fluency.</p>
                   </div>
+                  <Button 
+                      variant="outline" 
+                      onClick={() => navigate('/student/speaking-history')}
+                      className="gap-2 font-semibold text-[#8a42f5] border-[#8a42f5] hover:bg-[#8a42f5]/10 dark:hover:bg-[#8a42f5]/20"
+                  >
+                      <Activity className="w-4 h-4" />
+                      View Analytics History
+                  </Button>
               </div>
 
               <div className="flex flex-wrap gap-2 mb-8 border-b border-slate-200 dark:border-slate-800 pb-4">

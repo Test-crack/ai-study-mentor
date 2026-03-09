@@ -4,11 +4,12 @@ import {
   ChevronDown, ChevronUp, Mail, Phone, Building2,
   CheckCircle2, Clock, XCircle, Search, BarChart3,
 } from 'lucide-react';
-import StudentProgressModal from './StudentProgressModal';
 import { InstructorSidebar } from '../components/dashboard/InstructorSidebar';
 import { callBackend } from '@/features/auth/services/authClient';
 import { getBackendUrl } from '@/shared/utils';
 import { useToast } from '@/shared/hooks/use-toast';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -243,10 +244,10 @@ function BatchCard({ batch, onAnalyzeStudent }: { batch: InstructorBatch, onAnal
 
 export default function InstructorBatchView() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [batches, setBatches] = useState<InstructorBatch[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeStudent, setActiveStudent] = useState<BatchStudent | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -332,19 +333,12 @@ export default function InstructorBatchView() {
               </div>
             ) : (
               <div className="space-y-4">
-                {batches.map(batch => <BatchCard key={batch.id} batch={batch} onAnalyzeStudent={setActiveStudent} />)}
+                {batches.map(batch => <BatchCard key={batch.id} batch={batch} onAnalyzeStudent={(s) => navigate(`/instructor/student/${s.userId}/progress`, { state: { student: s }})} />)}
               </div>
             )}
           </div>
         </main>
       </div>
-
-      {activeStudent && (
-        <StudentProgressModal 
-          student={activeStudent} 
-          onClose={() => setActiveStudent(null)} 
-        />
-      )}
     </div>
   );
 }

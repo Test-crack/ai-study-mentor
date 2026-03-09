@@ -31,6 +31,7 @@ import StudentBatchView from "@/features/student/components/StudentBatchView";
 import InstructorDashboardPage from "@/features/instructor/components/InstructorDashboardPage";
 import InstructorAssessmentPage from "@/features/instructor/components/assessments/InstructorAssessmentPage";
 import InstructorBatchView from "@/features/instructor/components/InstructorBatchView";
+import InstructorStudentProgressPage from "@/features/instructor/components/InstructorStudentProgressPage";
 import { RoleProtectedRoute } from "@/shared/components/auth/ProtectedRoute";
 import SpeakingPractice from "@/features/student/components/SpeakingPractice";
 import MyCurriculum from "@/features/student/components/MyCurriculum";
@@ -40,6 +41,7 @@ import AlignmentPage from "@/features/instructor/components/Alignment";
 import MicTest from "@/features/student/components/MicTest";
 import { WebSocketProvider } from "@/shared/context/WebSocketContext";
 import { RequireActiveInstitute } from "@/features/auth/components/RequireActiveInstitute";
+import StudentSpeakingHistoryPage from "@/features/student/components/StudentSpeakingHistoryPage";
 
 import InstituteDashboard from "@/features/Institute/dashboard/InstituteDashboard";
 import InstituteBatches from "@/features/Institute/dashboard/BatchAllocation";
@@ -197,6 +199,7 @@ const AppRoutes = () => {
       <Route path="/student/listening" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><ListeningPractice/></RoleProtectedRoute>} />
       <Route path="/student/reading" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><ReadingPractice/></RoleProtectedRoute>} />
       <Route path="/student/reading-assessment/history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentAssessmentHistoryPage /></RoleProtectedRoute>} />
+      <Route path="/student/speaking-history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentSpeakingHistoryPage /></RoleProtectedRoute>} />
       <Route path="/student/my-curriculum" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><MyCurriculum/></RoleProtectedRoute>} />
       <Route path="/student/batches" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentBatchView/></RoleProtectedRoute>} />
       <Route path="/student/speaking-practice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><SpeakingPractice/></RoleProtectedRoute>} />
@@ -207,6 +210,15 @@ const AppRoutes = () => {
         element={
           <RoleProtectedRoute allowedRoles={['INSTRUCTOR']}>
             <InstructorDashboardPage />
+          </RoleProtectedRoute>
+        } 
+      />
+
+      <Route 
+        path="/instructor/student/:studentId/progress" 
+        element={
+          <RoleProtectedRoute allowedRoles={['INSTRUCTOR']}>
+            <InstructorStudentProgressPage />
           </RoleProtectedRoute>
         } 
       />
