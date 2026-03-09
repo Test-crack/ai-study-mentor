@@ -28,15 +28,15 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
   const navigate = useNavigate();
   
  const menuItems = [
-  { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/institute-dashboard' },
-  { id: 'batches', icon: Layers, label: 'Batch Allocation', path: '/institute-batches' },
-  { id: 'tutor', icon: Users, label: 'Tutor Accounts', path: '/institute-tutor' },
-  { id: 'tutor-onboard', icon: UserPlus, label: 'Tutor Onboarding', path: '/institute-tutorOnboarding' },
-  { id: 'students', icon: GraduationCap, label: 'Students', path: '/institute-students' },
-  { id: 'students-onboard', icon: UserCheck, label: 'Student Onboarding', path: '/institute-studentOnboarding' },
-  { id: 'billings', icon: CreditCard, label: 'Billings & Plans', path: '/institute-billings' }, 
-  { id: 'report', icon: BarChart3, label: 'Report', path: '/institute-reports' },
-  { id: 'settings', icon: Settings, label: 'Institute Setting', path: '/institute-Setting' },
+  { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/institute-admin/dashboard' },
+  { id: 'batches', icon: Layers, label: 'Batch Allocation', path: '/institute-admin/batches' },
+  { id: 'tutor', icon: Users, label: 'Tutor Accounts', path: '/institute-admin/tutor' },
+  { id: 'tutor-onboard', icon: UserPlus, label: 'Tutor Onboarding', path: '/institute-admin/tutorOnboarding' },
+  { id: 'students', icon: GraduationCap, label: 'Students', path: '/institute-admin/students' },
+  { id: 'students-onboard', icon: UserCheck, label: 'Student Onboarding', path: '/institute-admin/studentOnboarding' },
+  { id: 'billings', icon: CreditCard, label: 'Billings & Plans', path: '/institute-admin/billings' }, 
+  { id: 'report', icon: BarChart3, label: 'Report', path: '/institute-admin/reports' },
+  { id: 'settings', icon: Settings, label: 'Institute Setting', path: '/institute-admin/Setting' },
 ];
 
   const handleNavigation = (item: typeof menuItems[0]) => {
@@ -109,7 +109,7 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
       {profile?.role === 'INSTITUTE_OWNER' && (
         <div className={cn("mt-2 mb-2")}>
           <button
-            onClick={() => navigate('/owner-dashboard')}
+            onClick={() => navigate('/institute-owner/dashboard')}
             title={isCollapsed ? "Back to Owner Portal" : undefined}
             className={cn(
               "w-full flex items-center gap-3 rounded-xl transition-all duration-200 group",

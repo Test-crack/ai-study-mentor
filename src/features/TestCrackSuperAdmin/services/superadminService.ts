@@ -72,6 +72,14 @@ export async function toggleInstituteStatus(
     return callBackend(url, { method: 'PATCH', body: JSON.stringify({ isActive }) });
 }
 
+export async function updateInstitute(
+    id: string,
+    payload: { name?: string; address?: string; logoUrl?: string; }
+): Promise<{ data: { id: string; name: string; address: string | null; logoUrl: string | null; } }> {
+    const url = `${getBackendUrl()}/api/superadmin/institutes/${id}`;
+    return callBackend(url, { method: 'PATCH', body: JSON.stringify(payload) });
+}
+
 /**
  * GET /api/superadmin/users
  * Fetch all platform users — SUPERADMIN only.

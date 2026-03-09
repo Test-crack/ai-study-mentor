@@ -214,14 +214,14 @@ const LandingPage = () => {
               return;
             }
             if (user) {
-               if (profile?.role === 'INSTRUCTOR') {
-                 navigate('/instructor/dashboard');
-               } else if (profile?.role === 'SUPERADMIN') {
-                 navigate('/superadmin-dashboard');
+               if (profile?.role === 'SUPERADMIN') {
+                 navigate('/superadmin/dashboard');
                } else if (profile?.role === 'INSTITUTE_OWNER') {
-                 navigate('/owner-dashboard');
+                 navigate('/institute-owner/dashboard');
                } else if (profile?.role === 'INSTITUTE_ADMIN') {
-                 navigate('/institute-dashboard');
+                 navigate('/institute-admin/dashboard');
+               } else if (profile?.role === 'INSTRUCTOR') {
+                 navigate('/instructor/dashboard');
                } else {
                  navigate('/student/dashboard');
                }

@@ -52,11 +52,11 @@ const navigate = useNavigate();
                 </div>
                 
                 <div className="flex flex-wrap items-center gap-3 mt-2">
-                  <button  onClick={() => navigate('/institute-studentonboarding')}className="flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-[#633CFF] hover:bg-slate-50 dark:hover:bg-[#522EE0] text-indigo-700 dark:text-white rounded-lg text-sm font-semibold transition-colors shadow-sm w-full sm:w-auto">
+                  <button  onClick={() => navigate('/institute-admin/studentonboarding')}className="flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-[#633CFF] hover:bg-slate-50 dark:hover:bg-[#522EE0] text-indigo-700 dark:text-white rounded-lg text-sm font-semibold transition-colors shadow-sm w-full sm:w-auto">
                     <UserPlus className="w-4 h-4" />
                     Onboard Students
                   </button>
-                  <button onClick={() => navigate('/institute-tutoronboarding')} className="flex items-center justify-center gap-2 px-4 py-2 bg-transparent border border-indigo-200 dark:border-purple-400/50 hover:bg-white/10 text-white rounded-lg text-sm font-semibold transition-colors w-full sm:w-auto">
+                  <button onClick={() => navigate('/institute-admin/tutoronboarding')} className="flex items-center justify-center gap-2 px-4 py-2 bg-transparent border border-indigo-200 dark:border-purple-400/50 hover:bg-white/10 text-white rounded-lg text-sm font-semibold transition-colors w-full sm:w-auto">
                     <UserCheck className="w-4 h-4" />
                     Onboard Tutors
                   </button>
@@ -180,7 +180,7 @@ const navigate = useNavigate();
                         <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Manage batch assignments and capacity</p>
                       </div>
                     </div>
-                    <button   onClick={() => navigate('/institute-batches')} className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
+                    <button   onClick={() => navigate('/institute-admin/batches')} className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
                       View All <ChevronRight className="w-3 h-3" />
                     </button>
                   </div>

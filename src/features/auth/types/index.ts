@@ -16,4 +16,5 @@ export interface UserProfile {
   username: string | null;
   name: string | null;
   role: 'STUDENT' | 'INSTRUCTOR' | 'SUPERADMIN' | 'INSTITUTE_OWNER' | 'INSTITUTE_ADMIN';
+  instituteIsActive?: boolean;
 }

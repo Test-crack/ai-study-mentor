@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Building2, 
   Users, 
@@ -6,60 +6,24 @@ import {
   Headphones, 
   ChevronRight,
   Activity,
-  Ticket
+  Ticket,
+  Loader2
 } from 'lucide-react';
 import { SuperAdminSidebar } from '../Components/SuperadminSidebar';
 import { SuperAdminTopbar } from '../Components/Superadmintopbar';
+import { fetchInstitutes, InstituteRecord } from '../services/superadminService';
 
-// --- Mock Data ---
-const institutes = [
-  {
-    id: 'AE',
-    name: 'Ace English Academy',
-    details: '250 students • 5 tutors • Institute Pro',
-    status: 'Healthy',
-    mrr: '₹190K/mo',
-    initials: 'AE',
-    color: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-400'
-  },
-  {
-    id: 'SC',
-    name: 'SpeakWell Coaching',
-    details: '298 students • 8 tutors • Institute Pro',
-    status: 'Healthy',
-    mrr: '₹150K/mo',
-    initials: 'SC',
-    color: 'bg-purple-50 text-purple-700 dark:bg-purple-900/50 dark:text-purple-400'
-  },
-  {
-    id: 'TI',
-    name: 'TechBridge Institute',
-    details: '120 students • 3 tutors • Per Student',
-    status: 'At Risk',
-    mrr: '₹308K/mo',
-    initials: 'TI',
-    color: 'bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400'
-  },
-  {
-    id: 'PU',
-    name: 'Prestige University',
-    details: '500 students • 12 tutors • Enterprise',
-    status: 'Healthy',
-    mrr: '₹450K/mo',
-    initials: 'PU',
-    color: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-400'
-  },
-  {
-    id: 'LA',
-    name: 'LearnFirst Academy',
-    details: '45 students • 2 tutors • Per Student',
-    status: 'Trial',
-    mrr: '₹113K/mo',
-    initials: 'LA',
-    color: 'bg-amber-50 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400'
-  }
+// --- Static Data ---
+const COLORS = [
+  'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-400',
+  'bg-purple-50 text-purple-700 dark:bg-purple-900/50 dark:text-purple-400',
+  'bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400',
+  'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400',
+  'bg-rose-50 text-rose-700 dark:bg-rose-900/50 dark:text-rose-400',
+  'bg-amber-50 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400'
 ];
 
+const getInitials = (name: string) => name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
 const activities = [
   {
     text: <><span className="font-semibold text-slate-900 dark:text-white">New institute signed up</span> — LearnFirst Academy (Trial)</>,
@@ -120,6 +84,21 @@ const tickets = [
 
 export default function SuperAdminDashboard() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [institutes, setInstitutes] = useState<InstituteRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchInstitutes().then(res => {
+      setInstitutes(res.data || []);
+      setLoading(false);
+    }).catch(err => {
+      console.error(err);
+      setLoading(false);
+    });
+  }, []);
+
+  const totalStudents = institutes.reduce((acc, inst) => acc + inst.studentCount, 0);
+  const totalTutors = institutes.reduce((acc, inst) => acc + inst.instructorCount, 0);
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0A10] font-sans text-slate-900 dark:text-slate-200 transition-colors duration-300">
@@ -148,7 +127,7 @@ export default function SuperAdminDashboard() {
                   Super Admin Console
                 </h1>
                 <p className="text-blue-100 text-sm sm:text-base">
-                  <strong className="text-white font-medium">5 institutes</strong> onboarded. <strong className="text-white font-medium">1,145 total students</strong>. <strong className="text-white font-medium">₹12.0L MRR</strong>. 2 open support tickets.
+                  <strong className="text-white font-medium">{loading ? '...' : institutes.length} institutes</strong> onboarded. <strong className="text-white font-medium">{loading ? '...' : totalStudents.toLocaleString()} total students</strong>. <strong className="text-white font-medium">₹12.0L MRR</strong>. 2 open support tickets.
                 </p>
               </div>
             </div>
@@ -158,7 +137,7 @@ export default function SuperAdminDashboard() {
               <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl p-5 shadow-sm flex items-center justify-between transition-colors">
                 <div>
                   <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Institutes</p>
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white">5</h3>
+                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{loading ? '...' : institutes.length}</h3>
                   <p className="text-[10px] text-slate-500 mt-1">1 on trial</p>
                 </div>
                 <div className="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center shrink-0">
@@ -169,8 +148,8 @@ export default function SuperAdminDashboard() {
               <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl p-5 shadow-sm flex items-center justify-between transition-colors">
                 <div>
                   <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Total Students</p>
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white">1,145</h3>
-                  <p className="text-[10px] text-slate-500 mt-1">30 tutors</p>
+                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{loading ? '...' : totalStudents.toLocaleString()}</h3>
+                  <p className="text-[10px] text-slate-500 mt-1">{totalTutors.toLocaleString()} tutors</p>
                 </div>
                 <div className="w-10 h-10 rounded-full bg-purple-50 dark:bg-purple-500/10 flex items-center justify-center shrink-0">
                   <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" />
@@ -214,25 +193,29 @@ export default function SuperAdminDashboard() {
                 </div>
 
                 <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-[#26252D] transition-colors">
-                  {institutes.map((inst, idx) => (
-                    <div key={idx} className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors cursor-pointer group">
+                  {loading ? (
+                    <div className="flex justify-center p-8">
+                      <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+                    </div>
+                  ) : institutes.length === 0 ? (
+                    <div className="p-8 text-center text-slate-500 text-sm">No institutes found</div>
+                  ) : institutes.map((inst, idx) => (
+                    <div key={inst.id} className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors cursor-pointer group">
                       <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded flex items-center justify-center text-sm font-bold shrink-0 ${inst.color}`}>
-                          {inst.initials}
+                        <div className={`w-10 h-10 rounded flex items-center justify-center text-sm font-bold shrink-0 ${COLORS[idx % COLORS.length]}`}>
+                          {getInitials(inst.name)}
                         </div>
                         <div>
                           <h4 className="font-semibold text-sm text-slate-900 dark:text-white">{inst.name}</h4>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{inst.details}</p>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{inst.studentCount} students • {inst.instructorCount} tutors</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
                         <span className={`text-[11px] font-bold tracking-wider ${
-                          inst.status === 'Healthy' ? 'text-emerald-600 dark:text-emerald-500' : 
-                          inst.status === 'At Risk' ? 'text-rose-600 dark:text-rose-500' : 'text-amber-600 dark:text-amber-500'
+                          inst.isActive ? 'text-emerald-600 dark:text-emerald-500' : 'text-slate-500'
                         }`}>
-                          {inst.status}
+                          {inst.isActive ? 'Active' : 'Inactive'}
                         </span>
-                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 w-20 text-right">{inst.mrr}</span>
                         <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 dark:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
                       </div>
                     </div>
@@ -302,7 +285,7 @@ export default function SuperAdminDashboard() {
               <div>
                 <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Avg Revenue per Institute</p>
                 <h3 className="text-3xl font-bold text-slate-900 dark:text-white">₹241K</h3>
-                <p className="text-xs text-slate-500 mt-1">5 active institutes</p>
+                <p className="text-xs text-slate-500 mt-1">{loading ? '...' : institutes.filter(i => i.isActive).length} active institutes</p>
               </div>
               <div>
                 <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Platform Health Score</p>

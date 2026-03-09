@@ -7,7 +7,7 @@ import {
 import { SuperAdminSidebar } from '../Components/SuperadminSidebar';
 import { SuperAdminTopbar } from '../Components/Superadmintopbar';
 import {
-  fetchInstitutes, createInstitute, toggleInstituteStatus,
+  fetchInstitutes, createInstitute, toggleInstituteStatus, updateInstitute,
   InstituteRecord
 } from '../services/superadminService';
 import { useToast } from '@/shared/hooks/use-toast';
@@ -27,9 +27,10 @@ const formatDate = (iso: string) => {
 interface InstituteMenuProps {
   institute: InstituteRecord;
   onToggleStatus: (id: string, isActive: boolean) => Promise<void>;
+  onEdit: (institute: InstituteRecord) => void;
 }
 
-function InstituteMenu({ institute, onToggleStatus }: InstituteMenuProps) {
+function InstituteMenu({ institute, onToggleStatus, onEdit }: InstituteMenuProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -66,6 +67,13 @@ function InstituteMenu({ institute, onToggleStatus }: InstituteMenuProps) {
 
       {open && (
         <div className="absolute right-0 top-full mt-1 z-30 w-44 bg-white dark:bg-[#1E1D27] border border-slate-200 dark:border-[#2E2D3A] rounded-xl shadow-xl py-1 overflow-hidden">
+          <button
+            onClick={(e) => { e.stopPropagation(); setOpen(false); onEdit(institute); }}
+            className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm font-medium transition-colors text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-white/5"
+          >
+            <Building2 className="w-4 h-4" /> Edit Details
+          </button>
+          <div className="h-px w-full bg-slate-100 dark:bg-[#2E2D3A] my-0.5" />
           <button
             onClick={handleToggle}
             className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm font-medium transition-colors ${
@@ -211,6 +219,103 @@ function CreateInstituteModal({ onClose, onCreated }: CreateModalProps) {
   );
 }
 
+// ─── Edit Institute Modal ─────────────────────────────────────────────────────
+
+interface EditModalProps {
+  institute: InstituteRecord;
+  onClose: () => void;
+  onUpdated: () => void;
+}
+
+function EditInstituteModal({ institute, onClose, onUpdated }: EditModalProps) {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({
+    name: institute.name,
+    address: institute.address || '',
+    logoUrl: institute.logoUrl || '',
+  });
+
+  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm(prev => ({ ...prev, [k]: e.target.value }));
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name.trim()) return;
+    setLoading(true);
+    try {
+      await updateInstitute(institute.id, {
+        name: form.name,
+        address: form.address,
+        logoUrl: form.logoUrl, // Could support file upload here later, static text for now
+      });
+      toast({
+        title: '✅ Institute Updated',
+        description: 'Institute details have been successfully updated.',
+      });
+      onUpdated();
+      onClose();
+    } catch (err: any) {
+      toast({ title: 'Failed to update institute', description: err.message, variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="bg-white dark:bg-[#15141B] rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-[#26252D]">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-[#26252D]">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
+              <Building2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <div>
+              <h2 className="font-bold text-slate-900 dark:text-white text-base">Edit Institute</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Update profile information</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-slate-400">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Institute Name *</label>
+            <div className="relative">
+              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input type="text" required value={form.name} onChange={set('name')} placeholder="e.g. Ace English Academy"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-indigo-500 dark:text-white placeholder-slate-400" />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Address</label>
+            <div className="relative">
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input type="text" value={form.address} onChange={set('address')} placeholder="City, State"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-indigo-500 dark:text-white placeholder-slate-400" />
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-4 border-t border-slate-100 dark:border-[#26252D]">
+            <button type="button" onClick={onClose}
+              className="flex-1 py-2.5 rounded-lg border border-slate-200 dark:border-[#26252D] text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+              Cancel
+            </button>
+            <button type="submit" disabled={loading}
+              className="flex-1 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+              {loading ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function SuperAdminInstitutes() {
@@ -221,6 +326,7 @@ export default function SuperAdminInstitutes() {
   const [institutes, setInstitutes] = useState<InstituteRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editingInstitute, setEditingInstitute] = useState<InstituteRecord | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(searchQuery), 400);
@@ -263,6 +369,10 @@ export default function SuperAdminInstitutes() {
 
       {showCreateModal && (
         <CreateInstituteModal onClose={() => setShowCreateModal(false)} onCreated={load} />
+      )}
+
+      {editingInstitute && (
+        <EditInstituteModal institute={editingInstitute} onClose={() => setEditingInstitute(null)} onUpdated={load} />
       )}
 
       <div className="hidden lg:block">
@@ -456,7 +566,11 @@ export default function SuperAdminInstitutes() {
 
                           {/* Actions */}
                           <td className="px-4 py-4">
-                            <InstituteMenu institute={inst} onToggleStatus={handleToggleStatus} />
+                            <InstituteMenu 
+                              institute={inst} 
+                              onToggleStatus={handleToggleStatus} 
+                              onEdit={(i) => setEditingInstitute(i)} 
+                            />
                           </td>
                         </tr>
                       ))}

@@ -48,7 +48,7 @@ const navigate=useNavigate();
                 263 tutor hours freed monthly.
               </p>
               <div className="flex gap-3">
-                <button onClick={() => navigate('/owner-roi')} className="bg-indigo-600 dark:bg-white text-white dark:text-black px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-indigo-700 dark:hover:bg-gray-200 transition shadow-sm">
+                <button onClick={() => navigate('/institute-owner/roi')} className="bg-indigo-600 dark:bg-white text-white dark:text-black px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-indigo-700 dark:hover:bg-gray-200 transition shadow-sm">
                   <DollarSign size={18} /> ROI Report
                 </button>
               
@@ -133,7 +133,7 @@ const navigate=useNavigate();
                     <h3 className="text-lg font-bold">Batch Performance</h3>
                     <p className="text-slate-500 dark:text-gray-400 text-xs">Cross-batch outcome comparison</p>
                   </div>
-                  <button  onClick={()=>navigate('/owner-insight')}   className="text-sm flex items-center gap-1 text-slate-500 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-white transition">
+                  <button  onClick={()=>navigate('/institute-owner/insight')}   className="text-sm flex items-center gap-1 text-slate-500 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-white transition">
                     Details <ArrowRight size={16} />
                   </button>
                 </div>
@@ -178,7 +178,7 @@ const navigate=useNavigate();
                     <h3 className="text-lg font-bold">Tutor Effectiveness</h3>
                     <p className="text-slate-500 dark:text-gray-400 text-xs">Performance and AI alignment scores</p>
                   </div>
-                  <button onClick={()=>navigate('/owner-tuteffect')} className="text-sm flex items-center gap-1 text-slate-500 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-white transition">
+                  <button onClick={()=>navigate('/institute-owner/tuteffect')} className="text-sm flex items-center gap-1 text-slate-500 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-white transition">
                     Full Report <ArrowRight size={16} />
                   </button>
                 </div>

@@ -40,9 +40,9 @@ export const RoleProtectedRoute = ({
   if (allowedRoles && profile && !allowedRoles.includes(profile.role)) {
     // Redirect to the user's own dashboard — NOT /profile which renders inside instructor shell
     const roleHome: Record<string, string> = {
-      SUPERADMIN: '/superadmin-dashboard',
-      INSTITUTE_OWNER: '/owner-dashboard',
-      INSTITUTE_ADMIN: '/institute-dashboard',
+      SUPERADMIN: '/superadmin/dashboard',
+      INSTITUTE_OWNER: '/institute-owner/dashboard',
+      INSTITUTE_ADMIN: '/institute-admin/dashboard',
       INSTRUCTOR: '/instructor/dashboard',
       STUDENT: '/student/dashboard',
     };

@@ -39,6 +39,7 @@ import TechPrepPage from "@/features/instructor/components/TechPrepPage";
 import AlignmentPage from "@/features/instructor/components/Alignment";
 import MicTest from "@/features/student/components/MicTest";
 import { WebSocketProvider } from "@/shared/context/WebSocketContext";
+import { RequireActiveInstitute } from "@/features/auth/components/RequireActiveInstitute";
 
 import InstituteDashboard from "@/features/Institute/dashboard/InstituteDashboard";
 import InstituteBatches from "@/features/Institute/dashboard/BatchAllocation";
@@ -71,7 +72,13 @@ import Workflow from "@/features/instructor/components/Workflow";
 import IeltsWriting from "@/features/student/components/IeltsWriting";
 import ListeningPractice from "@/features/student/components/ListeningPractice";
 import ReadingPractice from "@/features/student/components/ReadingPractice";
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false, // Prevent aggressive re-fetches on tab switches
+    },
+  },
+});
 
 /**
  * 1. Initial Login Redirector
@@ -83,9 +90,9 @@ const LoginRedirect = () => {
 
   if (loading || profileLoading) return null;
 
-  if (profile?.role === 'SUPERADMIN') return <Navigate to="/superadmin-dashboard" replace />;
-  if (profile?.role === 'INSTITUTE_OWNER') return <Navigate to="/owner-dashboard" replace />;
-  if (profile?.role === 'INSTITUTE_ADMIN') return <Navigate to="/institute-dashboard" replace />;
+  if (profile?.role === 'SUPERADMIN') return <Navigate to="/superadmin/dashboard" replace />;
+  if (profile?.role === 'INSTITUTE_OWNER') return <Navigate to="/institute-owner/dashboard" replace />;
+  if (profile?.role === 'INSTITUTE_ADMIN') return <Navigate to="/institute-admin/dashboard" replace />;
   if (profile?.role === 'INSTRUCTOR') return <Navigate to="/instructor/dashboard" replace />;
   // Default: STUDENT
   return <Navigate to="/student/dashboard" replace />;
@@ -107,9 +114,9 @@ const ManualDashboardAccess = () => {
   }
 
   // All others: Redirect to their specific home
-  if (profile.role === 'SUPERADMIN') return <Navigate to="/superadmin-dashboard" replace />;
-  if (profile.role === 'INSTITUTE_OWNER') return <Navigate to="/owner-dashboard" replace />;
-  if (profile.role === 'INSTITUTE_ADMIN') return <Navigate to="/institute-dashboard" replace />;
+  if (profile.role === 'SUPERADMIN') return <Navigate to="/superadmin/dashboard" replace />;
+  if (profile.role === 'INSTITUTE_OWNER') return <Navigate to="/institute-owner/dashboard" replace />;
+  if (profile.role === 'INSTITUTE_ADMIN') return <Navigate to="/institute-admin/dashboard" replace />;
 
   // Students
   return <Navigate to="/student/dashboard" replace />;
@@ -122,35 +129,41 @@ const AppRoutes = () => {
     <Routes>
       {/* Public routes */}
       <Route path="/" element={<LandingPage />} />
-{/* Institute Owner Routes — RBAC: INSTITUTE_OWNER only */}
-<Route path="/owner-dashboard" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteOwnerDashboard/></RoleProtectedRoute>}/>
-<Route path="/owner-performance" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><Performance/></RoleProtectedRoute>}/>
-<Route path="/owner-roi" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><RoiAnalytics/></RoleProtectedRoute>}/>
-<Route path="/owner-insight" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><BatchInsight/></RoleProtectedRoute>}/>
-<Route path="/owner-tuteffect" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><TutorEffective/></RoleProtectedRoute>}/>
-<Route path="/owner-strategic" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><StrategicReport/></RoleProtectedRoute>}/>
-<Route path="/owner-calibration" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><AiCalibration/></RoleProtectedRoute>}/>
-<Route path="/owner-admins" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteAdmins/></RoleProtectedRoute>}/>
-{/* Testcrack SuperAdmin — RBAC: SUPERADMIN only */}
-            <Route path="/superadmin-dashboard" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SuperAdminDashboard/></RoleProtectedRoute>} />
-            <Route path="/superadmin-institutes" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SuperAdminInstitutes/></RoleProtectedRoute>} />
-            <Route path="/superadmin-subscription" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><Subscription/></RoleProtectedRoute>} />
-            <Route path="/superadmin-priceconfig" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><PricingConfig/></RoleProtectedRoute>} />
-            <Route path="/superadmin-supportickets" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SupportTicket/></RoleProtectedRoute>} />
-            <Route path="/superadmin-platform" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><PlatformAnalytics/></RoleProtectedRoute>} />
-            <Route path="/superadmin-allusers" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><AllUsers/></RoleProtectedRoute>} />
+
+      {/* Routes that require the institute to be active (Owners & Admins) */}
+      <Route element={<RequireActiveInstitute />}>
+        {/* Institute Owner Routes — RBAC: INSTITUTE_OWNER only */}
+        <Route path="/institute-owner/dashboard" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteOwnerDashboard/></RoleProtectedRoute>}/>
+        <Route path="/institute-owner/performance" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><Performance/></RoleProtectedRoute>}/>
+        <Route path="/institute-owner/roi" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><RoiAnalytics/></RoleProtectedRoute>}/>
+        <Route path="/institute-owner/insight" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><BatchInsight/></RoleProtectedRoute>}/>
+        <Route path="/institute-owner/tuteffect" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><TutorEffective/></RoleProtectedRoute>}/>
+        <Route path="/institute-owner/strategic" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><StrategicReport/></RoleProtectedRoute>}/>
+        <Route path="/institute-owner/calibration" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><AiCalibration/></RoleProtectedRoute>}/>
+        <Route path="/institute-owner/admins" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteAdmins/></RoleProtectedRoute>}/>
+
+        {/* Institute Admin routes — RBAC: INSTITUTE_ADMIN + INSTITUTE_OWNER */}
+        <Route path="/institute-admin/dashboard" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteDashboard/></RoleProtectedRoute>} />
+        <Route path="/institute-admin/batches" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteBatches/></RoleProtectedRoute>} />
+        <Route path="/institute-admin/tutor" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteTutor/></RoleProtectedRoute>} />
+        <Route path="/institute-admin/students" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteStudents/></RoleProtectedRoute>} />
+        <Route path="/institute-admin/billings" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteBillings/></RoleProtectedRoute>} />
+        <Route path="/institute-admin/reports" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteReports/></RoleProtectedRoute>} />
+        <Route path="/institute-admin/studentOnboarding" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><StudentOnboarding/></RoleProtectedRoute>} />
+        <Route path="/institute-admin/tutorOnboarding" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><TutorOnboarding/></RoleProtectedRoute>}/>
+        <Route path="/institute-admin/Setting" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteSettings/></RoleProtectedRoute>}/>
+      </Route>
+
+      {/* Testcrack SuperAdmin — RBAC: SUPERADMIN only */}
+            <Route path="/superadmin/dashboard" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SuperAdminDashboard/></RoleProtectedRoute>} />
+            <Route path="/superadmin/institutes" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SuperAdminInstitutes/></RoleProtectedRoute>} />
+            <Route path="/superadmin/subscription" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><Subscription/></RoleProtectedRoute>} />
+            <Route path="/superadmin/priceconfig" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><PricingConfig/></RoleProtectedRoute>} />
+            <Route path="/superadmin/supportickets" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SupportTicket/></RoleProtectedRoute>} />
+            <Route path="/superadmin/platform" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><PlatformAnalytics/></RoleProtectedRoute>} />
+            <Route path="/superadmin/allusers" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><AllUsers/></RoleProtectedRoute>} />
 
 
-      {/* Institute Admin routes — RBAC: INSTITUTE_ADMIN + INSTITUTE_OWNER */}
-            <Route path="/institute-dashboard" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteDashboard/></RoleProtectedRoute>} />
-            <Route path="/institute-batches" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteBatches/></RoleProtectedRoute>} />
-            <Route path="/institute-tutor" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteTutor/></RoleProtectedRoute>} />
-            <Route path="/institute-students" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteStudents/></RoleProtectedRoute>} />
-            <Route path="/institute-billings" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteBillings/></RoleProtectedRoute>} />
-            <Route path="/institute-reports" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteReports/></RoleProtectedRoute>} />
-            <Route path="/institute-studentOnboarding" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><StudentOnboarding/></RoleProtectedRoute>} />
-            <Route path="/institute-tutorOnboarding" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><TutorOnboarding/></RoleProtectedRoute>}/>
-            <Route path="/institute-Setting" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteSettings/></RoleProtectedRoute>}/>
       {/* Login Route: On login, LoginRedirect forces role-based dashboards */}
       <Route path="/login" element={user ? <LoginRedirect /> : <LoginPage />} />
       {/* Legacy redirect – keeps old /auth links working */}
