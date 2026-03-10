@@ -2,14 +2,19 @@ import {
   LayoutDashboard, 
   BookOpen, 
   Users, 
-  Layers,UserPlus,UserCheck,
-  Settings, CreditCard,
+  Layers,
+  UserPlus,
+  UserCheck,
+  Settings, 
+  CreditCard,
   LogOut, 
   GraduationCap,
   ChevronLeft,
   ChevronRight,
-  Home,BarChart3,
-  FileText, ArrowLeftRight
+  Home,
+  BarChart3,
+  FileText, 
+  ArrowLeftRight
 } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -27,17 +32,17 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
   const { signOut, profile } = useAuth();
   const navigate = useNavigate();
   
- const menuItems = [
-  { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/institute-admin/dashboard' },
-  { id: 'batches', icon: Layers, label: 'Batch Allocation', path: '/institute-admin/batches' },
-  { id: 'tutor', icon: Users, label: 'Tutor Accounts', path: '/institute-admin/tutor' },
-  { id: 'tutor-onboard', icon: UserPlus, label: 'Tutor Onboarding', path: '/institute-admin/tutorOnboarding' },
-  { id: 'students', icon: GraduationCap, label: 'Students', path: '/institute-admin/students' },
-  { id: 'students-onboard', icon: UserCheck, label: 'Student Onboarding', path: '/institute-admin/studentOnboarding' },
-  { id: 'billings', icon: CreditCard, label: 'Billings & Plans', path: '/institute-admin/billings' }, 
-  { id: 'report', icon: BarChart3, label: 'Report', path: '/institute-admin/reports' },
-  { id: 'settings', icon: Settings, label: 'Institute Setting', path: '/institute-admin/Setting' },
-];
+  const menuItems = [
+    { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/institute-admin/dashboard' },
+    { id: 'batches', icon: Layers, label: 'Batch Allocation', path: '/institute-admin/batches' },
+    { id: 'tutor', icon: Users, label: 'Tutor Accounts', path: '/institute-admin/tutor' },
+    { id: 'tutor-onboard', icon: UserPlus, label: 'Tutor Onboarding', path: '/institute-admin/tutorOnboarding' },
+    { id: 'students', icon: GraduationCap, label: 'Students', path: '/institute-admin/students' },
+    { id: 'students-onboard', icon: UserCheck, label: 'Student Onboarding', path: '/institute-admin/studentOnboarding' },
+    { id: 'billings', icon: CreditCard, label: 'Billings & Plans', path: '/institute-admin/billings' }, 
+    { id: 'report', icon: BarChart3, label: 'Report', path: '/institute-admin/reports' },
+    { id: 'settings', icon: Settings, label: 'Institute Setting', path: '/institute-admin/Setting' },
+  ];
 
   const handleNavigation = (item: typeof menuItems[0]) => {
     navigate(item.path);
@@ -62,13 +67,13 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
   return (
     <aside 
       className={cn(
-        "fixed left-4 top-4 bottom-4 bg-white dark:bg-[#12121A] rounded-2xl shadow-xl dark:shadow-2xl flex flex-col justify-between py-6 z-40 hidden lg:flex transition-all duration-300 border border-slate-200 dark:border-[#1E1E2A]",
+        "fixed left-4 top-4 bottom-4 bg-white dark:bg-[#12121A] rounded-2xl shadow-xl dark:shadow-2xl flex flex-col py-5 z-40 hidden lg:flex transition-all duration-300 border border-slate-200 dark:border-[#1E1E2A]",
         isCollapsed ? "w-20 px-2" : "w-64 px-4",
         className
       )}
     >
       {/* Brand */}
-      <div className={cn("flex items-center gap-3 mb-10", isCollapsed ? "justify-center px-0" : "px-2")}>
+      <div className={cn("flex items-center gap-3 mb-6 shrink-0", isCollapsed ? "justify-center px-0" : "px-2")}>
         <div className="bg-indigo-600 p-2 rounded-lg shrink-0 shadow-md shadow-indigo-500/20">
           <GraduationCap className="h-6 w-6 text-white" />
         </div>
@@ -79,8 +84,8 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
         )}
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 space-y-2">
+      {/* Navigation - Now vertically scrollable with a hidden/slim scrollbar */}
+      <nav className="flex-1 space-y-1.5 overflow-y-auto overflow-x-hidden pr-2 -mr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-200 dark:[&::-webkit-scrollbar-thumb]:bg-slate-700 [&::-webkit-scrollbar-track]:bg-transparent">
         {menuItems.map((item) => (
           <button
             key={item.id}
@@ -107,7 +112,7 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
 
       {/* Back to Owner Portal — only visible to INSTITUTE_OWNER users who switched into Admin View */}
       {profile?.role === 'INSTITUTE_OWNER' && (
-        <div className={cn("mt-2 mb-2")}>
+        <div className={cn("mt-4 mb-2 shrink-0")}>
           <button
             onClick={() => navigate('/institute-owner/dashboard')}
             title={isCollapsed ? "Back to Owner Portal" : undefined}
@@ -135,21 +140,7 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
       </button>
 
       {/* Bottom Actions */}
-      <div className={cn("pt-6 border-t border-slate-200 dark:border-[#1E1E2A] space-y-2", isCollapsed ? "px-0" : "px-0")}>
-        {/* Home Link */}
-        <button 
-          onClick={() => navigate('/')}
-          title={isCollapsed ? "Home Page" : undefined}
-          className={cn(
-            "w-full flex items-center gap-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-[#1A1A24] hover:text-indigo-600 dark:hover:text-white transition-all duration-200 group",
-            isCollapsed ? "justify-center p-3" : "px-4 py-3"
-          )}
-        >
-          <Home className="h-5 w-5 group-hover:scale-105 transition-transform shrink-0" />
-          {!isCollapsed && <span className="font-medium text-sm">Home Page</span>}
-        </button>
-
-        {/* Updated Logout Button */}
+      <div className={cn("pt-4 mt-2 border-t border-slate-200 dark:border-[#1E1E2A] shrink-0", isCollapsed ? "px-0" : "px-0")}>
         <button 
           onClick={handleLogout}
           title={isCollapsed ? "Logout" : undefined}

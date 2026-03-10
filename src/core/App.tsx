@@ -115,12 +115,12 @@ const ManualDashboardAccess = () => {
   if (!profile) return <Navigate to="/login" replace />;
 
   // Instructors: Show DashboardPage on /dashboard
-  if (profile.role === 'INSTRUCTOR') {
+  if (profile.role === 'SUPERADMIN') {
     return <DashboardPage />;
   }
 
   // All others: Redirect to their specific home
-  if (profile.role === 'SUPERADMIN') return <Navigate to="/superadmin/dashboard" replace />;
+  if (profile.role === 'INSTRUCTOR') return <Navigate to="/instructor/dashboard" replace />;
   if (profile.role === 'INSTITUTE_OWNER') return <Navigate to="/institute-owner/dashboard" replace />;
   if (profile.role === 'INSTITUTE_ADMIN') return <Navigate to="/institute-admin/dashboard" replace />;
 

@@ -6,7 +6,9 @@ import { Outlet } from 'react-router-dom';
 export const RequireActiveInstitute = ({ children }: { children?: React.ReactNode }) => {
   const { profile, loading, profileLoading, signOut } = useAuth();
 
-  if (loading || profileLoading) return null;
+  // ✅ THE FIX: Only return null if we are loading AND we don't have the profile yet.
+  // If we already have the profile, let it fetch in the background without destroying the UI!
+  if ((loading || profileLoading) && !profile) return null;
 
   const isRelevantRole = profile?.role === 'INSTITUTE_OWNER' || profile?.role === 'INSTITUTE_ADMIN';
   const isDeactivated = isRelevantRole && profile?.instituteIsActive === false;

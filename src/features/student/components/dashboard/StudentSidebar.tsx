@@ -124,7 +124,7 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
 
       {/* Bottom Actions */}
       <div className={cn("pt-4 border-t border-slate-200 dark:border-slate-800 space-y-2", isCollapsed ? "px-0" : "px-0")}>
-        <button 
+        {/* <button 
           onClick={() => navigate('/')}
           title={isCollapsed ? "Home Page" : undefined}
           className={cn(
@@ -134,7 +134,7 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
         >
           <Home className="h-5 w-5 group-hover:scale-105 transition-transform shrink-0" />
           <span className={cn("font-medium text-sm whitespace-nowrap", isCollapsed ? "lg:hidden" : "block")}>Home Page</span>
-        </button>
+        </button> */}
 
         <button 
           onClick={handleLogout}

@@ -12,24 +12,22 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useToast } from '@/shared/hooks/use-toast';
 import { getBackendUrl } from '@/shared/utils';
 import { callBackend, uploadFileToBackend } from '@/features/auth/services/authClient';
+
+// Navigation Imports
 import { InstructorSidebar } from '@/features/instructor/components/dashboard/InstructorSidebar';
 import { InstructorTopbar } from '@/features/instructor/components/dashboard/InstructorTopbar';
+
+import { InstituteOwnerSidebar } from '@/features/InstituteOwner/components/InstitiuteOwnerSidebar';
+import { InstituteOwnerTopbar } from '@/features/InstituteOwner/components/InstituteOwnerTopbar';
+
 import {
-  User,
-  Mail,
-  Loader2,
-  Upload,
-  Trash2,
-  Shield,
-  Calendar,
-  Settings,
-  Bell,
-  BookOpen,
-  Linkedin,
-  Twitter,
-  Github,
-  CheckCircle2
+  User, Mail, Loader2, Upload, Trash2, Shield, Calendar, 
+  Settings, Bell, BookOpen, Linkedin, Twitter, Github, CheckCircle2
 } from 'lucide-react';
+import { SuperAdminTopbar } from '@/features/TestCrackSuperAdmin/Components/Superadmintopbar';
+import { SuperAdminSidebar } from '@/features/TestCrackSuperAdmin/Components/SuperadminSidebar';
+import { InstituteTopbar } from '@/features/Institute/components/InstituteTopbar';
+import { InstituteSidebar } from '@/features/Institute/components/InstituteSidebar';
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -55,6 +53,11 @@ export default function ProfilePage() {
   const hasShownWelcome = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+
+  // Determine user role (Verify these match your backend exact strings)
+  const isSuperAdmin = profile?.role === 'SUPERADMIN'; 
+  const isOwner = profile?.role === 'INSTITUTE_OWNER';
+  const isInstituteAdmin = profile?.role === 'INSTITUTE_ADMIN';
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -159,17 +162,46 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#09090E] transition-colors duration-300 selection:bg-indigo-500/30 font-sans">
       
-      {/* Sidebar Navigation */}
-      <InstructorSidebar
-        activeTab="settings"
-        isCollapsed={isSidebarCollapsed}
-        toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-      />
+      {/* Conditionally Render Sidebar Navigation */}
+      {isSuperAdmin ? (
+        <SuperAdminSidebar
+          activeTab="settings"
+          isCollapsed={isSidebarCollapsed}
+          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        />
+      ) : isOwner ? (
+        <InstituteOwnerSidebar
+          activeTab="settings"
+          isCollapsed={isSidebarCollapsed}
+          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        />
+      ) : isInstituteAdmin ? (
+        <InstituteSidebar
+          activeTab="settings"
+          isCollapsed={isSidebarCollapsed}
+          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        />
+      ) : (
+        <InstructorSidebar
+          activeTab="settings"
+          isCollapsed={isSidebarCollapsed}
+          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        />
+      )}
 
       {/* Main Content Area */}
       <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-24' : 'lg:pl-72'} flex flex-col min-h-screen relative z-10`}>
         
-        <InstructorTopbar />
+        {/* Conditionally Render Topbar */}
+        {isSuperAdmin ? (
+          <SuperAdminTopbar />
+        ) : isOwner ? (
+          <InstituteOwnerTopbar />
+        ) : isInstituteAdmin ? (
+          <InstituteTopbar />
+        ) : (
+          <InstructorTopbar />
+        )}
 
         <main className="flex-1 w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           

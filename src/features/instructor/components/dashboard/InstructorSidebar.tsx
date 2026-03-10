@@ -105,7 +105,7 @@ const menuItems = [
 
       {/* Bottom Actions */}
       <div className={cn("pt-6 border-t border-slate-200 dark:border-[#1E1E2A] space-y-2", isCollapsed ? "px-0" : "px-0")}>
-        <button 
+        {/* <button 
           onClick={() => navigate('/')}
           title={isCollapsed ? "Home Page" : undefined}
           className={cn(
@@ -115,7 +115,7 @@ const menuItems = [
         >
           <Home className="h-5 w-5 group-hover:scale-105 transition-transform shrink-0" />
           {!isCollapsed && <span className="font-medium text-sm">Home Page</span>}
-        </button>
+        </button> */}
 
         <button 
           onClick={handleLogout}
