@@ -22,7 +22,7 @@ const Dashdemo: React.FC = () => {
     {
       id: 'InstructorView',
       label: 'Instructor View',
-      videoPath: '/videos/',
+      videoPath: '/videos/instructor.mp4',
     },
     {
       id: 'InstituteAdminPortalView',
