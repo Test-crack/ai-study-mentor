@@ -14,7 +14,7 @@ import {
   Calendar, 
   MessageCircle, 
   Library, 
-  Settings
+  Settings,Layers
 } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";

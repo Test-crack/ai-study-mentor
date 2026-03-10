@@ -9,7 +9,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Home,BarChart3,
-  FileText
+  FileText, ArrowLeftRight
 } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -24,19 +24,19 @@ interface SidebarProps {
 }
 
 export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isCollapsed, toggleCollapse, className }: SidebarProps) => {
-  const { signOut } = useAuth();
+  const { signOut, profile } = useAuth();
   const navigate = useNavigate();
   
  const menuItems = [
-  { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/institute-dashboard' },
-  { id: 'batches', icon: Layers, label: 'Batch Allocation', path: '/institute-batches' },
-  { id: 'tutor', icon: Users, label: 'Tutor Accounts', path: '/institute-tutor' },
-  { id: 'tutor-onboard', icon: UserPlus, label: 'Tutor Onboarding', path: '/institute-tutorOnboarding' },
-  { id: 'students', icon: GraduationCap, label: 'Students', path: '/institute-students' },
-  { id: 'students-onboard', icon: UserCheck, label: 'Student Onboarding', path: '/institute-studentOnboarding' },
-  { id: 'billings', icon: CreditCard, label: 'Billings & Plans', path: '/institute-billings' }, 
-  { id: 'report', icon: BarChart3, label: 'Report', path: '/institute-reports' },
-  { id: 'settings', icon: Settings, label: 'Institute Setting', path: '/institute-Setting' },
+  { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/institute-admin/dashboard' },
+  { id: 'batches', icon: Layers, label: 'Batch Allocation', path: '/institute-admin/batches' },
+  { id: 'tutor', icon: Users, label: 'Tutor Accounts', path: '/institute-admin/tutor' },
+  { id: 'tutor-onboard', icon: UserPlus, label: 'Tutor Onboarding', path: '/institute-admin/tutorOnboarding' },
+  { id: 'students', icon: GraduationCap, label: 'Students', path: '/institute-admin/students' },
+  { id: 'students-onboard', icon: UserCheck, label: 'Student Onboarding', path: '/institute-admin/studentOnboarding' },
+  { id: 'billings', icon: CreditCard, label: 'Billings & Plans', path: '/institute-admin/billings' }, 
+  { id: 'report', icon: BarChart3, label: 'Report', path: '/institute-admin/reports' },
+  { id: 'settings', icon: Settings, label: 'Institute Setting', path: '/institute-admin/Setting' },
 ];
 
   const handleNavigation = (item: typeof menuItems[0]) => {
@@ -104,6 +104,27 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
           </button>
         ))}
       </nav>
+
+      {/* Back to Owner Portal — only visible to INSTITUTE_OWNER users who switched into Admin View */}
+      {profile?.role === 'INSTITUTE_OWNER' && (
+        <div className={cn("mt-2 mb-2")}>
+          <button
+            onClick={() => navigate('/institute-owner/dashboard')}
+            title={isCollapsed ? "Back to Owner Portal" : undefined}
+            className={cn(
+              "w-full flex items-center gap-3 rounded-xl transition-all duration-200 group",
+              isCollapsed ? "justify-center p-3" : "px-4 py-3",
+              "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300",
+              "hover:bg-indigo-100 dark:hover:bg-indigo-800/30 border border-indigo-200 dark:border-indigo-700/40"
+            )}
+          >
+            <ArrowLeftRight className="h-4 w-4 shrink-0" />
+            {!isCollapsed && (
+              <span className="font-semibold text-sm">Back to Owner Portal</span>
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Collapse Toggle */}
       <button

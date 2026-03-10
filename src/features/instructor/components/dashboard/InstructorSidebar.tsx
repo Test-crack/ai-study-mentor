@@ -1,11 +1,11 @@
 import { 
   LayoutDashboard, 
   LogOut, 
-  GraduationCap,ClipboardCheck,
+  GraduationCap, ClipboardCheck,
   ChevronLeft,
-  ChevronRight,Laptop,
-  Home,GitMerge,Workflow,
-  Settings,BarChart3
+  ChevronRight, Laptop,
+  Home, GitMerge, Workflow,
+  Settings, BarChart3, Layers
 } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -24,14 +24,15 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
   const navigate = useNavigate();
   
 const menuItems = [
-  { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/instructor/dashboard' },
-  { id: 'courses', icon: GraduationCap, label: 'Course Management', path: '/instructor/coursemanagement' },
-  { id: 'assessments', icon: ClipboardCheck, label: 'Student Assessments', path: '/instructor/assessments' },
-  { id: 'techprep', icon: Laptop, label: 'Tech Prep', path: '/instructor/tech-pep' },
-  { id: 'alignment', icon: GitMerge, label: 'Alignment', path: '/instructor/alignment' }, 
-  { id: 'report', icon: BarChart3, label: 'Report', path: '/instructor/reports' }, 
-  { id: 'settings', icon: Settings, label: 'Settings', path: '/profile' },
-  { id: 'work', icon: Workflow, label: 'Workflow', path: '/instructor/workflow' },
+  { id: 'dashboard',   icon: LayoutDashboard, label: 'Dashboard',          path: '/instructor/dashboard' },
+  { id: 'courses',     icon: GraduationCap,   label: 'Course Management',  path: '/instructor/coursemanagement' },
+  { id: 'batches',     icon: Layers,          label: 'Batch Management',   path: '/instructor/batches' },
+  { id: 'assessments', icon: ClipboardCheck,  label: 'Student Assessments',path: '/instructor/assessments' },
+  { id: 'techprep',    icon: Laptop,          label: 'Tech Prep',          path: '/instructor/tech-pep' },
+  { id: 'alignment',   icon: GitMerge,        label: 'Alignment',          path: '/instructor/alignment' }, 
+  { id: 'report',      icon: BarChart3,       label: 'Report',             path: '/instructor/reports' }, 
+  { id: 'settings',    icon: Settings,        label: 'Settings',           path: '/profile' },
+  { id: 'work',        icon: Workflow,        label: 'Workflow',           path: '/instructor/workflow' },
 ];
 
   const handleNavigation = (item: typeof menuItems[0]) => {
@@ -41,16 +42,10 @@ const menuItems = [
     }
   };
 
-  // Custom logout handler to reset the theme
   const handleLogout = async () => {
-    // 1. Force the theme back to light mode by removing the Tailwind 'dark' class
     document.documentElement.classList.remove('dark');
-    
-    // 2. (Optional) Update local storage if your theme provider relies on it
     localStorage.setItem('theme', 'light'); 
-    localStorage.setItem('vite-ui-theme', 'light'); // Common if using shadcn/vite standard theme providers
-    
-    // 3. Proceed with the normal sign out
+    localStorage.setItem('vite-ui-theme', 'light');
     await signOut();
   };
 
@@ -110,7 +105,6 @@ const menuItems = [
 
       {/* Bottom Actions */}
       <div className={cn("pt-6 border-t border-slate-200 dark:border-[#1E1E2A] space-y-2", isCollapsed ? "px-0" : "px-0")}>
-        {/* Home Link */}
         <button 
           onClick={() => navigate('/')}
           title={isCollapsed ? "Home Page" : undefined}
@@ -123,7 +117,6 @@ const menuItems = [
           {!isCollapsed && <span className="font-medium text-sm">Home Page</span>}
         </button>
 
-        {/* Updated Logout Button */}
         <button 
           onClick={handleLogout}
           title={isCollapsed ? "Logout" : undefined}

@@ -4,7 +4,7 @@ import {
   BookOpen, Mic, Target, Zap, Clock, CheckCircle, 
   Sparkles, ChevronRight, Info, AlertTriangle, 
   XCircle, Check, PlaySquare, Square, Loader2,
-  ChevronLeft, RotateCcw
+  ChevronLeft, RotateCcw, Activity
 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent } from '@/shared/components/ui/card';
@@ -305,23 +305,30 @@ export default function StudentReadingAssessmentPage() {
           {!selectedTopic ? (
             /* LANDING VIEW */
             <>
-              {/* --- NEW COLORED BANNER --- */}
+              {/* --- NEW COLORED BANNER MERGED WITH MAIN --- */}
               <div className="bg-[#7B61FF] rounded-2xl p-8 md:p-10 text-white shadow-md relative overflow-hidden mb-8">
                 <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
                 
-                <div className="relative z-10">
-                  <h1 className="text-3xl font-bold mb-3 flex items-center gap-2">
-                    Speaking Practice <Sparkles className="h-6 w-6 text-yellow-300" fill="currentColor" />
-                  </h1>
-                  <p className="text-indigo-50 max-w-2xl text-base md:text-lg leading-relaxed mb-6">
-                    Practice and improve your speaking fluency. Select a topic, record your response, and get instant feedback on your pacing, filler words, and keyword usage.
-                  </p>
+                <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <div>
+                    <h1 className="text-3xl font-bold mb-3 flex items-center gap-2">
+                      Speaking Practice <Sparkles className="h-6 w-6 text-yellow-300" fill="currentColor" />
+                    </h1>
+                    <p className="text-indigo-50 max-w-2xl text-base md:text-lg leading-relaxed mb-6 md:mb-0">
+                      Practice and improve your speaking fluency. Select a topic, record your response, and get instant feedback on your pacing, filler words, and keyword usage.
+                    </p>
+                  </div>
                   
-                  {/* <div className="flex gap-3">
-                     <button className="bg-white text-[#7B61FF] hover:bg-slate-100 font-semibold rounded-full px-6 py-2 shadow-sm text-sm">
-                       Review Past Sessions
-                     </button>
-                  </div> */}
+                  <div>
+                    <Button 
+                      variant="secondary" 
+                      onClick={() => navigate('/student/speaking-history')}
+                      className="gap-2 font-semibold bg-white text-[#7B61FF] hover:bg-slate-100 rounded-full px-6 py-2 shadow-sm"
+                    >
+                      <Activity className="w-4 h-4" />
+                      View Analytics History
+                    </Button>
+                  </div>
                 </div>
               </div>
 

@@ -4,7 +4,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 
 interface RoleProtectedRouteProps {
   children: ReactNode;
-  allowedRoles?: ("STUDENT" | "INSTRUCTOR" | "ADMIN")[];
+  allowedRoles?: ("STUDENT" | "INSTRUCTOR" | "SUPERADMIN" | "INSTITUTE_OWNER" | "INSTITUTE_ADMIN")[];
 }
 
 export const RoleProtectedRoute = ({ 
@@ -34,12 +34,20 @@ export const RoleProtectedRoute = ({
   }
 
   if (!user) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   if (allowedRoles && profile && !allowedRoles.includes(profile.role)) {
-    // Senior Logic: Redirect to profile page for unauthorized access as requested
-    return <Navigate to="/profile" replace />;
+    // Redirect to the user's own dashboard — NOT /profile which renders inside instructor shell
+    const roleHome: Record<string, string> = {
+      SUPERADMIN: '/superadmin/dashboard',
+      INSTITUTE_OWNER: '/institute-owner/dashboard',
+      INSTITUTE_ADMIN: '/institute-admin/dashboard',
+      INSTRUCTOR: '/instructor/dashboard',
+      STUDENT: '/student/dashboard',
+    };
+    const destination = roleHome[profile.role] ?? '/';
+    return <Navigate to={destination} replace />;
   }
 
   // If we have a user but no profile could be loaded (even after loading finished), 

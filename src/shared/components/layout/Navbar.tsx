@@ -24,7 +24,7 @@ export function Navbar({
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isInstructor = profile?.role === "INSTRUCTOR" || profile?.role === "ADMIN";
+  const isInstructor = profile?.role === "INSTRUCTOR";
   const isHomePage = location.pathname === "/";
   const isLoggedIn = !!profile;
 
@@ -67,7 +67,13 @@ export function Navbar({
 
             <button onClick={() => {
               if (isLoggedIn) {
-                 if (profile?.role === 'INSTRUCTOR' || profile?.role === 'ADMIN') {
+                 if (profile?.role === 'SUPERADMIN') {
+                   navigate('/superadmin/dashboard');
+                 } else if (profile?.role === 'INSTITUTE_OWNER') {
+                   navigate('/institute-owner/dashboard');
+                 } else if (profile?.role === 'INSTITUTE_ADMIN') {
+                   navigate('/institute-admin/dashboard');
+                 } else if (profile?.role === 'INSTRUCTOR') {
                    navigate('/instructor/dashboard');
                  } else {
                    navigate('/student/dashboard');
@@ -128,13 +134,19 @@ export function Navbar({
             ) : (
               <Button onClick={() => {
                 if (isLoggedIn) {
-                   if (profile?.role === 'INSTRUCTOR' || profile?.role === 'ADMIN') {
+                   if (profile?.role === 'SUPERADMIN') {
+                     navigate('/superadmin/dashboard');
+                   } else if (profile?.role === 'INSTITUTE_OWNER') {
+                     navigate('/institute-owner/dashboard');
+                   } else if (profile?.role === 'INSTITUTE_ADMIN') {
+                     navigate('/institute-admin/dashboard');
+                   } else if (profile?.role === 'INSTRUCTOR') {
                      navigate('/instructor/dashboard');
                    } else {
                      navigate('/student/dashboard');
                    }
                 } else {
-                  navigate('/auth');
+                  navigate('/login');
                 }
               }} className="bg-indigo-600 text-white rounded-full px-6 shadow-md hover:shadow-lg transition-all">
                 {isLoggedIn ? "Dashboard" : "Login"}

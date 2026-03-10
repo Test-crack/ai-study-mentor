@@ -67,7 +67,7 @@ const ResetPasswordPage = () => {
       if (error) throw error;
       toast({ title: "Password Updated!", description: "Your password has been successfully changed." });
       await supabase.auth.signOut();
-      navigate("/auth?reset=success");
+      navigate("/login?reset=success");
     } catch (error: any) {
       toast({ title: "Error", description: error.message || "Failed to update password.", variant: "destructive" });
     } finally {
@@ -140,7 +140,7 @@ const ResetPasswordPage = () => {
                 This password reset link is invalid or has expired. Please request a new one from the sign-in page.
               </p>
               <Button 
-                onClick={() => navigate("/auth")}
+                onClick={() => navigate("/login")}
                 className="w-full h-14 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl transition-all shadow-xl mt-4"
               >
                 Back to Sign In
@@ -216,7 +216,7 @@ const ResetPasswordPage = () => {
 
               <div className="mt-10 text-center">
                 <button
-                  onClick={() => navigate("/auth")}
+                  onClick={() => navigate("/login")}
                   className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-purple-600 transition-colors"
                 >
                   <ChevronLeft className="h-4 w-4" />

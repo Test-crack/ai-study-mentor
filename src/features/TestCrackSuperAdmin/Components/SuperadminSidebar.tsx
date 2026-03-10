@@ -29,13 +29,13 @@ export const SuperAdminSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
   const navigate = useNavigate();
   
  const menuItems = [
-  { id: 'superadmin-dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/superadmin-dashboard' },
-  { id: 'institutes', icon: Building2, label: 'Institutes', path: '/Superadmin-institutes' },
-  { id: 'superadmin-subscription', icon: CreditCard, label: 'Subscription', path: '/superadmin-subscription' },
-  { id: 'pricing-config', icon: Coins, label: 'Pricing-Config', path: '/superadmin-priceconfig' },
-  { id: 'support-tickets', icon: LifeBuoy, label: 'Support Tickets', path: '/superadmin-supportickets' },
-  { id: 'platform-analytics', icon: Activity, label: 'Platform Analytics', path: '/superadmin-platform' },
-  { id: 'users', icon: Users, label: 'All Users', path: '/superadmin-allusers' }, 
+  { id: 'superadmin-dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/superadmin/dashboard' },
+  { id: 'institutes', icon: Building2, label: 'Institutes', path: '/superadmin/institutes' },
+  { id: 'superadmin-subscription', icon: CreditCard, label: 'Subscription', path: '/superadmin/subscription' },
+  { id: 'pricing-config', icon: Coins, label: 'Pricing-Config', path: '/superadmin/priceconfig' },
+  { id: 'support-tickets', icon: LifeBuoy, label: 'Support Tickets', path: '/superadmin/supportickets' },
+  { id: 'platform-analytics', icon: Activity, label: 'Platform Analytics', path: '/superadmin/platform' },
+  { id: 'users', icon: Users, label: 'All Users', path: '/superadmin/allusers' }, 
 ];
 
   const handleNavigation = (item: typeof menuItems[0]) => {

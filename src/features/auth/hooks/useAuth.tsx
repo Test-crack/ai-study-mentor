@@ -11,7 +11,8 @@ export interface UserProfile {
   countryCode: string | null;
   phoneNo: string | null;
   profileImage: string | null;
-  role: 'STUDENT' | 'INSTRUCTOR' | 'ADMIN';
+  username: string | null;
+  role: 'STUDENT' | 'INSTRUCTOR' | 'SUPERADMIN' | 'INSTITUTE_OWNER' | 'INSTITUTE_ADMIN';
   Instructor?: {
     id: string;
     bio: string | null;
@@ -21,6 +22,7 @@ export interface UserProfile {
   };
   createdAt: string;
   updatedAt: string;
+  instituteIsActive?: boolean;
 }
 
 interface AuthContextType {
@@ -57,11 +59,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     profileRef.current = profile;
   }, [profile]);
 
-  const fetchProfile = useCallback(async (force = false) => {
+  const fetchProfile = useCallback(async (force = false, silent = false) => {
     // If not forced and we already have a cached/stated profile, skip
     if (!force && profileRef.current) return;
     
-    setProfileLoading(true);
+    // Skip loader toggling during silent background token refreshes to avoid unmounting the app router
+    if (!silent) setProfileLoading(true);
     try {
       const data = await getUserProfile();
       if (data.user) {
@@ -71,7 +74,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
-      setProfileLoading(false);
+      if (!silent) setProfileLoading(false);
     }
   }, []); // Truly stable callback
 
@@ -112,9 +115,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(verifiedUser);
     
     if (verifiedUser) {
-      // If it's a new sign in or profile is missing, force a refresh
-      const shouldForceRefresh = event === 'SIGNED_IN' || event === 'USER_UPDATED' || !profileRef.current;
-      fetchProfile(shouldForceRefresh);
+      // If it's a new sign in or profile is missing, visibly show a loader. Otherwise, fetch silently in the background.
+      const isNewLogin = event === 'SIGNED_IN' || !profileRef.current;
+      const silently = !isNewLogin;
+      const shouldForceRefresh = event === 'SIGNED_IN' || event === 'USER_UPDATED' || event === 'TOKEN_REFRESHED' || !profileRef.current;
+      
+      fetchProfile(shouldForceRefresh, silently);
     } else {
       setProfile(null);
       localStorage.removeItem(PROFILE_CACHE_KEY);
@@ -149,12 +155,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     });
     
-    navigate('/auth', { replace: true });
+    navigate('/login', { replace: true });
   };
 
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     await fetchProfile(true);
-  };
+  }, [fetchProfile]);
 
   const value = {
     user,
