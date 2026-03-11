@@ -24,6 +24,9 @@ import { Button } from "@/shared/components/ui/button";
 import { InstructorSidebar } from "./dashboard/InstructorSidebar";
 import { InstructorTopbar } from "./dashboard/InstructorTopbar";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { callBackend } from '@/features/auth/services/authClient';
+import { getBackendUrl } from '@/shared/utils';
+import { useEffect } from "react";
 
 export default function InstructorDashboardPage() {
   const navigate = useNavigate();
@@ -77,14 +80,49 @@ export default function InstructorDashboardPage() {
     { title: "Can't prove student progress to institutions", desc: "Use the Alignment dashboard for Teacher vs Calibration scores. Export the Dean's Report for institutional review.", linkText: "Alignment Dashboard" },
   ];
 
-  const studentAnalytics = [
-    { id: "arjun", name: "Arjun Mehta", acc: "42%", avg: "68s", hes: "48%", tags: ["Conceptual"], text: "Arjun mastered Heaps (82%) but hesitates for 45s on Binary Tree integration—suggests a weak foundation in recursive logic. His accuracy drops 38% when questions chain recursive calls." },
-    { id: "priya", name: "Priya Sharma", acc: "78%", avg: "42s", hes: "22%", tags: ["Conceptual", "Tactical"], text: "Priya understands core concepts well (DP is 88%) but selects suboptimal approaches for Greedy problems—choosing brute-force over pattern-matched strategies. Bound and method selection costs 30s per question." },
-    { id: "rohan", name: "Rohan Gupta", acc: "72%", avg: "58s", hes: "62%", tags: ["Psychological"], text: "Rohan's untimed accuracy is 78% but drops to 41% under exam conditions. He spends 85s avg per question with 62% hesitation rate—classic time pressure panic. He re-reads questions 3x on average before attempting." },
-    { id: "kavya", name: "Kavya Nair", acc: "88%", avg: "32s", hes: "15%", tags: [], text: "Kavya is a strong performer who defaults to familiar patterns. She solves 80% of array/string problems optimally but applies BFS/DFS templates incorrectly to backtracking problems." },
-    { id: "aditya", name: "Aditya Patel", acc: "77%", avg: "38s", hes: "21%", tags: [], text: "Aditya scores across the board with 77% accuracy and minimal hesitation. Ready for advanced challenge sets and peer mentoring roles." },
-    { id: "sneha", name: "Sneha Reddy", acc: "28%", avg: "94s", hes: "82%", tags: ["Conceptual"], text: "Sneha shows 28% accuracy with 71% hesitation rate—spending 71s avg per question. Foundational gaps in Hash Tables and Queues require immediate structural remediation." },
-  ];
+  const [studentAnalytics, setStudentAnalytics] = useState<any[]>([]);
+  const [loadingAnalytics, setLoadingAnalytics] = useState(false);
+
+  // Fetch batches and their analytics
+  const fetchAnalytics = async () => {
+    setLoadingAnalytics(true);
+    try {
+        const batchesRes = await callBackend(`${getBackendUrl()}/api/instructor/batches`);
+        const activeBatches = batchesRes.data || [];
+        
+        let allStudents: any[] = [];
+
+        // For demo: fetch analytics for the first active batch or all batches
+        if (activeBatches.length > 0) {
+            const batchAnalyticsRes = await callBackend(`${getBackendUrl()}/api/instructor/batches/${activeBatches[0].id}/analytics`);
+            const data = batchAnalyticsRes.data || {};
+            
+            if (data.studentComparison) {
+                // Map the backend data to the UI format
+                allStudents = data.studentComparison.map((s: any) => ({
+                    id: s.id,
+                    name: s.name,
+                    acc: `${s.readingScore || 0} WPM`, // Repurposing acc for Reading Score
+                    avg: `${s.speakingScore || 0}`, // Repurposing avg for Speaking Score
+                    hes: `${s.listeningScore || 0}%`, // Repurposing hes for Listening Score
+                    tags: [(s.speakingScore || 0) < 50 ? "Needs Practice" : "On Track"],
+                    text: `${s.name} is currently scoring an overall band of ${s.overallGrade}. Their speaking score is ${s.speakingScore || 'N/A'} and reading speed is ${s.readingScore || 'N/A'} WPM.`
+                }));
+            }
+        }
+        
+        setStudentAnalytics(allStudents);
+    } catch (err: any) {
+        toast.error('Failed to load student analytics: ' + err.message);
+    } finally {
+        setLoadingAnalytics(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, []);
+
 
   const voiceLabSessions = [
     { fluency: "42%", latency: "2.8s", fillers: 12, wts: 9, duration: "2:08" },
@@ -330,15 +368,21 @@ export default function InstructorDashboardPage() {
                           variant="ghost" 
                           size="sm" 
                           className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 h-8 text-xs"
-                          onClick={() => setSelectedStudentReport(student.id)}
+                          onClick={() => navigate(`/instructor/student/${student.id}/progress`)}
                         >
                           View Full Report <ArrowRight className="w-3 h-3 ml-1.5" />
                         </Button>
                       </div>
                     </div>
                   ))}
+                  {studentAnalytics.length === 0 && !loadingAnalytics && (
+                      <div className="text-center py-8 text-slate-500 text-sm">No student analytics available for active batches.</div>
+                  )}
+                  {loadingAnalytics && (
+                      <div className="text-center py-8 text-indigo-500 text-sm animate-pulse">Loading analytics...</div>
+                  )}
                   <div className="text-center pt-2">
-                    <p className="text-xs text-slate-500 mb-2">Showing 6 of 6 students</p>
+                    {studentAnalytics.length > 0 && <p className="text-xs text-slate-500 mb-2">Showing {studentAnalytics.length} students</p>}
                     <Button variant="outline" className="w-full border-slate-200 dark:border-[#2A2A3A] bg-white dark:bg-[#1A1A24] hover:bg-slate-50 dark:hover:bg-[#20202C] text-slate-700 dark:text-slate-300">
                       View All
                     </Button>

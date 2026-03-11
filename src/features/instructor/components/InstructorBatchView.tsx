@@ -104,7 +104,7 @@ function StudentRow({ student, onAnalyze }: { student: BatchStudent, onAnalyze: 
 
 // ─── Batch Card ───────────────────────────────────────────────────────────────
 
-function BatchCard({ batch, onAnalyzeStudent }: { batch: InstructorBatch, onAnalyzeStudent: (s: BatchStudent) => void }) {
+function BatchCard({ batch, onAnalyzeStudent, navigate }: { batch: InstructorBatch, onAnalyzeStudent: (s: BatchStudent) => void, navigate: any }) {
   const [expanded, setExpanded] = useState(false);
   const [search, setSearch] = useState('');
   const cfg = STATUS_CONFIG[batch.status] ?? STATUS_CONFIG.ACTIVE;
@@ -146,6 +146,13 @@ function BatchCard({ batch, onAnalyzeStudent }: { batch: InstructorBatch, onAnal
             </div>
           </div>
           <div className="flex items-center gap-3 shrink-0">
+            <button
+               onClick={(e) => { e.stopPropagation(); navigate(`/institute-owner/batches/${batch.id}/analytics`); }}
+               className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 rounded-lg text-xs font-semibold transition-colors"
+            >
+               <BarChart3 className="w-3.5 h-3.5" />
+               Batch Analytics
+            </button>
             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${cfg.cls}`}>
               <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
               {cfg.label}
@@ -333,7 +340,7 @@ export default function InstructorBatchView() {
               </div>
             ) : (
               <div className="space-y-4">
-                {batches.map(batch => <BatchCard key={batch.id} batch={batch} onAnalyzeStudent={(s) => navigate(`/instructor/student/${s.userId}/progress`, { state: { student: s }})} />)}
+                {batches.map(batch => <BatchCard key={batch.id} batch={batch} onAnalyzeStudent={(s) => navigate(`/instructor/student/${s.userId}/progress`, { state: { student: s }})} navigate={navigate} />)}
               </div>
             )}
           </div>

@@ -67,6 +67,7 @@ import TutorEffective from "@/features/InstituteOwner/dashboard/TutorEffective";
 import StrategicReport from "@/features/InstituteOwner/dashboard/StrategicReport";
 import AiCalibration from "@/features/InstituteOwner/dashboard/AiCalibration";
 import InstituteAdmins from "@/features/InstituteOwner/dashboard/InstituteAdmins";
+import BatchAnalyticsView from "@/features/InstituteOwner/dashboard/BatchAnalyticsView";
 import VoiceLab from "@/features/student/components/VoiceLab";
 import SpeedReading from "@/features/student/components/SpeedReading";
 import InstructorReport from "@/features/instructor/components/InstructorReport";
@@ -143,6 +144,7 @@ const AppRoutes = () => {
         <Route path="/institute-owner/strategic" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><StrategicReport/></RoleProtectedRoute>}/>
         <Route path="/institute-owner/calibration" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><AiCalibration/></RoleProtectedRoute>}/>
         <Route path="/institute-owner/admins" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteAdmins/></RoleProtectedRoute>}/>
+        <Route path="/institute-owner/batches/:batchSlug/analytics" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER', 'INSTRUCTOR']}><BatchAnalyticsView/></RoleProtectedRoute>}/>
 
         {/* Institute Admin routes — RBAC: INSTITUTE_ADMIN + INSTITUTE_OWNER */}
         <Route path="/institute-admin/dashboard" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteDashboard/></RoleProtectedRoute>} />
