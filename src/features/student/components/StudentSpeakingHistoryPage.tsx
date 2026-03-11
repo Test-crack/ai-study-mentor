@@ -102,7 +102,7 @@ export default function StudentSpeakingHistoryPage() {
           {/* Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
             <div>
-              <Button variant="ghost" className="mb-4 -ml-4 text-slate-500 hover:text-slate-900" onClick={() => navigate('/student/reading-assessment')}>
+              <Button variant="ghost" className="mb-4 -ml-4 text-slate-500 hover:text-slate-900" onClick={() => navigate('/student/speaking-assessment')}>
                 <ChevronLeft className="w-4 h-4 mr-1" /> Back to Practice
               </Button>
               <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">

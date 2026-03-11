@@ -96,13 +96,13 @@ const StudentDashboardPage = () => {
                     title="Your pronunciation score dips on multi-syllable words"
                     desc="Practice the 'Word Stress' drill in Speaking."
                     action="Go to Speaking"
-                    onClick={() => navigate('/student/speaking-practice')}
+                    onClick={() => navigate('/student/speaking-assessment')}
                   />
                   <ImprovementItem 
                     title="You're reading passages too fast — keyword coverage is 45%"
                     desc="Slow down during familiarization. Highlight key terms."
                     action="Reading Practice"
-                    onClick={() => navigate('/student/reading-assessment')}
+                    onClick={() => navigate('/student/reading')}
                   />
                 </div>
               </DashboardCard>

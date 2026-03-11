@@ -31,7 +31,7 @@ import { getBackendUrl } from '@/shared/utils';
 import { callBackend } from '@/features/auth/services/authClient';
 
 const DashboardPage = () => {
-  const { tab } = useParams(); // URL parameter: /dashboard/:tab
+  const { tab } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -40,20 +40,15 @@ const DashboardPage = () => {
   const { user } = useAuth();
   const hasLoadedProfile = useRef(false);
 
-  // 1. Listen for "openUpgrade" state from Navbar/Other pages
   useEffect(() => {
     if (location.state?.openUpgrade) {
       setShowPremiumModal(true);
-      // Clean up the state so it doesn't pop up again on refresh
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
 
-  // 2. Profile Loading Logic
   useEffect(() => {
-    if (hasLoadedProfile.current || !user) {
-      return;
-    }
+    if (hasLoadedProfile.current || !user) return;
 
     const loadProfile = async () => {
       try {
@@ -75,6 +70,7 @@ const DashboardPage = () => {
     loadProfile();
   }, [user]);
 
+  // Fallbacks ensure the UI never looks empty while waiting for the profile fetch
   const userData = {
     name: displayName || user?.email?.split('@')[0] || 'Student',
     streak: 12,
@@ -87,7 +83,6 @@ const DashboardPage = () => {
     },
   };
 
-  // 3. Updated features using navigate() for routing
   const features = [
     {
       icon: Book,
@@ -128,13 +123,12 @@ const DashboardPage = () => {
       icon: Star,
       title: 'Daily Streak',
       description: 'Assessment of daily Streak You Have',
-      action: () => navigate('/404'),
+      action: () => navigate('/404'), // Might want to update this route for a real demo!
       premium: false,
     },
   ];
 
   const renderContent = () => {
-    // Switching content based on the :tab URL parameter
     switch (tab) {
       case 'notes':
         return <NotesUpload />;
@@ -145,9 +139,9 @@ const DashboardPage = () => {
       case 'progress':
         return <ProgressDashboard />;
       default:
-        // Default "Dashboard" Home View
         return (
-          <div className="space-y-8">
+          // Added Tailwind animate-in classes for a polished entrance
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
             {/* Welcome Section */}
             <div className="text-center space-y-3 px-2">
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
@@ -317,7 +311,7 @@ const DashboardPage = () => {
                 <Button
                   variant="secondary"
                   onClick={() => navigate('/dashboard/notes')}
-                  className="border-2 border-white text-white hover:bg-white hover:text-purple-600 bg-transparent w-full sm:w-auto"
+                  className="border-2 border-white text-white hover:bg-white hover:text-purple-600 bg-transparent w-full sm:w-auto transition-all"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Upload Notes
@@ -325,7 +319,7 @@ const DashboardPage = () => {
                 <Button
                   variant="secondary"
                   onClick={() => navigate('/dashboard/youtube')}
-                  className="border-2 border-white text-white hover:bg-white hover:text-purple-600 bg-transparent w-full sm:w-auto"
+                  className="border-2 border-white text-white hover:bg-white hover:text-purple-600 bg-transparent w-full sm:w-auto transition-all"
                 >
                   <Youtube className="h-4 w-4 mr-2" />
                   Analyze Video

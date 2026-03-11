@@ -250,7 +250,7 @@ export default function InstructorCourseManagement() {
                   </div>
 
                   <div className="flex flex-wrap gap-2 sm:gap-3 border-t border-slate-100 dark:border-[#1E1E2A] pt-4 mt-auto">
-                    <button 
+                    {/* <button 
                       onClick={(e) => handleToggle(e, course.id, 'quiz')}
                       className={`text-xs px-3 py-1.5 rounded-md flex items-center transition-colors flex-1 sm:flex-none justify-center font-medium ${
                         isQuizActive 
@@ -269,7 +269,7 @@ export default function InstructorCourseManagement() {
                       }`}
                     >
                       <AlertCircle className="w-3.5 h-3.5 mr-1.5 flex-shrink-0"/> I need help
-                    </button>
+                    </button> */}
                   </div>
                 </div>
               );

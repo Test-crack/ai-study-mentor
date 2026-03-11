@@ -10,6 +10,7 @@ import { getBackendUrl } from '@/shared/utils';
 import { useToast } from '@/shared/hooks/use-toast';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { InstructorTopbar } from './dashboard/InstructorTopbar';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -56,8 +57,42 @@ const formatDate = (iso: string) => {
 const STATUS_CONFIG = {
   ACTIVE:    { label: 'Active',    dot: 'bg-emerald-500', cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400', Icon: CheckCircle2 },
   INACTIVE:  { label: 'Inactive',  dot: 'bg-amber-500',   cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',         Icon: Clock       },
-  COMPLETED: { label: 'Completed', dot: 'bg-slate-400',   cls: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',             Icon: XCircle     },
+  COMPLETED: { label: 'Completed', dot: 'bg-slate-400',   cls: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',            Icon: XCircle     },
 };
+
+// ─── Skeletons ────────────────────────────────────────────────────────────────
+
+function BatchSkeleton() {
+  return (
+    <div className="bg-white dark:bg-[#15141B] rounded-2xl border border-slate-200 dark:border-[#26252D] p-5 shadow-sm">
+      <div className="flex items-start justify-between gap-4 animate-pulse">
+        <div className="flex items-start gap-4">
+          <div className="w-11 h-11 rounded-xl bg-slate-200 dark:bg-[#26252D] shrink-0" />
+          <div className="space-y-2 py-1">
+            <div className="h-5 w-48 bg-slate-200 dark:bg-[#26252D] rounded" />
+            <div className="h-3 w-32 bg-slate-200 dark:bg-[#26252D] rounded" />
+          </div>
+        </div>
+        <div className="w-20 h-6 bg-slate-200 dark:bg-[#26252D] rounded-full shrink-0" />
+      </div>
+      <div className="mt-4 flex items-center gap-6 animate-pulse">
+        <div className="h-8 w-24 bg-slate-200 dark:bg-[#26252D] rounded" />
+        <div className="h-8 w-32 bg-slate-200 dark:bg-[#26252D] rounded" />
+        <div className="h-2 w-24 bg-slate-200 dark:bg-[#26252D] rounded-full ml-auto" />
+      </div>
+    </div>
+  );
+}
+
+function StatsSkeleton() {
+  return (
+    <div className="grid grid-cols-3 gap-4">
+      {[1, 2, 3].map(i => (
+        <div key={i} className="rounded-2xl p-5 h-[104px] bg-slate-200 dark:bg-[#26252D] animate-pulse shadow-sm" />
+      ))}
+    </div>
+  );
+}
 
 // ─── Student Row ──────────────────────────────────────────────────────────────
 
@@ -108,7 +143,6 @@ function BatchCard({ batch, onAnalyzeStudent }: { batch: InstructorBatch, onAnal
   const [expanded, setExpanded] = useState(false);
   const [search, setSearch] = useState('');
   const cfg = STATUS_CONFIG[batch.status] ?? STATUS_CONFIG.ACTIVE;
-  const StatusIcon = cfg.Icon;
 
   const filtered = batch.students.filter(s =>
     (s.name ?? '').toLowerCase().includes(search.toLowerCase()) ||
@@ -277,64 +311,92 @@ export default function InstructorBatchView() {
         toggleCollapse={() => setIsCollapsed(v => !v)}
       />
 
-      <div className={`transition-all duration-300 min-h-screen ${isCollapsed ? 'lg:pl-28' : 'lg:pl-72'}`}>
-        <main className="p-4 sm:p-6 lg:p-8">
+      <div className={`transition-all duration-300 flex flex-col min-h-screen ${isCollapsed ? 'lg:pl-[112px]' : 'lg:pl-[288px]'}`}>
+        
+        {/* Topbar placed outside of main so it aligns correctly with the sidebar spacing */}
+        <InstructorTopbar />
+
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <div className="max-w-[900px] mx-auto space-y-6">
 
             {/* Header */}
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-white">My Batches</h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                  {loading ? '…' : `${totals.batches} batch${totals.batches !== 1 ? 'es' : ''} assigned · ${totals.students} total students`}
-                </p>
+                {loading ? (
+                  <div className="h-4 w-48 bg-slate-200 dark:bg-slate-800 rounded animate-pulse mt-1.5" />
+                ) : (
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                    {totals.batches} batch{totals.batches !== 1 ? 'es' : ''} assigned · {totals.students} total students
+                  </p>
+                )}
               </div>
-              <button onClick={load} className="p-2 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              <button 
+                onClick={load} 
+                title="Refresh Batches"
+                className="p-2 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors relative"
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-indigo-500' : ''}`} />
               </button>
             </div>
 
-            {/* Summary cards */}
-            {!loading && batches.length > 0 && (
-              <div className="grid grid-cols-3 gap-4">
-                {[
-                  { label: 'Total Batches', value: totals.batches, grad: 'from-indigo-500 to-purple-500' },
-                  { label: 'Active Batches', value: totals.active,   grad: 'from-emerald-500 to-teal-500' },
-                  { label: 'Total Students', value: totals.students, grad: 'from-rose-500 to-pink-500'    },
-                ].map(s => (
-                  <div key={s.label} className="relative overflow-hidden rounded-2xl p-5 text-white shadow-lg"
-                    style={{ background: `linear-gradient(135deg, var(--tw-gradient-stops))` }}
-                  >
-                    <div className={`absolute inset-0 bg-gradient-to-br ${s.grad} opacity-100`} />
-                    <div className="relative z-10">
-                      <p className="text-xs font-semibold text-white/70 uppercase tracking-wider">{s.label}</p>
-                      <p className="text-3xl font-bold mt-1">{s.value}</p>
-                    </div>
-                    <div className="absolute bottom-0 right-0 w-20 h-20 rounded-full bg-white/10 translate-x-4 translate-y-4" />
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Batch cards */}
+            {/* Skeletons or Content */}
             {loading ? (
-              <div className="py-24 flex justify-center">
-                <Loader2 className="w-7 h-7 animate-spin text-indigo-500" />
-              </div>
-            ) : batches.length === 0 ? (
-              <div className="py-24 text-center bg-white dark:bg-[#15141B] rounded-2xl border border-slate-200 dark:border-[#26252D]">
-                <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center mx-auto mb-4">
-                  <Layers className="w-8 h-8 text-indigo-400" />
+              <>
+                <StatsSkeleton />
+                <div className="space-y-4">
+                  <BatchSkeleton />
+                  <BatchSkeleton />
+                  <BatchSkeleton />
                 </div>
-                <h3 className="font-bold text-slate-900 dark:text-white">No batches assigned yet</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-xs mx-auto">
-                  Your institute admin will assign you to batches. Check back later.
-                </p>
-              </div>
+              </>
             ) : (
-              <div className="space-y-4">
-                {batches.map(batch => <BatchCard key={batch.id} batch={batch} onAnalyzeStudent={(s) => navigate(`/instructor/student/${s.userId}/progress`, { state: { student: s }})} />)}
-              </div>
+              <>
+                {/* Summary cards */}
+                {batches.length > 0 && (
+                  <div className="grid grid-cols-3 gap-4">
+                    {[
+                      { label: 'Total Batches', value: totals.batches, grad: 'from-indigo-500 to-purple-500' },
+                      { label: 'Active Batches', value: totals.active,   grad: 'from-emerald-500 to-teal-500' },
+                      { label: 'Total Students', value: totals.students, grad: 'from-rose-500 to-pink-500'    },
+                    ].map(s => (
+                      <div key={s.label} className="relative overflow-hidden rounded-2xl p-5 text-white shadow-lg"
+                        style={{ background: `linear-gradient(135deg, var(--tw-gradient-stops))` }}
+                      >
+                        <div className={`absolute inset-0 bg-gradient-to-br ${s.grad} opacity-100`} />
+                        <div className="relative z-10">
+                          <p className="text-xs font-semibold text-white/70 uppercase tracking-wider">{s.label}</p>
+                          <p className="text-3xl font-bold mt-1">{s.value}</p>
+                        </div>
+                        <div className="absolute bottom-0 right-0 w-20 h-20 rounded-full bg-white/10 translate-x-4 translate-y-4" />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Batch cards */}
+                {batches.length === 0 ? (
+                  <div className="py-24 text-center bg-white dark:bg-[#15141B] rounded-2xl border border-slate-200 dark:border-[#26252D]">
+                    <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center mx-auto mb-4">
+                      <Layers className="w-8 h-8 text-indigo-400" />
+                    </div>
+                    <h3 className="font-bold text-slate-900 dark:text-white">No batches assigned yet</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-xs mx-auto">
+                      Your institute admin will assign you to batches. Check back later.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {batches.map(batch => (
+                      <BatchCard 
+                        key={batch.id} 
+                        batch={batch} 
+                        onAnalyzeStudent={(s) => navigate(`/instructor/student/${s.userId}/progress`, { state: { student: s }})} 
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </main>

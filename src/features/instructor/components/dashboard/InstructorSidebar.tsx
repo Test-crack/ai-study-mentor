@@ -25,7 +25,7 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
   
 const menuItems = [
   { id: 'dashboard',   icon: LayoutDashboard, label: 'Dashboard',          path: '/instructor/dashboard' },
-  { id: 'courses',     icon: GraduationCap,   label: 'Course Management',  path: '/instructor/coursemanagement' },
+  // { id: 'courses',     icon: GraduationCap,   label: 'Course Management',  path: '/instructor/coursemanagement' },
   { id: 'batches',     icon: Layers,          label: 'Batch Management',   path: '/instructor/batches' },
   { id: 'assessments', icon: ClipboardCheck,  label: 'Student Assessments',path: '/instructor/assessments' },
   { id: 'techprep',    icon: Laptop,          label: 'Tech Prep',          path: '/instructor/tech-pep' },
