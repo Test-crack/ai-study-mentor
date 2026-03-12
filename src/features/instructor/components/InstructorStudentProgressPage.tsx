@@ -17,7 +17,9 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   AreaChart, Area
 } from 'recharts';
-type TabType = 'speaking' | 'listening' | 'speed'|'reading'|'writing';
+
+type TabType = 'speaking' | 'listening' | 'speed' | 'reading' | 'writing';
+
 // ─── Skeletons ────────────────────────────────────────────────────────────────
 function HistorySkeleton() {
   return (
@@ -37,12 +39,12 @@ function HistorySkeleton() {
 
       {/* Charts Section Skeleton */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-white dark:bg-[#15141B] p-6 rounded-3xl border border-slate-200 dark:border-[#26252D] shadow-sm">
+        <div className="lg:col-span-2 bg-white dark:bg-[#15141B] p-4 md:p-6 rounded-3xl border border-slate-200 dark:border-[#26252D] shadow-sm">
           <div className="h-6 w-48 bg-slate-200 dark:bg-[#26252D] rounded mb-6" />
-          <div className="h-[300px] w-full bg-slate-100 dark:bg-[#26252D]/50 rounded-xl" />
+          <div className="h-[250px] md:h-[300px] w-full bg-slate-100 dark:bg-[#26252D]/50 rounded-xl" />
         </div>
 
-        <div className="bg-[#fffbf0] dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 p-6 rounded-3xl">
+        <div className="bg-[#fffbf0] dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 p-4 md:p-6 rounded-3xl">
           <div className="flex items-center gap-2 mb-6">
             <div className="w-5 h-5 bg-amber-200 dark:bg-amber-800/50 rounded-full shrink-0" />
             <div className="h-5 w-32 bg-amber-200 dark:bg-amber-800/50 rounded" />
@@ -62,10 +64,10 @@ function HistorySkeleton() {
       </div>
 
       {/* Table Skeleton */}
-      <div className="bg-white dark:bg-[#15141B] rounded-3xl p-6 shadow-sm border border-slate-200 dark:border-[#26252D] overflow-hidden">
+      <div className="bg-white dark:bg-[#15141B] rounded-3xl p-4 md:p-6 shadow-sm border border-slate-200 dark:border-[#26252D] overflow-hidden">
         <div className="h-6 w-32 bg-slate-200 dark:bg-[#26252D] rounded mb-6" />
-        <div className="w-full">
-          <div className="flex border-b border-slate-100 dark:border-[#26252D] pb-3 mb-2">
+        <div className="w-full overflow-x-auto">
+          <div className="flex border-b border-slate-100 dark:border-[#26252D] pb-3 mb-2 min-w-[600px]">
             <div className="w-2/12 h-4 bg-slate-200 dark:bg-[#26252D] rounded ml-4" />
             <div className="w-3/12 h-4 bg-slate-200 dark:bg-[#26252D] rounded mx-4" />
             <div className="w-2/12 h-4 bg-slate-200 dark:bg-[#26252D] rounded mx-4" />
@@ -74,7 +76,7 @@ function HistorySkeleton() {
             <div className="w-1/12 h-4 bg-slate-200 dark:bg-[#26252D] rounded mr-4" />
           </div>
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="flex py-4 border-b border-slate-50 dark:border-[#26252D]/50 items-center">
+            <div key={i} className="flex py-4 border-b border-slate-50 dark:border-[#26252D]/50 items-center min-w-[600px]">
               <div className="w-2/12 h-4 bg-slate-100 dark:bg-[#26252D]/50 rounded ml-4" />
               <div className="w-3/12 h-4 bg-slate-100 dark:bg-[#26252D]/50 rounded mx-4" />
               <div className="w-2/12 h-6 bg-slate-100 dark:bg-[#26252D]/50 rounded mx-4" />
@@ -170,37 +172,38 @@ export default function InstructorStudentProgressPage() {
   }, [history]);
 
   return (
-    <div className="min-h-screen bg-[#f1f3f9] dark:bg-[#09090E] transition-colors duration-300 font-sans text-slate-800 dark:text-slate-200">
+    <div className="min-h-screen bg-[#f1f3f9] dark:bg-[#09090E] transition-colors duration-300 font-sans text-slate-800 dark:text-slate-200 flex">
       <InstructorSidebar 
         activeTab="batches" 
         isCollapsed={isSidebarCollapsed} 
         toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
       />
 
-      <div className={cn("transition-all duration-300 min-h-screen flex flex-col", isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-72')}>
-        {/* Topbar logic omitted for instructor depending on how it's handled in your app. Using standard padding. */}
-        <main className="p-6 md:p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 w-full pt-12">
+      <div className={cn("transition-all duration-300 min-h-screen flex flex-col w-full", isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-72')}>
+        <main className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 w-full pt-16 md:pt-12 overflow-x-hidden">
           
           {/* Header */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
-            <div>
-              <Button variant="ghost" className="mb-4 -ml-4 text-slate-500 hover:text-slate-900" onClick={() => navigate('/instructor/dashboard')}>
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-2">
+            <div className="w-full lg:w-auto">
+              <Button variant="ghost" className="mb-4 -ml-2 md:-ml-4 text-slate-500 hover:text-slate-900" onClick={() => navigate('/instructor/dashboard')}>
                 <ChevronLeft className="w-4 h-4 mr-1" /> Back to Batches
               </Button>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
-                <Activity className="w-8 h-8 text-[#8a42f5]" />
-                Student Analytics {student?.name ? `- ${student.name}` : ''}
+              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-2 md:gap-3 flex-wrap">
+                <Activity className="w-6 h-6 md:w-8 md:h-8 text-[#8a42f5] shrink-0" />
+                <span className="truncate">Student Analytics {student?.name ? `- ${student.name}` : ''}</span>
               </h1>
-              <p className="text-slate-500 dark:text-slate-400 mt-1">Deep dive into performance metrics and actionable insights.</p>
+              <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 mt-1">Deep dive into performance metrics and actionable insights.</p>
             </div>
             
-            <div className="bg-white dark:bg-slate-900 rounded-full p-1.5 flex shadow-sm border border-slate-200 dark:border-slate-800">
-                <TabButton active={activeTab === 'speaking'} onClick={() => setActiveTab('speaking')} icon={<Mic className="w-4 h-4" />}>Speaking Practice</TabButton>
-                {/* <TabButton active={activeTab === 'voice'} onClick={() => setActiveTab('voice')} icon={<Eye className="w-4 h-4" />}>Voice Lab</TabButton> */}
-                <TabButton active={activeTab === 'listening'} onClick={() => setActiveTab('listening')} icon={<SpeedIcon className="w-4 h-4" />}>listening</TabButton>
-                <TabButton active={activeTab === 'reading'} onClick={() => setActiveTab('reading')} icon={<SpeedIcon className="w-4 h-4" />}>Reading</TabButton>
-                <TabButton active={activeTab === 'speed'} onClick={() => setActiveTab('speed')} icon={<SpeedIcon className="w-4 h-4" />}>Speed Reading</TabButton>
-                <TabButton active={activeTab === 'writing'} onClick={() => setActiveTab('writing')} icon={<SpeedIcon className="w-4 h-4" />}>writing</TabButton>
+            {/* Responsive Tab Container */}
+            <div className="w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
+              <div className="bg-white dark:bg-slate-900 rounded-full p-1.5 flex shadow-sm border border-slate-200 dark:border-slate-800 w-max lg:w-auto">
+                  <TabButton active={activeTab === 'speaking'} onClick={() => setActiveTab('speaking')} icon={<Mic className="w-4 h-4" />}>Speaking</TabButton>
+                  <TabButton active={activeTab === 'listening'} onClick={() => setActiveTab('listening')} icon={<Headphones className="w-4 h-4" />}>Listening</TabButton>
+                  <TabButton active={activeTab === 'reading'} onClick={() => setActiveTab('reading')} icon={<BookOpen className="w-4 h-4" />}>Reading</TabButton>
+                  <TabButton active={activeTab === 'speed'} onClick={() => setActiveTab('speed')} icon={<SpeedIcon className="w-4 h-4" />}>Speed Reading</TabButton>
+                  <TabButton active={activeTab === 'writing'} onClick={() => setActiveTab('writing')} icon={<PenTool className="w-4 h-4" />}>Writing</TabButton>
+              </div>
             </div>
           </div>
 
@@ -208,12 +211,12 @@ export default function InstructorStudentProgressPage() {
               isLoading ? (
                 <HistorySkeleton />
               ) : history.length === 0 ? (
-                <div className="bg-white dark:bg-[#15141B] rounded-3xl p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D]">
-                    <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Target className="w-10 h-10 text-slate-400" />
+                <div className="bg-white dark:bg-[#15141B] rounded-3xl p-8 md:p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D]">
+                    <div className="w-16 h-16 md:w-20 md:h-20 bg-slate-100 dark:bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Target className="w-8 h-8 md:w-10 md:h-10 text-slate-400" />
                     </div>
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">No Practice History Yet</h2>
-                    <p className="text-slate-500 mb-6">This student hasn't completed any Speaking Practice sessions yet.</p>
+                    <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2">No Practice History Yet</h2>
+                    <p className="text-sm md:text-base text-slate-500 mb-6">This student hasn't completed any Speaking Practice sessions yet.</p>
                 </div>
               ) : (
                 <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
@@ -227,9 +230,9 @@ export default function InstructorStudentProgressPage() {
 
                   {/* Charts Section */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-2 bg-white dark:bg-[#15141B] p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-[#26252D]">
+                    <div className="lg:col-span-2 bg-white dark:bg-[#15141B] p-4 md:p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-[#26252D]">
                       <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Fluency Progression</h3>
-                      <div className="h-[300px] w-full">
+                      <div className="h-[250px] md:h-[300px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                             <defs>
@@ -252,9 +255,9 @@ export default function InstructorStudentProgressPage() {
                       </div>
                     </div>
 
-                    <div className="bg-[#fffbf0] dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 p-6 rounded-3xl">
+                    <div className="bg-[#fffbf0] dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 p-4 md:p-6 rounded-3xl">
                        <div className="flex items-center gap-2 mb-6">
-                          <AlertTriangle className="w-5 h-5 text-amber-500" />
+                          <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
                           <h3 className="font-bold text-[#8a6a24] dark:text-amber-500">Historical Fillers</h3>
                        </div>
                        <p className="text-sm text-[#8a6a24]/80 dark:text-slate-400 mb-6">Words that most commonly disrupt this student's fluency across all sessions.</p>
@@ -266,17 +269,17 @@ export default function InstructorStudentProgressPage() {
                                <span className="text-sm font-black text-slate-400">{f.count}x Total</span>
                            </div>
                          )) : (
-                           <div className="text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-xl">No significant filler usage detected for this student!</div>
+                           <div className="text-emerald-600 text-sm md:text-base font-bold bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-xl">No significant filler usage detected!</div>
                          )}
                        </div>
                     </div>
                   </div>
 
                   {/* History List */}
-                  <div className="bg-white dark:bg-[#15141B] rounded-3xl p-6 shadow-sm border border-slate-200 dark:border-[#26252D] overflow-hidden">
+                  <div className="bg-white dark:bg-[#15141B] rounded-3xl p-4 md:p-6 shadow-sm border border-slate-200 dark:border-[#26252D] overflow-hidden">
                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Past Sessions</h3>
                      <div className="overflow-x-auto">
-                       <table className="w-full text-left border-collapse">
+                       <table className="w-full text-left border-collapse min-w-[600px]">
                          <thead>
                            <tr className="border-b border-slate-100 dark:border-[#26252D] text-slate-500 text-sm font-semibold">
                              <th className="pb-3 pl-4">Date</th>
@@ -290,8 +293,8 @@ export default function InstructorStudentProgressPage() {
                          <tbody className="text-sm">
                            {history.map((h, i) => (
                              <tr key={i} className="border-b border-slate-50 dark:border-[#26252D]/50 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
-                               <td className="py-4 pl-4 text-slate-600 dark:text-slate-400 font-medium">{new Date(h.createdAt).toLocaleDateString()}</td>
-                               <td className="py-4 text-[#0b132b] dark:text-slate-200 font-bold max-w-[200px] truncate">{h.topicTitle || h.topicId}</td>
+                               <td className="py-4 pl-4 text-slate-600 dark:text-slate-400 font-medium whitespace-nowrap">{new Date(h.createdAt).toLocaleDateString()}</td>
+                               <td className="py-4 text-[#0b132b] dark:text-slate-200 font-bold max-w-[150px] md:max-w-[200px] truncate" title={h.topicTitle || h.topicId}>{h.topicTitle || h.topicId}</td>
                                <td className="py-4">
                                  <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded text-xs font-bold">{h.bandLevel}</span>
                                </td>
@@ -315,95 +318,93 @@ export default function InstructorStudentProgressPage() {
               )
           )}
 
-    
-
+          {/* Speed Reading Section */}
           {activeTab === 'speed' && (
-              <div className="bg-white dark:bg-[#15141B] rounded-3xl p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D] mt-8 animate-in slide-in-from-bottom-4">
-                  <div className="w-20 h-20 bg-teal-50 dark:bg-teal-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <SpeedIcon className="w-10 h-10 text-teal-500" />
+              <div className="bg-white dark:bg-[#15141B] rounded-3xl p-6 md:p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D] mt-8 animate-in slide-in-from-bottom-4">
+                  <div className="w-16 h-16 md:w-20 md:h-20 bg-teal-50 dark:bg-teal-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <SpeedIcon className="w-8 h-8 md:w-10 md:h-10 text-teal-500" />
                   </div>
-                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Reading Comprehension & WPM (Speed Reading)</h2>
-                  <p className="text-slate-500 max-w-md mx-auto mb-8">This module maps the student's structural comprehension and raw Words Per Minute across reading texts.</p>
+                  <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-3">Reading Comprehension & WPM</h2>
+                  <p className="text-sm md:text-base text-slate-500 max-w-md mx-auto mb-8">This module maps the student's structural comprehension and raw Words Per Minute across reading texts.</p>
                   
-                  {/* Mock UI elements for Speed Reading */}
-                  <div className="max-w-xl mx-auto grid grid-cols-2 gap-4 opacity-50">
+                  <div className="max-w-xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4 opacity-50">
                      <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
-                         <div className="text-4xl font-black text-teal-500 mb-2">320</div>
+                         <div className="text-3xl md:text-4xl font-black text-teal-500 mb-2">320</div>
                          <div className="text-xs font-bold text-slate-400 uppercase">Avg WPM Map</div>
                      </div>
                      <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
-                         <div className="text-4xl font-black text-emerald-500 mb-2">85%</div>
+                         <div className="text-3xl md:text-4xl font-black text-emerald-500 mb-2">85%</div>
                          <div className="text-xs font-bold text-slate-400 uppercase">Retention Ratio</div>
                      </div>
                   </div>
               </div>
           )}
-      {/* Listening Section */}
-{activeTab === 'listening' && (
-    <div className="bg-white dark:bg-[#15141B] rounded-3xl p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D] mt-8 animate-in slide-in-from-bottom-4">
-        <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Headphones className="w-10 h-10 text-blue-500" />
-        </div>
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Auditory Processing & Recall</h2>
-        <p className="text-slate-500 max-w-md mx-auto mb-8">This module analyzes the student's ability to extract key information and maintain focus during audio-based exercises.</p>
-        
-        {/* Mock UI elements for Listening */}
-        <div className="max-w-xl mx-auto grid grid-cols-2 gap-4 opacity-50">
-            <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
-                <div className="text-4xl font-black text-blue-500 mb-2">92%</div>
-                <div className="text-xs font-bold text-slate-400 uppercase">Focus Score</div>
-            </div>
-            <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
-                <div className="text-4xl font-black text-indigo-500 mb-2">14m</div>
-                <div className="text-xs font-bold text-slate-400 uppercase">Avg. Listen Time</div>
-            </div>
-        </div>
-    </div>
-)}
-{/* Reading Section */}
-{activeTab === 'reading' && (
-    <div className="bg-white dark:bg-[#15141B] rounded-3xl p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D] mt-8 animate-in slide-in-from-bottom-4">
-        <div className="w-20 h-20 bg-purple-50 dark:bg-purple-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <BookOpen className="w-10 h-10 text-purple-500" />
-        </div>
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Critical Analysis & Contextual Inference</h2>
-        <p className="text-slate-500 max-w-md mx-auto mb-8">This module evaluates the student's ability to identify core themes, infer meaning from context, and analyze narrative structures.</p>
-        
-        {/* Mock UI elements for Reading */}
-        <div className="max-w-xl mx-auto grid grid-cols-2 gap-4 opacity-50">
-            <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
-                <div className="text-4xl font-black text-purple-500 mb-2">94%</div>
-                <div className="text-xs font-bold text-slate-400 uppercase">Inference Accuracy</div>
-            </div>
-            <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
-                <div className="text-4xl font-black text-fuchsia-500 mb-2">12/15</div>
-                <div className="text-xs font-bold text-slate-400 uppercase">Thematic Mastery</div>
-            </div>
-        </div>
-    </div>
-)}
-{/* Writing Section */}
-{activeTab === 'writing' && (
-    <div className="bg-white dark:bg-[#15141B] rounded-3xl p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D] mt-8 animate-in slide-in-from-bottom-4">
-        <div className="w-20 h-20 bg-amber-50 dark:bg-amber-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <PenTool className="w-10 h-10 text-amber-500" />
-        </div>
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Linguistic Composition & Syntax</h2>
-        <p className="text-slate-500 max-w-md mx-auto mb-8">This module tracks grammatical precision, vocabulary diversity, and structural flow in written responses.</p>
-        
-        {/* Mock UI elements for Writing */}
-        <div className="max-w-xl mx-auto grid grid-cols-2 gap-4 opacity-50">
-            <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
-                <div className="text-4xl font-black text-amber-500 mb-2">A-</div>
-                <div className="text-xs font-bold text-slate-400 uppercase">Grammar Accuracy</div>
-            </div>
-            <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
-                <div className="text-4xl font-black text-orange-500 mb-2">1.2k</div>
-                <div className="text-xs font-bold text-slate-400 uppercase">Vocabulary Bank</div>
-            </div>
-        </div>
-    </div>
-)}
+
+          {/* Listening Section */}
+          {activeTab === 'listening' && (
+              <div className="bg-white dark:bg-[#15141B] rounded-3xl p-6 md:p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D] mt-8 animate-in slide-in-from-bottom-4">
+                  <div className="w-16 h-16 md:w-20 md:h-20 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <Headphones className="w-8 h-8 md:w-10 md:h-10 text-blue-500" />
+                  </div>
+                  <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-3">Auditory Processing & Recall</h2>
+                  <p className="text-sm md:text-base text-slate-500 max-w-md mx-auto mb-8">This module analyzes the student's ability to extract key information and maintain focus during audio-based exercises.</p>
+                  
+                  <div className="max-w-xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4 opacity-50">
+                      <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
+                          <div className="text-3xl md:text-4xl font-black text-blue-500 mb-2">92%</div>
+                          <div className="text-xs font-bold text-slate-400 uppercase">Focus Score</div>
+                      </div>
+                      <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
+                          <div className="text-3xl md:text-4xl font-black text-indigo-500 mb-2">14m</div>
+                          <div className="text-xs font-bold text-slate-400 uppercase">Avg. Listen Time</div>
+                      </div>
+                  </div>
+              </div>
+          )}
+
+          {/* Reading Section */}
+          {activeTab === 'reading' && (
+              <div className="bg-white dark:bg-[#15141B] rounded-3xl p-6 md:p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D] mt-8 animate-in slide-in-from-bottom-4">
+                  <div className="w-16 h-16 md:w-20 md:h-20 bg-purple-50 dark:bg-purple-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <BookOpen className="w-8 h-8 md:w-10 md:h-10 text-purple-500" />
+                  </div>
+                  <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-3">Critical Analysis & Contextual Inference</h2>
+                  <p className="text-sm md:text-base text-slate-500 max-w-md mx-auto mb-8">This module evaluates the student's ability to identify core themes, infer meaning from context, and analyze narrative structures.</p>
+                  
+                  <div className="max-w-xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4 opacity-50">
+                      <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
+                          <div className="text-3xl md:text-4xl font-black text-purple-500 mb-2">94%</div>
+                          <div className="text-xs font-bold text-slate-400 uppercase">Inference Accuracy</div>
+                      </div>
+                      <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
+                          <div className="text-3xl md:text-4xl font-black text-fuchsia-500 mb-2">12/15</div>
+                          <div className="text-xs font-bold text-slate-400 uppercase">Thematic Mastery</div>
+                      </div>
+                  </div>
+              </div>
+          )}
+
+          {/* Writing Section */}
+          {activeTab === 'writing' && (
+              <div className="bg-white dark:bg-[#15141B] rounded-3xl p-6 md:p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D] mt-8 animate-in slide-in-from-bottom-4">
+                  <div className="w-16 h-16 md:w-20 md:h-20 bg-amber-50 dark:bg-amber-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <PenTool className="w-8 h-8 md:w-10 md:h-10 text-amber-500" />
+                  </div>
+                  <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-3">Linguistic Composition & Syntax</h2>
+                  <p className="text-sm md:text-base text-slate-500 max-w-md mx-auto mb-8">This module tracks grammatical precision, vocabulary diversity, and structural flow in written responses.</p>
+                  
+                  <div className="max-w-xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4 opacity-50">
+                      <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
+                          <div className="text-3xl md:text-4xl font-black text-amber-500 mb-2">A-</div>
+                          <div className="text-xs font-bold text-slate-400 uppercase">Grammar Accuracy</div>
+                      </div>
+                      <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
+                          <div className="text-3xl md:text-4xl font-black text-orange-500 mb-2">1.2k</div>
+                          <div className="text-xs font-bold text-slate-400 uppercase">Vocabulary Bank</div>
+                      </div>
+                  </div>
+              </div>
+          )}
 
         </main>
       </div>
@@ -415,9 +416,9 @@ const TabButton = ({ children, active, onClick, icon }: any) => (
     <button 
         onClick={onClick}
         className={cn(
-            "flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300",
+            "flex items-center gap-1.5 md:gap-2 px-4 md:px-6 py-2 md:py-2.5 rounded-full text-sm font-semibold transition-all duration-300 whitespace-nowrap shrink-0",
             active 
-              ? "bg-[#8a42f5] text-white shadow-md shadow-[#8a42f5]/20 transform scale-105" 
+              ? "bg-[#8a42f5] text-white shadow-md shadow-[#8a42f5]/20 transform md:scale-105" 
               : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
         )}
     >
@@ -429,11 +430,11 @@ const TabButton = ({ children, active, onClick, icon }: any) => (
 const StatCard = ({ icon, label, value, color, bg }: any) => (
     <div className="bg-white dark:bg-[#15141B] p-6 rounded-3xl border border-slate-200 dark:border-[#26252D] shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex flex-col justify-center">
       <div className="flex items-center gap-4 mb-4">
-        <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center", bg, color)}>
+        <div className={cn("w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center shrink-0", bg, color)}>
           {icon}
         </div>
-        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</div>
+        <div className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest leading-tight">{label}</div>
       </div>
-      <div className={cn("text-3xl font-black", color)}>{value}</div>
+      <div className={cn("text-2xl md:text-3xl font-black", color)}>{value}</div>
     </div>
 );
