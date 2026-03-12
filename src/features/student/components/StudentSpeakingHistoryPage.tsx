@@ -16,6 +16,82 @@ import {
   AreaChart, Area
 } from 'recharts';
 
+// ─── Skeletons ────────────────────────────────────────────────────────────────
+
+function HistorySkeleton() {
+  return (
+    <div className="space-y-8 animate-pulse">
+      {/* Stat Cards Skeleton */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[1, 2, 3, 4].map(i => (
+          <div key={i} className="bg-white dark:bg-slate-900 p-6 rounded-3xl border-none shadow-[0_2px_10px_rgba(0,0,0,0.04)] flex flex-col justify-center h-[136px]">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 rounded-2xl bg-slate-200 dark:bg-slate-800 shrink-0" />
+              <div className="h-3 w-24 bg-slate-200 dark:bg-slate-800 rounded" />
+            </div>
+            <div className="h-8 w-20 bg-slate-200 dark:bg-slate-800 rounded" />
+          </div>
+        ))}
+      </div>
+
+      {/* Charts Section Skeleton */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border-none">
+          <div className="h-6 w-48 bg-slate-200 dark:bg-slate-800 rounded mb-6" />
+          <div className="h-[300px] w-full bg-slate-100 dark:bg-slate-800/50 rounded-xl" />
+        </div>
+
+        <div className="bg-[#fffbf0] dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 p-6 rounded-3xl">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="w-5 h-5 bg-amber-200 dark:bg-amber-800/50 rounded-full shrink-0" />
+            <div className="h-5 w-32 bg-amber-200 dark:bg-amber-800/50 rounded" />
+          </div>
+          <div className="h-4 w-full bg-amber-100 dark:bg-amber-900/30 rounded mb-2" />
+          <div className="h-4 w-3/4 bg-amber-100 dark:bg-amber-900/30 rounded mb-6" />
+          
+          <div className="space-y-3">
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className="flex items-center justify-between bg-white dark:bg-slate-800 p-3 rounded-xl border border-amber-100 dark:border-slate-700">
+                <div className="h-4 w-16 bg-slate-200 dark:bg-slate-700 rounded" />
+                <div className="h-4 w-12 bg-slate-200 dark:bg-slate-700 rounded" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Table Skeleton */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border-none overflow-hidden">
+        <div className="h-6 w-32 bg-slate-200 dark:bg-slate-800 rounded mb-6" />
+        <div className="w-full">
+          {/* Header Row */}
+          <div className="flex border-b border-slate-100 dark:border-slate-800 pb-3 mb-2">
+            <div className="w-2/12 h-4 bg-slate-200 dark:bg-slate-800 rounded ml-4" />
+            <div className="w-3/12 h-4 bg-slate-200 dark:bg-slate-800 rounded mx-4" />
+            <div className="w-2/12 h-4 bg-slate-200 dark:bg-slate-800 rounded mx-4" />
+            <div className="w-2/12 h-4 bg-slate-200 dark:bg-slate-800 rounded mx-4" />
+            <div className="w-2/12 h-4 bg-slate-200 dark:bg-slate-800 rounded mx-4" />
+            <div className="w-1/12 h-4 bg-slate-200 dark:bg-slate-800 rounded mr-4" />
+          </div>
+          {/* Data Rows */}
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="flex py-4 border-b border-slate-50 dark:border-slate-800/50 items-center">
+              <div className="w-2/12 h-4 bg-slate-100 dark:bg-slate-800/50 rounded ml-4" />
+              <div className="w-3/12 h-4 bg-slate-100 dark:bg-slate-800/50 rounded mx-4" />
+              <div className="w-2/12 h-6 bg-slate-100 dark:bg-slate-800/50 rounded mx-4" />
+              <div className="w-2/12 h-4 bg-slate-100 dark:bg-slate-800/50 rounded mx-4" />
+              <div className="w-2/12 h-4 bg-slate-100 dark:bg-slate-800/50 rounded mx-4" />
+              <div className="w-1/12 h-4 bg-slate-100 dark:bg-slate-800/50 rounded mr-4" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+
 export default function StudentSpeakingHistoryPage() {
   const navigate = useNavigate();
   const { profile } = useAuth();
@@ -114,10 +190,7 @@ export default function StudentSpeakingHistoryPage() {
           </div>
 
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center h-64 text-slate-400">
-              <Loader2 className="w-8 h-8 animate-spin text-[#8a42f5] mb-4" />
-              <p>Loading your history...</p>
-            </div>
+            <HistorySkeleton />
           ) : history.length === 0 ? (
             <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 text-center shadow-sm">
                 <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -232,13 +305,13 @@ export default function StudentSpeakingHistoryPage() {
 }
 
 const StatCard = ({ icon, label, value, color, bg }: any) => (
-    <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border-none shadow-[0_2px_10px_rgba(0,0,0,0.04)] flex flex-col justify-center">
-      <div className="flex items-center gap-4 mb-4">
-        <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center", bg, color)}>
-          {icon}
-        </div>
-        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</div>
+  <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border-none shadow-[0_2px_10px_rgba(0,0,0,0.04)] flex flex-col justify-center h-[136px]">
+    <div className="flex items-center gap-4 mb-4">
+      <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center", bg, color)}>
+        {icon}
       </div>
-      <div className={cn("text-3xl font-black", color)}>{value}</div>
+      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</div>
     </div>
-  );
+    <div className={cn("text-3xl font-black", color)}>{value}</div>
+  </div>
+);

@@ -4,7 +4,7 @@ import { UserRound } from 'lucide-react';
 interface TabData {
   id: string;
   label: string;
-  videoPath: string;
+  embedUrl: string;
 }
 
 const Dashdemo: React.FC = () => {
@@ -14,22 +14,22 @@ const Dashdemo: React.FC = () => {
     {
       id: 'StudentView',
       label: 'Student View',
-      videoPath: '/videos/instr.mp4',
+      embedUrl: 'https://www.youtube.com/embed/91dBFnM7jHI?si=5J1kD5LzAVn5XsJ0',
     },
     {
       id: 'InstructorView',
       label: 'Instructor View',
-      videoPath: '/videos/instructor.mp4',
+      embedUrl: 'https://www.youtube.com/embed/tt8N7m6RjgE?si=Mo-vRfrb0AQydScW',
     },
     {
       id: 'InstituteAdminPortalView',
       label: 'Institute Admin Portal',
-      videoPath: '/videos/admin.mp4',
+      embedUrl: 'https://www.youtube.com/embed/zz1EEjYcT5g?si=GcGY2OQAMlfqz295',
     },
     {
       id: 'InstituteOwnerPortalView',
       label: 'Institute Owner Portal',
-      videoPath: '/videos/Owner.mp4',
+      embedUrl: 'https://www.youtube.com/embed/xWWokRhKphs?si=MC9__ZgckV8qIF3P',
     },
   ];
 
@@ -159,16 +159,20 @@ const Dashdemo: React.FC = () => {
             className="video-transition"
             style={{ borderRadius: '8px', overflow: 'hidden', backgroundColor: '#000' }}
           >
-            <video
-              width="100%"
-              style={{ display: 'block', borderRadius: '8px' }}
-              controls
-              autoPlay
-              muted
-            >
-              <source src={currentTabData.videoPath} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+            <iframe 
+              width="100%" 
+              style={{ 
+                display: 'block', 
+                borderRadius: '8px', 
+                aspectRatio: '16/9', /* Keeps the video perfectly responsive like the old video tag */
+                border: 'none'
+              }}
+              src={`${currentTabData.embedUrl}&autoplay=1&mute=1`} 
+              title={`${currentTabData.label} Demo Video`}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            ></iframe>
           </div>
         </div>
 

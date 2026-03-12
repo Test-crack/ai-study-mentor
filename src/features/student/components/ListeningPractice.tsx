@@ -1,13 +1,12 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StudentSidebar } from './dashboard/StudentSidebar';
 import { StudentTopbar } from './dashboard/StudentTopbar';
 import { Button } from '@/shared/components/ui/button';
 import { useToast } from '@/shared/hooks/use-toast';
 import {
-  ArrowLeft, Send, Headphones, PlayCircle, Info,
-  Sparkles, Play, Pause, Square, ChevronDown, ChevronUp,
-  Trophy, RotateCcw, CheckCircle2, XCircle, Clock
+  ArrowLeft, Send, Headphones, Info,
+  Sparkles, Play, Trophy, RotateCcw, CheckCircle2, XCircle, Clock
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
@@ -438,7 +437,6 @@ function checkAnswer(question: Question, userAnswer: string): boolean {
   const ua = userAnswer.trim().toLowerCase();
   const ca = question.answer.trim().toLowerCase();
   if (question.type === 'mcq') return ua === ca;
-  // For form questions, check if main keyword matches
   return ca.split(' ').some(word => word.length > 3 && ua.includes(word));
 }
 
@@ -470,9 +468,8 @@ export default function ListeningPractice() {
 
   // TTS Audio
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
   const [hasPlayed, setHasPlayed] = useState(false);
-  const utterRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const [currentBoundaryIndex, setCurrentBoundaryIndex] = useState(-1);
 
   // Script visibility
   const [scriptVisible, setScriptVisible] = useState(false);
@@ -481,53 +478,127 @@ export default function ListeningPractice() {
   const [elapsed, setElapsed] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Timer effect
+  // --- BUG FIX: Warm up voices on mount ---
   useEffect(() => {
-    if (screen === 'test' && isPlaying && !isPaused) {
+    window.speechSynthesis.getVoices();
+  }, []);
+
+  // Timer & Chrome 14-second bug fix
+  useEffect(() => {
+    let fixInterval: ReturnType<typeof setInterval>;
+    
+    if (screen === 'test' && isPlaying) {
+      // 1. Regular timer
       timerRef.current = setInterval(() => setElapsed(e => e + 1), 1000);
+      
+      // 2. Chrome 14-Second Hack: Pause and resume very quickly to keep the engine alive on long text
+      fixInterval = setInterval(() => {
+        window.speechSynthesis.pause();
+        window.speechSynthesis.resume();
+      }, 14000); 
     } else {
       if (timerRef.current) clearInterval(timerRef.current);
     }
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [screen, isPlaying, isPaused]);
+    
+    return () => { 
+      if (timerRef.current) clearInterval(timerRef.current); 
+      if (fixInterval) clearInterval(fixInterval);
+    };
+  }, [screen, isPlaying]);
 
   // Stop TTS when leaving test screen
   useEffect(() => {
     if (screen !== 'test') {
       window.speechSynthesis?.cancel();
       setIsPlaying(false);
-      setIsPaused(false);
+      setCurrentBoundaryIndex(-1);
+      setScriptVisible(false);
     }
   }, [screen]);
+
+  // Pre-calculate word boundaries
+  const scriptParagraphs = useMemo(() => {
+    if (!selectedTask) return [];
+    const paragraphs: Array<Array<{ text: string; space: string; start: number; end: number }>> = [];
+    let currentIndex = 0;
+    const paras = selectedTask.script.split('\n\n');
+
+    paras.forEach((para) => {
+      const words: Array<{ text: string; space: string; start: number; end: number }> = [];
+      const regex = /([^\s]+)(\s*)/g;
+      let match;
+      while ((match = regex.exec(para)) !== null) {
+        words.push({
+          text: match[1],
+          space: match[2],
+          start: currentIndex + match.index,
+          end: currentIndex + match.index + match[1].length
+        });
+      }
+      paragraphs.push(words);
+      currentIndex += para.length + 2; 
+    });
+    return paragraphs;
+  }, [selectedTask]);
 
   const speak = useCallback(() => {
     if (!selectedTask) return;
     window.speechSynthesis.cancel();
+    
     const utter = new SpeechSynthesisUtterance(selectedTask.script);
+    
+    // --- BUG FIX: Prevent Garbage Collection in Chrome ---
+    // If not attached to window, Chrome deletes the utterance from memory randomly
+    (window as any)._speechBugFix = utter; 
+
+    // --- BUG FIX: Force a Local Voice ---
+    // Network voices DO NOT fire 'onboundary' events correctly. 
+    const availableVoices = window.speechSynthesis.getVoices();
+    const localEnglishVoice = availableVoices.find(v => v.lang.startsWith('en') && v.localService);
+    
+    if (localEnglishVoice) {
+      utter.voice = localEnglishVoice;
+    } else {
+      // Fallback if no specific local english voice is found
+      const backupVoice = availableVoices.find(v => v.localService) || availableVoices.find(v => v.lang.startsWith('en'));
+      if (backupVoice) utter.voice = backupVoice;
+    }
+
     utter.rate = 0.88;
     utter.pitch = 1;
-    utter.lang = 'en-GB';
-    utter.onstart = () => { setIsPlaying(true); setIsPaused(false); setHasPlayed(true); };
-    utter.onend = () => { setIsPlaying(false); setIsPaused(false); };
-    utter.onerror = () => { setIsPlaying(false); setIsPaused(false); };
-    utterRef.current = utter;
+    
+    utter.onstart = () => { 
+      setIsPlaying(true); 
+      setHasPlayed(true); 
+      setCurrentBoundaryIndex(0); 
+      setScriptVisible(true); // Automatically show script
+    };
+    
+    utter.onend = () => { 
+      setIsPlaying(false); 
+      setCurrentBoundaryIndex(-1); 
+      setScriptVisible(false); // Automatically hide script
+    };
+    
+    utter.onerror = () => { 
+      setIsPlaying(false); 
+      setCurrentBoundaryIndex(-1); 
+      setScriptVisible(false); // Automatically hide script
+    };
+    
+    // Track boundary updates
+    utter.onboundary = (event) => {
+      setCurrentBoundaryIndex(event.charIndex);
+    };
+    
     window.speechSynthesis.speak(utter);
   }, [selectedTask]);
-
-  const togglePause = () => {
-    if (isPlaying && !isPaused) {
-      window.speechSynthesis.pause();
-      setIsPaused(true);
-    } else if (isPaused) {
-      window.speechSynthesis.resume();
-      setIsPaused(false);
-    }
-  };
 
   const stopAudio = () => {
     window.speechSynthesis.cancel();
     setIsPlaying(false);
-    setIsPaused(false);
+    setCurrentBoundaryIndex(-1);
+    setScriptVisible(false);
   };
 
   const openTask = (task: ListeningTask) => {
@@ -537,6 +608,7 @@ export default function ListeningPractice() {
     setScriptVisible(false);
     setElapsed(0);
     setHasPlayed(false);
+    setCurrentBoundaryIndex(-1);
     setScreen('test');
   };
 
@@ -589,6 +661,22 @@ export default function ListeningPractice() {
       setScreen('results');
     }, 1000);
   };
+
+  // Find precisely which word to highlight
+  let activeWordStart = -1;
+  if (isPlaying && currentBoundaryIndex >= 0) {
+    let found = -1;
+    for (const para of scriptParagraphs) {
+      for (const wordObj of para) {
+        if (wordObj.start <= currentBoundaryIndex) {
+          found = wordObj.start;
+        } else {
+          break; 
+        }
+      }
+    }
+    activeWordStart = found;
+  }
 
   // Derived values
   const totalCorrect = allResults.reduce((sum, r) => sum + r.results.filter(q => q.correct).length, 0);
@@ -775,71 +863,71 @@ export default function ListeningPractice() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
+                
                 {/* TTS Controls */}
                 <div className="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-3 flex-wrap">
-                    {!isPlaying ? (
+                    {!isPlaying && !hasPlayed && (
                       <Button onClick={speak} className="bg-[#7B61FF] hover:bg-[#6a50e5] text-white gap-2 flex-1 sm:flex-none">
                         <Play className="w-4 h-4" />
-                        {hasPlayed ? 'Play Again' : 'Play Audio'}
+                        Play Audio
                       </Button>
-                    ) : (
-                      <>
-                        <Button onClick={togglePause} variant="outline" className="gap-2 flex-1 sm:flex-none
-                          border-[#7B61FF] text-[#7B61FF] hover:bg-indigo-50 dark:border-[#7B61FF]
-                          dark:text-[#9b86ff] dark:hover:bg-[#7B61FF]/10">
-                          {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-                          {isPaused ? 'Resume' : 'Pause'}
-                        </Button>
-                        <Button onClick={stopAudio} variant="outline" className="gap-2 border-red-300
-                          text-red-500 hover:bg-red-50 dark:border-red-800 dark:text-red-400
-                          dark:hover:bg-red-900/20">
-                          <Square className="w-4 h-4" />
-                          Stop
-                        </Button>
-                      </>
                     )}
-                    {isPlaying && !isPaused && (
+
+                    {isPlaying && (
+                      <Button disabled className="bg-[#7B61FF]/60 text-white gap-2 flex-1 sm:flex-none cursor-not-allowed">
+                        <span className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                        Playing Audio...
+                      </Button>
+                    )}
+
+                    {!isPlaying && hasPlayed && (
+                      <Button disabled className="bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 gap-2 flex-1 sm:flex-none cursor-not-allowed">
+                        <CheckCircle2 className="w-4 h-4" />
+                        Audio Finished
+                      </Button>
+                    )}
+
+                    {isPlaying && (
                       <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-sm font-medium">
                         <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
                         Now playing…
                       </div>
                     )}
-                    {isPaused && (
-                      <span className="text-amber-500 dark:text-amber-400 text-sm font-medium">⏸ Paused</span>
-                    )}
                   </div>
 
                   {!hasPlayed && (
                     <p className="text-xs text-slate-400 mt-3">
-                      👆 Press <strong>Play Audio</strong> to hear the recording before answering.
+                      👆 Press <strong>Play Audio</strong> to hear the recording. You can only listen to it once.
                     </p>
                   )}
                 </div>
 
-                {/* Script Toggle */}
-                <div>
-                  <button
-                    onClick={() => setScriptVisible(v => !v)}
-                    className="w-full flex items-center justify-between text-sm text-slate-500
-                      dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200
-                      bg-slate-50 dark:bg-slate-800/50 rounded-lg px-4 py-2.5 border
-                      border-slate-200 dark:border-slate-700 transition-colors"
-                  >
-                    <span>📄 {scriptVisible ? 'Hide' : 'Show'} Transcript</span>
-                    {scriptVisible ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                  </button>
-                  {scriptVisible && (
-                    <div className="mt-2 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200
-                      dark:border-slate-700 p-4 max-h-72 overflow-y-auto space-y-3">
-                      {selectedTask.script.split('\n\n').map((para, i) => (
-                        <p key={i} className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                          {para}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                {/* Script Container (Auto-shows when playing) */}
+                {scriptVisible && (
+                  <div className="mt-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200
+                    dark:border-slate-700 p-4 max-h-72 overflow-y-auto space-y-3">
+                    {scriptParagraphs.map((para, i) => (
+                      <p key={i} className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                        {para.map((wordObj, j) => {
+                          const isHighlighted = isPlaying && wordObj.start === activeWordStart;
+                          return (
+                            <React.Fragment key={j}>
+                              {isHighlighted ? (
+                                <mark className="bg-[#7B61FF]/30 text-indigo-900 dark:bg-[#7B61FF]/50 dark:text-white rounded px-1 transition-colors">
+                                  {wordObj.text}
+                                </mark>
+                              ) : (
+                                wordObj.text
+                              )}
+                              {wordObj.space}
+                            </React.Fragment>
+                          );
+                        })}
+                      </p>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -1081,3 +1169,4 @@ export default function ListeningPractice() {
     </div>
   );
 }
+// }TR7 2HJ

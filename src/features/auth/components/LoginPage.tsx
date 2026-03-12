@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { useToast } from "@/shared/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Eye, EyeOff, GraduationCap, ChevronLeft } from "lucide-react";
-
 const LoginPage = () => {
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -86,7 +85,9 @@ const LoginPage = () => {
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-10">
               <div className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-lg ring-1 ring-white/10">
-                <GraduationCap className="h-7 w-7 text-indigo-100" />
+           <Link to="/">
+  <GraduationCap className="h-7 w-7 text-indigo-100" />
+</Link>
               </div>
               <span className="text-2xl font-bold tracking-tight text-white/95 drop-shadow-sm">TestCrack</span>
             </div>

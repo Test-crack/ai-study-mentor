@@ -2,7 +2,10 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { 
   ChevronLeft, Activity, Target, Clock, Zap, 
-  TrendingUp, Award, AlertTriangle, Loader2, Mic, Eye, Zap as SpeedIcon 
+  TrendingUp, Award, AlertTriangle, Loader2, Mic, Eye, Zap as SpeedIcon, 
+  PenTool,
+  Headphones,
+  BookOpen
 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { InstructorSidebar } from '../components/dashboard/InstructorSidebar';
@@ -14,8 +17,79 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   AreaChart, Area
 } from 'recharts';
+type TabType = 'speaking' | 'listening' | 'speed'|'reading'|'writing';
+// ─── Skeletons ────────────────────────────────────────────────────────────────
+function HistorySkeleton() {
+  return (
+    <div className="space-y-8 animate-pulse">
+      {/* Stat Cards Skeleton */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[1, 2, 3, 4].map(i => (
+          <div key={i} className="bg-white dark:bg-[#15141B] p-6 rounded-3xl border border-slate-200 dark:border-[#26252D] shadow-sm flex flex-col justify-center h-[136px]">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 rounded-2xl bg-slate-200 dark:bg-[#26252D] shrink-0" />
+              <div className="h-3 w-24 bg-slate-200 dark:bg-[#26252D] rounded" />
+            </div>
+            <div className="h-8 w-20 bg-slate-200 dark:bg-[#26252D] rounded" />
+          </div>
+        ))}
+      </div>
 
-type TabType = 'speaking' | 'voice' | 'speed';
+      {/* Charts Section Skeleton */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 bg-white dark:bg-[#15141B] p-6 rounded-3xl border border-slate-200 dark:border-[#26252D] shadow-sm">
+          <div className="h-6 w-48 bg-slate-200 dark:bg-[#26252D] rounded mb-6" />
+          <div className="h-[300px] w-full bg-slate-100 dark:bg-[#26252D]/50 rounded-xl" />
+        </div>
+
+        <div className="bg-[#fffbf0] dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 p-6 rounded-3xl">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="w-5 h-5 bg-amber-200 dark:bg-amber-800/50 rounded-full shrink-0" />
+            <div className="h-5 w-32 bg-amber-200 dark:bg-amber-800/50 rounded" />
+          </div>
+          <div className="h-4 w-full bg-amber-100 dark:bg-amber-900/30 rounded mb-2" />
+          <div className="h-4 w-3/4 bg-amber-100 dark:bg-amber-900/30 rounded mb-6" />
+          
+          <div className="space-y-3">
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className="flex items-center justify-between bg-white dark:bg-[#15141B] p-3 rounded-xl border border-amber-100 dark:border-[#26252D]">
+                <div className="h-4 w-16 bg-slate-200 dark:bg-[#26252D] rounded" />
+                <div className="h-4 w-12 bg-slate-200 dark:bg-[#26252D] rounded" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Table Skeleton */}
+      <div className="bg-white dark:bg-[#15141B] rounded-3xl p-6 shadow-sm border border-slate-200 dark:border-[#26252D] overflow-hidden">
+        <div className="h-6 w-32 bg-slate-200 dark:bg-[#26252D] rounded mb-6" />
+        <div className="w-full">
+          <div className="flex border-b border-slate-100 dark:border-[#26252D] pb-3 mb-2">
+            <div className="w-2/12 h-4 bg-slate-200 dark:bg-[#26252D] rounded ml-4" />
+            <div className="w-3/12 h-4 bg-slate-200 dark:bg-[#26252D] rounded mx-4" />
+            <div className="w-2/12 h-4 bg-slate-200 dark:bg-[#26252D] rounded mx-4" />
+            <div className="w-2/12 h-4 bg-slate-200 dark:bg-[#26252D] rounded mx-4" />
+            <div className="w-2/12 h-4 bg-slate-200 dark:bg-[#26252D] rounded mx-4" />
+            <div className="w-1/12 h-4 bg-slate-200 dark:bg-[#26252D] rounded mr-4" />
+          </div>
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="flex py-4 border-b border-slate-50 dark:border-[#26252D]/50 items-center">
+              <div className="w-2/12 h-4 bg-slate-100 dark:bg-[#26252D]/50 rounded ml-4" />
+              <div className="w-3/12 h-4 bg-slate-100 dark:bg-[#26252D]/50 rounded mx-4" />
+              <div className="w-2/12 h-6 bg-slate-100 dark:bg-[#26252D]/50 rounded mx-4" />
+              <div className="w-2/12 h-4 bg-slate-100 dark:bg-[#26252D]/50 rounded mx-4" />
+              <div className="w-2/12 h-4 bg-slate-100 dark:bg-[#26252D]/50 rounded mx-4" />
+              <div className="w-1/12 h-4 bg-slate-100 dark:bg-[#26252D]/50 rounded mr-4" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function InstructorStudentProgressPage() {
   const navigate = useNavigate();
@@ -122,17 +196,17 @@ export default function InstructorStudentProgressPage() {
             
             <div className="bg-white dark:bg-slate-900 rounded-full p-1.5 flex shadow-sm border border-slate-200 dark:border-slate-800">
                 <TabButton active={activeTab === 'speaking'} onClick={() => setActiveTab('speaking')} icon={<Mic className="w-4 h-4" />}>Speaking Practice</TabButton>
-                <TabButton active={activeTab === 'voice'} onClick={() => setActiveTab('voice')} icon={<Eye className="w-4 h-4" />}>Voice Lab</TabButton>
+                {/* <TabButton active={activeTab === 'voice'} onClick={() => setActiveTab('voice')} icon={<Eye className="w-4 h-4" />}>Voice Lab</TabButton> */}
+                <TabButton active={activeTab === 'listening'} onClick={() => setActiveTab('listening')} icon={<SpeedIcon className="w-4 h-4" />}>listening</TabButton>
+                <TabButton active={activeTab === 'reading'} onClick={() => setActiveTab('reading')} icon={<SpeedIcon className="w-4 h-4" />}>Reading</TabButton>
                 <TabButton active={activeTab === 'speed'} onClick={() => setActiveTab('speed')} icon={<SpeedIcon className="w-4 h-4" />}>Speed Reading</TabButton>
+                <TabButton active={activeTab === 'writing'} onClick={() => setActiveTab('writing')} icon={<SpeedIcon className="w-4 h-4" />}>writing</TabButton>
             </div>
           </div>
 
           {activeTab === 'speaking' && (
               isLoading ? (
-                <div className="flex flex-col items-center justify-center h-64 text-slate-400">
-                  <Loader2 className="w-8 h-8 animate-spin text-[#8a42f5] mb-4" />
-                  <p>Aggregating student history...</p>
-                </div>
+                <HistorySkeleton />
               ) : history.length === 0 ? (
                 <div className="bg-white dark:bg-[#15141B] rounded-3xl p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D]">
                     <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -241,25 +315,7 @@ export default function InstructorStudentProgressPage() {
               )
           )}
 
-          {activeTab === 'voice' && (
-              <div className="bg-white dark:bg-[#15141B] rounded-3xl p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D] mt-8 animate-in slide-in-from-bottom-4">
-                  <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <Eye className="w-10 h-10 text-indigo-500" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Vocal Pitch & Resonance (Voice Lab)</h2>
-                  <p className="text-slate-500 max-w-md mx-auto mb-8">This module tracks the student's intonation, stress patterns, and pitch heatmaps across specialized vocal resonance tests.</p>
-                  
-                  {/* Mock UI elements for Voice Lab */}
-                  <div className="max-w-2xl mx-auto border border-dashed border-slate-200 dark:border-slate-800 rounded-xl p-8 bg-slate-50 dark:bg-[#0A0A0B]">
-                      <div className="h-[150px] w-full flex items-end justify-between gap-1 mb-4 opacity-50">
-                           {Array.from({length: 40}).map((_, i) => (
-                               <div key={i} className="w-full bg-indigo-400 rounded-t-sm" style={{ height: `${Math.max(10, Math.sin(i * 0.2) * 100 + Math.random() * 50)}%` }} />
-                           ))}
-                      </div>
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Mock Spectrogram Data</p>
-                  </div>
-              </div>
-          )}
+    
 
           {activeTab === 'speed' && (
               <div className="bg-white dark:bg-[#15141B] rounded-3xl p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D] mt-8 animate-in slide-in-from-bottom-4">
@@ -282,6 +338,72 @@ export default function InstructorStudentProgressPage() {
                   </div>
               </div>
           )}
+      {/* Listening Section */}
+{activeTab === 'listening' && (
+    <div className="bg-white dark:bg-[#15141B] rounded-3xl p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D] mt-8 animate-in slide-in-from-bottom-4">
+        <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Headphones className="w-10 h-10 text-blue-500" />
+        </div>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Auditory Processing & Recall</h2>
+        <p className="text-slate-500 max-w-md mx-auto mb-8">This module analyzes the student's ability to extract key information and maintain focus during audio-based exercises.</p>
+        
+        {/* Mock UI elements for Listening */}
+        <div className="max-w-xl mx-auto grid grid-cols-2 gap-4 opacity-50">
+            <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
+                <div className="text-4xl font-black text-blue-500 mb-2">92%</div>
+                <div className="text-xs font-bold text-slate-400 uppercase">Focus Score</div>
+            </div>
+            <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
+                <div className="text-4xl font-black text-indigo-500 mb-2">14m</div>
+                <div className="text-xs font-bold text-slate-400 uppercase">Avg. Listen Time</div>
+            </div>
+        </div>
+    </div>
+)}
+{/* Reading Section */}
+{activeTab === 'reading' && (
+    <div className="bg-white dark:bg-[#15141B] rounded-3xl p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D] mt-8 animate-in slide-in-from-bottom-4">
+        <div className="w-20 h-20 bg-purple-50 dark:bg-purple-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <BookOpen className="w-10 h-10 text-purple-500" />
+        </div>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Critical Analysis & Contextual Inference</h2>
+        <p className="text-slate-500 max-w-md mx-auto mb-8">This module evaluates the student's ability to identify core themes, infer meaning from context, and analyze narrative structures.</p>
+        
+        {/* Mock UI elements for Reading */}
+        <div className="max-w-xl mx-auto grid grid-cols-2 gap-4 opacity-50">
+            <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
+                <div className="text-4xl font-black text-purple-500 mb-2">94%</div>
+                <div className="text-xs font-bold text-slate-400 uppercase">Inference Accuracy</div>
+            </div>
+            <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
+                <div className="text-4xl font-black text-fuchsia-500 mb-2">12/15</div>
+                <div className="text-xs font-bold text-slate-400 uppercase">Thematic Mastery</div>
+            </div>
+        </div>
+    </div>
+)}
+{/* Writing Section */}
+{activeTab === 'writing' && (
+    <div className="bg-white dark:bg-[#15141B] rounded-3xl p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D] mt-8 animate-in slide-in-from-bottom-4">
+        <div className="w-20 h-20 bg-amber-50 dark:bg-amber-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <PenTool className="w-10 h-10 text-amber-500" />
+        </div>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Linguistic Composition & Syntax</h2>
+        <p className="text-slate-500 max-w-md mx-auto mb-8">This module tracks grammatical precision, vocabulary diversity, and structural flow in written responses.</p>
+        
+        {/* Mock UI elements for Writing */}
+        <div className="max-w-xl mx-auto grid grid-cols-2 gap-4 opacity-50">
+            <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
+                <div className="text-4xl font-black text-amber-500 mb-2">A-</div>
+                <div className="text-xs font-bold text-slate-400 uppercase">Grammar Accuracy</div>
+            </div>
+            <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
+                <div className="text-4xl font-black text-orange-500 mb-2">1.2k</div>
+                <div className="text-xs font-bold text-slate-400 uppercase">Vocabulary Bank</div>
+            </div>
+        </div>
+    </div>
+)}
 
         </main>
       </div>
