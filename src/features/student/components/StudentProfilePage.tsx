@@ -213,7 +213,6 @@ export default function StudentProfilePage() {
                  {[
                    { id: 'general', label: 'General Info', icon: User },
                    { id: 'security', label: 'Security', icon: Shield },
-                   { id: 'preferences', label: 'Preferences', icon: Settings },
                  ].map((tab) => (
                    <button
                      key={tab.id}
@@ -331,9 +330,9 @@ export default function StudentProfilePage() {
                      <span className="text-indigo-100">Member Since</span>
                      <span className="font-medium">{profile?.createdAt ? new Date(profile.createdAt).getFullYear() : '2024'}</span>
                    </div>
-                   <Button variant="secondary" className="w-full bg-white text-indigo-700 hover:bg-indigo-50">
+                   {/* <Button variant="secondary" className="w-full bg-white text-indigo-700 hover:bg-indigo-50">
                      Upgrade Plan
-                   </Button>
+                   </Button> */}
                  </CardContent>
               </Card>
 

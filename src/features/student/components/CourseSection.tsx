@@ -316,7 +316,7 @@ export default function CourseSection() {
                   <ArrowLeft size={16} /> Back to Courses
                 </button>
 
-                <div className="bg-[#0b132b] rounded-3xl p-8 md:p-10 text-white mb-8 shadow-lg relative overflow-hidden">
+                <div className="bg-indigo-700 rounded-3xl p-8 md:p-10 text-white mb-8 shadow-lg relative overflow-hidden">
                   <div className="relative z-10 max-w-2xl">
                     <span className="inline-block px-3 py-1 bg-[#7B61FF] text-white rounded-md text-xs font-bold uppercase tracking-widest mb-4">Course</span>
                     <h1 className="text-3xl md:text-4xl font-black mb-4 leading-tight">{selectedCourse.title}</h1>

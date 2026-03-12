@@ -39,7 +39,7 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
   { id: 'reading', icon: BookOpen, label: 'Reading Practice', path: '/student/reading' },
   { id: 'listening', icon: Headphones, label: 'Listening Practice', path: '/student/listening' },
   { id: 'speed', icon: Timer, label: 'Speed Reading', path: '/student/speed' },
-  { id: 'voice', icon: Activity, label: 'Voice Lab', path: '/student/voice' },
+  // { id: 'voice', icon: Activity, label: 'Voice Lab', path: '/student/voice' },
   // { id: 'schedule', icon: Calendar, label: 'Schedule', path: '/student/schedule' },
   // { id: 'speaking-practice', icon: MessageCircle, label: 'Speaking-Anatomy', path: '/student/speaking-practice' },
   // { id: 'my-curriculum', icon: Library, label: 'My-Curriculum', path: '/student/my-curriculum' },

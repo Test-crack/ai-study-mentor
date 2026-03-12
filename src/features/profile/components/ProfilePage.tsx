@@ -284,9 +284,9 @@ export default function ProfilePage() {
                       {[
                         { id: 'profile', label: 'General', icon: User },
                         ...(profile?.role === 'INSTRUCTOR' ? [{ id: 'instructor', label: 'Instructor Profile', icon: BookOpen }] : []),
-                        { id: 'security', label: 'Security', icon: Shield },
-                        { id: 'notifications', label: 'Alerts', icon: Bell },
-                        { id: 'preferences', label: 'Settings', icon: Settings },
+                        // { id: 'security', label: 'Security', icon: Shield },
+                        // { id: 'notifications', label: 'Alerts', icon: Bell },
+                        // { id: 'preferences', label: 'Settings', icon: Settings },
                       ].map((tab) => (
                         <button
                           key={tab.id}
@@ -397,13 +397,13 @@ export default function ProfilePage() {
                 )}
 
                 {/* Placeholder for future sections */}
-                {(activeTab === 'security' || activeTab === 'notifications' || activeTab === 'preferences') && (
+                {/* {(activeTab === 'security' || activeTab === 'notifications' || activeTab === 'preferences') && (
                   <div className="flex flex-col items-center justify-center py-24 bg-white dark:bg-[#12121A] rounded-xl shadow-sm dark:shadow-none border border-slate-200 dark:border-[#1E1E2A]">
                     <Settings className="h-12 w-12 text-slate-300 dark:text-slate-700 mb-4 animate-spin-slow" />
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Feature Coming Soon</h3>
                     <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs text-center font-medium">We're working hard to bring you more control over your experience.</p>
                   </div>
-                )}
+                )} */}
               </div>
 
               {/* Bottom Floating Save Action */}
