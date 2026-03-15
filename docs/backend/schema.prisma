@@ -205,6 +205,109 @@ model ReadingAssessmentHistory {
   @@index([userId, difficulty])
 }
 
+// ============================================================
+// IELTS SPEAKING PRACTICE (renamed from IeltsReadingPractice)
+// Stores speaking topics / model answers used by the Speaking
+// Practice feature (StudentReadingAssessmentPage.tsx).
+// ============================================================
+
+/// Renamed from IeltsReadingPractice → IeltsSpeakingPractice.
+/// Actual DB table: "IeltsSpeakingPractice" (PascalCase, Postgres quoted)
+/// @migration: ALTER TABLE "IeltsReadingPractice" RENAME TO "IeltsSpeakingPractice";
+model IeltsSpeakingPractice {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  title       String   @db.VarChar(500)
+  modelAnswer String
+  keywords    String[]
+  tips        String[]
+  band        String   @db.VarChar(10)
+  type        String   @default("Essay") @db.VarChar(50)
+  words       Int?
+  phrases     Int?
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @db.Timestamptz(6)
+
+  IeltsSpeakingAssessment IeltsSpeakingAssessment[]
+
+  @@index([band])
+  @@map("IeltsSpeakingPractice")
+}
+
+/// Renamed from IeltsReadingAssessment → IeltsSpeakingAssessment.
+/// Stores per-session outcomes for the Speaking Practice feature.
+/// Actual DB table: "IeltsSpeakingAssessment" (PascalCase, Postgres quoted)
+/// @migration: ALTER TABLE "IeltsReadingAssessment" RENAME TO "IeltsSpeakingAssessment";
+model IeltsSpeakingAssessment {
+  id             String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId         String               @db.Uuid
+  topicId        String               @db.Uuid
+  band           String               @db.VarChar(10)
+  fluencyScore   Float
+  weightedWpm    Float
+  keywordsHit    Int
+  totalKeywords  Int
+  bandLevel      String?              @db.VarChar(10)
+  topicTitle     String?              @db.VarChar(500)
+  pass1          Json?
+  pass2          Json?
+  frequentFillers Json?
+  createdAt      DateTime             @default(now()) @db.Timestamptz(6)
+
+  User                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  IeltsSpeakingPractice IeltsSpeakingPractice @relation(fields: [topicId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId, createdAt])
+  @@map("IeltsSpeakingAssessment")
+}
+
+// ============================================================
+// IELTS READING ASSESSMENT (NEW)
+// Stores per-session results from the Reading Practice feature
+// (ReadingPractice.tsx). Each row represents one completed
+// reading session (passage + MCQ answers + performance metrics).
+// ============================================================
+
+/// NEW TABLE for Reading Practice sessions.
+/// Source: ReadingPractice.tsx → POST /api/reading-practice/submit
+/// Actual DB table: "IeltsReadingAssessment" (PascalCase - freed up after rename above)
+model IeltsReadingAssessment {
+  id                 String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId             String   @db.Uuid
+
+  // Passage identity (links to IeltsSpeedReadingReport.id)
+  reportId           String   @db.VarChar(100)
+  passageTitle       String   @db.VarChar(500)
+  category           String   @db.VarChar(100)
+  wordCount          Int
+
+  // Performance metrics
+  readingTimeSeconds Int
+  wpm                Float                      // words / readingTimeSeconds * 60
+  accuracy           Float                      // % correct answers
+  retentionScore     Float
+  efficiencyScore    Float
+  speedLearningScore Float
+  grade              String   @db.VarChar(5)    // A+, A, B, C, D, F
+  speedCategory      String?  @db.VarChar(50)
+
+  // Q&A summary
+  totalQuestions     Int
+  correctAnswers     Int
+
+  // Raw data blobs
+  scoredAnswers      Json?                      // Array<ScoredAnswer>
+  feedbackTips       String[]  @default([])
+
+  createdAt          DateTime @default(now()) @db.Timestamptz(6)
+
+  User               User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId, createdAt])
+  @@index([userId, category])
+  @@index([userId, grade])
+  @@map("IeltsReadingAssessment")
+}
+
 model User {
   id                       String                     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   supabaseuserid           String                     @unique @db.VarChar(255)
@@ -218,7 +321,9 @@ model User {
   profileImage             String?
   // Legacy course-level instructor relation (kept for course relations)
   Instructor               Instructor?
-  ReadingAssessmentHistory ReadingAssessmentHistory[]
+  ReadingAssessmentHistory ReadingAssessmentHistory[]   // Speed Reading history (legacy)
+  IeltsReadingAssessment   IeltsReadingAssessment[]     // NEW: Reading Practice sessions
+  IeltsSpeakingAssessment  IeltsSpeakingAssessment[]    // Speaking Practice sessions
   UserConcept              UserConcept[]
   UserContentProgress      UserContentProgress[]
   UserCourseEnrollment     UserCourseEnrollment[]

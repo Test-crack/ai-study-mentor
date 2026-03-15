@@ -340,7 +340,10 @@ export default function InstructorBatchView() {
               </div>
             ) : (
               <div className="space-y-4">
-                {batches.map(batch => <BatchCard key={batch.id} batch={batch} onAnalyzeStudent={(s) => navigate(`/instructor/student/${s.userId}/progress`, { state: { student: s }})} navigate={navigate} />)}
+                {batches.map(batch => <BatchCard key={batch.id} batch={batch} onAnalyzeStudent={(s) => {
+                  const slug = (s.name || 'student').toLowerCase().replace(/\s+/g, '-');
+                  navigate(`/instructor/student/${slug}/progress`, { state: { studentId: s.userId, student: s }})
+                }} navigate={navigate} />)}
               </div>
             )}
           </div>
