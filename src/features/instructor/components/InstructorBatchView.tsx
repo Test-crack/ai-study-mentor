@@ -55,8 +55,8 @@ const formatDate = (iso: string) => {
 
 const STATUS_CONFIG = {
   ACTIVE:    { label: 'Active',    dot: 'bg-emerald-500', cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400', Icon: CheckCircle2 },
-  INACTIVE:  { label: 'Inactive',  dot: 'bg-amber-500',   cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',         Icon: Clock       },
-  COMPLETED: { label: 'Completed', dot: 'bg-slate-400',   cls: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',            Icon: XCircle     },
+  INACTIVE:  { label: 'Inactive',  dot: 'bg-amber-500',   cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',         Icon: Clock      },
+  COMPLETED: { label: 'Completed', dot: 'bg-slate-400',   cls: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',            Icon: XCircle    },
 };
 
 // ─── Skeletons ────────────────────────────────────────────────────────────────
@@ -379,7 +379,10 @@ export default function InstructorBatchView() {
                     <BatchCard 
                       key={batch.id} 
                       batch={batch} 
-                      onAnalyzeStudent={(s) => navigate(`/instructor/student/${s.userId}/progress`, { state: { student: s }})} 
+                      onAnalyzeStudent={(s) => {
+                        const slug = (s.name || 'student').toLowerCase().replace(/\s+/g, '-');
+                        navigate(`/instructor/student/${slug}/progress`, { state: { studentId: s.userId, student: s }})
+                      }} 
                       navigate={navigate} 
                     />
                   ))}

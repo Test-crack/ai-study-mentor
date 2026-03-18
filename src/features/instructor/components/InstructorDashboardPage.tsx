@@ -368,7 +368,10 @@ export default function InstructorDashboardPage() {
                           variant="ghost" 
                           size="sm" 
                           className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 h-8 text-xs"
-                          onClick={() => navigate(`/instructor/student/${student.id}/progress`)}
+                          onClick={() => {
+                            const slug = (student.name || 'student').toLowerCase().replace(/\s+/g, '-');
+                            navigate(`/instructor/student/${slug}/progress`, { state: { studentId: student.id, student } });
+                          }}
                         >
                           View Full Report <ArrowRight className="w-3 h-3 ml-1.5" />
                         </Button>

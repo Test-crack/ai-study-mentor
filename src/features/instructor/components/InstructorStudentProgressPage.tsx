@@ -3,9 +3,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { 
   ChevronLeft, Activity, Target, Clock, Zap, 
   TrendingUp, Award, AlertTriangle, Loader2, Mic, Eye, Zap as SpeedIcon, 
-  PenTool,
-  Headphones,
-  BookOpen
+  PenTool, Headphones, BookOpen, BarChart2, CheckCircle, FileText
 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { InstructorSidebar } from '../components/dashboard/InstructorSidebar';
@@ -13,12 +11,12 @@ import { cn } from "@/shared/utils";
 import { callBackend } from '@/features/auth/services/authClient';
 import { getBackendUrl } from '@/shared/utils';
 import { toast } from 'sonner';
-import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area
 } from 'recharts';
 
-type TabType = 'speaking' | 'listening' | 'speed' | 'reading' | 'writing';
+type TabType = 'speaking' | 'voice' | 'listening' | 'reading' | 'speed' | 'writing';
 
 // ─── Skeletons ────────────────────────────────────────────────────────────────
 function HistorySkeleton() {
@@ -93,83 +91,164 @@ function HistorySkeleton() {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
+// ─── Reading session shape (from ReadingAssessmentHistory) ────────────────────
+interface ReadingSession {
+  id: string;
+  passageId: string;
+  passageTitle?: string;
+  difficulty: string;
+  category: string;
+  wordCount: number;
+  actualWPM: number;
+  weightedWPM: number;
+  wpm?: number;
+  accuracy: number;
+  retention: number;
+  speedLearningScore: number;
+  integrityScore?: number;
+  focusRatio: number;
+  readingTimeSeconds: number;
+  createdAt: string;
+}
+
+function getDifficultyColor(d: string) {
+  if (d === 'hard') return 'bg-rose-100 text-rose-600 dark:bg-rose-900/20 dark:text-rose-400';
+  if (d === 'medium') return 'bg-amber-100 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400';
+  return 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400';
+}
+
+function getScoreColor(score: number) {
+  if (score >= 80) return 'text-emerald-500';
+  if (score >= 60) return 'text-amber-500';
+  return 'text-rose-500';
+}
+
 export default function InstructorStudentProgressPage() {
   const navigate = useNavigate();
-  const { studentId } = useParams();
+  const { studentSlug } = useParams();
   const location = useLocation();
-  const student = location.state?.student; // from the navigate state
+  const student = location.state?.student;
+  const studentId = location.state?.studentId || student?.userId || student?.id;
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('speaking');
-  
-  const [history, setHistory] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (activeTab === 'speaking' && studentId) {
-      loadSpeakingHistory();
+    if (!studentId) {
+       toast.error("Student session lost. Navigating back.");
+       navigate('/instructor');
     }
-  }, [activeTab, studentId]);
+  }, [studentId, navigate]);
+
+  // Speaking tab
+  const [speakingHistory, setSpeakingHistory] = useState<any[]>([]);
+  const [speakingLoading, setSpeakingLoading] = useState(false);
+
+  // Speed reading tab
+  const [readingHistory, setReadingHistory] = useState<ReadingSession[]>([]);
+  const [readingLoading, setReadingLoading] = useState(false);
+
+  // ─── Loaders ─────────────────────────────────────────────────────────────────
 
   const loadSpeakingHistory = async () => {
-    setIsLoading(true);
+    if (!studentId) return;
+    setSpeakingLoading(true);
     try {
-      const res = await callBackend(`${getBackendUrl()}/api/instructor/students/${studentId}/reading-history`);
+      const res = await callBackend(`${getBackendUrl()}/api/instructor/students/${studentId}/speaking-history`);
       if (res.success) {
-        setHistory(res.data);
+        // Backend returns the array under either res.data directly (legacy) or res.data.sessions
+        setSpeakingHistory(Array.isArray(res.data?.sessions) ? res.data.sessions : (Array.isArray(res.data) ? res.data : []));
       } else {
-        toast.error("Failed to load history data.");
+        toast.error('Failed to load speaking history.');
       }
     } catch (err: any) {
-      toast.error(err.message || "Could not fetch analytics.");
+      toast.error(err.message || 'Could not fetch speaking analytics.');
     } finally {
-      setIsLoading(false);
+      setSpeakingLoading(false);
     }
   };
 
-  const stats = useMemo(() => {
-    if (!history.length) return { avgScore: 0, peakWpm: 0, totalAssessments: 0, avgKeywords: 0 };
-    const avgScore = history.reduce((acc, curr) => acc + curr.fluencyScore, 0) / history.length;
-    const peakWpm = Math.max(...history.map(h => h.weightedWpm));
-    
-    let totalKeywordsHit = 0;
-    let totalKeywordsPossible = 0;
-    history.forEach(h => {
-        totalKeywordsHit += h.keywordsHit;
-        totalKeywordsPossible += h.totalKeywords;
-    });
+  const loadReadingHistory = async () => {
+    if (!studentId) return;
+    setReadingLoading(true);
+    try {
+      const res = await callBackend(`${getBackendUrl()}/api/instructor/students/${studentId}/reading-history`);
+      if (res.success) {
+        setReadingHistory(Array.isArray(res.data?.sessions) ? res.data.sessions : (Array.isArray(res.data) ? res.data : []));
+      } else {
+        toast.error('Failed to load reading history.');
+      }
+    } catch (err: any) {
+      // Graceful fallback — don't crash the page if this endpoint isn't live yet
+      console.warn('Speed reading history endpoint not available:', err.message);
+      setReadingHistory([]);
+    } finally {
+      setReadingLoading(false);
+    }
+  };
 
-    const avgKeywords = totalKeywordsPossible > 0 ? (totalKeywordsHit / totalKeywordsPossible) * 100 : 0;
+  useEffect(() => {
+    if (activeTab === 'speaking') loadSpeakingHistory();
+    if (activeTab === 'speed') loadReadingHistory();
+  }, [activeTab, studentId]);
 
+  // ─── Speaking stats & chart ───────────────────────────────────────────────────
+  const speakingStats = useMemo(() => {
+    if (!speakingHistory.length) return { avgScore: 0, peakWpm: 0, totalAssessments: 0, avgKeywords: 0 };
+    const avgScore = speakingHistory.reduce((acc, curr) => acc + curr.fluencyScore, 0) / speakingHistory.length;
+    const peakWpm = Math.max(...speakingHistory.map(h => h.weightedWpm));
+    let totalKH = 0, totalKTotal = 0;
+    speakingHistory.forEach(h => { totalKH += h.keywordsHit; totalKTotal += h.totalKeywords; });
     return {
       avgScore: Math.round(avgScore),
       peakWpm: Math.round(peakWpm),
-      totalAssessments: history.length,
-      avgKeywords: Math.round(avgKeywords)
+      totalAssessments: speakingHistory.length,
+      avgKeywords: totalKTotal > 0 ? Math.round((totalKH / totalKTotal) * 100) : 0,
     };
-  }, [history]);
+  }, [speakingHistory]);
 
-  const chartData = useMemo(() => {
-    return [...history].reverse().map((h, i) => ({
+  const speakingChartData = useMemo(() =>
+    [...speakingHistory].reverse().map((h, i) => ({
       name: `S ${i + 1}`,
       fluency: h.fluencyScore,
       wpm: h.weightedWpm,
-      date: new Date(h.createdAt).toLocaleDateString()
-    }));
-  }, [history]);
+      date: new Date(h.createdAt).toLocaleDateString(),
+    })),
+    [speakingHistory]
+  );
 
   const overallFillers = useMemo(() => {
     const fillerMap: Record<string, number> = {};
-    history.forEach(h => {
-        h.frequentFillers?.forEach((f: any) => {
-            fillerMap[f.word] = (fillerMap[f.word] || 0) + f.count;
-        });
+    speakingHistory.forEach(h => {
+      h.frequentFillers?.forEach((f: any) => { fillerMap[f.word] = (fillerMap[f.word] || 0) + f.count; });
     });
-    return Object.entries(fillerMap)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5)
-        .map(([word, count]) => ({ word, count }));
-  }, [history]);
+    return Object.entries(fillerMap).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([word, count]) => ({ word, count }));
+  }, [speakingHistory]);
+
+  // ─── Reading stats & chart ────────────────────────────────────────────────────
+  const readingStats = useMemo(() => {
+    if (!readingHistory.length) return { avgWPM: 0, bestScore: 0, totalSessions: 0, avgAccuracy: 0 };
+    const avgWPM = readingHistory.reduce((acc, r) => acc + (r.wpm || r.actualWPM || 0), 0) / readingHistory.length;
+    const bestScore = Math.max(...readingHistory.map(r => r.speedLearningScore || 0));
+    const avgAccuracy = readingHistory.reduce((acc, r) => acc + (r.accuracy || 0), 0) / readingHistory.length;
+    return {
+      avgWPM: Math.round(avgWPM),
+      bestScore: Math.round(bestScore),
+      totalSessions: readingHistory.length,
+      avgAccuracy: Math.round(avgAccuracy),
+    };
+  }, [readingHistory]);
+
+  const readingChartData = useMemo(() =>
+    [...readingHistory].reverse().map((r, i) => ({
+      name: `R${i + 1}`,
+      wpm: Math.round(r.wpm || r.actualWPM || 0),
+      accuracy: Math.round(r.accuracy || 0),
+      score: Math.round(r.speedLearningScore || 0),
+      date: new Date(r.createdAt).toLocaleDateString(),
+    })),
+    [readingHistory]
+  );
 
   return (
     <div className="min-h-screen bg-[#f1f3f9] dark:bg-[#09090E] transition-colors duration-300 font-sans text-slate-800 dark:text-slate-200 flex">
@@ -199,6 +278,7 @@ export default function InstructorStudentProgressPage() {
             <div className="w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
               <div className="bg-white dark:bg-slate-900 rounded-full p-1.5 flex shadow-sm border border-slate-200 dark:border-slate-800 w-max lg:w-auto">
                   <TabButton active={activeTab === 'speaking'} onClick={() => setActiveTab('speaking')} icon={<Mic className="w-4 h-4" />}>Speaking</TabButton>
+                  <TabButton active={activeTab === 'voice'} onClick={() => setActiveTab('voice')} icon={<Eye className="w-4 h-4" />}>Voice Lab</TabButton>
                   <TabButton active={activeTab === 'listening'} onClick={() => setActiveTab('listening')} icon={<Headphones className="w-4 h-4" />}>Listening</TabButton>
                   <TabButton active={activeTab === 'reading'} onClick={() => setActiveTab('reading')} icon={<BookOpen className="w-4 h-4" />}>Reading</TabButton>
                   <TabButton active={activeTab === 'speed'} onClick={() => setActiveTab('speed')} icon={<SpeedIcon className="w-4 h-4" />}>Speed Reading</TabButton>
@@ -207,25 +287,24 @@ export default function InstructorStudentProgressPage() {
             </div>
           </div>
 
+          {/* ──────────────────────────── SPEAKING TAB ──────────────────────────── */}
           {activeTab === 'speaking' && (
-              isLoading ? (
+              speakingLoading ? (
                 <HistorySkeleton />
-              ) : history.length === 0 ? (
-                <div className="bg-white dark:bg-[#15141B] rounded-3xl p-8 md:p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D]">
-                    <div className="w-16 h-16 md:w-20 md:h-20 bg-slate-100 dark:bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Target className="w-8 h-8 md:w-10 md:h-10 text-slate-400" />
-                    </div>
-                    <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2">No Practice History Yet</h2>
-                    <p className="text-sm md:text-base text-slate-500 mb-6">This student hasn't completed any Speaking Practice sessions yet.</p>
-                </div>
+              ) : speakingHistory.length === 0 ? (
+                <EmptyState 
+                  icon={<Target className="w-10 h-10 text-slate-400" />} 
+                  title="No Speaking History" 
+                  desc="This student hasn't completed any Speaking Practice sessions yet." 
+                />
               ) : (
                 <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
                   {/* Stat Cards */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <StatCard icon={<TrendingUp />} label="Avg Fluency Score" value={`${stats.avgScore}/100`} color="text-emerald-500" bg="bg-emerald-50 dark:bg-emerald-500/10" />
-                    <StatCard icon={<Zap />} label="Peak Speaking Speed" value={`${stats.peakWpm} WPM`} color="text-[#8a42f5]" bg="bg-[#8a42f5]/10" />
-                    <StatCard icon={<Award />} label="Practice Sessions" value={stats.totalAssessments} color="text-blue-500" bg="bg-blue-50 dark:bg-blue-500/10" />
-                    <StatCard icon={<Target />} label="Keyword Hit Rate" value={`${stats.avgKeywords}%`} color="text-amber-500" bg="bg-amber-50 dark:bg-amber-500/10" />
+                    <StatCard icon={<TrendingUp />} label="Avg Fluency Score" value={`${speakingStats.avgScore}/100`} color="text-emerald-500" bg="bg-emerald-50 dark:bg-emerald-500/10" />
+                    <StatCard icon={<Zap />} label="Peak Speaking Speed" value={`${speakingStats.peakWpm} WPM`} color="text-[#8a42f5]" bg="bg-[#8a42f5]/10" />
+                    <StatCard icon={<Award />} label="Practice Sessions" value={speakingStats.totalAssessments} color="text-blue-500" bg="bg-blue-50 dark:bg-blue-500/10" />
+                    <StatCard icon={<Target />} label="Keyword Hit Rate" value={`${speakingStats.avgKeywords}%`} color="text-amber-500" bg="bg-amber-50 dark:bg-amber-500/10" />
                   </div>
 
                   {/* Charts Section */}
@@ -234,7 +313,7 @@ export default function InstructorStudentProgressPage() {
                       <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Fluency Progression</h3>
                       <div className="h-[250px] md:h-[300px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                          <AreaChart data={speakingChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                             <defs>
                               <linearGradient id="colorFluency" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#8a42f5" stopOpacity={0.3}/>
@@ -256,11 +335,11 @@ export default function InstructorStudentProgressPage() {
                     </div>
 
                     <div className="bg-[#fffbf0] dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 p-4 md:p-6 rounded-3xl">
-                       <div className="flex items-center gap-2 mb-6">
+                       <div className="flex items-center gap-2 mb-4">
                           <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
                           <h3 className="font-bold text-[#8a6a24] dark:text-amber-500">Historical Fillers</h3>
                        </div>
-                       <p className="text-sm text-[#8a6a24]/80 dark:text-slate-400 mb-6">Words that most commonly disrupt this student's fluency across all sessions.</p>
+                       <p className="text-xs md:text-sm text-[#8a6a24]/80 dark:text-slate-400 mb-6">Words that most commonly disrupt this student's fluency across all sessions.</p>
                        
                        <div className="space-y-3">
                          {overallFillers.length > 0 ? overallFillers.map((f, i) => (
@@ -291,7 +370,7 @@ export default function InstructorStudentProgressPage() {
                            </tr>
                          </thead>
                          <tbody className="text-sm">
-                           {history.map((h, i) => (
+                           {speakingHistory.map((h, i) => (
                              <tr key={i} className="border-b border-slate-50 dark:border-[#26252D]/50 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
                                <td className="py-4 pl-4 text-slate-600 dark:text-slate-400 font-medium whitespace-nowrap">{new Date(h.createdAt).toLocaleDateString()}</td>
                                <td className="py-4 text-[#0b132b] dark:text-slate-200 font-bold max-w-[150px] md:max-w-[200px] truncate" title={h.topicTitle || h.topicId}>{h.topicTitle || h.topicId}</td>
@@ -313,34 +392,30 @@ export default function InstructorStudentProgressPage() {
                        </table>
                      </div>
                   </div>
-
                 </div>
               )
           )}
 
-          {/* Speed Reading Section */}
-          {activeTab === 'speed' && (
-              <div className="bg-white dark:bg-[#15141B] rounded-3xl p-6 md:p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D] mt-8 animate-in slide-in-from-bottom-4">
-                  <div className="w-16 h-16 md:w-20 md:h-20 bg-teal-50 dark:bg-teal-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <SpeedIcon className="w-8 h-8 md:w-10 md:h-10 text-teal-500" />
-                  </div>
-                  <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-3">Reading Comprehension & WPM</h2>
-                  <p className="text-sm md:text-base text-slate-500 max-w-md mx-auto mb-8">This module maps the student's structural comprehension and raw Words Per Minute across reading texts.</p>
-                  
-                  <div className="max-w-xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4 opacity-50">
-                     <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
-                         <div className="text-3xl md:text-4xl font-black text-teal-500 mb-2">320</div>
-                         <div className="text-xs font-bold text-slate-400 uppercase">Avg WPM Map</div>
-                     </div>
-                     <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
-                         <div className="text-3xl md:text-4xl font-black text-emerald-500 mb-2">85%</div>
-                         <div className="text-xs font-bold text-slate-400 uppercase">Retention Ratio</div>
-                     </div>
-                  </div>
+          {/* ──────────────────────────── VOICE LAB TAB ──────────────────────────── */}
+          {activeTab === 'voice' && (
+            <div className="bg-white dark:bg-[#15141B] rounded-3xl p-6 md:p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D] mt-8 animate-in slide-in-from-bottom-4">
+              <div className="w-16 h-16 md:w-20 md:h-20 bg-indigo-50 dark:bg-indigo-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Eye className="w-8 h-8 md:w-10 md:h-10 text-indigo-500" />
               </div>
+              <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-3">Vocal Pitch & Resonance (Voice Lab)</h2>
+              <p className="text-sm md:text-base text-slate-500 max-w-md mx-auto mb-8">This module tracks intonation, stress patterns, and pitch heatmaps across specialized vocal resonance tests.</p>
+              <div className="max-w-2xl mx-auto border border-dashed border-slate-200 dark:border-slate-800 rounded-xl p-8 bg-slate-50 dark:bg-[#0A0A0B]">
+                <div className="h-[150px] w-full flex items-end justify-between gap-1 mb-4 opacity-50">
+                  {Array.from({ length: 40 }).map((_, i) => (
+                    <div key={i} className="w-full bg-indigo-400 rounded-t-sm" style={{ height: `${Math.max(10, Math.sin(i * 0.2) * 100 + Math.random() * 50)}%` }} />
+                  ))}
+                </div>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Mock Spectrogram — Feature Coming Soon</p>
+              </div>
+            </div>
           )}
 
-          {/* Listening Section */}
+          {/* ──────────────────────────── LISTENING TAB ──────────────────────────── */}
           {activeTab === 'listening' && (
               <div className="bg-white dark:bg-[#15141B] rounded-3xl p-6 md:p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D] mt-8 animate-in slide-in-from-bottom-4">
                   <div className="w-16 h-16 md:w-20 md:h-20 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -362,7 +437,7 @@ export default function InstructorStudentProgressPage() {
               </div>
           )}
 
-          {/* Reading Section */}
+          {/* ──────────────────────────── READING TAB (Comprehension) ─────────────── */}
           {activeTab === 'reading' && (
               <div className="bg-white dark:bg-[#15141B] rounded-3xl p-6 md:p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D] mt-8 animate-in slide-in-from-bottom-4">
                   <div className="w-16 h-16 md:w-20 md:h-20 bg-purple-50 dark:bg-purple-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -384,7 +459,125 @@ export default function InstructorStudentProgressPage() {
               </div>
           )}
 
-          {/* Writing Section */}
+          {/* ──────────────────────────── SPEED READING TAB ──────────────────────── */}
+          {activeTab === 'speed' && (
+            readingLoading ? <HistorySkeleton /> :
+            readingHistory.length === 0 ? (
+              <EmptyState
+                icon={<SpeedIcon className="w-10 h-10 text-slate-400" />}
+                title="No Speed Reading History"
+                desc="This student hasn't completed any Speed Reading Practice sessions yet."
+              />
+            ) : (
+              <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+
+                {/* Stat Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <StatCard icon={<Zap />} label="Avg Reading Speed" value={`${readingStats.avgWPM} WPM`} color="text-[#8a42f5]" bg="bg-[#8a42f5]/10" />
+                  <StatCard icon={<CheckCircle />} label="Avg Accuracy" value={`${readingStats.avgAccuracy}%`} color="text-emerald-500" bg="bg-emerald-50 dark:bg-emerald-500/10" />
+                  <StatCard icon={<Award />} label="Best Score" value={`${readingStats.bestScore}/100`} color="text-amber-500" bg="bg-amber-50 dark:bg-amber-500/10" />
+                  <StatCard icon={<BarChart2 />} label="Total Sessions" value={readingStats.totalSessions} color="text-blue-500" bg="bg-blue-50 dark:bg-blue-500/10" />
+                </div>
+
+                {/* WPM Progression Chart */}
+                <div className="bg-white dark:bg-[#15141B] p-4 md:p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-[#26252D]">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Reading Performance Progression</h3>
+                  <div className="h-[250px] md:h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={readingChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="colorWpm" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#8a42f5" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="#8a42f5" stopOpacity={0} />
+                          </linearGradient>
+                          <linearGradient id="colorAcc" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" strokeOpacity={0.4} />
+                        <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                        <Tooltip
+                          contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: '#fff' }}
+                          labelStyle={{ color: '#0b132b', fontWeight: 'bold' }}
+                          formatter={(value: any, name: string) => [`${value}${name === 'accuracy' ? '%' : name === 'wpm' ? ' WPM' : ''}`, name === 'wpm' ? 'WPM' : name === 'accuracy' ? 'Accuracy' : 'Score']}
+                        />
+                        <Area type="monotone" dataKey="wpm" stroke="#8a42f5" strokeWidth={3} fillOpacity={1} fill="url(#colorWpm)" name="wpm" />
+                        <Line type="monotone" dataKey="accuracy" stroke="#10b981" strokeWidth={3} dot={false} name="accuracy" />
+                        <Line type="monotone" dataKey="score" stroke="#f59e0b" strokeWidth={2} dot={false} strokeDasharray="5 3" name="score" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                  {/* Legend */}
+                  <div className="flex flex-wrap items-center gap-5 mt-6 justify-center text-xs font-semibold text-slate-500">
+                    <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-[#8a42f5]" />WPM</span>
+                    <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-emerald-500" />Accuracy</span>
+                    <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-amber-500" />Speed Score</span>
+                  </div>
+                </div>
+
+                {/* Session History Table */}
+                <div className="bg-white dark:bg-[#15141B] rounded-3xl p-4 md:p-6 shadow-sm border border-slate-200 dark:border-[#26252D] overflow-hidden">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-5">Reading Sessions</h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse min-w-[700px]">
+                      <thead>
+                        <tr className="border-b border-slate-100 dark:border-[#26252D] text-slate-500 text-xs font-bold uppercase tracking-wider">
+                          <th className="pb-3 pl-4">Date</th>
+                          <th className="pb-3">Category</th>
+                          <th className="pb-3">Difficulty</th>
+                          <th className="pb-3 text-center">WPM</th>
+                          <th className="pb-3 text-center">Accuracy</th>
+                          <th className="pb-3 text-center">Score</th>
+                          <th className="pb-3 text-right pr-4">Integrity</th>
+                        </tr>
+                      </thead>
+                      <tbody className="text-sm">
+                        {readingHistory.map((r, i) => (
+                          <tr key={i} className="border-b border-slate-50 dark:border-[#26252D]/50 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
+                            <td className="py-4 pl-4 text-slate-600 dark:text-slate-400 font-medium">
+                              {new Date(r.createdAt).toLocaleDateString()}
+                            </td>
+                            <td className="py-4 text-slate-700 dark:text-slate-200 font-medium capitalize max-w-[150px] truncate">
+                              {r.category || r.passageTitle || 'Reading Practice'}
+                            </td>
+                            <td className="py-4">
+                              <span className={cn("px-2 py-0.5 rounded-full text-xs font-bold capitalize", getDifficultyColor(r.difficulty || 'medium'))}>
+                                {r.difficulty || 'Medium'}
+                              </span>
+                            </td>
+                            <td className="py-4 text-center font-mono font-bold text-[#8a42f5]">
+                              {Math.round(r.wpm || r.actualWPM || 0)}
+                            </td>
+                            <td className="py-4 text-center">
+                              <span className={cn("font-bold", getScoreColor(r.accuracy || 0))}>{Math.round(r.accuracy || 0)}%</span>
+                            </td>
+                            <td className="py-4 text-center">
+                              <span className={cn("font-bold", getScoreColor(r.speedLearningScore || 0))}>{Math.round(r.speedLearningScore || 0)}</span>
+                            </td>
+                            <td className="py-4 text-right pr-4">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <div className="w-16 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                  <div
+                                    className={cn("h-full rounded-full", (r.integrityScore ?? 100) >= 80 ? 'bg-emerald-500' : (r.integrityScore ?? 100) >= 60 ? 'bg-amber-500' : 'bg-rose-500')}
+                                    style={{ width: `${r.integrityScore ?? 100}%` }}
+                                  />
+                                </div>
+                                <span className={cn("text-xs font-bold", getScoreColor(r.integrityScore ?? 100))}>{Math.round(r.integrityScore ?? 100)}%</span>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )
+          )}
+
+          {/* ──────────────────────────── WRITING TAB ──────────────────────────── */}
           {activeTab === 'writing' && (
               <div className="bg-white dark:bg-[#15141B] rounded-3xl p-6 md:p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D] mt-8 animate-in slide-in-from-bottom-4">
                   <div className="w-16 h-16 md:w-20 md:h-20 bg-amber-50 dark:bg-amber-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -412,6 +605,8 @@ export default function InstructorStudentProgressPage() {
   );
 }
 
+// ─── Shared sub-components ────────────────────────────────────────────────────
+
 const TabButton = ({ children, active, onClick, icon }: any) => (
     <button 
         onClick={onClick}
@@ -437,4 +632,19 @@ const StatCard = ({ icon, label, value, color, bg }: any) => (
       </div>
       <div className={cn("text-2xl md:text-3xl font-black", color)}>{value}</div>
     </div>
+);
+
+const EmptyState = ({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) => (
+  <div className="bg-white dark:bg-[#15141B] rounded-3xl p-8 md:p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D]">
+    <div className="w-16 h-16 md:w-20 md:h-20 bg-slate-100 dark:bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4">{icon}</div>
+    <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2">{title}</h2>
+    <p className="text-sm md:text-base text-slate-500 mb-6">{desc}</p>
+  </div>
+);
+
+const LoadingSpinner = () => (
+  <div className="flex flex-col items-center justify-center h-64 text-slate-400">
+    <Loader2 className="w-8 h-8 animate-spin text-[#8a42f5] mb-4" />
+    <p>Loading analytics...</p>
+  </div>
 );

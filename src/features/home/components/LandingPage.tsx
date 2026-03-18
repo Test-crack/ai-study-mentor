@@ -7,26 +7,27 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
-// PERFORMANCE FIX: Individual imports prevent loading the entire 1000+ icon library
-import GraduationCap from 'lucide-react/dist/esm/icons/graduation-cap';
-import BookOpen from 'lucide-react/dist/esm/icons/book-open';
-import Zap from 'lucide-react/dist/esm/icons/zap';
-import User from 'lucide-react/dist/esm/icons/User';
-import Target from 'lucide-react/dist/esm/icons/target';
-import Cpu from 'lucide-react/dist/esm/icons/cpu';
-import Briefcase from 'lucide-react/dist/esm/icons/briefcase';
-import FileBarChart from 'lucide-react/dist/esm/icons/file-bar-chart';
-import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard';
-import Bot from 'lucide-react/dist/esm/icons/bot';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
-import Users from 'lucide-react/dist/esm/icons/users';
-import Building2 from 'lucide-react/dist/esm/icons/building-2';
-import MonitorPlay from 'lucide-react/dist/esm/icons/monitor-play';
-import LineChart from 'lucide-react/dist/esm/icons/line-chart';
-import MessageSquareText from 'lucide-react/dist/esm/icons/message-square-text';
-import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
-import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
-import { UserRound } from 'lucide-react';
+import {
+  GraduationCap,
+  BookOpen,
+  Zap,
+  User,
+  Target,
+  Cpu,
+  Briefcase,
+  FileBarChart,
+  LayoutDashboard,
+  Bot,
+  Sparkles,
+  Users,
+  Building2,
+  MonitorPlay,
+  LineChart,
+  MessageSquareText,
+  AlertTriangle,
+  ShieldCheck,
+  UserRound,
+} from 'lucide-react';
 
 // Icons for the "Pain Points" Section
 import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
