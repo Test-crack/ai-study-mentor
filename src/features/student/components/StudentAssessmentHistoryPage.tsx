@@ -97,7 +97,7 @@ export default function StudentAssessmentHistoryPage() {
               <Button 
                 variant="ghost" 
                 className="pl-0 hover:pl-2 transition-all text-slate-500 mb-2"
-                onClick={() => navigate('/student/reading-assessment')}
+                onClick={() => navigate('/student/reading')}
               >
                 <ArrowLeft className="w-4 h-4 mr-2" /> Back to Assessment
               </Button>
