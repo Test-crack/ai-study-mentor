@@ -28,6 +28,18 @@ import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
 import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
 import { UserRound } from 'lucide-react';
 
+// Icons for the "Pain Points" Section
+import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
+import Hourglass from 'lucide-react/dist/esm/icons/hourglass';
+import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
+import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
+
+// Icons for the "Tools" Section
+import Mic from 'lucide-react/dist/esm/icons/mic';
+import FileEdit from 'lucide-react/dist/esm/icons/file-edit';
+import Shield from 'lucide-react/dist/esm/icons/shield';
+import Laptop from 'lucide-react/dist/esm/icons/laptop';
+
 const LandingPage = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
@@ -118,18 +130,56 @@ const LandingPage = () => {
     ],
   };
 
+  // Data for the new Tools Section
+  const toolsData = [
+    {
+      icon: Mic,
+      title: "AI Speaking Assessor",
+      description: "Students record responses; our AI scores fluency, pronunciation, coherence, and vocabulary against IELTS band descriptors. Tutors get a full breakdown — no more guesswork.",
+      status: "LIVE"
+    },
+    {
+      icon: LayoutDashboard,
+      title: "Institute Performance Dashboard",
+      description: "One view for your institute head: cohort-level band averages, tutor effectiveness metrics, at-risk students, and predicted exam outcomes — updated daily.",
+      status: "LIVE"
+    },
+    {
+      icon: FileEdit,
+      title: "Writing Task Feedback Engine",
+      description: "Automated first-pass scoring on Task 1 & 2 essays — aligned with IELTS criteria. Tutors review, adjust, and save 60% of marking time per student.",
+      status: "BETA"
+    },
+    {
+      icon: Target,
+      title: "Weak-Point Drill Generator",
+      description: "When the AI spots a recurring gap — say, conditional structures or academic vocabulary — it auto-generates targeted micro-drills for that student to practice between sessions.",
+      status: "BETA"
+    },
+    {
+      icon: Shield,
+      title: "Role-Based Access Control",
+      description: "Institute Owner → Admin → Tutor → Student. Your team sees exactly what they need. Students only access their own content. You stay in control.",
+      status: "LIVE"
+    },
+    {
+      icon: Laptop,
+      title: "Adaptive Mock Tests",
+      description: "Full-length simulations that adapt difficulty based on a student's performance profile. Coming with per-section time analytics and a printable score report for the student's file.",
+      status: "COMING SOON"
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-white">
   {/* Navigation */}
 <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 transform-gpu">
-  {/* Changed max-w-7xl mx-auto to w-full */}
   <div className="w-full px-4 sm:px-6 lg:px-8">
     <div className="flex items-center justify-between h-16">
       
-      {/* Logo Section - Now stays at the far left */}
+      {/* Logo Section */}
       <div className="flex items-center space-x-2">
         <div className="p-2 bg-indigo-700 rounded-xl">
-          {/* Replaced GraduationCap with UserRound */}
           <UserRound className="h-6 w-6 text-white" />
         </div>
         <span className="text-xl font-bold text-indigo-700">
@@ -137,8 +187,6 @@ const LandingPage = () => {
         </span>
       </div>
 
-  
-      
     </div>
   </div>
 </nav>
@@ -146,7 +194,6 @@ const LandingPage = () => {
       {/* Hero Section */}
 <section className="relative min-h-[80vh] flex items-center pt-24 pb-10 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-50 via-white to-indigo-100 overflow-hidden ">
   <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
-    {/* PERFORMANCE FIX: Added transform-gpu and will-change to background animations */}
     <div className="absolute top-[10%] left-[10%] w-64 h-64 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 transform-gpu will-change-transform"></div>
     <div className="absolute bottom-[10%] right-[10%] w-64 h-64 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 transform-gpu will-change-transform"></div>
   </div>
@@ -158,79 +205,130 @@ const LandingPage = () => {
         AI-Powered Education Platform
       </Badge>
       
-    {/* PERFORMANCE FIX: Lighthouse hates "empty" H1s. This span makes it instantly visible to the bot */}
-    <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight tracking-tight mt-5 relative min-h-[1.2em]">
-      <span className="sr-only">Stop Guessing Start Cracking</span>
-      <Typewriter
-        options={{
-          autoStart: true,
-          loop: true,
-          delay: 75,
-          cursor: '|',
-        }}
-        onInit={(typewriter) => {
-          typewriter
-            .typeString('Stop Guessing Start ')
-            .typeString('<span class="bg-indigo-700  bg-clip-text text-transparent">Cracking</span>')
-            .pauseFor(3000)
-            .deleteAll()
-            .start();
-        }}
-      />
-    </h1>
+      <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-900 mb-4 leading-tight tracking-tight mt-5 relative min-h-[1.2em]">
+        <span className="sr-only">Lift Your Institute's Band Score Average Measurably.</span>
+        
+        <Typewriter
+          options={{
+            autoStart: true,
+            loop: true,
+            delay: 75,
+            cursor: '|',
+          }}
+          onInit={(typewriter) => {
+            typewriter
+              .typeString("Lift Your Institute's Band Score Average ")
+              .typeString('<span class="text-indigo-700">Measurably.</span>')
+              .pauseFor(3000)
+              .deleteAll()
+              .start();
+          }}
+        />
+      </h1>
       
-      <p className="text-lg sm:text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-        Transform your learning experience with personalized AI.
+      <p className="text-lg sm:text-xl text-slate-600 mb-10 max-w-3xl mx-auto leading-relaxed text-balance">
+        <span className="block mt-2">   Transform your coaching institute with TestCrack’s AI co-pilot the ultimate tool for automated student performance tracking. </span>
       </p>
 
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-
-        {/* <Button
-          size="lg"
-          onClick={() => {
-            if (!user) {
-              navigate('/login');
-              return;
-            }
-            if (user) {
-               if (profile?.role === 'SUPERADMIN') {
-                 navigate('/superadmin/dashboard');
-               } else if (profile?.role === 'INSTITUTE_OWNER') {
-                 navigate('/institute-owner/dashboard');
-               } else if (profile?.role === 'INSTITUTE_ADMIN') {
-                 navigate('/institute-admin/dashboard');
-               } else if (profile?.role === 'INSTRUCTOR') {
-                 navigate('/instructor/dashboard');
-               } else {
-                 navigate('/student/dashboard');
-               }
-            }
-          }}
-          className="bg-indigo-700 hover:bg-indigo-800 text-white px-8 py-6 h-auto transition-all shadow-md active:scale-95"
-        >
-          {user ? 'Go to Dashboard' : 'Start Learning Free'}
-          <ArrowRight className="ml-2 h-5 w-5" />
-        </Button> */}
-        
         <Button
           size="lg"
           variant="outline"
           onClick={() => navigate('/dashdemo')}
-          className="px-8 py-6 h-auto bg-indigo-700 hover:bg-indigo-800 text-white px-8 py-6 h-auto transition-all shadow-md active:scale-95"
+          className="px-8 py-6 h-auto bg-indigo-700 hover:bg-indigo-800 text-white transition-all shadow-md active:scale-95 border-none"
         >
-          <BookOpen className="mr-2 h-5 w-5 text-white" />
-         <span className='text-white'> View Demo</span>
+          <MonitorPlay className="mr-2 h-5 w-5 text-white" />
+          <span className='text-white font-bold'>View Demo</span>
         </Button>
         <Button
           size="lg"
           variant="outline"
           onClick={() => navigate('/Contact')}
-          className="px-8 py-6 h-auto bg-indigo-700 hover:bg-indigo-800 text-white px-8 py-6 h-auto transition-all shadow-md active:scale-95"
+          className="px-8 py-6 h-auto bg-white hover:bg-gray-50 text-indigo-700 border-indigo-100 transition-all shadow-sm active:scale-95"
         >
-          <BookOpen className="mr-2 h-5 w-5 text-white" />
-         <span className='text-white'>Contact us</span>
+          <MessageSquareText className="mr-2 h-5 w-5 text-indigo-700" />
+          <span className='font-bold'>Contact Us</span>
         </Button>
       </div>
+    </div>
+  </div>
+</section>
+
+{/* Pain Points / Problem Statement Section */}
+<section className="py-20 px-4 sm:px-6 lg:px-8 bg-white relative z-10">
+  <div className="max-w-7xl mx-auto">
+    
+    {/* --- NEW HEADING --- */}
+    <div className="text-center mb-16">
+      <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest">
+        The Industry Challenge
+      </span>
+      <h2 className="text-4xl sm:text-5xl font-black text-slate-900 mt-4 mb-6">
+        Hidden roadblocks limiting your <span className="text-indigo-600">growth.</span>
+      </h2>
+      <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
+        Traditional teaching methods are burning out tutors and capping student success. Here is what is standing in the way of your institute's scale.
+      </p>
+    </div>
+    {/* ------------------- */}
+
+    <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-0">
+      
+      {/* Card 1 */}
+      <Card className="flex-1 w-full bg-white/50 backdrop-blur-sm border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 transform-gpu z-10 group">
+        <CardContent className="p-8">
+          <div className="p-3 bg-red-50 rounded-xl w-fit mb-6 group-hover:bg-red-100 transition-colors">
+            <TrendingDown className="h-6 w-6 text-red-500" />
+          </div>
+          <h3 className="text-xl font-bold text-slate-900 mb-3 leading-tight group-hover:text-indigo-700 transition-colors">
+            Pass rates stagnate after a plateau
+          </h3>
+          <p className="text-slate-600 text-sm leading-relaxed">
+            Most institutes hit a ceiling at 70–75% pass rate because tutors lack real-time data on where students are slipping.
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Connecting Arrow 1 */}
+      <div className="hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white shrink-0 z-20 -mx-4 shadow-md">
+        <ArrowRight className="h-4 w-4" />
+      </div>
+
+      {/* Card 2 */}
+      <Card className="flex-1 w-full bg-white/50 backdrop-blur-sm border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 transform-gpu z-10 group">
+        <CardContent className="p-8">
+          <div className="p-3 bg-amber-50 rounded-xl w-fit mb-6 group-hover:bg-amber-100 transition-colors">
+            <Hourglass className="h-6 w-6 text-amber-500" />
+          </div>
+          <h3 className="text-xl font-bold text-slate-900 mb-3 leading-tight group-hover:text-indigo-700 transition-colors">
+            Tutors spend hours marking, not teaching
+          </h3>
+          <p className="text-slate-600 text-sm leading-relaxed">
+            Manual essay and speaking corrections eat 40–60% of tutor time — time that could be spent on high-value coaching.
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Connecting Arrow 2 */}
+      <div className="hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white shrink-0 z-20 -mx-4 shadow-md">
+        <ArrowRight className="h-4 w-4" />
+      </div>
+
+      {/* Card 3 */}
+      <Card className="flex-1 w-full bg-white/50 backdrop-blur-sm border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 transform-gpu z-10 group">
+        <CardContent className="p-8">
+          <div className="p-3 bg-blue-50 rounded-xl w-fit mb-6 group-hover:bg-blue-100 transition-colors">
+            <RefreshCw className="h-6 w-6 text-blue-500" />
+          </div>
+          <h3 className="text-xl font-bold text-slate-900 mb-3 leading-tight group-hover:text-indigo-700 transition-colors">
+            Students drop out before exam day
+          </h3>
+          <p className="text-slate-600 text-sm leading-relaxed">
+            Without visible progress, students lose motivation mid-course — and your institute loses revenue and referrals.
+          </p>
+        </CardContent>
+      </Card>
+
     </div>
   </div>
 </section>
@@ -238,7 +336,6 @@ const LandingPage = () => {
       {/* Features Section */}
    <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden bg-[#f8fafc]">
   <div className="absolute inset-0 -z-10 overflow-hidden">
-    {/* PERFORMANCE FIX: transform-gpu on large blur areas */}
     <div className="absolute -top-[10%] -right-[5%] w-[45%] h-[45%] rounded-full bg-indigo-200/40 blur-[120px] animate-pulse transform-gpu" />
     <div className="absolute top-[20%] -left-[10%] w-[40%] h-[40%] rounded-full bg-purple-200/30 blur-[120px] transform-gpu" />
     <div className="absolute -bottom-[10%] left-[30%] w-[50%] h-[50%] rounded-full bg-blue-100/50 blur-[120px] transform-gpu" />
@@ -300,6 +397,58 @@ const LandingPage = () => {
           </Card>
         ))}
       </div>
+    </div>
+  </div>
+</section>
+
+{/* NEW: Tools Section */}
+<section className="py-24 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden">
+  <div className="max-w-7xl mx-auto">
+    <div className="text-center mb-16">
+      <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest">
+        What TestCrack Delivers
+      </span>
+      <h2 className="text-4xl sm:text-5xl font-black text-slate-900 mt-4 mb-6">
+        Tools your institute can use <span className="text-indigo-600">today.</span>
+      </h2>
+      <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
+        Each feature is built around one goal: helping your tutors teach better and your students score higher — with clear, trackable proof.
+      </p>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {toolsData.map((tool, index) => (
+        <Card key={index} className="border border-slate-100 bg-white shadow-sm hover:shadow-xl hover:border-indigo-100 transition-all duration-300 transform-gpu flex flex-col h-full">
+          <CardContent className="p-8 flex flex-col h-full relative">
+            <div className="p-3 bg-indigo-50 rounded-xl w-fit mb-6">
+              <tool.icon className="h-6 w-6 text-indigo-600" />
+            </div>
+            
+            <h3 className="text-xl font-bold text-slate-900 mb-4">
+              {tool.title}
+            </h3>
+            
+            <p className="text-slate-600 text-sm leading-relaxed mb-8 flex-grow">
+              {tool.description}
+            </p>
+            
+            <div className="mt-auto">
+              <Badge 
+                variant="secondary" 
+                className={`px-3 py-1 text-[10px] font-bold tracking-wider uppercase rounded-md border ${
+                  tool.status === 'LIVE' 
+                    ? 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-50' 
+                    : tool.status === 'BETA' 
+                      ? 'bg-amber-50 text-amber-600 border-amber-100 hover:bg-amber-50'
+                      : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                {tool.status}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   </div>
 </section>
@@ -500,15 +649,6 @@ Our engine doesn't just track your mistakes; it benchmarks your performance agai
         </div>
 
         <div className="flex flex-col items-center gap-6">
-          {/* <Button
-            size="lg"
-            onClick={() => navigate(user ? '/dashboard' : '/login')}
-            className="bg-white text-indigo-700 hover:bg-indigo-50 px-12 py-8 h-auto transition-all duration-300 rounded-full shadow-[0_20px_40px_-10px_rgba(0,0,0,0.3)] hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] hover:-translate-y-1 active:scale-95 text-lg font-bold group"
-          >
-            {user ? 'Go to Dashboard' : 'Get Started for Free'}
-            <ArrowRight className="ml-2 h-6 w-6 transition-transform group-hover:translate-x-1" />
-          </Button> */}
-          
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-2">
             {[
               { icon: Zap, text: 'Instant Setup' }
@@ -536,7 +676,7 @@ Our engine doesn't just track your mistakes; it benchmarks your performance agai
               <span className="text-lg font-bold text-white">TestCrack</span>
             </div>
             <p className="text-sm">
-              © 2025 TestCrack. All rights reserved.
+              © 2026 TestCrack. All rights reserved.
             </p>
           </div>
         </div>

@@ -117,77 +117,305 @@ const IELTS_COURSES: Course[] = [
     ]
   },
   {
-    id: 'ielts-gen-reading',
-    title: 'General Training Reading',
-    description: 'Navigate workplace documents, notices, and everyday texts with high efficiency and accuracy.',
-    progress: 0,
+    id: 'ielts-listening',
+    title: 'Listening Essentials',
+    description: 'Train your ear to catch specific details, navigate map labeling, and keep up with academic lectures.',
+    progress: 15,
     level: 'Intermediate',
-    duration: '10h 0m',
+    duration: '8h 45m',
     modules: [
       {
-        id: 'gen-1',
-        title: 'Module 1: Reading Everyday Notices',
-        duration: '30m',
+        id: 'list-1',
+        title: 'Module 1: Beating Map Labeling',
+        duration: '55m',
         content: (
           <div className="space-y-4 text-slate-700 dark:text-slate-300 leading-relaxed">
-            <p>Section 1 of the GT Reading test contains short texts relevant to everyday life in an English-speaking country. These might be advertisements, timetables, or notices.</p>
-            <p>Pay attention to the conditions attached to statements. For example, a notice might say "Free entry for children under 12 on Tuesdays." If the question asks if a 10-year-old enters free on Wednesday, the answer is False.</p>
+            <p>Map labeling questions often appear in Section 2 of the listening test. You will be given a map with letters, and you must match them to locations based on the audio.</p>
+            <p><strong>Crucial Strategy:</strong> Always find the "Starting Point" on the map before the audio begins. The speaker will always orient you from this location. Pay close attention to directional language like <em>"just past the..."</em>, <em>"adjacent to..."</em>, or <em>"at the junction of..."</em>.</p>
           </div>
         ),
         quiz: {
-          question: 'When reading short notices in Section 1, what is crucial to pay attention to?',
+          question: 'What is the most important thing to do before the map audio begins?',
           options: [
-            'The author\'s emotional tone.',
-            'Conditions and specific details like days, ages, or exceptions.',
-            'Complex grammatical structures.',
-            'The historical background of the notice.'
+            'Try to guess the answers based on logic.',
+            'Memorize the entire map.',
+            'Locate the "Starting Point" or "You are here" marker.',
+            'Translate the location names into your native language.'
           ],
-          correctAnswer: 'Conditions and specific details like days, ages, or exceptions.',
-          explanation: 'Everyday notices often rely on specific conditions (like dates or age limits) to test your detailed comprehension.'
+          correctAnswer: 'Locate the "Starting Point" or "You are here" marker.',
+          explanation: 'The speaker will always give directions relative to a specific starting point. If you don\'t know where that is, you will immediately get lost.'
         }
       },
       {
-        id: 'gen-2',
-        title: 'Module 2: Workplace Survival Skills',
+        id: 'list-2',
+        title: 'Module 2: Distractors and Self-Corrections',
+        duration: '40m',
+        content: (
+          <div className="space-y-4 text-slate-700 dark:text-slate-300 leading-relaxed">
+            <p>IELTS listening tracks are full of traps. A speaker will often give a piece of information, only to correct themselves a second later.</p>
+            <p>For example: <em>"The meeting is at 4 PM... oh wait, no, my watch is wrong, it's actually been moved to 4:30 PM."</em> If you write down the first time you hear, you will get the answer wrong. Always keep listening until the thought is completely finished.</p>
+          </div>
+        ),
+        quiz: {
+          question: 'Why should you be cautious when you hear an answer immediately in the audio?',
+          options: [
+            'Because the first answer is always a lie.',
+            'Because speakers frequently self-correct or change their minds.',
+            'Because the audio is played twice.',
+            'Because you need to write it in capital letters.'
+          ],
+          correctAnswer: 'Because speakers frequently self-correct or change their minds.',
+          explanation: 'Self-correction is a deliberate test of your sustained listening comprehension. Never commit to an answer until the speaker finishes the point.'
+        }
+      },
+      {
+        id: 'list-3',
+        title: 'Module 3: Spelling and Number Formats',
         duration: '45m',
         content: (
           <div className="space-y-4 text-slate-700 dark:text-slate-300 leading-relaxed">
-            <p>Section 2 focuses on work-related topics: job descriptions, contracts, and staff training manuals.</p>
-            <p>Vocabulary here is slightly more formal. You need to quickly identify the purpose of the document. Is it explaining a process, outlining rules, or advertising a role?</p>
+            <p>In Section 1 (Form Completion), you will often have to write down names, phone numbers, or postcodes. If your spelling is wrong, the answer is marked wrong.</p>
+            <p>Be aware of double letters (e.g., "double T") and how numbers are spoken (e.g., "oh" instead of "zero"). Remember that hyphenated words count as a single word.</p>
           </div>
         ),
         quiz: {
-          question: 'What type of texts are typically found in Section 2 of the General Training Reading test?',
+          question: 'If the instruction says "WRITE NO MORE THAN ONE WORD AND/OR A NUMBER", which of the following is a valid answer?',
           options: [
-            'Academic journals and scientific research.',
-            'Workplace documents like manuals, contracts, and job descriptions.',
-            'Fictional short stories.',
-            'Opinion pieces from newspapers.'
+            '25th of May',
+            'May 25',
+            'Twenty five May',
+            'The 25th'
           ],
-          correctAnswer: 'Workplace documents like manuals, contracts, and job descriptions.',
-          explanation: 'Section 2 is specifically designed to test "workplace survival" English.'
+          correctAnswer: 'May 25',
+          explanation: '"May" is one word, and "25" is one number, perfectly fitting the criteria.'
         }
-      },
+      }
+    ]
+  },
+  {
+    id: 'ielts-speaking',
+    title: 'Speaking Success',
+    description: 'Learn to speak fluently, structure your "Long Turn", and handle complex abstract discussions confidently.',
+    progress: 0,
+    level: 'Intermediate',
+    duration: '7h 30m',
+    modules: [
       {
-        id: 'gen-3',
-        title: 'Module 3: The Extended Prose',
+        id: 'speak-1',
+        title: 'Module 1: Part 2 - The Long Turn',
         duration: '1h 0m',
         content: (
           <div className="space-y-4 text-slate-700 dark:text-slate-300 leading-relaxed">
-            <p>Section 3 is the hardest part of the GT test. It consists of a single, long text that is more complex and instructive.</p>
-            <p>You will need to use all the skills you learned: skimming for general meaning, scanning for specifics, and reading for detail to understand arguments and opinions.</p>
+            <p>In Speaking Part 2, you are given a cue card and must speak for 1 to 2 minutes on a specific topic. You get 1 minute to prepare.</p>
+            <p>Do not write full sentences during your prep time. Write bullet points or create a quick mind map. Use the bullet points on the cue card to structure your talk chronologically (Past, Present, Future) to ensure you don't run out of things to say.</p>
           </div>
         ),
         quiz: {
-          question: 'How does Section 3 of the GT Reading test compare to Sections 1 and 2?',
+          question: 'What is the most effective use of your 1-minute preparation time in Speaking Part 2?',
           options: [
-            'It is much shorter and easier.',
-            'It consists of multiple short advertisements.',
-            'It contains a single, longer, and more complex text.',
-            'It only tests grammar.'
+            'Writing out a full introductory script to read from.',
+            'Asking the examiner to change the topic.',
+            'Jotting down bullet points or a mind map of keywords.',
+            'Practicing your speech in a whisper.'
           ],
-          correctAnswer: 'It contains a single, longer, and more complex text.',
-          explanation: 'Section 3 is the longest and most difficult part of the GT reading, requiring sustained focus on a complex text.'
+          correctAnswer: 'Jotting down bullet points or a mind map of keywords.',
+          explanation: 'Writing full sentences wastes time and leads to unnatural reading. Keywords trigger your memory while allowing you to speak naturally.'
+        }
+      },
+      {
+        id: 'speak-2',
+        title: 'Module 2: Expanding Your Answers (Part 1 & 3)',
+        duration: '45m',
+        content: (
+          <div className="space-y-4 text-slate-700 dark:text-slate-300 leading-relaxed">
+            <p>Never give one-word answers in the IELTS speaking test. The examiner is testing your fluency and vocabulary.</p>
+            <p>Use the <strong>A.R.E. method</strong>: Answer, Reason, Example. <br/><em>Examiner: "Do you like cooking?"</em> <br/><em>You: "Yes, I do (Answer). I find it incredibly relaxing after a long day at work (Reason). For instance, yesterday I baked a homemade pizza which was a great stress-reliever (Example)."</em></p>
+          </div>
+        ),
+        quiz: {
+          question: 'If the examiner asks "Do you prefer traveling by train or by bus?", what is a poor way to respond?',
+          options: [
+            '"I prefer trains because they are generally much faster and offer better views."',
+            '"Definitely the train. For example, my commute is much smoother on the rails."',
+            '"Train."',
+            '"I usually choose trains. The legroom is much better, which is vital for long journeys."'
+          ],
+          correctAnswer: '"Train."',
+          explanation: 'A one-word answer gives the examiner no language to grade. You must expand with reasons and examples.'
+        }
+      },
+      {
+        id: 'speak-3',
+        title: 'Module 3: Dealing with Unknown Vocabulary',
+        duration: '40m',
+        content: (
+          <div className="space-y-4 text-slate-700 dark:text-slate-300 leading-relaxed">
+            <p>It is totally normal to forget a word or not know the exact term for something during the test. Do not panic or freeze.</p>
+            <p>Use <strong>paraphrasing</strong>. If you forget the word "veterinarian," you can say "a doctor who treats sick animals." The examiner actually awards points for the ability to paraphrase successfully when you hit a vocabulary gap.</p>
+          </div>
+        ),
+        quiz: {
+          question: 'What should you do if you forget a specific noun during the Speaking test?',
+          options: [
+            'Stop speaking and apologize to the examiner.',
+            'Switch to your native language for that one word.',
+            'Describe what the object is or what it does (paraphrase).',
+            'Skip to a completely different topic.'
+          ],
+          correctAnswer: 'Describe what the object is or what it does (paraphrase).',
+          explanation: 'Paraphrasing is a key communicative skill. Explaining the word you forgot demonstrates strong control of the language.'
+        }
+      }
+    ]
+  },
+  {
+    id: 'ielts-acad-writing',
+    title: 'Academic Writing Mastery',
+    description: 'Learn the exact structures needed for Task 1 data interpretation and Task 2 essay argumentation.',
+    progress: 0,
+    level: 'Advanced',
+    duration: '14h 0m',
+    modules: [
+      {
+        id: 'writ-1',
+        title: 'Module 1: Task 1 - The Overview Paragraph',
+        duration: '1h 15m',
+        content: (
+          <div className="space-y-4 text-slate-700 dark:text-slate-300 leading-relaxed">
+            <p>In Academic Writing Task 1, you must describe a chart, graph, or diagram. The single most important part of your response is the <strong>Overview paragraph</strong>.</p>
+            <p>Without a clear overview highlighting the main trends or key differences, you cannot score above a Band 5 in Task Achievement. The overview should usually be your second paragraph, right after the introduction, and should NOT include specific data points (numbers/percentages).</p>
+          </div>
+        ),
+        quiz: {
+          question: 'What is a critical rule regarding the Overview paragraph in Academic Task 1?',
+          options: [
+            'It must contain exact percentages and data points.',
+            'It should highlight the main trends without using specific numbers.',
+            'It should give your personal opinion on the data.',
+            'It must be the very last sentence of your essay.'
+          ],
+          correctAnswer: 'It should highlight the main trends without using specific numbers.',
+          explanation: 'The overview is a summary of the "big picture." Specific numbers should be saved for the detailed body paragraphs.'
+        }
+      },
+      {
+        id: 'writ-2',
+        title: 'Module 2: Task 2 - Structuring an Opinion Essay',
+        duration: '1h 30m',
+        content: (
+          <div className="space-y-4 text-slate-700 dark:text-slate-300 leading-relaxed">
+            <p>When given a "To what extent do you agree or disagree?" prompt, your position must be crystal clear throughout the essay.</p>
+            <p>A standard 4-paragraph structure works best: <br/>1. Introduction (Paraphrase prompt + Thesis statement). <br/>2. Body Paragraph 1 (First reason supporting your view). <br/>3. Body Paragraph 2 (Second reason supporting your view). <br/>4. Conclusion (Summarize points and restate position).</p>
+          </div>
+        ),
+        quiz: {
+          question: 'In an IELTS opinion essay, where should you first state your clear position?',
+          options: [
+            'In the conclusion paragraph only.',
+            'In the first body paragraph.',
+            'In the introduction paragraph (Thesis statement).',
+            'You should not state your position directly; let the examiner guess.'
+          ],
+          correctAnswer: 'In the introduction paragraph (Thesis statement).',
+          explanation: 'A clear thesis in the introduction ensures your position is clear from the very beginning, which is required for a high score in Task Response.'
+        }
+      },
+      {
+        id: 'writ-3',
+        title: 'Module 3: Using Cohesive Devices',
+        duration: '50m',
+        content: (
+          <div className="space-y-4 text-slate-700 dark:text-slate-300 leading-relaxed">
+            <p>Cohesive devices (linking words) act like signposts for the reader. They include words like <em>Furthermore</em>, <em>However</em>, <em>Consequently</em>, and <em>For instance</em>.</p>
+            <p><strong>Warning:</strong> Overusing linking words will lower your score. Only use them when there is a logical relationship between two sentences. Aim for precision, not quantity.</p>
+          </div>
+        ),
+        quiz: {
+          question: 'Which of the following is true regarding cohesive devices (linking words) in IELTS Writing?',
+          options: [
+            'You should start every single sentence with a linking word.',
+            'They should be used mechanically to hit a specific word count.',
+            'They should only be used to show clear logical relationships between ideas.',
+            'They are only necessary in Task 1, not Task 2.'
+          ],
+          correctAnswer: 'They should only be used to show clear logical relationships between ideas.',
+          explanation: 'Examiners penalize "mechanical" or "forced" use of cohesive devices. They must feel natural and logical.'
+        }
+      }
+    ]
+  },
+  {
+    id: 'ielts-gen-writing',
+    title: 'General Training Writing',
+    description: 'Master the art of letter writing for Task 1 and tackle everyday essay topics for Task 2.',
+    progress: 100,
+    level: 'Intermediate',
+    duration: '6h 45m',
+    modules: [
+      {
+        id: 'gen-writ-1',
+        title: 'Module 1: Task 1 - Letter Tone and Formality',
+        duration: '1h 0m',
+        content: (
+          <div className="space-y-4 text-slate-700 dark:text-slate-300 leading-relaxed">
+            <p>In GT Task 1, you must write a letter. Identifying the correct tone (Formal, Semi-formal, or Informal) is vital.</p>
+            <p><strong>Formal:</strong> Writing to someone you don\'t know (e.g., a hotel manager). Start with <em>Dear Sir/Madam</em> and end with <em>Yours faithfully</em>. <br/><strong>Semi-formal:</strong> Writing to a colleague or boss you know. Start with <em>Dear Mr. Smith</em> and end with <em>Yours sincerely</em>. <br/><strong>Informal:</strong> Writing to a friend. Start with <em>Dear [First Name]</em> and use contractions (I\'m, we\'re).</p>
+          </div>
+        ),
+        quiz: {
+          question: 'If the prompt asks you to write a letter to your neighbor complaining about noise, what tone should you use?',
+          options: [
+            'Highly formal (Dear Sir/Madam)',
+            'Semi-formal or informal depending on how well you know them',
+            'Academic and scientific',
+            'Aggressive and threatening'
+          ],
+          correctAnswer: 'Semi-formal or informal depending on how well you know them',
+          explanation: 'Neighbors are acquaintances or friends, meaning a semi-formal or informal tone with a polite but firm approach is best.'
+        }
+      },
+      {
+        id: 'gen-writ-2',
+        title: 'Module 2: Task 1 - Addressing the Bullet Points',
+        duration: '45m',
+        content: (
+          <div className="space-y-4 text-slate-700 dark:text-slate-300 leading-relaxed">
+            <p>Every GT letter prompt comes with three bullet points detailing what you must include in your letter. To score well, you must write about <strong>all three</strong> bullet points equally.</p>
+            <p>A good strategy is to dedicate one short paragraph to each bullet point. This ensures you cover everything and makes your letter easy to read.</p>
+          </div>
+        ),
+        quiz: {
+          question: 'What happens if you write a brilliant letter but forget to include one of the three bullet points?',
+          options: [
+            'You get bonus points for creativity.',
+            'Your Task Achievement score will drop significantly.',
+            'The examiner will ignore the missing point.',
+            'You will automatically fail the entire test.'
+          ],
+          correctAnswer: 'Your Task Achievement score will drop significantly.',
+          explanation: 'Failing to address all parts of the prompt means you have not achieved the task, capping your Task Achievement score at a Band 5 or lower.'
+        }
+      },
+      {
+        id: 'gen-writ-3',
+        title: 'Module 3: Task 2 - Brainstorming Ideas',
+        duration: '1h 10m',
+        content: (
+          <div className="space-y-4 text-slate-700 dark:text-slate-300 leading-relaxed">
+            <p>GT Task 2 essays usually focus on everyday topics: family, work, society, or the environment. Before writing, spend 3-5 minutes brainstorming.</p>
+            <p>If you get stuck for ideas, use the <strong>SPENT method</strong> to look at the topic from different angles: Social, Personal, Economic, Nature (Environmental), and Technological.</p>
+          </div>
+        ),
+        quiz: {
+          question: 'Why is brainstorming for 3-5 minutes before writing highly recommended?',
+          options: [
+            'To waste time so you don\'t have to write as much.',
+            'To practice your handwriting.',
+            'To ensure you have logical, well-organized points before you commit them to paper.',
+            'To memorize the prompt.'
+          ],
+          correctAnswer: 'To ensure you have logical, well-organized points before you commit them to paper.',
+          explanation: 'Planning prevents you from getting stuck halfway through your essay and ensures a logical flow of ideas.'
         }
       }
     ]

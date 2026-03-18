@@ -198,7 +198,7 @@ export default function StudentSpeakingHistoryPage() {
                 </div>
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">No Practice History Yet</h2>
                 <p className="text-slate-500 mb-6">Complete your first speaking practice to see your analytics dashboard here.</p>
-                <Button onClick={() => navigate('/student/reading-assessment')} className="bg-[#8a42f5] hover:bg-[#7b3be6] text-white">Start Practicing</Button>
+                <Button onClick={() => navigate('/student/speaking-assessment')} className="bg-[#8a42f5] hover:bg-[#7b3be6] text-white">Start Practicing</Button>
             </div>
           ) : (
             <div className="space-y-8">

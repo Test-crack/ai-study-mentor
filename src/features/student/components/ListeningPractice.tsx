@@ -46,7 +46,10 @@ interface SectionResult {
 
 // ── IELTS Data ────────────────────────────────────────────────────────────────
 
+// ── IELTS Data ────────────────────────────────────────────────────────────────
+
 const IELTS_TASKS: ListeningTask[] = [
+  // --- TEST 1 ---
   {
     id: '1',
     title: 'Section 1',
@@ -410,6 +413,302 @@ Thank you. I'll now take a few questions before we move on to the seminar discus
           { id: 'B', text: 'B. They reflect particular perspectives and priorities' },
           { id: 'C', text: 'C. They are created by governments' },
           { id: 'D', text: 'D. They use the Mercator projection' },
+        ],
+        answer: 'B',
+      },
+    ],
+  },
+  // --- TEST 2 ---
+  {
+    id: '5',
+    title: 'Section 1',
+    topic: 'Joining a Leisure Centre',
+    type: 'Conversation between two people',
+    description: 'Listen to a conversation between a receptionist and a man looking to join a local leisure centre.',
+    script: `Receptionist: Good afternoon, welcome to the Riverside Leisure Centre. How can I help you?
+
+Man: Hi there. I recently moved to the area and I'm interested in signing up for a membership. 
+
+Receptionist: Excellent. We have a few different packages available. First, could I get your name and contact details?
+
+Man: Sure, my name is Thomas Garrett. 
+
+Receptionist: Could you spell your surname for me, please?
+
+Man: It's G-A-R-R-E-T-T. 
+
+Receptionist: Thank you, Mr. Garrett. And what's the best phone number to reach you on?
+
+Man: My mobile number is zero seven seven eight nine, five five four, three two one.
+
+Receptionist: Perfect. Now, regarding memberships, we have an 'Off-Peak' option, which allows you to use the facilities between 9 AM and 4 PM on weekdays, and a 'Premium' option which gives you unlimited access at any time, including weekends.
+
+Man: I work standard office hours, so the Off-Peak package wouldn't be much use to me. I'll have to go with the Premium option. How much is that?
+
+Receptionist: The Premium membership is forty-five pounds per month. However, if you commit to a full year in advance, it brings the monthly cost down to just thirty-eight pounds.
+
+Man: I'd rather just pay monthly for now, in case my circumstances change. Does the membership include fitness classes?
+
+Receptionist: Yes, the Premium membership includes all group fitness classes. We have yoga, spinning, pilates, and a new high-intensity interval training class that is very popular. You just need to book your spot 24 hours in advance via our mobile app.
+
+Man: That sounds great. Do you have a swimming pool as well?
+
+Receptionist: We do. We have a 25-metre heated indoor pool. There's also a sauna and steam room located just off the main pool area. 
+
+Man: Fantastic. I'll sign up for the monthly Premium membership, please.`,
+    questions: [
+      {
+        id: 'q5_1', type: 'form',
+        text: "1. What is the man's surname?",
+        answer: 'Garrett',
+        hint: 'Listen for the spelling of the last name.',
+      },
+      {
+        id: 'q5_2', type: 'form',
+        text: '2. What is his mobile phone number?',
+        answer: '07789 554 321',
+        hint: 'Listen closely to the digits he recites.',
+      },
+      {
+        id: 'q5_3', type: 'mcq',
+        text: '3. Which membership type does the man choose?',
+        options: [
+          { id: 'A', text: 'A. Off-Peak monthly' },
+          { id: 'B', text: 'B. Premium monthly' },
+          { id: 'C', text: 'C. Premium annual' },
+          { id: 'D', text: 'D. Off-Peak annual' },
+        ],
+        answer: 'B',
+      },
+      {
+        id: 'q5_4', type: 'form',
+        text: '4. How many hours in advance must you book a fitness class?',
+        answer: '24',
+        hint: 'Listen for the booking rules mentioned by the receptionist.',
+      },
+      {
+        id: 'q5_5', type: 'mcq',
+        text: '5. Which facility is located just off the main pool area?',
+        options: [
+          { id: 'A', text: 'A. A spinning studio' },
+          { id: 'B', text: 'B. A yoga room' },
+          { id: 'C', text: 'C. A sauna and steam room' },
+          { id: 'D', text: 'D. The changing rooms' },
+        ],
+        answer: 'C',
+      },
+    ],
+  },
+  {
+    id: '6',
+    title: 'Section 2',
+    topic: 'Wildlife Park Tour',
+    type: 'Monologue in a social context',
+    description: 'Listen to a tour guide giving visitors an overview of the day\'s schedule at a wildlife park.',
+    script: `Hello everyone, and welcome to the Oakwood Wildlife Park! We are absolutely thrilled to have you with us today. Before you head off to explore, I want to quickly run through some of the daily events and feeding times so you don't miss out on the highlights.
+
+Right now it's 9:30 AM. The park is fully open, and I highly recommend heading over to the primate enclosure first. They are most active in the morning.
+
+At 11:30 AM, we have our famous penguin feeding session. This takes place at the Aquatic Zone, which is located in the northern sector of the park. It's incredibly popular, so try to get there a few minutes early to secure a good viewing spot. The keepers will also be giving a short talk about marine conservation during the feed.
+
+After lunch, at 2:00 PM, you won't want to miss the Birds of Prey flight demonstration. This happens in the central arena. You'll get to see eagles, falcons, and owls flying right over your heads. Please remember to remain seated during the demonstration for your own safety and the safety of the birds.
+
+If you have young children with you, the petting zoo is open all day. It's situated right next to the main cafeteria. However, please be aware that the animal interaction zone closes at 4:00 PM to give our smaller animals a chance to rest before the park closes.
+
+Finally, a quick safety reminder. Please do not attempt to feed any of the animals with your own food. Many of our animals are on strict, specialized diets, and human food can make them very ill. If you wish to feed the animals, specially formulated feed bags are available for purchase at the gift shop for just two pounds.
+
+Have a wonderful day exploring the park, and if you need any assistance, any of our staff members wearing green polo shirts will be happy to help.`,
+    questions: [
+      {
+        id: 'q6_1', type: 'mcq',
+        text: '1. Which animals does the guide recommend seeing first?',
+        options: [
+          { id: 'A', text: 'A. The penguins' },
+          { id: 'B', text: 'B. The birds of prey' },
+          { id: 'C', text: 'C. The primates' },
+          { id: 'D', text: 'D. The petting zoo animals' },
+        ],
+        answer: 'C',
+      },
+      {
+        id: 'q6_2', type: 'form',
+        text: '2. At what time is the penguin feeding session?',
+        answer: '11:30 AM',
+        hint: 'Listen for the specific time mentioned for the Aquatic Zone.',
+      },
+      {
+        id: 'q6_3', type: 'mcq',
+        text: '3. Where does the Birds of Prey demonstration take place?',
+        options: [
+          { id: 'A', text: 'A. The Aquatic Zone' },
+          { id: 'B', text: 'B. The central arena' },
+          { id: 'C', text: 'C. The northern sector' },
+          { id: 'D', text: 'D. Next to the cafeteria' },
+        ],
+        answer: 'B',
+      },
+      {
+        id: 'q6_4', type: 'form',
+        text: '4. What time does the animal interaction zone close?',
+        answer: '4:00 PM',
+        hint: 'Listen for the closing time of the area next to the cafeteria.',
+      },
+      {
+        id: 'q6_5', type: 'mcq',
+        text: '5. How can visitors identify staff members who can help them?',
+        options: [
+          { id: 'A', text: 'A. They are wearing green polo shirts' },
+          { id: 'B', text: 'B. They are stationed at the gift shop' },
+          { id: 'C', text: 'C. They have walkie-talkies' },
+          { id: 'D', text: 'D. They are wearing blue caps' },
+        ],
+        answer: 'A',
+      },
+    ],
+  },
+  {
+    id: '7',
+    title: 'Section 3',
+    topic: 'Student Presentation Planning',
+    type: 'Conversation in an academic context',
+    description: 'Listen to two university students, Chloe and Mark, discussing their upcoming marketing presentation with their tutor.',
+    script: `Tutor: Hi Chloe, hi Mark. Come on in. Let's review your progress for the upcoming marketing presentation. Have you finalized your core topic?
+
+Chloe: Yes, we have. We've decided to focus on the impact of influencer marketing on consumer purchasing behavior, specifically targeting the Gen Z demographic.
+
+Tutor: That's a very timely topic. Have you divided up the research workload yet?
+
+Mark: We have. I'm going to handle the historical context and the shift from traditional celebrity endorsements to micro-influencers. Chloe is going to focus on the psychological aspects—why younger consumers trust these influencers more than traditional advertising.
+
+Tutor: That sounds like a solid division of labor. Are you planning to include any case studies?
+
+Chloe: Yes, we want to look at two specific campaigns. I'm researching a successful campaign by a sustainable cosmetics brand, and Mark is analyzing a failed campaign by a fast-fashion retailer to show the contrast.
+
+Tutor: Excellent. Analyzing a failure often yields deeper insights than just looking at successes. Now, regarding the presentation format, remember that you only have 15 minutes. How are you structuring the slides?
+
+Mark: We were thinking of having about twenty slides in total. We want to keep them highly visual, using mostly charts and infographics rather than blocks of text.
+
+Tutor: Twenty slides in fifteen minutes means less than a minute per slide. You might find yourselves rushing. I'd strongly advise cutting that down to a maximum of twelve to fourteen slides. You want to speak *to* the audience, not just click through a rapid slideshow.
+
+Chloe: That makes sense. We'll condense the data. 
+
+Tutor: Good. And have you noted the final submission date for the presentation slides and the accompanying report?
+
+Mark: Yes, it's the 22nd of November, isn't it?
+
+Tutor: Correct. The slides need to be uploaded to the portal by 5:00 PM on the 22nd. The actual presentations will take place the following week. 
+
+Chloe: Great, we are on track to finish the draft by this Friday. We'll send it over for your feedback then.`,
+    questions: [
+      {
+        id: 'q7_1', type: 'mcq',
+        text: '1. Which demographic is the focus of Chloe and Mark’s presentation?',
+        options: [
+          { id: 'A', text: 'A. Millennials' },
+          { id: 'B', text: 'B. Gen Z' },
+          { id: 'C', text: 'C. Baby Boomers' },
+          { id: 'D', text: 'D. Gen X' },
+        ],
+        answer: 'B',
+      },
+      {
+        id: 'q7_2', type: 'mcq',
+        text: '2. What is Mark researching for the presentation?',
+        options: [
+          { id: 'A', text: 'A. The psychological aspects of trust' },
+          { id: 'B', text: 'B. A successful sustainable cosmetics campaign' },
+          { id: 'C', text: 'C. The shift from traditional celebrity endorsements' },
+          { id: 'D', text: 'D. Future trends in marketing' },
+        ],
+        answer: 'C',
+      },
+      {
+        id: 'q7_3', type: 'form',
+        text: '3. What type of brand was involved in the successful campaign Chloe is researching?',
+        answer: 'Sustainable cosmetics',
+        hint: 'Listen for the specific industry mentioned by Chloe.',
+      },
+      {
+        id: 'q7_4', type: 'mcq',
+        text: '4. What does the tutor advise regarding the presentation slides?',
+        options: [
+          { id: 'A', text: 'A. Use more text blocks' },
+          { id: 'B', text: 'B. Have about 20 slides' },
+          { id: 'C', text: 'C. Reduce the number to 12-14 slides' },
+          { id: 'D', text: 'D. Extend the presentation to 20 minutes' },
+        ],
+        answer: 'C',
+      },
+      {
+        id: 'q7_5', type: 'form',
+        text: '5. What is the submission date for the slides and report?',
+        answer: '22nd November',
+        hint: 'Listen for the specific date mentioned at the end.',
+      },
+    ],
+  },
+  {
+    id: '8',
+    title: 'Section 4',
+    topic: 'The Science of Bioluminescence',
+    type: 'Academic lecture',
+    description: 'Listen to a biology lecture explaining the mechanisms and evolutionary purposes of bioluminescence in marine life.',
+    script: `Welcome back to our marine biology module. Today, we are exploring one of the most mesmerizing phenomena in the natural world: bioluminescence. This is the biochemical emission of light by living organisms. While it can be found on land—think of fireflies or certain fungi—it is overwhelmingly a marine phenomenon. 
+
+To understand bioluminescence, we must first look at the chemistry behind it. The light is produced by a chemical reaction involving a light-emitting molecule, generically called luciferin, and an enzyme called luciferase. When oxygen is introduced to this mixture, the luciferin oxidizes, and the energy from this reaction is released as visible light. Unlike the light from a traditional incandescent light bulb, which wastes a huge amount of energy as heat, bioluminescence is "cold light." Nearly 100% of the energy is emitted as light, making it incredibly efficient.
+
+But why did this evolve? In the vast, dark expanse of the deep ocean, where sunlight cannot penetrate beyond about 200 meters, emitting light serves several critical evolutionary functions. 
+
+The first function is defense. Some species of squid, when threatened by a predator, will eject a cloud of bioluminescent chemicals instead of ink. This sudden, glowing burst temporarily blinds and confuses the predator, allowing the squid to escape into the darkness. 
+
+The second major function is predation. The most famous example of this is the anglerfish. It possesses a modified dorsal fin that acts like a fishing rod, dangling a glowing, bacteria-filled sac in front of its mouth. In the pitch-black environment, smaller fish are drawn to this light like moths to a flame, only to be swiftly consumed.
+
+Finally, bioluminescence plays a vital role in communication and mating. Many deep-sea shrimp and jellyfish use specific patterns of light flashes to identify members of their own species and attract mates. Because the deep ocean is so vast and sparsely populated, this visual signaling is far more effective than chemical or acoustic communication over short distances.
+
+Interestingly, medical science is now borrowing from the ocean. Researchers are utilizing the green fluorescent protein, originally discovered in jellyfish, as a biological marker. By attaching this glowing protein to specific genes or cells, scientists can literally watch cellular processes unfold in real-time under a microscope, which has revolutionized genetics and cancer research.`,
+    questions: [
+      {
+        id: 'q8_1', type: 'form',
+        text: '1. What is the name of the enzyme required to produce bioluminescence?',
+        answer: 'luciferase',
+        hint: 'Listen for the chemical components mentioned early in the lecture.',
+      },
+      {
+        id: 'q8_2', type: 'mcq',
+        text: '2. Why is bioluminescence referred to as "cold light"?',
+        options: [
+          { id: 'A', text: 'A. Because it only occurs in freezing waters' },
+          { id: 'B', text: 'B. Because nearly 100% of the energy is emitted as light, not heat' },
+          { id: 'C', text: 'C. Because the chemical reaction requires ice' },
+          { id: 'D', text: 'D. Because it is blue in color' },
+        ],
+        answer: 'B',
+      },
+      {
+        id: 'q8_3', type: 'form',
+        text: '3. Beyond what depth does sunlight fail to penetrate the ocean?',
+        answer: '200 meters',
+        hint: 'Listen for a specific measurement in meters.',
+      },
+      {
+        id: 'q8_4', type: 'mcq',
+        text: '4. How does the anglerfish use bioluminescence?',
+        options: [
+          { id: 'A', text: 'A. To confuse predators' },
+          { id: 'B', text: 'B. To communicate with other anglerfish' },
+          { id: 'C', text: 'C. To attract smaller fish as prey' },
+          { id: 'D', text: 'D. To navigate through coral reefs' },
+        ],
+        answer: 'C',
+      },
+      {
+        id: 'q8_5', type: 'mcq',
+        text: '5. What have medical researchers used green fluorescent protein for?',
+        options: [
+          { id: 'A', text: 'A. To cure deep-sea viruses' },
+          { id: 'B', text: 'B. As a biological marker to watch cellular processes' },
+          { id: 'C', text: 'C. To create better underwater lighting' },
+          { id: 'D', text: 'D. To develop new sunscreen formulas' },
         ],
         answer: 'B',
       },
@@ -1169,4 +1468,3 @@ export default function ListeningPractice() {
     </div>
   );
 }
-// }TR7 2HJ

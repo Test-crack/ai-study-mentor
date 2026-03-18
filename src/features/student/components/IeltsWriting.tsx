@@ -30,6 +30,54 @@ const MOCK_ASSIGNMENTS: Assignment[] = [
     topic: 'Governments should spend more money on education than on recreation and sports. Do you agree or disagree with this statement? Provide specific reasons and examples to support your answer.',
     assignedDate: '2026-03-04',
   },
+  {
+    id: '3',
+    title: 'Task 1: Academic - Data Interpretation',
+    topic: 'The chart provided in your workbook shows the global sales of different types of digital games from 2000 to 2006. Summarise the information by selecting and reporting the main features, and make comparisons where relevant. (Note: Please refer to page 12 of your pilot program handbook for the chart).',
+    assignedDate: '2026-03-08',
+  },
+  {
+    id: '4',
+    title: 'Task 2: Environment & Corporate Responsibility',
+    topic: 'Many people believe that companies and individuals should pay to clean up the environment in proportion to the amount of pollution they have produced. To what extent do you agree or disagree? Include relevant examples from your own experience.',
+    assignedDate: '2026-03-11',
+  },
+  {
+    id: '5',
+    title: 'Task 2: Urbanization & Migration',
+    topic: 'In many countries, an increasing number of people are migrating from rural areas to cities in search of a better life. What are the main problems this causes? What solutions can you suggest?',
+    assignedDate: '2026-03-15',
+  },
+  {
+    id: '6',
+    title: 'Task 1: General - Formal Letter',
+    topic: 'You recently stayed at a hotel and left a valuable item in your room. Write a letter to the hotel manager. In your letter: give details of your stay, describe the item you left behind, and suggest what you want the manager to do.',
+    assignedDate: '2026-03-18',
+  },
+  {
+    id: '7',
+    title: 'Task 2: Health & Public Policy',
+    topic: 'In some countries, the growing number of fast-food outlets has led to a rise in health issues such as obesity. Some people think the government should impose a higher tax on this kind of food. Do you agree or disagree?',
+    assignedDate: '2026-03-22',
+  },
+  {
+    id: '8',
+    title: 'Task 2: Work & Lifestyle Balance',
+    topic: 'Nowadays, many people complain that they have difficulties balancing their work and personal life. What are the causes of this? What are the possible solutions to this problem?',
+    assignedDate: '2026-03-25',
+  },
+  {
+    id: '9',
+    title: 'Task 1: Academic - Process Diagram',
+    topic: 'The diagram in your pilot handbook (Page 18) shows the process of recycling plastic bottles. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    assignedDate: '2026-03-29',
+  },
+  {
+    id: '10',
+    title: 'Task 2: Crime & Punishment',
+    topic: 'Some people believe that the best way to reduce crime is to give longer prison sentences. Others, however, believe there are better alternative ways of reducing crime. Discuss both views and give your opinion.',
+    assignedDate: '2026-04-02',
+  }
 ];
 
 export default function IeltsWriting() {
@@ -44,6 +92,9 @@ export default function IeltsWriting() {
   const [essayText, setEssayText] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // Dynamic Word Count Target based on Task Type
+  const targetWordCount = selectedAssignment?.title.includes('Task 1') ? 150 : 250;
+
   // Calculate word count dynamically
   const wordCount = useMemo(() => {
     const trimmed = essayText.trim();
@@ -56,10 +107,10 @@ export default function IeltsWriting() {
   };
 
   const handleSubmit = async () => {
-    if (wordCount < 250) {
+    if (wordCount < targetWordCount) {
       toast({ 
         title: 'Word count too low', 
-        description: 'Please write at least 250 words before submitting.', 
+        description: `Please write at least ${targetWordCount} words before submitting.`, 
         variant: 'destructive' 
       });
       return;
@@ -108,13 +159,6 @@ export default function IeltsWriting() {
                   <p className="text-indigo-50 max-w-2xl text-base md:text-lg leading-relaxed mb-6">
                     Master your writing skills with detailed, AI-powered feedback. Select a prompt below, aim for your target word count, and get instant insights on your grammar, vocabulary, and task coherence to push for a band 7+.
                   </p>
-                  
-                  {/* Added a decorative button row similar to the screenshot just in case you want quick actions */}
-                  {/* <div className="flex gap-3">
-                     <Button className="bg-white text-[#7B61FF] hover:bg-slate-100 font-semibold rounded-full px-6">
-                       View Past Essays
-                     </Button>
-                  </div> */}
                 </div>
               </div>
 
@@ -212,7 +256,7 @@ export default function IeltsWriting() {
                     <CardContent className="p-5">
                       <h4 className="text-sm font-bold text-amber-800 dark:text-amber-500 mb-2">Instructions</h4>
                       <ul className="text-sm text-amber-700 dark:text-amber-400/80 list-disc list-inside space-y-1.5">
-                        <li>Target length is around <strong>800 words</strong>.</li>
+                        <li>Target length is at least <strong>{targetWordCount} words</strong>.</li>
                         <li>Include your own knowledge and experiences.</li>
                         <li>Review spelling and grammar before submitting.</li>
                       </ul>
@@ -227,12 +271,12 @@ export default function IeltsWriting() {
                     <Badge 
                       variant="secondary"
                       className={`font-medium ${
-                        wordCount >= 800 
+                        wordCount >= targetWordCount 
                           ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' 
                           : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
                       }`}
                     >
-                      {wordCount} / 800 words
+                      {wordCount} / {targetWordCount} words
                     </Badge>
                   </div>
                   

@@ -1,22 +1,78 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { StudentSidebar } from "./dashboard/StudentSidebar";
 import { StudentTopbar } from "./dashboard/StudentTopbar";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { PremiumModal } from "@/features/payment/components/PremiumModal";
 import { Clock, CheckCircle2, Trophy, Flame } from "lucide-react";
-// 1. Import useNavigate
 import { useNavigate } from "react-router-dom";
+
+// 1. UTILITY: Calculate Streak Logic
+const calculateStreak = (dates: string[]): number => {
+  if (!dates || dates.length === 0) return 0;
+
+  const sortedDates = [...new Set(dates)].sort().reverse();
+  let streak = 0;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const lastAttendance = new Date(sortedDates[0]);
+  lastAttendance.setHours(0, 0, 0, 0);
+
+  // If they didn't log in today or yesterday, the streak is dead (0)
+  if (lastAttendance.getTime() < yesterday.getTime()) return 0;
+
+  for (let i = 0; i < sortedDates.length; i++) {
+    const current = new Date(sortedDates[i]);
+    current.setHours(0, 0, 0, 0);
+
+    const expected = new Date(today);
+    expected.setDate(expected.getDate() - streak);
+    expected.setHours(0, 0, 0, 0);
+
+    if (current.getTime() === expected.getTime()) {
+      streak++;
+    } else if (current.getTime() < expected.getTime()) {
+      break;
+    }
+  }
+  return streak;
+};
 
 const StudentDashboardPage = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const { user, profile } = useAuth();
-  
-  // 2. Initialize navigate
   const navigate = useNavigate();
   
   const displayName = profile?.name || user?.email?.split('@')[0] || "Student";
+
+  // 2. FRONTEND STATE: Track streak dynamically
+  const [currentStreak, setCurrentStreak] = useState(0);
+
+  // 3. FRONTEND LOGIC: Use LocalStorage for Persistence
+  useEffect(() => {
+    // Get today's date in YYYY-MM-DD format based on local timezone
+    const today = new Date();
+    const offset = today.getTimezoneOffset() * 60000;
+    const localISOTime = (new Date(today.getTime() - offset)).toISOString().split('T')[0];
+
+    // Load existing dates from Local Storage
+    const storedData = localStorage.getItem('student_attendance');
+    let dates: string[] = storedData ? JSON.parse(storedData) : [];
+
+    // If today isn't in the array, add it!
+    if (!dates.includes(localISOTime)) {
+      dates.push(localISOTime);
+      localStorage.setItem('student_attendance', JSON.stringify(dates));
+    }
+
+    // Calculate and set the streak
+    setCurrentStreak(calculateStreak(dates));
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
@@ -37,22 +93,8 @@ const StudentDashboardPage = () => {
             <div className="relative z-10">
               <h1 className="text-3xl font-bold">Welcome back, {displayName} 👋</h1>
               <p className="mt-2 text-indigo-100 max-w-xl">
-                You're on a 5-day streak! Keep it up. Your predicted IELTS band is 8.5 — practice speaking and reading to push for 7+.
+                You're on a {currentStreak}-day streak! Keep it up. Your predicted IELTS band is 8.5 — practice speaking and reading to push for 7+.
               </p>
-              {/* <div className="mt-6 flex gap-3">
-                <button 
-                  onClick={() => navigate('/student/speaking-practice')}
-                  className="rounded-lg bg-white px-4 py-2 text-sm font-bold text-indigo-600 hover:bg-indigo-50 transition-colors"
-                >
-                  Start Speaking
-                </button>
-                <button 
-                   onClick={() => navigate('/student/settings')}
-                   className="rounded-lg bg-white/20 px-4 py-2 text-sm font-bold text-white backdrop-blur-sm hover:bg-white/30 transition-colors"
-                >
-                  Reading Practice
-                </button>
-              </div> */}
             </div>
           </section>
 
@@ -60,7 +102,7 @@ const StudentDashboardPage = () => {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             <StatCard label="My Score" value="72%" sub="+5.3%" icon="🎯" color="text-indigo-600" />
             <StatCard label="Sessions Done" value="18" sub="+12%" icon="📖" color="text-purple-600" />
-            <StatCard label="Current Streak" value="5 days" sub="+25%" icon="⚡" color="text-orange-500" />
+            <StatCard label="Current Streak" value={`${currentStreak} days`} sub="Keep it up!" icon="🔥" color="text-orange-500" />
             <StatCard label="Predicted Band" value="6.5" sub="+4.2%" icon="🎓" color="text-blue-600" />
           </div>
 
@@ -91,7 +133,6 @@ const StudentDashboardPage = () => {
 
               <DashboardCard title="Areas to Improve" icon="🎯">
                 <div className="space-y-4">
-                  {/* 3. Added onClick handlers here */}
                   <ImprovementItem 
                     title="Your pronunciation score dips on multi-syllable words"
                     desc="Practice the 'Word Stress' drill in Speaking."
@@ -110,6 +151,11 @@ const StudentDashboardPage = () => {
 
             {/* RIGHT: Recent Activity & Weekly Goals */}
             <div className="lg:col-span-4 space-y-6">
+              
+              <DashboardCard title="Attendance Focus" icon={<Flame className="h-5 w-5 text-orange-500" />}>
+                <AttendanceStreakTracker currentStreak={currentStreak} goal={7} />
+              </DashboardCard>
+
               <DashboardCard title="Recent Activity" subtitle="Your recent actions">
                 <div className="space-y-6 pt-2">
                   <ActivityItem label="Completed Reading Comprehension Set 3" time="2 hours ago" color="bg-emerald-500" />
@@ -122,7 +168,6 @@ const StudentDashboardPage = () => {
                 <div className="space-y-5">
                   <GoalItem label="Complete 3 speaking sessions" current={2} total={3} color="bg-indigo-500" />
                   <GoalItem label="Finish 2 reading passages" current={1} total={2} color="bg-purple-500" />
-                  <GoalItem label="Maintain 5-day streak" current={5} total={5} color="bg-emerald-500" />
                 </div>
               </DashboardCard>
             </div>
@@ -189,7 +234,6 @@ const GoalItem = ({ label, current, total, color }: any) => (
   </div>
 );
 
-// 4. Update ImprovementItem to accept and use onClick
 const ImprovementItem = ({ title, desc, action, onClick }: any) => (
   <div className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
     <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{title}</p>
@@ -202,5 +246,29 @@ const ImprovementItem = ({ title, desc, action, onClick }: any) => (
     </button>
   </div>
 );
+
+const AttendanceStreakTracker = ({ currentStreak, goal = 7 }: any) => {
+  const progress = Math.min((currentStreak / goal) * 100, 100);
+  
+  return (
+    <div className="bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 rounded-xl p-4 flex items-center gap-4">
+      <div className="bg-orange-100 dark:bg-orange-500/20 p-3 rounded-full flex-shrink-0">
+        <Flame className="h-6 w-6 text-orange-500" />
+      </div>
+      <div className="flex-1">
+        <div className="flex justify-between items-center mb-1">
+          <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{currentStreak} Day Streak!</span>
+          <span className="text-xs text-orange-600 dark:text-orange-400 font-medium">Goal: {goal}</span>
+        </div>
+        <div className="h-2 w-full bg-orange-200 dark:bg-slate-800 rounded-full overflow-hidden mt-2">
+          <div className="h-full bg-orange-500 transition-all duration-700 ease-out" style={{ width: `${progress}%` }}></div>
+        </div>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+          {currentStreak >= goal ? "You hit your weekly goal! 🎉" : `${goal - currentStreak} more days to reach your goal.`}
+        </p>
+      </div>
+    </div>
+  );
+};
 
 export default StudentDashboardPage;

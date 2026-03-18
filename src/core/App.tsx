@@ -79,6 +79,7 @@ import Dashdemo from "@/features/home/components/Dashdemo";
 import Contactpage from "@/features/home/components/ContactPage";
 import CourseSection from "@/features/student/components/CourseSection";
 import InstituteOwnerStudentProgressPage from "@/features/InstituteOwner/dashboard/InstituteOwnerStudentProgressPage";
+import Suggestion from "@/features/student/components/Suggestions";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -212,6 +213,7 @@ const AppRoutes = () => {
       <Route path="/student/speaking-history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentSpeakingHistoryPage /></RoleProtectedRoute>} />
       <Route path="/student/my-curriculum" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><MyCurriculum/></RoleProtectedRoute>} />
       <Route path="/student/batches" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentBatchView/></RoleProtectedRoute>} />
+      <Route path="/student/suggestion" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><Suggestion/></RoleProtectedRoute>} />
       <Route path="/student/speaking-practice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><SpeakingPractice/></RoleProtectedRoute>} />
 
       {/* Instructor Dashboard & Routes */}
