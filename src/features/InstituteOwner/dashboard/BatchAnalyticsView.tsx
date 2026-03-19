@@ -5,7 +5,7 @@ import { InstituteOwnerTopbar } from '../components/InstituteOwnerTopbar';
 import { callBackend } from '@/features/auth/services/authClient';
 import { getBackendUrl } from '@/shared/utils';
 import {
-  ArrowLeft, Loader2, TrendingUp, TrendingDown, Users, Mic, BookOpen,
+  ArrowLeft, Loader2, TrendingUp, TrendingDown, Users, Mic, BookOpen, PenTool,
   Trophy, Zap, CheckCircle, BarChart2, Medal
 } from 'lucide-react';
 import {
@@ -16,7 +16,7 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useToast } from '@/shared/hooks/use-toast';
 import { cn } from '@/shared/utils';
 
-type ActiveTab = 'overview' | 'speaking' | 'reading';
+type ActiveTab = 'overview' | 'speaking' | 'reading' | 'writing';
 
 // ─── Reading analytics shape ──────────────────────────────────────────────────
 interface ReadingStudentRow {
@@ -243,13 +243,13 @@ export default function BatchAnalyticsView() {
                   </div>
 
                   {/* Tab pills */}
-                  <div className="flex bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl p-1 gap-1 shadow-sm">
-                    {(['overview', 'speaking', 'reading'] as ActiveTab[]).map(tab => (
+                  <div className="flex bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl p-1 gap-1 shadow-sm overflow-x-auto">
+                    {(['overview', 'speaking', 'reading', 'writing'] as ActiveTab[]).map(tab => (
                       <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
                         className={cn(
-                          "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 capitalize",
+                          "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 capitalize whitespace-nowrap",
                           activeTab === tab
                             ? "bg-indigo-600 text-white shadow-sm"
                             : "text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5"
@@ -257,6 +257,7 @@ export default function BatchAnalyticsView() {
                       >
                         {tab === 'speaking' && <Mic className="w-3.5 h-3.5" />}
                         {tab === 'reading' && <BookOpen className="w-3.5 h-3.5" />}
+                        {tab === 'writing' && <PenTool className="w-3.5 h-3.5" />}
                         {tab === 'overview' && <BarChart2 className="w-3.5 h-3.5" />}
                         {tab.charAt(0).toUpperCase() + tab.slice(1)}
                       </button>
@@ -270,9 +271,10 @@ export default function BatchAnalyticsView() {
                 {activeTab === 'overview' && (
                   <div className="space-y-6 animate-in fade-in duration-300">
                     {/* Top Metrics */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                       <MetricCard label="Avg Speaking Score" value={data.summary.avgSpeaking != null ? Number(data.summary.avgSpeaking).toFixed(1) : '—'} icon={<Mic className="w-5 h-5 text-indigo-500" />} />
-                      <MetricCard label="Avg Reading Speed (WPM)" value={data.summary.avgReading != null ? Math.round(Number(data.summary.avgReading)) + ' WPM' : '—'} icon={<BookOpen className="w-5 h-5 text-emerald-500" />} />
+                      <MetricCard label="Avg Reading Speed" value={data.summary.avgReading != null ? Math.round(Number(data.summary.avgReading)) + ' WPM' : '—'} icon={<BookOpen className="w-5 h-5 text-emerald-500" />} />
+                      <MetricCard label="Avg Writing Score" value={data.summary.avgWriting != null ? Number(data.summary.avgWriting).toFixed(1) : '—'} icon={<PenTool className="w-5 h-5 text-purple-500" />} />
                       <MetricCard label="Avg Listening Score" value={data.summary.avgListening != null ? Number(data.summary.avgListening).toFixed(1) : '—'} icon={<Zap className="w-5 h-5 text-amber-500" />} />
                     </div>
 
@@ -303,6 +305,19 @@ export default function BatchAnalyticsView() {
                             <Legend />
                             <Line yAxisId="left" type="monotone" dataKey="wpm" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#10b981' }} name="WPM" />
                             <Line yAxisId="right" type="monotone" dataKey="accuracy" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4, fill: '#f59e0b' }} name="Accuracy %" />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </ChartCard>
+
+                      <ChartCard title="Writing Band Score Growth">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={data.writingTrends}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
+                            <XAxis dataKey="date" stroke="#888" fontSize={12} tickMargin={10} />
+                            <YAxis stroke="#888" fontSize={12} domain={[0, 9]} ticks={[0,1,2,3,4,5,6,7,8,9]} />
+                            <RechartsTooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px', color: '#fff' }} />
+                            <Legend />
+                            <Line type="monotone" dataKey="score" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4, fill: '#8b5cf6' }} name="Writing AI Band" />
                           </LineChart>
                         </ResponsiveContainer>
                       </ChartCard>
@@ -350,7 +365,7 @@ export default function BatchAnalyticsView() {
                                   <td className="px-6 py-4 font-medium">{student.speakingScore != null ? Number(student.speakingScore).toFixed(1) : '—'}</td>
                                   <td className="px-6 py-4 font-medium">{student.readingScore != null ? Math.round(Number(student.readingScore)) + ' WPM' : '—'}</td>
                                   <td className="px-6 py-4 font-medium">{student.listeningScore != null ? student.listeningScore : '—'}</td>
-                                  <td className="px-6 py-4 font-medium">{student.writingScore ?? fallbackScore}</td>
+                                  <td className="px-6 py-4 font-medium">{student.writingScore != null ? Number(student.writingScore).toFixed(1) : fallbackScore}</td>
                                   <td className="px-6 py-4">
                                     <span className="inline-flex px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs">
                                       {student.overallGrade}
@@ -404,6 +419,73 @@ export default function BatchAnalyticsView() {
                         </AreaChart>
                       </ResponsiveContainer>
                     </ChartCard>
+
+                    {/* Speaking Leaderboard */}
+                    <div className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl shadow-sm overflow-hidden">
+                      <div className="p-5 border-b border-slate-200 dark:border-[#27272a] flex items-center justify-between">
+                        <h3 className="text-lg font-bold flex items-center gap-2">
+                          <Trophy className="w-5 h-5 text-amber-500" /> Speaking Leaderboard
+                        </h3>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left text-sm">
+                          <thead className="bg-slate-50 dark:bg-[#1a1a1c] text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                            <tr>
+                              <th className="px-5 py-4">Rank</th>
+                              <th className="px-5 py-4">Student</th>
+                              <th className="px-5 py-4 text-center">Avg Fluency</th>
+                              <th className="px-5 py-4 text-center">Avg Band</th>
+                              <th className="px-5 py-4 text-center">Best Score</th>
+                              <th className="px-5 py-4 text-right pr-6">Sessions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-200 dark:divide-[#27272a]">
+                            {data.speakingLeaderboard?.map((student: any, i: number) => (
+                              <tr key={student.studentId} className="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
+                                <td className="px-5 py-4">
+                                  <span className={cn(
+                                    "inline-flex items-center justify-center w-7 h-7 rounded-full font-black text-xs",
+                                    getRankBadgeColor(i + 1)
+                                  )}>
+                                    {i + 1 <= 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}
+                                  </span>
+                                </td>
+                                <td className="px-5 py-4">
+                                  <div className="flex items-center gap-3">
+                                    {student.avatar ? (
+                                      <img src={student.avatar} alt="" className="w-8 h-8 rounded-full" />
+                                    ) : (
+                                      <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 flex items-center justify-center font-bold text-xs">
+                                        {student.name?.charAt(0)}
+                                      </div>
+                                    )}
+                                    <span className="font-semibold text-slate-900 dark:text-white">{student.name}</span>
+                                  </div>
+                                </td>
+                                <td className="px-5 py-4 text-center">
+                                  <span className="font-bold font-mono text-indigo-600 dark:text-indigo-400">
+                                    {Math.round(student.avgFluency)}
+                                  </span>
+                                </td>
+                                <td className="px-5 py-4 text-center">
+                                  <span className="inline-flex px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 font-bold text-xs text-slate-700 dark:text-slate-300">
+                                    {student.avgBand}
+                                  </span>
+                                </td>
+                                <td className="px-5 py-4 text-center">
+                                  <span className={cn("font-bold", getScoreColor(student.bestScore))}>
+                                    {student.bestScore ?? '—'}
+                                  </span>
+                                </td>
+                                <td className="px-5 py-4 text-right pr-6 text-slate-500 font-medium">
+                                  {student.totalSessions}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -532,6 +614,103 @@ export default function BatchAnalyticsView() {
                       </div>
                     </div>
                   )
+                )}
+
+                {/* ═══════════════════════════════════════════════════════════════ */}
+                {/* WRITING TAB */}
+                {/* ═══════════════════════════════════════════════════════════════ */}
+                {activeTab === 'writing' && (
+                  <div className="space-y-6 animate-in fade-in duration-300">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <MetricCard label="Avg Writing AI Band" value={data.summary.avgWriting != null ? Number(data.summary.avgWriting).toFixed(1) : '—'} icon={<PenTool className="w-5 h-5 text-purple-500" />} />
+                      <MetricCard label="Total Students" value={data.summary.totalStudents} icon={<Users className="w-5 h-5 text-slate-500" />} />
+                    </div>
+                    <ChartCard title="Writing Band Score Growth">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={data.writingTrends}>
+                          <defs>
+                            <linearGradient id="gradWriting" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4} />
+                              <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                          <XAxis dataKey="date" stroke="#888" fontSize={12} />
+                          <YAxis stroke="#888" fontSize={12} domain={[0, 9]} ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]} />
+                          <RechartsTooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
+                          <Legend />
+                          <Area type="monotone" dataKey="score" stroke="#8b5cf6" strokeWidth={3} fill="url(#gradWriting)" name="Writing Score" />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </ChartCard>
+
+                    {/* Writing Leaderboard */}
+                    <div className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl shadow-sm overflow-hidden">
+                      <div className="p-5 border-b border-slate-200 dark:border-[#27272a] flex items-center justify-between">
+                        <h3 className="text-lg font-bold flex items-center gap-2">
+                          <Trophy className="w-5 h-5 text-amber-500" /> Writing Leaderboard
+                        </h3>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left text-sm">
+                          <thead className="bg-slate-50 dark:bg-[#1a1a1c] text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                            <tr>
+                              <th className="px-5 py-4">Rank</th>
+                              <th className="px-5 py-4">Student</th>
+                              <th className="px-5 py-4 text-center">Avg Band</th>
+                              <th className="px-5 py-4 text-center">Avg Word Count</th>
+                              <th className="px-5 py-4 text-center">Best Score</th>
+                              <th className="px-5 py-4 text-right pr-6">Sessions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-200 dark:divide-[#27272a]">
+                            {data.writingLeaderboard?.map((student: any, i: number) => (
+                              <tr key={student.studentId} className="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
+                                <td className="px-5 py-4">
+                                  <span className={cn(
+                                    "inline-flex items-center justify-center w-7 h-7 rounded-full font-black text-xs",
+                                    getRankBadgeColor(i + 1)
+                                  )}>
+                                    {i + 1 <= 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}
+                                  </span>
+                                </td>
+                                <td className="px-5 py-4">
+                                  <div className="flex items-center gap-3">
+                                    {student.avatar ? (
+                                      <img src={student.avatar} alt="" className="w-8 h-8 rounded-full" />
+                                    ) : (
+                                      <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 flex items-center justify-center font-bold text-xs">
+                                        {student.name?.charAt(0)}
+                                      </div>
+                                    )}
+                                    <span className="font-semibold text-slate-900 dark:text-white">{student.name}</span>
+                                  </div>
+                                </td>
+                                <td className="px-5 py-4 text-center">
+                                  <span className="inline-flex px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-900/30 font-bold text-xs text-indigo-700 dark:text-indigo-400">
+                                    {student.avgBand}
+                                  </span>
+                                </td>
+                                <td className="px-5 py-4 text-center">
+                                  <span className="font-bold text-slate-700 dark:text-slate-300">
+                                    {student.avgWordCount} words
+                                  </span>
+                                </td>
+                                <td className="px-5 py-4 text-center">
+                                  <span className={cn("font-bold")}>
+                                    {student.bestScore ?? '—'}
+                                  </span>
+                                </td>
+                                <td className="px-5 py-4 text-right pr-6 text-slate-500 font-medium">
+                                  {student.totalSessions}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
                 )}
 
               </>
