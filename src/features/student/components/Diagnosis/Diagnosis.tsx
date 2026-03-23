@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { callBackend } from "@/features/auth/services/authClient";
+import { getBackendUrl } from "@/shared/utils";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES & INTERFACES
@@ -274,15 +275,14 @@ const MOCK_SPEAKING_PROMPT = `Talk about a memorable journey you have taken. You
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function fetchDiagnosticQuestionsData(skill: string) {
-  const data = await callBackend(`/api/diagnostic/questions/${skill}`, { method: "GET" });
+  const data = await callBackend(`${getBackendUrl()}/api/diagnostic/questions/${skill}`, { method: "GET" });
   if (!data?.ok) throw new Error("Fetch failed");
   return data;
 }
 
 async function fetchDiagnosticStatus(studentId: string): Promise<DiagnosticStatus> {
-  const res = await fetch(`/api/diagnostic/status/${studentId}`);
-  if (!res.ok) throw new Error("Status fetch failed");
-  return res.json();
+  const res = await callBackend(`${getBackendUrl()}/api/diagnostic/status`, { method: "GET" });
+  return res as unknown as DiagnosticStatus;
 }
 
 async function submitSection(
@@ -1938,7 +1938,7 @@ function OnboardingScreen() {
     e.preventDefault();
     setLoading(true);
     try {
-      await callBackend(`/api/profile`, {
+      await callBackend(`${getBackendUrl()}/api/profile`, {
         method: "PUT",
         body: JSON.stringify({ name, targetBand: Number(targetBand) }),
       });
