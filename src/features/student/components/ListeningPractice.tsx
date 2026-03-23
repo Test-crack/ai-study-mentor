@@ -6,27 +6,51 @@ import { Button } from '@/shared/components/ui/button';
 import { useToast } from '@/shared/hooks/use-toast';
 import {
   ArrowLeft, Send, Headphones, Info,
-  Sparkles, Play, Trophy, RotateCcw, CheckCircle2, XCircle, Clock
+  Sparkles, Play, Trophy, RotateCcw, CheckCircle2, XCircle, Clock, Map, Image as ImageIcon
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-type QuestionType = 'mcq' | 'form';
+type QuestionType = 'mcq' | 'form' | 'image_label' | 'image_map' | 'image_match';
 
 interface Option {
   id: string;
   text: string;
 }
 
+/**
+ * image_label  → an SVG/image with numbered hotspots; user types/selects a label per hotspot
+ * image_map    → a floor-plan / map image with lettered zones; user picks which zone matches a description
+ * image_match  → a set of diagrams/icons shown side by side; user matches a statement to one
+ */
+interface ImageHotspot {
+  id: string;          // e.g. "A", "B", "1", "2"
+  x: number;          // % from left
+  y: number;          // % from top
+  label?: string;     // display label on the hotspot marker
+}
+
+interface ImageQuestion {
+  /** Public URL or inline SVG data-uri for the image */
+  src: string;
+  alt: string;
+  hotspots?: ImageHotspot[];
+  /** Word bank shown below image for image_label tasks */
+  wordBank?: string[];
+}
+
 interface Question {
   id: string;
   type: QuestionType;
   text: string;
-  options?: Option[];   // for MCQ
-  answer: string;       // correct answer
-  hint?: string;        // for form questions
+  options?: Option[];        // for MCQ / image_map / image_match
+  answer: string;            // correct answer
+  hint?: string;
+  image?: ImageQuestion;     // for image_* types
+  /** For image_label: which hotspot id this question is asking about */
+  hotspotId?: string;
 }
 
 interface ListeningTask {
@@ -37,6 +61,8 @@ interface ListeningTask {
   topic: string;
   script: string;
   questions: Question[];
+  /** If true, show a shared image above the question group */
+  sharedImage?: ImageQuestion;
 }
 
 interface SectionResult {
@@ -44,7 +70,245 @@ interface SectionResult {
   results: Array<Question & { userAnswer: string; correct: boolean }>;
 }
 
-// ── IELTS Data ────────────────────────────────────────────────────────────────
+// ── SVG Diagrams (inline, no external dependency) ────────────────────────────
+
+/**
+ * Simple SVG floor-plan for the Library Orientation task.
+ * Zones are coloured rectangles labelled A-F.
+ */
+const LIBRARY_FLOOR_PLAN_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 360" font-family="system-ui,sans-serif">
+  <!-- Background -->
+  <rect width="500" height="360" fill="#f8fafc" rx="8"/>
+  <!-- Outer walls -->
+  <rect x="20" y="20" width="460" height="320" fill="none" stroke="#334155" stroke-width="3" rx="6"/>
+
+  <!-- Ground Floor left: Periodicals (A) -->
+  <rect x="20" y="20" width="130" height="160" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="85" y="95" text-anchor="middle" font-size="13" fill="#1e40af" font-weight="600">Periodicals</text>
+  <text x="85" y="112" text-anchor="middle" font-size="22" fill="#1d4ed8" font-weight="800">A</text>
+
+  <!-- Ground Floor centre: Info Desk (B) -->
+  <rect x="150" y="20" width="200" height="80" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="250" y="55" text-anchor="middle" font-size="13" fill="#166534" font-weight="600">Information Desk</text>
+  <text x="250" y="78" text-anchor="middle" font-size="22" fill="#15803d" font-weight="800">B</text>
+
+  <!-- Ground Floor right: Children (C) -->
+  <rect x="350" y="20" width="130" height="160" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.5"/>
+  <text x="415" y="88" text-anchor="middle" font-size="13" fill="#854d0e" font-weight="600">Children's</text>
+  <text x="415" y="106" text-anchor="middle" font-size="13" fill="#854d0e" font-weight="600">Library</text>
+  <text x="415" y="130" text-anchor="middle" font-size="22" fill="#a16207" font-weight="800">C</text>
+
+  <!-- Ground Floor centre-bottom: Entrance (shared) -->
+  <rect x="150" y="100" width="200" height="80" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="250" y="142" text-anchor="middle" font-size="12" fill="#475569">Main Entrance Area</text>
+
+  <!-- First Floor left: Reference (D) -->
+  <rect x="20" y="180" width="200" height="80" fill="#fce7f3" stroke="#db2777" stroke-width="1.5"/>
+  <text x="120" y="217" text-anchor="middle" font-size="13" fill="#9d174d" font-weight="600">Reference Section</text>
+  <text x="120" y="240" text-anchor="middle" font-size="22" fill="#be185d" font-weight="800">D</text>
+
+  <!-- First Floor right: Lending (E) -->
+  <rect x="220" y="180" width="260" height="80" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="350" y="217" text-anchor="middle" font-size="13" fill="#4c1d95" font-weight="600">Main Lending Collection</text>
+  <text x="350" y="240" text-anchor="middle" font-size="22" fill="#6d28d9" font-weight="800">E</text>
+
+  <!-- Second Floor: Study Centre (F) -->
+  <rect x="20" y="260" width="460" height="80" fill="#ffedd5" stroke="#ea580c" stroke-width="1.5"/>
+  <text x="250" y="297" text-anchor="middle" font-size="13" fill="#9a3412" font-weight="600">Study Centre &amp; Meeting Rooms</text>
+  <text x="250" y="322" text-anchor="middle" font-size="22" fill="#c2410c" font-weight="800">F</text>
+
+  <!-- Floor labels -->
+  <text x="490" y="120" text-anchor="end" font-size="10" fill="#64748b" transform="rotate(-90,490,120)">Ground Floor</text>
+  <text x="490" y="225" text-anchor="end" font-size="10" fill="#64748b" transform="rotate(-90,490,225)">1st Floor</text>
+  <text x="490" y="305" text-anchor="end" font-size="10" fill="#64748b" transform="rotate(-90,490,305)">2nd Floor</text>
+</svg>
+`)}`;
+
+/**
+ * Simple wildlife park map SVG — zones N/S/E/W + Central Arena.
+ */
+const WILDLIFE_PARK_MAP_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 380" font-family="system-ui,sans-serif">
+  <rect width="500" height="380" fill="#f0fdf4" rx="8"/>
+  <rect x="15" y="15" width="470" height="350" fill="none" stroke="#166534" stroke-width="2.5" rx="8"/>
+
+  <!-- North: Aquatic Zone (A) -->
+  <rect x="150" y="15" width="200" height="100" fill="#bfdbfe" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="250" y="60" text-anchor="middle" font-size="13" fill="#1e3a8a" font-weight="600">Aquatic Zone</text>
+  <text x="250" y="82" text-anchor="middle" font-size="11" fill="#1e40af">(Penguin Feeding)</text>
+  <text x="250" y="105" text-anchor="middle" font-size="20" fill="#1d4ed8" font-weight="800">A</text>
+
+  <!-- West: Primate Enclosure (B) -->
+  <rect x="15" y="115" width="130" height="140" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+  <text x="80" y="178" text-anchor="middle" font-size="12" fill="#065f46" font-weight="600">Primate</text>
+  <text x="80" y="194" text-anchor="middle" font-size="12" fill="#065f46" font-weight="600">Enclosure</text>
+  <text x="80" y="218" text-anchor="middle" font-size="20" fill="#047857" font-weight="800">B</text>
+
+  <!-- Central Arena (C) -->
+  <ellipse cx="250" cy="195" rx="80" ry="70" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+  <text x="250" y="188" text-anchor="middle" font-size="12" fill="#92400e" font-weight="600">Central</text>
+  <text x="250" y="204" text-anchor="middle" font-size="12" fill="#92400e" font-weight="600">Arena</text>
+  <text x="250" y="224" text-anchor="middle" font-size="20" fill="#b45309" font-weight="800">C</text>
+
+  <!-- East: Gift Shop + Cafeteria (D) -->
+  <rect x="355" y="115" width="130" height="140" fill="#fce7f3" stroke="#db2777" stroke-width="1.5"/>
+  <text x="420" y="175" text-anchor="middle" font-size="12" fill="#9d174d" font-weight="600">Gift Shop &amp;</text>
+  <text x="420" y="191" text-anchor="middle" font-size="12" fill="#9d174d" font-weight="600">Cafeteria</text>
+  <text x="420" y="215" text-anchor="middle" font-size="20" fill="#be185d" font-weight="800">D</text>
+
+  <!-- South: Petting Zoo (E) -->
+  <rect x="150" y="265" width="200" height="100" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="250" y="308" text-anchor="middle" font-size="13" fill="#4c1d95" font-weight="600">Petting Zoo &amp;</text>
+  <text x="250" y="324" text-anchor="middle" font-size="12" fill="#4c1d95">Animal Interaction</text>
+  <text x="250" y="350" text-anchor="middle" font-size="20" fill="#6d28d9" font-weight="800">E</text>
+
+  <!-- Compass -->
+  <text x="468" y="35" text-anchor="middle" font-size="14" fill="#166534" font-weight="700">N</text>
+  <line x1="468" y1="40" x2="468" y2="55" stroke="#166534" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Main entrance label -->
+  <text x="250" y="375" text-anchor="middle" font-size="10" fill="#6b7280">▼ Main Entrance</text>
+</svg>
+`)}`;
+
+/**
+ * Bioluminescence diagram: anglerfish with labelled parts.
+ */
+const ANGLERFISH_DIAGRAM_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 320" font-family="system-ui,sans-serif">
+  <rect width="520" height="320" fill="#0c1445" rx="8"/>
+
+  <!-- Body -->
+  <ellipse cx="240" cy="180" rx="120" ry="80" fill="#1a3a6e" stroke="#3b82f6" stroke-width="2"/>
+
+  <!-- Tail -->
+  <polygon points="360,150 440,120 440,240 360,210" fill="#1a3a6e" stroke="#3b82f6" stroke-width="2"/>
+
+  <!-- Mouth -->
+  <path d="M130 200 Q100 230 130 250" fill="none" stroke="#60a5fa" stroke-width="2.5"/>
+  <!-- Teeth -->
+  <line x1="115" y1="212" x2="122" y2="225" stroke="#93c5fd" stroke-width="1.5"/>
+  <line x1="110" y1="222" x2="118" y2="234" stroke="#93c5fd" stroke-width="1.5"/>
+  <line x1="113" y1="233" x2="121" y2="244" stroke="#93c5fd" stroke-width="1.5"/>
+
+  <!-- Eye -->
+  <circle cx="160" cy="155" r="18" fill="#0ea5e9" stroke="#38bdf8" stroke-width="2"/>
+  <circle cx="160" cy="155" r="8" fill="#0369a1"/>
+  <circle cx="165" cy="150" r="3" fill="white" opacity="0.8"/>
+
+  <!-- Dorsal fin lure (modified fin) -->
+  <line x1="220" y1="100" x2="200" y2="55" stroke="#a78bfa" stroke-width="3"/>
+  <ellipse cx="193" cy="42" rx="16" ry="12" fill="#fbbf24" stroke="#f59e0b" stroke-width="2" opacity="0.9"/>
+  <!-- Glow effect -->
+  <ellipse cx="193" cy="42" rx="24" ry="18" fill="none" stroke="#fde68a" stroke-width="1" opacity="0.5"/>
+  <ellipse cx="193" cy="42" rx="32" ry="24" fill="none" stroke="#fde68a" stroke-width="0.5" opacity="0.25"/>
+
+  <!-- Pectoral fin -->
+  <ellipse cx="175" cy="235" rx="35" ry="15" fill="#1e4080" stroke="#3b82f6" stroke-width="1.5" transform="rotate(-30 175 235)"/>
+
+  <!-- Hotspot labels -->
+  <!-- 1: Lure (esca) -->
+  <circle cx="193" cy="42" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5" opacity="0.9"/>
+  <text x="193" y="46" text-anchor="middle" font-size="11" fill="white" font-weight="700">1</text>
+
+  <!-- 2: Eye -->
+  <circle cx="160" cy="155" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5" opacity="0.9"/>
+  <text x="160" y="159" text-anchor="middle" font-size="11" fill="white" font-weight="700">2</text>
+
+  <!-- 3: Modified dorsal fin (spine) -->
+  <circle cx="220" cy="100" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5" opacity="0.9"/>
+  <text x="220" y="104" text-anchor="middle" font-size="11" fill="white" font-weight="700">3</text>
+
+  <!-- 4: Tail -->
+  <circle cx="400" cy="185" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5" opacity="0.9"/>
+  <text x="400" y="189" text-anchor="middle" font-size="11" fill="white" font-weight="700">4</text>
+
+  <!-- 5: Pectoral fin -->
+  <circle cx="175" cy="235" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5" opacity="0.9"/>
+  <text x="175" y="239" text-anchor="middle" font-size="11" fill="white" font-weight="700">5</text>
+
+  <text x="260" y="305" text-anchor="middle" font-size="11" fill="#93c5fd">Fig 1 — Anatomy of a Deep-Sea Anglerfish</text>
+</svg>
+`)}`;
+
+/**
+ * Mercator vs Peters projection illustration.
+ */
+const MAP_PROJECTIONS_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 280" font-family="system-ui,sans-serif">
+  <rect width="520" height="280" fill="#f8fafc" rx="8"/>
+
+  <!-- Mercator -->
+  <rect x="20" y="40" width="220" height="180" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" rx="4"/>
+  <!-- Grid lines -->
+  <line x1="20" y1="85" x2="240" y2="85" stroke="#93c5fd" stroke-width="0.8"/>
+  <line x1="20" y1="130" x2="240" y2="130" stroke="#93c5fd" stroke-width="0.8"/>
+  <line x1="20" y1="175" x2="240" y2="175" stroke="#93c5fd" stroke-width="0.8"/>
+  <line x1="93" y1="40" x2="93" y2="220" stroke="#93c5fd" stroke-width="0.8"/>
+  <line x1="167" y1="40" x2="167" y2="220" stroke="#93c5fd" stroke-width="0.8"/>
+
+  <!-- Greenland (exaggerated large near top) -->
+  <ellipse cx="80" cy="62" rx="38" ry="20" fill="#16a34a" opacity="0.7"/>
+  <text x="80" y="66" text-anchor="middle" font-size="9" fill="white" font-weight="600">Greenland</text>
+
+  <!-- Africa (appears smaller) -->
+  <ellipse cx="160" cy="140" rx="30" ry="40" fill="#ca8a04" opacity="0.7"/>
+  <text x="160" y="143" text-anchor="middle" font-size="9" fill="white" font-weight="600">Africa</text>
+
+  <!-- Europe -->
+  <ellipse cx="110" cy="80" rx="22" ry="15" fill="#7c3aed" opacity="0.7"/>
+  <text x="110" y="84" text-anchor="middle" font-size="8" fill="white">Europe</text>
+
+  <!-- Distortion annotation -->
+  <line x1="58" y1="50" x2="58" y2="82" stroke="#ef4444" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="25" y="44" font-size="9" fill="#ef4444">Distorted</text>
+  <text x="25" y="54" font-size="9" fill="#ef4444">↑ larger</text>
+
+  <!-- Hotspot 1 -->
+  <circle cx="80" cy="62" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5"/>
+  <text x="80" y="66" text-anchor="middle" font-size="11" fill="white" font-weight="700">1</text>
+
+  <!-- Hotspot 2 -->
+  <circle cx="160" cy="140" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5"/>
+  <text x="160" y="144" text-anchor="middle" font-size="11" fill="white" font-weight="700">2</text>
+
+  <text x="130" y="235" text-anchor="middle" font-size="12" fill="#1e40af" font-weight="700">Mercator Projection</text>
+  <text x="130" y="250" text-anchor="middle" font-size="10" fill="#6b7280">Standard nautical navigation</text>
+
+  <!-- Peters -->
+  <rect x="280" y="40" width="220" height="180" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" rx="4"/>
+  <!-- Grid lines -->
+  <line x1="280" y1="85" x2="500" y2="85" stroke="#86efac" stroke-width="0.8"/>
+  <line x1="280" y1="130" x2="500" y2="130" stroke="#86efac" stroke-width="0.8"/>
+  <line x1="280" y1="175" x2="500" y2="175" stroke="#86efac" stroke-width="0.8"/>
+  <line x1="353" y1="40" x2="353" y2="220" stroke="#86efac" stroke-width="0.8"/>
+  <line x1="427" y1="40" x2="427" y2="220" stroke="#86efac" stroke-width="0.8"/>
+
+  <!-- Greenland (accurate, small) -->
+  <ellipse cx="335" cy="65" rx="15" ry="8" fill="#16a34a" opacity="0.7"/>
+  <text x="335" y="69" text-anchor="middle" font-size="8" fill="white">Greenland</text>
+
+  <!-- Africa (accurate, large) -->
+  <ellipse cx="420" cy="135" rx="40" ry="60" fill="#ca8a04" opacity="0.7"/>
+  <text x="420" y="137" text-anchor="middle" font-size="9" fill="white" font-weight="600">Africa</text>
+
+  <!-- Europe -->
+  <ellipse cx="370" cy="82" rx="18" ry="10" fill="#7c3aed" opacity="0.7"/>
+  <text x="370" y="86" text-anchor="middle" font-size="8" fill="white">Europe</text>
+
+  <!-- Hotspot 3 -->
+  <circle cx="335" cy="65" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5"/>
+  <text x="335" y="69" text-anchor="middle" font-size="11" fill="white" font-weight="700">3</text>
+
+  <!-- Hotspot 4 -->
+  <circle cx="420" cy="135" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5"/>
+  <text x="420" y="139" text-anchor="middle" font-size="11" fill="white" font-weight="700">4</text>
+
+  <text x="390" y="235" text-anchor="middle" font-size="12" fill="#166534" font-weight="700">Peters Projection</text>
+  <text x="390" y="250" text-anchor="middle" font-size="10" fill="#6b7280">Equal-area, proposed 1974</text>
+</svg>
+`)}`;
 
 // ── IELTS Data ────────────────────────────────────────────────────────────────
 
@@ -158,7 +422,7 @@ Caller: Brilliant. I'll go ahead and book it then.`,
     title: 'Section 2',
     topic: 'City Library Orientation',
     type: 'Monologue in a social context',
-    description: 'Listen to a guide giving an orientation talk at the Westfield City Library for new members.',
+    description: 'Listen to a guide giving an orientation talk at the Westfield City Library. Label the floor plan and answer questions about facilities.',
     script: `Welcome, everyone, to the Westfield City Library. My name is James Hartley, and I'll be your guide for today's orientation. Whether you're a new member or returning after a while, I hope this tour will help you make the most of everything we offer.
 
 Let me begin with the layout. As you enter through the main doors, you'll find the information desk directly ahead of you. Staff there can help you with membership registration, renewals, and general enquiries. To the left of the information desk is our periodicals section, where you can read newspapers and magazines from both the UK and abroad.
@@ -176,10 +440,52 @@ We also have two meeting rooms available for hire on the second floor. These can
 Finally, I'd like to mention our digital services. All members have free access to our online catalogue, e-book library, and audiobook collection. Simply log in with your membership number on our website. If you have any trouble accessing these services, the IT helpdesk on the first floor will be happy to assist.
 
 Thank you for listening. Please feel free to pick up a copy of our library guide from the information desk, and don't hesitate to ask any of our staff if you need help.`,
+    sharedImage: {
+      src: LIBRARY_FLOOR_PLAN_SVG,
+      alt: 'Westfield City Library floor plan with zones labelled A to F',
+      hotspots: [
+        { id: 'A', x: 17, y: 27, label: 'A' },
+        { id: 'B', x: 50, y: 14, label: 'B' },
+        { id: 'C', x: 83, y: 27, label: 'C' },
+        { id: 'D', x: 24, y: 56, label: 'D' },
+        { id: 'E', x: 70, y: 56, label: 'E' },
+        { id: 'F', x: 50, y: 83, label: 'F' },
+      ],
+    },
     questions: [
       {
+        id: 'q2_img1', type: 'image_map',
+        text: '1. Which zone (A–F) on the floor plan shows the Periodicals section?',
+        image: { src: LIBRARY_FLOOR_PLAN_SVG, alt: 'Library floor plan' },
+        options: [
+          { id: 'A', text: 'Zone A' },
+          { id: 'B', text: 'Zone B' },
+          { id: 'C', text: 'Zone C' },
+          { id: 'D', text: 'Zone D' },
+          { id: 'E', text: 'Zone E' },
+          { id: 'F', text: 'Zone F' },
+        ],
+        answer: 'A',
+        hint: 'Listen for where the speaker says the periodicals section is relative to the information desk.',
+      },
+      {
+        id: 'q2_img2', type: 'image_map',
+        text: '2. The Children\'s Library is shown as which zone on the map?',
+        image: { src: LIBRARY_FLOOR_PLAN_SVG, alt: 'Library floor plan' },
+        options: [
+          { id: 'A', text: 'Zone A' },
+          { id: 'B', text: 'Zone B' },
+          { id: 'C', text: 'Zone C' },
+          { id: 'D', text: 'Zone D' },
+          { id: 'E', text: 'Zone E' },
+          { id: 'F', text: 'Zone F' },
+        ],
+        answer: 'C',
+        hint: 'The guide says it is on the right side of the ground floor.',
+      },
+      {
         id: 'q2_1', type: 'mcq',
-        text: '1. Where is the information desk located?',
+        text: '3. Where is the information desk located?',
         options: [
           { id: 'A', text: 'A. To the left of the entrance' },
           { id: 'B', text: 'B. Directly ahead of the main doors' },
@@ -190,29 +496,12 @@ Thank you for listening. Please feel free to pick up a copy of our library guide
       },
       {
         id: 'q2_2', type: 'form',
-        text: '2. At what time are the Saturday children\'s reading sessions held?',
+        text: '4. At what time are the Saturday children\'s reading sessions held?',
         answer: '10am',
         hint: 'A specific time is mentioned',
       },
       {
         id: 'q2_3', type: 'mcq',
-        text: '3. For how long can members borrow books?',
-        options: [
-          { id: 'A', text: 'A. Two weeks' },
-          { id: 'B', text: 'B. Three weeks' },
-          { id: 'C', text: 'C. Four weeks' },
-          { id: 'D', text: 'D. One month' },
-        ],
-        answer: 'B',
-      },
-      {
-        id: 'q2_4', type: 'form',
-        text: '4. What is the maximum computer session length per day? (in hours)',
-        answer: '2',
-        hint: 'A number of hours is stated',
-      },
-      {
-        id: 'q2_5', type: 'mcq',
         text: '5. What must members do to hire a meeting room?',
         options: [
           { id: 'A', text: 'A. Book 24 hours in advance' },
@@ -223,10 +512,19 @@ Thank you for listening. Please feel free to pick up a copy of our library guide
         answer: 'C',
       },
       {
-        id: 'q2_6', type: 'form',
-        text: '6. On which floor is the IT helpdesk located?',
-        answer: 'First floor',
-        hint: 'The speaker mentions the floor name',
+        id: 'q2_4', type: 'image_map',
+        text: '6. The Study Centre and Meeting Rooms occupy which zone?',
+        image: { src: LIBRARY_FLOOR_PLAN_SVG, alt: 'Library floor plan' },
+        options: [
+          { id: 'A', text: 'Zone A' },
+          { id: 'B', text: 'Zone B' },
+          { id: 'C', text: 'Zone C' },
+          { id: 'D', text: 'Zone D' },
+          { id: 'E', text: 'Zone E' },
+          { id: 'F', text: 'Zone F' },
+        ],
+        answer: 'F',
+        hint: 'These are on the second floor.',
       },
     ],
   },
@@ -339,7 +637,7 @@ Sarah: Great. Thank you, Dr. Chen. We feel much clearer about our direction now.
     title: 'Section 4',
     topic: 'The History of Cartography',
     type: 'Academic lecture',
-    description: 'Listen to an academic lecture on the history and evolution of mapmaking from ancient Babylon to the modern digital age.',
+    description: 'Listen to an academic lecture on the history and evolution of mapmaking. Use the diagram to answer image-based questions.',
     script: `Good afternoon, everyone. Today I'd like to take you on a journey through the history of cartography — the science and art of mapmaking — and explore how maps have shaped human understanding of the world.
 
 The earliest known maps date back to ancient Babylon, around 2300 BCE. These were clay tablets that depicted not just physical geography but also the known cosmos. Interestingly, Babylon was placed at the very centre of these early world maps, reflecting the human tendency to position oneself at the heart of the universe.
@@ -359,6 +657,10 @@ The twentieth century also witnessed the transformation of cartography through t
 Yet despite these advances, maps remain profoundly interpretive documents. Every map involves choices — what to include, what to omit, how to represent borders — and those choices always reflect particular perspectives and priorities. As the geographer John Harley argued, maps are never neutral. They are instruments of communication, and sometimes, of power.
 
 Thank you. I'll now take a few questions before we move on to the seminar discussion.`,
+    sharedImage: {
+      src: MAP_PROJECTIONS_SVG,
+      alt: 'Side-by-side comparison of Mercator and Peters map projections with hotspots labelled 1–4',
+    },
     questions: [
       {
         id: 'q4_1', type: 'mcq',
@@ -378,24 +680,29 @@ Thank you. I'll now take a few questions before we move on to the seminar discus
         hint: 'A Greek scholar is named',
       },
       {
+        id: 'q4_img1', type: 'image_label',
+        text: '3. Look at the diagram above. What does hotspot 1 (on the Mercator projection) represent — which land mass appears exaggerated in size?',
+        image: {
+          src: MAP_PROJECTIONS_SVG,
+          alt: 'Mercator vs Peters projections diagram',
+          wordBank: ['Greenland', 'Africa', 'Europe', 'Asia', 'North America'],
+        },
+        answer: 'Greenland',
+        hint: 'The lecturer specifically names a land mass near the poles that appears similar in size to Africa.',
+      },
+      {
+        id: 'q4_img2', type: 'image_label',
+        text: '4. In the Peters projection (right side), hotspot 4 shows the land mass depicted at its true relative size. What is it?',
+        image: {
+          src: MAP_PROJECTIONS_SVG,
+          alt: 'Mercator vs Peters projections diagram',
+          wordBank: ['Greenland', 'Africa', 'Europe', 'Asia', 'North America'],
+        },
+        answer: 'Africa',
+        hint: 'The lecturer says Africa is approximately fourteen times larger than Greenland.',
+      },
+      {
         id: 'q4_3', type: 'mcq',
-        text: '3. What was placed at the centre of medieval Mappa Mundi?',
-        options: [
-          { id: 'A', text: 'A. Babylon' },
-          { id: 'B', text: 'B. Rome' },
-          { id: 'C', text: 'C. Jerusalem' },
-          { id: 'D', text: 'D. Athens' },
-        ],
-        answer: 'C',
-      },
-      {
-        id: 'q4_4', type: 'form',
-        text: '4. What was the nationality of the cartographer Gerardus Mercator?',
-        answer: 'Flemish',
-        hint: 'His origin is clearly stated',
-      },
-      {
-        id: 'q4_5', type: 'mcq',
         text: '5. What is the main criticism of the Mercator projection?',
         options: [
           { id: 'A', text: 'A. It cannot be used at sea' },
@@ -406,7 +713,7 @@ Thank you. I'll now take a few questions before we move on to the seminar discus
         answer: 'B',
       },
       {
-        id: 'q4_6', type: 'mcq',
+        id: 'q4_4', type: 'mcq',
         text: '6. According to the lecturer, what do all maps have in common?',
         options: [
           { id: 'A', text: 'A. They are always accurate' },
@@ -504,7 +811,7 @@ Man: Fantastic. I'll sign up for the monthly Premium membership, please.`,
     title: 'Section 2',
     topic: 'Wildlife Park Tour',
     type: 'Monologue in a social context',
-    description: 'Listen to a tour guide giving visitors an overview of the day\'s schedule at a wildlife park.',
+    description: 'Listen to a tour guide giving visitors an overview of the day\'s schedule. Use the park map to answer location questions.',
     script: `Hello everyone, and welcome to the Oakwood Wildlife Park! We are absolutely thrilled to have you with us today. Before you head off to explore, I want to quickly run through some of the daily events and feeding times so you don't miss out on the highlights.
 
 Right now it's 9:30 AM. The park is fully open, and I highly recommend heading over to the primate enclosure first. They are most active in the morning.
@@ -518,10 +825,42 @@ If you have young children with you, the petting zoo is open all day. It's situa
 Finally, a quick safety reminder. Please do not attempt to feed any of the animals with your own food. Many of our animals are on strict, specialized diets, and human food can make them very ill. If you wish to feed the animals, specially formulated feed bags are available for purchase at the gift shop for just two pounds.
 
 Have a wonderful day exploring the park, and if you need any assistance, any of our staff members wearing green polo shirts will be happy to help.`,
+    sharedImage: {
+      src: WILDLIFE_PARK_MAP_SVG,
+      alt: 'Oakwood Wildlife Park map with zones labelled A to E',
+    },
     questions: [
       {
+        id: 'q6_img1', type: 'image_map',
+        text: '1. Look at the park map. Which zone (A–E) is the Aquatic Zone, where the penguin feeding takes place?',
+        image: { src: WILDLIFE_PARK_MAP_SVG, alt: 'Wildlife park map' },
+        options: [
+          { id: 'A', text: 'Zone A — North' },
+          { id: 'B', text: 'Zone B — West' },
+          { id: 'C', text: 'Zone C — Central' },
+          { id: 'D', text: 'Zone D — East' },
+          { id: 'E', text: 'Zone E — South' },
+        ],
+        answer: 'A',
+        hint: 'The guide says the Aquatic Zone is in the northern sector.',
+      },
+      {
+        id: 'q6_img2', type: 'image_map',
+        text: '2. The Birds of Prey demonstration takes place in which zone on the map?',
+        image: { src: WILDLIFE_PARK_MAP_SVG, alt: 'Wildlife park map' },
+        options: [
+          { id: 'A', text: 'Zone A — North' },
+          { id: 'B', text: 'Zone B — West' },
+          { id: 'C', text: 'Zone C — Central' },
+          { id: 'D', text: 'Zone D — East' },
+          { id: 'E', text: 'Zone E — South' },
+        ],
+        answer: 'C',
+        hint: 'Listen for the location of the central arena.',
+      },
+      {
         id: 'q6_1', type: 'mcq',
-        text: '1. Which animals does the guide recommend seeing first?',
+        text: '3. Which animals does the guide recommend seeing first?',
         options: [
           { id: 'A', text: 'A. The penguins' },
           { id: 'B', text: 'B. The birds of prey' },
@@ -532,37 +871,23 @@ Have a wonderful day exploring the park, and if you need any assistance, any of 
       },
       {
         id: 'q6_2', type: 'form',
-        text: '2. At what time is the penguin feeding session?',
-        answer: '11:30 AM',
-        hint: 'Listen for the specific time mentioned for the Aquatic Zone.',
-      },
-      {
-        id: 'q6_3', type: 'mcq',
-        text: '3. Where does the Birds of Prey demonstration take place?',
-        options: [
-          { id: 'A', text: 'A. The Aquatic Zone' },
-          { id: 'B', text: 'B. The central arena' },
-          { id: 'C', text: 'C. The northern sector' },
-          { id: 'D', text: 'D. Next to the cafeteria' },
-        ],
-        answer: 'B',
-      },
-      {
-        id: 'q6_4', type: 'form',
-        text: '4. What time does the animal interaction zone close?',
+        text: '4. At what time does the animal interaction zone close?',
         answer: '4:00 PM',
         hint: 'Listen for the closing time of the area next to the cafeteria.',
       },
       {
-        id: 'q6_5', type: 'mcq',
-        text: '5. How can visitors identify staff members who can help them?',
+        id: 'q6_img3', type: 'image_map',
+        text: '5. The Petting Zoo and Animal Interaction area is next to the cafeteria. Which zone does this match on the map?',
+        image: { src: WILDLIFE_PARK_MAP_SVG, alt: 'Wildlife park map' },
         options: [
-          { id: 'A', text: 'A. They are wearing green polo shirts' },
-          { id: 'B', text: 'B. They are stationed at the gift shop' },
-          { id: 'C', text: 'C. They have walkie-talkies' },
-          { id: 'D', text: 'D. They are wearing blue caps' },
+          { id: 'A', text: 'Zone A — North' },
+          { id: 'B', text: 'Zone B — West' },
+          { id: 'C', text: 'Zone C — Central' },
+          { id: 'D', text: 'Zone D — East' },
+          { id: 'E', text: 'Zone E — South' },
         ],
-        answer: 'A',
+        answer: 'E',
+        hint: 'The guide says the petting zoo is situated next to the cafeteria.',
       },
     ],
   },
@@ -602,7 +927,7 @@ Chloe: Great, we are on track to finish the draft by this Friday. We'll send it 
     questions: [
       {
         id: 'q7_1', type: 'mcq',
-        text: '1. Which demographic is the focus of Chloe and Mark’s presentation?',
+        text: '1. Which demographic is the focus of Chloe and Mark\'s presentation?',
         options: [
           { id: 'A', text: 'A. Millennials' },
           { id: 'B', text: 'B. Gen Z' },
@@ -652,7 +977,7 @@ Chloe: Great, we are on track to finish the draft by this Friday. We'll send it 
     title: 'Section 4',
     topic: 'The Science of Bioluminescence',
     type: 'Academic lecture',
-    description: 'Listen to a biology lecture explaining the mechanisms and evolutionary purposes of bioluminescence in marine life.',
+    description: 'Listen to a biology lecture on bioluminescence in marine life. Label the anglerfish anatomy diagram.',
     script: `Welcome back to our marine biology module. Today, we are exploring one of the most mesmerizing phenomena in the natural world: bioluminescence. This is the biochemical emission of light by living organisms. While it can be found on land—think of fireflies or certain fungi—it is overwhelmingly a marine phenomenon. 
 
 To understand bioluminescence, we must first look at the chemistry behind it. The light is produced by a chemical reaction involving a light-emitting molecule, generically called luciferin, and an enzyme called luciferase. When oxygen is introduced to this mixture, the luciferin oxidizes, and the energy from this reaction is released as visible light. Unlike the light from a traditional incandescent light bulb, which wastes a huge amount of energy as heat, bioluminescence is "cold light." Nearly 100% of the energy is emitted as light, making it incredibly efficient.
@@ -666,6 +991,18 @@ The second major function is predation. The most famous example of this is the a
 Finally, bioluminescence plays a vital role in communication and mating. Many deep-sea shrimp and jellyfish use specific patterns of light flashes to identify members of their own species and attract mates. Because the deep ocean is so vast and sparsely populated, this visual signaling is far more effective than chemical or acoustic communication over short distances.
 
 Interestingly, medical science is now borrowing from the ocean. Researchers are utilizing the green fluorescent protein, originally discovered in jellyfish, as a biological marker. By attaching this glowing protein to specific genes or cells, scientists can literally watch cellular processes unfold in real-time under a microscope, which has revolutionized genetics and cancer research.`,
+    sharedImage: {
+      src: ANGLERFISH_DIAGRAM_SVG,
+      alt: 'Labelled diagram of an anglerfish with numbered hotspots 1–5',
+      hotspots: [
+        { id: '1', x: 37, y: 13, label: '1' },
+        { id: '2', x: 31, y: 48, label: '2' },
+        { id: '3', x: 42, y: 31, label: '3' },
+        { id: '4', x: 77, y: 58, label: '4' },
+        { id: '5', x: 34, y: 73, label: '5' },
+      ],
+      wordBank: ['Lure (esca)', 'Eye', 'Modified dorsal fin spine', 'Tail fin', 'Pectoral fin', 'Mouth', 'Gill'],
+    },
     questions: [
       {
         id: 'q8_1', type: 'form',
@@ -685,24 +1022,31 @@ Interestingly, medical science is now borrowing from the ocean. Researchers are 
         answer: 'B',
       },
       {
-        id: 'q8_3', type: 'form',
-        text: '3. Beyond what depth does sunlight fail to penetrate the ocean?',
-        answer: '200 meters',
-        hint: 'Listen for a specific measurement in meters.',
+        id: 'q8_img1', type: 'image_label',
+        text: '3. Refer to the anglerfish diagram. Hotspot 1 marks the glowing structure used to attract prey. Choose the correct label from the word bank.',
+        image: {
+          src: ANGLERFISH_DIAGRAM_SVG,
+          alt: 'Anglerfish anatomy diagram',
+          wordBank: ['Lure (esca)', 'Eye', 'Modified dorsal fin spine', 'Tail fin', 'Pectoral fin'],
+        },
+        hotspotId: '1',
+        answer: 'Lure (esca)',
+        hint: 'The lecturer describes "a glowing, bacteria-filled sac" dangled in front of the mouth.',
       },
       {
-        id: 'q8_4', type: 'mcq',
-        text: '4. How does the anglerfish use bioluminescence?',
-        options: [
-          { id: 'A', text: 'A. To confuse predators' },
-          { id: 'B', text: 'B. To communicate with other anglerfish' },
-          { id: 'C', text: 'C. To attract smaller fish as prey' },
-          { id: 'D', text: 'D. To navigate through coral reefs' },
-        ],
-        answer: 'C',
+        id: 'q8_img2', type: 'image_label',
+        text: '4. Hotspot 3 marks the structure that acts like a fishing rod to hold the lure. Choose the correct label.',
+        image: {
+          src: ANGLERFISH_DIAGRAM_SVG,
+          alt: 'Anglerfish anatomy diagram',
+          wordBank: ['Lure (esca)', 'Eye', 'Modified dorsal fin spine', 'Tail fin', 'Pectoral fin'],
+        },
+        hotspotId: '3',
+        answer: 'Modified dorsal fin spine',
+        hint: 'The lecturer says the anglerfish has "a modified dorsal fin that acts like a fishing rod."',
       },
       {
-        id: 'q8_5', type: 'mcq',
+        id: 'q8_3', type: 'mcq',
         text: '5. What have medical researchers used green fluorescent protein for?',
         options: [
           { id: 'A', text: 'A. To cure deep-sea viruses' },
@@ -735,7 +1079,11 @@ function getIELTSBand(correct: number, total: number): string {
 function checkAnswer(question: Question, userAnswer: string): boolean {
   const ua = userAnswer.trim().toLowerCase();
   const ca = question.answer.trim().toLowerCase();
-  if (question.type === 'mcq') return ua === ca;
+  if (question.type === 'mcq' || question.type === 'image_map') return ua === ca;
+  if (question.type === 'image_label') {
+    // accept if answer contains the key word(s)
+    return ca.split(' ').filter(w => w.length > 3).some(word => ua.includes(word));
+  }
   return ca.split(' ').some(word => word.length > 3 && ua.includes(word));
 }
 
@@ -743,6 +1091,172 @@ function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0');
   const s = (seconds % 60).toString().padStart(2, '0');
   return `${m}:${s}`;
+}
+
+// ── Question type badge label helper ─────────────────────────────────────────
+
+function questionTypeBadge(type: QuestionType) {
+  const map: Record<QuestionType, { label: string; color: string }> = {
+    mcq:          { label: 'Multiple Choice',    color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+    form:         { label: 'Short Answer',       color: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400' },
+    image_label:  { label: 'Diagram Labelling',  color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
+    image_map:    { label: 'Map / Plan',         color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
+    image_match:  { label: 'Image Matching',     color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
+  };
+  const { label, color } = map[type];
+  return <span className={`inline-block text-[10px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full ${color} mb-2`}>{label}</span>;
+}
+
+// ── ImageQuestionBlock ────────────────────────────────────────────────────────
+
+interface ImageQuestionBlockProps {
+  question: Question;
+  answer: string;
+  onAnswer: (val: string) => void;
+}
+
+function ImageQuestionBlock({ question, answer, onAnswer }: ImageQuestionBlockProps) {
+  const img = question.image;
+  if (!img) return null;
+
+  // image_map: show a compact image thumbnail + zone grid buttons
+  if (question.type === 'image_map') {
+    return (
+      <div className="space-y-4">
+        {/* Map thumbnail */}
+        <div className="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 max-h-56">
+          <img
+            src={img.src}
+            alt={img.alt}
+            className="w-full h-full object-contain max-h-56"
+            draggable={false}
+          />
+        </div>
+        {/* Zone grid */}
+        <div className="grid grid-cols-3 gap-2">
+          {(question.options ?? []).map(opt => {
+            const selected = answer === opt.id;
+            return (
+              <button
+                key={opt.id}
+                onClick={() => onAnswer(opt.id)}
+                className={`py-2.5 px-3 rounded-xl border-2 text-sm font-medium transition-all duration-150 text-left
+                  ${selected
+                    ? 'border-[#7B61FF] bg-indigo-50 text-indigo-800 dark:border-[#7B61FF] dark:bg-[#7B61FF]/10 dark:text-indigo-200'
+                    : 'border-slate-200 bg-white text-slate-700 hover:border-[#7B61FF]/50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-[#7B61FF]/40'
+                  }`}
+              >
+                <span className={`inline-block w-5 h-5 rounded-full border-2 mr-2 text-xs font-bold text-center leading-4
+                  ${selected ? 'border-[#7B61FF] bg-[#7B61FF] text-white' : 'border-slate-400 dark:border-slate-500'}`}>
+                  {opt.id}
+                </span>
+                {opt.text.replace(`Zone ${opt.id} — `, '')}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // image_label: show image + word bank chips
+  if (question.type === 'image_label') {
+    const wordBank = img.wordBank ?? [];
+    return (
+      <div className="space-y-4">
+        {/* Diagram */}
+        <div className="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-900 max-h-56">
+          <img
+            src={img.src}
+            alt={img.alt}
+            className="w-full object-contain max-h-56"
+            draggable={false}
+          />
+        </div>
+        {/* Word bank */}
+        {wordBank.length > 0 && (
+          <div>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mb-2 uppercase tracking-wider font-semibold">
+              Word Bank — click to select your answer:
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {wordBank.map(word => {
+                const selected = answer === word;
+                return (
+                  <button
+                    key={word}
+                    onClick={() => onAnswer(selected ? '' : word)}
+                    className={`px-3 py-1.5 rounded-lg border-2 text-sm font-medium transition-all duration-150
+                      ${selected
+                        ? 'border-[#7B61FF] bg-indigo-50 text-indigo-800 dark:border-[#7B61FF] dark:bg-[#7B61FF]/15 dark:text-indigo-200'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-[#7B61FF]/40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                      }`}
+                  >
+                    {word}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+        {/* Also allow free text in case user wants to type */}
+        <div>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mb-1">Or type your answer:</p>
+          <input
+            type="text"
+            value={answer}
+            onChange={e => onAnswer(e.target.value)}
+            placeholder="Type label here…"
+            className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-200 dark:border-slate-700
+              bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm
+              placeholder-slate-400 dark:placeholder-slate-500 outline-none
+              focus:border-[#7B61FF] dark:focus:border-[#7B61FF] transition-colors"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}
+
+// ── Shared Image Panel ────────────────────────────────────────────────────────
+
+function SharedImagePanel({ image, isPlaying }: { image: ImageQuestion; isPlaying: boolean }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div className={`rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900
+      transition-all duration-300 ${expanded ? '' : 'max-h-64'}`}>
+      <div className="flex items-center justify-between px-3 py-2 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+          <Map className="w-3.5 h-3.5" />
+          Reference Diagram / Map
+        </div>
+        <button
+          onClick={() => setExpanded(e => !e)}
+          className="text-xs text-[#7B61FF] dark:text-[#9b86ff] hover:underline"
+        >
+          {expanded ? 'Collapse' : 'Expand'}
+        </button>
+      </div>
+      <div className={`overflow-hidden transition-all duration-300 ${expanded ? 'max-h-[600px]' : 'max-h-52'}`}>
+        <img
+          src={image.src}
+          alt={image.alt}
+          className="w-full object-contain"
+          draggable={false}
+        />
+      </div>
+      {isPlaying && (
+        <div className="px-3 py-1.5 bg-indigo-50 dark:bg-[#7B61FF]/10 border-t border-indigo-100 dark:border-[#7B61FF]/20">
+          <p className="text-xs text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse inline-block" />
+            Study this diagram while listening
+          </p>
+        </div>
+      )}
+    </div>
+  );
 }
 
 // ── Main Component ────────────────────────────────────────────────────────────
@@ -753,59 +1267,39 @@ export default function ListeningPractice() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Layout
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-
-  // Navigation
   const [screen, setScreen] = useState<ScreenView>('home');
   const [selectedTask, setSelectedTask] = useState<ListeningTask | null>(null);
-
-  // Answers & submission
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [allResults, setAllResults] = useState<SectionResult[]>([]);
 
-  // TTS Audio
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasPlayed, setHasPlayed] = useState(false);
   const [currentBoundaryIndex, setCurrentBoundaryIndex] = useState(-1);
-
-  // Script visibility
   const [scriptVisible, setScriptVisible] = useState(false);
-
-  // Timer
   const [elapsed, setElapsed] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // --- BUG FIX: Warm up voices on mount ---
-  useEffect(() => {
-    window.speechSynthesis.getVoices();
-  }, []);
+  useEffect(() => { window.speechSynthesis.getVoices(); }, []);
 
-  // Timer & Chrome 14-second bug fix
   useEffect(() => {
     let fixInterval: ReturnType<typeof setInterval>;
-    
     if (screen === 'test' && isPlaying) {
-      // 1. Regular timer
       timerRef.current = setInterval(() => setElapsed(e => e + 1), 1000);
-      
-      // 2. Chrome 14-Second Hack: Pause and resume very quickly to keep the engine alive on long text
       fixInterval = setInterval(() => {
         window.speechSynthesis.pause();
         window.speechSynthesis.resume();
-      }, 14000); 
+      }, 14000);
     } else {
       if (timerRef.current) clearInterval(timerRef.current);
     }
-    
-    return () => { 
-      if (timerRef.current) clearInterval(timerRef.current); 
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
       if (fixInterval) clearInterval(fixInterval);
     };
   }, [screen, isPlaying]);
 
-  // Stop TTS when leaving test screen
   useEffect(() => {
     if (screen !== 'test') {
       window.speechSynthesis?.cancel();
@@ -815,13 +1309,11 @@ export default function ListeningPractice() {
     }
   }, [screen]);
 
-  // Pre-calculate word boundaries
   const scriptParagraphs = useMemo(() => {
     if (!selectedTask) return [];
     const paragraphs: Array<Array<{ text: string; space: string; start: number; end: number }>> = [];
     let currentIndex = 0;
     const paras = selectedTask.script.split('\n\n');
-
     paras.forEach((para) => {
       const words: Array<{ text: string; space: string; start: number; end: number }> = [];
       const regex = /([^\s]+)(\s*)/g;
@@ -835,7 +1327,7 @@ export default function ListeningPractice() {
         });
       }
       paragraphs.push(words);
-      currentIndex += para.length + 2; 
+      currentIndex += para.length + 2;
     });
     return paragraphs;
   }, [selectedTask]);
@@ -843,53 +1335,22 @@ export default function ListeningPractice() {
   const speak = useCallback(() => {
     if (!selectedTask) return;
     window.speechSynthesis.cancel();
-    
     const utter = new SpeechSynthesisUtterance(selectedTask.script);
-    
-    // --- BUG FIX: Prevent Garbage Collection in Chrome ---
-    // If not attached to window, Chrome deletes the utterance from memory randomly
-    (window as any)._speechBugFix = utter; 
-
-    // --- BUG FIX: Force a Local Voice ---
-    // Network voices DO NOT fire 'onboundary' events correctly. 
+    (window as any)._speechBugFix = utter;
     const availableVoices = window.speechSynthesis.getVoices();
     const localEnglishVoice = availableVoices.find(v => v.lang.startsWith('en') && v.localService);
-    
     if (localEnglishVoice) {
       utter.voice = localEnglishVoice;
     } else {
-      // Fallback if no specific local english voice is found
       const backupVoice = availableVoices.find(v => v.localService) || availableVoices.find(v => v.lang.startsWith('en'));
       if (backupVoice) utter.voice = backupVoice;
     }
-
     utter.rate = 0.88;
     utter.pitch = 1;
-    
-    utter.onstart = () => { 
-      setIsPlaying(true); 
-      setHasPlayed(true); 
-      setCurrentBoundaryIndex(0); 
-      setScriptVisible(true); // Automatically show script
-    };
-    
-    utter.onend = () => { 
-      setIsPlaying(false); 
-      setCurrentBoundaryIndex(-1); 
-      setScriptVisible(false); // Automatically hide script
-    };
-    
-    utter.onerror = () => { 
-      setIsPlaying(false); 
-      setCurrentBoundaryIndex(-1); 
-      setScriptVisible(false); // Automatically hide script
-    };
-    
-    // Track boundary updates
-    utter.onboundary = (event) => {
-      setCurrentBoundaryIndex(event.charIndex);
-    };
-    
+    utter.onstart = () => { setIsPlaying(true); setHasPlayed(true); setCurrentBoundaryIndex(0); setScriptVisible(true); };
+    utter.onend = () => { setIsPlaying(false); setCurrentBoundaryIndex(-1); setScriptVisible(false); };
+    utter.onerror = () => { setIsPlaying(false); setCurrentBoundaryIndex(-1); setScriptVisible(false); };
+    utter.onboundary = (event) => { setCurrentBoundaryIndex(event.charIndex); };
     window.speechSynthesis.speak(utter);
   }, [selectedTask]);
 
@@ -911,23 +1372,16 @@ export default function ListeningPractice() {
     setScreen('test');
   };
 
-  const handleBack = () => {
-    stopAudio();
-    setScreen('home');
-    setSelectedTask(null);
-  };
+  const handleBack = () => { stopAudio(); setScreen('home'); setSelectedTask(null); };
 
-  const handleOptionSelect = (questionId: string, optionId: string) => {
+  const handleOptionSelect = (questionId: string, optionId: string) =>
     setAnswers(prev => ({ ...prev, [questionId]: optionId }));
-  };
 
-  const handleFormInput = (questionId: string, value: string) => {
+  const handleFormInput = (questionId: string, value: string) =>
     setAnswers(prev => ({ ...prev, [questionId]: value }));
-  };
 
   const handleSubmit = async () => {
     if (!selectedTask) return;
-
     const unanswered = selectedTask.questions.filter(q => !answers[q.id] || answers[q.id].trim() === '');
     if (unanswered.length > 0) {
       toast({
@@ -937,7 +1391,6 @@ export default function ListeningPractice() {
       });
       return;
     }
-
     setSubmitting(true);
     setTimeout(() => {
       const results = selectedTask.questions.map(q => ({
@@ -945,12 +1398,10 @@ export default function ListeningPractice() {
         userAnswer: answers[q.id] || '—',
         correct: checkAnswer(q, answers[q.id] || ''),
       }));
-
       setAllResults(prev => {
         const filtered = prev.filter(r => r.taskId !== selectedTask.id);
         return [...filtered, { taskId: selectedTask.id, results }];
       });
-
       const score = results.filter(r => r.correct).length;
       setSubmitting(false);
       toast({
@@ -961,36 +1412,33 @@ export default function ListeningPractice() {
     }, 1000);
   };
 
-  // Find precisely which word to highlight
+  // Highlight active word in transcript
   let activeWordStart = -1;
   if (isPlaying && currentBoundaryIndex >= 0) {
     let found = -1;
     for (const para of scriptParagraphs) {
       for (const wordObj of para) {
-        if (wordObj.start <= currentBoundaryIndex) {
-          found = wordObj.start;
-        } else {
-          break; 
-        }
+        if (wordObj.start <= currentBoundaryIndex) { found = wordObj.start; } else { break; }
       }
     }
     activeWordStart = found;
   }
 
-  // Derived values
   const totalCorrect = allResults.reduce((sum, r) => sum + r.results.filter(q => q.correct).length, 0);
   const totalQ = allResults.reduce((sum, r) => sum + r.results.length, 0);
   const band = getIELTSBand(totalCorrect, totalQ);
-
   const answeredCount = selectedTask
     ? selectedTask.questions.filter(q => answers[q.id] && answers[q.id].trim() !== '').length
     : 0;
+
+  // Count image-based questions for a task
+  const imageQCount = (task: ListeningTask) =>
+    task.questions.filter(q => q.type === 'image_label' || q.type === 'image_map' || q.type === 'image_match').length;
 
   // ── HOME VIEW ──────────────────────────────────────────────────────────────
 
   const renderHome = () => (
     <div className="space-y-8">
-      {/* Banner */}
       <div className="bg-[#7B61FF] rounded-2xl p-8 md:p-10 text-white shadow-md relative overflow-hidden">
         <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl" />
         <div className="relative z-10">
@@ -998,17 +1446,17 @@ export default function ListeningPractice() {
             IELTS Listening Practice <Sparkles className="h-6 w-6 text-yellow-300" fill="currentColor" />
           </h1>
           <p className="text-indigo-50 max-w-2xl text-base md:text-lg leading-relaxed">
-            Improve your listening skills with authentic voice scripts. Select a section below to practice
-            comprehension of accents, specific details, and overall meaning to aim for a band 7+.
+            Improve your listening skills with authentic voice scripts. Sections now include
+            <strong className="text-yellow-200"> diagram labelling and map / plan tasks</strong> — just like the real IELTS Academic exam.
           </p>
         </div>
       </div>
 
-      {/* Section Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
         {IELTS_TASKS.map((task) => {
           const done = allResults.find(r => r.taskId === task.id);
           const score = done ? done.results.filter(q => q.correct).length : null;
+          const imgQs = imageQCount(task);
           return (
             <Card
               key={task.id}
@@ -1029,23 +1477,24 @@ export default function ListeningPractice() {
                   </div>
                   <div className="flex flex-col items-end gap-2 flex-shrink-0">
                     {done ? (
-                      <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100
-                        dark:bg-emerald-900/30 dark:text-emerald-400">
+                      <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
                         {score}/{task.questions.length} ✓
                       </Badge>
                     ) : (
-                      <Badge className="bg-indigo-50 text-[#7B61FF] hover:bg-indigo-100
-                        dark:bg-[#7B61FF]/20 dark:text-[#9b86ff]">
+                      <Badge className="bg-indigo-50 text-[#7B61FF] hover:bg-indigo-100 dark:bg-[#7B61FF]/20 dark:text-[#9b86ff]">
                         New
+                      </Badge>
+                    )}
+                    {imgQs > 0 && (
+                      <Badge className="bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400 flex items-center gap-1">
+                        <ImageIcon className="w-3 h-3" /> {imgQs} Image Q{imgQs > 1 ? 's' : ''}
                       </Badge>
                     )}
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-slate-500 dark:text-slate-400 text-sm mb-4 line-clamp-2">
-                  {task.description}
-                </p>
+                <p className="text-slate-500 dark:text-slate-400 text-sm mb-4 line-clamp-2">{task.description}</p>
                 <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500 mb-4">
                   <span className="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">{task.type}</span>
                 </div>
@@ -1054,8 +1503,7 @@ export default function ListeningPractice() {
                   <span className="flex items-center gap-1">
                     <Headphones className="w-3 h-3" /> {task.questions.length} Questions
                   </span>
-                  <span className="text-[#7B61FF] dark:text-[#9b86ff] flex items-center
-                    group-hover:translate-x-1 transition-transform">
+                  <span className="text-[#7B61FF] dark:text-[#9b86ff] flex items-center group-hover:translate-x-1 transition-transform">
                     {done ? 'Retry' : 'Start Listening'} <ArrowLeft className="h-3 w-3 ml-1 rotate-180" />
                   </span>
                 </div>
@@ -1065,11 +1513,9 @@ export default function ListeningPractice() {
         })}
       </div>
 
-      {/* Overall Score Button */}
       {allResults.length > 0 && (
         <Card
-          className="border border-[#7B61FF]/30 bg-indigo-50/50 dark:bg-[#7B61FF]/10
-            dark:border-[#7B61FF]/30 cursor-pointer hover:bg-indigo-100/50 transition-all"
+          className="border border-[#7B61FF]/30 bg-indigo-50/50 dark:bg-[#7B61FF]/10 dark:border-[#7B61FF]/30 cursor-pointer hover:bg-indigo-100/50 transition-all"
           onClick={() => setScreen('results')}
         >
           <CardContent className="p-5 flex items-center justify-between">
@@ -1088,7 +1534,7 @@ export default function ListeningPractice() {
       )}
 
       <p className="text-sm text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-900 rounded-xl p-4 border border-slate-100 dark:border-slate-800">
-        💡 <strong>Exam Tip:</strong> In the real IELTS exam, you hear each recording only once. Use the "Play Audio" button and resist using the script — it's there for review only.
+        💡 <strong>Exam Tip:</strong> For diagram and map tasks, study the image carefully <em>before</em> pressing Play. In the real IELTS exam you hear each recording only once.
       </p>
     </div>
   );
@@ -1111,7 +1557,6 @@ export default function ListeningPractice() {
             Back to Modules
           </Button>
           <div className="flex items-center gap-3">
-            {/* Timer */}
             <div className="flex items-center gap-1.5 text-sm font-mono text-slate-500 dark:text-slate-400
               bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-lg">
               <Clock className="w-4 h-4" />
@@ -1137,10 +1582,8 @@ export default function ListeningPractice() {
         {/* Split Content */}
         <div className="flex flex-col lg:flex-row gap-6 flex-grow min-h-0">
 
-          {/* Left: Audio Player & Info */}
+          {/* Left: Audio Player + Shared Diagram + Tips */}
           <div className="w-full lg:w-[40%] flex flex-col gap-5">
-
-            {/* Audio Card */}
             <Card className="border-none shadow-sm bg-white dark:bg-slate-900 flex-shrink-0">
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-2 text-[#7B61FF] dark:text-[#9b86ff] mb-2">
@@ -1156,37 +1599,36 @@ export default function ListeningPractice() {
                       {selectedTask.type}
                     </CardDescription>
                   </div>
-                  <Badge variant="secondary" className="flex-shrink-0 text-xs">
-                    {selectedTask.questions.length} Qs
-                  </Badge>
+                  <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                    <Badge variant="secondary" className="text-xs">{selectedTask.questions.length} Qs</Badge>
+                    {imageQCount(selectedTask) > 0 && (
+                      <Badge className="bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400 text-xs flex items-center gap-1">
+                        <ImageIcon className="w-2.5 h-2.5" /> Image Tasks
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                
                 {/* TTS Controls */}
                 <div className="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-3 flex-wrap">
                     {!isPlaying && !hasPlayed && (
                       <Button onClick={speak} className="bg-[#7B61FF] hover:bg-[#6a50e5] text-white gap-2 flex-1 sm:flex-none">
-                        <Play className="w-4 h-4" />
-                        Play Audio
+                        <Play className="w-4 h-4" /> Play Audio
                       </Button>
                     )}
-
                     {isPlaying && (
                       <Button disabled className="bg-[#7B61FF]/60 text-white gap-2 flex-1 sm:flex-none cursor-not-allowed">
                         <span className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                         Playing Audio...
                       </Button>
                     )}
-
                     {!isPlaying && hasPlayed && (
                       <Button disabled className="bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 gap-2 flex-1 sm:flex-none cursor-not-allowed">
-                        <CheckCircle2 className="w-4 h-4" />
-                        Audio Finished
+                        <CheckCircle2 className="w-4 h-4" /> Audio Finished
                       </Button>
                     )}
-
                     {isPlaying && (
                       <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-sm font-medium">
                         <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
@@ -1194,7 +1636,6 @@ export default function ListeningPractice() {
                       </div>
                     )}
                   </div>
-
                   {!hasPlayed && (
                     <p className="text-xs text-slate-400 mt-3">
                       👆 Press <strong>Play Audio</strong> to hear the recording. You can only listen to it once.
@@ -1202,10 +1643,14 @@ export default function ListeningPractice() {
                   )}
                 </div>
 
-                {/* Script Container (Auto-shows when playing) */}
+                {/* Shared diagram panel */}
+                {selectedTask.sharedImage && (
+                  <SharedImagePanel image={selectedTask.sharedImage} isPlaying={isPlaying} />
+                )}
+
+                {/* Transcript */}
                 {scriptVisible && (
-                  <div className="mt-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200
-                    dark:border-slate-700 p-4 max-h-72 overflow-y-auto space-y-3">
+                  <div className="mt-2 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 p-4 max-h-60 overflow-y-auto space-y-3">
                     {scriptParagraphs.map((para, i) => (
                       <p key={i} className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                         {para.map((wordObj, j) => {
@@ -1216,9 +1661,7 @@ export default function ListeningPractice() {
                                 <mark className="bg-[#7B61FF]/30 text-indigo-900 dark:bg-[#7B61FF]/50 dark:text-white rounded px-1 transition-colors">
                                   {wordObj.text}
                                 </mark>
-                              ) : (
-                                wordObj.text
-                              )}
+                              ) : wordObj.text}
                               {wordObj.space}
                             </React.Fragment>
                           );
@@ -1230,17 +1673,18 @@ export default function ListeningPractice() {
               </CardContent>
             </Card>
 
-            {/* Tips Card */}
+            {/* Tips */}
             <Card className="border-none shadow-sm bg-blue-50 dark:bg-blue-900/10 flex-shrink-0">
               <CardContent className="p-5 flex gap-3">
                 <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                 <div>
                   <h4 className="text-sm font-bold text-blue-800 dark:text-blue-400 mb-2">Testing Tips</h4>
                   <ul className="text-sm text-blue-700 dark:text-blue-400/80 space-y-1.5 list-disc list-inside">
-                    <li>Read all questions <strong>before</strong> pressing play.</li>
+                    <li>Read all questions and study diagrams <strong>before</strong> pressing play.</li>
                     <li>In the real exam you hear the recording <strong>once only</strong>.</li>
+                    <li>For <strong>map/plan tasks</strong>: identify key landmarks first.</li>
+                    <li>For <strong>diagram labelling</strong>: use the word bank — spelling counts.</li>
                     <li>Answer while listening — don't wait until the end.</li>
-                    <li>For short answers, spelling must be correct.</li>
                   </ul>
                 </div>
               </CardContent>
@@ -1267,12 +1711,25 @@ export default function ListeningPractice() {
 
             <div className="flex-grow overflow-y-auto p-6 space-y-8">
               {selectedTask.questions.map((question) => (
-                <div key={question.id} className="space-y-4">
+                <div key={question.id} className="space-y-3">
+                  {/* Question type badge */}
+                  {questionTypeBadge(question.type)}
+
                   <h4 className="text-base font-medium text-slate-800 dark:text-slate-100 leading-relaxed">
                     {question.text}
                   </h4>
 
-                  {question.type === 'mcq' && question.options ? (
+                  {/* Image-based question types */}
+                  {(question.type === 'image_label' || question.type === 'image_map' || question.type === 'image_match') && (
+                    <ImageQuestionBlock
+                      question={question}
+                      answer={answers[question.id] || ''}
+                      onAnswer={(val) => handleFormInput(question.id, val)}
+                    />
+                  )}
+
+                  {/* Standard MCQ */}
+                  {question.type === 'mcq' && question.options && (
                     <div className="grid grid-cols-1 gap-3">
                       {question.options.map((option) => {
                         const isSelected = answers[question.id] === option.id;
@@ -1297,12 +1754,13 @@ export default function ListeningPractice() {
                         );
                       })}
                     </div>
-                  ) : (
+                  )}
+
+                  {/* Form / short answer */}
+                  {question.type === 'form' && (
                     <div className="space-y-2">
                       {question.hint && (
-                        <p className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1">
-                          💬 {question.hint}
-                        </p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1">💬 {question.hint}</p>
                       )}
                       <input
                         type="text"
@@ -1315,6 +1773,13 @@ export default function ListeningPractice() {
                           focus:border-[#7B61FF] dark:focus:border-[#7B61FF] transition-colors"
                       />
                     </div>
+                  )}
+
+                  {/* Hint for image questions */}
+                  {(question.type === 'image_label' || question.type === 'image_map') && question.hint && (
+                    <p className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1 mt-1">
+                      💬 {question.hint}
+                    </p>
                   )}
                 </div>
               ))}
@@ -1340,15 +1805,12 @@ export default function ListeningPractice() {
         </Button>
       </div>
 
-      {/* Band Score Summary */}
       <div className="bg-[#7B61FF] rounded-2xl p-8 text-white shadow-md relative overflow-hidden">
         <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl" />
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div>
             <p className="text-indigo-200 text-sm font-medium uppercase tracking-widest mb-2">Overall Results</p>
-            <h2 className="text-3xl font-bold">
-              {totalCorrect} / {totalQ} Correct
-            </h2>
+            <h2 className="text-3xl font-bold">{totalCorrect} / {totalQ} Correct</h2>
             <p className="text-indigo-100 mt-1 text-sm">
               Across {allResults.length} section{allResults.length !== 1 ? 's' : ''} completed
             </p>
@@ -1360,7 +1822,6 @@ export default function ListeningPractice() {
         </div>
       </div>
 
-      {/* Per-section breakdown */}
       {allResults.map((r) => {
         const task = IELTS_TASKS.find(t => t.id === r.taskId);
         if (!task) return null;
@@ -1370,12 +1831,8 @@ export default function ListeningPractice() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-xs font-bold uppercase tracking-widest text-[#7B61FF] dark:text-[#9b86ff]">
-                    {task.title}
-                  </span>
-                  <CardTitle className="text-lg text-slate-800 dark:text-slate-100 mt-0.5">
-                    {task.topic}
-                  </CardTitle>
+                  <span className="text-xs font-bold uppercase tracking-widest text-[#7B61FF] dark:text-[#9b86ff]">{task.title}</span>
+                  <CardTitle className="text-lg text-slate-800 dark:text-slate-100 mt-0.5">{task.topic}</CardTitle>
                 </div>
                 <div className="text-right">
                   <p className="text-2xl font-black text-slate-800 dark:text-slate-100">
@@ -1391,7 +1848,7 @@ export default function ListeningPractice() {
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
-              {r.results.map((q, i) => (
+              {r.results.map((q) => (
                 <div
                   key={q.id}
                   className={`p-4 rounded-xl border-l-4 ${
@@ -1405,8 +1862,17 @@ export default function ListeningPractice() {
                       ? <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
                       : <XCircle className="w-4 h-4 text-red-500 dark:text-red-400 mt-0.5 flex-shrink-0" />
                     }
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        {questionTypeBadge(q.type)}
+                      </div>
                       <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{q.text}</p>
+                      {/* Show thumbnail for image questions in results */}
+                      {q.image && (
+                        <div className="mt-2 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 max-h-32">
+                          <img src={q.image.src} alt={q.image.alt} className="w-full object-contain max-h-32" />
+                        </div>
+                      )}
                       <p className={`text-xs mt-1 ${q.correct ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                         Your answer: <strong>{q.userAnswer}</strong>
                       </p>
@@ -1428,12 +1894,9 @@ export default function ListeningPractice() {
         <Card className="border border-dashed border-[#7B61FF]/40 bg-indigo-50/30 dark:bg-[#7B61FF]/5 dark:border-[#7B61FF]/20">
           <CardContent className="p-6 text-center">
             <p className="text-slate-500 dark:text-slate-400 text-sm mb-3">
-              Complete all 4 sections for a full band score estimate.
+              Complete all {IELTS_TASKS.length} sections for a full band score estimate.
             </p>
-            <Button
-              onClick={() => setScreen('home')}
-              className="bg-[#7B61FF] hover:bg-[#6a50e5] text-white"
-            >
+            <Button onClick={() => setScreen('home')} className="bg-[#7B61FF] hover:bg-[#6a50e5] text-white">
               Continue Practising →
             </Button>
           </CardContent>
@@ -1448,17 +1911,11 @@ export default function ListeningPractice() {
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
       <StudentSidebar
         activeTab="listening"
-        onTabChange={(tab) => {
-          if (tab === 'dashboard') navigate('/student/dashboard');
-          if (tab === 'settings') navigate('/student/profile');
-        }}
         isCollapsed={isSidebarCollapsed}
         toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
-
       <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-24' : 'lg:pl-72'} flex flex-col min-h-screen`}>
         <StudentTopbar onUpgradeClick={() => {}} />
-
         <main className="flex-1 p-6 max-w-7xl mx-auto w-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
           {screen === 'home' && renderHome()}
           {screen === 'test' && renderTest()}

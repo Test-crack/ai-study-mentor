@@ -558,7 +558,7 @@ export default function ReadingPractice() {
                   <CardContent className="space-y-4">
                     {results.scoredAnswers.map((sa, i) => (
                       <div key={sa.questionId} className={`p-4 rounded-xl border ${
-                        sa.isCorrect
+                        sa.isCorrect     
                           ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-900/40 dark:bg-emerald-900/10'
                           : 'border-rose-200 bg-rose-50 dark:border-rose-900/40 dark:bg-rose-900/10'
                       }`}>

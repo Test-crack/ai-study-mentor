@@ -81,6 +81,8 @@ import Contactpage from "@/features/home/components/ContactPage";
 import CourseSection from "@/features/student/components/CourseSection";
 import InstituteOwnerStudentProgressPage from "@/features/InstituteOwner/dashboard/InstituteOwnerStudentProgressPage";
 import Suggestion from "@/features/student/components/Suggestions";
+import SpeakingAssessment from "@/features/student/components/SpeakingAssessment";
+import Diagnosis from "@/features/student/components/Diagnosis/Diagnosis";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -139,6 +141,7 @@ const AppRoutes = () => {
     <Routes>
       {/* Public routes */}
       <Route path="/" element={<LandingPage />} />
+      <Route path="/daignosis" element={<Diagnosis/>} />
       <Route path="/dashdemo" element={<Dashdemo/>} />
       <Route path="/Contact" element={<Contactpage/>} />
 
@@ -208,6 +211,7 @@ const AppRoutes = () => {
       <Route path="/student/speaking-assessment" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentReadingAssessmentPage /></RoleProtectedRoute>} />
       <Route path="/student/writing" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><IeltsWriting/></RoleProtectedRoute>} />
       <Route path="/student/listening" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><ListeningPractice/></RoleProtectedRoute>} />
+      <Route path="/student/asess" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><SpeakingAssessment/></RoleProtectedRoute>} />
       <Route path="/student/reading" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><ReadingPractice/></RoleProtectedRoute>} />
       <Route path="/student/courses-section" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><CourseSection/></RoleProtectedRoute>} />
       <Route path="/student/reading-assessment/history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentAssessmentHistoryPage /></RoleProtectedRoute>} />
