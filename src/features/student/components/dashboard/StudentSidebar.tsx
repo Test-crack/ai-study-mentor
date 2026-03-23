@@ -43,6 +43,7 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
   // { id: 'schedule', icon: Calendar, label: 'Schedule', path: '/student/schedule' },
   // { id: 'speaking-practice', icon: MessageCircle, label: 'Speaking-Anatomy', path: '/student/speaking-practice' },
   // { id: 'my-curriculum', icon: Library, label: 'My-Curriculum', path: '/student/my-curriculum' },
+  { id: 'speaking-asess', icon: GraduationCap, label: 'Speaking Asessment', path: '/student/asess' },
   { id: 'courses-section', icon: GraduationCap, label: 'My Courses', path: '/student/courses-section' },
   { id: 'suggestion', icon: GraduationCap, label: 'Suggestion', path: '/student/suggestion' },
   { id: 'settings', icon: Settings, label: 'Settings', path: '/student/settings' },
