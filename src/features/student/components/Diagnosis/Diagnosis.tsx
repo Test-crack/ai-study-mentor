@@ -6,6 +6,9 @@ import React, {
   useRef,
   useCallback,
 } from "react";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { callBackend } from "@/features/auth/services/authClient";
+import { getBackendUrl } from "@/shared/utils";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES & INTERFACES
@@ -271,6 +274,12 @@ const MOCK_SPEAKING_PROMPT = `Talk about a memorable journey you have taken. You
 // API CALLS
 // ─────────────────────────────────────────────────────────────────────────────
 
+async function fetchDiagnosticQuestionsData(skill: string) {
+  const data = await callBackend(`${getBackendUrl()}/api/diagnostic/questions/${skill}`, { method: "GET" });
+  if (!data?.ok) throw new Error("Fetch failed");
+  return data;
+}
+
 async function fetchDiagnosticStatus(studentId: string): Promise<DiagnosticStatus> {
   const res = await fetch(`/api/diagnostic/status/${studentId}`);
   if (!res.ok) throw new Error("Status fetch failed");
@@ -430,9 +439,11 @@ function LevelBadge({ level, size = "md" }: { level: Level; size?: "sm" | "md" |
 function ProgressSteps({
   currentPhase,
   results,
+  onPhaseChange,
 }: {
   currentPhase: Skill | "gate" | "summary";
   results: AllResults;
+  onPhaseChange?: (skill: Skill) => void;
 }) {
   const skills: Skill[] = ["listening", "reading", "writing", "speaking"];
 
@@ -443,8 +454,9 @@ function ProgressSteps({
         const isCurrent = currentPhase === skill;
         return (
           <React.Fragment key={skill}>
-            <div
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+            <button
+              onClick={() => onPhaseChange && onPhaseChange(skill)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition-all hover:shadow-sm hover:scale-105 active:scale-95 ${
                 isDone
                   ? "bg-teal-100 text-teal-700 border border-teal-300"
                   : isCurrent
@@ -455,7 +467,7 @@ function ProgressSteps({
               <span>{SKILL_ICONS[skill]}</span>
               <span className="hidden sm:inline">{SKILL_LABELS[skill]}</span>
               {isDone && <span>✓</span>}
-            </div>
+            </button>
             {idx < skills.length - 1 && (
               <div
                 className={`h-px w-4 transition-colors ${
@@ -630,10 +642,18 @@ function ListeningPhase({
   const [audioPlayed, setAudioPlayed] = useState(false);
   const [error, setError] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    const t = setTimeout(() => setSectionState("ready"), 800);
-    return () => clearTimeout(t);
+    fetchDiagnosticQuestionsData("listening")
+      .then(res => {
+        setData(res);
+        setSectionState("ready");
+      })
+      .catch(() => {
+        setError(true);
+        setSectionState("error");
+      });
   }, []);
 
   // Auto-save answers to localStorage on every change
@@ -641,7 +661,7 @@ function ListeningPhase({
     storageSave(SK.listeningAnswers, answers);
   }, [answers]);
 
-  const allAnswered = MOCK_LISTENING_QUESTIONS.every((q) => answers[q.id]);
+  const allAnswered = data?.questions ? data.questions.every((q: any) => answers[q.id]) : false;
 
   const handleSubmit = async () => {
     setSectionState("submitting");
@@ -725,7 +745,7 @@ function ListeningPhase({
           </div>
           <audio
             ref={audioRef}
-            src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+            src={data?.audio_url || ""}
             onPlay={handleAudioPlay}
             onEnded={() => {}}
           />
@@ -749,7 +769,7 @@ function ListeningPhase({
 
       {/* Questions */}
       <div className="space-y-4">
-        {MOCK_LISTENING_QUESTIONS.map((q, qi) => (
+        {data?.questions?.map((q: any, qi: number) => (
           <div
             key={q.id}
             className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm"
@@ -759,40 +779,42 @@ function ListeningPhase({
               {q.text}
             </p>
             <div className="grid grid-cols-1 gap-2">
-              {q.options.map((opt) => (
+              {q.options.map((opt: string) => {
+                const optLetter = opt.split('.')[0];
+                return (
                 <label
-                  key={opt.id}
+                  key={optLetter}
                   className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
-                    answers[q.id] === opt.id
+                    answers[q.id] === optLetter
                       ? "border-indigo-400 bg-indigo-50 text-gray-900"
                       : "border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700"
                   }`}
                 >
                   <div
                     className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                      answers[q.id] === opt.id
+                      answers[q.id] === optLetter
                         ? "border-indigo-600 bg-indigo-600"
                         : "border-gray-300"
                     }`}
                   >
-                    {answers[q.id] === opt.id && (
+                    {answers[q.id] === optLetter && (
                       <div className="w-1.5 h-1.5 rounded-full bg-white" />
                     )}
                   </div>
                   <span className="text-indigo-700 font-bold text-sm w-5 shrink-0">
-                    {opt.id}
+                    {optLetter}
                   </span>
-                  <span className="text-sm">{opt.text}</span>
+                  <span className="text-sm">{opt.substring(optLetter.length + 1).trim()}</span>
                   <input
                     type="radio"
                     name={q.id}
-                    value={opt.id}
-                    checked={answers[q.id] === opt.id}
-                    onChange={() => setAnswers((prev) => ({ ...prev, [q.id]: opt.id }))}
+                    value={optLetter}
+                    checked={answers[q.id] === optLetter}
+                    onChange={() => setAnswers((prev) => ({ ...prev, [q.id]: optLetter }))}
                     className="sr-only"
                   />
                 </label>
-              ))}
+              )})}
             </div>
           </div>
         ))}
@@ -837,10 +859,18 @@ function ReadingPhase({
   const [answers, setAnswers] = useState<Record<string, string>>(initialAnswers);
   const [timeLeft, setTimeLeft] = useState(300);
   const [error, setError] = useState(false);
+  const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    const t = setTimeout(() => setSectionState("ready"), 600);
-    return () => clearTimeout(t);
+    fetchDiagnosticQuestionsData("reading")
+      .then(res => {
+        setData(res);
+        setSectionState("ready");
+      })
+      .catch(() => {
+        setError(true);
+        setSectionState("error");
+      });
   }, []);
 
   useEffect(() => {
@@ -855,8 +885,7 @@ function ReadingPhase({
     storageSave(SK.readingAnswers, answers);
   }, [answers]);
 
-  const allAnswered = MOCK_READING_QUESTIONS.every((q) => answers[q.id]);
-  const tfngOptions = ["TRUE", "FALSE", "NOT GIVEN"];
+  const allAnswered = data?.questions ? data.questions.every((q: any) => answers[q.id]) : false;
   const timerWarning = timeLeft <= 60 && timeLeft > 0;
 
   const handleSubmit = async () => {
@@ -930,7 +959,7 @@ function ReadingPhase({
           Reading Passage
         </p>
         <p className="text-gray-700 text-sm leading-7 whitespace-pre-line">
-          {MOCK_READING_PASSAGE}
+          {data?.passage}
         </p>
       </div>
 
@@ -939,7 +968,7 @@ function ReadingPhase({
         <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">
           Questions — True / False / Not Given
         </p>
-        {MOCK_READING_QUESTIONS.map((q, qi) => (
+        {data?.questions?.map((q: any, qi: number) => (
           <div
             key={q.id}
             className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm"
@@ -949,30 +978,32 @@ function ReadingPhase({
               {q.text}
             </p>
             <div className="flex gap-2 flex-wrap">
-              {tfngOptions.map((opt) => (
+              {q.options.map((opt: string) => {
+                const optLetter = opt.split('.')[0];
+                return (
                 <label
-                  key={opt}
+                  key={optLetter}
                   className={`px-4 py-2 rounded-lg border cursor-pointer text-sm font-medium transition-all ${
-                    answers[q.id] === opt
-                      ? opt === "TRUE"
+                    answers[q.id] === optLetter
+                      ? optLetter === "A"
                         ? "border-teal-400 bg-teal-50 text-teal-700"
-                        : opt === "FALSE"
+                        : optLetter === "B"
                         ? "border-red-300 bg-red-50 text-red-700"
                         : "border-gray-400 bg-gray-100 text-gray-700"
                       : "border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700"
                   }`}
                 >
-                  {opt}
+                  {opt.substring(optLetter.length + 1).trim()}
                   <input
                     type="radio"
                     name={q.id}
-                    value={opt}
-                    checked={answers[q.id] === opt}
-                    onChange={() => setAnswers((prev) => ({ ...prev, [q.id]: opt }))}
+                    value={optLetter}
+                    checked={answers[q.id] === optLetter}
+                    onChange={() => setAnswers((prev) => ({ ...prev, [q.id]: optLetter }))}
                     className="sr-only"
                   />
                 </label>
-              ))}
+              )})}
             </div>
           </div>
         ))}
@@ -1016,13 +1047,22 @@ function WritingPhase({
   const [sectionState, setSectionState] = useState<SectionState>("loading");
   const [text, setText] = useState(initialText);
   const [error, setError] = useState(false);
-  const wordCount = countWords(text);
-  const MIN_WORDS = 60;
+  const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    const t = setTimeout(() => setSectionState("ready"), 700);
-    return () => clearTimeout(t);
+    fetchDiagnosticQuestionsData("writing")
+      .then(res => {
+        setData(res);
+        setSectionState("ready");
+      })
+      .catch(() => {
+        setError(true);
+        setSectionState("error");
+      });
   }, []);
+
+  const wordCount = countWords(text);
+  const MIN_WORDS = data?.minWords || 150;
 
   // Auto-save writing text to localStorage on every change
   useEffect(() => {
@@ -1092,17 +1132,19 @@ function WritingPhase({
       </div>
 
       {/* Graph image */}
-      <div className="rounded-xl overflow-hidden border border-gray-200">
+      {data?.image_url && (
+      <div className="rounded-xl overflow-hidden border border-gray-200 mb-4">
         <img
-          src={MOCK_GRAPH_URL}
-          alt="Bar chart showing digital media usage"
+          src={data.image_url}
+          alt="Writing Task Visualization"
           className="w-full object-cover"
         />
       </div>
+      )}
 
       {/* Prompt */}
       <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
-        <p className="text-gray-700 text-sm leading-relaxed">{MOCK_WRITING_PROMPT}</p>
+        <p className="text-gray-700 text-sm leading-relaxed">{data?.topic}</p>
       </div>
 
       {/* Textarea */}
@@ -1166,11 +1208,24 @@ function WritingPhase({
 // ─────────────────────────────────────────────────────────────────────────────
 
 function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => void }) {
-  const [recordState, setRecordState] = useState<RecordState>("idle");
+  const [recordState, setRecordState] = useState<RecordState | "loading" | "error">("loading");
   const [elapsed, setElapsed] = useState(0);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<any>(null);
   const [animBars] = useState(() => Array.from({ length: 12 }, () => Math.random()));
+
+  useEffect(() => {
+    fetchDiagnosticQuestionsData("speaking")
+      .then(res => {
+        setData(res);
+        setRecordState("idle");
+      })
+      .catch((e) => {
+        setError("Failed to load speaking prompt");
+        setRecordState("error");
+      });
+  }, []);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -1254,7 +1309,11 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
         <p className="text-gray-400 text-xs uppercase tracking-wider mb-2 font-medium">
           Your Speaking Prompt
         </p>
-        <p className="text-gray-700 text-sm leading-7">{MOCK_SPEAKING_PROMPT}</p>
+        <div className="text-gray-700 text-sm leading-7 space-y-2">
+          {data?.prompts?.map((prompt: string, i: number) => (
+             <p key={i}><span className="font-bold mr-2">{i+1}.</span>{prompt}</p>
+          ))}
+        </div>
       </div>
 
       {/* Instructions */}
@@ -1591,7 +1650,7 @@ function DiagnosticSummaryScreen({
 
 type Phase = "gate" | Skill | "speaking_result" | "summary";
 
-export default function Diagnosis() {
+function DiagnosisInner() {
   const [phase, setPhase] = useState<Phase>("gate");
   const [gateState, setGateState] = useState<GateState>("idle");
   const [results, setResults] = useState<AllResults>({});
@@ -1743,7 +1802,15 @@ export default function Diagnosis() {
         {/* Progress bar (shown during skill phases) */}
         {phase !== "gate" && phase !== "summary" && (
           <div className="mb-6 flex justify-center">
-            <ProgressSteps currentPhase={phase as Skill} results={results} />
+            <ProgressSteps 
+              currentPhase={phase as Skill} 
+              results={results} 
+              onPhaseChange={(newPhase) => {
+                setInterimSkill(null);
+                setPendingNextPhase(null);
+                setPhase(newPhase);
+              }}
+            />
           </div>
         )}
 
@@ -1856,4 +1923,98 @@ export default function Diagnosis() {
       `}</style>
     </div>
   );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ONBOARDING SCREEN WRAPPER
+// ─────────────────────────────────────────────────────────────────────────────
+
+function OnboardingScreen() {
+  const { profile, refreshProfile } = useAuth();
+  const [name, setName] = useState(profile?.name || "");
+  const [targetBand, setTargetBand] = useState<string>(profile?.targetBand ? String(profile.targetBand) : "7.0");
+  const [loading, setLoading] = useState(false);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await callBackend(`${getBackendUrl()}/api/profile`, {
+        method: "PUT",
+        body: JSON.stringify({ name, targetBand: Number(targetBand) }),
+      });
+      await refreshProfile();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex bg-slate-50 min-h-screen items-center justify-center p-6 relative w-full overflow-hidden">
+      <div className="absolute -top-48 -left-48 w-96 h-96 rounded-full bg-indigo-100/60 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-48 -right-48 w-96 h-96 rounded-full bg-teal-100/40 blur-3xl pointer-events-none" />
+      
+      <div className="bg-white p-8 md:p-10 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full max-w-md relative z-10 border border-slate-100 animate-fade-in">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="p-3 bg-indigo-700 rounded-2xl shadow-lg shadow-indigo-200">
+            <GraduationCap className="h-6 w-6 text-white" />
+          </div>
+          <span className="text-2xl font-black text-gray-900 tracking-tight">TestCrack</span>
+        </div>
+        
+        <h2 className="text-2xl font-black mb-2 text-gray-900 leading-tight">Welcome aboard! 🎯</h2>
+        <p className="text-gray-500 mb-8 text-sm leading-relaxed">Let's set your goals so we can tailor your upcoming diagnostic baseline specifically for you.</p>
+        
+        <form onSubmit={handleSave} className="space-y-6">
+          <div className="space-y-2">
+            <label className="block text-sm font-bold text-gray-700 ml-1">Full Name</label>
+            <input 
+              type="text"
+              value={name} 
+              onChange={(e) => setName(e.target.value)} 
+              required 
+              placeholder="E.g. John Doe" 
+              className="w-full border-2 border-slate-100 rounded-xl p-3.5 text-sm font-medium focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all bg-slate-50 placeholder:text-slate-400 text-gray-900"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <label className="block text-sm font-bold text-gray-700 ml-1">Target IELTS Band</label>
+            <div className="relative">
+              <select 
+                value={targetBand} 
+                onChange={(e) => setTargetBand(e.target.value)}
+                className="w-full border-2 border-slate-100 rounded-xl p-3.5 text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all bg-slate-50 appearance-none text-indigo-700 cursor-pointer"
+              >
+                {[4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0].map(band => (
+                  <option key={band} value={band.toFixed(1)}>{band.toFixed(1)} Band</option>
+                ))}
+              </select>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 font-bold">⌄</div>
+            </div>
+          </div>
+
+          <button 
+            type="submit" 
+            className="w-full mt-4 py-4 bg-gray-900 hover:bg-gray-800 text-white font-bold text-base rounded-xl transition-all shadow-xl shadow-gray-200 active:scale-[0.98] active:shadow-sm disabled:opacity-70 disabled:pointer-events-none" 
+            disabled={loading}
+          >
+            {loading ? "Saving Profile..." : "Start Diagnostic →"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+export default function Diagnosis() {
+  const { profile } = useAuth();
+  
+  if (!profile?.targetBand) {
+    return <OnboardingScreen />;
+  }
+  
+  return <DiagnosisInner />;
 }
