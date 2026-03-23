@@ -1928,7 +1928,7 @@ function DiagnosisInner() {
 // ONBOARDING SCREEN WRAPPER
 // ─────────────────────────────────────────────────────────────────────────────
 
-function OnboardingScreen() {
+function OnboardingScreen({ onComplete }: { onComplete: () => void }) {
   const { profile, refreshProfile } = useAuth();
   const [name, setName] = useState(profile?.name || "");
   const [targetBand, setTargetBand] = useState<string>(profile?.targetBand ? String(profile.targetBand) : "7.0");
@@ -1943,6 +1943,7 @@ function OnboardingScreen() {
         body: JSON.stringify({ name, targetBand: Number(targetBand) }),
       });
       await refreshProfile();
+      onComplete();
     } catch (err) {
       console.error(err);
     } finally {
@@ -2010,9 +2011,10 @@ function OnboardingScreen() {
 
 export default function Diagnosis() {
   const { profile } = useAuth();
+  const [forceDone, setForceDone] = useState(false);
   
-  if (!profile?.targetBand) {
-    return <OnboardingScreen />;
+  if (!profile?.targetBand && !forceDone) {
+    return <OnboardingScreen onComplete={() => setForceDone(true)} />;
   }
   
   return <DiagnosisInner />;
