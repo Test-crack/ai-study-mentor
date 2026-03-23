@@ -8,7 +8,6 @@ import React, {
 } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { callBackend } from "@/features/auth/services/authClient";
-import { getBackendUrl } from "@/shared/utils";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES & INTERFACES
@@ -275,7 +274,7 @@ const MOCK_SPEAKING_PROMPT = `Talk about a memorable journey you have taken. You
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function fetchDiagnosticQuestionsData(skill: string) {
-  const data = await callBackend(`${getBackendUrl()}/api/diagnostic/questions/${skill}`, { method: "GET" });
+  const data = await callBackend(`/api/diagnostic/questions/${skill}`, { method: "GET" });
   if (!data?.ok) throw new Error("Fetch failed");
   return data;
 }
@@ -1939,7 +1938,7 @@ function OnboardingScreen() {
     e.preventDefault();
     setLoading(true);
     try {
-      await callBackend(`${getBackendUrl()}/api/profile`, {
+      await callBackend(`/api/profile`, {
         method: "PUT",
         body: JSON.stringify({ name, targetBand: Number(targetBand) }),
       });
