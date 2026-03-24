@@ -649,7 +649,8 @@ function ListeningPhase({
         setData(res);
         setSectionState("ready");
       })
-      .catch(() => {
+      .catch((e) => {
+        console.error("ListeningPhase fetch error:", e);
         setError(true);
         setSectionState("error");
       });
@@ -693,6 +694,14 @@ function ListeningPhase({
           </div>
         </div>
         <SkeletonLoader />
+      </div>
+    );
+  }
+
+  if (sectionState === "error") {
+    return (
+      <div className="space-y-6">
+        <ErrorBanner onRetry={() => window.location.reload()} />
       </div>
     );
   }
@@ -866,7 +875,8 @@ function ReadingPhase({
         setData(res);
         setSectionState("ready");
       })
-      .catch(() => {
+      .catch((e) => {
+        console.error("ReadingPhase fetch error:", e);
         setError(true);
         setSectionState("error");
       });
@@ -910,6 +920,14 @@ function ReadingPhase({
           <p className="text-gray-900 font-bold">Loading Reading Section…</p>
         </div>
         <SkeletonLoader />
+      </div>
+    );
+  }
+
+  if (sectionState === "error") {
+    return (
+      <div className="space-y-6">
+        <ErrorBanner onRetry={() => window.location.reload()} />
       </div>
     );
   }
@@ -1054,7 +1072,8 @@ function WritingPhase({
         setData(res);
         setSectionState("ready");
       })
-      .catch(() => {
+      .catch((e) => {
+        console.error("WritingPhase fetch error:", e);
         setError(true);
         setSectionState("error");
       });
@@ -1091,6 +1110,14 @@ function WritingPhase({
           <p className="text-gray-900 font-bold">Loading Writing Task…</p>
         </div>
         <SkeletonLoader />
+      </div>
+    );
+  }
+
+  if (sectionState === "error") {
+    return (
+      <div className="space-y-6">
+        <ErrorBanner onRetry={() => window.location.reload()} />
       </div>
     );
   }
@@ -1221,6 +1248,7 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
         setRecordState("idle");
       })
       .catch((e) => {
+        console.error("SpeakingPhase fetch error:", e);
         setError("Failed to load speaking prompt");
         setRecordState("error");
       });
