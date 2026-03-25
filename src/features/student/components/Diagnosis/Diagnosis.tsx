@@ -34,7 +34,7 @@ type RecordState =
 interface SkillResult {
   band_score: number;
   level: Level;
-  sub_scores?: Record<string, number>;
+  sub_scores?: any;
   feedback?: string;
   transcript?: string;
 }
@@ -862,14 +862,14 @@ function ListeningPhase({
 
       <button
         onClick={handleSubmit}
-        disabled={!allAnswered || sectionState === "scoring"}
+        disabled={!allAnswered || sectionState === "submitting"}
         className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all ${
           allAnswered
             ? "bg-indigo-700 hover:bg-indigo-600 text-white hover:shadow-lg hover:shadow-indigo-500/20 hover:-translate-y-0.5"
             : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
         }`}
       >
-        {sectionState === "scoring" ? (
+        {sectionState === "submitting" ? (
           <span className="flex items-center justify-center gap-2">
             <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             Submitting…
@@ -1060,14 +1060,14 @@ function ReadingPhase({
 
       <button
         onClick={handleSubmit}
-        disabled={!allAnswered || sectionState === "scoring"}
+        disabled={!allAnswered || sectionState === "submitting"}
         className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all ${
           allAnswered
             ? "bg-indigo-700 hover:bg-indigo-600 text-white hover:shadow-lg hover:shadow-indigo-500/20 hover:-translate-y-0.5"
             : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
         }`}
       >
-        {sectionState === "scoring" ? (
+        {sectionState === "submitting" ? (
           <span className="flex items-center justify-center gap-2">
             <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             Submitting…
@@ -1610,15 +1610,50 @@ function SpeakingResultCard({
         </div>
       )}
 
-      {/* Transcript */}
-      {result.transcript && (
-        <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
-          <p className="text-gray-400 text-xs uppercase tracking-wider mb-3 font-medium">
-            What we heard
-          </p>
-          <blockquote className="text-gray-700 text-sm leading-7 italic border-l-2 border-gray-300 pl-4">
-            {result.transcript}
-          </blockquote>
+      {/* AI Feedback */}
+      {result.sub_scores?.feedback && (
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-sm text-left">
+          <p className="text-gray-900 font-bold mb-4 text-center">AI Detailed Feedback</p>
+          <div className="space-y-4">
+            {result.sub_scores.feedback.fluency && Array.isArray(result.sub_scores.feedback.fluency) && (
+              <div>
+                <p className="text-xs uppercase font-bold text-gray-500 mb-1">Fluency</p>
+                <ul className="list-disc pl-4 text-sm text-gray-700 space-y-1">
+                  {result.sub_scores.feedback.fluency.map((item: string, i: number) => <li key={i}>{item}</li>)}
+                </ul>
+              </div>
+            )}
+            {result.sub_scores.feedback.delivery_and_confidence && Array.isArray(result.sub_scores.feedback.delivery_and_confidence) && (
+              <div>
+                <p className="text-xs uppercase font-bold text-gray-500 mb-1">Delivery & Confidence</p>
+                <ul className="list-disc pl-4 text-sm text-gray-700 space-y-1">
+                  {result.sub_scores.feedback.delivery_and_confidence.map((item: string, i: number) => <li key={i}>{item}</li>)}
+                </ul>
+              </div>
+            )}
+            {result.sub_scores.feedback.filler_words_used && Array.isArray(result.sub_scores.feedback.filler_words_used) && (
+              <div>
+                <p className="text-xs uppercase font-bold text-gray-500 mb-1">Filler Words</p>
+                <ul className="list-disc pl-4 text-sm text-gray-700 space-y-1">
+                  {result.sub_scores.feedback.filler_words_used.map((item: string, i: number) => <li key={i}>{item}</li>)}
+                </ul>
+              </div>
+            )}
+            {result.sub_scores.feedback.pronunciation && Array.isArray(result.sub_scores.feedback.pronunciation) && (
+              <div>
+                <p className="text-xs uppercase font-bold text-gray-500 mb-1">Pronunciation</p>
+                <ul className="list-disc pl-4 text-sm text-gray-700 space-y-1">
+                  {result.sub_scores.feedback.pronunciation.map((item: string, i: number) => <li key={i}>{item}</li>)}
+                </ul>
+              </div>
+            )}
+            {result.sub_scores.feedback.improvements && (
+              <div>
+                <p className="text-xs uppercase font-bold text-gray-500 mb-1">Overall Improvements</p>
+                <p className="text-sm text-gray-700 bg-white p-3 rounded-lg border border-gray-100">{result.sub_scores.feedback.improvements}</p>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
