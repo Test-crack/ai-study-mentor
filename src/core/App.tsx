@@ -85,6 +85,7 @@ import SpeakingAssessment from "@/features/student/components/SpeakingAssessment
 import Diagnosis from "@/features/student/components/Diagnosis/Diagnosis";
 import AssessmentHistoryPage from "@/features/student/components/AssessmentHistoryPage";
 import SuggestionsPage from "@/features/student/components/SuggestionsPage";
+import Report from "@/features/student/components/Report";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -223,10 +224,11 @@ const AppRoutes = () => {
       <Route path="/student/batches" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentBatchView/></RoleProtectedRoute>} />
       <Route path="/student/assessment-history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><AssessmentHistoryPage/></RoleProtectedRoute>} />
       <Route path="/student/suggestion-page" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><SuggestionsPage/></RoleProtectedRoute>} />
+      <Route path='/student/report' element={<RoleProtectedRoute allowedRoles={['STUDENT']}><Report/></RoleProtectedRoute>} />
       <Route path="/student/suggestion" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><Suggestion/></RoleProtectedRoute>} />
       <Route path="/student/speaking-practice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><SpeakingPractice/></RoleProtectedRoute>} />
 
-      {/* Instructor Dashboard & Routes */}
+      {/* Instructor Dashboard & Routes */}'/student/report'
       <Route 
         path="/instructor/dashboard" 
         element={

@@ -50,6 +50,7 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
   { id: 'courses-section', icon: GraduationCap, label: 'My Courses', path: '/student/courses-section' },
   { id: 'assessment-history', icon: History, label: 'Assessment History', path: '/student/assessment-history' },
   { id: 'SuggestionPage', icon: Lightbulb, label: 'SuggestionPage', path: '/student/suggestion-page' },
+  { id: 'Report', icon: Sparkles, label: 'Report', path: '/student/report' },
   { id: 'suggestion', icon: Sparkles, label: 'Recommendations', path: '/student/suggestion' },
   { id: 'settings', icon: Settings, label: 'Settings', path: '/student/settings' },
 ];
