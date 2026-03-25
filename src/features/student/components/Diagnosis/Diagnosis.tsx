@@ -7,8 +7,7 @@ import React, {
   useCallback,
 } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { callBackend } from "@/features/auth/services/authClient";
-import { getBackendUrl } from "@/shared/utils";
+import { callBackend, uploadFileToBackend } from "@/features/auth/services/authClient";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES & INTERFACES
@@ -275,13 +274,13 @@ const MOCK_SPEAKING_PROMPT = `Talk about a memorable journey you have taken. You
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function fetchDiagnosticQuestionsData(skill: string) {
-  const data = await callBackend(`${getBackendUrl()}/api/diagnostic/questions/${skill}`, { method: "GET" });
+  const data = await callBackend(`/api/diagnostic/questions/${skill}`, { method: "GET" });
   if (!data?.ok) throw new Error("Fetch failed");
   return data;
 }
 
 async function fetchDiagnosticStatus(studentId: string): Promise<DiagnosticStatus> {
-  const res = await callBackend(`${getBackendUrl()}/api/diagnostic/status`, { method: "GET" });
+  const res = await callBackend(`/api/diagnostic/status`, { method: "GET" });
   return res as unknown as DiagnosticStatus;
 }
 
@@ -290,40 +289,29 @@ async function submitSection(
   skill: "listening" | "reading",
   answers: Record<string, string>
 ): Promise<SkillResult> {
-  const res = await fetch("/api/diagnostic/submit-section", {
+  const data = await callBackend(`/api/diagnostic/submit/${skill}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ student_id: studentId, skill, answers }),
+    body: JSON.stringify({ answers }),
   });
-  const data = await res.json();
-  if (!data.ok) throw new Error(data.error || "Submission failed");
-  return { band_score: data.band_score, level: data.level };
+  if (!data?.bandScore) throw new Error("Submission failed");
+  return { band_score: data.bandScore, level: getBandLevel(data.bandScore), sub_scores: data.sub_scores } as SkillResult;
 }
 
 async function submitWriting(
   studentId: string,
   text: string
 ): Promise<SkillResult> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 20000);
-  try {
-    const res = await fetch("/api/diagnostic/submit-writing", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ student_id: studentId, text }),
-      signal: controller.signal,
-    });
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.error || "Writing submission failed");
-    return {
-      band_score: data.band_score,
-      level: getBandLevel(data.band_score),
-      sub_scores: data.sub_scores,
-      feedback: data.feedback,
-    };
-  } finally {
-    clearTimeout(timeout);
-  }
+  const data = await callBackend(`/api/diagnostic/submit/writing`, {
+    method: "POST",
+    body: JSON.stringify({ answers: { text } }),
+  });
+  if (!data?.bandScore) throw new Error("Writing submission failed");
+  return {
+    band_score: data.bandScore,
+    level: getBandLevel(data.bandScore),
+    sub_scores: data.sub_scores,
+    feedback: data.feedback,
+  } as SkillResult;
 }
 
 async function submitSpeaking(
@@ -331,27 +319,21 @@ async function submitSpeaking(
   audioBlob: Blob
 ): Promise<SkillResult> {
   const formData = new FormData();
-  formData.append("student_id", studentId);
   formData.append("audio", audioBlob, "recording.webm");
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30000);
-  try {
-    const res = await fetch("/api/diagnostic/submit-speaking", {
-      method: "POST",
-      body: formData,
-      signal: controller.signal,
-    });
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.error || "Speaking submission failed");
-    return {
-      band_score: data.band_score,
-      level: getBandLevel(data.band_score),
-      sub_scores: data.sub_scores,
-      transcript: data.transcript,
-    };
-  } finally {
-    clearTimeout(timeout);
-  }
+
+  const data = await uploadFileToBackend(
+    `/api/diagnostic/submit/speaking`,
+    formData,
+    "POST"
+  );
+  if (!data?.bandScore) throw new Error("Speaking submission failed");
+  return {
+    band_score: data.bandScore,
+    level: getBandLevel(data.bandScore),
+    sub_scores: data.sub_scores,
+    transcript: data.transcript,
+    feedback: data.feedback,
+  } as SkillResult;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -527,6 +509,54 @@ function InterimResultCard({
       <p className="text-gray-600 text-sm max-w-xs leading-relaxed">
         {encouragements[level]}
       </p>
+
+      {/* Sub-Scores Stats Board (Listening & Reading) */}
+      {result.sub_scores && result.sub_scores.total_questions !== undefined && (
+        <div className="grid grid-cols-2 gap-4 w-full max-w-sm mt-2">
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center">
+            <p className="text-gray-400 text-[10px] uppercase font-bold tracking-widest mb-1">Accuracy</p>
+            <p className="text-gray-800 text-xl font-black">{result.sub_scores.accuracy_percentage}%</p>
+          </div>
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center">
+            <p className="text-gray-400 text-[10px] uppercase font-bold tracking-widest mb-1">Correct</p>
+            <p className="text-gray-800 text-xl font-black">{result.sub_scores.correct_answers} <span className="text-sm font-medium text-gray-400">/ {result.sub_scores.total_questions}</span></p>
+          </div>
+        </div>
+      )}
+
+      {/* Sub-Scores Stats Board (Writing) */}
+      {result.sub_scores && result.sub_scores.word_count !== undefined && result.sub_scores.grammarScore !== undefined && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-lg mt-2 mx-auto">
+          {[
+            { key: 'taskResponseScore', label: 'Response' },
+            { key: 'coherenceScore', label: 'Coherence' },
+            { key: 'vocabularyScore', label: 'Lexical' },
+            { key: 'grammarScore', label: 'Grammar' }
+          ].map(({ key, label }) => (
+            <div key={key} className="bg-gray-50 border border-gray-200 rounded-xl p-3 flex flex-col items-center justify-center">
+              <p className="text-gray-400 text-[9px] uppercase font-bold tracking-widest mb-1">{label}</p>
+              <p className="text-gray-800 text-lg font-black">{result.sub_scores[key]}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Sub-Scores Stats Board (Speaking) */}
+      {result.sub_scores && result.sub_scores.fluencyScore !== undefined && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-lg mt-2 mx-auto">
+          {[
+            { key: 'fluencyScore', label: 'Fluency' },
+            { key: 'vocabularyScore', label: 'Lexical' },
+            { key: 'pronunciationScore', label: 'Pronunciation' },
+            { key: 'grammarScore', label: 'Grammar' }
+          ].map(({ key, label }) => (
+            <div key={key} className="bg-gray-50 border border-gray-200 rounded-xl p-3 flex flex-col items-center justify-center">
+              <p className="text-gray-400 text-[9px] uppercase font-bold tracking-widest mb-1">{label}</p>
+              <p className="text-gray-800 text-lg font-black">{result.sub_scores[key]}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
       {result.feedback && (
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 max-w-md text-left">
@@ -1487,32 +1517,40 @@ function SpeakingResultCard({
   result: SkillResult;
   onContinue: () => void;
 }) {
-  const level = getBandLevel(result.band_score);
-  const cfg = getLevelConfig(level);
+  const band_score = Number(result.band_score) || 0;
   const subScores = result.sub_scores ?? {};
-  const subScoreEntries = Object.entries(subScores);
+  // Only keep numeric entries (skip feedback object, error strings, fallback booleans)
+  const subScoreEntries = Object.entries(subScores).filter(
+    ([, val]) => typeof val === "number" && !isNaN(val as number)
+  );
   const maxSub = subScoreEntries.reduce(
-    (a, b) => (b[1] > a[1] ? b : a),
+    (a, b) => ((b[1] as number) > (a[1] as number) ? b : a),
     subScoreEntries[0] ?? ["", 0]
   );
   const minSub = subScoreEntries.reduce(
-    (a, b) => (b[1] < a[1] ? b : a),
-    subScoreEntries[0] ?? ["", 0]
+    (a, b) => ((b[1] as number) < (a[1] as number) ? b : a),
+    subScoreEntries[0] ?? ["", 9]
   );
 
   const subScoreLabels: Record<string, string> = {
-    fluency: "Fluency & Coherence",
-    lexical: "Lexical Resource",
-    grammar: "Grammatical Range",
-    pronunciation: "Pronunciation",
+    fluencyScore: "Fluency & Coherence",
+    vocabularyScore: "Lexical Resource",
+    grammarScore: "Grammatical Range",
+    pronunciationScore: "Pronunciation",
+    // writing aliases
+    taskResponseScore: "Task Response",
+    coherenceScore: "Coherence & Cohesion",
   };
+
+  const level = getBandLevel(band_score);
+  const cfg = getLevelConfig(level);
 
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="text-center space-y-3">
         <div className="text-4xl">🎤</div>
         <div className={`text-6xl font-black ${cfg.text} tabular-nums`}>
-          {result.band_score.toFixed(1)}
+          {band_score.toFixed(1)}
         </div>
         <LevelBadge level={level} size="lg" />
       </div>
@@ -1556,7 +1594,7 @@ function SpeakingResultCard({
                         : "text-gray-900"
                     }`}
                   >
-                    {(val as number).toFixed(1)}
+                    {Number(val).toFixed(1)}
                   </span>
                 </div>
               );
@@ -1966,7 +2004,7 @@ function OnboardingScreen({ onComplete }: { onComplete: () => void }) {
     e.preventDefault();
     setLoading(true);
     try {
-      await callBackend(`${getBackendUrl()}/api/profile`, {
+      await callBackend(`/api/profile`, {
         method: "PUT",
         body: JSON.stringify({ name, targetBand: Number(targetBand) }),
       });
