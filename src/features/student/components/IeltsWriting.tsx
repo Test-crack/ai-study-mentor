@@ -1,84 +1,20 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StudentSidebar } from './dashboard/StudentSidebar';
 import { StudentTopbar } from './dashboard/StudentTopbar';
 import { Button } from '@/shared/components/ui/button';
 import { useToast } from '@/shared/hooks/use-toast';
-import { ArrowLeft, Send, PenTool, BookOpen, Sparkles } from 'lucide-react';
+import { ArrowLeft, Send, PenTool, BookOpen, Sparkles, History, CheckCircle, BarChart2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
+import { fetchWritingTasks, submitWritingSession, fetchWritingHistory, WritingAssessmentHistoryItem, WritingTask } from '../services/ieltsWritingService';
 
-// --- Types ---
-interface Assignment {
-  id: string;
-  title: string;
-  topic: string;
-  assignedDate: string;
-}
 
-// --- Mock Data (Replace with your API fetch) ---
-const MOCK_ASSIGNMENTS: Assignment[] = [
-  {
-    id: '1',
-    title: 'Task 2: Technology & Society',
-    topic: 'Some people think that the rapid development of technology is making our lives more complex, and we should strive for a simpler life without so much technology. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples from your own knowledge or experience.',
-    assignedDate: '2026-03-01',
-  },
-  {
-    id: '2',
-    title: 'Task 2: Education Funding',
-    topic: 'Governments should spend more money on education than on recreation and sports. Do you agree or disagree with this statement? Provide specific reasons and examples to support your answer.',
-    assignedDate: '2026-03-04',
-  },
-  {
-    id: '3',
-    title: 'Task 1: Academic - Data Interpretation',
-    topic: 'The chart provided in your workbook shows the global sales of different types of digital games from 2000 to 2006. Summarise the information by selecting and reporting the main features, and make comparisons where relevant. (Note: Please refer to page 12 of your pilot program handbook for the chart).',
-    assignedDate: '2026-03-08',
-  },
-  {
-    id: '4',
-    title: 'Task 2: Environment & Corporate Responsibility',
-    topic: 'Many people believe that companies and individuals should pay to clean up the environment in proportion to the amount of pollution they have produced. To what extent do you agree or disagree? Include relevant examples from your own experience.',
-    assignedDate: '2026-03-11',
-  },
-  {
-    id: '5',
-    title: 'Task 2: Urbanization & Migration',
-    topic: 'In many countries, an increasing number of people are migrating from rural areas to cities in search of a better life. What are the main problems this causes? What solutions can you suggest?',
-    assignedDate: '2026-03-15',
-  },
-  {
-    id: '6',
-    title: 'Task 1: General - Formal Letter',
-    topic: 'You recently stayed at a hotel and left a valuable item in your room. Write a letter to the hotel manager. In your letter: give details of your stay, describe the item you left behind, and suggest what you want the manager to do.',
-    assignedDate: '2026-03-18',
-  },
-  {
-    id: '7',
-    title: 'Task 2: Health & Public Policy',
-    topic: 'In some countries, the growing number of fast-food outlets has led to a rise in health issues such as obesity. Some people think the government should impose a higher tax on this kind of food. Do you agree or disagree?',
-    assignedDate: '2026-03-22',
-  },
-  {
-    id: '8',
-    title: 'Task 2: Work & Lifestyle Balance',
-    topic: 'Nowadays, many people complain that they have difficulties balancing their work and personal life. What are the causes of this? What are the possible solutions to this problem?',
-    assignedDate: '2026-03-25',
-  },
-  {
-    id: '9',
-    title: 'Task 1: Academic - Process Diagram',
-    topic: 'The diagram in your pilot handbook (Page 18) shows the process of recycling plastic bottles. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
-    assignedDate: '2026-03-29',
-  },
-  {
-    id: '10',
-    title: 'Task 2: Crime & Punishment',
-    topic: 'Some people believe that the best way to reduce crime is to give longer prison sentences. Others, however, believe there are better alternative ways of reducing crime. Discuss both views and give your opinion.',
-    assignedDate: '2026-04-02',
-  }
-];
+type ViewState = 'library' | 'writing' | 'history' | 'results';
+
+// Ensure the API url is retrieved
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+const MOCK_ASSIGNMENTS: WritingTask[] = [];
 
 export default function IeltsWriting() {
   const navigate = useNavigate();
@@ -88,7 +24,12 @@ export default function IeltsWriting() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   
   // Writing Task State
-  const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
+  const [view, setView] = useState<ViewState>('library');
+  const [assignments, setAssignments] = useState<WritingTask[]>([]);
+  const [history, setHistory] = useState<WritingAssessmentHistoryItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedAssignment, setSelectedAssignment] = useState<WritingTask | null>(null);
+  const [evaluationResult, setEvaluationResult] = useState<WritingAssessmentHistoryItem | null>(null);
   const [essayText, setEssayText] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -96,14 +37,50 @@ export default function IeltsWriting() {
   const targetWordCount = selectedAssignment?.title.includes('Task 1') ? 150 : 250;
 
   // Calculate word count dynamically
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const tasks = await fetchWritingTasks();
+        if (tasks) {
+          const formattedTasks = tasks.map((task: any) => ({
+            ...task,
+            assignedDate: new Date(task.assignedDate).toISOString().split('T')[0]
+          }));
+          setAssignments(formattedTasks);
+        } else {
+          setAssignments(MOCK_ASSIGNMENTS);
+        }
+        
+        const hist = await fetchWritingHistory();
+        if (hist) setHistory(hist);
+        
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+        setAssignments(MOCK_ASSIGNMENTS);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    if (view === 'library' || view === 'history') {
+      loadData();
+    }
+  }, [view]);
+
   const wordCount = useMemo(() => {
     const trimmed = essayText.trim();
     return trimmed ? trimmed.split(/\s+/).length : 0;
   }, [essayText]);
 
+  const handleSelectAssignment = (assignment: WritingTask) => {
+    setSelectedAssignment(assignment);
+    setView('writing');
+  };
+
   const handleBack = () => {
     setSelectedAssignment(null);
-    setEssayText(''); // Optional: clear text or keep for draft saving
+    setEvaluationResult(null);
+    setEssayText('');
+    setView('library');
   };
 
   const handleSubmit = async () => {
@@ -117,12 +94,16 @@ export default function IeltsWriting() {
     }
 
     setSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
-      setSubmitting(false);
+    try {
+      const result = await submitWritingSession(selectedAssignment.id, essayText, wordCount);
+      setEvaluationResult(result);
+      setView('results');
       toast({ title: 'Success!', description: 'Writing submitted successfully for analysis.' });
-      handleBack();
-    }, 1500);
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message || 'Failed to submit analysis', variant: 'destructive' });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -140,7 +121,7 @@ export default function IeltsWriting() {
         <main className="flex-1 p-6 max-w-7xl mx-auto w-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
           
           {/* --- VIEW 1: Card Selection Screen --- */}
-          {!selectedAssignment ? (
+          {view === 'library' && (
             <div className="space-y-8 h-full">
               
               {/* --- NEW COLORED BANNER --- */}
@@ -148,17 +129,30 @@ export default function IeltsWriting() {
                 {/* Optional decorative element */}
                 <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
                 
-                <div className="relative z-10">
-                  <h1 className="text-3xl font-bold mb-3 flex items-center gap-2">
-                    IELTS Writing Analysis <Sparkles className="h-6 w-6 text-yellow-300" fill="currentColor" />
-                  </h1>
-                  <p className="text-indigo-50 max-w-2xl text-base md:text-lg leading-relaxed mb-6">
-                    Master your writing skills with detailed, AI-powered feedback. Select a prompt below, aim for your target word count, and get instant insights on your grammar, vocabulary, and task coherence to push for a band 7+.
-                  </p>
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div>
+                    <h1 className="text-3xl font-bold mb-3 flex items-center gap-2">
+                      IELTS Writing Analysis <Sparkles className="h-6 w-6 text-yellow-300" fill="currentColor" />
+                    </h1>
+                    <p className="text-indigo-50 max-w-2xl text-base md:text-lg leading-relaxed mb-6">
+                      Master your writing skills with detailed, AI-powered feedback. Select a prompt below, aim for your target word count, and get instant insights on your grammar, vocabulary, and task coherence to push for a band 7+.
+                    </p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 whitespace-nowrap"
+                    onClick={() => setView('history')}
+                  >
+                    <History className="w-4 h-4 mr-2" /> View History
+                  </Button>
                 </div>
               </div>
 
-              {MOCK_ASSIGNMENTS.length === 0 ? (
+              {isLoading ? (
+                <div className="flex justify-center items-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#7B61FF]"></div>
+                </div>
+              ) : assignments.length === 0 ? (
                 <Card className="border-none shadow-sm bg-white dark:bg-slate-900 flex flex-col items-center justify-center p-12 text-center">
                   <BookOpen className="h-12 w-12 text-slate-300 dark:text-slate-600 mb-4" />
                   <CardTitle className="text-lg text-slate-700 dark:text-slate-200">No Assignments Yet</CardTitle>
@@ -166,10 +160,10 @@ export default function IeltsWriting() {
                 </Card>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {MOCK_ASSIGNMENTS.map((assignment) => (
+                  {assignments.map((assignment) => (
                     <Card 
                       key={assignment.id}
-                      onClick={() => setSelectedAssignment(assignment)}
+                      onClick={() => handleSelectAssignment(assignment)}
                       className="border border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900 hover:shadow-md hover:border-[#7B61FF] dark:hover:border-[#7B61FF] transition-all cursor-pointer flex flex-col h-64 group"
                     >
                       <CardHeader className="pb-3 flex-none">
@@ -198,9 +192,48 @@ export default function IeltsWriting() {
                 </div>
               )}
             </div>
-          ) : (
-            
-            /* --- VIEW 2: Split Screen Writing Interface --- */
+          )}
+
+          {/* --- VIEW 2: HISTORY SCREEN --- */}
+          {view === 'history' && (
+            <div className="space-y-8 h-full">
+              <div className="flex items-center gap-4">
+                <Button variant="ghost" onClick={() => setView('library')} className="text-slate-600 hover:bg-slate-100 -ml-2">
+                  <ArrowLeft className="w-4 h-4 mr-2" /> Back to Assignments
+                </Button>
+                <h2 className="text-2xl font-bold dark:text-white">Past Analytics</h2>
+              </div>
+              
+              {history.length === 0 && !isLoading ? (
+                <Card className="p-8 text-center text-slate-500">No past writings found.</Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {history.map((item) => (
+                    <Card key={item.id} className="cursor-pointer hover:border-[#7B61FF]" onClick={() => {
+                        setEvaluationResult(item);
+                        setSelectedAssignment(item.IeltsWritingTask || null);
+                        setView('results');
+                      }}
+                    >
+                      <CardHeader className="pb-2">
+                        <CardTitle className="line-clamp-1">{item.IeltsWritingTask?.title || 'Unknown Task'}</CardTitle>
+                        <CardDescription>{new Date(item.createdAt).toLocaleDateString()}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="font-semibold text-slate-700 dark:text-slate-200">Band Score:</span>
+                          <Badge className="bg-[#7B61FF]">{item.aiBandScore}</Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* --- VIEW 3: Split Screen Writing Interface --- */}
+          {view === 'writing' && selectedAssignment && (
             <div className="flex flex-col h-full flex-1 min-h-[calc(100vh-140px)]">
               {/* Header - UPDATED FOR MOBILE RESPONSIVENESS */}
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -286,6 +319,84 @@ export default function IeltsWriting() {
                 </Card>
 
               </div>
+            </div>
+          )}
+
+          {/* --- VIEW 4: RESULTS SCREEN --- */}
+          {view === 'results' && evaluationResult && (
+            <div className="space-y-6 max-w-4xl mx-auto h-full overflow-y-auto pb-12">
+              <Button variant="ghost" onClick={handleBack} className="text-slate-600 hover:bg-slate-100 -ml-2">
+                <ArrowLeft className="w-4 h-4 mr-2" /> Back
+              </Button>
+
+              <div className="bg-gradient-to-br from-[#7B61FF] to-[#5B41DF] rounded-3xl p-8 text-white text-center relative overflow-hidden shadow-xl">
+                <div className="relative z-10">
+                  <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4 border-2 border-white/20">
+                    <CheckCircle className="w-10 h-10 text-emerald-300" />
+                  </div>
+                  <p className="text-indigo-100 text-sm font-bold uppercase tracking-widest mb-1">Overall Band Score</p>
+                  <div className="text-7xl font-black mb-3">
+                    {evaluationResult.aiBandScore}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card className="text-center p-4">
+                  <p className="text-xs font-bold text-slate-400 uppercase">Grammar</p>
+                  <p className="text-2xl font-black text-[#7B61FF]">{evaluationResult.aiGrammarScore}</p>
+                </Card>
+                <Card className="text-center p-4">
+                  <p className="text-xs font-bold text-slate-400 uppercase">Vocabulary</p>
+                  <p className="text-2xl font-black text-[#7B61FF]">{evaluationResult.aiVocabularyScore}</p>
+                </Card>
+                <Card className="text-center p-4">
+                  <p className="text-xs font-bold text-slate-400 uppercase">Coherence</p>
+                  <p className="text-2xl font-black text-[#7B61FF]">{evaluationResult.aiCoherenceScore}</p>
+                </Card>
+                <Card className="text-center p-4">
+                  <p className="text-xs font-bold text-slate-400 uppercase">Task Response</p>
+                  <p className="text-2xl font-black text-[#7B61FF]">{evaluationResult.aiTaskResponseScore}</p>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <BarChart2 className="w-5 h-5 text-[#7B61FF]"/> Coach Feedback
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 text-sm text-slate-700 dark:text-slate-300">
+                  <div>
+                    <h4 className="font-bold text-slate-800 dark:text-white mb-2">Grammar Fixes:</h4>
+                    <ul className="list-disc pl-5 space-y-1">
+                      {evaluationResult.aiFeedbackData?.grammar?.map((g: string, i: number) => <li key={i}>{g}</li>) || <li>No major grammar issues detected.</li>}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-800 dark:text-white mb-2">Vocabulary Improvements:</h4>
+                    <ul className="list-disc pl-5 space-y-1">
+                      {evaluationResult.aiFeedbackData?.vocabulary?.map((v: string, i: number) => <li key={i}>{v}</li>) || <li>Vocabulary was strong.</li>}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-800 dark:text-white mb-2">Overall Guidance:</h4>
+                    <p>{evaluationResult.aiFeedbackData?.improvements || 'Keep practicing.'}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {evaluationResult.manualBandScore && (
+                <Card className="border-emerald-200 bg-emerald-50 dark:bg-emerald-900/10">
+                  <CardHeader>
+                    <CardTitle className="text-emerald-700 flex items-center gap-2">Instructor Review</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p><strong>Band Grade Updated To:</strong> {evaluationResult.manualBandScore}</p>
+                    <p className="mt-2 text-sm text-emerald-800">{evaluationResult.manualFeedback}</p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           )}
         </main>

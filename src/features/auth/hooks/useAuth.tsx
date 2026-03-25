@@ -23,6 +23,9 @@ export interface UserProfile {
   createdAt: string;
   updatedAt: string;
   instituteIsActive?: boolean;
+  isDiagnosed?: boolean;
+  recommendationSeeded?: boolean;
+  targetBand?: number | null;
 }
 
 interface AuthContextType {

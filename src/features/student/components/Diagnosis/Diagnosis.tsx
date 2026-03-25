@@ -6,6 +6,8 @@ import React, {
   useRef,
   useCallback,
 } from "react";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { callBackend, uploadFileToBackend } from "@/features/auth/services/authClient";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES & INTERFACES
@@ -271,10 +273,15 @@ const MOCK_SPEAKING_PROMPT = `Talk about a memorable journey you have taken. You
 // API CALLS
 // ─────────────────────────────────────────────────────────────────────────────
 
+async function fetchDiagnosticQuestionsData(skill: string) {
+  const data = await callBackend(`/api/diagnostic/questions/${skill}`, { method: "GET" });
+  if (!data?.ok) throw new Error("Fetch failed");
+  return data;
+}
+
 async function fetchDiagnosticStatus(studentId: string): Promise<DiagnosticStatus> {
-  const res = await fetch(`/api/diagnostic/status/${studentId}`);
-  if (!res.ok) throw new Error("Status fetch failed");
-  return res.json();
+  const res = await callBackend(`/api/diagnostic/status`, { method: "GET" });
+  return res as unknown as DiagnosticStatus;
 }
 
 async function submitSection(
@@ -282,40 +289,29 @@ async function submitSection(
   skill: "listening" | "reading",
   answers: Record<string, string>
 ): Promise<SkillResult> {
-  const res = await fetch("/api/diagnostic/submit-section", {
+  const data = await callBackend(`/api/diagnostic/submit/${skill}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ student_id: studentId, skill, answers }),
+    body: JSON.stringify({ answers }),
   });
-  const data = await res.json();
-  if (!data.ok) throw new Error(data.error || "Submission failed");
-  return { band_score: data.band_score, level: data.level };
+  if (data?.bandScore === undefined) throw new Error("Submission failed");
+  return { band_score: data.bandScore, level: getBandLevel(data.bandScore), sub_scores: data.sub_scores } as SkillResult;
 }
 
 async function submitWriting(
   studentId: string,
   text: string
 ): Promise<SkillResult> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 20000);
-  try {
-    const res = await fetch("/api/diagnostic/submit-writing", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ student_id: studentId, text }),
-      signal: controller.signal,
-    });
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.error || "Writing submission failed");
-    return {
-      band_score: data.band_score,
-      level: getBandLevel(data.band_score),
-      sub_scores: data.sub_scores,
-      feedback: data.feedback,
-    };
-  } finally {
-    clearTimeout(timeout);
-  }
+  const data = await callBackend(`/api/diagnostic/submit/writing`, {
+    method: "POST",
+    body: JSON.stringify({ answers: { text } }),
+  });
+  if (data?.bandScore === undefined) throw new Error("Writing submission failed");
+  return {
+    band_score: data.bandScore,
+    level: getBandLevel(data.bandScore),
+    sub_scores: data.sub_scores,
+    feedback: data.feedback,
+  } as SkillResult;
 }
 
 async function submitSpeaking(
@@ -323,27 +319,21 @@ async function submitSpeaking(
   audioBlob: Blob
 ): Promise<SkillResult> {
   const formData = new FormData();
-  formData.append("student_id", studentId);
   formData.append("audio", audioBlob, "recording.webm");
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30000);
-  try {
-    const res = await fetch("/api/diagnostic/submit-speaking", {
-      method: "POST",
-      body: formData,
-      signal: controller.signal,
-    });
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.error || "Speaking submission failed");
-    return {
-      band_score: data.band_score,
-      level: getBandLevel(data.band_score),
-      sub_scores: data.sub_scores,
-      transcript: data.transcript,
-    };
-  } finally {
-    clearTimeout(timeout);
-  }
+
+  const data = await uploadFileToBackend(
+    `/api/diagnostic/submit/speaking`,
+    formData,
+    "POST"
+  );
+  if (data?.bandScore === undefined) throw new Error("Speaking submission failed");
+  return {
+    band_score: data.bandScore,
+    level: getBandLevel(data.bandScore),
+    sub_scores: data.sub_scores,
+    transcript: data.transcript,
+    feedback: data.feedback,
+  } as SkillResult;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -430,9 +420,11 @@ function LevelBadge({ level, size = "md" }: { level: Level; size?: "sm" | "md" |
 function ProgressSteps({
   currentPhase,
   results,
+  onPhaseChange,
 }: {
   currentPhase: Skill | "gate" | "summary";
   results: AllResults;
+  onPhaseChange?: (skill: Skill) => void;
 }) {
   const skills: Skill[] = ["listening", "reading", "writing", "speaking"];
 
@@ -443,8 +435,9 @@ function ProgressSteps({
         const isCurrent = currentPhase === skill;
         return (
           <React.Fragment key={skill}>
-            <div
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+            <button
+              onClick={() => onPhaseChange && onPhaseChange(skill)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition-all hover:shadow-sm hover:scale-105 active:scale-95 ${
                 isDone
                   ? "bg-teal-100 text-teal-700 border border-teal-300"
                   : isCurrent
@@ -455,7 +448,7 @@ function ProgressSteps({
               <span>{SKILL_ICONS[skill]}</span>
               <span className="hidden sm:inline">{SKILL_LABELS[skill]}</span>
               {isDone && <span>✓</span>}
-            </div>
+            </button>
             {idx < skills.length - 1 && (
               <div
                 className={`h-px w-4 transition-colors ${
@@ -516,6 +509,54 @@ function InterimResultCard({
       <p className="text-gray-600 text-sm max-w-xs leading-relaxed">
         {encouragements[level]}
       </p>
+
+      {/* Sub-Scores Stats Board (Listening & Reading) */}
+      {result.sub_scores && result.sub_scores.total_questions !== undefined && (
+        <div className="grid grid-cols-2 gap-4 w-full max-w-sm mt-2">
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center">
+            <p className="text-gray-400 text-[10px] uppercase font-bold tracking-widest mb-1">Accuracy</p>
+            <p className="text-gray-800 text-xl font-black">{result.sub_scores.accuracy_percentage}%</p>
+          </div>
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center">
+            <p className="text-gray-400 text-[10px] uppercase font-bold tracking-widest mb-1">Correct</p>
+            <p className="text-gray-800 text-xl font-black">{result.sub_scores.correct_answers} <span className="text-sm font-medium text-gray-400">/ {result.sub_scores.total_questions}</span></p>
+          </div>
+        </div>
+      )}
+
+      {/* Sub-Scores Stats Board (Writing) */}
+      {result.sub_scores && result.sub_scores.word_count !== undefined && result.sub_scores.grammarScore !== undefined && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-lg mt-2 mx-auto">
+          {[
+            { key: 'taskResponseScore', label: 'Response' },
+            { key: 'coherenceScore', label: 'Coherence' },
+            { key: 'vocabularyScore', label: 'Lexical' },
+            { key: 'grammarScore', label: 'Grammar' }
+          ].map(({ key, label }) => (
+            <div key={key} className="bg-gray-50 border border-gray-200 rounded-xl p-3 flex flex-col items-center justify-center">
+              <p className="text-gray-400 text-[9px] uppercase font-bold tracking-widest mb-1">{label}</p>
+              <p className="text-gray-800 text-lg font-black">{result.sub_scores[key]}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Sub-Scores Stats Board (Speaking) */}
+      {result.sub_scores && result.sub_scores.fluencyScore !== undefined && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-lg mt-2 mx-auto">
+          {[
+            { key: 'fluencyScore', label: 'Fluency' },
+            { key: 'vocabularyScore', label: 'Lexical' },
+            { key: 'pronunciationScore', label: 'Pronunciation' },
+            { key: 'grammarScore', label: 'Grammar' }
+          ].map(({ key, label }) => (
+            <div key={key} className="bg-gray-50 border border-gray-200 rounded-xl p-3 flex flex-col items-center justify-center">
+              <p className="text-gray-400 text-[9px] uppercase font-bold tracking-widest mb-1">{label}</p>
+              <p className="text-gray-800 text-lg font-black">{result.sub_scores[key]}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
       {result.feedback && (
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 max-w-md text-left">
@@ -630,10 +671,19 @@ function ListeningPhase({
   const [audioPlayed, setAudioPlayed] = useState(false);
   const [error, setError] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    const t = setTimeout(() => setSectionState("ready"), 800);
-    return () => clearTimeout(t);
+    fetchDiagnosticQuestionsData("listening")
+      .then(res => {
+        setData(res);
+        setSectionState("ready");
+      })
+      .catch((e) => {
+        console.error("ListeningPhase fetch error:", e);
+        setError(true);
+        setSectionState("error");
+      });
   }, []);
 
   // Auto-save answers to localStorage on every change
@@ -641,7 +691,7 @@ function ListeningPhase({
     storageSave(SK.listeningAnswers, answers);
   }, [answers]);
 
-  const allAnswered = MOCK_LISTENING_QUESTIONS.every((q) => answers[q.id]);
+  const allAnswered = data?.questions ? data.questions.every((q: any) => answers[q.id]) : false;
 
   const handleSubmit = async () => {
     setSectionState("submitting");
@@ -674,6 +724,14 @@ function ListeningPhase({
           </div>
         </div>
         <SkeletonLoader />
+      </div>
+    );
+  }
+
+  if (sectionState === "error") {
+    return (
+      <div className="space-y-6">
+        <ErrorBanner onRetry={() => window.location.reload()} />
       </div>
     );
   }
@@ -725,7 +783,7 @@ function ListeningPhase({
           </div>
           <audio
             ref={audioRef}
-            src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+            src={data?.audio_url || ""}
             onPlay={handleAudioPlay}
             onEnded={() => {}}
           />
@@ -749,7 +807,7 @@ function ListeningPhase({
 
       {/* Questions */}
       <div className="space-y-4">
-        {MOCK_LISTENING_QUESTIONS.map((q, qi) => (
+        {data?.questions?.map((q: any, qi: number) => (
           <div
             key={q.id}
             className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm"
@@ -759,40 +817,42 @@ function ListeningPhase({
               {q.text}
             </p>
             <div className="grid grid-cols-1 gap-2">
-              {q.options.map((opt) => (
+              {q.options.map((opt: string) => {
+                const optLetter = opt.split('.')[0];
+                return (
                 <label
-                  key={opt.id}
+                  key={optLetter}
                   className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
-                    answers[q.id] === opt.id
+                    answers[q.id] === optLetter
                       ? "border-indigo-400 bg-indigo-50 text-gray-900"
                       : "border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700"
                   }`}
                 >
                   <div
                     className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                      answers[q.id] === opt.id
+                      answers[q.id] === optLetter
                         ? "border-indigo-600 bg-indigo-600"
                         : "border-gray-300"
                     }`}
                   >
-                    {answers[q.id] === opt.id && (
+                    {answers[q.id] === optLetter && (
                       <div className="w-1.5 h-1.5 rounded-full bg-white" />
                     )}
                   </div>
                   <span className="text-indigo-700 font-bold text-sm w-5 shrink-0">
-                    {opt.id}
+                    {optLetter}
                   </span>
-                  <span className="text-sm">{opt.text}</span>
+                  <span className="text-sm">{opt.substring(optLetter.length + 1).trim()}</span>
                   <input
                     type="radio"
                     name={q.id}
-                    value={opt.id}
-                    checked={answers[q.id] === opt.id}
-                    onChange={() => setAnswers((prev) => ({ ...prev, [q.id]: opt.id }))}
+                    value={optLetter}
+                    checked={answers[q.id] === optLetter}
+                    onChange={() => setAnswers((prev) => ({ ...prev, [q.id]: optLetter }))}
                     className="sr-only"
                   />
                 </label>
-              ))}
+              )})}
             </div>
           </div>
         ))}
@@ -802,14 +862,14 @@ function ListeningPhase({
 
       <button
         onClick={handleSubmit}
-        disabled={!allAnswered || sectionState === "submitting"}
+        disabled={!allAnswered || sectionState === "scoring"}
         className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all ${
           allAnswered
             ? "bg-indigo-700 hover:bg-indigo-600 text-white hover:shadow-lg hover:shadow-indigo-500/20 hover:-translate-y-0.5"
             : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
         }`}
       >
-        {sectionState === "submitting" ? (
+        {sectionState === "scoring" ? (
           <span className="flex items-center justify-center gap-2">
             <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             Submitting…
@@ -837,10 +897,19 @@ function ReadingPhase({
   const [answers, setAnswers] = useState<Record<string, string>>(initialAnswers);
   const [timeLeft, setTimeLeft] = useState(300);
   const [error, setError] = useState(false);
+  const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    const t = setTimeout(() => setSectionState("ready"), 600);
-    return () => clearTimeout(t);
+    fetchDiagnosticQuestionsData("reading")
+      .then(res => {
+        setData(res);
+        setSectionState("ready");
+      })
+      .catch((e) => {
+        console.error("ReadingPhase fetch error:", e);
+        setError(true);
+        setSectionState("error");
+      });
   }, []);
 
   useEffect(() => {
@@ -855,8 +924,7 @@ function ReadingPhase({
     storageSave(SK.readingAnswers, answers);
   }, [answers]);
 
-  const allAnswered = MOCK_READING_QUESTIONS.every((q) => answers[q.id]);
-  const tfngOptions = ["TRUE", "FALSE", "NOT GIVEN"];
+  const allAnswered = data?.questions ? data.questions.every((q: any) => answers[q.id]) : false;
   const timerWarning = timeLeft <= 60 && timeLeft > 0;
 
   const handleSubmit = async () => {
@@ -882,6 +950,14 @@ function ReadingPhase({
           <p className="text-gray-900 font-bold">Loading Reading Section…</p>
         </div>
         <SkeletonLoader />
+      </div>
+    );
+  }
+
+  if (sectionState === "error") {
+    return (
+      <div className="space-y-6">
+        <ErrorBanner onRetry={() => window.location.reload()} />
       </div>
     );
   }
@@ -930,7 +1006,7 @@ function ReadingPhase({
           Reading Passage
         </p>
         <p className="text-gray-700 text-sm leading-7 whitespace-pre-line">
-          {MOCK_READING_PASSAGE}
+          {data?.passage}
         </p>
       </div>
 
@@ -939,7 +1015,7 @@ function ReadingPhase({
         <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">
           Questions — True / False / Not Given
         </p>
-        {MOCK_READING_QUESTIONS.map((q, qi) => (
+        {data?.questions?.map((q: any, qi: number) => (
           <div
             key={q.id}
             className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm"
@@ -949,30 +1025,32 @@ function ReadingPhase({
               {q.text}
             </p>
             <div className="flex gap-2 flex-wrap">
-              {tfngOptions.map((opt) => (
+              {q.options.map((opt: string) => {
+                const optLetter = opt.split('.')[0];
+                return (
                 <label
-                  key={opt}
+                  key={optLetter}
                   className={`px-4 py-2 rounded-lg border cursor-pointer text-sm font-medium transition-all ${
-                    answers[q.id] === opt
-                      ? opt === "TRUE"
+                    answers[q.id] === optLetter
+                      ? optLetter === "A"
                         ? "border-teal-400 bg-teal-50 text-teal-700"
-                        : opt === "FALSE"
+                        : optLetter === "B"
                         ? "border-red-300 bg-red-50 text-red-700"
                         : "border-gray-400 bg-gray-100 text-gray-700"
                       : "border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700"
                   }`}
                 >
-                  {opt}
+                  {opt.substring(optLetter.length + 1).trim()}
                   <input
                     type="radio"
                     name={q.id}
-                    value={opt}
-                    checked={answers[q.id] === opt}
-                    onChange={() => setAnswers((prev) => ({ ...prev, [q.id]: opt }))}
+                    value={optLetter}
+                    checked={answers[q.id] === optLetter}
+                    onChange={() => setAnswers((prev) => ({ ...prev, [q.id]: optLetter }))}
                     className="sr-only"
                   />
                 </label>
-              ))}
+              )})}
             </div>
           </div>
         ))}
@@ -982,14 +1060,14 @@ function ReadingPhase({
 
       <button
         onClick={handleSubmit}
-        disabled={!allAnswered || sectionState === "submitting"}
+        disabled={!allAnswered || sectionState === "scoring"}
         className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all ${
           allAnswered
             ? "bg-indigo-700 hover:bg-indigo-600 text-white hover:shadow-lg hover:shadow-indigo-500/20 hover:-translate-y-0.5"
             : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
         }`}
       >
-        {sectionState === "submitting" ? (
+        {sectionState === "scoring" ? (
           <span className="flex items-center justify-center gap-2">
             <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             Submitting…
@@ -1016,13 +1094,23 @@ function WritingPhase({
   const [sectionState, setSectionState] = useState<SectionState>("loading");
   const [text, setText] = useState(initialText);
   const [error, setError] = useState(false);
-  const wordCount = countWords(text);
-  const MIN_WORDS = 60;
+  const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    const t = setTimeout(() => setSectionState("ready"), 700);
-    return () => clearTimeout(t);
+    fetchDiagnosticQuestionsData("writing")
+      .then(res => {
+        setData(res);
+        setSectionState("ready");
+      })
+      .catch((e) => {
+        console.error("WritingPhase fetch error:", e);
+        setError(true);
+        setSectionState("error");
+      });
   }, []);
+
+  const wordCount = countWords(text);
+  const MIN_WORDS = data?.minWords || 150;
 
   // Auto-save writing text to localStorage on every change
   useEffect(() => {
@@ -1052,6 +1140,14 @@ function WritingPhase({
           <p className="text-gray-900 font-bold">Loading Writing Task…</p>
         </div>
         <SkeletonLoader />
+      </div>
+    );
+  }
+
+  if (sectionState === "error") {
+    return (
+      <div className="space-y-6">
+        <ErrorBanner onRetry={() => window.location.reload()} />
       </div>
     );
   }
@@ -1092,17 +1188,19 @@ function WritingPhase({
       </div>
 
       {/* Graph image */}
-      <div className="rounded-xl overflow-hidden border border-gray-200">
+      {data?.image_url && (
+      <div className="rounded-xl overflow-hidden border border-gray-200 mb-4">
         <img
-          src={MOCK_GRAPH_URL}
-          alt="Bar chart showing digital media usage"
+          src={data.image_url}
+          alt="Writing Task Visualization"
           className="w-full object-cover"
         />
       </div>
+      )}
 
       {/* Prompt */}
       <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
-        <p className="text-gray-700 text-sm leading-relaxed">{MOCK_WRITING_PROMPT}</p>
+        <p className="text-gray-700 text-sm leading-relaxed">{data?.topic}</p>
       </div>
 
       {/* Textarea */}
@@ -1148,14 +1246,21 @@ function WritingPhase({
 
       <button
         onClick={handleSubmit}
-        disabled={wordCount < MIN_WORDS || sectionState === "submitting"}
+        disabled={wordCount < MIN_WORDS || sectionState === "scoring"}
         className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all ${
           wordCount >= MIN_WORDS
             ? "bg-indigo-700 hover:bg-indigo-600 text-white hover:shadow-lg hover:shadow-indigo-500/20 hover:-translate-y-0.5"
             : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
         }`}
       >
-        Submit Writing →
+        {sectionState === "scoring" ? (
+          <span className="flex items-center justify-center gap-2">
+            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            Submitting…
+          </span>
+        ) : (
+          "Submit Writing →"
+        )}
       </button>
     </div>
   );
@@ -1166,11 +1271,25 @@ function WritingPhase({
 // ─────────────────────────────────────────────────────────────────────────────
 
 function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => void }) {
-  const [recordState, setRecordState] = useState<RecordState>("idle");
+  const [recordState, setRecordState] = useState<RecordState | "loading" | "error">("loading");
   const [elapsed, setElapsed] = useState(0);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<any>(null);
   const [animBars] = useState(() => Array.from({ length: 12 }, () => Math.random()));
+
+  useEffect(() => {
+    fetchDiagnosticQuestionsData("speaking")
+      .then(res => {
+        setData(res);
+        setRecordState("idle");
+      })
+      .catch((e) => {
+        console.error("SpeakingPhase fetch error:", e);
+        setError("Failed to load speaking prompt");
+        setRecordState("error");
+      });
+  }, []);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -1254,7 +1373,11 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
         <p className="text-gray-400 text-xs uppercase tracking-wider mb-2 font-medium">
           Your Speaking Prompt
         </p>
-        <p className="text-gray-700 text-sm leading-7">{MOCK_SPEAKING_PROMPT}</p>
+        <div className="text-gray-700 text-sm leading-7 space-y-2">
+          {data?.prompts?.map((prompt: string, i: number) => (
+             <p key={i}><span className="font-bold mr-2">{i+1}.</span>{prompt}</p>
+          ))}
+        </div>
       </div>
 
       {/* Instructions */}
@@ -1401,32 +1524,40 @@ function SpeakingResultCard({
   result: SkillResult;
   onContinue: () => void;
 }) {
-  const level = getBandLevel(result.band_score);
-  const cfg = getLevelConfig(level);
+  const band_score = Number(result.band_score) || 0;
   const subScores = result.sub_scores ?? {};
-  const subScoreEntries = Object.entries(subScores);
+  // Only keep numeric entries (skip feedback object, error strings, fallback booleans)
+  const subScoreEntries = Object.entries(subScores).filter(
+    ([, val]) => typeof val === "number" && !isNaN(val as number)
+  );
   const maxSub = subScoreEntries.reduce(
-    (a, b) => (b[1] > a[1] ? b : a),
+    (a, b) => ((b[1] as number) > (a[1] as number) ? b : a),
     subScoreEntries[0] ?? ["", 0]
   );
   const minSub = subScoreEntries.reduce(
-    (a, b) => (b[1] < a[1] ? b : a),
-    subScoreEntries[0] ?? ["", 0]
+    (a, b) => ((b[1] as number) < (a[1] as number) ? b : a),
+    subScoreEntries[0] ?? ["", 9]
   );
 
   const subScoreLabels: Record<string, string> = {
-    fluency: "Fluency & Coherence",
-    lexical: "Lexical Resource",
-    grammar: "Grammatical Range",
-    pronunciation: "Pronunciation",
+    fluencyScore: "Fluency & Coherence",
+    vocabularyScore: "Lexical Resource",
+    grammarScore: "Grammatical Range",
+    pronunciationScore: "Pronunciation",
+    // writing aliases
+    taskResponseScore: "Task Response",
+    coherenceScore: "Coherence & Cohesion",
   };
+
+  const level = getBandLevel(band_score);
+  const cfg = getLevelConfig(level);
 
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="text-center space-y-3">
         <div className="text-4xl">🎤</div>
         <div className={`text-6xl font-black ${cfg.text} tabular-nums`}>
-          {result.band_score.toFixed(1)}
+          {band_score.toFixed(1)}
         </div>
         <LevelBadge level={level} size="lg" />
       </div>
@@ -1470,7 +1601,7 @@ function SpeakingResultCard({
                         : "text-gray-900"
                     }`}
                   >
-                    {(val as number).toFixed(1)}
+                    {Number(val).toFixed(1)}
                   </span>
                 </div>
               );
@@ -1591,7 +1722,7 @@ function DiagnosticSummaryScreen({
 
 type Phase = "gate" | Skill | "speaking_result" | "summary";
 
-export default function Diagnosis() {
+function DiagnosisInner() {
   const [phase, setPhase] = useState<Phase>("gate");
   const [gateState, setGateState] = useState<GateState>("idle");
   const [results, setResults] = useState<AllResults>({});
@@ -1743,7 +1874,15 @@ export default function Diagnosis() {
         {/* Progress bar (shown during skill phases) */}
         {phase !== "gate" && phase !== "summary" && (
           <div className="mb-6 flex justify-center">
-            <ProgressSteps currentPhase={phase as Skill} results={results} />
+            <ProgressSteps 
+              currentPhase={phase as Skill} 
+              results={results} 
+              onPhaseChange={(newPhase) => {
+                setInterimSkill(null);
+                setPendingNextPhase(null);
+                setPhase(newPhase);
+              }}
+            />
           </div>
         )}
 
@@ -1856,4 +1995,100 @@ export default function Diagnosis() {
       `}</style>
     </div>
   );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ONBOARDING SCREEN WRAPPER
+// ─────────────────────────────────────────────────────────────────────────────
+
+function OnboardingScreen({ onComplete }: { onComplete: () => void }) {
+  const { profile, refreshProfile } = useAuth();
+  const [name, setName] = useState(profile?.name || "");
+  const [targetBand, setTargetBand] = useState<string>(profile?.targetBand ? String(profile.targetBand) : "7.0");
+  const [loading, setLoading] = useState(false);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await callBackend(`/api/profile`, {
+        method: "PUT",
+        body: JSON.stringify({ name, targetBand: Number(targetBand) }),
+      });
+      await refreshProfile();
+      onComplete();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex bg-slate-50 min-h-screen items-center justify-center p-6 relative w-full overflow-hidden">
+      <div className="absolute -top-48 -left-48 w-96 h-96 rounded-full bg-indigo-100/60 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-48 -right-48 w-96 h-96 rounded-full bg-teal-100/40 blur-3xl pointer-events-none" />
+      
+      <div className="bg-white p-8 md:p-10 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full max-w-md relative z-10 border border-slate-100 animate-fade-in">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="p-3 bg-indigo-700 rounded-2xl shadow-lg shadow-indigo-200">
+            <GraduationCap className="h-6 w-6 text-white" />
+          </div>
+          <span className="text-2xl font-black text-gray-900 tracking-tight">TestCrack</span>
+        </div>
+        
+        <h2 className="text-2xl font-black mb-2 text-gray-900 leading-tight">Welcome aboard! 🎯</h2>
+        <p className="text-gray-500 mb-8 text-sm leading-relaxed">Let's set your goals so we can tailor your upcoming diagnostic baseline specifically for you.</p>
+        
+        <form onSubmit={handleSave} className="space-y-6">
+          <div className="space-y-2">
+            <label className="block text-sm font-bold text-gray-700 ml-1">Full Name</label>
+            <input 
+              type="text"
+              value={name} 
+              onChange={(e) => setName(e.target.value)} 
+              required 
+              placeholder="E.g. John Doe" 
+              className="w-full border-2 border-slate-100 rounded-xl p-3.5 text-sm font-medium focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all bg-slate-50 placeholder:text-slate-400 text-gray-900"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <label className="block text-sm font-bold text-gray-700 ml-1">Target IELTS Band</label>
+            <div className="relative">
+              <select 
+                value={targetBand} 
+                onChange={(e) => setTargetBand(e.target.value)}
+                className="w-full border-2 border-slate-100 rounded-xl p-3.5 text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all bg-slate-50 appearance-none text-indigo-700 cursor-pointer"
+              >
+                {[4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0].map(band => (
+                  <option key={band} value={band.toFixed(1)}>{band.toFixed(1)} Band</option>
+                ))}
+              </select>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 font-bold">⌄</div>
+            </div>
+          </div>
+
+          <button 
+            type="submit" 
+            className="w-full mt-4 py-4 bg-gray-900 hover:bg-gray-800 text-white font-bold text-base rounded-xl transition-all shadow-xl shadow-gray-200 active:scale-[0.98] active:shadow-sm disabled:opacity-70 disabled:pointer-events-none" 
+            disabled={loading}
+          >
+            {loading ? "Saving Profile..." : "Start Diagnostic →"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+export default function Diagnosis() {
+  const { profile } = useAuth();
+  const [forceDone, setForceDone] = useState(false);
+  
+  if (!profile?.targetBand && !forceDone) {
+    return <OnboardingScreen onComplete={() => setForceDone(true)} />;
+  }
+  
+  return <DiagnosisInner />;
 }

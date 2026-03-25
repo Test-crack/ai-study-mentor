@@ -109,7 +109,13 @@ const LoginRedirect = () => {
   if (profile?.role === 'INSTITUTE_OWNER') return <Navigate to="/institute-owner/dashboard" replace />;
   if (profile?.role === 'INSTITUTE_ADMIN') return <Navigate to="/institute-admin/dashboard" replace />;
   if (profile?.role === 'INSTRUCTOR') return <Navigate to="/instructor/dashboard" replace />;
+  
   // Default: STUDENT
+  if (profile?.role === 'STUDENT') {
+    if (!profile.isDiagnosed) {
+      return <Navigate to="/student/diagnosis" replace />;
+    }
+  }
   return <Navigate to="/student/dashboard" replace />;
 };
 
@@ -134,6 +140,9 @@ const ManualDashboardAccess = () => {
   if (profile.role === 'INSTITUTE_ADMIN') return <Navigate to="/institute-admin/dashboard" replace />;
 
   // Students
+  if (profile.role === 'STUDENT' && !profile.isDiagnosed) {
+    return <Navigate to="/student/diagnosis" replace />;
+  }
   return <Navigate to="/student/dashboard" replace />;
 };
 
@@ -144,7 +153,7 @@ const AppRoutes = () => {
     <Routes>
       {/* Public routes */}
       <Route path="/" element={<LandingPage />} />
-      <Route path="/daignosis" element={<Diagnosis/>} />
+      <Route path="/student/diagnosis" element={<Diagnosis/>} />
       <Route path="/dashdemo" element={<Dashdemo/>} />
       <Route path="/Contact" element={<Contactpage/>} />
 

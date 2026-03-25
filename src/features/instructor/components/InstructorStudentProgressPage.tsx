@@ -11,12 +11,13 @@ import { cn } from "@/shared/utils";
 import { callBackend } from '@/features/auth/services/authClient';
 import { getBackendUrl } from '@/shared/utils';
 import { toast } from 'sonner';
-import {
+import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  AreaChart, Area
+  AreaChart, Area,
+  BarChart, Bar
 } from 'recharts';
 
-type TabType = 'speaking' | 'voice' | 'listening' | 'reading' | 'speed' | 'writing';
+type TabType = 'speaking' | 'reading' | 'writing';
 
 // ─── Skeletons ────────────────────────────────────────────────────────────────
 function HistorySkeleton() {
@@ -144,9 +145,15 @@ export default function InstructorStudentProgressPage() {
   const [speakingHistory, setSpeakingHistory] = useState<any[]>([]);
   const [speakingLoading, setSpeakingLoading] = useState(false);
 
-  // Speed reading tab
-  const [readingHistory, setReadingHistory] = useState<ReadingSession[]>([]);
+  // Reading tab
+  const [readingHistory, setReadingHistory] = useState<any[]>([]);
   const [readingLoading, setReadingLoading] = useState(false);
+
+  // Writing tab
+  const [writingHistory, setWritingHistory] = useState<any[]>([]);
+  const [writingLoading, setWritingLoading] = useState(false);
+  const [gradingModalOpen, setGradingModalOpen] = useState(false);
+  const [selectedAssessment, setSelectedAssessment] = useState<any>(null);
 
   // ─── Loaders ─────────────────────────────────────────────────────────────────
 
@@ -179,17 +186,35 @@ export default function InstructorStudentProgressPage() {
         toast.error('Failed to load reading history.');
       }
     } catch (err: any) {
-      // Graceful fallback — don't crash the page if this endpoint isn't live yet
-      console.warn('Speed reading history endpoint not available:', err.message);
+      console.warn('Reading history endpoint not available:', err.message);
       setReadingHistory([]);
     } finally {
       setReadingLoading(false);
     }
   };
 
+  const loadWritingHistory = async () => {
+    if (!studentId) return;
+    setWritingLoading(true);
+    try {
+      const res = await callBackend(`${getBackendUrl()}/api/instructor/students/${studentId}/writing-history`);
+      if (res.success) {
+        setWritingHistory(Array.isArray(res.data?.sessions) ? res.data.sessions : (Array.isArray(res.data) ? res.data : []));
+      } else {
+        toast.error('Failed to load writing history.');
+      }
+    } catch (err: any) {
+      console.warn('Writing history endpoint not available:', err.message);
+      setWritingHistory([]);
+    } finally {
+      setWritingLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (activeTab === 'speaking') loadSpeakingHistory();
-    if (activeTab === 'speed') loadReadingHistory();
+    if (activeTab === 'reading') loadReadingHistory();
+    if (activeTab === 'writing') loadWritingHistory();
   }, [activeTab, studentId]);
 
   // ─── Speaking stats & chart ───────────────────────────────────────────────────
@@ -278,10 +303,7 @@ export default function InstructorStudentProgressPage() {
             <div className="w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
               <div className="bg-white dark:bg-slate-900 rounded-full p-1.5 flex shadow-sm border border-slate-200 dark:border-slate-800 w-max lg:w-auto">
                   <TabButton active={activeTab === 'speaking'} onClick={() => setActiveTab('speaking')} icon={<Mic className="w-4 h-4" />}>Speaking</TabButton>
-                  <TabButton active={activeTab === 'voice'} onClick={() => setActiveTab('voice')} icon={<Eye className="w-4 h-4" />}>Voice Lab</TabButton>
-                  <TabButton active={activeTab === 'listening'} onClick={() => setActiveTab('listening')} icon={<Headphones className="w-4 h-4" />}>Listening</TabButton>
                   <TabButton active={activeTab === 'reading'} onClick={() => setActiveTab('reading')} icon={<BookOpen className="w-4 h-4" />}>Reading</TabButton>
-                  <TabButton active={activeTab === 'speed'} onClick={() => setActiveTab('speed')} icon={<SpeedIcon className="w-4 h-4" />}>Speed Reading</TabButton>
                   <TabButton active={activeTab === 'writing'} onClick={() => setActiveTab('writing')} icon={<PenTool className="w-4 h-4" />}>Writing</TabButton>
               </div>
             </div>
@@ -396,71 +418,8 @@ export default function InstructorStudentProgressPage() {
               )
           )}
 
-          {/* ──────────────────────────── VOICE LAB TAB ──────────────────────────── */}
-          {activeTab === 'voice' && (
-            <div className="bg-white dark:bg-[#15141B] rounded-3xl p-6 md:p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D] mt-8 animate-in slide-in-from-bottom-4">
-              <div className="w-16 h-16 md:w-20 md:h-20 bg-indigo-50 dark:bg-indigo-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Eye className="w-8 h-8 md:w-10 md:h-10 text-indigo-500" />
-              </div>
-              <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-3">Vocal Pitch & Resonance (Voice Lab)</h2>
-              <p className="text-sm md:text-base text-slate-500 max-w-md mx-auto mb-8">This module tracks intonation, stress patterns, and pitch heatmaps across specialized vocal resonance tests.</p>
-              <div className="max-w-2xl mx-auto border border-dashed border-slate-200 dark:border-slate-800 rounded-xl p-8 bg-slate-50 dark:bg-[#0A0A0B]">
-                <div className="h-[150px] w-full flex items-end justify-between gap-1 mb-4 opacity-50">
-                  {Array.from({ length: 40 }).map((_, i) => (
-                    <div key={i} className="w-full bg-indigo-400 rounded-t-sm" style={{ height: `${Math.max(10, Math.sin(i * 0.2) * 100 + Math.random() * 50)}%` }} />
-                  ))}
-                </div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Mock Spectrogram — Feature Coming Soon</p>
-              </div>
-            </div>
-          )}
-
-          {/* ──────────────────────────── LISTENING TAB ──────────────────────────── */}
-          {activeTab === 'listening' && (
-              <div className="bg-white dark:bg-[#15141B] rounded-3xl p-6 md:p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D] mt-8 animate-in slide-in-from-bottom-4">
-                  <div className="w-16 h-16 md:w-20 md:h-20 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <Headphones className="w-8 h-8 md:w-10 md:h-10 text-blue-500" />
-                  </div>
-                  <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-3">Auditory Processing & Recall</h2>
-                  <p className="text-sm md:text-base text-slate-500 max-w-md mx-auto mb-8">This module analyzes the student's ability to extract key information and maintain focus during audio-based exercises.</p>
-                  
-                  <div className="max-w-xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4 opacity-50">
-                      <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
-                          <div className="text-3xl md:text-4xl font-black text-blue-500 mb-2">92%</div>
-                          <div className="text-xs font-bold text-slate-400 uppercase">Focus Score</div>
-                      </div>
-                      <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
-                          <div className="text-3xl md:text-4xl font-black text-indigo-500 mb-2">14m</div>
-                          <div className="text-xs font-bold text-slate-400 uppercase">Avg. Listen Time</div>
-                      </div>
-                  </div>
-              </div>
-          )}
-
-          {/* ──────────────────────────── READING TAB (Comprehension) ─────────────── */}
+          {/* ──────────────────────────── READING TAB ──────────────────────── */}
           {activeTab === 'reading' && (
-              <div className="bg-white dark:bg-[#15141B] rounded-3xl p-6 md:p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D] mt-8 animate-in slide-in-from-bottom-4">
-                  <div className="w-16 h-16 md:w-20 md:h-20 bg-purple-50 dark:bg-purple-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <BookOpen className="w-8 h-8 md:w-10 md:h-10 text-purple-500" />
-                  </div>
-                  <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-3">Critical Analysis & Contextual Inference</h2>
-                  <p className="text-sm md:text-base text-slate-500 max-w-md mx-auto mb-8">This module evaluates the student's ability to identify core themes, infer meaning from context, and analyze narrative structures.</p>
-                  
-                  <div className="max-w-xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4 opacity-50">
-                      <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
-                          <div className="text-3xl md:text-4xl font-black text-purple-500 mb-2">94%</div>
-                          <div className="text-xs font-bold text-slate-400 uppercase">Inference Accuracy</div>
-                      </div>
-                      <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
-                          <div className="text-3xl md:text-4xl font-black text-fuchsia-500 mb-2">12/15</div>
-                          <div className="text-xs font-bold text-slate-400 uppercase">Thematic Mastery</div>
-                      </div>
-                  </div>
-              </div>
-          )}
-
-          {/* ──────────────────────────── SPEED READING TAB ──────────────────────── */}
-          {activeTab === 'speed' && (
             readingLoading ? <HistorySkeleton /> :
             readingHistory.length === 0 ? (
               <EmptyState
@@ -579,24 +538,165 @@ export default function InstructorStudentProgressPage() {
 
           {/* ──────────────────────────── WRITING TAB ──────────────────────────── */}
           {activeTab === 'writing' && (
-              <div className="bg-white dark:bg-[#15141B] rounded-3xl p-6 md:p-12 text-center shadow-sm border border-slate-200 dark:border-[#26252D] mt-8 animate-in slide-in-from-bottom-4">
-                  <div className="w-16 h-16 md:w-20 md:h-20 bg-amber-50 dark:bg-amber-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <PenTool className="w-8 h-8 md:w-10 md:h-10 text-amber-500" />
-                  </div>
-                  <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-3">Linguistic Composition & Syntax</h2>
-                  <p className="text-sm md:text-base text-slate-500 max-w-md mx-auto mb-8">This module tracks grammatical precision, vocabulary diversity, and structural flow in written responses.</p>
-                  
-                  <div className="max-w-xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4 opacity-50">
-                      <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
-                          <div className="text-3xl md:text-4xl font-black text-amber-500 mb-2">A-</div>
-                          <div className="text-xs font-bold text-slate-400 uppercase">Grammar Accuracy</div>
+            writingLoading ? <HistorySkeleton /> :
+            writingHistory.length === 0 ? (
+              <EmptyState
+                icon={<PenTool className="w-10 h-10 text-slate-400" />}
+                title="No Writing History"
+                desc="This student hasn't completed any Writing Practice sessions yet."
+              />
+            ) : (
+                <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+                  {/* Chart for Writing Progress */}
+                  <div className="bg-white dark:bg-[#15141B] p-4 md:p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-[#26252D]">
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">AI Band Score Growth</h3>
+                      <div className="h-[250px] md:h-[300px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={[...writingHistory].reverse().map((w, i) => ({
+                            name: `Task ${i+1}`,
+                            score: parseFloat(w.aiBandScore || "0"),
+                            date: new Date(w.createdAt).toLocaleDateString()
+                          }))} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" strokeOpacity={0.4} />
+                             <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                             <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} domain={[0, 9]} ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}/>
+                             <Tooltip
+                                 contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: '#fff' }}
+                                 labelStyle={{ color: '#0b132b', fontWeight: 'bold' }}
+                             />
+                             <Line type="monotone" dataKey="score" stroke="#f59e0b" strokeWidth={3} dot={{r: 4, strokeWidth: 2}} activeDot={{r: 6}} name="Band Score" />
+                          </LineChart>
+                        </ResponsiveContainer>
                       </div>
-                      <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
-                          <div className="text-3xl md:text-4xl font-black text-orange-500 mb-2">1.2k</div>
-                          <div className="text-xs font-bold text-slate-400 uppercase">Vocabulary Bank</div>
-                      </div>
                   </div>
-              </div>
+
+                  {/* Writing Table List */}
+                  <div className="bg-white dark:bg-[#15141B] rounded-3xl p-4 md:p-6 shadow-sm border border-slate-200 dark:border-[#26252D] overflow-hidden">
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-5">Writing Assignments</h3>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse min-w-[700px]">
+                        <thead>
+                          <tr className="border-b border-slate-100 dark:border-[#26252D] text-slate-500 text-xs font-bold uppercase tracking-wider">
+                            <th className="pb-3 pl-4">Date</th>
+                            <th className="pb-3">Task Prompt</th>
+                            <th className="pb-3 text-center">Word Count</th>
+                            <th className="pb-3 text-center">AI Grade</th>
+                            <th className="pb-3 text-center">Manual Grade</th>
+                            <th className="pb-3 text-right pr-4">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="text-sm">
+                           {writingHistory.map((w, i) => (
+                             <tr key={i} className="border-b border-slate-50 dark:border-[#26252D]/50 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
+                                <td className="py-4 pl-4 text-slate-600 dark:text-slate-400 font-medium">
+                                  {new Date(w.createdAt).toLocaleDateString()}
+                                </td>
+                                <td className="py-4 text-[#0b132b] dark:text-slate-200 font-bold max-w-[200px] truncate" title={w.IeltsWritingTask?.topic || 'N/A'}>
+                                  {w.IeltsWritingTask?.title || 'Custom Answer'}
+                                </td>
+                                <td className="py-4 text-center font-mono">
+                                  {w.wordCount}
+                                </td>
+                                <td className="py-4 text-center">
+                                  <span className="px-2 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-600 font-bold rounded text-xs">{w.aiBandScore || 'N/A'}</span>
+                                </td>
+                                <td className="py-4 text-center">
+                                  {w.manualBandScore ? (
+                                    <span className="px-2 py-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 font-bold rounded text-xs">{w.manualBandScore}</span>
+                                  ) : (
+                                    <span className="text-slate-300 text-xs italic">Pending</span>
+                                  )}
+                                </td>
+                                <td className="py-4 text-right pr-4">
+                                   <Button size="sm" variant="outline" className="rounded-full text-xs hover:bg-[#8a42f5] hover:text-white hover:border-[#8a42f5]" onClick={() => {
+                                      setSelectedAssessment(w);
+                                      setGradingModalOpen(true);
+                                   }}>
+                                       Grade
+                                   </Button>
+                                </td>
+                             </tr>
+                           ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+            )
+          )}
+
+          {/* Optional: Add Grade Modal Component here (GradingModalOpen) */}
+          {gradingModalOpen && selectedAssessment && (
+             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in">
+                 <div className="bg-white dark:bg-[#15141B] w-full max-w-2xl rounded-3xl p-6 md:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+                    <button onClick={() => setGradingModalOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                       <ChevronLeft className="rotate-180 w-6 h-6" />
+                    </button>
+                    <h2 className="text-2xl font-bold mb-6 text-slate-900 dark:text-white">Evaluate Written Response</h2>
+                    
+                    <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 mb-6">
+                        <p className="text-sm font-semibold text-slate-500 mb-2">Student's Content ({selectedAssessment.wordCount} words):</p>
+                        <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-serif leading-relaxed text-sm">
+                          {selectedAssessment.writtenContent}
+                        </p>
+                    </div>
+
+                    <div className="flex flex-col gap-4">
+                        <div className="grid grid-cols-2 gap-4">
+                           <div>
+                              <label className="block text-xs font-bold text-slate-500 mb-1">AI Grade (Reference)</label>
+                              <div className="text-xl font-bold text-amber-500">{selectedAssessment.aiBandScore || 'N/A'}</div>
+                           </div>
+                           <div>
+                              <label className="block text-xs font-bold text-slate-500 mb-1">Your Override Score</label>
+                              <input 
+                                id="manualGradeInput" 
+                                type="text"
+                                defaultValue={selectedAssessment.manualBandScore || ''} 
+                                placeholder="e.g. 7.5"
+                                className="w-full bg-slate-100 dark:bg-slate-800 p-2 rounded-lg font-bold border-none outline-none focus:ring-2 focus:ring-[#8a42f5]" 
+                              />
+                           </div>
+                        </div>
+                        <div>
+                           <label className="block text-xs font-bold text-slate-500 mb-1">Instructor Feedback</label>
+                           <textarea 
+                             id="manualFeedbackInput" 
+                             defaultValue={selectedAssessment.manualFeedback || ''}
+                             placeholder="Provide constructive feedback..."
+                             className="w-full bg-slate-100 dark:bg-slate-800 p-3 rounded-xl min-h-[100px] text-sm border-none outline-none focus:ring-2 focus:ring-[#8a42f5]"
+                           />
+                        </div>
+                    </div>
+                    
+                    <div className="mt-8 flex justify-end gap-3">
+                        <Button variant="ghost" onClick={() => setGradingModalOpen(false)}>Cancel</Button>
+                        <Button className="bg-[#8a42f5] hover:bg-[#722ed1] text-white rounded-full" onClick={async () => {
+                             const score = (document.getElementById('manualGradeInput') as HTMLInputElement).value;
+                             const feedback = (document.getElementById('manualFeedbackInput') as HTMLTextAreaElement).value;
+                             
+                             try {
+                                const res = await callBackend(`${getBackendUrl()}/api/instructor/writing-assessment/${selectedAssessment.id}/grade`, {
+                                   method: 'PATCH',
+                                   body: JSON.stringify({
+                                     bandScore: score,
+                                     feedback: feedback
+                                   })
+                                });
+                                if (res.success) {
+                                   toast.success('Grade saved successfully!');
+                                   setGradingModalOpen(false);
+                                   loadWritingHistory(); // Refresh history
+                                } else {
+                                   toast.error('Failed to save grade.');
+                                }
+                             } catch(err) {
+                                toast.error('An error occurred.');
+                             }
+                        }}>Save Evaluation</Button>
+                    </div>
+                 </div>
+             </div>
           )}
 
         </main>
