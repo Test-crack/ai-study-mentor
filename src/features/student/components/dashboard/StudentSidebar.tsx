@@ -1,20 +1,23 @@
 import { 
- LayoutDashboard, 
+
   GraduationCap, 
-  Mic, 
+  LayoutDashboard, Mic, PenTool, Headphones, 
+  ClipboardCheck,  History, Lightbulb, Sparkles, Settings,
   Activity,
   Home,
    LogOut,
   Timer, 
   ChevronLeft,
-  PenTool, 
-  Headphones, 
+  
+
+
+  
   BookOpen, 
   ChevronRight,
   Calendar, 
   MessageCircle, 
   Library, 
-  Settings,Layers
+  Layers
 } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -43,9 +46,11 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
   // { id: 'schedule', icon: Calendar, label: 'Schedule', path: '/student/schedule' },
   // { id: 'speaking-practice', icon: MessageCircle, label: 'Speaking-Anatomy', path: '/student/speaking-practice' },
   // { id: 'my-curriculum', icon: Library, label: 'My-Curriculum', path: '/student/my-curriculum' },
-  { id: 'speaking-asess', icon: GraduationCap, label: 'Speaking Asessment', path: '/student/asess' },
+  { id: 'speaking-asess', icon: ClipboardCheck, label: 'Speaking Assessment', path: '/student/asess' },
   { id: 'courses-section', icon: GraduationCap, label: 'My Courses', path: '/student/courses-section' },
-  { id: 'suggestion', icon: GraduationCap, label: 'Suggestion', path: '/student/suggestion' },
+  { id: 'assessment-history', icon: History, label: 'Assessment History', path: '/student/assessment-history' },
+  { id: 'SuggestionPage', icon: Lightbulb, label: 'SuggestionPage', path: '/student/suggestion-page' },
+  { id: 'suggestion', icon: Sparkles, label: 'Recommendations', path: '/student/suggestion' },
   { id: 'settings', icon: Settings, label: 'Settings', path: '/student/settings' },
 ];
   const handleNavigation = (item: typeof menuItems[0]) => {
