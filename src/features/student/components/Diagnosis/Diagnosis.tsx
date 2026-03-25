@@ -293,7 +293,7 @@ async function submitSection(
     method: "POST",
     body: JSON.stringify({ answers }),
   });
-  if (!data?.bandScore) throw new Error("Submission failed");
+  if (data?.bandScore === undefined) throw new Error("Submission failed");
   return { band_score: data.bandScore, level: getBandLevel(data.bandScore), sub_scores: data.sub_scores } as SkillResult;
 }
 
@@ -305,7 +305,7 @@ async function submitWriting(
     method: "POST",
     body: JSON.stringify({ answers: { text } }),
   });
-  if (!data?.bandScore) throw new Error("Writing submission failed");
+  if (data?.bandScore === undefined) throw new Error("Writing submission failed");
   return {
     band_score: data.bandScore,
     level: getBandLevel(data.bandScore),
@@ -326,7 +326,7 @@ async function submitSpeaking(
     formData,
     "POST"
   );
-  if (!data?.bandScore) throw new Error("Speaking submission failed");
+  if (data?.bandScore === undefined) throw new Error("Speaking submission failed");
   return {
     band_score: data.bandScore,
     level: getBandLevel(data.bandScore),
@@ -862,14 +862,14 @@ function ListeningPhase({
 
       <button
         onClick={handleSubmit}
-        disabled={!allAnswered || sectionState === "submitting"}
+        disabled={!allAnswered || sectionState === "scoring"}
         className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all ${
           allAnswered
             ? "bg-indigo-700 hover:bg-indigo-600 text-white hover:shadow-lg hover:shadow-indigo-500/20 hover:-translate-y-0.5"
             : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
         }`}
       >
-        {sectionState === "submitting" ? (
+        {sectionState === "scoring" ? (
           <span className="flex items-center justify-center gap-2">
             <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             Submitting…
@@ -1060,14 +1060,14 @@ function ReadingPhase({
 
       <button
         onClick={handleSubmit}
-        disabled={!allAnswered || sectionState === "submitting"}
+        disabled={!allAnswered || sectionState === "scoring"}
         className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all ${
           allAnswered
             ? "bg-indigo-700 hover:bg-indigo-600 text-white hover:shadow-lg hover:shadow-indigo-500/20 hover:-translate-y-0.5"
             : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
         }`}
       >
-        {sectionState === "submitting" ? (
+        {sectionState === "scoring" ? (
           <span className="flex items-center justify-center gap-2">
             <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             Submitting…
@@ -1246,14 +1246,21 @@ function WritingPhase({
 
       <button
         onClick={handleSubmit}
-        disabled={wordCount < MIN_WORDS || sectionState === "submitting"}
+        disabled={wordCount < MIN_WORDS || sectionState === "scoring"}
         className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all ${
           wordCount >= MIN_WORDS
             ? "bg-indigo-700 hover:bg-indigo-600 text-white hover:shadow-lg hover:shadow-indigo-500/20 hover:-translate-y-0.5"
             : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
         }`}
       >
-        Submit Writing →
+        {sectionState === "scoring" ? (
+          <span className="flex items-center justify-center gap-2">
+            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            Submitting…
+          </span>
+        ) : (
+          "Submit Writing →"
+        )}
       </button>
     </div>
   );
