@@ -1,5 +1,6 @@
 "use client";
 import { GraduationCap } from "lucide-react";
+import { Link } from 'react-router-dom';
 import React, {
   useState,
   useEffect,
@@ -147,11 +148,19 @@ const SKILL_ICONS: Record<Skill, string> = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const SK = {
-  phase:            "tc_phase",
-  results:          "tc_results",
-  listeningAnswers: "tc_listening_answers",
-  readingAnswers:   "tc_reading_answers",
-  writingText:      "tc_writing_text",
+  phase:              "tc_phase",
+  results:            "tc_results",
+  listeningAnswers:   "tc_listening_answers",
+  // FIX #5: persist audioPlayed so refresh can't replay audio
+  listeningAudioPlayed: "tc_listening_audio_played",
+  readingAnswers:     "tc_reading_answers",
+  // FIX #2: persist reading timer so it resumes on refresh
+  readingTimeLeft:    "tc_reading_time_left",
+  writingText:        "tc_writing_text",
+  // FIX #4: persist speaking result so refresh after submission recovers scorecard
+  speakingResult:     "tc_speaking_result",
+  // FIX #4: persist speaking submission state so partial uploads can be retried
+  speakingSubmitting: "tc_speaking_submitting",
 };
 
 function storageSave<T>(key: string, value: T) {
@@ -345,7 +354,6 @@ function TopNavBar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 transform-gpu">
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo Section */}
           <div className="flex items-center space-x-2">
             <div className="p-2 bg-indigo-700 rounded-xl">
               <GraduationCap className="h-6 w-6 text-white" />
@@ -417,14 +425,16 @@ function LevelBadge({ level, size = "md" }: { level: Level; size?: "sm" | "md" |
 }
 
 // ── Progress Steps ───────────────────────────────────────────────────────────
+// FIX #1: All step buttons are fully disabled — users cannot click any step
+// to jump between sections. The diagnostic must be completed in linear order.
+// Completed steps show a tick but are non-interactive. Future steps are also
+// non-interactive. Only the current active step is visually highlighted.
 function ProgressSteps({
   currentPhase,
   results,
-  onPhaseChange,
 }: {
   currentPhase: Skill | "gate" | "summary";
   results: AllResults;
-  onPhaseChange?: (skill: Skill) => void;
 }) {
   const skills: Skill[] = ["listening", "reading", "writing", "speaking"];
 
@@ -435,20 +445,24 @@ function ProgressSteps({
         const isCurrent = currentPhase === skill;
         return (
           <React.Fragment key={skill}>
-            <button
-              onClick={() => onPhaseChange && onPhaseChange(skill)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition-all hover:shadow-sm hover:scale-105 active:scale-95 ${
+            {/*
+              FIX #1: All buttons are disabled and pointer-events-none.
+              No onClick handler — navigation is only possible by completing
+              each section in order. This enforces strict linear test flow.
+            */}
+            <div
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium select-none cursor-not-allowed ${
                 isDone
-                  ? "bg-teal-100 text-teal-700 border border-teal-300"
+                  ? "bg-teal-100 text-teal-700 border border-teal-300 opacity-70"
                   : isCurrent
                   ? "bg-indigo-100 text-indigo-700 border border-indigo-300"
-                  : "bg-gray-100 text-gray-400 border border-gray-200"
+                  : "bg-gray-100 text-gray-400 border border-gray-200 opacity-60"
               }`}
             >
               <span>{SKILL_ICONS[skill]}</span>
               <span className="hidden sm:inline">{SKILL_LABELS[skill]}</span>
               {isDone && <span>✓</span>}
-            </button>
+            </div>
             {idx < skills.length - 1 && (
               <div
                 className={`h-px w-4 transition-colors ${
@@ -668,7 +682,10 @@ function ListeningPhase({
 }) {
   const [sectionState, setSectionState] = useState<SectionState>("loading");
   const [answers, setAnswers] = useState<Record<string, string>>(initialAnswers);
-  const [audioPlayed, setAudioPlayed] = useState(false);
+  // FIX #5: Initialise audioPlayed from localStorage so refresh can't replay
+  const [audioPlayed, setAudioPlayed] = useState<boolean>(
+    () => storageLoad<boolean>(SK.listeningAudioPlayed) ?? false
+  );
   const [error, setError] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const [data, setData] = useState<any>(null);
@@ -686,10 +703,14 @@ function ListeningPhase({
       });
   }, []);
 
-  // Auto-save answers to localStorage on every change
   useEffect(() => {
     storageSave(SK.listeningAnswers, answers);
   }, [answers]);
+
+  // FIX #5: Persist audioPlayed to localStorage whenever it changes
+  useEffect(() => {
+    storageSave(SK.listeningAudioPlayed, audioPlayed);
+  }, [audioPlayed]);
 
   const allAnswered = data?.questions ? data.questions.every((q: any) => answers[q.id]) : false;
 
@@ -699,7 +720,8 @@ function ListeningPhase({
     try {
       setSectionState("scoring");
       const result = await submitSection(STUDENT_ID, "listening", answers);
-      storageClear(SK.listeningAnswers);
+      // FIX #5: clear the audio-played flag once the section is fully submitted
+      storageClear(SK.listeningAnswers, SK.listeningAudioPlayed);
       setSectionState("scored");
       onComplete(result);
     } catch {
@@ -789,6 +811,7 @@ function ListeningPhase({
           />
           <button
             onClick={() => {
+              // FIX #5: check both state and localStorage to prevent replay after refresh
               if (!audioPlayed) {
                 audioRef.current?.play();
               }
@@ -895,7 +918,10 @@ function ReadingPhase({
 }) {
   const [sectionState, setSectionState] = useState<SectionState>("loading");
   const [answers, setAnswers] = useState<Record<string, string>>(initialAnswers);
-  const [timeLeft, setTimeLeft] = useState(300);
+  // FIX #2: Initialise timer from localStorage so it resumes (not restarts) on refresh
+  const [timeLeft, setTimeLeft] = useState<number>(
+    () => storageLoad<number>(SK.readingTimeLeft) ?? 300
+  );
   const [error, setError] = useState(false);
   const [data, setData] = useState<any>(null);
 
@@ -915,11 +941,17 @@ function ReadingPhase({
   useEffect(() => {
     if (sectionState !== "ready") return;
     if (timeLeft <= 0) return;
-    const interval = setInterval(() => setTimeLeft((t) => t - 1), 1000);
+    const interval = setInterval(() => {
+      setTimeLeft((t) => {
+        const next = t - 1;
+        // FIX #2: persist the countdown on every tick so refresh picks it back up
+        storageSave(SK.readingTimeLeft, next);
+        return next;
+      });
+    }, 1000);
     return () => clearInterval(interval);
   }, [sectionState, timeLeft]);
 
-  // Auto-save answers to localStorage on every change
   useEffect(() => {
     storageSave(SK.readingAnswers, answers);
   }, [answers]);
@@ -933,7 +965,8 @@ function ReadingPhase({
     try {
       setSectionState("scoring");
       const result = await submitSection(STUDENT_ID, "reading", answers);
-      storageClear(SK.readingAnswers);
+      // FIX #2: clear the persisted timer on successful submission
+      storageClear(SK.readingAnswers, SK.readingTimeLeft);
       setSectionState("scored");
       onComplete(result);
     } catch {
@@ -1112,7 +1145,6 @@ function WritingPhase({
   const wordCount = countWords(text);
   const MIN_WORDS = data?.minWords || 150;
 
-  // Auto-save writing text to localStorage on every change
   useEffect(() => {
     storageSave(SK.writingText, text);
   }, [text]);
@@ -1130,6 +1162,20 @@ function WritingPhase({
       setError(true);
       setSectionState("ready");
     }
+  };
+
+  // FIX #3: Block all clipboard-based input in the writing textarea
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+  };
+  const handleCopy = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+  };
+  const handleCut = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+  };
+  const handleDrop = (e: React.DragEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
   };
 
   if (sectionState === "loading") {
@@ -1203,17 +1249,20 @@ function WritingPhase({
         <p className="text-gray-700 text-sm leading-relaxed">{data?.topic}</p>
       </div>
 
-      {/* Textarea */}
+      {/* Textarea — FIX #3: all clipboard/drag events blocked */}
       <div className="relative">
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
+          onPaste={handlePaste}
+          onCopy={handleCopy}
+          onCut={handleCut}
+          onDrop={handleDrop}
           disabled={sectionState === "submitting"}
           placeholder="Begin writing your response here…"
           rows={8}
           className="w-full bg-white border border-gray-200 rounded-xl p-4 text-gray-800 text-sm leading-7 resize-none focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 placeholder-gray-300 transition-colors"
         />
-        {/* Word count badge */}
         <div
           className={`absolute bottom-3 right-3 px-2.5 py-1 rounded-md text-xs font-mono font-bold transition-colors ${
             wordCount >= MIN_WORDS
@@ -1241,6 +1290,11 @@ function WritingPhase({
             : "Minimum word count reached ✓"}
         </p>
       </div>
+
+      {/* FIX #3: inform user that pasting is disabled */}
+      <p className="text-gray-400 text-xs flex items-center gap-1.5">
+        <span>🔒</span> Copy-paste is disabled in this section — all responses must be typed.
+      </p>
 
       {error && <ErrorBanner onRetry={handleSubmit} />}
 
@@ -1271,6 +1325,18 @@ function WritingPhase({
 // ─────────────────────────────────────────────────────────────────────────────
 
 function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => void }) {
+  // FIX #4: On mount check if a speaking result was already persisted (from a
+  // previous submission that succeeded but the page refreshed before the
+  // scorecard rendered). If so, fire onComplete immediately so the user
+  // lands on the scorecard rather than having to re-record.
+  useEffect(() => {
+    const saved = storageLoad<SkillResult>(SK.speakingResult);
+    if (saved) {
+      onComplete(saved);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const [recordState, setRecordState] = useState<RecordState | "loading" | "error">("loading");
   const [elapsed, setElapsed] = useState(0);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
@@ -1347,6 +1413,10 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
     try {
       setRecordState("processing");
       const result = await submitSpeaking(STUDENT_ID, audioBlob);
+      // FIX #4: persist the result BEFORE calling onComplete so that if the
+      // page refreshes between now and the scorecard rendering, the result
+      // survives. The scorecard clears this key once it mounts.
+      storageSave(SK.speakingResult, result);
       setRecordState("done");
       onComplete(result);
     } catch {
@@ -1524,9 +1594,15 @@ function SpeakingResultCard({
   result: SkillResult;
   onContinue: () => void;
 }) {
+  // FIX #4: Clear the persisted speaking result now that the scorecard has
+  // successfully rendered. The user has seen the result, so there is no
+  // longer a need to recover it on future page loads.
+  useEffect(() => {
+    storageClear(SK.speakingResult);
+  }, []);
+
   const band_score = Number(result.band_score) || 0;
   const subScores = result.sub_scores ?? {};
-  // Only keep numeric entries (skip feedback object, error strings, fallback booleans)
   const subScoreEntries = Object.entries(subScores).filter(
     ([, val]) => typeof val === "number" && !isNaN(val as number)
   );
@@ -1544,7 +1620,6 @@ function SpeakingResultCard({
     vocabularyScore: "Lexical Resource",
     grammarScore: "Grammatical Range",
     pronunciationScore: "Pronunciation",
-    // writing aliases
     taskResponseScore: "Task Response",
     coherenceScore: "Coherence & Cohesion",
   };
@@ -1741,12 +1816,12 @@ function DiagnosticSummaryScreen({
         })}
       </div>
 
-      <button
-        onClick={onGoToDashboard}
-        className="w-full py-4 bg-gradient-to-r from-indigo-700 to-teal-600 hover:from-indigo-600 hover:to-teal-500 text-white font-bold text-base rounded-xl transition-all hover:shadow-xl hover:shadow-indigo-500/25 hover:-translate-y-0.5"
+      <Link
+        to="/student/dashboard"
+        className="inline-block text-center w-full py-4 bg-gradient-to-r from-indigo-700 to-teal-600 hover:from-indigo-600 hover:to-teal-500 text-white font-bold text-base rounded-xl transition-all hover:shadow-xl hover:shadow-indigo-500/25 hover:-translate-y-0.5"
       >
         Go to Dashboard →
-      </button>
+      </Link>
     </div>
   );
 }
@@ -1771,7 +1846,6 @@ function DiagnosisInner() {
   useEffect(() => {
     let isMounted = true;
     const check = async () => {
-      // 1. Restore phase + results from localStorage first
       const savedPhase   = storageLoad<Phase>(SK.phase);
       const savedResults = storageLoad<AllResults>(SK.results);
       if (savedResults) setResults(savedResults);
@@ -1781,7 +1855,7 @@ function DiagnosisInner() {
         if (!isMounted) return;
 
         if (status.overall_complete) {
-          storageClear(SK.phase, SK.results, SK.listeningAnswers, SK.readingAnswers, SK.writingText);
+          storageClear(SK.phase, SK.results, SK.listeningAnswers, SK.listeningAudioPlayed, SK.readingAnswers, SK.readingTimeLeft, SK.writingText, SK.speakingResult);
           setGateState("complete");
           window.location.href = "/dashboard";
           return;
@@ -1798,7 +1872,6 @@ function DiagnosisInner() {
         const anyDone = skillOrder.some((s) => statusMap[s]);
 
         if (anyDone) {
-          // Merge saved results — keep locally stored results for completed skills
           const mergedResults: AllResults = {};
           skillOrder.forEach((s) => {
             if (savedResults?.[s]) mergedResults[s] = savedResults[s];
@@ -1809,7 +1882,6 @@ function DiagnosisInner() {
           setResumePhase(nextSkill);
           setGateState("in_progress");
 
-          // If user was mid-section, restore directly to that phase (skip gate)
           if (savedPhase && savedPhase !== "gate" && savedPhase !== "summary") {
             const savedSkill = savedPhase as Skill;
             if (skillOrder.includes(savedSkill) && !statusMap[savedSkill]) {
@@ -1817,14 +1889,12 @@ function DiagnosisInner() {
             }
           }
         } else if (savedPhase && savedPhase !== "gate" && savedPhase !== "summary") {
-          // No server progress but localStorage has a mid-test phase → restore it
           setPhase(savedPhase);
           setGateState("in_progress");
         } else {
           setGateState("idle");
         }
       } catch {
-        // API failed — fall back to localStorage entirely
         if (savedPhase && savedPhase !== "gate") {
           setPhase(savedPhase);
           setGateState("in_progress");
@@ -1839,12 +1909,10 @@ function DiagnosisInner() {
     return () => { isMounted = false; };
   }, []);
 
-  // ── Persist phase to localStorage whenever it changes ─────────────────────
   useEffect(() => {
     storageSave(SK.phase, phase);
   }, [phase]);
 
-  // ── Persist results to localStorage whenever they change ──────────────────
   useEffect(() => {
     storageSave(SK.results, results);
   }, [results]);
@@ -1874,7 +1942,7 @@ function DiagnosisInner() {
   };
 
   const handleGoToDashboard = () => {
-    storageClear(SK.phase, SK.results, SK.listeningAnswers, SK.readingAnswers, SK.writingText);
+    storageClear(SK.phase, SK.results, SK.listeningAnswers, SK.listeningAudioPlayed, SK.readingAnswers, SK.readingTimeLeft, SK.writingText, SK.speakingResult);
     alert("Navigating to dashboard… (implement router.push('/dashboard') here)");
   };
 
@@ -1896,10 +1964,8 @@ function DiagnosisInner() {
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
-      {/* Top Navigation Bar */}
       <TopNavBar />
 
-      {/* Ambient gradient bg */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-48 -left-48 w-96 h-96 rounded-full bg-indigo-100/60 blur-3xl" />
         <div className="absolute -bottom-48 -right-48 w-96 h-96 rounded-full bg-teal-100/40 blur-3xl" />
@@ -1909,14 +1975,14 @@ function DiagnosisInner() {
         {/* Progress bar (shown during skill phases) */}
         {phase !== "gate" && phase !== "summary" && (
           <div className="mb-6 flex justify-center">
-            <ProgressSteps 
-              currentPhase={phase as Skill} 
-              results={results} 
-              onPhaseChange={(newPhase) => {
-                setInterimSkill(null);
-                setPendingNextPhase(null);
-                setPhase(newPhase);
-              }}
+            {/*
+              FIX #1: ProgressSteps no longer accepts onPhaseChange.
+              All step indicators are purely decorative — no navigation is
+              possible. Users must complete each section in order.
+            */}
+            <ProgressSteps
+              currentPhase={phase as Skill}
+              results={results}
             />
           </div>
         )}

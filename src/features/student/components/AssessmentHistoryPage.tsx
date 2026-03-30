@@ -9,7 +9,6 @@ import {
   BookOpen,
   PenLine,
   Mic,
-  CheckCircle2,
   Clock,
   Filter,
   BarChart2,
@@ -18,7 +17,7 @@ import {
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
 type Skill = "Listening" | "Reading" | "Writing" | "Speaking";
-type Mode = "Diagnostic" | "Practice" | "Mock Exam";
+type Mode = "Practice" | "Mock Exam";
 
 interface Assessment {
   id: string;
@@ -99,22 +98,6 @@ const MOCK_ASSESSMENTS: Assessment[] = [
     ],
   },
   {
-    id: "a5",
-    date: "2026-03-20T10:00:00",
-    skill: "Speaking",
-    mode: "Diagnostic",
-    bandScore: 4.0,
-    duration: 10,
-    feedback:
-      "Baseline diagnostic complete. Pronunciation is the primary bottleneck — Consonant Clusters drill assigned. Fluency score held back by frequent self-corrections and long pauses.",
-    subScores: [
-      { label: "Fluency", score: 4.5 },
-      { label: "Pronunciation", score: 3.5 },
-      { label: "Vocabulary", score: 4.0 },
-      { label: "Grammar", score: 4.0 },
-    ],
-  },
-  {
     id: "a6",
     date: "2026-03-19T13:00:00",
     skill: "Reading",
@@ -123,16 +106,6 @@ const MOCK_ASSESSMENTS: Assessment[] = [
     duration: 20,
     feedback:
       "Skimming speed is adequate but scanning is slow. You re-read sentences too often. Practice 'first pass / second pass' technique. Strong on MCQ but weak on sentence completion.",
-  },
-  {
-    id: "a7",
-    date: "2026-03-18T09:30:00",
-    skill: "Listening",
-    mode: "Diagnostic",
-    bandScore: 6.0,
-    duration: 10,
-    feedback:
-      "Baseline set at 6.0. Sections 1 and 2 are strong. Academic vocabulary in sections 3–4 is the main gap. Assigned: Academic Word List drills.",
   },
 ];
 
@@ -146,7 +119,6 @@ const SKILL_CONFIG: Record<Skill, { icon: React.ReactNode; color: string; bg: st
 };
 
 const MODE_COLOR: Record<Mode, string> = {
-  Diagnostic: "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300",
   Practice:   "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400",
   "Mock Exam": "bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300",
 };
@@ -213,10 +185,6 @@ const AssessmentHistoryPage = () => {
                 {filtered.length} assessment{filtered.length !== 1 ? "s" : ""} found
               </p>
             </div>
-            {/* <div className="flex items-center gap-2 text-xs text-slate-400">
-              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-              <span>All data is mock — will sync with backend Wednesday</span>
-            </div> */}
           </div>
 
           {/* ── Filter Bar ─────────────────────────────────────────── */}
@@ -243,7 +211,7 @@ const AssessmentHistoryPage = () => {
 
               {/* Mode filter */}
               <div className="flex flex-wrap gap-2">
-                {(["All", "Diagnostic", "Practice", "Mock Exam"] as const).map((m) => (
+                {(["All", "Practice", "Mock Exam"] as const).map((m) => (
                   <FilterChip
                     key={m}
                     label={m}
