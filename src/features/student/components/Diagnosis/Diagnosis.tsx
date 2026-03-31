@@ -73,8 +73,6 @@ interface TFNGQuestion {
 // HELPERS & CONSTANTS
 // ─────────────────────────────────────────────────────────────────────────────
 
-const STUDENT_ID = "mock-student-abc-123";
-
 function getBandLevel(score: number): Level {
   if (score <= 4.5) return "A";
   if (score <= 6.5) return "B";
@@ -157,7 +155,7 @@ const SK = {
   writingText:        "tc_writing_text",
   speakingResult:     "tc_speaking_result",
   speakingSubmitting: "tc_speaking_submitting",
-  activeTabLock:      "tc_active_tab", // Lock key for TC-51
+  activeTabLock:      "tc_active_tab",
 };
 
 function storageSave<T>(key: string, value: T) {
@@ -176,106 +174,6 @@ function storageClear(...keys: string[]) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MOCK DATA
-// ─────────────────────────────────────────────────────────────────────────────
-
-const MOCK_LISTENING_QUESTIONS: MCQQuestion[] = [
-  {
-    id: "q1",
-    text: "What is the main topic discussed in the audio?",
-    options: [
-      { id: "A", text: "Environmental conservation" },
-      { id: "B", text: "Urban development planning" },
-      { id: "C", text: "Public transportation systems" },
-      { id: "D", text: "Water resource management" },
-    ],
-  },
-  {
-    id: "q2",
-    text: "According to the speaker, when was the project first proposed?",
-    options: [
-      { id: "A", text: "In 2018" },
-      { id: "B", text: "In 2020" },
-      { id: "C", text: "In 2021" },
-      { id: "D", text: "In 2023" },
-    ],
-  },
-  {
-    id: "q3",
-    text: "Which department is primarily responsible for the initiative?",
-    options: [
-      { id: "A", text: "Department of Finance" },
-      { id: "B", text: "Department of Infrastructure" },
-      { id: "C", text: "Department of Environment" },
-      { id: "D", text: "Department of Health" },
-    ],
-  },
-  {
-    id: "q4",
-    text: "What percentage of the budget has been allocated to research?",
-    options: [
-      { id: "A", text: "15%" },
-      { id: "B", text: "20%" },
-      { id: "C", text: "25%" },
-      { id: "D", text: "30%" },
-    ],
-  },
-  {
-    id: "q5",
-    text: "What concern does the speaker raise about the timeline?",
-    options: [
-      { id: "A", text: "Lack of funding" },
-      { id: "B", text: "Insufficient staffing" },
-      { id: "C", text: "Regulatory delays" },
-      { id: "D", text: "Public opposition" },
-    ],
-  },
-  {
-    id: "q6",
-    text: "What is the expected outcome by the end of the programme?",
-    options: [
-      { id: "A", text: "A 40% reduction in emissions" },
-      { id: "B", text: "Construction of 500 new homes" },
-      { id: "C", text: "A fully operational metro line" },
-      { id: "D", text: "Improved air quality index" },
-    ],
-  },
-];
-
-const MOCK_READING_PASSAGE = `
-The rapid expansion of urban green spaces has become a central pillar of modern city planning strategy across several developed nations. Studies conducted over the past two decades suggest a strong correlation between access to parks and public gardens and the overall mental well-being of urban residents. Researchers at the University of Edinburgh noted that individuals who spend at least 30 minutes outdoors in a natural setting each week report significantly lower levels of anxiety and stress-related symptoms.
-
-City councils in Amsterdam, Singapore, and Melbourne have invested heavily in 'biophilic design', a concept that integrates natural elements such as living walls, rooftop gardens, and tree-lined pedestrian corridors into the built environment. Proponents argue that such investments yield economic returns through reduced healthcare costs and increased property values in adjacent areas.
-
-Critics, however, caution that green space development must not obscure deeper socioeconomic inequalities. Research published in the journal Urban Studies found that premium green spaces are disproportionately located in wealthier neighbourhoods, a phenomenon termed 'green gentrification'. The concern is that improvements to public spaces may inadvertently accelerate the displacement of low-income residents rather than improving quality of life for all citizens.
-`.trim();
-
-const MOCK_READING_QUESTIONS: TFNGQuestion[] = [
-  {
-    id: "q1",
-    text: "Researchers have found a direct link between green space access and reduced levels of anxiety.",
-  },
-  {
-    id: "q2",
-    text: "Biophilic design was first developed by researchers at the University of Edinburgh.",
-  },
-  {
-    id: "q3",
-    text: "Green space development can sometimes lead to the displacement of lower-income communities.",
-  },
-  {
-    id: "q4",
-    text: "The city of London is mentioned as a leader in green space investment.",
-  },
-];
-
-const MOCK_WRITING_PROMPT = `The bar chart below shows the average weekly hours spent on digital media by age group in the UK in 2023. Write 2–3 sentences describing the key trend. Minimum 60 words.`;
-const MOCK_GRAPH_URL =
-  "https://placehold.co/600x300/eef2ff/4338ca?text=Bar+Chart+%E2%80%94+Digital+Media+Usage+by+Age+Group+(2023)";
-
-const MOCK_SPEAKING_PROMPT = `Talk about a memorable journey you have taken. You should say: where you went, who you were with, what made it memorable, and whether you would recommend this destination to others.`;
-
-// ─────────────────────────────────────────────────────────────────────────────
 // API CALLS
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -286,10 +184,11 @@ async function fetchDiagnosticQuestionsData(skill: string) {
 }
 
 async function fetchDiagnosticStatus(studentId: string): Promise<DiagnosticStatus> {
-  const res = await callBackend(`/api/diagnostic/status`, { method: "GET" });
+  const res = await callBackend(`/api/diagnostic/status?student_id=${studentId}`, { method: "GET" });
   return res as unknown as DiagnosticStatus;
 }
 
+// FIX TC-40: Inject student_id and skill into the request body
 async function submitSection(
   studentId: string,
   skill: "listening" | "reading",
@@ -297,19 +196,28 @@ async function submitSection(
 ): Promise<SkillResult> {
   const data = await callBackend(`/api/diagnostic/submit/${skill}`, {
     method: "POST",
-    body: JSON.stringify({ answers }),
+    body: JSON.stringify({ 
+      student_id: studentId,
+      skill: skill,
+      answers: answers 
+    }),
   });
   if (data?.bandScore === undefined) throw new Error("Submission failed");
   return { band_score: data.bandScore, level: getBandLevel(data.bandScore), sub_scores: data.sub_scores } as SkillResult;
 }
 
+// FIX TC-41: Inject student_id and skill into the writing request body
 async function submitWriting(
   studentId: string,
   text: string
 ): Promise<SkillResult> {
   const data = await callBackend(`/api/diagnostic/submit/writing`, {
     method: "POST",
-    body: JSON.stringify({ answers: { text } }),
+    body: JSON.stringify({ 
+      student_id: studentId,
+      skill: "writing",
+      answers: { text } 
+    }),
   });
   if (data?.bandScore === undefined) throw new Error("Writing submission failed");
   return {
@@ -320,12 +228,15 @@ async function submitWriting(
   } as SkillResult;
 }
 
+// FIX TC-42: Inject student_id and skill into the speaking FormData
 async function submitSpeaking(
   studentId: string,
   audioBlob: Blob
 ): Promise<SkillResult> {
   const formData = new FormData();
   formData.append("audio", audioBlob, "recording.webm");
+  formData.append("student_id", studentId);
+  formData.append("skill", "speaking");
 
   const data = await uploadFileToBackend(
     `/api/diagnostic/submit/speaking`,
@@ -369,7 +280,6 @@ function TopNavBar() {
 // SUB-COMPONENTS
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ── Skeleton Loader ──────────────────────────────────────────────────────────
 function SkeletonLoader() {
   return (
     <div className="space-y-4 animate-pulse">
@@ -382,7 +292,6 @@ function SkeletonLoader() {
   );
 }
 
-// ── Error Banner ─────────────────────────────────────────────────────────────
 function ErrorBanner({ onRetry }: { onRetry: () => void }) {
   return (
     <div className="border border-red-200 bg-red-50 rounded-xl p-5 flex items-start gap-4">
@@ -403,7 +312,6 @@ function ErrorBanner({ onRetry }: { onRetry: () => void }) {
   );
 }
 
-// ── Level Badge ──────────────────────────────────────────────────────────────
 function LevelBadge({ level, size = "md" }: { level: Level; size?: "sm" | "md" | "lg" }) {
   const cfg = getLevelConfig(level);
   const sizes = {
@@ -421,7 +329,6 @@ function LevelBadge({ level, size = "md" }: { level: Level; size?: "sm" | "md" |
   );
 }
 
-// ── Progress Steps ───────────────────────────────────────────────────────────
 function ProgressSteps({
   currentPhase,
   results,
@@ -465,7 +372,6 @@ function ProgressSteps({
   );
 }
 
-// ── Interim Result Card ──────────────────────────────────────────────────────
 function InterimResultCard({
   skill,
   result,
@@ -577,10 +483,6 @@ function InterimResultCard({
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PHASE: DIAGNOSTIC GATE
-// ─────────────────────────────────────────────────────────────────────────────
-
 function DiagnosticGate({
   gateState,
   resumePhase,
@@ -599,7 +501,6 @@ function DiagnosticGate({
 
   return (
     <div className="flex flex-col items-center text-center gap-8 max-w-xl mx-auto py-8">
-      {/* Hero */}
       <div className="space-y-3">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-medium tracking-wider uppercase">
           <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
@@ -618,7 +519,6 @@ function DiagnosticGate({
         </p>
       </div>
 
-      {/* Steps grid */}
       <div className="grid grid-cols-2 gap-3 w-full">
         {steps.map((step) => (
           <div
@@ -632,7 +532,6 @@ function DiagnosticGate({
         ))}
       </div>
 
-      {/* Info row */}
       <div className="flex items-center gap-6 text-gray-400 text-xs">
         <span className="flex items-center gap-1.5">
           <span>⏱</span> ~10 minutes
@@ -668,6 +567,9 @@ function ListeningPhase({
   onComplete: (result: SkillResult) => void;
   initialAnswers?: Record<string, string>;
 }) {
+  const { profile } = useAuth();
+  const studentId = profile?.id || profile?.student_id || "unknown-student";
+
   const [sectionState, setSectionState] = useState<SectionState>("loading");
   const [answers, setAnswers] = useState<Record<string, string>>(initialAnswers);
   const [audioPlayed, setAudioPlayed] = useState<boolean>(
@@ -705,7 +607,7 @@ function ListeningPhase({
     setError(false);
     try {
       setSectionState("scoring");
-      const result = await submitSection(STUDENT_ID, "listening", answers);
+      const result = await submitSection(studentId, "listening", answers);
       storageClear(SK.listeningAnswers, SK.listeningAudioPlayed);
       setSectionState("scored");
       onComplete(result);
@@ -760,7 +662,6 @@ function ListeningPhase({
 
   return (
     <div className="space-y-6">
-      {/* Section header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-2xl">🎧</span>
@@ -774,7 +675,6 @@ function ListeningPhase({
         </div>
       </div>
 
-      {/* Audio player */}
       <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-lg shrink-0">
@@ -812,7 +712,6 @@ function ListeningPhase({
         </div>
       </div>
 
-      {/* Questions */}
       <div className="space-y-4">
         {data?.questions?.map((q: any, qi: number) => (
           <div
@@ -900,6 +799,9 @@ function ReadingPhase({
   onComplete: (result: SkillResult) => void;
   initialAnswers?: Record<string, string>;
 }) {
+  const { profile } = useAuth();
+  const studentId = profile?.id || profile?.student_id || "unknown-student";
+
   const [sectionState, setSectionState] = useState<SectionState>("loading");
   const [answers, setAnswers] = useState<Record<string, string>>(initialAnswers);
   const [timeLeft, setTimeLeft] = useState<number>(
@@ -946,7 +848,7 @@ function ReadingPhase({
     setError(false);
     try {
       setSectionState("scoring");
-      const result = await submitSection(STUDENT_ID, "reading", answers);
+      const result = await submitSection(studentId, "reading", answers);
       storageClear(SK.readingAnswers, SK.readingTimeLeft);
       setSectionState("scored");
       onComplete(result);
@@ -990,7 +892,6 @@ function ReadingPhase({
 
   return (
     <div className="space-y-6">
-      {/* Header + Timer */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-2xl">📖</span>
@@ -1014,7 +915,6 @@ function ReadingPhase({
         </div>
       </div>
 
-      {/* Passage */}
       <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
         <p className="text-gray-400 text-xs uppercase tracking-wider mb-3 font-medium">
           Reading Passage
@@ -1024,7 +924,6 @@ function ReadingPhase({
         </p>
       </div>
 
-      {/* Questions */}
       <div className="space-y-4">
         <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">
           Questions — True / False / Not Given
@@ -1105,6 +1004,9 @@ function WritingPhase({
   onComplete: (result: SkillResult) => void;
   initialText?: string;
 }) {
+  const { profile } = useAuth();
+  const studentId = profile?.id || profile?.student_id || "unknown-student";
+
   const [sectionState, setSectionState] = useState<SectionState>("loading");
   const [text, setText] = useState(initialText);
   const [error, setError] = useState(false);
@@ -1135,7 +1037,7 @@ function WritingPhase({
     setError(false);
     try {
       setSectionState("scoring");
-      const result = await submitWriting(STUDENT_ID, text);
+      const result = await submitWriting(studentId, text);
       storageClear(SK.writingText);
       setSectionState("scored");
       onComplete(result);
@@ -1204,7 +1106,6 @@ function WritingPhase({
 
   return (
     <div className="space-y-5">
-      {/* Header */}
       <div className="flex items-center gap-3">
         <span className="text-2xl">✍️</span>
         <div>
@@ -1213,7 +1114,6 @@ function WritingPhase({
         </div>
       </div>
 
-      {/* Graph image */}
       {data?.image_url && (
       <div className="rounded-xl overflow-hidden border border-gray-200 mb-4">
         <img
@@ -1224,12 +1124,10 @@ function WritingPhase({
       </div>
       )}
 
-      {/* Prompt */}
       <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
         <p className="text-gray-700 text-sm leading-relaxed">{data?.topic}</p>
       </div>
 
-      {/* Textarea */}
       <div className="relative">
         <textarea
           value={text}
@@ -1254,7 +1152,6 @@ function WritingPhase({
         </div>
       </div>
 
-      {/* Word count bar */}
       <div className="space-y-1.5">
         <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
           <div
@@ -1304,6 +1201,9 @@ function WritingPhase({
 // ─────────────────────────────────────────────────────────────────────────────
 
 function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => void }) {
+  const { profile } = useAuth();
+  const studentId = profile?.id || profile?.student_id || "unknown-student";
+
   useEffect(() => {
     const saved = storageLoad<SkillResult>(SK.speakingResult);
     if (saved) {
@@ -1387,7 +1287,7 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
     setRecordState("uploading");
     try {
       setRecordState("processing");
-      const result = await submitSpeaking(STUDENT_ID, audioBlob);
+      const result = await submitSpeaking(studentId, audioBlob);
       storageSave(SK.speakingResult, result);
       setRecordState("done");
       onComplete(result);
@@ -1401,7 +1301,6 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center gap-3">
         <span className="text-2xl">🎤</span>
         <div>
@@ -1410,7 +1309,6 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
         </div>
       </div>
 
-      {/* Prompt */}
       <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
         <p className="text-gray-400 text-xs uppercase tracking-wider mb-2 font-medium">
           Your Speaking Prompt
@@ -1422,7 +1320,6 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
         </div>
       </div>
 
-      {/* Instructions */}
       {recordState === "idle" && (
         <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
           <ul className="text-gray-700 text-sm space-y-1.5">
@@ -1433,9 +1330,7 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
         </div>
       )}
 
-      {/* Recorder UI */}
       <div className="flex flex-col items-center gap-5 py-4">
-        {/* Waveform animation */}
         {recordState === "recording" && (
           <div className="flex items-center gap-1 h-12">
             {animBars.map((h, i) => (
@@ -1452,7 +1347,6 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
           </div>
         )}
 
-        {/* Timer */}
         {(recordState === "recording" || recordState === "recorded") && (
           <div className="w-full space-y-2">
             <div className="flex justify-between text-xs text-gray-500">
@@ -1474,7 +1368,6 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
           </div>
         )}
 
-        {/* Main record button */}
         {recordState !== "uploading" && recordState !== "processing" && recordState !== "done" && (
           <button
             onClick={
@@ -1504,7 +1397,6 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
           {recordState === "recorded" && `Recorded (${formatTime(elapsed)}) — tap ▲ to submit`}
         </p>
 
-        {/* Separate submit button for clarity when recorded */}
         {recordState === "recorded" && (
           <button
             onClick={handleSubmit}
@@ -1515,7 +1407,6 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
         )}
       </div>
 
-      {/* Processing state */}
       {(recordState === "uploading" || recordState === "processing") && (
         <div className="flex flex-col items-center gap-4 py-8 text-center">
           <div className="relative">
@@ -1543,7 +1434,6 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
         </div>
       )}
 
-      {/* Microphone instructions */}
       {recordState === "idle" && (
         <p className="text-gray-400 text-xs text-center">
           Your browser will request microphone access. Allow it to begin recording.
@@ -1606,7 +1496,6 @@ function SpeakingResultCard({
         <LevelBadge level={level} size="lg" />
       </div>
 
-      {/* Sub-score table */}
       {subScoreEntries.length > 0 && (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
           <p className="px-5 py-3 text-gray-400 text-xs uppercase tracking-wider border-b border-gray-100 font-medium">
@@ -1654,7 +1543,6 @@ function SpeakingResultCard({
         </div>
       )}
 
-      {/* AI Feedback */}
       {result.sub_scores?.feedback && (
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-sm text-left">
           <p className="text-gray-900 font-bold mb-4 text-center">AI Detailed Feedback</p>
@@ -1735,7 +1623,6 @@ function DiagnosticSummaryScreen({
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* Hero */}
       <div className="text-center space-y-4">
         <div className="text-5xl">🎓</div>
         <h2 className="text-3xl font-black text-gray-900">Diagnostic Complete</h2>
@@ -1744,7 +1631,6 @@ function DiagnosticSummaryScreen({
         </p>
       </div>
 
-      {/* Overall badge */}
       <div
         className={`border rounded-2xl p-6 text-center space-y-2 ${overallCfg.bg} ${overallCfg.border}`}
       >
@@ -1758,7 +1644,6 @@ function DiagnosticSummaryScreen({
         </p>
       </div>
 
-      {/* 2x2 grid */}
       <div className="grid grid-cols-2 gap-3">
         {skills.map((skill) => {
           const result = results[skill];
@@ -1802,7 +1687,9 @@ function DiagnosticSummaryScreen({
 type Phase = "gate" | Skill | "speaking_result" | "summary";
 
 function DiagnosisInner() {
-  // TC-51: Handle Cross-Tab Prevention
+  const { profile } = useAuth();
+  const studentId = profile?.id || profile?.student_id || "unknown-student";
+
   const [tabConflict, setTabConflict] = useState(false);
   const tabIdRef = useRef(Math.random().toString(36).substring(2, 15));
 
@@ -1820,7 +1707,6 @@ function DiagnosisInner() {
       } else {
         setTabConflict(true);
         channel.postMessage({ type: "PING", tabId });
-        // If no response in 1s, assume dead lock (tab closed forcefully) and take over
         deadLockTimeout = setTimeout(() => {
           localStorage.setItem(SK.activeTabLock, tabId);
           channel.postMessage({ type: "CLAIMED", tabId });
@@ -1834,18 +1720,15 @@ function DiagnosisInner() {
       if (data.type === "CLAIMED") {
         if (data.tabId !== tabId) {
           clearTimeout(deadLockTimeout);
-          // Only surrender if we don't actually own the lock in localStorage to prevent a simultaneous race
           if (localStorage.getItem(SK.activeTabLock) !== tabId) {
             setTabConflict(true);
           }
         }
       } else if (data.type === "PING") {
-        // Someone is asking if we are alive, answer yes if we hold the lock
         if (localStorage.getItem(SK.activeTabLock) === tabId) {
           channel.postMessage({ type: "CLAIMED", tabId });
         }
       } else if (data.type === "RELEASED") {
-        // The active tab closed, attempt to claim it seamlessly
         attemptClaim();
       }
     };
@@ -1878,7 +1761,6 @@ function DiagnosisInner() {
   const [interimSkill, setInterimSkill] = useState<Skill | null>(null);
   const [pendingNextPhase, setPendingNextPhase] = useState<Phase | null>(null);
 
-  // ── On mount: check diagnostic status ─────────────────────────────────────
   useEffect(() => {
     let isMounted = true;
     const check = async () => {
@@ -1887,7 +1769,7 @@ function DiagnosisInner() {
       if (savedResults) setResults(savedResults);
 
       try {
-        const status = await fetchDiagnosticStatus(STUDENT_ID);
+        const status = await fetchDiagnosticStatus(studentId);
         if (!isMounted) return;
 
         if (status.overall_complete) {
@@ -1941,9 +1823,11 @@ function DiagnosisInner() {
         if (isMounted) setIsCheckingStatus(false);
       }
     };
-    check();
+    if (studentId) {
+       check();
+    }
     return () => { isMounted = false; };
-  }, []);
+  }, [studentId]);
 
   useEffect(() => {
     storageSave(SK.phase, phase);
@@ -1953,7 +1837,6 @@ function DiagnosisInner() {
     storageSave(SK.results, results);
   }, [results]);
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
   const handleStart = () => {
     setPhase(resumePhase ?? "listening");
   };
@@ -1982,7 +1865,6 @@ function DiagnosisInner() {
     alert("Navigating to dashboard… (implement router.push('/dashboard') here)");
   };
 
-  // ── Loading state ─────────────────────────────────────────────────────────
   if (isCheckingStatus) {
     return (
       <>
@@ -1997,7 +1879,6 @@ function DiagnosisInner() {
     );
   }
 
-  // TC-51 Block UI if conflict
   if (tabConflict) {
     return (
       <>
@@ -2015,7 +1896,6 @@ function DiagnosisInner() {
     );
   }
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
       <TopNavBar />
@@ -2026,7 +1906,6 @@ function DiagnosisInner() {
       </div>
 
       <div className="relative z-10 max-w-2xl mx-auto px-4 pt-24 pb-8 flex flex-col min-h-screen">
-        {/* Progress bar (shown during skill phases) */}
         {phase !== "gate" && phase !== "summary" && (
           <div className="mb-6 flex justify-center">
             <ProgressSteps
@@ -2036,9 +1915,7 @@ function DiagnosisInner() {
           </div>
         )}
 
-        {/* Main card */}
         <div className="flex-1 bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
-          {/* GATE */}
           {phase === "gate" && (
             <DiagnosticGate
               gateState={gateState}
@@ -2047,7 +1924,6 @@ function DiagnosisInner() {
             />
           )}
 
-          {/* LISTENING */}
           {phase === "listening" && interimSkill === "listening" && results.listening && (
             <InterimResultCard
               skill="listening"
@@ -2063,7 +1939,6 @@ function DiagnosisInner() {
             />
           )}
 
-          {/* READING */}
           {phase === "reading" && interimSkill === "reading" && results.reading && (
             <InterimResultCard
               skill="reading"
@@ -2079,7 +1954,6 @@ function DiagnosisInner() {
             />
           )}
 
-          {/* WRITING */}
           {phase === "writing" && interimSkill === "writing" && results.writing && (
             <InterimResultCard
               skill="writing"
@@ -2095,7 +1969,6 @@ function DiagnosisInner() {
             />
           )}
 
-          {/* SPEAKING */}
           {phase === "speaking" && (
             <SpeakingPhase
               onComplete={(r) => {
@@ -2106,7 +1979,6 @@ function DiagnosisInner() {
             />
           )}
 
-          {/* SPEAKING RESULT */}
           {phase === "speaking_result" && lastSpeakingResult && (
             <SpeakingResultCard
               result={lastSpeakingResult}
@@ -2114,7 +1986,6 @@ function DiagnosisInner() {
             />
           )}
 
-          {/* SUMMARY */}
           {phase === "summary" && (
             <DiagnosticSummaryScreen
               results={results}
@@ -2123,13 +1994,11 @@ function DiagnosisInner() {
           )}
         </div>
 
-        {/* Footer */}
         <p className="text-center text-gray-400 text-xs mt-4">
           TestCrack · Diagnostic Engine v1 · All responses are encrypted and secure
         </p>
       </div>
 
-      {/* CSS keyframes */}
       <style>{`
         @keyframes pulse {
           0% { transform: scaleY(0.4); }
