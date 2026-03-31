@@ -151,16 +151,13 @@ const SK = {
   phase:              "tc_phase",
   results:            "tc_results",
   listeningAnswers:   "tc_listening_answers",
-  // FIX #5: persist audioPlayed so refresh can't replay audio
   listeningAudioPlayed: "tc_listening_audio_played",
   readingAnswers:     "tc_reading_answers",
-  // FIX #2: persist reading timer so it resumes on refresh
   readingTimeLeft:    "tc_reading_time_left",
   writingText:        "tc_writing_text",
-  // FIX #4: persist speaking result so refresh after submission recovers scorecard
   speakingResult:     "tc_speaking_result",
-  // FIX #4: persist speaking submission state so partial uploads can be retried
   speakingSubmitting: "tc_speaking_submitting",
+  activeTabLock:      "tc_active_tab", // Lock key for TC-51
 };
 
 function storageSave<T>(key: string, value: T) {
@@ -425,10 +422,6 @@ function LevelBadge({ level, size = "md" }: { level: Level; size?: "sm" | "md" |
 }
 
 // ── Progress Steps ───────────────────────────────────────────────────────────
-// FIX #1: All step buttons are fully disabled — users cannot click any step
-// to jump between sections. The diagnostic must be completed in linear order.
-// Completed steps show a tick but are non-interactive. Future steps are also
-// non-interactive. Only the current active step is visually highlighted.
 function ProgressSteps({
   currentPhase,
   results,
@@ -445,11 +438,6 @@ function ProgressSteps({
         const isCurrent = currentPhase === skill;
         return (
           <React.Fragment key={skill}>
-            {/*
-              FIX #1: All buttons are disabled and pointer-events-none.
-              No onClick handler — navigation is only possible by completing
-              each section in order. This enforces strict linear test flow.
-            */}
             <div
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium select-none cursor-not-allowed ${
                 isDone
@@ -682,7 +670,6 @@ function ListeningPhase({
 }) {
   const [sectionState, setSectionState] = useState<SectionState>("loading");
   const [answers, setAnswers] = useState<Record<string, string>>(initialAnswers);
-  // FIX #5: Initialise audioPlayed from localStorage so refresh can't replay
   const [audioPlayed, setAudioPlayed] = useState<boolean>(
     () => storageLoad<boolean>(SK.listeningAudioPlayed) ?? false
   );
@@ -707,7 +694,6 @@ function ListeningPhase({
     storageSave(SK.listeningAnswers, answers);
   }, [answers]);
 
-  // FIX #5: Persist audioPlayed to localStorage whenever it changes
   useEffect(() => {
     storageSave(SK.listeningAudioPlayed, audioPlayed);
   }, [audioPlayed]);
@@ -720,7 +706,6 @@ function ListeningPhase({
     try {
       setSectionState("scoring");
       const result = await submitSection(STUDENT_ID, "listening", answers);
-      // FIX #5: clear the audio-played flag once the section is fully submitted
       storageClear(SK.listeningAnswers, SK.listeningAudioPlayed);
       setSectionState("scored");
       onComplete(result);
@@ -811,7 +796,6 @@ function ListeningPhase({
           />
           <button
             onClick={() => {
-              // FIX #5: check both state and localStorage to prevent replay after refresh
               if (!audioPlayed) {
                 audioRef.current?.play();
               }
@@ -918,7 +902,6 @@ function ReadingPhase({
 }) {
   const [sectionState, setSectionState] = useState<SectionState>("loading");
   const [answers, setAnswers] = useState<Record<string, string>>(initialAnswers);
-  // FIX #2: Initialise timer from localStorage so it resumes (not restarts) on refresh
   const [timeLeft, setTimeLeft] = useState<number>(
     () => storageLoad<number>(SK.readingTimeLeft) ?? 300
   );
@@ -944,7 +927,6 @@ function ReadingPhase({
     const interval = setInterval(() => {
       setTimeLeft((t) => {
         const next = t - 1;
-        // FIX #2: persist the countdown on every tick so refresh picks it back up
         storageSave(SK.readingTimeLeft, next);
         return next;
       });
@@ -965,7 +947,6 @@ function ReadingPhase({
     try {
       setSectionState("scoring");
       const result = await submitSection(STUDENT_ID, "reading", answers);
-      // FIX #2: clear the persisted timer on successful submission
       storageClear(SK.readingAnswers, SK.readingTimeLeft);
       setSectionState("scored");
       onComplete(result);
@@ -1164,7 +1145,6 @@ function WritingPhase({
     }
   };
 
-  // FIX #3: Block all clipboard-based input in the writing textarea
   const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     e.preventDefault();
   };
@@ -1249,7 +1229,7 @@ function WritingPhase({
         <p className="text-gray-700 text-sm leading-relaxed">{data?.topic}</p>
       </div>
 
-      {/* Textarea — FIX #3: all clipboard/drag events blocked */}
+      {/* Textarea */}
       <div className="relative">
         <textarea
           value={text}
@@ -1291,7 +1271,6 @@ function WritingPhase({
         </p>
       </div>
 
-      {/* FIX #3: inform user that pasting is disabled */}
       <p className="text-gray-400 text-xs flex items-center gap-1.5">
         <span>🔒</span> Copy-paste is disabled in this section — all responses must be typed.
       </p>
@@ -1325,10 +1304,6 @@ function WritingPhase({
 // ─────────────────────────────────────────────────────────────────────────────
 
 function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => void }) {
-  // FIX #4: On mount check if a speaking result was already persisted (from a
-  // previous submission that succeeded but the page refreshed before the
-  // scorecard rendered). If so, fire onComplete immediately so the user
-  // lands on the scorecard rather than having to re-record.
   useEffect(() => {
     const saved = storageLoad<SkillResult>(SK.speakingResult);
     if (saved) {
@@ -1413,9 +1388,6 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
     try {
       setRecordState("processing");
       const result = await submitSpeaking(STUDENT_ID, audioBlob);
-      // FIX #4: persist the result BEFORE calling onComplete so that if the
-      // page refreshes between now and the scorecard rendering, the result
-      // survives. The scorecard clears this key once it mounts.
       storageSave(SK.speakingResult, result);
       setRecordState("done");
       onComplete(result);
@@ -1594,9 +1566,6 @@ function SpeakingResultCard({
   result: SkillResult;
   onContinue: () => void;
 }) {
-  // FIX #4: Clear the persisted speaking result now that the scorecard has
-  // successfully rendered. The user has seen the result, so there is no
-  // longer a need to recover it on future page loads.
   useEffect(() => {
     storageClear(SK.speakingResult);
   }, []);
@@ -1833,6 +1802,73 @@ function DiagnosticSummaryScreen({
 type Phase = "gate" | Skill | "speaking_result" | "summary";
 
 function DiagnosisInner() {
+  // TC-51: Handle Cross-Tab Prevention
+  const [tabConflict, setTabConflict] = useState(false);
+  const tabIdRef = useRef(Math.random().toString(36).substring(2, 15));
+
+  useEffect(() => {
+    const tabId = tabIdRef.current;
+    const channel = new BroadcastChannel("tc_diagnostic_sync");
+    let deadLockTimeout: ReturnType<typeof setTimeout>;
+
+    const attemptClaim = () => {
+      const currentLock = localStorage.getItem(SK.activeTabLock);
+      if (!currentLock || currentLock === tabId) {
+        localStorage.setItem(SK.activeTabLock, tabId);
+        channel.postMessage({ type: "CLAIMED", tabId });
+        setTabConflict(false);
+      } else {
+        setTabConflict(true);
+        channel.postMessage({ type: "PING", tabId });
+        // If no response in 1s, assume dead lock (tab closed forcefully) and take over
+        deadLockTimeout = setTimeout(() => {
+          localStorage.setItem(SK.activeTabLock, tabId);
+          channel.postMessage({ type: "CLAIMED", tabId });
+          setTabConflict(false);
+        }, 1000);
+      }
+    };
+
+    channel.onmessage = (e) => {
+      const data = e.data;
+      if (data.type === "CLAIMED") {
+        if (data.tabId !== tabId) {
+          clearTimeout(deadLockTimeout);
+          // Only surrender if we don't actually own the lock in localStorage to prevent a simultaneous race
+          if (localStorage.getItem(SK.activeTabLock) !== tabId) {
+            setTabConflict(true);
+          }
+        }
+      } else if (data.type === "PING") {
+        // Someone is asking if we are alive, answer yes if we hold the lock
+        if (localStorage.getItem(SK.activeTabLock) === tabId) {
+          channel.postMessage({ type: "CLAIMED", tabId });
+        }
+      } else if (data.type === "RELEASED") {
+        // The active tab closed, attempt to claim it seamlessly
+        attemptClaim();
+      }
+    };
+
+    attemptClaim();
+
+    const handleUnload = () => {
+      if (localStorage.getItem(SK.activeTabLock) === tabId) {
+        localStorage.removeItem(SK.activeTabLock);
+        channel.postMessage({ type: "RELEASED", tabId });
+      }
+    };
+
+    window.addEventListener("beforeunload", handleUnload);
+
+    return () => {
+      clearTimeout(deadLockTimeout);
+      channel.close();
+      window.removeEventListener("beforeunload", handleUnload);
+      handleUnload();
+    };
+  }, []);
+
   const [phase, setPhase] = useState<Phase>("gate");
   const [gateState, setGateState] = useState<GateState>("idle");
   const [results, setResults] = useState<AllResults>({});
@@ -1961,6 +1997,24 @@ function DiagnosisInner() {
     );
   }
 
+  // TC-51 Block UI if conflict
+  if (tabConflict) {
+    return (
+      <>
+        <TopNavBar />
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+          <div className="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-red-100 max-w-md text-center animate-fade-in">
+            <div className="text-4xl mb-4">⚠️</div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Session already active</h2>
+            <p className="text-gray-500 text-sm">
+              You are already taking this diagnostic in another tab. Please close this tab or return to the active one to continue.
+            </p>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -1975,11 +2029,6 @@ function DiagnosisInner() {
         {/* Progress bar (shown during skill phases) */}
         {phase !== "gate" && phase !== "summary" && (
           <div className="mb-6 flex justify-center">
-            {/*
-              FIX #1: ProgressSteps no longer accepts onPhaseChange.
-              All step indicators are purely decorative — no navigation is
-              possible. Users must complete each section in order.
-            */}
             <ProgressSteps
               currentPhase={phase as Skill}
               results={results}
