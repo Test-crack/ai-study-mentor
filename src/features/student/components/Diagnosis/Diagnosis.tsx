@@ -188,7 +188,6 @@ async function fetchDiagnosticStatus(studentId: string): Promise<DiagnosticStatu
   return res as unknown as DiagnosticStatus;
 }
 
-// FIX TC-40: Inject student_id and skill into the request body
 async function submitSection(
   studentId: string,
   skill: "listening" | "reading",
@@ -206,7 +205,6 @@ async function submitSection(
   return { band_score: data.bandScore, level: getBandLevel(data.bandScore), sub_scores: data.sub_scores } as SkillResult;
 }
 
-// FIX TC-41: Inject student_id and skill into the writing request body
 async function submitWriting(
   studentId: string,
   text: string
@@ -228,7 +226,6 @@ async function submitWriting(
   } as SkillResult;
 }
 
-// FIX TC-42: Inject student_id and skill into the speaking FormData
 async function submitSpeaking(
   studentId: string,
   audioBlob: Blob
@@ -1672,6 +1669,7 @@ function DiagnosticSummaryScreen({
 
       <Link
         to="/student/dashboard"
+        onClick={onGoToDashboard}
         className="inline-block text-center w-full py-4 bg-gradient-to-r from-indigo-700 to-teal-600 hover:from-indigo-600 hover:to-teal-500 text-white font-bold text-base rounded-xl transition-all hover:shadow-xl hover:shadow-indigo-500/25 hover:-translate-y-0.5"
       >
         Go to Dashboard →
@@ -1746,9 +1744,9 @@ function DiagnosisInner() {
 
     return () => {
       clearTimeout(deadLockTimeout);
-      channel.close();
       window.removeEventListener("beforeunload", handleUnload);
       handleUnload();
+      channel.close();
     };
   }, []);
 
@@ -1761,21 +1759,42 @@ function DiagnosisInner() {
   const [interimSkill, setInterimSkill] = useState<Skill | null>(null);
   const [pendingNextPhase, setPendingNextPhase] = useState<Phase | null>(null);
 
+  // ── On mount: check diagnostic status (with Bulletproof Polling Fix for TC-39) ───────
   useEffect(() => {
     let isMounted = true;
-    const check = async () => {
-      const savedPhase   = storageLoad<Phase>(SK.phase);
+    let pollingInterval: ReturnType<typeof setInterval>;
+
+    const checkStatus = async () => {
+      // 1. Get the absolute latest phase directly from browser storage
+      const currentSavedPhase = storageLoad<Phase>(SK.phase);
+      
+      // 2. FRONTEND OVERRIDE: Stop polling immediately if we are on the final screens!
+      if (currentSavedPhase === "summary" || currentSavedPhase === "speaking_result") {
+          clearInterval(pollingInterval);
+          console.log("Diagnostic finished locally. Polling stopped.");
+          return;
+      }
+
       const savedResults = storageLoad<AllResults>(SK.results);
       if (savedResults) setResults(savedResults);
 
       try {
+        console.log("Checking diagnostic status...");
         const status = await fetchDiagnosticStatus(studentId);
         if (!isMounted) return;
 
+        // 3. BACKEND OVERRIDE: Stop polling if backend says it's 100% complete
         if (status.overall_complete) {
-          storageClear(SK.phase, SK.results, SK.listeningAnswers, SK.listeningAudioPlayed, SK.readingAnswers, SK.readingTimeLeft, SK.writingText, SK.speakingResult);
-          setGateState("complete");
-          window.location.href = "/dashboard";
+          clearInterval(pollingInterval);
+          console.log("Diagnostic complete in DB. Polling stopped.");
+
+          // Only force a redirect if the user JUST opened the page (gate).
+          // If they are actively mid-test, let the React UI finish transitioning naturally!
+          if (currentSavedPhase === "gate" || !currentSavedPhase) {
+            storageClear(SK.phase, SK.results, SK.listeningAnswers, SK.listeningAudioPlayed, SK.readingAnswers, SK.readingTimeLeft, SK.writingText, SK.speakingResult);
+            setGateState("complete");
+            window.location.href = "/dashboard";
+          }
           return;
         }
 
@@ -1800,21 +1819,22 @@ function DiagnosisInner() {
           setResumePhase(nextSkill);
           setGateState("in_progress");
 
-          if (savedPhase && savedPhase !== "gate" && savedPhase !== "summary") {
-            const savedSkill = savedPhase as Skill;
+          // Ensure we don't accidentally navigate backwards
+          if (currentSavedPhase && currentSavedPhase !== "gate" && currentSavedPhase !== "summary") {
+            const savedSkill = currentSavedPhase as Skill;
             if (skillOrder.includes(savedSkill) && !statusMap[savedSkill]) {
-              setPhase(savedPhase);
+              setPhase(currentSavedPhase);
             }
           }
-        } else if (savedPhase && savedPhase !== "gate" && savedPhase !== "summary") {
-          setPhase(savedPhase);
+        } else if (currentSavedPhase && currentSavedPhase !== "gate" && currentSavedPhase !== "summary") {
+          setPhase(currentSavedPhase);
           setGateState("in_progress");
         } else {
           setGateState("idle");
         }
       } catch {
-        if (savedPhase && savedPhase !== "gate") {
-          setPhase(savedPhase);
+        if (currentSavedPhase && currentSavedPhase !== "gate") {
+          setPhase(currentSavedPhase);
           setGateState("in_progress");
         } else {
           setGateState("idle");
@@ -1823,10 +1843,16 @@ function DiagnosisInner() {
         if (isMounted) setIsCheckingStatus(false);
       }
     };
+
     if (studentId) {
-       check();
+       checkStatus(); // Run once immediately
+       pollingInterval = setInterval(checkStatus, 10000); // Then poll every 10s
     }
-    return () => { isMounted = false; };
+
+    return () => { 
+      isMounted = false; 
+      clearInterval(pollingInterval); 
+    };
   }, [studentId]);
 
   useEffect(() => {
@@ -1862,7 +1888,6 @@ function DiagnosisInner() {
 
   const handleGoToDashboard = () => {
     storageClear(SK.phase, SK.results, SK.listeningAnswers, SK.listeningAudioPlayed, SK.readingAnswers, SK.readingTimeLeft, SK.writingText, SK.speakingResult);
-    alert("Navigating to dashboard… (implement router.push('/dashboard') here)");
   };
 
   if (isCheckingStatus) {

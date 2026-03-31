@@ -152,7 +152,11 @@ const ManualDashboardAccess = () => {
 const StudentDiagnosisGuard = ({ children }: { children: React.ReactNode }) => {
   const { profile, loading, profileLoading } = useAuth();
 
-  if (loading || profileLoading) return null;
+  // FIX: Only return a blank screen if we are loading AND we don't have the profile yet.
+  // If we already have the profile in memory, just skip the blank screen!
+  if ((loading || profileLoading) && !profile) {
+    return null; 
+  }
 
   if (!profile) return <Navigate to="/login" replace />;
 
@@ -162,7 +166,6 @@ const StudentDiagnosisGuard = ({ children }: { children: React.ReactNode }) => {
 
   return <>{children}</>;
 };
-
 const AppRoutes = () => {
   const { user } = useAuth();
 
