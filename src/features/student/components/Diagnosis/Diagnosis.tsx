@@ -84,26 +84,26 @@ function getLevelConfig(level: Level) {
     A: {
       label: "Foundation",
       bg: "bg-amber-50",
-      border: "border-amber-200",
-      text: "text-amber-600",
+      border: "border-gray-900",
+      text: "text-gray-900",
       dot: "bg-amber-500",
-      ring: "ring-amber-200",
+      ring: "ring-gray-900",
     },
     B: {
       label: "Intermediate",
       bg: "bg-indigo-50",
-      border: "border-indigo-200",
-      text: "text-indigo-600",
-      dot: "bg-indigo-500",
-      ring: "ring-indigo-200",
+      border: "border-gray-900",
+      text: "text-indigo-700",
+      dot: "bg-indigo-700",
+      ring: "ring-gray-900",
     },
     C: {
       label: "Advanced",
-      bg: "bg-teal-50",
-      border: "border-teal-200",
-      text: "text-teal-600",
-      dot: "bg-teal-500",
-      ring: "ring-teal-200",
+      bg: "bg-emerald-50",
+      border: "border-gray-900",
+      text: "text-emerald-800",
+      dot: "bg-emerald-700",
+      ring: "ring-gray-900",
     },
   };
   return configs[level];
@@ -174,7 +174,7 @@ function storageClear(...keys: string[]) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// API CALLS
+// API CALLS  (unchanged)
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function fetchDiagnosticQuestionsData(skill: string) {
@@ -256,14 +256,14 @@ async function submitSpeaking(
 
 function TopNavBar() {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 transform-gpu">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b-2 border-gray-900 transform-gpu">
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div className="flex items-center space-x-2">
-            <div className="p-2 bg-indigo-700 rounded-xl">
-              <GraduationCap className="h-6 w-6 text-white" />
+          <div className="flex items-center space-x-2.5">
+            <div className="p-2 bg-indigo-700 border-2 border-gray-900 rounded-lg" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+              <GraduationCap className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-indigo-700">
+            <span className="text-xl font-black text-gray-900 uppercase tracking-tight">
               TestCrack
             </span>
           </div>
@@ -280,30 +280,31 @@ function TopNavBar() {
 function SkeletonLoader() {
   return (
     <div className="space-y-4 animate-pulse">
-      <div className="h-4 bg-gray-200 rounded-full w-3/4" />
-      <div className="h-4 bg-gray-200 rounded-full w-1/2" />
-      <div className="h-32 bg-gray-200 rounded-xl" />
-      <div className="h-4 bg-gray-200 rounded-full w-2/3" />
-      <div className="h-4 bg-gray-200 rounded-full w-5/6" />
+      <div className="h-4 bg-gray-200 rounded w-3/4 border border-gray-300" />
+      <div className="h-4 bg-gray-200 rounded w-1/2 border border-gray-300" />
+      <div className="h-32 bg-gray-200 rounded-lg border border-gray-300" />
+      <div className="h-4 bg-gray-200 rounded w-2/3 border border-gray-300" />
+      <div className="h-4 bg-gray-200 rounded w-5/6 border border-gray-300" />
     </div>
   );
 }
 
 function ErrorBanner({ onRetry }: { onRetry: () => void }) {
   return (
-    <div className="border border-red-200 bg-red-50 rounded-xl p-5 flex items-start gap-4">
-      <span className="text-red-500 text-xl mt-0.5">⚠</span>
+    <div className="border-2 border-gray-900 bg-red-50 rounded-lg p-5 flex items-start gap-4" style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>
+      <span className="text-red-600 text-xl mt-0.5 font-black">⚠</span>
       <div className="flex-1">
-        <p className="text-red-700 font-semibold text-sm">Something went wrong</p>
-        <p className="text-red-500 text-xs mt-1">
+        <p className="text-gray-900 font-black text-sm uppercase tracking-wide">Something went wrong</p>
+        <p className="text-gray-600 text-xs mt-1">
           Your answers have been saved. Check your connection and try again.
         </p>
       </div>
       <button
         onClick={onRetry}
-        className="px-4 py-2 bg-red-100 hover:bg-red-200 border border-red-200 text-red-700 text-sm rounded-lg transition-colors font-medium"
+        className="px-4 py-2 bg-red-100 hover:bg-red-200 border-2 border-gray-900 text-gray-900 text-sm rounded-lg transition-all font-black uppercase tracking-wide"
+        style={{ boxShadow: '3px 3px 0 #0F0F0F' }}
       >
-        Try again
+        Retry
       </button>
     </div>
   );
@@ -318,9 +319,10 @@ function LevelBadge({ level, size = "md" }: { level: Level; size?: "sm" | "md" |
   };
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border font-bold tracking-wider ${cfg.bg} ${cfg.border} ${cfg.text} ${sizes[size]}`}
+      className={`inline-flex items-center gap-1.5 rounded border-2 font-black tracking-wider uppercase ${cfg.bg} ${cfg.border} ${cfg.text} ${sizes[size]}`}
+      style={{ boxShadow: '3px 3px 0 #0F0F0F' }}
     >
-      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+      <span className={`w-2 h-2 rounded-full ${cfg.dot}`} />
       Level {level} · {cfg.label}
     </span>
   );
@@ -334,6 +336,12 @@ function ProgressSteps({
   results: AllResults;
 }) {
   const skills: Skill[] = ["listening", "reading", "writing", "speaking"];
+  const stepNums: Record<Skill, string> = {
+    listening: "01",
+    reading: "02",
+    writing: "03",
+    speaking: "04",
+  };
 
   return (
     <div className="flex items-center gap-1">
@@ -343,22 +351,25 @@ function ProgressSteps({
         return (
           <React.Fragment key={skill}>
             <div
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium select-none cursor-not-allowed ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded border-2 text-xs font-black uppercase tracking-wide select-none cursor-not-allowed transition-all ${
                 isDone
-                  ? "bg-teal-100 text-teal-700 border border-teal-300 opacity-70"
+                  ? "bg-indigo-700 text-white border-gray-900"
                   : isCurrent
-                  ? "bg-indigo-100 text-indigo-700 border border-indigo-300"
-                  : "bg-gray-100 text-gray-400 border border-gray-200 opacity-60"
+                  ? "bg-white text-gray-900 border-gray-900"
+                  : "bg-white text-gray-400 border-gray-300"
               }`}
+              style={isDone || isCurrent ? { boxShadow: '2px 2px 0 #0F0F0F' } : {}}
             >
-              <span>{SKILL_ICONS[skill]}</span>
+              <span className="hidden sm:inline font-mono text-xs">{stepNums[skill]}</span>
+              <span className="hidden sm:inline">{SKILL_ICONS[skill]}</span>
               <span className="hidden sm:inline">{SKILL_LABELS[skill]}</span>
-              {isDone && <span>✓</span>}
+              <span className="sm:hidden">{SKILL_ICONS[skill]}</span>
+              {isDone && <span className="font-black">✓</span>}
             </div>
             {idx < skills.length - 1 && (
               <div
-                className={`h-px w-4 transition-colors ${
-                  isDone ? "bg-teal-300" : "bg-gray-200"
+                className={`h-0.5 w-4 transition-colors ${
+                  isDone ? "bg-gray-900" : "bg-gray-300"
                 }`}
               />
             )}
@@ -391,22 +402,18 @@ function InterimResultCard({
 
   return (
     <div className="flex flex-col items-center text-center gap-6 py-8 animate-fade-in">
-      <div className="relative">
-        <div
-          className={`absolute inset-0 rounded-full blur-2xl opacity-20 ${cfg.bg}`}
-          style={{ transform: "scale(1.5)" }}
-        />
-        <div className="relative text-5xl">{SKILL_ICONS[skill]}</div>
+      <div className="w-16 h-16 bg-indigo-700 border-2 border-gray-900 rounded-xl flex items-center justify-center text-3xl" style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>
+        {SKILL_ICONS[skill]}
       </div>
 
       <div>
-        <p className="text-gray-500 text-sm uppercase tracking-widest mb-2">
+        <p className="text-gray-500 text-xs uppercase tracking-widest mb-2 font-black">
           {SKILL_LABELS[skill]} · Section Complete
         </p>
-        <div className={`text-7xl font-black ${cfg.text} tabular-nums leading-none`}>
+        <div className="text-8xl font-black text-gray-900 tabular-nums leading-none">
           {result.band_score.toFixed(1)}
         </div>
-        <p className="text-gray-500 text-sm mt-2">Band Score</p>
+        <p className="text-gray-500 text-sm mt-2 font-black uppercase tracking-wide">Band Score</p>
       </div>
 
       <LevelBadge level={level} size="lg" />
@@ -418,13 +425,13 @@ function InterimResultCard({
       {/* Sub-Scores Stats Board (Listening & Reading) */}
       {result.sub_scores && result.sub_scores.total_questions !== undefined && (
         <div className="grid grid-cols-2 gap-4 w-full max-w-sm mt-2">
-          <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center">
-            <p className="text-gray-400 text-[10px] uppercase font-bold tracking-widest mb-1">Accuracy</p>
-            <p className="text-gray-800 text-xl font-black">{result.sub_scores.accuracy_percentage}%</p>
+          <div className="bg-white border-2 border-gray-900 rounded-lg p-4 flex flex-col items-center justify-center" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+            <p className="text-gray-500 text-[10px] uppercase font-black tracking-widest mb-1">Accuracy</p>
+            <p className="text-gray-900 text-2xl font-black">{result.sub_scores.accuracy_percentage}%</p>
           </div>
-          <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center">
-            <p className="text-gray-400 text-[10px] uppercase font-bold tracking-widest mb-1">Correct</p>
-            <p className="text-gray-800 text-xl font-black">{result.sub_scores.correct_answers} <span className="text-sm font-medium text-gray-400">/ {result.sub_scores.total_questions}</span></p>
+          <div className="bg-white border-2 border-gray-900 rounded-lg p-4 flex flex-col items-center justify-center" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+            <p className="text-gray-500 text-[10px] uppercase font-black tracking-widest mb-1">Correct</p>
+            <p className="text-gray-900 text-2xl font-black">{result.sub_scores.correct_answers} <span className="text-sm font-bold text-gray-400">/ {result.sub_scores.total_questions}</span></p>
           </div>
         </div>
       )}
@@ -438,9 +445,9 @@ function InterimResultCard({
             { key: 'vocabularyScore', label: 'Lexical' },
             { key: 'grammarScore', label: 'Grammar' }
           ].map(({ key, label }) => (
-            <div key={key} className="bg-gray-50 border border-gray-200 rounded-xl p-3 flex flex-col items-center justify-center">
-              <p className="text-gray-400 text-[9px] uppercase font-bold tracking-widest mb-1">{label}</p>
-              <p className="text-gray-800 text-lg font-black">{result.sub_scores[key]}</p>
+            <div key={key} className="bg-white border-2 border-gray-900 rounded-lg p-3 flex flex-col items-center justify-center" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+              <p className="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1">{label}</p>
+              <p className="text-gray-900 text-xl font-black">{result.sub_scores[key]}</p>
             </div>
           ))}
         </div>
@@ -455,24 +462,25 @@ function InterimResultCard({
             { key: 'pronunciationScore', label: 'Pronunciation' },
             { key: 'grammarScore', label: 'Grammar' }
           ].map(({ key, label }) => (
-            <div key={key} className="bg-gray-50 border border-gray-200 rounded-xl p-3 flex flex-col items-center justify-center">
-              <p className="text-gray-400 text-[9px] uppercase font-bold tracking-widest mb-1">{label}</p>
-              <p className="text-gray-800 text-lg font-black">{result.sub_scores[key]}</p>
+            <div key={key} className="bg-white border-2 border-gray-900 rounded-lg p-3 flex flex-col items-center justify-center" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+              <p className="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1">{label}</p>
+              <p className="text-gray-900 text-xl font-black">{result.sub_scores[key]}</p>
             </div>
           ))}
         </div>
       )}
 
       {result.feedback && (
-        <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 max-w-md text-left">
-          <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">AI Feedback</p>
+        <div className="bg-indigo-50 border-2 border-gray-900 rounded-lg p-4 max-w-md text-left" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+          <p className="text-indigo-700 text-xs uppercase tracking-wider mb-1 font-black">AI Feedback</p>
           <p className="text-gray-700 text-sm leading-relaxed">{result.feedback}</p>
         </div>
       )}
 
       <button
         onClick={onContinue}
-        className="mt-2 px-8 py-3 bg-indigo-700 hover:bg-indigo-600 text-white font-semibold rounded-xl transition-all hover:shadow-lg hover:shadow-indigo-500/20 hover:-translate-y-0.5 active:translate-y-0"
+        className="mt-2 px-8 py-3.5 bg-indigo-700 hover:bg-indigo-600 text-white font-black uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all neo-btn"
+        style={{ boxShadow: '4px 4px 0 #0F0F0F' }}
       >
         Continue to {nextLabel} →
       </button>
@@ -490,60 +498,59 @@ function DiagnosticGate({
   onStart: () => void;
 }) {
   const steps = [
-    { icon: "🎧", label: "Listening", desc: "6 MCQs with audio" },
-    { icon: "📖", label: "Reading", desc: "Passage + 4 questions" },
-    { icon: "✍️", label: "Writing", desc: "Graph response task" },
-    { icon: "🎤", label: "Speaking", desc: "90-second verbal prompt" },
+    { icon: "🎧", label: "Listening", desc: "6 MCQs with audio", num: "01" },
+    { icon: "📖", label: "Reading", desc: "Passage + 4 questions", num: "02" },
+    { icon: "✍️", label: "Writing", desc: "Graph response task", num: "03" },
+    { icon: "🎤", label: "Speaking", desc: "90-second verbal prompt", num: "04" },
   ];
 
   return (
     <div className="flex flex-col items-center text-center gap-8 max-w-xl mx-auto py-8">
       <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-medium tracking-wider uppercase">
-          <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded border-2 border-gray-900 bg-indigo-700 text-white text-xs font-black tracking-widest uppercase" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
           IELTS Baseline Diagnostic
         </div>
-        <h1 className="text-4xl font-black text-gray-900 tracking-tight">
+        <h1 className="text-4xl font-black text-gray-900 tracking-tight uppercase">
           {gateState === "in_progress" ? "Resume Your" : "Begin Your"}{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-teal-500">
+          <span className="text-indigo-700">
             Diagnostic
           </span>
         </h1>
-        <p className="text-gray-500 leading-relaxed">
+        <p className="text-gray-600 leading-relaxed">
           {gateState === "in_progress"
             ? `You left off at the ${SKILL_LABELS[resumePhase!]} section. Pick up exactly where you stopped.`
             : "Complete this 10-minute assessment to unlock your personalised learning path and band score baseline."}
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 w-full">
+      <div className="w-full space-y-3">
         {steps.map((step) => (
           <div
             key={step.label}
-            className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-left hover:border-indigo-200 hover:bg-indigo-50/50 transition-colors"
+            className="bg-white border-2 border-gray-900 rounded-lg p-4 flex items-center gap-4 text-left hover:bg-indigo-50 transition-colors"
+            style={{ boxShadow: '4px 4px 0 #0F0F0F' }}
           >
             <span className="text-2xl">{step.icon}</span>
-            <p className="text-gray-900 font-semibold text-sm mt-2">{step.label}</p>
-            <p className="text-gray-400 text-xs mt-0.5">{step.desc}</p>
+            <div className="flex-1">
+              <p className="text-gray-900 font-black text-sm uppercase tracking-wide">{step.label}</p>
+              <p className="text-gray-500 text-xs mt-0.5">{step.desc}</p>
+            </div>
+            <span className="text-gray-300 font-black font-mono text-lg">{step.num}</span>
           </div>
         ))}
       </div>
 
-      <div className="flex items-center gap-6 text-gray-400 text-xs">
-        <span className="flex items-center gap-1.5">
-          <span>⏱</span> ~10 minutes
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span>🔒</span> Cannot be skipped
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span>💡</span> Progress is saved
-        </span>
+      <div className="flex items-center gap-6 text-gray-500 text-xs font-bold uppercase tracking-wide">
+        <span className="flex items-center gap-1.5">⏱ ~10 minutes</span>
+        <span className="flex items-center gap-1.5">🔒 No skip</span>
+        <span className="flex items-center gap-1.5">💡 Saved</span>
       </div>
 
       <button
         onClick={onStart}
-        className="w-full py-4 bg-indigo-700 hover:bg-indigo-600 text-white font-bold text-base rounded-xl transition-all hover:shadow-xl hover:shadow-indigo-500/25 hover:-translate-y-0.5 active:translate-y-0"
+        className="w-full py-4 bg-indigo-700 hover:bg-indigo-600 text-white font-black text-base uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all neo-btn"
+        style={{ boxShadow: '5px 5px 0 #0F0F0F' }}
       >
         {gateState === "in_progress"
           ? `Resume from ${SKILL_LABELS[resumePhase!]}`
@@ -623,9 +630,9 @@ function ListeningPhase({
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-3 mb-4">
-          <span className="text-2xl">🎧</span>
+          <div className="w-10 h-10 bg-indigo-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>🎧</div>
           <div>
-            <p className="text-gray-900 font-bold">Listening Section</p>
+            <p className="text-gray-900 font-black uppercase tracking-wide">Listening Section</p>
             <p className="text-gray-500 text-sm">Loading your audio and questions…</p>
           </div>
         </div>
@@ -646,11 +653,11 @@ function ListeningPhase({
     return (
       <div className="flex flex-col items-center gap-6 py-16 text-center">
         <div className="relative">
-          <div className="w-16 h-16 rounded-full border-2 border-indigo-200 border-t-indigo-600 animate-spin" />
+          <div className="w-16 h-16 rounded-full border-4 border-gray-200 border-t-indigo-700 animate-spin" />
           <span className="absolute inset-0 flex items-center justify-center text-2xl">🎧</span>
         </div>
         <div>
-          <p className="text-gray-900 font-semibold">Scoring your answers…</p>
+          <p className="text-gray-900 font-black uppercase tracking-wide">Scoring your answers…</p>
           <p className="text-gray-500 text-sm mt-1">This takes just a moment.</p>
         </div>
       </div>
@@ -661,25 +668,25 @@ function ListeningPhase({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">🎧</span>
+          <div className="w-10 h-10 bg-indigo-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>🎧</div>
           <div>
-            <p className="text-gray-900 font-bold">Listening Section</p>
+            <p className="text-gray-900 font-black uppercase tracking-wide">Listening Section</p>
             <p className="text-gray-500 text-sm">6 questions · Answer all to submit</p>
           </div>
         </div>
-        <div className="text-gray-500 text-sm font-medium tabular-nums">
-          {Object.keys(answers).length}/6 answered
+        <div className="bg-white border-2 border-gray-900 rounded-lg px-3 py-1.5 text-gray-900 text-sm font-black tabular-nums" style={{ boxShadow: '2px 2px 0 #0F0F0F' }}>
+          {Object.keys(answers).length}/6
         </div>
       </div>
 
-      <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+      <div className="bg-indigo-50 border-2 border-gray-900 rounded-lg p-4" style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-lg shrink-0">
+          <div className="w-10 h-10 rounded-lg bg-indigo-700 border-2 border-gray-900 flex items-center justify-center text-white text-lg shrink-0 font-black" style={{ boxShadow: '2px 2px 0 #0F0F0F' }}>
             ▶
           </div>
           <div className="flex-1">
-            <p className="text-gray-900 text-sm font-medium">Diagnostic Audio Clip</p>
-            <p className="text-gray-400 text-xs mt-0.5">
+            <p className="text-gray-900 text-sm font-black uppercase tracking-wide">Diagnostic Audio Clip</p>
+            <p className="text-gray-500 text-xs mt-0.5">
               {audioPlayed
                 ? "Audio has been played — replay disabled in exam mode"
                 : "Play once. Listen carefully before answering."}
@@ -698,11 +705,12 @@ function ListeningPhase({
               }
             }}
             disabled={audioPlayed}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            className={`px-4 py-2 rounded-lg text-sm font-black uppercase tracking-wide border-2 transition-all ${
               audioPlayed
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-indigo-700 hover:bg-indigo-600 text-white"
+                ? "bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed"
+                : "bg-indigo-700 hover:bg-indigo-600 text-white border-gray-900 neo-btn"
             }`}
+            style={!audioPlayed ? { boxShadow: '3px 3px 0 #0F0F0F' } : {}}
           >
             {audioPlayed ? "Played ✓" : "Play Audio"}
           </button>
@@ -713,10 +721,11 @@ function ListeningPhase({
         {data?.questions?.map((q: any, qi: number) => (
           <div
             key={q.id}
-            className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm"
+            className="bg-white border-2 border-gray-900 rounded-lg p-5"
+            style={{ boxShadow: '4px 4px 0 #0F0F0F' }}
           >
-            <p className="text-gray-700 text-sm font-medium mb-3">
-              <span className="text-indigo-700 font-bold mr-2">Q{qi + 1}.</span>
+            <p className="text-gray-700 text-sm font-bold mb-3">
+              <span className="text-indigo-700 font-black mr-2 uppercase">Q{qi + 1}.</span>
               {q.text}
             </p>
             <div className="grid grid-cols-1 gap-2">
@@ -725,24 +734,24 @@ function ListeningPhase({
                 return (
                 <label
                   key={optLetter}
-                  className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                  className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
                     answers[q.id] === optLetter
-                      ? "border-indigo-400 bg-indigo-50 text-gray-900"
-                      : "border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                      ? "border-gray-900 bg-gray-900 text-white"
+                      : "border-gray-200 text-gray-600 hover:border-gray-400 hover:text-gray-900"
                   }`}
                 >
                   <div
-                    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                    className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-all ${
                       answers[q.id] === optLetter
-                        ? "border-indigo-600 bg-indigo-600"
-                        : "border-gray-300"
+                        ? "border-indigo-400 bg-indigo-500"
+                        : "border-gray-400"
                     }`}
                   >
                     {answers[q.id] === optLetter && (
-                      <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                      <div className="w-1.5 h-1.5 rounded-sm bg-white" />
                     )}
                   </div>
-                  <span className="text-indigo-700 font-bold text-sm w-5 shrink-0">
+                  <span className={`font-black text-sm w-5 shrink-0 ${answers[q.id] === optLetter ? 'text-indigo-300' : 'text-indigo-700'}`}>
                     {optLetter}
                   </span>
                   <span className="text-sm">{opt.substring(optLetter.length + 1).trim()}</span>
@@ -766,11 +775,12 @@ function ListeningPhase({
       <button
         onClick={handleSubmit}
         disabled={!allAnswered || sectionState === "submitting"}
-        className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all ${
+        className={`w-full py-3.5 rounded-lg font-black text-sm uppercase tracking-wide border-2 transition-all ${
           allAnswered
-            ? "bg-indigo-700 hover:bg-indigo-600 text-white hover:shadow-lg hover:shadow-indigo-500/20 hover:-translate-y-0.5"
-            : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
+            ? "bg-indigo-700 hover:bg-indigo-600 text-white border-gray-900 neo-btn"
+            : "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-300"
         }`}
+        style={allAnswered ? { boxShadow: '4px 4px 0 #0F0F0F' } : {}}
       >
         {sectionState === "submitting" ? (
           <span className="flex items-center justify-center gap-2">
@@ -859,8 +869,8 @@ function ReadingPhase({
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-3 mb-4">
-          <span className="text-2xl">📖</span>
-          <p className="text-gray-900 font-bold">Loading Reading Section…</p>
+          <div className="w-10 h-10 bg-indigo-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>📖</div>
+          <p className="text-gray-900 font-black uppercase tracking-wide">Loading Reading Section…</p>
         </div>
         <SkeletonLoader />
       </div>
@@ -879,10 +889,10 @@ function ReadingPhase({
     return (
       <div className="flex flex-col items-center gap-6 py-16 text-center">
         <div className="relative">
-          <div className="w-16 h-16 rounded-full border-2 border-indigo-200 border-t-indigo-600 animate-spin" />
+          <div className="w-16 h-16 rounded-full border-4 border-gray-200 border-t-indigo-700 animate-spin" />
           <span className="absolute inset-0 flex items-center justify-center text-2xl">📖</span>
         </div>
-        <p className="text-gray-900 font-semibold">Scoring your answers…</p>
+        <p className="text-gray-900 font-black uppercase tracking-wide">Scoring your answers…</p>
       </div>
     );
   }
@@ -891,29 +901,30 @@ function ReadingPhase({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">📖</span>
+          <div className="w-10 h-10 bg-indigo-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>📖</div>
           <div>
-            <p className="text-gray-900 font-bold">Reading Section</p>
+            <p className="text-gray-900 font-black uppercase tracking-wide">Reading Section</p>
             <p className="text-gray-500 text-sm">Read the passage, then answer 4 questions</p>
           </div>
         </div>
         <div
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-mono font-bold transition-colors ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 text-sm font-mono font-black transition-colors ${
             timerWarning
-              ? "bg-amber-50 border-amber-200 text-amber-600"
+              ? "bg-amber-100 border-gray-900 text-gray-900"
               : timeLeft === 0
-              ? "bg-red-50 border-red-200 text-red-600"
-              : "bg-gray-50 border-gray-200 text-gray-700"
+              ? "bg-red-100 border-gray-900 text-red-700"
+              : "bg-white border-gray-900 text-gray-900"
           }`}
+          style={{ boxShadow: '2px 2px 0 #0F0F0F' }}
         >
           <span className="text-xs">{timerWarning ? "⚠" : "⏱"}</span>
           {formatTime(timeLeft)}
-          {timeLeft === 0 && <span className="text-xs font-normal ml-1">Time's up</span>}
+          {timeLeft === 0 && <span className="text-xs font-bold ml-1">Time's up</span>}
         </div>
       </div>
 
-      <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
-        <p className="text-gray-400 text-xs uppercase tracking-wider mb-3 font-medium">
+      <div className="bg-gray-50 border-2 border-gray-900 rounded-lg p-5" style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>
+        <p className="text-gray-500 text-xs uppercase tracking-widest mb-3 font-black">
           Reading Passage
         </p>
         <p className="text-gray-700 text-sm leading-7 whitespace-pre-line">
@@ -922,40 +933,39 @@ function ReadingPhase({
       </div>
 
       <div className="space-y-4">
-        <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">
+        <p className="text-gray-500 text-xs uppercase tracking-widest font-black">
           Questions — True / False / Not Given
         </p>
         {data?.questions?.map((q: any, qi: number) => (
           <div
             key={q.id}
-            className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm"
+            className="bg-white border-2 border-gray-900 rounded-lg p-5"
+            style={{ boxShadow: '4px 4px 0 #0F0F0F' }}
           >
             <p className="text-gray-700 text-sm mb-3">
-              <span className="text-indigo-700 font-bold mr-2">{qi + 1}.</span>
+              <span className="text-indigo-700 font-black mr-2">{qi + 1}.</span>
               {q.text}
             </p>
             <div className="flex gap-2 flex-wrap">
               {q.options.map((opt: string) => {
                 const optLetter = opt.split('.')[0];
+                const isSelected = answers[q.id] === optLetter;
                 return (
                 <label
                   key={optLetter}
-                  className={`px-4 py-2 rounded-lg border cursor-pointer text-sm font-medium transition-all ${
-                    answers[q.id] === optLetter
-                      ? optLetter === "A"
-                        ? "border-teal-400 bg-teal-50 text-teal-700"
-                        : optLetter === "B"
-                        ? "border-red-300 bg-red-50 text-red-700"
-                        : "border-gray-400 bg-gray-100 text-gray-700"
-                      : "border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                  className={`px-4 py-2 rounded-lg border-2 cursor-pointer text-sm font-black uppercase tracking-wide transition-all ${
+                    isSelected
+                      ? "border-gray-900 bg-gray-900 text-white"
+                      : "border-gray-300 text-gray-500 hover:border-gray-600 hover:text-gray-800"
                   }`}
+                  style={isSelected ? { boxShadow: '2px 2px 0 #0F0F0F' } : {}}
                 >
                   {opt.substring(optLetter.length + 1).trim()}
                   <input
                     type="radio"
                     name={q.id}
                     value={optLetter}
-                    checked={answers[q.id] === optLetter}
+                    checked={isSelected}
                     onChange={() => setAnswers((prev) => ({ ...prev, [q.id]: optLetter }))}
                     className="sr-only"
                   />
@@ -971,11 +981,12 @@ function ReadingPhase({
       <button
         onClick={handleSubmit}
         disabled={!allAnswered || sectionState === "submitting"}
-        className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all ${
+        className={`w-full py-3.5 rounded-lg font-black text-sm uppercase tracking-wide border-2 transition-all ${
           allAnswered
-            ? "bg-indigo-700 hover:bg-indigo-600 text-white hover:shadow-lg hover:shadow-indigo-500/20 hover:-translate-y-0.5"
-            : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
+            ? "bg-indigo-700 hover:bg-indigo-600 text-white border-gray-900 neo-btn"
+            : "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-300"
         }`}
+        style={allAnswered ? { boxShadow: '4px 4px 0 #0F0F0F' } : {}}
       >
         {sectionState === "submitting" ? (
           <span className="flex items-center justify-center gap-2">
@@ -1044,25 +1055,17 @@ function WritingPhase({
     }
   };
 
-  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    e.preventDefault();
-  };
-  const handleCopy = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    e.preventDefault();
-  };
-  const handleCut = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    e.preventDefault();
-  };
-  const handleDrop = (e: React.DragEvent<HTMLTextAreaElement>) => {
-    e.preventDefault();
-  };
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => { e.preventDefault(); };
+  const handleCopy = (e: React.ClipboardEvent<HTMLTextAreaElement>) => { e.preventDefault(); };
+  const handleCut = (e: React.ClipboardEvent<HTMLTextAreaElement>) => { e.preventDefault(); };
+  const handleDrop = (e: React.DragEvent<HTMLTextAreaElement>) => { e.preventDefault(); };
 
   if (sectionState === "loading") {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-3 mb-4">
-          <span className="text-2xl">✍️</span>
-          <p className="text-gray-900 font-bold">Loading Writing Task…</p>
+          <div className="w-10 h-10 bg-indigo-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>✍️</div>
+          <p className="text-gray-900 font-black uppercase tracking-wide">Loading Writing Task…</p>
         </div>
         <SkeletonLoader />
       </div>
@@ -1081,18 +1084,18 @@ function WritingPhase({
     return (
       <div className="flex flex-col items-center gap-5 py-16 text-center">
         <div className="relative">
-          <div className="w-16 h-16 rounded-full border-2 border-indigo-200 border-t-indigo-600 animate-spin" />
+          <div className="w-16 h-16 rounded-full border-4 border-gray-200 border-t-indigo-700 animate-spin" />
           <span className="absolute inset-0 flex items-center justify-center text-2xl">✍️</span>
         </div>
         <div>
-          <p className="text-gray-900 font-semibold">AI examiner is reviewing your writing…</p>
+          <p className="text-gray-900 font-black uppercase tracking-wide">AI Examiner Reviewing…</p>
           <p className="text-gray-500 text-sm mt-1">This may take 5–10 seconds. Please wait.</p>
         </div>
         <div className="flex gap-1 mt-2">
           {[0, 1, 2].map((i) => (
             <div
               key={i}
-              className="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-bounce"
+              className="w-2 h-2 rounded-sm bg-indigo-700 animate-bounce"
               style={{ animationDelay: `${i * 0.15}s` }}
             />
           ))}
@@ -1104,24 +1107,24 @@ function WritingPhase({
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-3">
-        <span className="text-2xl">✍️</span>
+        <div className="w-10 h-10 bg-indigo-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>✍️</div>
         <div>
-          <p className="text-gray-900 font-bold">Writing Section</p>
+          <p className="text-gray-900 font-black uppercase tracking-wide">Writing Section</p>
           <p className="text-gray-500 text-sm">Describe the graph in at least {MIN_WORDS} words</p>
         </div>
       </div>
 
       {data?.image_url && (
-      <div className="rounded-xl overflow-hidden border border-gray-200 mb-4">
-        <img
-          src={data.image_url}
-          alt="Writing Task Visualization"
-          className="w-full object-cover"
-        />
-      </div>
+        <div className="rounded-lg overflow-hidden border-2 border-gray-900 mb-4" style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>
+          <img
+            src={data.image_url}
+            alt="Writing Task Visualization"
+            className="w-full object-cover"
+          />
+        </div>
       )}
 
-      <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+      <div className="bg-indigo-50 border-2 border-gray-900 rounded-lg p-4" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
         <p className="text-gray-700 text-sm leading-relaxed">{data?.topic}</p>
       </div>
 
@@ -1136,37 +1139,38 @@ function WritingPhase({
           disabled={sectionState === "submitting"}
           placeholder="Begin writing your response here…"
           rows={8}
-          className="w-full bg-white border border-gray-200 rounded-xl p-4 text-gray-800 text-sm leading-7 resize-none focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 placeholder-gray-300 transition-colors"
+          className="w-full bg-white border-2 border-gray-900 rounded-lg p-4 text-gray-800 text-sm leading-7 resize-none focus:outline-none focus:border-indigo-700 focus:ring-2 focus:ring-indigo-100 placeholder-gray-300 transition-colors font-medium"
+          style={{ boxShadow: '4px 4px 0 #0F0F0F' }}
         />
         <div
-          className={`absolute bottom-3 right-3 px-2.5 py-1 rounded-md text-xs font-mono font-bold transition-colors ${
+          className={`absolute bottom-3 right-3 px-2.5 py-1 rounded border-2 text-xs font-black font-mono transition-colors ${
             wordCount >= MIN_WORDS
-              ? "bg-teal-100 text-teal-700"
-              : "bg-gray-100 text-gray-500"
+              ? "bg-indigo-700 text-white border-gray-900"
+              : "bg-white text-gray-600 border-gray-300"
           }`}
         >
-          {wordCount} / {MIN_WORDS} words
+          {wordCount} / {MIN_WORDS}
         </div>
       </div>
 
       <div className="space-y-1.5">
-        <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+        <div className="h-2 bg-gray-100 rounded border border-gray-300 overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all duration-300 ${
-              wordCount >= MIN_WORDS ? "bg-teal-500" : "bg-indigo-500"
+            className={`h-full rounded transition-all duration-300 ${
+              wordCount >= MIN_WORDS ? "bg-indigo-700" : "bg-indigo-400"
             }`}
             style={{ width: `${Math.min((wordCount / MIN_WORDS) * 100, 100)}%` }}
           />
         </div>
-        <p className="text-gray-400 text-xs">
+        <p className="text-gray-500 text-xs font-bold">
           {wordCount < MIN_WORDS
             ? `${MIN_WORDS - wordCount} more words needed to enable submission`
             : "Minimum word count reached ✓"}
         </p>
       </div>
 
-      <p className="text-gray-400 text-xs flex items-center gap-1.5">
-        <span>🔒</span> Copy-paste is disabled in this section — all responses must be typed.
+      <p className="text-gray-400 text-xs flex items-center gap-1.5 font-bold uppercase tracking-wide">
+        <span>🔒</span> Copy-paste disabled — all responses must be typed.
       </p>
 
       {error && <ErrorBanner onRetry={handleSubmit} />}
@@ -1174,11 +1178,12 @@ function WritingPhase({
       <button
         onClick={handleSubmit}
         disabled={wordCount < MIN_WORDS || sectionState === "scoring"}
-        className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all ${
+        className={`w-full py-3.5 rounded-lg font-black text-sm uppercase tracking-wide border-2 transition-all ${
           wordCount >= MIN_WORDS
-            ? "bg-indigo-700 hover:bg-indigo-600 text-white hover:shadow-lg hover:shadow-indigo-500/20 hover:-translate-y-0.5"
-            : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
+            ? "bg-indigo-700 hover:bg-indigo-600 text-white border-gray-900 neo-btn"
+            : "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-300"
         }`}
+        style={wordCount >= MIN_WORDS ? { boxShadow: '4px 4px 0 #0F0F0F' } : {}}
       >
         {sectionState === "scoring" ? (
           <span className="flex items-center justify-center gap-2">
@@ -1299,30 +1304,30 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <span className="text-2xl">🎤</span>
+        <div className="w-10 h-10 bg-indigo-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>🎤</div>
         <div>
-          <p className="text-gray-900 font-bold">Speaking Section</p>
+          <p className="text-gray-900 font-black uppercase tracking-wide">Speaking Section</p>
           <p className="text-gray-500 text-sm">Up to 90 seconds · Speak clearly and naturally</p>
         </div>
       </div>
 
-      <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
-        <p className="text-gray-400 text-xs uppercase tracking-wider mb-2 font-medium">
+      <div className="bg-gray-50 border-2 border-gray-900 rounded-lg p-5" style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>
+        <p className="text-gray-500 text-xs uppercase tracking-widest mb-2 font-black">
           Your Speaking Prompt
         </p>
         <div className="text-gray-700 text-sm leading-7 space-y-2">
           {data?.prompts?.map((prompt: string, i: number) => (
-             <p key={i}><span className="font-bold mr-2">{i+1}.</span>{prompt}</p>
+            <p key={i}><span className="font-black text-indigo-700 mr-2">{i+1}.</span>{prompt}</p>
           ))}
         </div>
       </div>
 
       {recordState === "idle" && (
-        <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+        <div className="bg-indigo-50 border-2 border-gray-900 rounded-lg p-4" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
           <ul className="text-gray-700 text-sm space-y-1.5">
-            <li className="flex gap-2"><span className="text-indigo-600">•</span>Read the prompt carefully before recording</li>
-            <li className="flex gap-2"><span className="text-indigo-600">•</span>Tap the button below to start — you have 90 seconds</li>
-            <li className="flex gap-2"><span className="text-indigo-600">•</span>Speak naturally — your response will be transcribed and scored</li>
+            <li className="flex gap-2"><span className="text-indigo-700 font-black">→</span>Read the prompt carefully before recording</li>
+            <li className="flex gap-2"><span className="text-indigo-700 font-black">→</span>Tap the button below to start — you have 90 seconds</li>
+            <li className="flex gap-2"><span className="text-indigo-700 font-black">→</span>Speak naturally — your response will be transcribed and scored</li>
           </ul>
         </div>
       )}
@@ -1333,10 +1338,10 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
             {animBars.map((h, i) => (
               <div
                 key={i}
-                className="w-1.5 bg-red-500 rounded-full"
+                className="w-1.5 bg-red-500 rounded-sm"
                 style={{
                   height: `${20 + h * 30}px`,
-                  animation: `pulse 0.${5 + (i % 5)}s ease-in-out infinite alternate`,
+                  animation: `waveform 0.${5 + (i % 5)}s ease-in-out infinite alternate`,
                   animationDelay: `${i * 0.06}s`,
                 }}
               />
@@ -1346,17 +1351,15 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
 
         {(recordState === "recording" || recordState === "recorded") && (
           <div className="w-full space-y-2">
-            <div className="flex justify-between text-xs text-gray-500">
+            <div className="flex justify-between text-xs text-gray-600 font-black font-mono">
               <span>{formatTime(elapsed)}</span>
-              <span
-                className={elapsed >= MAX_DURATION - 10 ? "text-amber-600 font-medium" : ""}
-              >
+              <span className={elapsed >= MAX_DURATION - 10 ? "text-amber-600" : ""}>
                 {formatTime(MAX_DURATION - elapsed)} remaining
               </span>
             </div>
-            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-2 bg-gray-100 rounded border border-gray-300 overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all duration-1000 ${
+                className={`h-full rounded transition-all duration-1000 ${
                   progress > 80 ? "bg-amber-500" : "bg-red-500"
                 }`}
                 style={{ width: `${progress}%` }}
@@ -1374,13 +1377,14 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
                 ? stopRecording
                 : handleSubmit
             }
-            className={`w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold transition-all shadow-xl ${
+            className={`w-20 h-20 rounded-xl flex items-center justify-center text-2xl font-black border-2 transition-all ${
               recordState === "recording"
-                ? "bg-red-500 hover:bg-red-600 text-white animate-pulse shadow-red-300"
+                ? "bg-red-500 hover:bg-red-600 text-white border-gray-900 animate-pulse"
                 : recordState === "recorded"
-                ? "bg-teal-600 hover:bg-teal-500 text-white shadow-teal-200"
-                : "bg-indigo-700 hover:bg-indigo-600 text-white shadow-indigo-200 hover:-translate-y-1"
+                ? "bg-gray-900 hover:bg-gray-800 text-white border-gray-900 neo-btn"
+                : "bg-indigo-700 hover:bg-indigo-600 text-white border-gray-900 neo-btn"
             }`}
+            style={recordState !== "recording" ? { boxShadow: '4px 4px 0 #0F0F0F' } : { boxShadow: '4px 4px 0 #991b1b' }}
           >
             {recordState === "idle" && "●"}
             {recordState === "recording" && "■"}
@@ -1388,7 +1392,7 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
           </button>
         )}
 
-        <p className="text-gray-500 text-sm text-center">
+        <p className="text-gray-600 text-sm text-center font-bold uppercase tracking-wide">
           {recordState === "idle" && "Tap to start recording"}
           {recordState === "recording" && "Recording… tap to stop"}
           {recordState === "recorded" && `Recorded (${formatTime(elapsed)}) — tap ▲ to submit`}
@@ -1397,7 +1401,8 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
         {recordState === "recorded" && (
           <button
             onClick={handleSubmit}
-            className="px-8 py-3 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl transition-all hover:shadow-lg hover:shadow-teal-200 hover:-translate-y-0.5"
+            className="px-8 py-3 bg-indigo-700 hover:bg-indigo-600 text-white font-black uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all neo-btn"
+            style={{ boxShadow: '4px 4px 0 #0F0F0F' }}
           >
             Submit Recording →
           </button>
@@ -1407,14 +1412,12 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
       {(recordState === "uploading" || recordState === "processing") && (
         <div className="flex flex-col items-center gap-4 py-8 text-center">
           <div className="relative">
-            <div className="w-16 h-16 rounded-full border-2 border-indigo-200 border-t-indigo-600 animate-spin" />
+            <div className="w-16 h-16 rounded-full border-4 border-gray-200 border-t-indigo-700 animate-spin" />
             <span className="absolute inset-0 flex items-center justify-center text-2xl">🎤</span>
           </div>
           <div>
-            <p className="text-gray-900 font-semibold">
-              {recordState === "uploading"
-                ? "Uploading your recording…"
-                : "AI examiner is transcribing and scoring…"}
+            <p className="text-gray-900 font-black uppercase tracking-wide">
+              {recordState === "uploading" ? "Uploading Recording…" : "AI Scoring in Progress…"}
             </p>
             <p className="text-gray-500 text-sm mt-1">
               {recordState === "uploading"
@@ -1426,16 +1429,14 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
       )}
 
       {error && (
-        <div className="border border-red-200 bg-red-50 rounded-xl p-4">
-          <p className="text-red-700 text-sm">{error}</p>
+        <div className="border-2 border-gray-900 bg-red-50 rounded-lg p-4" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+          <p className="text-gray-900 font-black text-sm">{error}</p>
         </div>
       )}
 
       {recordState === "idle" && (
-        <p className="text-gray-400 text-xs text-center">
-          Your browser will request microphone access. Allow it to begin recording.
-          <br />
-          Safari on iOS may have limitations — use Chrome for best results.
+        <p className="text-gray-400 text-xs text-center font-bold uppercase tracking-wide">
+          Browser will request microphone access. Use Chrome for best results.
         </p>
       )}
     </div>
@@ -1481,24 +1482,23 @@ function SpeakingResultCard({
   };
 
   const level = getBandLevel(band_score);
-  const cfg = getLevelConfig(level);
 
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="text-center space-y-3">
-        <div className="text-4xl">🎤</div>
-        <div className={`text-6xl font-black ${cfg.text} tabular-nums`}>
+        <div className="w-16 h-16 bg-indigo-700 border-2 border-gray-900 rounded-xl flex items-center justify-center text-3xl mx-auto" style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>🎤</div>
+        <div className="text-7xl font-black text-gray-900 tabular-nums">
           {band_score.toFixed(1)}
         </div>
         <LevelBadge level={level} size="lg" />
       </div>
 
       {subScoreEntries.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-          <p className="px-5 py-3 text-gray-400 text-xs uppercase tracking-wider border-b border-gray-100 font-medium">
+        <div className="bg-white border-2 border-gray-900 rounded-lg overflow-hidden" style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>
+          <p className="px-5 py-3 text-gray-500 text-xs uppercase tracking-widest border-b-2 border-gray-900 font-black">
             Criterion Breakdown
           </p>
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y-2 divide-gray-100">
             {subScoreEntries.map(([key, val]) => {
               const isWeakest = key === minSub[0];
               const isStrongest = key === maxSub[0];
@@ -1506,29 +1506,21 @@ function SpeakingResultCard({
                 <div
                   key={key}
                   className={`flex items-center justify-between px-5 py-3 ${
-                    isWeakest
-                      ? "bg-amber-50"
-                      : isStrongest
-                      ? "bg-teal-50"
-                      : "bg-white"
+                    isWeakest ? "bg-amber-50" : isStrongest ? "bg-indigo-50" : "bg-white"
                   }`}
                 >
-                  <span className="text-gray-700 text-sm">
+                  <span className="text-gray-700 text-sm font-bold">
                     {subScoreLabels[key] ?? key}
                     {isWeakest && (
-                      <span className="ml-2 text-amber-600 text-xs">(needs work)</span>
+                      <span className="ml-2 text-amber-700 text-xs font-black uppercase tracking-wide border border-amber-300 bg-amber-100 px-1.5 py-0.5 rounded">needs work</span>
                     )}
                     {isStrongest && (
-                      <span className="ml-2 text-teal-600 text-xs">(strongest)</span>
+                      <span className="ml-2 text-indigo-700 text-xs font-black uppercase tracking-wide border border-indigo-300 bg-indigo-100 px-1.5 py-0.5 rounded">strongest</span>
                     )}
                   </span>
                   <span
-                    className={`font-bold tabular-nums ${
-                      isWeakest
-                        ? "text-amber-600"
-                        : isStrongest
-                        ? "text-teal-600"
-                        : "text-gray-900"
+                    className={`font-black tabular-nums text-lg ${
+                      isWeakest ? "text-amber-600" : isStrongest ? "text-indigo-700" : "text-gray-900"
                     }`}
                   >
                     {Number(val).toFixed(1)}
@@ -1541,12 +1533,12 @@ function SpeakingResultCard({
       )}
 
       {result.sub_scores?.feedback && (
-        <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-sm text-left">
-          <p className="text-gray-900 font-bold mb-4 text-center">AI Detailed Feedback</p>
+        <div className="bg-white border-2 border-gray-900 rounded-lg p-6" style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>
+          <p className="text-gray-900 font-black uppercase tracking-wide mb-4 text-center">AI Detailed Feedback</p>
           <div className="space-y-4">
             {result.sub_scores.feedback.fluency && Array.isArray(result.sub_scores.feedback.fluency) && (
               <div>
-                <p className="text-xs uppercase font-bold text-gray-500 mb-1">Fluency</p>
+                <p className="text-xs uppercase font-black text-gray-500 mb-1 tracking-wider">Fluency</p>
                 <ul className="list-disc pl-4 text-sm text-gray-700 space-y-1">
                   {result.sub_scores.feedback.fluency.map((item: string, i: number) => <li key={i}>{item}</li>)}
                 </ul>
@@ -1554,7 +1546,7 @@ function SpeakingResultCard({
             )}
             {result.sub_scores.feedback.delivery_and_confidence && Array.isArray(result.sub_scores.feedback.delivery_and_confidence) && (
               <div>
-                <p className="text-xs uppercase font-bold text-gray-500 mb-1">Delivery & Confidence</p>
+                <p className="text-xs uppercase font-black text-gray-500 mb-1 tracking-wider">Delivery & Confidence</p>
                 <ul className="list-disc pl-4 text-sm text-gray-700 space-y-1">
                   {result.sub_scores.feedback.delivery_and_confidence.map((item: string, i: number) => <li key={i}>{item}</li>)}
                 </ul>
@@ -1562,7 +1554,7 @@ function SpeakingResultCard({
             )}
             {result.sub_scores.feedback.filler_words_used && Array.isArray(result.sub_scores.feedback.filler_words_used) && (
               <div>
-                <p className="text-xs uppercase font-bold text-gray-500 mb-1">Filler Words</p>
+                <p className="text-xs uppercase font-black text-gray-500 mb-1 tracking-wider">Filler Words</p>
                 <ul className="list-disc pl-4 text-sm text-gray-700 space-y-1">
                   {result.sub_scores.feedback.filler_words_used.map((item: string, i: number) => <li key={i}>{item}</li>)}
                 </ul>
@@ -1570,7 +1562,7 @@ function SpeakingResultCard({
             )}
             {result.sub_scores.feedback.pronunciation && Array.isArray(result.sub_scores.feedback.pronunciation) && (
               <div>
-                <p className="text-xs uppercase font-bold text-gray-500 mb-1">Pronunciation</p>
+                <p className="text-xs uppercase font-black text-gray-500 mb-1 tracking-wider">Pronunciation</p>
                 <ul className="list-disc pl-4 text-sm text-gray-700 space-y-1">
                   {result.sub_scores.feedback.pronunciation.map((item: string, i: number) => <li key={i}>{item}</li>)}
                 </ul>
@@ -1578,8 +1570,8 @@ function SpeakingResultCard({
             )}
             {result.sub_scores.feedback.improvements && (
               <div>
-                <p className="text-xs uppercase font-bold text-gray-500 mb-1">Overall Improvements</p>
-                <p className="text-sm text-gray-700 bg-white p-3 rounded-lg border border-gray-100">{result.sub_scores.feedback.improvements}</p>
+                <p className="text-xs uppercase font-black text-gray-500 mb-1 tracking-wider">Overall Improvements</p>
+                <p className="text-sm text-gray-700 bg-indigo-50 p-3 rounded-lg border-2 border-gray-900">{result.sub_scores.feedback.improvements}</p>
               </div>
             )}
           </div>
@@ -1588,7 +1580,8 @@ function SpeakingResultCard({
 
       <button
         onClick={onContinue}
-        className="w-full py-3.5 bg-indigo-700 hover:bg-indigo-600 text-white font-bold rounded-xl transition-all hover:shadow-lg hover:shadow-indigo-500/20 hover:-translate-y-0.5"
+        className="w-full py-3.5 bg-indigo-700 hover:bg-indigo-600 text-white font-black uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all neo-btn"
+        style={{ boxShadow: '4px 4px 0 #0F0F0F' }}
       >
         View Full Results →
       </button>
@@ -1610,7 +1603,6 @@ function DiagnosticSummaryScreen({
   const skills: Skill[] = ["listening", "reading", "writing", "speaking"];
   const avgScore = getAverageScore(results);
   const overallLevel = getBandLevel(avgScore);
-  const overallCfg = getLevelConfig(overallLevel);
 
   const readinessMessages: Record<Level, string> = {
     A: "You're at the foundation stage. Our personalised plan will fast-track you toward your target band.",
@@ -1620,28 +1612,34 @@ function DiagnosticSummaryScreen({
 
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="text-center space-y-4">
-        <div className="text-5xl">🎓</div>
-        <h2 className="text-3xl font-black text-gray-900">Diagnostic Complete</h2>
+      <div className="text-center space-y-3">
+        <div className="w-16 h-16 bg-indigo-700 border-2 border-gray-900 rounded-xl flex items-center justify-center text-3xl mx-auto" style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>🎓</div>
+        <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tight">Diagnostic Complete</h2>
         <p className="text-gray-500 text-sm max-w-sm mx-auto leading-relaxed">
           Here's your IELTS baseline. Your personalised learning path has been generated.
         </p>
       </div>
 
       <div
-        className={`border rounded-2xl p-6 text-center space-y-2 ${overallCfg.bg} ${overallCfg.border}`}
+        className="border-2 border-gray-900 bg-indigo-700 rounded-xl p-6 text-center space-y-2"
+        style={{ boxShadow: '6px 6px 0 #0F0F0F' }}
       >
-        <p className="text-gray-500 text-xs uppercase tracking-wider">Overall Band Score</p>
-        <div className={`text-5xl font-black tabular-nums ${overallCfg.text}`}>
+        <p className="text-indigo-200 text-xs uppercase tracking-widest font-black">Overall Band Score</p>
+        <div className="text-6xl font-black tabular-nums text-white">
           {avgScore.toFixed(1)}
         </div>
-        <LevelBadge level={overallLevel} size="lg" />
-        <p className={`text-sm mt-3 max-w-xs mx-auto leading-relaxed ${overallCfg.text}`}>
+        <div className="flex justify-center">
+          <span className="inline-flex items-center gap-1.5 rounded border-2 border-white font-black tracking-wider uppercase px-5 py-2 text-base bg-white text-indigo-700">
+            <span className="w-2 h-2 rounded-full bg-indigo-700" />
+            Level {overallLevel} · {getLevelConfig(overallLevel).label}
+          </span>
+        </div>
+        <p className="text-indigo-200 text-sm mt-3 max-w-xs mx-auto leading-relaxed">
           {readinessMessages[overallLevel]}
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         {skills.map((skill) => {
           const result = results[skill];
           if (!result) return null;
@@ -1650,18 +1648,17 @@ function DiagnosticSummaryScreen({
           return (
             <div
               key={skill}
-              className={`border rounded-xl p-4 text-center shadow-sm ${cfg.bg} ${cfg.border}`}
+              className={`border-2 border-gray-900 rounded-xl p-4 text-center ${cfg.bg}`}
+              style={{ boxShadow: '4px 4px 0 #0F0F0F' }}
             >
               <span className="text-2xl">{SKILL_ICONS[skill]}</span>
-              <p className="text-gray-500 text-xs mt-2 uppercase tracking-wide">
+              <p className="text-gray-500 text-xs mt-2 uppercase tracking-widest font-black">
                 {SKILL_LABELS[skill]}
               </p>
-              <div className={`text-3xl font-black mt-1 tabular-nums ${cfg.text}`}>
+              <div className="text-3xl font-black mt-1 tabular-nums text-gray-900">
                 {result.band_score.toFixed(1)}
               </div>
-              <span className={`text-xs font-bold mt-1 inline-block ${cfg.text}`}>
-                Level {level}
-              </span>
+              <LevelBadge level={level} size="sm" />
             </div>
           );
         })}
@@ -1670,7 +1667,8 @@ function DiagnosticSummaryScreen({
       <Link
         to="/student/dashboard"
         onClick={onGoToDashboard}
-        className="inline-block text-center w-full py-4 bg-gradient-to-r from-indigo-700 to-teal-600 hover:from-indigo-600 hover:to-teal-500 text-white font-bold text-base rounded-xl transition-all hover:shadow-xl hover:shadow-indigo-500/25 hover:-translate-y-0.5"
+        className="inline-block text-center w-full py-4 bg-gray-900 hover:bg-gray-800 text-white font-black text-base uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all neo-btn"
+        style={{ boxShadow: '5px 5px 0 #4338CA' }}
       >
         Go to Dashboard →
       </Link>
@@ -1759,19 +1757,15 @@ function DiagnosisInner() {
   const [interimSkill, setInterimSkill] = useState<Skill | null>(null);
   const [pendingNextPhase, setPendingNextPhase] = useState<Phase | null>(null);
 
-  // ── On mount: check diagnostic status (with Bulletproof Polling Fix for TC-39) ───────
   useEffect(() => {
     let isMounted = true;
     let pollingInterval: ReturnType<typeof setInterval>;
 
     const checkStatus = async () => {
-      // 1. Get the absolute latest phase directly from browser storage
       const currentSavedPhase = storageLoad<Phase>(SK.phase);
       
-      // 2. FRONTEND OVERRIDE: Stop polling immediately if we are on the final screens!
       if (currentSavedPhase === "summary" || currentSavedPhase === "speaking_result") {
           clearInterval(pollingInterval);
-          console.log("Diagnostic finished locally. Polling stopped.");
           return;
       }
 
@@ -1779,17 +1773,12 @@ function DiagnosisInner() {
       if (savedResults) setResults(savedResults);
 
       try {
-        console.log("Checking diagnostic status...");
         const status = await fetchDiagnosticStatus(studentId);
         if (!isMounted) return;
 
-        // 3. BACKEND OVERRIDE: Stop polling if backend says it's 100% complete
         if (status.overall_complete) {
           clearInterval(pollingInterval);
-          console.log("Diagnostic complete in DB. Polling stopped.");
 
-          // Only force a redirect if the user JUST opened the page (gate).
-          // If they are actively mid-test, let the React UI finish transitioning naturally!
           if (currentSavedPhase === "gate" || !currentSavedPhase) {
             storageClear(SK.phase, SK.results, SK.listeningAnswers, SK.listeningAudioPlayed, SK.readingAnswers, SK.readingTimeLeft, SK.writingText, SK.speakingResult);
             setGateState("complete");
@@ -1819,7 +1808,6 @@ function DiagnosisInner() {
           setResumePhase(nextSkill);
           setGateState("in_progress");
 
-          // Ensure we don't accidentally navigate backwards
           if (currentSavedPhase && currentSavedPhase !== "gate" && currentSavedPhase !== "summary") {
             const savedSkill = currentSavedPhase as Skill;
             if (skillOrder.includes(savedSkill) && !statusMap[savedSkill]) {
@@ -1845,8 +1833,8 @@ function DiagnosisInner() {
     };
 
     if (studentId) {
-       checkStatus(); // Run once immediately
-       pollingInterval = setInterval(checkStatus, 10000); // Then poll every 10s
+       checkStatus();
+       pollingInterval = setInterval(checkStatus, 10000);
     }
 
     return () => { 
@@ -1894,10 +1882,10 @@ function DiagnosisInner() {
     return (
       <>
         <TopNavBar />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="flex flex-col items-center gap-4 text-center">
-            <div className="w-10 h-10 rounded-full border-2 border-indigo-200 border-t-indigo-600 animate-spin" />
-            <p className="text-gray-500 text-sm">Checking your diagnostic status…</p>
+            <div className="w-12 h-12 rounded-full border-4 border-gray-200 border-t-indigo-700 animate-spin" />
+            <p className="text-gray-600 text-sm font-bold uppercase tracking-wide">Checking diagnostic status…</p>
           </div>
         </div>
       </>
@@ -1908,10 +1896,10 @@ function DiagnosisInner() {
     return (
       <>
         <TopNavBar />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-          <div className="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-red-100 max-w-md text-center animate-fade-in">
+        <div className="min-h-screen bg-white flex items-center justify-center p-4">
+          <div className="bg-white p-8 md:p-10 rounded-xl border-2 border-gray-900 max-w-md text-center animate-fade-in" style={{ boxShadow: '6px 6px 0 #0F0F0F' }}>
             <div className="text-4xl mb-4">⚠️</div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Session already active</h2>
+            <h2 className="text-xl font-black text-gray-900 mb-2 uppercase tracking-wide">Session Already Active</h2>
             <p className="text-gray-500 text-sm">
               You are already taking this diagnostic in another tab. Please close this tab or return to the active one to continue.
             </p>
@@ -1922,13 +1910,15 @@ function DiagnosisInner() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
+    <div className="min-h-screen bg-white text-gray-900">
       <TopNavBar />
 
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-48 -left-48 w-96 h-96 rounded-full bg-indigo-100/60 blur-3xl" />
-        <div className="absolute -bottom-48 -right-48 w-96 h-96 rounded-full bg-teal-100/40 blur-3xl" />
-      </div>
+      {/* Subtle grid background */}
+      <div className="fixed inset-0 pointer-events-none" style={{
+        backgroundImage: 'radial-gradient(circle, #e5e7eb 1px, transparent 1px)',
+        backgroundSize: '24px 24px',
+        opacity: 0.4,
+      }} />
 
       <div className="relative z-10 max-w-2xl mx-auto px-4 pt-24 pb-8 flex flex-col min-h-screen">
         {phase !== "gate" && phase !== "summary" && (
@@ -1940,7 +1930,7 @@ function DiagnosisInner() {
           </div>
         )}
 
-        <div className="flex-1 bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
+        <div className="flex-1 bg-white border-2 border-gray-900 rounded-xl p-6 md:p-8" style={{ boxShadow: '6px 6px 0 #0F0F0F' }}>
           {phase === "gate" && (
             <DiagnosticGate
               gateState={gateState}
@@ -2019,13 +2009,13 @@ function DiagnosisInner() {
           )}
         </div>
 
-        <p className="text-center text-gray-400 text-xs mt-4">
+        <p className="text-center text-gray-400 text-xs mt-4 font-bold uppercase tracking-widest">
           TestCrack · Diagnostic Engine v1 · All responses are encrypted and secure
         </p>
       </div>
 
       <style>{`
-        @keyframes pulse {
+        @keyframes waveform {
           0% { transform: scaleY(0.4); }
           100% { transform: scaleY(1); }
         }
@@ -2035,6 +2025,16 @@ function DiagnosisInner() {
         }
         .animate-fade-in {
           animation: fade-in 0.35s ease-out;
+        }
+        .neo-btn {
+          transition: all 0.1s ease;
+        }
+        .neo-btn:hover {
+          transform: translate(-1px, -1px);
+        }
+        .neo-btn:active {
+          transform: translate(2px, 2px);
+          box-shadow: 2px 2px 0 #0F0F0F !important;
         }
       `}</style>
     </div>
@@ -2069,59 +2069,82 @@ function OnboardingScreen({ onComplete }: { onComplete: () => void }) {
   };
 
   return (
-    <div className="flex bg-slate-50 min-h-screen items-center justify-center p-6 relative w-full overflow-hidden">
-      <div className="absolute -top-48 -left-48 w-96 h-96 rounded-full bg-indigo-100/60 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-48 -right-48 w-96 h-96 rounded-full bg-teal-100/40 blur-3xl pointer-events-none" />
+    <div className="flex bg-white min-h-screen items-center justify-center p-6 relative w-full overflow-hidden">
+      {/* Dot grid background */}
+      <div className="absolute inset-0 pointer-events-none" style={{
+        backgroundImage: 'radial-gradient(circle, #d1d5db 1px, transparent 1px)',
+        backgroundSize: '24px 24px',
+        opacity: 0.5,
+      }} />
       
-      <div className="bg-white p-8 md:p-10 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full max-w-md relative z-10 border border-slate-100 animate-fade-in">
+      <div className="bg-white p-8 md:p-10 rounded-xl w-full max-w-md relative z-10 border-2 border-gray-900 animate-fade-in" style={{ boxShadow: '8px 8px 0 #0F0F0F' }}>
         <div className="flex items-center gap-3 mb-8">
-          <div className="p-3 bg-indigo-700 rounded-2xl shadow-lg shadow-indigo-200">
+          <div className="p-3 bg-indigo-700 border-2 border-gray-900 rounded-lg" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
             <GraduationCap className="h-6 w-6 text-white" />
           </div>
-          <span className="text-2xl font-black text-gray-900 tracking-tight">TestCrack</span>
+          <span className="text-2xl font-black text-gray-900 uppercase tracking-tight">TestCrack</span>
         </div>
         
-        <h2 className="text-2xl font-black mb-2 text-gray-900 leading-tight">Welcome aboard! 🎯</h2>
-        <p className="text-gray-500 mb-8 text-sm leading-relaxed">Let's set your goals so we can tailor your upcoming diagnostic baseline specifically for you.</p>
+        <div className="mb-2">
+          <span className="inline-block bg-indigo-700 text-white text-xs font-black uppercase tracking-widest px-3 py-1 rounded border-2 border-gray-900 mb-3" style={{ boxShadow: '2px 2px 0 #0F0F0F' }}>
+            Welcome
+          </span>
+        </div>
+        <h2 className="text-2xl font-black mb-2 text-gray-900 leading-tight uppercase tracking-tight">Let's Set Your Goals 🎯</h2>
+        <p className="text-gray-500 mb-8 text-sm leading-relaxed">Tailor your upcoming diagnostic baseline specifically for you.</p>
         
         <form onSubmit={handleSave} className="space-y-6">
           <div className="space-y-2">
-            <label className="block text-sm font-bold text-gray-700 ml-1">Full Name</label>
+            <label className="block text-xs font-black text-gray-700 uppercase tracking-widest">Full Name</label>
             <input 
               type="text"
               value={name} 
               onChange={(e) => setName(e.target.value)} 
               required 
               placeholder="E.g. John Doe" 
-              className="w-full border-2 border-slate-100 rounded-xl p-3.5 text-sm font-medium focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all bg-slate-50 placeholder:text-slate-400 text-gray-900"
+              className="w-full border-2 border-gray-900 rounded-lg p-3.5 text-sm font-bold focus:border-indigo-700 focus:ring-2 focus:ring-indigo-100 outline-none transition-all bg-white placeholder:text-gray-300 text-gray-900"
+              style={{ boxShadow: '3px 3px 0 #0F0F0F' }}
             />
           </div>
           
           <div className="space-y-2">
-            <label className="block text-sm font-bold text-gray-700 ml-1">Target IELTS Band</label>
+            <label className="block text-xs font-black text-gray-700 uppercase tracking-widest">Target IELTS Band</label>
             <div className="relative">
               <select 
                 value={targetBand} 
                 onChange={(e) => setTargetBand(e.target.value)}
-                className="w-full border-2 border-slate-100 rounded-xl p-3.5 text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all bg-slate-50 appearance-none text-indigo-700 cursor-pointer"
+                className="w-full border-2 border-gray-900 rounded-lg p-3.5 text-sm font-black focus:border-indigo-700 focus:ring-2 focus:ring-indigo-100 outline-none transition-all bg-white appearance-none text-indigo-700 cursor-pointer"
+                style={{ boxShadow: '3px 3px 0 #0F0F0F' }}
               >
                 {[4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0].map(band => (
                   <option key={band} value={band.toFixed(1)}>{band.toFixed(1)} Band</option>
                 ))}
               </select>
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 font-bold">⌄</div>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-900 font-black text-lg">⌄</div>
             </div>
           </div>
 
           <button 
             type="submit" 
-            className="w-full mt-4 py-4 bg-gray-900 hover:bg-gray-800 text-white font-bold text-base rounded-xl transition-all shadow-xl shadow-gray-200 active:scale-[0.98] active:shadow-sm disabled:opacity-70 disabled:pointer-events-none" 
+            className="w-full mt-4 py-4 bg-indigo-700 hover:bg-indigo-600 text-white font-black text-base uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all neo-btn disabled:opacity-70 disabled:pointer-events-none" 
+            style={{ boxShadow: '5px 5px 0 #0F0F0F' }}
             disabled={loading}
           >
             {loading ? "Saving Profile..." : "Start Diagnostic →"}
           </button>
         </form>
       </div>
+
+      <style>{`
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fade-in 0.35s ease-out; }
+        .neo-btn { transition: all 0.1s ease; }
+        .neo-btn:hover { transform: translate(-1px, -1px); }
+        .neo-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #0F0F0F !important; }
+      `}</style>
     </div>
   );
 }
