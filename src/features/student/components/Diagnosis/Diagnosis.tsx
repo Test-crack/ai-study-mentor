@@ -36,7 +36,7 @@ interface SkillResult {
   band_score: number;
   level: Level;
   sub_scores?: any;
-  feedback?: string;
+  feedback?: any;
   transcript?: string;
 }
 
@@ -380,6 +380,73 @@ function ProgressSteps({
   );
 }
 
+function DetailedFeedbackDisplay({ feedback }: { feedback: any }) {
+  if (typeof feedback === 'string') {
+    return <p className="text-gray-700 text-sm leading-relaxed">{feedback}</p>;
+  }
+  
+  if (feedback?.improvements && typeof feedback.improvements === 'string') {
+     return <p className="text-gray-700 text-sm leading-relaxed">Improvements: {feedback.improvements}</p>;
+  }
+
+  return (
+    <div className="space-y-3">
+      {feedback?.priority_action && (
+        <div className="bg-red-50 border-2 border-red-200 p-3 rounded">
+          <p className="text-red-700 font-bold text-[10px] uppercase tracking-wider">Priority Action</p>
+          <p className="text-red-900 text-sm mt-1 font-medium">{feedback.priority_action}</p>
+        </div>
+      )}
+      
+      {['task_response', 'coherence', 'fluency', 'pronunciation', 'vocabulary', 'grammar'].map((key) => {
+        const sect = feedback?.[key];
+        if (!sect) return null;
+        return (
+          <div key={key} className="bg-white border-2 border-indigo-100 rounded p-3">
+             <p className="text-indigo-700 font-bold text-[10px] uppercase mb-1 tracking-wider">{key.replace('_', ' ')}</p>
+             <p className="text-gray-800 text-sm italic mb-2">"{sect.score_rationale}"</p>
+             
+             {sect.observed_issues && sect.observed_issues.length > 0 && (
+               <ul className="list-disc pl-4 text-xs text-amber-700 space-y-1 mb-2">
+                 {sect.observed_issues.map((i: string, idx: number) => <li key={idx}>{i}</li>)}
+               </ul>
+             )}
+             
+             {sect.error_examples && sect.error_examples.length > 0 && (
+               <ul className="list-disc pl-4 text-xs text-red-600 space-y-1 mb-2">
+                 {sect.error_examples.map((i: string, idx: number) => <li key={idx}>{i}</li>)}
+               </ul>
+             )}
+
+             {sect.strengths && sect.strengths.length > 0 && (
+               <ul className="list-disc pl-4 text-xs text-emerald-600 space-y-1 mb-2">
+                 {sect.strengths.map((i: string, idx: number) => <li key={idx}>{i}</li>)}
+               </ul>
+             )}
+
+             {sect.next_step && (
+               <p className="text-indigo-900 text-xs mt-2 border-t border-indigo-50 pt-2"><span className="font-bold">Next Step:</span> {sect.next_step}</p>
+             )}
+          </div>
+        )
+      })}
+      
+      {feedback?.filler_words_detected && feedback.filler_words_detected.length > 0 && (
+        <div className="bg-orange-50 border-2 border-orange-200 p-3 rounded">
+          <p className="text-orange-700 font-bold text-[10px] uppercase tracking-wider mb-2">Filler Words Detected</p>
+          <div className="flex flex-wrap gap-2">
+            {feedback.filler_words_detected.map((filler: string, idx: number) => (
+              <span key={idx} className="bg-orange-200 text-orange-900 text-[10px] font-bold px-2 py-1 rounded">
+                {filler}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function InterimResultCard({
   skill,
   result,
@@ -471,9 +538,9 @@ function InterimResultCard({
       )}
 
       {result.feedback && (
-        <div className="bg-indigo-50 border-2 border-gray-900 rounded-lg p-4 max-w-md text-left" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
-          <p className="text-indigo-700 text-xs uppercase tracking-wider mb-1 font-black">AI Feedback</p>
-          <p className="text-gray-700 text-sm leading-relaxed">{result.feedback}</p>
+        <div className="bg-indigo-50 border-2 border-gray-900 rounded-lg p-4 w-full max-w-lg text-left" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+          <p className="text-indigo-700 text-xs uppercase tracking-wider mb-2 font-black">AI Feedback & Insights</p>
+          <DetailedFeedbackDisplay feedback={result.feedback} />
         </div>
       )}
 

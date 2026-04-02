@@ -4,6 +4,7 @@ import { StudentTopbar } from "./dashboard/StudentTopbar";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { PremiumModal } from "@/features/payment/components/PremiumModal";
 import { useNavigate } from "react-router-dom";
+import { callBackend } from "@/features/auth/services/authClient";
 import {
   Clock,
   Flame,
@@ -43,9 +44,9 @@ interface SkillBand {
 const SKILL_BANDS: SkillBand[] = [
   {
     skill: "Listening",
-    score: 6.5,
-    target: 7.5,
-    delta: +0.5,
+    score: 0.0,
+    target: 0.0,
+    delta: 0.0,
     route: "/student/listening",
     icon: <Headphones className="h-5 w-5" />,
     color: "text-sky-600",
@@ -54,9 +55,9 @@ const SKILL_BANDS: SkillBand[] = [
   },
   {
     skill: "Reading",
-    score: 6.0,
-    target: 7.5,
-    delta: +0.0,
+    score: 0.0,
+    target: 0.0,
+    delta: 0.0,
     route: "/student/reading",
     icon: <BookOpen className="h-5 w-5" />,
     color: "text-violet-600",
@@ -65,9 +66,9 @@ const SKILL_BANDS: SkillBand[] = [
   },
   {
     skill: "Writing",
-    score: 5.5,
-    target: 7.0,
-    delta: -0.5,
+    score: 0.0,
+    target: 0.0,
+    delta: 0.0,
     route: "/student/writing",
     icon: <PenLine className="h-5 w-5" />,
     color: "text-amber-600",
@@ -76,9 +77,9 @@ const SKILL_BANDS: SkillBand[] = [
   },
   {
     skill: "Speaking",
-    score: 4.0,
-    target: 7.0,
-    delta: +0.5,
+    score: 0.0,
+    target: 0.0,
+    delta: 0.0,
     route: "/student/speaking-assessment",
     icon: <Mic className="h-5 w-5" />,
     color: "text-rose-600",
@@ -148,13 +149,55 @@ const StudentDashboardPage = () => {
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [currentStreak, setCurrentStreak] = useState(0);
+  const [skillBands, setSkillBands] = useState<SkillBand[]>(SKILL_BANDS);
   const { user, profile } = useAuth();
   const navigate = useNavigate();
 
   const displayName = profile?.name || user?.email?.split("@")[0] || "Student";
-  const overall = overallBand(SKILL_BANDS);
+  const overall = overallBand(skillBands);
 
   useEffect(() => {
+    // 1. Fetch exact scores from competency matrix
+    const fetchCompetencyScores = async () => {
+      try {
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+        const fullUrl = `${backendUrl}/api/student/competency-scores`;
+        
+        // Use Supabase-authenticated callBackend explicitly
+        const resData = await callBackend(fullUrl);
+        
+        if (resData.success && resData.data) {
+          const fetchedTarget = resData.target_band || 7.0;
+          
+          setSkillBands((prevBands) => {
+            return prevBands.map(band => {
+              // Find matching score in DB
+              const dbRecord = resData.data.find(
+                (m: any) => m.skill.toUpperCase() === band.skill.toUpperCase()
+              );
+              
+              if (dbRecord) {
+                // Ensure number casting to prevent .toFixed crashes
+                return { 
+                  ...band, 
+                  score: Number(dbRecord.band_score) || 0.0, 
+                  target: Number(fetchedTarget) || 7.0,
+                  delta: 0 
+                };
+              }
+              // Just update the target
+              return { ...band, target: Number(fetchedTarget) || 7.0 };
+            });
+          });
+        }
+      } catch (err) {
+        console.error("Failed to fetch competency matrix", err);
+      }
+    };
+    
+    fetchCompetencyScores();
+
+    // 2. Determine Attendance Streak
     const today = new Date();
     const offset = today.getTimezoneOffset() * 60000;
     const localISO = new Date(today.getTime() - offset).toISOString().split("T")[0];
@@ -223,7 +266,7 @@ const StudentDashboardPage = () => {
           {/* ── 4 Skill Band Score Cards ────────────────────────────── */}
           <section>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {SKILL_BANDS.map((band) => (
+              {skillBands.map((band) => (
                 <SkillBandCard key={band.skill} band={band} onNavigate={() => navigate(band.route)} />
               ))}
             </div>
@@ -257,7 +300,7 @@ const StudentDashboardPage = () => {
             <div className="lg:col-span-8">
               <DashboardCard title="Skill Modules" subtitle="Tap any module to continue">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {SKILL_BANDS.map((band) => (
+                  {skillBands.map((band) => (
                     <ModuleNavCard key={band.skill} band={band} onNavigate={() => navigate(band.route)} />
                   ))}
                 </div>
