@@ -646,6 +646,8 @@ function ListeningPhase({
   const [audioPlayed, setAudioPlayed] = useState<boolean>(
     () => storageLoad<boolean>(SK.listeningAudioPlayed) ?? false
   );
+  // ── CHANGE 1: track whether audio is currently playing ──
+  const [audioPlaying, setAudioPlaying] = useState<boolean>(false);
   const [error, setError] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const [data, setData] = useState<any>(null);
@@ -688,8 +690,13 @@ function ListeningPhase({
     }
   };
 
+  // ── CHANGE 1: separate onPlay and onEnded handlers ──
   const handleAudioPlay = () => {
-    if (audioPlayed) return;
+    setAudioPlaying(true);
+  };
+
+  const handleAudioEnded = () => {
+    setAudioPlaying(false);
     setAudioPlayed(true);
   };
 
@@ -731,6 +738,14 @@ function ListeningPhase({
     );
   }
 
+  // ── CHANGE 1: derive button label and disabled state from audioPlaying + audioPlayed ──
+  const audioButtonLabel = audioPlayed
+    ? "Played ✓"
+    : audioPlaying
+    ? "Playing…"
+    : "Play Audio";
+  const audioButtonDisabled = audioPlayed || audioPlaying;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -756,30 +771,33 @@ function ListeningPhase({
             <p className="text-gray-500 text-xs mt-0.5">
               {audioPlayed
                 ? "Audio has been played — replay disabled in exam mode"
+                : audioPlaying
+                ? "Audio is playing — listen carefully"
                 : "Play once. Listen carefully before answering."}
             </p>
           </div>
+          {/* ── CHANGE 1: wire up onPlay and onEnded ── */}
           <audio
             ref={audioRef}
             src={data?.audio_url || ""}
             onPlay={handleAudioPlay}
-            onEnded={() => {}}
+            onEnded={handleAudioEnded}
           />
           <button
             onClick={() => {
-              if (!audioPlayed) {
+              if (!audioPlayed && !audioPlaying) {
                 audioRef.current?.play();
               }
             }}
-            disabled={audioPlayed}
+            disabled={audioButtonDisabled}
             className={`px-4 py-2 rounded-lg text-sm font-black uppercase tracking-wide border-2 transition-all ${
-              audioPlayed
+              audioButtonDisabled
                 ? "bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed"
                 : "bg-indigo-700 hover:bg-indigo-600 text-white border-gray-900 neo-btn"
             }`}
-            style={!audioPlayed ? { boxShadow: '3px 3px 0 #0F0F0F' } : {}}
+            style={!audioButtonDisabled ? { boxShadow: '3px 3px 0 #0F0F0F' } : {}}
           >
-            {audioPlayed ? "Played ✓" : "Play Audio"}
+            {audioButtonLabel}
           </button>
         </div>
       </div>
@@ -1173,11 +1191,25 @@ function WritingPhase({
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-indigo-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>✍️</div>
-        <div>
-          <p className="text-gray-900 font-black uppercase tracking-wide">Writing Section</p>
-          <p className="text-gray-500 text-sm">Describe the graph in at least {MIN_WORDS} words</p>
+      {/* ── CHANGE 2: header row now has justify-between with word count on the right ── */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-indigo-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>✍️</div>
+          <div>
+            <p className="text-gray-900 font-black uppercase tracking-wide">Writing Section</p>
+            <p className="text-gray-500 text-sm">Describe the graph in at least {MIN_WORDS} words</p>
+          </div>
+        </div>
+        {/* Word count badge moved here from inside the textarea div */}
+        <div
+          className={`px-3 py-1.5 rounded border-2 text-xs font-black font-mono transition-colors ${
+            wordCount >= MIN_WORDS
+              ? "bg-indigo-700 text-white border-gray-900"
+              : "bg-white text-gray-600 border-gray-300"
+          }`}
+          style={wordCount >= MIN_WORDS ? { boxShadow: '2px 2px 0 #0F0F0F' } : {}}
+        >
+          {wordCount} / {MIN_WORDS}
         </div>
       </div>
 
@@ -1195,30 +1227,20 @@ function WritingPhase({
         <p className="text-gray-700 text-sm leading-relaxed">{data?.topic}</p>
       </div>
 
-      <div className="relative">
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onPaste={handlePaste}
-          onCopy={handleCopy}
-          onCut={handleCut}
-          onDrop={handleDrop}
-          disabled={sectionState === "submitting"}
-          placeholder="Begin writing your response here…"
-          rows={8}
-          className="w-full bg-white border-2 border-gray-900 rounded-lg p-4 text-gray-800 text-sm leading-7 resize-none focus:outline-none focus:border-indigo-700 focus:ring-2 focus:ring-indigo-100 placeholder-gray-300 transition-colors font-medium"
-          style={{ boxShadow: '4px 4px 0 #0F0F0F' }}
-        />
-        <div
-          className={`absolute bottom-3 right-3 px-2.5 py-1 rounded border-2 text-xs font-black font-mono transition-colors ${
-            wordCount >= MIN_WORDS
-              ? "bg-indigo-700 text-white border-gray-900"
-              : "bg-white text-gray-600 border-gray-300"
-          }`}
-        >
-          {wordCount} / {MIN_WORDS}
-        </div>
-      </div>
+      {/* ── CHANGE 2: textarea wrapper no longer needs "relative" for the word count badge ── */}
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        onPaste={handlePaste}
+        onCopy={handleCopy}
+        onCut={handleCut}
+        onDrop={handleDrop}
+        disabled={sectionState === "submitting"}
+        placeholder="Begin writing your response here…"
+        rows={8}
+        className="w-full bg-white border-2 border-gray-900 rounded-lg p-4 text-gray-800 text-sm leading-7 resize-none focus:outline-none focus:border-indigo-700 focus:ring-2 focus:ring-indigo-100 placeholder-gray-300 transition-colors font-medium"
+        style={{ boxShadow: '4px 4px 0 #0F0F0F' }}
+      />
 
       <div className="space-y-1.5">
         <div className="h-2 bg-gray-100 rounded border border-gray-300 overflow-hidden">

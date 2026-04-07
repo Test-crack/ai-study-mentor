@@ -10,10 +10,7 @@ import {
   Flame,
   Trophy,
   Target,
-  TrendingUp,
-  ChevronDown,
   ChevronRight,
-  Star,
   Zap,
   BookOpen,
   Mic,
@@ -31,12 +28,13 @@ interface SkillBand {
   skill: "Listening" | "Reading" | "Writing" | "Speaking";
   score: number;
   target: number;
-  delta: number; // change from last assessment
+  delta: number;
   route: string;
   icon: React.ReactNode;
   color: string;
   bg: string;
   border: string;
+  subScores?: Record<string, number | string>;
 }
 
 // ─── MOCK DATA ────────────────────────────────────────────────────────────────
@@ -88,33 +86,18 @@ const SKILL_BANDS: SkillBand[] = [
   },
 ];
 
-// Focus Area Card — hardcoded
-const FOCUS_AREA = {
-  skill: "Speaking",
-  subScore: 4.0,
-  subSkill: "Pronunciation",
-  drill: "Consonant Clusters",
-  reason: "Your Pronunciation sub-score is 4.0. Practice Consonant Clusters.",
-  route: "/student/speaking-assessment",
-  urgencyColor: "text-rose-600",
-  urgencyBg: "bg-rose-50 dark:bg-rose-500/10",
-  urgencyBorder: "border-rose-200 dark:border-rose-500/25",
-};
-
-// Predicted Readiness — hardcoded
 const READINESS = {
   targetBand: 7.5,
   targetDate: "2026-06-15",
   currentOverall: 5.5,
   trajectory: "At current pace: 6.5 by June 15",
-  status: "warn", // "on-track" | "warn" | "danger"
+  status: "warn",
   daysLeft: 83,
 };
 
-// Level badge
 const LEVEL = { label: "Intermediate", tier: "B2", color: "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300" };
 
-// ─── UTILS ────────────────────────────────────────────────────────────────────
+// ─── UTILS & TIE-BREAKER LOGIC (FE-10) ────────────────────────────────────────
 
 const calculateStreak = (dates: string[]): number => {
   if (!dates || dates.length === 0) return 0;
@@ -142,6 +125,54 @@ const calculateStreak = (dates: string[]): number => {
 const overallBand = (bands: SkillBand[]) =>
   Math.round((bands.reduce((s, b) => s + b.score, 0) / bands.length) * 2) / 2;
 
+// FE-10: Strict tie-breaker priority (lower number = wins tie)
+const TIE_BREAKER_PRIORITY: Record<string, number> = {
+  pronunciation: 1,
+  fluency: 2,
+  grammar: 3,
+  vocabulary: 4,
+  coherence: 5,
+  taskresponse: 6,
+};
+
+const normalizeKey = (key: string) => key.toLowerCase().replace(/score|_/g, '');
+
+const getPriorityFocusArea = (bands: SkillBand[]) => {
+  let lowestFocus = {
+    sub_skill: "General Practice",
+    band: 9.0, // Start high
+    skill: "Overall",
+    priorityRank: 999
+  };
+
+  bands.forEach(band => {
+    if (!band.subScores) return;
+
+    Object.entries(band.subScores).forEach(([key, value]) => {
+      // Ignore raw metrics like word count, total questions (anything over a 9.0 band or not a number)
+      if (typeof value !== 'number' || value > 9.0) return;
+      if (key.toLowerCase().includes('count') || key.toLowerCase().includes('total') || key.toLowerCase().includes('correct')) return;
+
+      const normalizedKey = normalizeKey(key);
+      const priorityRank = TIE_BREAKER_PRIORITY[normalizedKey] || 99;
+
+      let displayName = key.replace(/Score/g, '').replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim();
+      displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+
+      // Apply Tie-Breaker Logic
+      if (value < lowestFocus.band) {
+        lowestFocus = { sub_skill: displayName, band: value, skill: band.skill, priorityRank };
+      } else if (value === lowestFocus.band) {
+        if (priorityRank < lowestFocus.priorityRank) {
+          lowestFocus = { sub_skill: displayName, band: value, skill: band.skill, priorityRank };
+        }
+      }
+    });
+  });
+
+  return lowestFocus;
+};
+
 // ─── MAIN COMPONENT ──────────────────────────────────────────────────────────
 
 const StudentDashboardPage = () => {
@@ -157,13 +188,11 @@ const StudentDashboardPage = () => {
   const overall = overallBand(skillBands);
 
   useEffect(() => {
-    // 1. Fetch exact scores from competency matrix
     const fetchCompetencyScores = async () => {
       try {
         const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
         const fullUrl = `${backendUrl}/api/student/competency-scores`;
         
-        // Use Supabase-authenticated callBackend explicitly
         const resData = await callBackend(fullUrl);
         
         if (resData.success && resData.data) {
@@ -171,21 +200,19 @@ const StudentDashboardPage = () => {
           
           setSkillBands((prevBands) => {
             return prevBands.map(band => {
-              // Find matching score in DB
               const dbRecord = resData.data.find(
                 (m: any) => m.skill.toUpperCase() === band.skill.toUpperCase()
               );
               
               if (dbRecord) {
-                // Ensure number casting to prevent .toFixed crashes
                 return { 
                   ...band, 
                   score: Number(dbRecord.band_score) || 0.0, 
                   target: Number(fetchedTarget) || 7.0,
-                  delta: 0 
+                  delta: 0,
+                  subScores: dbRecord.sub_scores || {} 
                 };
               }
-              // Just update the target
               return { ...band, target: Number(fetchedTarget) || 7.0 };
             });
           });
@@ -197,7 +224,6 @@ const StudentDashboardPage = () => {
     
     fetchCompetencyScores();
 
-    // 2. Determine Attendance Streak
     const today = new Date();
     const offset = today.getTimezoneOffset() * 60000;
     const localISO = new Date(today.getTime() - offset).toISOString().split("T")[0];
@@ -227,10 +253,8 @@ const StudentDashboardPage = () => {
         <StudentTopbar onUpgradeClick={() => setShowPremiumModal(true)} />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6">
-
           {/* ── Hero Banner ─────────────────────────────────────────── */}
           <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-500 p-7 text-white shadow-lg">
-            {/* decorative blobs */}
             <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
             <div className="pointer-events-none absolute right-24 bottom-0 h-28 w-28 rounded-full bg-purple-400/30 blur-xl" />
 
@@ -240,7 +264,6 @@ const StudentDashboardPage = () => {
                   <h1 className="text-2xl sm:text-3xl font-bold">
                     Welcome back, {displayName} 👋
                   </h1>
-                  {/* Level badge */}
                   <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-white/20 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm border border-white/30">
                     <Trophy className="h-3.5 w-3.5" /> {LEVEL.tier} · {LEVEL.label}
                   </span>
@@ -248,11 +271,9 @@ const StudentDashboardPage = () => {
                 <p className="text-indigo-100 max-w-xl text-sm sm:text-base">
                   You&apos;re on a <span className="font-bold text-white">{currentStreak}-day streak</span> — great momentum!
                   Your current overall band is{" "}
-                  <span className="font-bold text-white">{overall}</span>. Focus on
-                  Speaking to close the gap.
+                  <span className="font-bold text-white">{overall}</span>.
                 </p>
               </div>
-              {/* overall band pill */}
               <div className="flex-shrink-0 text-center bg-white/15 border border-white/30 backdrop-blur-sm rounded-2xl px-6 py-3">
                 <p className="text-xs font-bold text-indigo-200 uppercase tracking-widest mb-0.5">
                   Overall Band
@@ -275,17 +296,31 @@ const StudentDashboardPage = () => {
           {/* ── Second Row: Focus Area + Readiness + Streak ────────── */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-            {/* Focus Area Card */}
+            {/* FE-10 Focus Area Card Integration */}
             <div className="lg:col-span-5">
-              <FocusAreaCard focus={FOCUS_AREA} onNavigate={() => navigate(FOCUS_AREA.route)} />
+              {(() => {
+                const focusData = getPriorityFocusArea(skillBands);
+                return (
+                  <FocusAreaCard 
+                    sub_skill={focusData.sub_skill} 
+                    band={focusData.band}
+                    skill={focusData.skill}
+                    onStart={() => {
+                      // Redirect to the main practice section for the relevant skill
+                      const targetSkill = skillBands.find(b => b.skill === focusData.skill);
+                      if (targetSkill) {
+                        navigate(targetSkill.route);
+                      }
+                    }} 
+                  />
+                );
+              })()}
             </div>
 
-            {/* Predicted Readiness */}
             <div className="lg:col-span-4">
               <PredictedReadinessCard readiness={READINESS} />
             </div>
 
-            {/* Streak */}
             <div className="lg:col-span-3">
               <DashboardCard title="Streak" icon={<Flame className="h-5 w-5 text-orange-500" />}>
                 <AttendanceStreakTracker currentStreak={currentStreak} goal={7} />
@@ -295,8 +330,6 @@ const StudentDashboardPage = () => {
 
           {/* ── Third Row: Modules Nav + Activity ──────────────────── */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-            {/* 4 Skill Module Navigation */}
             <div className="lg:col-span-8">
               <DashboardCard title="Skill Modules" subtitle="Tap any module to continue">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -307,7 +340,6 @@ const StudentDashboardPage = () => {
               </DashboardCard>
             </div>
 
-            {/* Recent Activity + Goals */}
             <div className="lg:col-span-4 space-y-4">
               <DashboardCard title="Recent Activity" subtitle="Your last 3 actions">
                 <div className="space-y-5 pt-1">
@@ -325,7 +357,6 @@ const StudentDashboardPage = () => {
                 </div>
               </DashboardCard>
             </div>
-
           </div>
         </main>
       </div>
@@ -337,7 +368,6 @@ const StudentDashboardPage = () => {
 
 // ─── SUB-COMPONENTS ───────────────────────────────────────────────────────────
 
-/** 4 Skill Band Score Card */
 const SkillBandCard = ({ band, onNavigate }: { band: SkillBand; onNavigate: () => void }) => {
   const pct = Math.round((band.score / 9) * 100);
   const isUp = band.delta >= 0;
@@ -345,10 +375,9 @@ const SkillBandCard = ({ band, onNavigate }: { band: SkillBand; onNavigate: () =
   return (
     <button
       onClick={onNavigate}
-      className={`text-left w-full rounded-2xl border p-4 sm:p-5 transition-all duration-200 hover:scale-[1.02] hover:shadow-md bg-white dark:bg-slate-900 ${band.border} shadow-sm`}
+      className={`text-left w-full rounded-2xl border p-4 sm:p-5 flex flex-col transition-all duration-200 hover:scale-[1.02] hover:shadow-md bg-white dark:bg-slate-900 ${band.border} shadow-sm`}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-3 w-full">
         <div className={`flex items-center justify-center h-9 w-9 rounded-xl ${band.bg} ${band.color}`}>
           {band.icon}
         </div>
@@ -363,64 +392,98 @@ const SkillBandCard = ({ band, onNavigate }: { band: SkillBand; onNavigate: () =
         </span>
       </div>
 
-      {/* Score */}
       <p className="text-2xl font-black text-slate-800 dark:text-white">{band.score.toFixed(1)}</p>
       <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">{band.skill}</p>
 
-      {/* Progress bar */}
       <div className="mt-3 h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-700 ${band.color.replace("text-", "bg-")}`}
           style={{ width: `${pct}%` }}
         />
       </div>
-      <p className="text-[10px] text-slate-400 mt-1">Target: {band.target}</p>
+      <p className="text-[10px] text-slate-400 mt-1 mb-3">Target: {band.target}</p>
+
+      {/* Renders ONLY actual band scores in the Skill Card (filters out word counts, etc) */}
+      {band.subScores && Object.keys(band.subScores).length > 0 && (
+        <div className="grid grid-cols-2 gap-1.5 border-t border-slate-100 dark:border-slate-700/50 pt-3 mt-auto w-full">
+          {Object.entries(band.subScores)
+            .filter(([key, val]) => {
+              if (typeof val !== 'number' || val > 9.0) return false;
+              const k = key.toLowerCase();
+              if (k.includes('count') || k.includes('total') || k.includes('correct')) return false;
+              return true;
+            })
+            .map(([key, val]) => {
+              let label = key.replace(/Score/g, '').replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim();
+              label = label.charAt(0).toUpperCase() + label.slice(1);
+
+              return (
+                <div key={key} className="flex justify-between items-center text-[10px] bg-slate-50 dark:bg-slate-800/50 px-1.5 py-1 rounded">
+                  <span className="text-slate-500 truncate mr-1" title={label}>{label}</span>
+                  <span className="font-bold text-slate-700 dark:text-slate-300">
+                    {typeof val === 'number' && !Number.isInteger(val) ? val.toFixed(1) : val}
+                  </span>
+                </div>
+              );
+          })}
+        </div>
+      )}
     </button>
   );
 };
 
-/** Focus Area Card — the "Consultant" card */
-const FocusAreaCard = ({ focus, onNavigate }: { focus: typeof FOCUS_AREA; onNavigate: () => void }) => (
-  <div className={`h-full rounded-2xl border p-5 ${focus.urgencyBg} ${focus.urgencyBorder} shadow-sm`}>
-    <div className="flex items-center gap-2 mb-3">
-      <Zap className="h-5 w-5 text-rose-500" />
-      <h2 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">
-        Next Best Action
-      </h2>
-    </div>
+/** FE-10: Strict Implementation of Focus Area Card */
+interface FocusAreaProps {
+  sub_skill: string;
+  band: number;
+  skill: string;
+  onStart: () => void;
+}
 
-    <div className="flex items-start gap-4">
-      <div className="flex-shrink-0 h-14 w-14 rounded-2xl bg-rose-100 dark:bg-rose-500/20 flex items-center justify-center">
-        <Mic className="h-7 w-7 text-rose-500" />
+const FocusAreaCard = ({ sub_skill, band, skill, onStart }: FocusAreaProps) => {
+  if (band === 9.0 && sub_skill === "General Practice") return null;
+
+  return (
+    <div className="h-full rounded-2xl border p-5 bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/25 shadow-sm">
+      <div className="flex items-center gap-2 mb-3">
+        <Zap className="h-5 w-5 text-rose-500" />
+        <h2 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">
+          Next Best Action
+        </h2>
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-base font-bold text-slate-800 dark:text-white leading-snug">
-          {focus.reason}
-        </p>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          Skill: <span className="font-semibold text-slate-700 dark:text-slate-300">{focus.skill}</span>{" "}
-          · Sub-skill:{" "}
-          <span className="font-semibold text-slate-700 dark:text-slate-300">{focus.subSkill}</span>
-        </p>
+
+      <div className="flex items-start gap-4">
+        <div className="flex-shrink-0 h-14 w-14 rounded-2xl bg-rose-100 dark:bg-rose-500/20 flex items-center justify-center">
+          <Target className="h-7 w-7 text-rose-500" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-base font-bold text-slate-800 dark:text-white leading-snug">
+            Your priority: {sub_skill}
+          </p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Skill: <span className="font-semibold text-slate-700 dark:text-slate-300">{skill}</span>{" "}
+            · Sub-score:{" "}
+            <span className="font-semibold text-rose-600 dark:text-rose-400">{band.toFixed(1)}</span>
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 flex items-center justify-between bg-white/60 dark:bg-slate-900/40 rounded-xl p-3 border border-rose-100 dark:border-rose-500/20">
+        <div>
+          <p className="text-[10px] font-bold text-rose-400 uppercase tracking-widest">Action Required</p>
+          <p className="text-sm font-bold text-slate-800 dark:text-white">{sub_skill} Drill</p>
+        </div>
+        <button
+          onClick={onStart}
+          className="flex items-center gap-1 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold px-4 py-2.5 rounded-lg transition-colors shadow-sm"
+        >
+          Start Drill <ArrowRight className="h-3.5 w-3.5" />
+        </button>
       </div>
     </div>
+  );
+};
 
-    <div className="mt-4 flex items-center justify-between bg-white/60 dark:bg-slate-900/40 rounded-xl p-3 border border-rose-100 dark:border-rose-500/20">
-      <div>
-        <p className="text-[10px] font-bold text-rose-400 uppercase tracking-widest">Drill Assigned</p>
-        <p className="text-sm font-bold text-slate-800 dark:text-white">{focus.drill}</p>
-      </div>
-      <button
-        onClick={onNavigate}
-        className="flex items-center gap-1 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition-colors"
-      >
-        Start <ArrowRight className="h-3.5 w-3.5" />
-      </button>
-    </div>
-  </div>
-);
-
-/** Predicted Readiness Card */
 const PredictedReadinessCard = ({ readiness }: { readiness: typeof READINESS }) => {
   const statusConfig = {
     "on-track": { icon: <CheckCircle2 className="h-5 w-5 text-emerald-500" />, color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-500/10", border: "border-emerald-200 dark:border-emerald-500/25" },
@@ -469,7 +532,6 @@ const PredictedReadinessCard = ({ readiness }: { readiness: typeof READINESS }) 
   );
 };
 
-/** Module Navigation Card */
 const ModuleNavCard = ({ band, onNavigate }: { band: SkillBand; onNavigate: () => void }) => {
   const gap = band.target - band.score;
   return (
@@ -498,8 +560,6 @@ const ModuleNavCard = ({ band, onNavigate }: { band: SkillBand; onNavigate: () =
   );
 };
 
-// ─── SHARED CARD WRAPPER ──────────────────────────────────────────────────────
-
 const DashboardCard = ({ title, subtitle, children, icon }: any) => (
   <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm h-full">
     <div className="mb-4">
@@ -511,8 +571,6 @@ const DashboardCard = ({ title, subtitle, children, icon }: any) => (
     {children}
   </div>
 );
-
-// ─── SMALL HELPERS ────────────────────────────────────────────────────────────
 
 const ActivityItem = ({ label, time, color }: any) => (
   <div className="flex gap-3 relative">

@@ -542,6 +542,7 @@ const MOCK_SUGGESTIONS: Suggestion[] = [
     url: 'https://www.youtube.com/watch?v=D5l_d60RkMQ',
     embedId: 'D5l_d60RkMQ'
   },
+  
   // ── GROUP 10 ──────────────────────────────────────────────────
   {
     id: 's46',
@@ -701,7 +702,7 @@ export default function Suggestions() {
                         : 'bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-[#7B61FF]/50 dark:hover:border-[#7B61FF]/50'
                     }`}
                 >
-                  {/* Video Embed */}
+                  {/* Video git Embed */}
                   <div className="relative flex-shrink-0">
                     {suggestion.type === 'video' && suggestion.embedId ? (
                       <div className="w-full aspect-video">
