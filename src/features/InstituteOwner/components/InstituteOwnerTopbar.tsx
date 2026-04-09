@@ -20,7 +20,7 @@ export const InstituteOwnerTopbar = ({ onCreateCourse }: InstituteOwnerTopbarPro
   const displayName = profile?.name || user?.email?.split('@')[0] || "Institute Owner";
 
   return (
-    <header className="flex items-center justify-between w-full py-4 px-4 sm:px-6 gap-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-30 lg:rounded-2xl lg:mx-4 lg:mt-4 lg:shadow-sm border-b lg:border-none border-slate-100 dark:border-slate-800 transition-colors">
+    <header className="flex items-center justify-between  py-4 px-4 sm:px-6 gap-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-30 lg:rounded-2xl lg:mx-4 lg:mt-4 lg:shadow-sm border-b lg:border-none border-slate-100 dark:border-slate-800 transition-colors">
       
       {/* Mobile Menu Trigger */}
       <div className="lg:hidden">

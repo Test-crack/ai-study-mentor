@@ -137,9 +137,9 @@ const TIE_BREAKER_PRIORITY: Record<string, number> = {
 
 const normalizeKey = (key: string) => key.toLowerCase().replace(/score|_/g, '');
 
-const getPriorityFocusArea = (bands: SkillBand[]) => {
+const getPriorityFocusArea = (bands: SkillBand[], completedToday: string[]) => {
   let lowestFocus = {
-    sub_skill: "General Practice",
+    sub_skill: "All Caught Up!", // Replaced "General Practice"
     band: 9.0, // Start high
     skill: "Overall",
     priorityRank: 999
@@ -153,11 +153,14 @@ const getPriorityFocusArea = (bands: SkillBand[]) => {
       if (typeof value !== 'number' || value > 9.0) return;
       if (key.toLowerCase().includes('count') || key.toLowerCase().includes('total') || key.toLowerCase().includes('correct')) return;
 
-      const normalizedKey = normalizeKey(key);
-      const priorityRank = TIE_BREAKER_PRIORITY[normalizedKey] || 99;
-
       let displayName = key.replace(/Score/g, '').replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim();
       displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+
+      // 🚀 THE MAGIC: Skip this sub-skill if it was already completed today!
+      if (completedToday.includes(displayName)) return;
+
+      const normalizedKey = normalizeKey(key);
+      const priorityRank = TIE_BREAKER_PRIORITY[normalizedKey] || 99;
 
       // Apply Tie-Breaker Logic
       if (value < lowestFocus.band) {
@@ -181,11 +184,26 @@ const StudentDashboardPage = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [currentStreak, setCurrentStreak] = useState(0);
   const [skillBands, setSkillBands] = useState<SkillBand[]>(SKILL_BANDS);
+  const [completedDrills, setCompletedDrills] = useState<string[]>([]);
   const { user, profile } = useAuth();
   const navigate = useNavigate();
 
   const displayName = profile?.name || user?.email?.split("@")[0] || "Student";
   const overall = overallBand(skillBands);
+
+  // Load completed drills for the day
+  useEffect(() => {
+    const todayDate = new Date().toISOString().split('T')[0];
+    const storedDrills = localStorage.getItem('completed_drills_today');
+    if (storedDrills) {
+      const parsed = JSON.parse(storedDrills);
+      if (parsed.date === todayDate) {
+        setCompletedDrills(parsed.completed);
+      } else {
+        localStorage.removeItem('completed_drills_today');
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const fetchCompetencyScores = async () => {
@@ -299,18 +317,18 @@ const StudentDashboardPage = () => {
             {/* FE-10 Focus Area Card Integration */}
             <div className="lg:col-span-5">
               {(() => {
-                const focusData = getPriorityFocusArea(skillBands);
+                const focusData = getPriorityFocusArea(skillBands, completedDrills);
                 return (
                   <FocusAreaCard 
                     sub_skill={focusData.sub_skill} 
                     band={focusData.band}
                     skill={focusData.skill}
                     onStart={() => {
-                      // Redirect to the main practice section for the relevant skill
-                      const targetSkill = skillBands.find(b => b.skill === focusData.skill);
-                      if (targetSkill) {
-                        navigate(targetSkill.route);
-                      }
+                      const params = new URLSearchParams({
+                        skill: focusData.skill,
+                        sub_skill: focusData.sub_skill
+                      });
+                      navigate(`/student/drill?${params.toString()}`);
                     }} 
                   />
                 );
@@ -441,10 +459,21 @@ interface FocusAreaProps {
 }
 
 const FocusAreaCard = ({ sub_skill, band, skill, onStart }: FocusAreaProps) => {
-  if (band === 9.0 && sub_skill === "General Practice") return null;
+  // Show a success card if all drills are knocked out
+  if (band === 9.0 && sub_skill === "All Caught Up!") {
+    return (
+      <div className="h-full rounded-2xl border p-5 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/25 shadow-sm flex flex-col items-center justify-center text-center">
+        <div className="h-16 w-16 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center mb-4">
+          <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+        </div>
+        <h2 className="text-lg font-black text-slate-800 dark:text-white mb-2">Daily Priorities Knocked Out!</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400">You have completed the required drills for your weakest sub-skills today. Great job keeping your momentum up!</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="h-full rounded-2xl border p-5 bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/25 shadow-sm">
+    <div className="h-full rounded-2xl border p-5 bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/25 shadow-sm flex flex-col">
       <div className="flex items-center gap-2 mb-3">
         <Zap className="h-5 w-5 text-rose-500" />
         <h2 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">
@@ -468,17 +497,19 @@ const FocusAreaCard = ({ sub_skill, band, skill, onStart }: FocusAreaProps) => {
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-between bg-white/60 dark:bg-slate-900/40 rounded-xl p-3 border border-rose-100 dark:border-rose-500/20">
-        <div>
-          <p className="text-[10px] font-bold text-rose-400 uppercase tracking-widest">Action Required</p>
-          <p className="text-sm font-bold text-slate-800 dark:text-white">{sub_skill} Drill</p>
+      <div className="mt-auto pt-4">
+        <div className="flex items-center justify-between bg-white/60 dark:bg-slate-900/40 rounded-xl p-3 border border-rose-100 dark:border-rose-500/20">
+          <div>
+            <p className="text-[10px] font-bold text-rose-400 uppercase tracking-widest">Action Required</p>
+            <p className="text-sm font-bold text-slate-800 dark:text-white">{sub_skill} Drill</p>
+          </div>
+          <button
+            onClick={onStart}
+            className="flex items-center gap-1 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold px-4 py-2.5 rounded-lg transition-colors shadow-sm"
+          >
+            Start Drill <ArrowRight className="h-3.5 w-3.5" />
+          </button>
         </div>
-        <button
-          onClick={onStart}
-          className="flex items-center gap-1 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold px-4 py-2.5 rounded-lg transition-colors shadow-sm"
-        >
-          Start Drill <ArrowRight className="h-3.5 w-3.5" />
-        </button>
       </div>
     </div>
   );

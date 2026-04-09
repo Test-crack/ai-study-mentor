@@ -1,29 +1,147 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   ArrowUpRight, 
   DollarSign, 
   Clock, 
   TrendingUp, 
   ArrowRight, 
-  Star, 
-  FileText 
+  ChevronDown, 
+  ChevronUp, 
+  Target, 
+  Activity, 
+  Calendar, 
+  AlertCircle 
 } from 'lucide-react';
 
-// Adjust these imports to match your actual file structure
 import { InstituteOwnerSidebar } from '../components/InstitiuteOwnerSidebar';
 import { InstituteOwnerTopbar } from '../components/InstituteOwnerTopbar';
 import { useNavigate } from 'react-router-dom';
 
+// ─── TYPES & MOCK DATA (FE-15) ────────────────────────────────────────────────
+interface Assessment {
+  date: string;
+  type: string;
+  score: number;
+}
+
+interface Student {
+  id: string;
+  name: string;
+  batch: string;
+  listening: number;
+  reading: number;
+  writing: number;
+  speaking: number;
+  lastActiveDaysAgo: number;
+  bandDeclining: boolean;
+  focusArea: string;
+  subScores: {
+    fluency?: number;
+    pronunciation?: number;
+    grammar?: number;
+    vocabulary?: number;
+    coherence?: number;
+    taskResponse?: number;
+  };
+  recentAssessments: Assessment[];
+}
+
+const MOCK_STUDENTS: Student[] = [
+  {
+    id: "1", name: "Gokul R Nair", batch: "IELTS Evening",
+    listening: 7.0, reading: 6.5, writing: 6.0, speaking: 6.5,
+    lastActiveDaysAgo: 1, bandDeclining: false, focusArea: "Writing - Grammar",
+    subScores: { fluency: 6.5, pronunciation: 7.0, grammar: 5.5, vocabulary: 6.0, coherence: 6.0, taskResponse: 6.0 },
+    recentAssessments: [
+      { date: "2024-04-05", type: "Full Mock Test", score: 6.5 },
+      { date: "2024-04-01", type: "Speaking Mini-Mock", score: 6.5 },
+      { date: "2024-03-28", type: "Writing Task 2", score: 6.0 },
+    ]
+  },
+  {
+    id: "2", name: "Sarah Jenkins", batch: "IELTS Batch 12",
+    listening: 8.0, reading: 7.5, writing: 7.0, speaking: 7.5,
+    lastActiveDaysAgo: 4, bandDeclining: false, focusArea: "Speaking - Fluency",
+    subScores: { fluency: 7.0, pronunciation: 8.0, grammar: 7.5, vocabulary: 7.0, coherence: 7.0, taskResponse: 7.5 },
+    recentAssessments: [
+      { date: "2024-04-02", type: "Full Mock Test", score: 7.5 },
+      { date: "2024-03-25", type: "Reading Practice", score: 7.5 },
+    ]
+  },
+  {
+    id: "3", name: "Amit Patel", batch: "IELTS Evening",
+    listening: 5.5, reading: 5.0, writing: 5.5, speaking: 5.0,
+    lastActiveDaysAgo: 6, bandDeclining: true, focusArea: "Reading - Comprehension",
+    subScores: { fluency: 5.0, pronunciation: 5.5, grammar: 5.0, vocabulary: 5.5, coherence: 5.5, taskResponse: 5.0 },
+    recentAssessments: [
+      { date: "2024-03-30", type: "Full Mock Test", score: 5.0 },
+      { date: "2024-03-15", type: "Full Mock Test", score: 5.5 },
+      { date: "2024-03-01", type: "Full Mock Test", score: 6.0 }, // Band declining
+    ]
+  },
+  {
+    id: "4", name: "Elena Rodriguez", batch: "Tech Prep Batch 5",
+    listening: 6.5, reading: 7.0, writing: 6.5, speaking: 7.0,
+    lastActiveDaysAgo: 0, bandDeclining: false, focusArea: "Writing - Task Response",
+    subScores: { fluency: 7.0, pronunciation: 7.0, grammar: 6.5, vocabulary: 6.5, coherence: 6.5, taskResponse: 6.0 },
+    recentAssessments: [
+      { date: "2024-04-06", type: "Writing Task 1", score: 6.5 },
+      { date: "2024-03-29", type: "Full Mock Test", score: 6.5 },
+    ]
+  }
+];
+
+// ─── UTILS (FE-15 Logic) ──────────────────────────────────────────────────────
+type StatusRank = 1 | 2 | 3; 
+
+const getStudentStatus = (student: Student): { color: string; label: string; rank: StatusRank } => {
+  // Red = inactive 5+ days OR band declining
+  if (student.lastActiveDaysAgo >= 5 || student.bandDeclining) {
+    return { color: "bg-rose-500", label: student.bandDeclining ? "Band Declining" : "Inactive 5+ Days", rank: 1 };
+  }
+  // Amber = inactive 3–5 days
+  if (student.lastActiveDaysAgo >= 3) {
+    return { color: "bg-amber-500", label: "Inactive 3-4 Days", rank: 2 };
+  }
+  // Green = active in last 2 days
+  return { color: "bg-emerald-500", label: "Active", rank: 3 };
+};
+
 export default function InstituteOwnerDashboard() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-const navigate=useNavigate();
+  const navigate = useNavigate();
+
+  // FE-15 Table State
+  const [selectedBatchFilter, setSelectedBatchFilter] = useState<string>("All");
+  const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
+
+  const uniqueBatches = ["All", ...Array.from(new Set(MOCK_STUDENTS.map(s => s.batch)))];
+
+  const processedStudents = useMemo(() => {
+    let filtered = MOCK_STUDENTS;
+    if (selectedBatchFilter !== "All") {
+      filtered = filtered.filter(s => s.batch === selectedBatchFilter);
+    }
+
+    // Sort by Status Rank (Red = 1 goes first)
+    return filtered.sort((a, b) => {
+      const rankA = getStudentStatus(a).rank;
+      const rankB = getStudentStatus(b).rank;
+      return rankA - rankB; 
+    });
+  }, [selectedBatchFilter]);
+
+  const toggleRow = (id: string) => {
+    setExpandedRowId(prev => prev === id ? null : id);
+  };
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0a0a0a] font-sans text-slate-900 dark:text-white transition-colors duration-300">
       
       {/* Sidebar */}
       <div className="hidden lg:block">
         <InstituteOwnerSidebar 
-          activeTab="owner-dashboard" // Adjust this to match your sidebar's active item
+          activeTab="owner-dashboard"
           isCollapsed={isSidebarCollapsed} 
           toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
         />
@@ -51,7 +169,6 @@ const navigate=useNavigate();
                 <button onClick={() => navigate('/institute-owner/roi')} className="bg-indigo-600 dark:bg-white text-white dark:text-black px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-indigo-700 dark:hover:bg-gray-200 transition shadow-sm">
                   <DollarSign size={18} /> ROI Report
                 </button>
-              
               </div>
             </div>
 
@@ -123,102 +240,157 @@ const navigate=useNavigate();
               </div>
             </div>
 
-            {/* Tables & Lists Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {/* FE-15: Student Data Table (Replaces generic grid tables) */}
+            <div className="bg-white dark:bg-[#121214] rounded-2xl shadow-sm border border-slate-200 dark:border-[#27272a] overflow-hidden mb-6">
               
-              {/* Batch Performance */}
-              <div className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl p-5 shadow-sm overflow-hidden">
-                <div className="flex justify-between items-start mb-6">
-                  <div>
-                    <h3 className="text-lg font-bold">Batch Performance</h3>
-                    <p className="text-slate-500 dark:text-gray-400 text-xs">Cross-batch outcome comparison</p>
-                  </div>
-                  <button  onClick={()=>navigate('/institute-owner/insight')}   className="text-sm flex items-center gap-1 text-slate-500 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-white transition">
-                    Details <ArrowRight size={16} />
-                  </button>
+              {/* Table Header & Filter */}
+              <div className="p-5 border-b border-slate-200 dark:border-[#27272a] flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50 dark:bg-[#121214]">
+                <div>
+                  <h2 className="text-lg font-bold text-slate-800 dark:text-white">Student Roster</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">Identify at-risk students and review sub-skill precision.</p>
                 </div>
-                
-                <div className="overflow-x-auto w-full">
-                  <table className="w-full text-left text-sm whitespace-nowrap">
-                    <thead>
-                      <tr className="text-slate-500 dark:text-gray-400 border-b border-slate-200 dark:border-[#27272a]">
-                        <th className="pb-3 font-medium">Batch</th>
-                        <th className="pb-3 font-medium">Tutor</th>
-                        <th className="pb-3 font-medium text-center">Students</th>
-                        <th className="pb-3 font-medium text-center">Avg Score</th>
-                        <th className="pb-3 font-medium text-center">Improvement</th>
-                        <th className="pb-3 font-medium text-right">Retention</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {[
-                        { batch: "IELTS Batch 12", tutor: "Sarah Khan", students: 28, score: 7.2, imp: "+18%", ret: "96%", impColor: "text-emerald-600 dark:text-green-500", retColor: "text-emerald-600 dark:text-green-500" },
-                        { batch: "Spoken English A", tutor: "Ravi Kumar", students: 35, score: 6.8, imp: "+22%", ret: "91%", impColor: "text-emerald-600 dark:text-green-500", retColor: "text-emerald-600 dark:text-green-500" },
-                        { batch: "Tech Prep Batch 5", tutor: "Deepak Sharma", students: 20, score: 7.5, imp: "+15%", ret: "100%", impColor: "text-emerald-600 dark:text-green-500", retColor: "text-emerald-600 dark:text-green-500" },
-                        { batch: "IELTS Evening", tutor: "Priya Menon", students: 22, score: 6.1, imp: "+8%", ret: "82%", impColor: "text-amber-600 dark:text-yellow-500", retColor: "text-amber-600 dark:text-yellow-500" },
-                      ].map((row, idx) => (
-                        <tr key={idx} className="border-b border-slate-100 dark:border-[#27272a] last:border-0 hover:bg-slate-50 dark:hover:bg-white/5 transition">
-                          <td className="py-3 font-medium">{row.batch}</td>
-                          <td className="py-3 text-slate-600 dark:text-gray-300">{row.tutor}</td>
-                          <td className="py-3 text-center">{row.students}</td>
-                          <td className="py-3 text-center font-semibold">{row.score}</td>
-                          <td className={`py-3 text-center ${row.impColor}`}>{row.imp}</td>
-                          <td className={`py-3 text-right ${row.retColor}`}>{row.ret}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="flex items-center gap-3">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Filter Batch:</label>
+                  <select 
+                    value={selectedBatchFilter} 
+                    onChange={(e) => setSelectedBatchFilter(e.target.value)}
+                    className="bg-white dark:bg-[#1a1a1c] border border-slate-200 dark:border-[#27272a] text-slate-800 dark:text-slate-200 text-sm font-semibold rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500/50 cursor-pointer shadow-sm"
+                  >
+                    {uniqueBatches.map(b => (
+                      <option key={b} value={b}>{b}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
-              {/* Tutor Effectiveness */}
-              <div className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl p-5 shadow-sm">
-                <div className="flex justify-between items-start mb-6">
-                  <div>
-                    <h3 className="text-lg font-bold">Tutor Effectiveness</h3>
-                    <p className="text-slate-500 dark:text-gray-400 text-xs">Performance and AI alignment scores</p>
-                  </div>
-                  <button onClick={()=>navigate('/institute-owner/tuteffect')} className="text-sm flex items-center gap-1 text-slate-500 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-white transition">
-                    Full Report <ArrowRight size={16} />
-                  </button>
-                </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 dark:bg-[#1a1a1c] border-b border-slate-200 dark:border-[#27272a] text-[11px] uppercase tracking-widest text-slate-500 font-bold">
+                      <th className="p-5 whitespace-nowrap">Student Name</th>
+                      <th className="p-5 text-center">Listening</th>
+                      <th className="p-5 text-center">Reading</th>
+                      <th className="p-5 text-center">Writing</th>
+                      <th className="p-5 text-center">Speaking</th>
+                      <th className="p-5 text-center">Last Active</th>
+                      <th className="p-5 text-center">Status</th>
+                      <th className="p-5 w-10"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-[#27272a]">
+                    {processedStudents.map((student) => {
+                      const status = getStudentStatus(student);
+                      const isExpanded = expandedRowId === student.id;
 
-                <div className="space-y-4">
-                  {[
-                    { init: "SK", name: "Sarah Khan", desc: "2 batches • 50 students", imp: "+20%", align: "94%", rating: "4.8", color: "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300" },
-                    { init: "RK", name: "Ravi Kumar", desc: "1 batches • 35 students", imp: "+22%", align: "88%", rating: "4.6", color: "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300" },
-                    { init: "DS", name: "Deepak Sharma", desc: "1 batches • 20 students", imp: "+15%", align: "91%", rating: "4.7", color: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300" },
-                    { init: "PM", name: "Priya Menon", desc: "1 batches • 22 students", imp: "+8%", align: "72%", rating: "3.9", color: "bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300" },
-                  ].map((tutor, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-2 hover:bg-slate-50 dark:hover:bg-[#1a1a1e] rounded-lg transition">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${tutor.color}`}>
-                          {tutor.init}
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-sm">{tutor.name}</h4>
-                          <p className="text-xs text-slate-500 dark:text-gray-500">{tutor.desc}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-6 text-sm text-center">
-                        <div>
-                          <p className="text-slate-400 dark:text-gray-400 text-[10px] mb-1">Improvement</p>
-                          <p className="text-emerald-600 dark:text-green-500 font-semibold">{tutor.imp}</p>
-                        </div>
-                        <div>
-                          <p className="text-slate-400 dark:text-gray-400 text-[10px] mb-1">AI Align</p>
-                          <p className={tutor.align === "72%" ? "text-amber-500 dark:text-yellow-500 font-semibold" : "text-emerald-600 dark:text-green-500 font-semibold"}>{tutor.align}</p>
-                        </div>
-                        <div>
-                          <p className="text-slate-400 dark:text-gray-400 text-[10px] mb-1">Rating</p>
-                          <p className="font-semibold flex items-center justify-center gap-1">
-                            <Star size={12} className={tutor.rating === "3.9" ? "text-amber-500 dark:text-yellow-500" : "text-orange-400"} fill="currentColor" /> {tutor.rating}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                      return (
+                        <React.Fragment key={student.id}>
+                          {/* Main Row */}
+                          <tr 
+                            onClick={() => toggleRow(student.id)}
+                            className={`group cursor-pointer transition-colors ${isExpanded ? 'bg-indigo-50/50 dark:bg-indigo-500/5' : 'hover:bg-slate-50 dark:hover:bg-[#1a1a1c]'}`}
+                          >
+                            <td className="p-5">
+                              <p className="font-bold text-slate-800 dark:text-white">{student.name}</p>
+                              <p className="text-xs text-slate-500 font-medium mt-0.5">{student.batch}</p>
+                            </td>
+                            <td className="p-5 text-center font-bold text-slate-700 dark:text-slate-300">{student.listening.toFixed(1)}</td>
+                            <td className="p-5 text-center font-bold text-slate-700 dark:text-slate-300">{student.reading.toFixed(1)}</td>
+                            <td className="p-5 text-center font-bold text-slate-700 dark:text-slate-300">{student.writing.toFixed(1)}</td>
+                            <td className="p-5 text-center font-bold text-slate-700 dark:text-slate-300">{student.speaking.toFixed(1)}</td>
+                            <td className="p-5 text-center">
+                              <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                                {student.lastActiveDaysAgo === 0 ? "Today" : `${student.lastActiveDaysAgo}d ago`}
+                              </span>
+                            </td>
+                            <td className="p-5">
+                              <div className="flex flex-col items-center justify-center gap-1.5 cursor-help" title={status.label}>
+                                <div className={`h-3 w-3 rounded-full ${status.color} shadow-sm ${status.rank === 1 ? 'animate-pulse ring-2 ring-rose-500/20' : ''}`} />
+                                <span className="text-[10px] font-bold text-slate-400 uppercase leading-none text-center whitespace-nowrap">
+                                  {status.label}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="p-5 text-slate-400 group-hover:text-indigo-500 transition-colors">
+                              {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                            </td>
+                          </tr>
+
+                          {/* Expanded Row Content */}
+                          {isExpanded && (
+                            <tr className="bg-indigo-50/30 dark:bg-indigo-500/5 border-b border-indigo-100 dark:border-indigo-500/10">
+                              <td colSpan={8} className="p-0">
+                                <div className="p-6 md:p-8 animate-in slide-in-from-top-2 duration-200">
+                                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                    
+                                    {/* 1. Current Focus Area */}
+                                    <div className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-2xl p-5 shadow-sm">
+                                      <div className="flex items-center gap-2 mb-3 text-indigo-500">
+                                        <Target className="w-5 h-5" />
+                                        <h4 className="text-xs font-bold uppercase tracking-widest">Current Priority</h4>
+                                      </div>
+                                      <p className="text-lg font-black text-slate-800 dark:text-white">{student.focusArea}</p>
+                                      {student.bandDeclining && (
+                                        <div className="mt-4 inline-flex items-center gap-1.5 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 px-3 py-2 rounded-lg text-xs font-bold border border-rose-200 dark:border-rose-500/20 w-full">
+                                          <AlertCircle className="w-4 h-4 shrink-0" /> Student band score is declining
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    {/* 2. Sub-Skills Breakdown */}
+                                    <div className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-2xl p-5 shadow-sm">
+                                      <div className="flex items-center gap-2 mb-4 text-blue-500">
+                                        <Activity className="w-5 h-5" />
+                                        <h4 className="text-xs font-bold uppercase tracking-widest">Sub-Scores</h4>
+                                      </div>
+                                      <div className="grid grid-cols-2 gap-y-3 gap-x-6">
+                                        {Object.entries(student.subScores).map(([key, val]) => (
+                                          <div key={key} className="flex justify-between items-center text-sm border-b border-slate-100 dark:border-[#27272a] pb-1">
+                                            <span className="text-slate-500 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                                            <span className="font-bold text-slate-800 dark:text-slate-200">{val?.toFixed(1)}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+
+                                    {/* 3. Recent Assessments */}
+                                    <div className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-2xl p-5 shadow-sm">
+                                      <div className="flex items-center gap-2 mb-4 text-emerald-500">
+                                        <Calendar className="w-5 h-5" />
+                                        <h4 className="text-xs font-bold uppercase tracking-widest">Last 3 Assessments</h4>
+                                      </div>
+                                      <div className="space-y-3">
+                                        {student.recentAssessments.map((assessment, idx) => (
+                                          <div key={idx} className="flex justify-between items-center text-sm">
+                                            <div>
+                                              <p className="font-bold text-slate-700 dark:text-slate-200">{assessment.type}</p>
+                                              <p className="text-xs text-slate-400">{assessment.date}</p>
+                                            </div>
+                                            <div className="bg-slate-50 dark:bg-[#1a1a1c] border border-slate-100 dark:border-[#27272a] px-3 py-1 rounded-lg font-black text-slate-800 dark:text-white">
+                                              {assessment.score.toFixed(1)}
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+
+                    {processedStudents.length === 0 && (
+                      <tr>
+                        <td colSpan={8} className="p-10 text-center text-slate-500">
+                          No students found for this filter.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
 

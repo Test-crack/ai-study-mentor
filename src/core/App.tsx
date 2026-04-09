@@ -86,6 +86,9 @@ import Diagnosis from "@/features/student/components/Diagnosis/Diagnosis";
 import AssessmentHistoryPage from "@/features/student/components/AssessmentHistoryPage";
 import SuggestionsPage from "@/features/student/components/SuggestionsPage";
 import Report from "@/features/student/components/Report";
+import DrillScreen from "@/features/student/components/Drills/DrillScreen";
+import { MomentumProvider } from "@/features/student/Context/MomentumContext";
+import ApplyDrillScreen from "@/features/student/components/Drills/ApplyDrillScreen";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -97,8 +100,6 @@ const queryClient = new QueryClient({
 
 /**
  * 1. Initial Login Redirector
- * Triggered when a user lands on /login while already logged in.
- * Sends users to their specific homes.
  */
 const LoginRedirect = () => {
   const { profile, loading, profileLoading } = useAuth();
@@ -121,7 +122,6 @@ const LoginRedirect = () => {
 
 /**
  * 2. Manual URL Entry Redirector
- * Triggered when someone types /dashboard manually in the URL bar.
  */
 const ManualDashboardAccess = () => {
   const { profile, loading, profileLoading } = useAuth();
@@ -145,15 +145,11 @@ const ManualDashboardAccess = () => {
 };
 
 /**
- * 3. Student Diagnosis Guard                        ← NEW
- * Wraps any student route that requires diagnosis to be complete.
- * If isDiagnosed is false, boots the student back to the diagnosis flow.
+ * 3. Student Diagnosis Guard
  */
 const StudentDiagnosisGuard = ({ children }: { children: React.ReactNode }) => {
   const { profile, loading, profileLoading } = useAuth();
 
-  // FIX: Only return a blank screen if we are loading AND we don't have the profile yet.
-  // If we already have the profile in memory, just skip the blank screen!
   if ((loading || profileLoading) && !profile) {
     return null; 
   }
@@ -166,6 +162,7 @@ const StudentDiagnosisGuard = ({ children }: { children: React.ReactNode }) => {
 
   return <>{children}</>;
 };
+
 const AppRoutes = () => {
   const { user } = useAuth();
 
@@ -177,9 +174,9 @@ const AppRoutes = () => {
       <Route path="/dashdemo" element={<Dashdemo />} />
       <Route path="/Contact" element={<Contactpage />} />
 
-      {/* Routes that require the institute to be active (Owners & Admins) */}
+      {/* Routes that require the institute to be active */}
       <Route element={<RequireActiveInstitute />}>
-        {/* Institute Owner Routes — RBAC: INSTITUTE_OWNER only */}
+        {/* Institute Owner Routes */}
         <Route path="/institute-owner/dashboard" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteOwnerDashboard /></RoleProtectedRoute>} />
         <Route path="/institute-owner/performance" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><Performance /></RoleProtectedRoute>} />
         <Route path="/institute-owner/roi" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><RoiAnalytics /></RoleProtectedRoute>} />
@@ -191,7 +188,7 @@ const AppRoutes = () => {
         <Route path="/institute-owner/batches/:batchSlug/analytics" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER', 'INSTRUCTOR']}><BatchAnalyticsView /></RoleProtectedRoute>} />
         <Route path="/institute-owner/students/:studentId/progress" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER', 'INSTRUCTOR']}><InstituteOwnerStudentProgressPage /></RoleProtectedRoute>} />
 
-        {/* Institute Admin routes — RBAC: INSTITUTE_ADMIN + INSTITUTE_OWNER */}
+        {/* Institute Admin routes */}
         <Route path="/institute-admin/dashboard" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteDashboard /></RoleProtectedRoute>} />
         <Route path="/institute-admin/batches" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteBatches /></RoleProtectedRoute>} />
         <Route path="/institute-admin/tutor" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteTutor /></RoleProtectedRoute>} />
@@ -203,7 +200,7 @@ const AppRoutes = () => {
         <Route path="/institute-admin/Setting" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteSettings /></RoleProtectedRoute>} />
       </Route>
 
-      {/* Testcrack SuperAdmin — RBAC: SUPERADMIN only */}
+      {/* Testcrack SuperAdmin */}
       <Route path="/superadmin/dashboard" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SuperAdminDashboard /></RoleProtectedRoute>} />
       <Route path="/superadmin/institutes" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SuperAdminInstitutes /></RoleProtectedRoute>} />
       <Route path="/superadmin/subscription" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><Subscription /></RoleProtectedRoute>} />
@@ -212,17 +209,12 @@ const AppRoutes = () => {
       <Route path="/superadmin/platform" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><PlatformAnalytics /></RoleProtectedRoute>} />
       <Route path="/superadmin/allusers" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><AllUsers /></RoleProtectedRoute>} />
 
-      {/* Login Route: On login, LoginRedirect forces role-based dashboards */}
       <Route path="/login" element={user ? <LoginRedirect /> : <LoginPage />} />
-      {/* Legacy redirect – keeps old /auth links working */}
       <Route path="/auth" element={<Navigate to="/login" replace />} />
-
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/courses" element={<CoursesPage />} />
       <Route path="/courses/:slug" element={<CourseDetailPage />} />
-
-      {/* Manual Dashboard Access: Handled by ManualDashboardAccess logic */}
       <Route path="/dashboard" element={<ManualDashboardAccess />} />
       <Route path="/dashboard/:tab" element={<ManualDashboardAccess />} />
 
@@ -231,7 +223,7 @@ const AppRoutes = () => {
         path="/student/dashboard"
         element={
           <RoleProtectedRoute allowedRoles={['STUDENT']}>
-            <StudentDiagnosisGuard>        {/* ← ADDED: TC-01 fix */}
+            <StudentDiagnosisGuard>
               <StudentDashboardPage />
             </StudentDiagnosisGuard>
           </RoleProtectedRoute>
@@ -258,7 +250,9 @@ const AppRoutes = () => {
       <Route path="/student/report" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><Report /></RoleProtectedRoute>} />
       <Route path="/student/suggestion" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><Suggestion /></RoleProtectedRoute>} />
       <Route path="/student/speaking-practice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><SpeakingPractice /></RoleProtectedRoute>} />
-
+      <Route path="/student/drill" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><DrillScreen /></RoleProtectedRoute>} />
+      <Route path="/student/apply-drill" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><ApplyDrillScreen /></RoleProtectedRoute>} />
+      
       {/* Instructor Dashboard & Routes */}
       <Route
         path="/instructor/dashboard"
@@ -268,22 +262,8 @@ const AppRoutes = () => {
           </RoleProtectedRoute>
         }
       />
-      <Route
-        path="/instructor/student/:studentSlug/progress"
-        element={
-          <RoleProtectedRoute allowedRoles={['INSTRUCTOR']}>
-            <InstructorStudentProgressPage />
-          </RoleProtectedRoute>
-        }
-      />
-      <Route
-        path="/instructor/assessments"
-        element={
-          <RoleProtectedRoute allowedRoles={['INSTRUCTOR']}>
-            <InstructorAssessmentPage />
-          </RoleProtectedRoute>
-        }
-      />
+      <Route path="/instructor/student/:studentSlug/progress" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorStudentProgressPage /></RoleProtectedRoute>} />
+      <Route path="/instructor/assessments" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorAssessmentPage /></RoleProtectedRoute>} />
       <Route path="/instructor/coursemanagement" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorCourseManagementPage /></RoleProtectedRoute>} />
       <Route path="/instructor/batches" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorBatchView /></RoleProtectedRoute>} />
       <Route path="/instructor/tech-pep" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><TechPrepPage /></RoleProtectedRoute>} />
@@ -291,7 +271,6 @@ const AppRoutes = () => {
       <Route path="/instructor/reports" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorReport /></RoleProtectedRoute>} />
       <Route path="/instructor/workflow" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><Workflow /></RoleProtectedRoute>} />
 
-      {/* Protected routes */}
       <Route path="/learn/:slug" element={<RoleProtectedRoute><LearningPage /></RoleProtectedRoute>} />
       <Route path="/notes" element={<RoleProtectedRoute><NotesPage /></RoleProtectedRoute>} />
       <Route path="/profile" element={<RoleProtectedRoute><ProfilePage /></RoleProtectedRoute>} />
@@ -299,23 +278,8 @@ const AppRoutes = () => {
       <Route path="/assessment/legacy" element={<RoleProtectedRoute><SpeedAssessmentPage /></RoleProtectedRoute>} />
       <Route path="/payment/success" element={<RoleProtectedRoute><PaymentSuccess /></RoleProtectedRoute>} />
 
-      {/* Admin specific */}
-      <Route
-        path="/courses/admin/dashboard"
-        element={
-          <RoleProtectedRoute allowedRoles={["INSTRUCTOR"]}>
-            <AdminDashboardPage />
-          </RoleProtectedRoute>
-        }
-      />
-      <Route
-        path="/courses/admin/manage/:id"
-        element={
-          <RoleProtectedRoute allowedRoles={["INSTRUCTOR"]}>
-            <CourseManagementPage />
-          </RoleProtectedRoute>
-        }
-      />
+      <Route path="/courses/admin/dashboard" element={<RoleProtectedRoute allowedRoles={["INSTRUCTOR"]}><AdminDashboardPage /></RoleProtectedRoute>} />
+      <Route path="/courses/admin/manage/:id" element={<RoleProtectedRoute allowedRoles={["INSTRUCTOR"]}><CourseManagementPage /></RoleProtectedRoute>} />
 
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
@@ -330,9 +294,12 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
-            <WebSocketProvider>
-              <AppRoutes />
-            </WebSocketProvider>
+         
+            <MomentumProvider>
+              <WebSocketProvider>
+                <AppRoutes />
+              </WebSocketProvider>
+            </MomentumProvider>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
