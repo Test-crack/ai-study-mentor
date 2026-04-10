@@ -314,25 +314,32 @@ const StudentDashboardPage = () => {
           {/* ── Second Row: Focus Area + Readiness + Streak ────────── */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-            {/* FE-10 Focus Area Card Integration */}
-            <div className="lg:col-span-5">
+            {/* FE-10 Focus Area Card & FE-16 Rhythm Indicator */}
+            <div className="lg:col-span-5 flex flex-col h-full gap-4">
               {(() => {
                 const focusData = getPriorityFocusArea(skillBands, completedDrills);
                 return (
-                  <FocusAreaCard 
-                    sub_skill={focusData.sub_skill} 
-                    band={focusData.band}
-                    skill={focusData.skill}
-                    onStart={() => {
-                      const params = new URLSearchParams({
-                        skill: focusData.skill,
-                        sub_skill: focusData.sub_skill
-                      });
-                      navigate(`/student/drill?${params.toString()}`);
-                    }} 
-                  />
+                  <div className="flex-1">
+                    <FocusAreaCard 
+                      sub_skill={focusData.sub_skill} 
+                      band={focusData.band}
+                      skill={focusData.skill}
+                      onStart={() => {
+                        const params = new URLSearchParams({
+                          skill: focusData.skill,
+                          sub_skill: focusData.sub_skill
+                        });
+                        navigate(`/student/drill?${params.toString()}`);
+                      }} 
+                    />
+                  </div>
                 );
               })()}
+              
+              {/* FE-16 Added Here */}
+              <div className="mt-auto">
+                 <WeeklyRhythmIndicator />
+              </div>
             </div>
 
             <div className="lg:col-span-4">
@@ -653,6 +660,69 @@ const AttendanceStreakTracker = ({ currentStreak, goal = 7 }: any) => {
       <p className="text-xs font-bold text-slate-700 dark:text-slate-300 text-center">
         {currentStreak >= goal ? "Weekly goal hit! 🎉" : `${goal - currentStreak} more to reach ${goal}-day goal`}
       </p>
+    </div>
+  );
+};
+
+// ─── FE-16: WEEKLY RHYTHM INDICATOR ───────────────────────────────────────────
+
+const WEEKLY_RHYTHM = [
+  { day: "Mon", type: "Drill", color: "blue", text: "Priority sub-skill drill (15 min)" },
+  { day: "Tue", type: "Drill", color: "blue", text: "Same sub-skill, new prompts (15 min)" },
+  { day: "Wed", type: "Assessment", color: "purple", text: "Mid-Week Priority Assessment (20 min)" },
+  { day: "Thu", type: "Drill", color: "blue", text: "Secondary sub-skill drill (15 min)" },
+  { day: "Fri", type: "Content", color: "teal", text: "Apply Lesson & Mini-Drill (15 min)" },
+  { day: "Sat", type: "Eval", color: "amber", text: "Full Weekly Assessment (45 min)" },
+  { day: "Sun", type: "Rest", color: "slate", text: "Rest & Recovery" },
+];
+
+const colorConfig: Record<string, any> = {
+  blue: { bg: 'bg-blue-500', border: 'border-blue-500', text: 'text-blue-600 dark:text-blue-400', ring: 'ring-blue-500/30' },
+  purple: { bg: 'bg-purple-500', border: 'border-purple-500', text: 'text-purple-600 dark:text-purple-400', ring: 'ring-purple-500/30' },
+  teal: { bg: 'bg-teal-500', border: 'border-teal-500', text: 'text-teal-600 dark:text-teal-400', ring: 'ring-teal-500/30' },
+  amber: { bg: 'bg-amber-500', border: 'border-amber-500', text: 'text-amber-600 dark:text-amber-400', ring: 'ring-amber-500/30' },
+  slate: { bg: 'bg-slate-400', border: 'border-slate-300 dark:border-slate-600', text: 'text-slate-500 dark:text-slate-400', ring: 'ring-slate-400/30' },
+};
+
+const WeeklyRhythmIndicator = () => {
+  // JS Date.getDay() gives 0 for Sunday. We shift it so Monday = 0, Sunday = 6.
+  const jsDay = new Date().getDay();
+  const currentDayIndex = jsDay === 0 ? 6 : jsDay - 1;
+  const todayConfig = WEEKLY_RHYTHM[currentDayIndex];
+
+  return (
+    <div className="mt-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+      <div className="flex items-center justify-between gap-1 mb-5 relative px-2">
+        {/* Background connecting line */}
+        <div className="absolute left-4 right-4 top-2 h-0.5 bg-slate-100 dark:bg-slate-800 z-0" />
+        
+        {WEEKLY_RHYTHM.map((day, idx) => {
+          const isCompleted = idx < currentDayIndex;
+          const isToday = idx === currentDayIndex;
+          const isFuture = idx > currentDayIndex;
+          const colors = colorConfig[day.color];
+
+          return (
+            <div key={day.day} className="relative z-10 flex flex-col items-center gap-2">
+              <div 
+                className={`w-4 h-4 rounded-full transition-all duration-300 
+                  ${isFuture ? `bg-white dark:bg-slate-900 border-2 ${colors.border}` : colors.bg} 
+                  ${isToday ? `ring-4 ring-offset-2 dark:ring-offset-slate-900 ${colors.ring} scale-125` : ''}
+                `}
+              />
+              <span className={`text-[10px] font-black uppercase tracking-wider ${isToday ? 'text-slate-800 dark:text-white' : 'text-slate-400 dark:text-slate-500'}`}>
+                {day.day}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-xl p-3 text-center">
+        <p className="text-xs font-bold text-slate-600 dark:text-slate-300">
+          Today: <span className={`ml-1 ${colorConfig[todayConfig.color].text}`}>{todayConfig.text}</span>
+        </p>
+      </div>
     </div>
   );
 };
