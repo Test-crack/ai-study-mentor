@@ -89,7 +89,7 @@ import Report from "@/features/student/components/Report";
 import DrillScreen from "@/features/student/components/Drills/DrillScreen";
 import { MomentumProvider } from "@/features/student/Context/MomentumContext";
 import ApplyDrillScreen from "@/features/student/components/Drills/ApplyDrillScreen";
-
+import LexiGrid from "@/features/student/components/LexiGrid";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -252,6 +252,8 @@ const AppRoutes = () => {
       <Route path="/student/speaking-practice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><SpeakingPractice /></RoleProtectedRoute>} />
       <Route path="/student/drill" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><DrillScreen /></RoleProtectedRoute>} />
       <Route path="/student/apply-drill" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><ApplyDrillScreen /></RoleProtectedRoute>} />
+      <Route path="/student/lexigrid" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><LexiGrid /></RoleProtectedRoute>} />
+      
       
       {/* Instructor Dashboard & Routes */}
       <Route

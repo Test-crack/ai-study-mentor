@@ -20,6 +20,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   ArrowRight,
+  Sparkles,
 } from "lucide-react";
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
@@ -302,6 +303,45 @@ const StudentDashboardPage = () => {
             </div>
           </section>
 
+          {/* ── Daily Challenge Banner (Gamification) Moved to Top ── */}
+          <section>
+            <div 
+              onClick={() => navigate('/student/lexigrid')}
+              className="relative overflow-hidden rounded-2xl bg-slate-900 dark:bg-[#0B0F19] border border-indigo-500/30 p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 cursor-pointer group shadow-xl shadow-indigo-900/10 hover:shadow-indigo-500/20 hover:border-indigo-400/60 transition-all duration-500"
+            >
+              {/* Animated background glows */}
+              <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+                <div className="absolute -top-[50%] -left-[10%] w-[40%] h-[200%] bg-indigo-500/20 blur-[60px] group-hover:bg-indigo-500/30 transition-colors duration-700"></div>
+                <div className="absolute top-[10%] -right-[5%] w-[30%] h-[150%] bg-purple-500/20 blur-[60px] group-hover:bg-purple-500/30 transition-colors duration-700"></div>
+                {/* Subtle grid pattern overlay */}
+                <div className="absolute inset-0 opacity-[0.03] bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiNmZmZmZmYiLz48L3N2Zz4=')]"></div>
+              </div>
+
+              <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-5 md:gap-6">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-400/40 flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500 shadow-[0_0_20px_rgba(99,102,241,0.3)]">
+                  <Sparkles className="w-8 h-8 text-amber-400 drop-shadow-md" />
+                </div>
+                <div>
+                  <div className="flex flex-col sm:flex-row items-center gap-2 mb-2">
+                    <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Daily Challenge</h2>
+                    <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
+                      Ready to Play
+                    </span>
+                  </div>
+                  <p className="text-sm sm:text-base text-indigo-100/80 font-medium max-w-xl">
+                    Crack today's <strong className="text-white">LexiGrid</strong> vocabulary puzzle to build your exam vocabulary and instantly earn <strong className="text-amber-400">+15 Momentum Points</strong>.
+                  </p>
+                </div>
+              </div>
+
+              <div className="relative z-10 w-full md:w-auto shrink-0">
+                <button className="w-full md:w-auto bg-white text-indigo-900 font-black text-sm uppercase tracking-widest py-4 px-8 rounded-xl shadow-[0_0_20px_rgba(255,255,255,0.1)] group-hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] group-hover:bg-indigo-50 transition-all duration-300 flex items-center justify-center gap-2 active:scale-95">
+                  Enter LexiGrid <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
+                </button>
+              </div>
+            </div>
+          </section>
+
           {/* ── 4 Skill Band Score Cards ────────────────────────────── */}
           <section>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -337,9 +377,10 @@ const StudentDashboardPage = () => {
               })()}
               
               {/* FE-16 Added Here */}
-              <div className="mt-auto">
+              <div>
                  <WeeklyRhythmIndicator />
               </div>
+
             </div>
 
             <div className="lg:col-span-4">
@@ -691,7 +732,7 @@ const WeeklyRhythmIndicator = () => {
   const todayConfig = WEEKLY_RHYTHM[currentDayIndex];
 
   return (
-    <div className="mt-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
       <div className="flex items-center justify-between gap-1 mb-5 relative px-2">
         {/* Background connecting line */}
         <div className="absolute left-4 right-4 top-2 h-0.5 bg-slate-100 dark:bg-slate-800 z-0" />
