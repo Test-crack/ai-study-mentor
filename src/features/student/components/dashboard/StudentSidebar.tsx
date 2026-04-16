@@ -52,7 +52,9 @@ export const StudentSidebar = ({ activeTab = 'dashboard', onTabChange, isCollaps
   { id: 'SuggestionPage', icon: Lightbulb, label: 'SuggestionPage', path: '/student/suggestion-page' },
   { id: 'Report',icon: FileText, label: 'Report', path: '/student/report' },
   { id: 'suggestion', icon: Sparkles, label: 'Recommendations', path: '/student/suggestion' },
+  { id: 'internal', icon: Sparkles, label: 'Internal Assessment', path: '/student/internal' },
   { id: 'settings', icon: Settings, label: 'Settings', path: '/student/settings' },
+  { id: 'full mock', icon: Settings, label: 'Mock', path: '/student/mock' },
 ];
   const handleNavigation = (item: typeof menuItems[0]) => {
     navigate(item.path);
