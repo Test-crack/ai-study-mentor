@@ -1,50 +1,105 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { StudentSidebar } from '../dashboard/StudentSidebar';
 import { StudentTopbar } from '../dashboard/StudentTopbar'; 
 import AudioResponseDrill from './AudioResponseDrill';
 import ParagraphRepairDrill from './ParagraphRepairDrill';
+import McqDrill from './McqDrill';
 import DrillResultCard from './DrillResultCard';
-import { ArrowLeft, Target } from 'lucide-react';
+import { callBackend } from '@/features/auth/services/authClient';
+import { ArrowLeft, Target, Loader2 } from 'lucide-react';
 
 export default function DrillScreen() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   
-  const skill = searchParams.get('skill') || 'Speaking';
-  const subSkill = searchParams.get('sub_skill') || 'Pronunciation';
+  const skill = searchParams.get('skill') || 'SPEAKING';
+  const subSkill = searchParams.get('sub_skill') || 'PRONUNCIATION';
+  const level = searchParams.get('level') || 'INTERMEDIATE';
   
   // Drill State
+  const [prompts, setPrompts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [currentPromptIndex, setCurrentPromptIndex] = useState(0);
-  const [momentumScore, setMomentumScore] = useState(0);
-  const [isComplete, setIsComplete] = useState(false);
   
-  const totalPrompts = 5;
+  // Scoring State
+  const [targetCount, setTargetCount] = useState(5); // Randomized between 4-6
+  const [correctAnswersCount, setCorrectAnswersCount] = useState(0); 
+  const [momentumScore, setMomentumScore] = useState(0); // Will show the raw percentage 0-100
+  const [isComplete, setIsComplete] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const totalPrompts = prompts.length || targetCount;
 
-  // Determine drill type based on sub-skill
-  const drillType = skill.toLowerCase() === 'writing' ? 'paragraph_repair' : 'audio_response';
+  useEffect(() => {
+    // Determine random question count (4, 5, or 6) only ONCE when skill/subskill changes
+    const randomCount = Math.floor(Math.random() * 3) + 4;
+    setTargetCount(randomCount);
 
-  // Mock Prompts (In the future, fetch this from your backend based on skill/subSkill)
-  const prompts = Array.from({ length: 5 }).map((_, i) => ({
-    id: i + 1,
-    text: drillType === 'audio_response' 
-      ? `Describe a time when you experienced something new. (Prompt ${i + 1})`
-      : `Fix the missing linking words in this paragraph. (Prompt ${i + 1})`,
-  }));
+    const fetchQuestions = async () => {
+      try {
+        setLoading(true);
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+        const url = `${backendUrl}/api/drills/questions?skill=${encodeURIComponent(skill.toUpperCase())}&subskill=${encodeURIComponent(subSkill.toUpperCase().replace(/\s+/g, '_'))}&level=${encodeURIComponent(level.toUpperCase())}&count=${randomCount}`;
+        
+        const res = await callBackend(url);
+        if (res.success && res.data) {
+          setPrompts(res.data);
+        } else {
+          setPrompts([]);
+        }
+      } catch (err) {
+        console.error('Failed to fetch drills', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchQuestions();
+  }, [skill, subSkill, level]);
 
-  const handleNextPrompt = () => {
-    // Simulate earning 4 to 6 points for this specific prompt
-    const pointsEarnedThisPrompt = Math.floor(Math.random() * 3) + 4;
+  const saveSessionAndComplete = async (finalCorrectCount: number) => {
+    const finalScoreFloat = (finalCorrectCount / totalPrompts) * 100;
+    const finalScore = Math.round(Number.isNaN(finalScoreFloat) ? 0 : finalScoreFloat);
+    
+    setMomentumScore(finalScore); 
+    setIsSubmitting(true);
+
+    try {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+      await callBackend(`${backendUrl}/api/drills/session`, {
+        method: 'POST',
+        body: JSON.stringify({
+          skill: skill.toUpperCase(),
+          subskill: subSkill.toUpperCase().replace(/\s+/g, '_'),
+          prompts_completed: totalPrompts,
+          momentum_earned: finalScore
+        })
+      });
+    } catch (err) {
+      console.error("Failed to save drill session", err);
+    } finally {
+      setIsSubmitting(false);
+      setIsComplete(true);
+    }
+  };
+
+  const handleNextPrompt = (pointsEarnedThisPrompt: number = 5) => {
+    // Internally pointsEarnedThisPrompt = 10 for MCQ if correct, else 2.
+    // If it's a correct MCQ answer, it yields 10 points. 
+    const isCorrect = pointsEarnedThisPrompt === 10;
+    const newCorrectCount = isCorrect ? correctAnswersCount + 1 : correctAnswersCount;
+    
+    if (isCorrect) {
+       setCorrectAnswersCount(prev => prev + 1);
+    }
 
     if (currentPromptIndex < totalPrompts - 1) {
-      // Move to next prompt AND update the momentum score
       setCurrentPromptIndex(prev => prev + 1);
-      setMomentumScore(prev => prev + pointsEarnedThisPrompt); 
     } else {
-      // Final prompt: update score and mark as complete
-      setMomentumScore(prev => prev + pointsEarnedThisPrompt);
-      setIsComplete(true);
+      // Final prompt: save and complete
+      saveSessionAndComplete(newCorrectCount);
     }
   };
 
@@ -61,37 +116,56 @@ export default function DrillScreen() {
             <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
           </button>
 
-          {!isComplete ? (
+          {loading || isSubmitting ? (
+            <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+              <Loader2 className="w-10 h-10 animate-spin mb-4 text-[#7B61FF]" />
+              <p className="font-medium text-slate-500">
+                {isSubmitting ? "Saving session results..." : "Loading your customized drills..."}
+              </p>
+            </div>
+          ) : prompts.length === 0 ? (
+            <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
+              <p className="text-slate-500 font-medium">No drills available for this topic right now.</p>
+            </div>
+          ) : !isComplete ? (
             <>
               {/* Header */}
               <div className="mb-8 text-center space-y-2">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-rose-100 text-rose-500 mb-2">
                   <Target className="w-6 h-6" />
                 </div>
-                <h1 className="text-3xl font-black text-slate-800 dark:text-white">
-                  Today's Focus: {skill} {subSkill}
+                <h1 className="text-3xl font-black text-slate-800 dark:text-white capitalize">
+                  Today's Focus: {skill.toLowerCase()} {subSkill.toLowerCase()}
                 </h1>
                 <p className="text-slate-500 font-medium tracking-wide uppercase text-sm">
                   Prompt {currentPromptIndex + 1} of {totalPrompts}
                 </p>
-                {/* Momentum Score Bar (No Band Score shown) */}
+                {/* Mock Progress Bar strictly counting questions done vs total, percent not shown till end */}
                 <div className="flex justify-center items-center gap-2 mt-4">
-                  <span className="text-xs font-bold text-amber-500 uppercase tracking-widest">Momentum</span>
+                  <span className="text-xs font-bold text-amber-500 uppercase tracking-widest">Progress</span>
                   <div className="w-32 h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-amber-500 transition-all duration-500" style={{ width: `${(momentumScore / (totalPrompts * 10)) * 100}%` }} />
+                    <div className="h-full bg-amber-500 transition-all duration-500" style={{ width: `${(currentPromptIndex / totalPrompts) * 100}%` }} />
                   </div>
-                  <span className="text-xs font-bold text-amber-500">{momentumScore}</span>
                 </div>
               </div>
 
               {/* Render Specific Drill Type */}
               <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-sm border border-slate-200 dark:border-slate-800">
-                {drillType === 'audio_response' && (
-                  <AudioResponseDrill prompt={prompts[currentPromptIndex]} onComplete={() => handleNextPrompt()} />
-                )}
-                {drillType === 'paragraph_repair' && (
-                  <ParagraphRepairDrill prompt={prompts[currentPromptIndex]} onComplete={() => handleNextPrompt()} />
-                )}
+                {(() => {
+                  const currentPrompt = prompts[currentPromptIndex];
+                  if (!currentPrompt) return null;
+
+                  if (currentPrompt.drill_type === 'MCQ') {
+                    return <McqDrill prompt={currentPrompt} onComplete={(pts) => handleNextPrompt(pts)} />;
+                  }
+
+                  // Fallbacks for older UI mocks
+                  if (skill.toLowerCase() === 'writing') {
+                    return <ParagraphRepairDrill prompt={{ text: currentPrompt.prompt_text || 'Mock Prompt' }} onComplete={() => handleNextPrompt(5)} />;
+                  } else {
+                    return <AudioResponseDrill prompt={{ text: currentPrompt.prompt_text || 'Mock Prompt' }} onComplete={() => handleNextPrompt(5)} />;
+                  }
+                })()}
               </div>
             </>
          ) : (
@@ -100,13 +174,7 @@ export default function DrillScreen() {
   skill={skill} 
   subSkill={subSkill} 
   momentumScore={momentumScore} 
-  feedback={[
-    "Good attempt, but watch your syllable stress on 'development'.",
-    "Clear intonation, try to maintain a steadier pace.",
-    "Great use of linking words here.",
-    "A bit hesitant; practice speaking without pausing mid-sentence.",
-    "Excellent pronunciation of the target vocabulary."
-  ]}
+  feedback={[]}
   onUnlockNext={() => {
     // Navigate to Apply Drill, passing context via URL
     navigate(`/student/apply-drill?skill=${skill}&sub_skill=${subSkill}&score=${momentumScore}`);

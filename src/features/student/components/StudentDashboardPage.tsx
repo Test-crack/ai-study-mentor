@@ -125,56 +125,7 @@ const calculateStreak = (dates: string[]): number => {
 const overallBand = (bands: SkillBand[]) =>
   Math.round((bands.reduce((s, b) => s + b.score, 0) / bands.length) * 2) / 2;
 
-// FE-10: Strict tie-breaker priority (lower number = wins tie)
-const TIE_BREAKER_PRIORITY: Record<string, number> = {
-  pronunciation: 1,
-  fluency: 2,
-  grammar: 3,
-  vocabulary: 4,
-  coherence: 5,
-  taskresponse: 6,
-};
-
-const normalizeKey = (key: string) => key.toLowerCase().replace(/score|_/g, '');
-
-const getPriorityFocusArea = (bands: SkillBand[], completedToday: string[]) => {
-  let lowestFocus = {
-    sub_skill: "All Caught Up!", // Replaced "General Practice"
-    band: 9.0, // Start high
-    skill: "Overall",
-    priorityRank: 999
-  };
-
-  bands.forEach(band => {
-    if (!band.subScores) return;
-
-    Object.entries(band.subScores).forEach(([key, value]) => {
-      // Ignore raw metrics like word count, total questions (anything over a 9.0 band or not a number)
-      if (typeof value !== 'number' || value > 9.0) return;
-      if (key.toLowerCase().includes('count') || key.toLowerCase().includes('total') || key.toLowerCase().includes('correct')) return;
-
-      let displayName = key.replace(/Score/g, '').replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim();
-      displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
-
-      // 🚀 THE MAGIC: Skip this sub-skill if it was already completed today!
-      if (completedToday.includes(displayName)) return;
-
-      const normalizedKey = normalizeKey(key);
-      const priorityRank = TIE_BREAKER_PRIORITY[normalizedKey] || 99;
-
-      // Apply Tie-Breaker Logic
-      if (value < lowestFocus.band) {
-        lowestFocus = { sub_skill: displayName, band: value, skill: band.skill, priorityRank };
-      } else if (value === lowestFocus.band) {
-        if (priorityRank < lowestFocus.priorityRank) {
-          lowestFocus = { sub_skill: displayName, band: value, skill: band.skill, priorityRank };
-        }
-      }
-    });
-  });
-
-  return lowestFocus;
-};
+// --- Removed Local Tie Breaker Logic ---
 
 // ─── MAIN COMPONENT ──────────────────────────────────────────────────────────
 
@@ -185,6 +136,7 @@ const StudentDashboardPage = () => {
   const [currentStreak, setCurrentStreak] = useState(0);
   const [skillBands, setSkillBands] = useState<SkillBand[]>(SKILL_BANDS);
   const [completedDrills, setCompletedDrills] = useState<string[]>([]);
+  const [nextActionDrill, setNextActionDrill] = useState<any>(null); // New state
   const { user, profile } = useAuth();
   const navigate = useNavigate();
 
@@ -239,8 +191,30 @@ const StudentDashboardPage = () => {
         console.error("Failed to fetch competency matrix", err);
       }
     };
+
+    const fetchNextActionDrill = async () => {
+      try {
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+        const fullUrl = `${backendUrl}/api/student/next-action-drill`;
+        const resData = await callBackend(fullUrl);
+        if (resData.success) {
+          if (resData.recommended_drills && resData.recommended_drills.length > 0) {
+            setNextActionDrill(resData.recommended_drills[0]);
+          } else {
+            setNextActionDrill({ sub_skill: "All Caught Up!", skill: "Overall", sub_skill_score: 9.0 });
+          }
+        } else {
+          // Fallback if API fails
+          setNextActionDrill({ sub_skill: "General Practice", skill: "Overall", sub_skill_score: 5.5 });
+        }
+      } catch (err) {
+        console.error("Failed to fetch next action drill", err);
+        setNextActionDrill({ sub_skill: "General Practice", skill: "Overall", sub_skill_score: 5.5 });
+      }
+    };
     
     fetchCompetencyScores();
+    fetchNextActionDrill();
 
     const today = new Date();
     const offset = today.getTimezoneOffset() * 60000;
@@ -314,19 +288,40 @@ const StudentDashboardPage = () => {
           {/* ── Second Row: Focus Area + Readiness + Streak ────────── */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-            {/* FE-10 Focus Area Card Integration */}
+            {/* FE-10 Focus Area Card Integration via Backend API */}
             <div className="lg:col-span-5">
               {(() => {
-                const focusData = getPriorityFocusArea(skillBands, completedDrills);
+                if (!nextActionDrill) {
+                  return (
+                    <div className="h-full rounded-2xl border p-5 bg-slate-50 dark:bg-slate-900 border-slate-200 shadow-sm flex flex-col items-center justify-center animate-pulse">
+                      <div className="h-8 w-8 bg-slate-200 dark:bg-slate-800 rounded-full mb-2"></div>
+                      <div className="h-4 w-32 bg-slate-200 dark:bg-slate-800 rounded"></div>
+                    </div>
+                  );
+                }
+
+                // If sub_skill matches "General Practice", treat it as All Caught Up
+                const isCaughtUp = nextActionDrill.sub_skill === "General Practice" || completedDrills.includes(nextActionDrill.sub_skill);
+                
+                // Helper to determine Level
+                const getLevel = (score: number) => {
+                  if (score >= 7.0) return 'ADVANCED';
+                  if (score >= 5.5) return 'INTERMEDIATE';
+                  return 'BEGINNER';
+                };
+
+                const inferredLevel = getLevel(nextActionDrill.sub_skill_score);
+
                 return (
                   <FocusAreaCard 
-                    sub_skill={focusData.sub_skill} 
-                    band={focusData.band}
-                    skill={focusData.skill}
+                    sub_skill={isCaughtUp ? "All Caught Up!" : nextActionDrill.sub_skill} 
+                    band={isCaughtUp ? 9.0 : nextActionDrill.sub_skill_score}
+                    skill={isCaughtUp ? "Overall" : nextActionDrill.skill}
                     onStart={() => {
                       const params = new URLSearchParams({
-                        skill: focusData.skill,
-                        sub_skill: focusData.sub_skill
+                        skill: nextActionDrill.skill,
+                        sub_skill: nextActionDrill.sub_skill,
+                        level: inferredLevel
                       });
                       navigate(`/student/drill?${params.toString()}`);
                     }} 
