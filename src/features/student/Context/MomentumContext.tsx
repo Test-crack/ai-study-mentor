@@ -1,48 +1,143 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+
+// ─── TYPES ────────────────────────────────────────────────────────────────────
 
 interface MomentumContextType {
   totalMomentum: number;
   streak: number;
-  addPoints: (points: number) => void;
+  addPoints: (points: number, reason?: string) => void;
+  deductPoints: (points: number, reason?: string) => void;
   updateStreak: (newStreak: number) => void;
+  applyMissPenalty: (missCount: 1 | 2, cycleKey: string) => boolean; // returns true if penalty was newly applied
+  hasPenaltyBeenApplied: (cycleKey: string) => boolean;
 }
+
+// ─── CONTEXT ──────────────────────────────────────────────────────────────────
 
 const MomentumContext = createContext<MomentumContextType | undefined>(undefined);
 
+// ─── PROVIDER ─────────────────────────────────────────────────────────────────
+
 export const MomentumProvider = ({ children }: { children: ReactNode }) => {
-  // Load initial values from LocalStorage (or backend later)
-  const [totalMomentum, setTotalMomentum] = useState(() => {
-    return parseInt(localStorage.getItem('testcrack_momentum') || '120', 10); // starting with 120 for demo
-  });
-  
-  const [streak, setStreak] = useState(() => {
-    return parseInt(localStorage.getItem('testcrack_streak') || '2', 10); 
+
+  // ── Core State ──────────────────────────────────────────────────────────────
+
+  const [totalMomentum, setTotalMomentum] = useState<number>(() => {
+    const stored = localStorage.getItem('testcrack_momentum');
+    return stored !== null ? parseInt(stored, 10) : 120;
   });
 
-  // Auto-save to LocalStorage whenever it changes (to persist across reloads for now)
+  const [streak, setStreak] = useState<number>(() => {
+    const stored = localStorage.getItem('testcrack_streak');
+    return stored !== null ? parseInt(stored, 10) : 2;
+  });
+
+  /**
+   * Tracks which penalty cycles have already been applied.
+   * Key format: "miss_penalty_<cycleKey>" where cycleKey is a unique identifier
+   * per miss event (e.g. "2026-W25-miss1", "2026-W25-miss2").
+   * This prevents double-deduction on re-renders or page reloads.
+   */
+  const [appliedPenalties, setAppliedPenalties] = useState<Set<string>>(() => {
+    const stored = localStorage.getItem('testcrack_applied_penalties');
+    return stored ? new Set(JSON.parse(stored)) : new Set();
+  });
+
+  // ── Persistence Side-Effects ─────────────────────────────────────────────────
+
   useEffect(() => {
     localStorage.setItem('testcrack_momentum', totalMomentum.toString());
   }, [totalMomentum]);
 
-  // The function to call when the backend says "You earned X points!"
-  const addPoints = (points: number) => {
-    setTotalMomentum(prev => prev + points);
-  };
+  useEffect(() => {
+    localStorage.setItem(
+      'testcrack_applied_penalties',
+      JSON.stringify(Array.from(appliedPenalties))
+    );
+  }, [appliedPenalties]);
 
-  const updateStreak = (newStreak: number) => {
+  // ── Actions ──────────────────────────────────────────────────────────────────
+
+  const addPoints = useCallback((points: number, reason?: string) => {
+    if (reason) console.info(`[Momentum] +${points} — ${reason}`);
+    setTotalMomentum(prev => prev + Math.abs(points));
+  }, []);
+
+  /**
+   * Safely deducts points. Floors at 0 — momentum can never go negative.
+   */
+  const deductPoints = useCallback((points: number, reason?: string) => {
+    if (reason) console.info(`[Momentum] -${Math.abs(points)} — ${reason}`);
+    setTotalMomentum(prev => Math.max(0, prev - Math.abs(points)));
+  }, []);
+
+  const updateStreak = useCallback((newStreak: number) => {
     setStreak(newStreak);
     localStorage.setItem('testcrack_streak', newStreak.toString());
-  };
+  }, []);
+
+  /**
+   * Applies a miss penalty ONCE per unique cycleKey.
+   * Miss 1 → −20 pts. Miss 2 → −40 pts (cumulative from miss 1 = −60 total).
+   *
+   * cycleKey should encode enough context to be unique per event:
+   *   e.g. `${studentId}_${isoWeek}_miss${missCount}`
+   *   For now a date-based key works fine: `${todayDate}_miss${missCount}`
+   *
+   * Returns true if the penalty was freshly applied, false if already recorded.
+   */
+  const applyMissPenalty = useCallback(
+    (missCount: 1 | 2, cycleKey: string): boolean => {
+      if (appliedPenalties.has(cycleKey)) return false; // guard — already applied
+
+      const deduction = missCount === 1 ? 20 : 40;
+      const reason = missCount === 1
+        ? 'Missed assessment — cycle 1'
+        : 'Second consecutive missed assessment — cycle 2 intervention';
+
+      deductPoints(deduction, reason);
+
+      setAppliedPenalties(prev => {
+        const next = new Set(prev);
+        next.add(cycleKey);
+        return next;
+      });
+
+      return true;
+    },
+    [appliedPenalties, deductPoints]
+  );
+
+  const hasPenaltyBeenApplied = useCallback(
+    (cycleKey: string): boolean => appliedPenalties.has(cycleKey),
+    [appliedPenalties]
+  );
+
+  // ── Provider ─────────────────────────────────────────────────────────────────
 
   return (
-    <MomentumContext.Provider value={{ totalMomentum, streak, addPoints, updateStreak }}>
+    <MomentumContext.Provider
+      value={{
+        totalMomentum,
+        streak,
+        addPoints,
+        deductPoints,
+        updateStreak,
+        applyMissPenalty,
+        hasPenaltyBeenApplied,
+      }}
+    >
       {children}
     </MomentumContext.Provider>
   );
 };
 
-export const useMomentum = () => {
+// ─── HOOK ─────────────────────────────────────────────────────────────────────
+
+export const useMomentum = (): MomentumContextType => {
   const context = useContext(MomentumContext);
-  if (!context) throw new Error('useMomentum must be used within MomentumProvider');
+  if (!context) {
+    throw new Error('useMomentum must be used within a MomentumProvider');
+  }
   return context;
 };
