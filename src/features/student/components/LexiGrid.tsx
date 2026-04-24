@@ -1,19 +1,19 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useMomentum } from "@/features/student/Context/MomentumContext";
 import { callBackend } from '@/features/auth/services/authClient';
-import { ArrowLeft, Sparkles, Lightbulb, CheckCircle2, Zap, Info, ShieldAlert, Award } from 'lucide-react';
+import { ArrowLeft, Sparkles, Lightbulb, CheckCircle2, Zap, Info, ShieldAlert, Award, Loader2 } from 'lucide-react';
 
-// --- Dynamic Word Bank ---
-const WORD_BANK = [
-  { base: "IMPORTANT", target: "CRUCIAL", hint: "Decisive or critical, especially in the success or failure of something." },
-  { base: "VERY HAPPY", target: "ECSTATIC", hint: "Feeling or expressing overwhelming happiness or joyful excitement." },
-  { base: "POOR", target: "DESTITUTE", hint: "Without the basic necessities of life." },
-  { base: "LAZY", target: "LETHARGIC", hint: "Affected by lethargy; sluggish and apathetic." },
-  { base: "BRAVE", target: "INTREPID", hint: "Fearless; adventurous (often used for rhetorical or humorous effect)." },
-  { base: "CAREFUL", target: "METICULOUS", hint: "Showing great attention to detail; very careful and precise." },
-  { base: "BAD", target: "DETRIMENTAL", hint: "Tending to cause harm." },
-  { base: "MANY", target: "MYRIAD", hint: "A countless or extremely great number." }
+// --- Emergency offline fallback (used only when the API is unreachable) ---
+const FALLBACK_WORD_BANK = [
+  { base: "IMPORTANT",  target: "CRUCIAL",     hint: "Decisive or critical, especially in the success or failure of something." },
+  { base: "VERY HAPPY", target: "ECSTATIC",    hint: "Feeling or expressing overwhelming happiness or joyful excitement." },
+  { base: "POOR",       target: "DESTITUTE",   hint: "Without the basic necessities of life." },
+  { base: "LAZY",       target: "LETHARGIC",   hint: "Affected by lethargy; sluggish and apathetic." },
+  { base: "BRAVE",      target: "INTREPID",    hint: "Fearless; adventurous, often used in formal contexts." },
+  { base: "CAREFUL",    target: "METICULOUS",  hint: "Showing great attention to detail; very careful and precise." },
+  { base: "BAD",        target: "DETRIMENTAL", hint: "Tending to cause harm." },
+  { base: "MANY",       target: "MYRIAD",      hint: "A countless or extremely great number." },
 ];
 
 const INTRO_WORDS = [
@@ -33,8 +33,17 @@ const KEYBOARD_ROWS = [
   ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫']
 ];
 
+interface WordItem {
+  base:   string;
+  target: string;
+  hint:   string;
+}
+
 export default function LexiGrid() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const difficulty = (searchParams.get('difficulty') || 'INTERMEDIATE').toUpperCase();
+
   const { totalMomentum, addPoints, syncMomentum } = useMomentum();
 
   // Tracks total attempts across all words this session (for bonus eligibility)
@@ -43,13 +52,14 @@ export default function LexiGrid() {
   const allBonusEligibleRef = useRef(true);
 
   // --- State Management ---
-  const [dailyWords, setDailyWords]   = useState<typeof WORD_BANK>([]);
+  const [dailyWords, setDailyWords]     = useState<WordItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentGuess, setCurrentGuess] = useState("");
-  const [triesLeft, setTriesLeft]     = useState(MAX_TRIES);
-  const [wordsWon, setWordsWon]       = useState(0);
-  const [gameStatus, setGameStatus]   = useState<'playing' | 'won' | 'lost' | 'completed_day'>('playing');
+  const [triesLeft, setTriesLeft]       = useState(MAX_TRIES);
+  const [wordsWon, setWordsWon]         = useState(0);
+  const [gameStatus, setGameStatus]     = useState<'playing' | 'won' | 'lost' | 'completed_day'>('playing');
   const [isInitializing, setIsInitializing] = useState(true);
+  const [fetchError, setFetchError]     = useState(false);
 
   // UI States
   const [introStage, setIntroStage]     = useState<'playing' | 'fading' | 'done'>('playing');
@@ -87,9 +97,8 @@ export default function LexiGrid() {
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
     const savedData = localStorage.getItem('lexigrid_state');
-    
-    let loadedSuccessfully = false;
 
+    // Try to resume a saved session for today
     if (savedData) {
       try {
         const parsed = JSON.parse(savedData);
@@ -99,38 +108,74 @@ export default function LexiGrid() {
           setTriesLeft(parsed.triesLeft ?? MAX_TRIES);
           setCurrentGuess(parsed.currentGuess || "");
           setWordsWon(parsed.wordsWon || 0);
-          
-          if (parsed.currentIndex >= DAILY_LIMIT) {
-            setGameStatus('completed_day');
-          }
-          loadedSuccessfully = true;
+          if (parsed.currentIndex >= DAILY_LIMIT) setGameStatus('completed_day');
+          setIsInitializing(false);
+          return; // No fetch needed — local state is valid for today
         }
-      } catch (error) {
-        console.error("Corrupted LexiGrid save data found. Clearing...");
+      } catch {
+        console.warn('[LexiGrid] Corrupted save data. Clearing...');
         localStorage.removeItem('lexigrid_state');
       }
     }
 
-    if (!loadedSuccessfully) {
-      const shuffled = [...WORD_BANK].sort(() => 0.5 - Math.random()).slice(0, DAILY_LIMIT);
-      setDailyWords(shuffled);
-      setCurrentIndex(0);
-      setTriesLeft(MAX_TRIES);
-      setCurrentGuess("");
-      setWordsWon(0);
-      
-      localStorage.setItem('lexigrid_state', JSON.stringify({
-        date: today,
-        words: shuffled,
-        currentIndex: 0,
-        triesLeft: MAX_TRIES,
-        currentGuess: "",
-        wordsWon: 0
-      }));
-    }
+    // No valid save for today — fetch fresh words from backend
+    const fetchWords = async () => {
+      try {
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+        const res = await callBackend(
+          `${backendUrl}/api/student/lexigrid-words?difficulty=${encodeURIComponent(difficulty)}`
+        );
 
-    setIsInitializing(false);
-  }, []);
+        let words: WordItem[];
+
+        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+          // Map DB column names → game shape; normalise to uppercase
+          words = (res.data as any[]).map((w) => ({
+            base:   w.base_word.toUpperCase(),
+            target: w.target_word.toUpperCase(),
+            hint:   w.hint,
+          }));
+        } else {
+          // Backend returned no words — use offline fallback
+          console.warn('[LexiGrid] No words from API, using fallback bank.');
+          words = [...FALLBACK_WORD_BANK]
+            .sort(() => 0.5 - Math.random())
+            .slice(0, DAILY_LIMIT);
+        }
+
+        setDailyWords(words);
+        setCurrentIndex(0);
+        setTriesLeft(MAX_TRIES);
+        setCurrentGuess('');
+        setWordsWon(0);
+
+        localStorage.setItem('lexigrid_state', JSON.stringify({
+          date: today,
+          words,
+          currentIndex: 0,
+          triesLeft: MAX_TRIES,
+          currentGuess: '',
+          wordsWon: 0,
+        }));
+      } catch (err) {
+        console.error('[LexiGrid] Failed to fetch words from API:', err);
+        setFetchError(true);
+        // Use offline fallback so the game is still playable
+        const words = [...FALLBACK_WORD_BANK]
+          .sort(() => 0.5 - Math.random())
+          .slice(0, DAILY_LIMIT);
+        setDailyWords(words);
+        setCurrentIndex(0);
+        setTriesLeft(MAX_TRIES);
+        setCurrentGuess('');
+        setWordsWon(0);
+      } finally {
+        setIsInitializing(false);
+      }
+    };
+
+    fetchWords();
+  }, [difficulty]);
 
   const saveState = (index: number, tries: number, guess: string, score: number) => {
     const today = new Date().toISOString().split('T')[0];
@@ -260,9 +305,11 @@ export default function LexiGrid() {
   if (isInitializing) {
     return (
       <div className="min-h-screen bg-[#07070a] flex items-center justify-center font-sans text-white">
-        <div className="flex flex-col items-center animate-pulse">
-          <Sparkles className="w-10 h-10 text-indigo-500 mb-4" />
-          <p className="text-slate-400 font-bold tracking-widest uppercase">Loading Challenge...</p>
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
+          <p className="text-slate-400 font-bold tracking-widest uppercase text-sm">
+            Loading Today's Challenge...
+          </p>
         </div>
       </div>
     );
@@ -301,6 +348,13 @@ export default function LexiGrid() {
           <h1 className="relative z-10 text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 tracking-[0.2em] uppercase drop-shadow-[0_0_40px_rgba(129,140,248,0.6)] animate-[logoPop_1s_ease-out_1s_both]">
             LexiGrid
           </h1>
+        </div>
+      )}
+
+      {/* ── Offline warning banner ── */}
+      {fetchError && (
+        <div className="relative z-20 mx-auto mt-2 max-w-lg bg-amber-500/10 border border-amber-500/30 rounded-2xl px-4 py-2 text-center text-amber-400 text-xs font-bold tracking-wide">
+          Using offline word bank — check your connection for fresh challenges.
         </div>
       )}
 

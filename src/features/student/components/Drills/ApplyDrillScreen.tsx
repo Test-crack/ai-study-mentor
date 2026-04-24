@@ -3,7 +3,8 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { StudentSidebar } from '../dashboard/StudentSidebar';
 import { StudentTopbar } from '../dashboard/StudentTopbar';
 import { Mic, Square, Loader2, Send, Flame, Zap, ArrowRight, CheckCircle2 } from 'lucide-react';
-import { useMomentum } from "@/features/student/Context/MomentumContext"; 
+import { useMomentum } from "@/features/student/Context/MomentumContext";
+import { callBackend } from '@/features/auth/services/authClient';
 
 export default function ApplyDrillScreen() {
   const [searchParams] = useSearchParams();
@@ -13,7 +14,7 @@ export default function ApplyDrillScreen() {
   const subSkill = searchParams.get('sub_skill') || 'Pronunciation';
   const initialScore = parseInt(searchParams.get('score') || '0', 10);
   
-  const { streak, addPoints } = useMomentum();
+  const { streak, syncMomentum } = useMomentum();
   
   const drillType = skill.toLowerCase() === 'writing' ? 'paragraph_repair' : 'audio_response';
   const timeLimit = drillType === 'audio_response' ? 120 : 180; // 2 mins audio, 3 mins text
@@ -24,27 +25,33 @@ export default function ApplyDrillScreen() {
   const [isComplete, setIsComplete] = useState(false);
   const [textAnswer, setTextAnswer] = useState("");
 
-  // Timer logic
+  // Timer logic — void cast prevents "no floating promise" lint warning on async handler
   useEffect(() => {
     let interval: any;
     if (isRecording && timeLeft > 0) {
       interval = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
     } else if (timeLeft === 0 && isRecording) {
-      handleSubmit();
+      void handleSubmit();
     }
     return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRecording, timeLeft]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsRecording(false);
     setIsProcessing(true);
-    
-    setTimeout(() => {
+    try {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+      const res = await callBackend(`${backendUrl}/api/drills/apply-complete`, { method: 'POST' });
+      if (res.success && res.momentum_score !== undefined) {
+        syncMomentum(res.momentum_score);
+      }
+    } catch (err) {
+      console.error('[ApplyDrill] Failed to persist +30 pts:', err);
+    } finally {
       setIsProcessing(false);
       setIsComplete(true);
-      // Flat +30 points for completing the full daily loop (FE-14)
-      addPoints(initialScore + 30); 
-    }, 1500);
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -154,8 +161,8 @@ export default function ApplyDrillScreen() {
 
                 <p className="text-slate-500 mb-8 font-medium">Excellent work today. You've completed your targeted drills, absorbed a lesson, and proved your knowledge. See you tomorrow!</p>
 
-                <button 
-                  onClick={() => navigate('/student/dashboard')}
+                <button
+                  onClick={() => navigate('/student/dashboard', { state: { drillCompleted: true } })}
                   className="w-full sm:w-auto inline-flex items-center justify-center bg-slate-800 dark:bg-white text-white dark:text-slate-900 px-8 py-4 rounded-xl font-black hover:scale-105 transition-all shadow-lg"
                 >
                   Back to Dashboard <ArrowRight className="w-5 h-5 ml-2" />

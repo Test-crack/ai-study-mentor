@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { StudentSidebar } from "./dashboard/StudentSidebar";
 import { StudentTopbar } from "./dashboard/StudentTopbar";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { PremiumModal } from "@/features/payment/components/PremiumModal";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { callBackend } from "@/features/auth/services/authClient";
-import { useMomentum } from "@/features/student/Context/MomentumContext"; // 🔌 WIRED
+import { useMomentum } from "@/features/student/Context/MomentumContext";
 import { cn } from "@/shared/utils";
 import {
   Clock, Flame, Trophy, Target, Zap, BookOpen, Mic, PenLine,
@@ -77,34 +77,11 @@ const calculateStreak = (dates: string[]): number => {
 const overallBand = (bands: SkillBand[]) =>
   Math.round((bands.reduce((s, b) => s + b.score, 0) / bands.length) * 2) / 2;
 
-const TIE_BREAKER_PRIORITY: Record<string, number> = {
-  pronunciation: 1, fluency: 2, grammar: 3, vocabulary: 4, coherence: 5, taskresponse: 6,
-};
-
-const normalizeKey = (key: string) => key.toLowerCase().replace(/score|_/g, "");
-
-const getPriorityFocusArea = (bands: SkillBand[], completedToday: string[]) => {
-  let lowestFocus = { sub_skill: "All Caught Up!", band: 9.0, skill: "Overall", priorityRank: 999 };
-  bands.forEach((band) => {
-    if (!band.subScores) return;
-    Object.entries(band.subScores).forEach(([key, value]) => {
-      const numValue = Number(value);
-      if (isNaN(numValue) || numValue > 9.0) return;
-      const k = key.toLowerCase();
-      if (k.includes("count") || k.includes("total") || k.includes("correct")) return;
-      let displayName = key.replace(/Score/g, "").replace(/_/g, " ").replace(/([A-Z])/g, " $1").trim();
-      displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
-      if (completedToday.includes(displayName)) return;
-      const normalizedKey = normalizeKey(key);
-      const priorityRank = TIE_BREAKER_PRIORITY[normalizedKey] || 99;
-      if (numValue < lowestFocus.band) {
-        lowestFocus = { sub_skill: displayName, band: numValue, skill: band.skill, priorityRank };
-      } else if (numValue === lowestFocus.band && priorityRank < lowestFocus.priorityRank) {
-        lowestFocus = { sub_skill: displayName, band: numValue, skill: band.skill, priorityRank };
-      }
-    });
-  });
-  return lowestFocus;
+// Maps a sub-skill band score to a drill level for the backend question picker
+const getLevelFromScore = (score: number): string => {
+  if (score < 5.0) return 'BEGINNER';
+  if (score < 7.0) return 'INTERMEDIATE';
+  return 'ADVANCED';
 };
 
 /**
@@ -131,10 +108,9 @@ const StudentDashboardPage = () => {
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
   const [currentStreak, setCurrentStreak] = useState(0);
   const [skillBands, setSkillBands] = useState<SkillBand[]>(SKILL_BANDS);
-  const [completedDrills, setCompletedDrills] = useState<string[]>([]);
   const [nextActionDrill, setNextActionDrill] = useState<any>(null);
 
-  // Daily drill state (from backend)
+  // Daily drill state (from backend) — single source of truth
   const [dailyDrillState, setDailyDrillState] = useState<{
     drills_completed_today: number;
     lexigrid_completed_today: boolean;
@@ -143,15 +119,16 @@ const StudentDashboardPage = () => {
     can_buy_extra: boolean;
     sessions_remaining: number;
     momentum_score: number;
+    daily_streak: number;
     extra_session_cost: number;
   } | null>(null);
   const [buyingExtra, setBuyingExtra] = useState(false);
 
   const { user, profile } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // 🔌 WIRED: Pull momentum actions from context
-  const { applyMissPenalty, syncMomentum } = useMomentum();
+  const { applyMissPenalty, syncMomentum, totalMomentum } = useMomentum();
 
   // ─── Guards ──────────────────────────────────────────────────────────────────
   // Prevent firing the tutor alert more than once per session even if the
@@ -191,10 +168,42 @@ const StudentDashboardPage = () => {
 
   const displayName = profile?.name || user?.email?.split("@")[0] || "Student";
   const overall = overallBand(skillBands);
-  // Use backend daily-drill-state as source of truth; fall back to localStorage until loaded
-  const isLocked = dailyDrillState
-    ? (!dailyDrillState.dashboard_unlocked || missedData.misses >= 2)
-    : (completedDrills.length < 2 || missedData.misses >= 2);
+  // Backend daily-drill-state is the single source of truth; locked until state loads or dashboard unlocked
+  const isLocked = !dailyDrillState || !dailyDrillState.dashboard_unlocked || missedData.misses >= 2;
+
+  // ─── Extracted fetch helpers (stable refs so they're safe as effect deps) ────
+
+  const fetchDailyDrillState = useCallback(async () => {
+    try {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+      const resData = await callBackend(`${backendUrl}/api/student/daily-drill-state`);
+      if (resData.success) {
+        setDailyDrillState(resData);
+        syncMomentum(resData.momentum_score);
+      }
+    } catch (err) {
+      console.error("[DailyDrillState] Fetch failed:", err);
+    }
+  }, [syncMomentum]);
+
+  const fetchNextActionDrill = useCallback(async () => {
+    try {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+      const resData = await callBackend(`${backendUrl}/api/student/next-action-drill`);
+      if (resData.success) {
+        if (resData.recommended_drills && resData.recommended_drills.length > 0) {
+          setNextActionDrill(resData.recommended_drills[0]);
+        } else {
+          setNextActionDrill({ sub_skill: "All Caught Up!", skill: "Overall", sub_skill_score: 9.0 });
+        }
+      } else {
+        setNextActionDrill({ sub_skill: "General Practice", skill: "Overall", sub_skill_score: 5.5 });
+      }
+    } catch (err) {
+      console.error("[NextActionDrill] Fetch failed:", err);
+      setNextActionDrill({ sub_skill: "General Practice", skill: "Overall", sub_skill_score: 5.5 });
+    }
+  }, []);
 
   // ─── Effect: Apply Momentum Penalties ────────────────────────────────────────
   /**
@@ -256,21 +265,8 @@ const StudentDashboardPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [missedData.misses]);
 
-  // ─── Effect: Competency Scores + Attendance ──────────────────────────────────
+  // ─── Effect: Initial data load ───────────────────────────────────────────────
   useEffect(() => {
-    // Restore today's completed drills from localStorage
-    const todayDate = new Date().toISOString().split("T")[0];
-    const storedDrills = localStorage.getItem("completed_drills_today");
-    if (storedDrills) {
-      const parsed = JSON.parse(storedDrills);
-      if (parsed.date === todayDate) {
-        setCompletedDrills(parsed.completed);
-      } else {
-        localStorage.removeItem("completed_drills_today");
-      }
-    }
-
-    // Fetch competency scores from backend
     const fetchCompetencyScores = async () => {
       try {
         const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
@@ -300,43 +296,11 @@ const StudentDashboardPage = () => {
       }
     };
 
-    const fetchNextActionDrill = async () => {
-      try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
-        const resData = await callBackend(`${backendUrl}/api/student/next-action-drill`);
-        if (resData.success) {
-          if (resData.recommended_drills && resData.recommended_drills.length > 0) {
-            setNextActionDrill(resData.recommended_drills[0]);
-          } else {
-            setNextActionDrill({ sub_skill: "All Caught Up!", skill: "Overall", sub_skill_score: 9.0 });
-          }
-        } else {
-          setNextActionDrill({ sub_skill: "General Practice", skill: "Overall", sub_skill_score: 5.5 });
-        }
-      } catch (err) {
-        console.error("[NextActionDrill] Fetch failed:", err);
-        setNextActionDrill({ sub_skill: "General Practice", skill: "Overall", sub_skill_score: 5.5 });
-      }
-    };
-
-    const fetchDailyDrillState = async () => {
-      try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
-        const resData = await callBackend(`${backendUrl}/api/student/daily-drill-state`);
-        if (resData.success) {
-          setDailyDrillState(resData);
-          syncMomentum(resData.momentum_score);
-        }
-      } catch (err) {
-        console.error("[DailyDrillState] Fetch failed:", err);
-      }
-    };
-
     fetchCompetencyScores();
     fetchNextActionDrill();
     fetchDailyDrillState();
 
-    // Attendance / streak tracking
+    // Attendance streak (localStorage-based fallback; backend daily_streak takes over once loaded)
     const today = new Date();
     const offset = today.getTimezoneOffset() * 60000;
     const localISO = new Date(today.getTime() - offset).toISOString().split("T")[0];
@@ -347,9 +311,20 @@ const StudentDashboardPage = () => {
       localStorage.setItem("student_attendance", JSON.stringify(dates));
     }
     setCurrentStreak(calculateStreak(dates));
-  }, []);
+  }, [fetchDailyDrillState, fetchNextActionDrill]);
 
-  const focusData = getPriorityFocusArea(skillBands, completedDrills);
+  // ─── Effect: Refresh drill state when returning from drill/apply screens ──────
+  useEffect(() => {
+    if (location.state?.drillCompleted) {
+      fetchDailyDrillState();
+      fetchNextActionDrill();
+    }
+  }, [location.state?.drillCompleted, fetchDailyDrillState, fetchNextActionDrill]);
+
+  // focusData is driven purely by the backend's prioritized drill recommendation
+  const focusData = nextActionDrill
+    ? { sub_skill: nextActionDrill.sub_skill, band: nextActionDrill.sub_skill_score ?? 5.0, skill: nextActionDrill.skill }
+    : { sub_skill: "Loading...", band: 5.0, skill: "Overall" };
 
   // ─── Render ───────────────────────────────────────────────────────────────────
 
@@ -402,19 +377,30 @@ const StudentDashboardPage = () => {
                 </div>
                 <p className="text-indigo-100 max-w-xl text-sm sm:text-base">
                   You're on a{" "}
-                  <span className="font-bold text-white">{currentStreak}-day streak</span> —
-                  great momentum! Your current overall band is{" "}
+                  <span className="font-bold text-white">
+                    {dailyDrillState?.daily_streak ?? currentStreak}-day streak
+                  </span>{" "}
+                  — great momentum! Overall band:{" "}
                   <span className="font-bold text-white">{overall}</span>.
                 </p>
               </div>
-              <div className="flex-shrink-0 text-center bg-white/15 border border-white/30 backdrop-blur-sm rounded-2xl px-6 py-3">
-                <p className="text-xs font-bold text-indigo-200 uppercase tracking-widest mb-0.5">
-                  Overall Band
-                </p>
-                <p className="text-4xl font-black text-white leading-none">{overall}</p>
-                <p className="text-xs text-indigo-200 mt-0.5">
-                  Target: {dynamicReadiness.targetBand}
-                </p>
+              <div className="flex-shrink-0 flex flex-col sm:flex-row gap-3">
+                <div className="text-center bg-white/15 border border-white/30 backdrop-blur-sm rounded-2xl px-6 py-3">
+                  <p className="text-xs font-bold text-indigo-200 uppercase tracking-widest mb-0.5">
+                    Overall Band
+                  </p>
+                  <p className="text-4xl font-black text-white leading-none">{overall}</p>
+                  <p className="text-xs text-indigo-200 mt-0.5">
+                    Target: {dynamicReadiness.targetBand}
+                  </p>
+                </div>
+                <div className="text-center bg-white/15 border border-white/30 backdrop-blur-sm rounded-2xl px-6 py-3">
+                  <p className="text-xs font-bold text-indigo-200 uppercase tracking-widest mb-0.5 flex items-center justify-center gap-1">
+                    <Zap className="h-3 w-3" /> Momentum
+                  </p>
+                  <p className="text-4xl font-black text-white leading-none">{totalMomentum}</p>
+                  <p className="text-xs text-indigo-200 mt-0.5">pts</p>
+                </div>
               </div>
             </div>
           </section>
@@ -508,7 +494,7 @@ const StudentDashboardPage = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
               {missedData.misses < 2 && (() => {
-                const drillsToday   = dailyDrillState?.drills_completed_today ?? completedDrills.length;
+                const drillsToday   = dailyDrillState?.drills_completed_today ?? 0;
                 const nextAction    = dailyDrillState?.next_action ?? 'DRILL_1';
                 const drillLocked   = nextAction === 'DRILL_LOCKED_INSUFFICIENT_PTS'
                                    || nextAction === 'DAILY_LIMIT_REACHED';
@@ -545,6 +531,7 @@ const StudentDashboardPage = () => {
                         const params = new URLSearchParams({
                           skill:     focusData.skill,
                           sub_skill: focusData.sub_skill,
+                          level:     getLevelFromScore(focusData.band),
                           ...(nextAction !== 'DRILL_1' && nextAction !== 'DRILL_2' ? { extra: 'true' } : {})
                         });
                         navigate(`/student/drill?${params.toString()}`);
@@ -589,7 +576,11 @@ const StudentDashboardPage = () => {
                     )}
                   >
                     <div
-                      onClick={() => !lexiBlocked && navigate("/student/lexigrid")}
+                      onClick={() => {
+                        if (!lexiBlocked) {
+                          navigate(`/student/lexigrid?difficulty=${getLevelFromScore(overall)}`);
+                        }
+                      }}
                       className={cn(
                         "h-full relative overflow-hidden rounded-3xl bg-slate-900 dark:bg-[#0f172a] p-6 flex flex-col justify-center group shadow-lg transition-all duration-300",
                         isLexiGate

@@ -43,29 +43,7 @@ export default function DrillResultCard({ skill, subSkill, momentumScore, feedba
       return;
     }
     setError("");
-
-    // Knockout system logic
-    const today = new Date().toISOString().split('T')[0];
-    const storedData = localStorage.getItem('completed_drills_today');
-    let completedList: string[] = [];
-
-    if (storedData) {
-      const parsed = JSON.parse(storedData);
-      if (parsed.date === today) {
-        completedList = parsed.completed;
-      }
-    }
-
-    if (!completedList.includes(subSkill)) {
-      completedList.push(subSkill);
-    }
-
-    localStorage.setItem('completed_drills_today', JSON.stringify({
-      date: today,
-      completed: completedList
-    }));
-
-    onUnlockNext(); 
+    onUnlockNext();
   };
 
   return (
