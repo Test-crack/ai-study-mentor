@@ -7,8 +7,9 @@ interface MomentumContextType {
   streak: number;
   addPoints: (points: number, reason?: string) => void;
   deductPoints: (points: number, reason?: string) => void;
+  syncMomentum: (serverScore: number) => void;
   updateStreak: (newStreak: number) => void;
-  applyMissPenalty: (missCount: 1 | 2, cycleKey: string) => boolean; // returns true if penalty was newly applied
+  applyMissPenalty: (missCount: 1 | 2, cycleKey: string) => boolean;
   hasPenaltyBeenApplied: (cycleKey: string) => boolean;
 }
 
@@ -71,6 +72,11 @@ export const MomentumProvider = ({ children }: { children: ReactNode }) => {
     setTotalMomentum(prev => Math.max(0, prev - Math.abs(points)));
   }, []);
 
+  // Override local state with the authoritative value from the backend
+  const syncMomentum = useCallback((serverScore: number) => {
+    setTotalMomentum(serverScore);
+  }, []);
+
   const updateStreak = useCallback((newStreak: number) => {
     setStreak(newStreak);
     localStorage.setItem('testcrack_streak', newStreak.toString());
@@ -122,6 +128,7 @@ export const MomentumProvider = ({ children }: { children: ReactNode }) => {
         streak,
         addPoints,
         deductPoints,
+        syncMomentum,
         updateStreak,
         applyMissPenalty,
         hasPenaltyBeenApplied,

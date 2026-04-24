@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMomentum } from "@/features/student/Context/MomentumContext";
+import { callBackend } from '@/features/auth/services/authClient';
 import { ArrowLeft, Sparkles, Lightbulb, CheckCircle2, Zap, Info, ShieldAlert, Award } from 'lucide-react';
 
 // --- Dynamic Word Bank ---
@@ -34,22 +35,27 @@ const KEYBOARD_ROWS = [
 
 export default function LexiGrid() {
   const navigate = useNavigate();
-  const { totalMomentum, addPoints } = useMomentum();
+  const { totalMomentum, addPoints, syncMomentum } = useMomentum();
+
+  // Tracks total attempts across all words this session (for bonus eligibility)
+  const totalAttemptsRef = useRef(0);
+  // Tracks whether every solved word used ≤3 attempts (bonus check)
+  const allBonusEligibleRef = useRef(true);
 
   // --- State Management ---
-  const [dailyWords, setDailyWords] = useState<typeof WORD_BANK>([]);
+  const [dailyWords, setDailyWords]   = useState<typeof WORD_BANK>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentGuess, setCurrentGuess] = useState("");
-  const [triesLeft, setTriesLeft] = useState(MAX_TRIES);
-  const [wordsWon, setWordsWon] = useState(0); 
-  const [gameStatus, setGameStatus] = useState<'playing' | 'won' | 'lost' | 'completed_day'>('playing');
+  const [triesLeft, setTriesLeft]     = useState(MAX_TRIES);
+  const [wordsWon, setWordsWon]       = useState(0);
+  const [gameStatus, setGameStatus]   = useState<'playing' | 'won' | 'lost' | 'completed_day'>('playing');
   const [isInitializing, setIsInitializing] = useState(true);
-  
+
   // UI States
-  const [introStage, setIntroStage] = useState<'playing' | 'fading' | 'done'>('playing');
+  const [introStage, setIntroStage]     = useState<'playing' | 'fading' | 'done'>('playing');
   const [isErrorShake, setIsErrorShake] = useState(false);
-  const [showHint, setShowHint] = useState(false);
-  const [flyingScore, setFlyingScore] = useState(false);
+  const [showHint, setShowHint]         = useState(false);
+  const [flyingScore, setFlyingScore]   = useState(false);
   const [localMomentum, setLocalMomentum] = useState(totalMomentum);
 
   // Sync local momentum with global on load
@@ -158,7 +164,8 @@ export default function LexiGrid() {
         const newScore = wordsWon + 1;
         setWordsWon(newScore);
         saveState(currentIndex, triesLeft, currentGuess, newScore);
-        triggerWinAnimation();
+        const attemptsUsedForWord = MAX_TRIES - triesLeft + 1; // e.g. first try → 1
+        triggerWinAnimation(attemptsUsedForWord);
       } else {
         const newTries = triesLeft - 1;
         setTriesLeft(newTries);
@@ -198,8 +205,35 @@ export default function LexiGrid() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyPress]);
 
+  // --- Backend sync on session complete ---
+  const submitLexiGridSession = useCallback(async (finalWordsWon: number) => {
+    try {
+      const attemptsUsed = totalAttemptsRef.current;
+      const bonusEligible = allBonusEligibleRef.current && finalWordsWon >= DAILY_LIMIT;
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+      const res = await callBackend(`${backendUrl}/api/student/game-score`, {
+        method: 'POST',
+        body: JSON.stringify({
+          game_type:      'LEXIGRID',
+          words_solved:   finalWordsWon,
+          total_attempts: attemptsUsed,
+          bonus_eligible: bonusEligible
+        })
+      });
+      if (res.momentum_score !== undefined) {
+        syncMomentum(res.momentum_score);
+      }
+    } catch (err) {
+      console.error('[LexiGrid] Failed to submit session:', err);
+    }
+  }, [syncMomentum]);
+
   // --- Animations & Progression ---
-  const triggerWinAnimation = () => {
+  const triggerWinAnimation = (attemptsForThisWord: number) => {
+    // Track if this word used ≤ MAX_TRIES - triesLeft attempts (i.e. ≤ 3 total → bonus eligible)
+    if (attemptsForThisWord > MAX_TRIES) allBonusEligibleRef.current = false;
+    totalAttemptsRef.current += attemptsForThisWord;
+
     setFlyingScore(true);
     setTimeout(() => {
       setLocalMomentum(prev => prev + POINTS_PER_WORD);
@@ -212,6 +246,7 @@ export default function LexiGrid() {
     const nextIndex = currentIndex + 1;
     if (nextIndex >= DAILY_LIMIT) {
       setGameStatus('completed_day');
+      submitLexiGridSession(wordsWon);
     } else {
       setCurrentIndex(nextIndex);
       setTriesLeft(MAX_TRIES);

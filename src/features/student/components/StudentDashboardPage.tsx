@@ -134,11 +134,24 @@ const StudentDashboardPage = () => {
   const [completedDrills, setCompletedDrills] = useState<string[]>([]);
   const [nextActionDrill, setNextActionDrill] = useState<any>(null);
 
+  // Daily drill state (from backend)
+  const [dailyDrillState, setDailyDrillState] = useState<{
+    drills_completed_today: number;
+    lexigrid_completed_today: boolean;
+    dashboard_unlocked: boolean;
+    next_action: string;
+    can_buy_extra: boolean;
+    sessions_remaining: number;
+    momentum_score: number;
+    extra_session_cost: number;
+  } | null>(null);
+  const [buyingExtra, setBuyingExtra] = useState(false);
+
   const { user, profile } = useAuth();
   const navigate = useNavigate();
 
   // 🔌 WIRED: Pull momentum actions from context
-  const { applyMissPenalty } = useMomentum();
+  const { applyMissPenalty, syncMomentum } = useMomentum();
 
   // ─── Guards ──────────────────────────────────────────────────────────────────
   // Prevent firing the tutor alert more than once per session even if the
@@ -178,7 +191,10 @@ const StudentDashboardPage = () => {
 
   const displayName = profile?.name || user?.email?.split("@")[0] || "Student";
   const overall = overallBand(skillBands);
-  const isLocked = completedDrills.length < 2 || missedData.misses >= 2;
+  // Use backend daily-drill-state as source of truth; fall back to localStorage until loaded
+  const isLocked = dailyDrillState
+    ? (!dailyDrillState.dashboard_unlocked || missedData.misses >= 2)
+    : (completedDrills.length < 2 || missedData.misses >= 2);
 
   // ─── Effect: Apply Momentum Penalties ────────────────────────────────────────
   /**
@@ -303,8 +319,22 @@ const StudentDashboardPage = () => {
       }
     };
 
+    const fetchDailyDrillState = async () => {
+      try {
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+        const resData = await callBackend(`${backendUrl}/api/student/daily-drill-state`);
+        if (resData.success) {
+          setDailyDrillState(resData);
+          syncMomentum(resData.momentum_score);
+        }
+      } catch (err) {
+        console.error("[DailyDrillState] Fetch failed:", err);
+      }
+    };
+
     fetchCompetencyScores();
     fetchNextActionDrill();
+    fetchDailyDrillState();
 
     // Attendance / streak tracking
     const today = new Date();
@@ -447,7 +477,7 @@ const StudentDashboardPage = () => {
           </div>
 
           {/* ── Platform Lock Banner ─────────────────────────────────────────── */}
-          {isLocked && missedData.misses < 2 && (
+          {isLocked && missedData.misses < 2 && dailyDrillState && (
             <div className="relative z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-xl flex items-center justify-between animate-in slide-in-from-top-4">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-500/20 rounded-full flex items-center justify-center">
@@ -458,12 +488,10 @@ const StudentDashboardPage = () => {
                     Platform Locked
                   </h3>
                   <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                    Complete{" "}
-                    <strong className="text-indigo-500">
-                      {2 - completedDrills.length} more priority drill
-                      {2 - completedDrills.length > 1 ? "s" : ""}
-                    </strong>{" "}
-                    from the Next Best Action card below to unlock full access today.
+                    {dailyDrillState.next_action === 'LEXIGRID'
+                      ? <>Complete <strong className="text-teal-500">LexiGrid</strong> (5 words) to unlock Drill 2.</>
+                      : <>Complete <strong className="text-indigo-500">{2 - dailyDrillState.drills_completed_today} more priority drill{2 - dailyDrillState.drills_completed_today !== 1 ? 's' : ''}</strong> to unlock full access today.</>
+                    }
                   </p>
                 </div>
               </div>
@@ -479,61 +507,137 @@ const StudentDashboardPage = () => {
           >
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-              {missedData.misses < 2 && (
-                <div className="lg:col-span-6 flex flex-col h-full">
-                  <FocusAreaCard
-                    sub_skill={focusData.sub_skill}
-                    band={focusData.band}
-                    skill={focusData.skill}
-                    isLocked={isLocked}
-                    drillsLeft={2 - completedDrills.length}
-                    onStart={() => {
-                      const params = new URLSearchParams({
-                        skill: focusData.skill,
-                        sub_skill: focusData.sub_skill,
-                      });
-                      navigate(`/student/drill?${params.toString()}`);
-                    }}
-                  />
-                </div>
-              )}
+              {missedData.misses < 2 && (() => {
+                const drillsToday   = dailyDrillState?.drills_completed_today ?? completedDrills.length;
+                const nextAction    = dailyDrillState?.next_action ?? 'DRILL_1';
+                const drillLocked   = nextAction === 'DRILL_LOCKED_INSUFFICIENT_PTS'
+                                   || nextAction === 'DAILY_LIMIT_REACHED';
+                const canBuyExtra   = dailyDrillState?.can_buy_extra ?? false;
+                const drillsLeft    = Math.max(0, 2 - drillsToday);
 
-              <div
-                className={cn(
-                  missedData.misses < 2 ? "lg:col-span-6" : "lg:col-span-12",
-                  "h-full",
-                  isLocked && "opacity-40 grayscale pointer-events-none blur-[2px]"
-                )}
-              >
-                <div
-                  onClick={() => navigate("/student/lexigrid")}
-                  className="h-full relative overflow-hidden rounded-3xl bg-slate-900 dark:bg-[#0f172a] border border-indigo-500/30 p-6 flex flex-col justify-center cursor-pointer group shadow-lg hover:shadow-indigo-500/20 transition-all duration-300"
-                >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-[50px] group-hover:bg-indigo-500/20 transition-colors" />
-                  <div className="relative z-10 flex items-start gap-5">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-400/30 flex items-center justify-center flex-shrink-0">
-                      <Sparkles className="w-7 h-7 text-amber-400" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <h2 className="text-xl font-bold text-white tracking-tight">
-                          Daily Challenge
-                        </h2>
-                        <span className="bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
-                          Ready
-                        </span>
+                const handleBuyExtra = async () => {
+                  setBuyingExtra(true);
+                  try {
+                    const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+                    const res = await callBackend(`${backendUrl}/api/drills/authorize-extra`, { method: 'POST' });
+                    if (res.success) {
+                      syncMomentum(res.momentum_score);
+                      // Refresh daily state so the card re-enables
+                      const stateRes = await callBackend(`${backendUrl}/api/student/daily-drill-state`);
+                      if (stateRes.success) setDailyDrillState(stateRes);
+                    }
+                  } catch (err) {
+                    console.error('[BuyExtra] failed:', err);
+                  } finally {
+                    setBuyingExtra(false);
+                  }
+                };
+
+                return (
+                  <div className="lg:col-span-6 flex flex-col h-full gap-3">
+                    <FocusAreaCard
+                      sub_skill={focusData.sub_skill}
+                      band={focusData.band}
+                      skill={focusData.skill}
+                      isLocked={isLocked || drillLocked}
+                      drillsLeft={drillsLeft}
+                      onStart={() => {
+                        const params = new URLSearchParams({
+                          skill:     focusData.skill,
+                          sub_skill: focusData.sub_skill,
+                          ...(nextAction !== 'DRILL_1' && nextAction !== 'DRILL_2' ? { extra: 'true' } : {})
+                        });
+                        navigate(`/student/drill?${params.toString()}`);
+                      }}
+                    />
+                    {/* Extra session purchase button — visible after 2 free drills */}
+                    {drillsToday >= 2 && nextAction !== 'DAILY_LIMIT_REACHED' && (
+                      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex items-center justify-between gap-4">
+                        <div>
+                          <p className="text-sm font-bold text-slate-800 dark:text-white">
+                            {drillLocked ? "Drill Session Locked" : `${dailyDrillState?.sessions_remaining ?? 0} sessions left today`}
+                          </p>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            Spend <strong className="text-amber-500">{dailyDrillState?.extra_session_cost ?? 75} pts</strong> to unlock one extra drill session
+                          </p>
+                        </div>
+                        <button
+                          onClick={handleBuyExtra}
+                          disabled={!canBuyExtra || buyingExtra}
+                          className="shrink-0 px-4 py-2 rounded-xl bg-amber-500 text-white font-bold text-sm hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        >
+                          {buyingExtra ? "..." : `Unlock (+75 pts)`}
+                        </button>
                       </div>
-                      <p className="text-sm text-indigo-100/70 font-medium mb-4">
-                        Crack today's LexiGrid vocabulary puzzle to earn{" "}
-                        <strong className="text-amber-400">+15 Momentum</strong>.
-                      </p>
-                      <button className="bg-white/10 hover:bg-white/20 text-white font-semibold text-sm py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
-                        Play Now <ArrowRight className="w-4 h-4" />
-                      </button>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {(() => {
+                const isLexiGate   = dailyDrillState?.next_action === 'LEXIGRID';
+                const lexiDone     = dailyDrillState?.lexigrid_completed_today ?? false;
+                // LexiGrid is accessible when: it's the active gate, OR dashboard is already unlocked
+                const lexiBlocked  = !isLexiGate && isLocked;
+
+                return (
+                  <div
+                    className={cn(
+                      missedData.misses < 2 ? "lg:col-span-6" : "lg:col-span-12",
+                      "h-full",
+                      lexiBlocked && "opacity-40 grayscale pointer-events-none blur-[2px]"
+                    )}
+                  >
+                    <div
+                      onClick={() => !lexiBlocked && navigate("/student/lexigrid")}
+                      className={cn(
+                        "h-full relative overflow-hidden rounded-3xl bg-slate-900 dark:bg-[#0f172a] p-6 flex flex-col justify-center group shadow-lg transition-all duration-300",
+                        isLexiGate
+                          ? "border-2 border-teal-500/60 cursor-pointer hover:shadow-teal-500/20"
+                          : "border border-indigo-500/30 cursor-pointer hover:shadow-indigo-500/20"
+                      )}
+                    >
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-[50px] group-hover:bg-indigo-500/20 transition-colors" />
+                      <div className="relative z-10 flex items-start gap-5">
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-400/30 flex items-center justify-center flex-shrink-0">
+                          <Sparkles className="w-7 h-7 text-amber-400" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <h2 className="text-xl font-bold text-white tracking-tight">
+                              LexiGrid
+                            </h2>
+                            {isLexiGate && (
+                              <span className="bg-teal-500/20 text-teal-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase animate-pulse">
+                                Active Gate
+                              </span>
+                            )}
+                            {lexiDone && (
+                              <span className="bg-green-500/20 text-green-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
+                                ✓ Done
+                              </span>
+                            )}
+                            {!isLexiGate && !lexiDone && (
+                              <span className="bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
+                                Ready
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-indigo-100/70 font-medium mb-4">
+                            {isLexiGate
+                              ? <>Solve <strong className="text-teal-300">5 words</strong> to unlock Drill 2 — your gate is open now.</>
+                              : <>Crack today's vocabulary puzzle to earn <strong className="text-amber-400">+10 Momentum</strong>.</>
+                            }
+                          </p>
+                          <button className="bg-white/10 hover:bg-white/20 text-white font-semibold text-sm py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
+                            {lexiDone ? "Play Again" : "Play Now"} <ArrowRight className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
+                );
+              })()}
             </div>
           </section>
 

@@ -1,48 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { StudentSidebar } from '../dashboard/StudentSidebar';
-import { StudentTopbar } from '../dashboard/StudentTopbar'; 
+import { StudentTopbar } from '../dashboard/StudentTopbar';
 import AudioResponseDrill from './AudioResponseDrill';
 import ParagraphRepairDrill from './ParagraphRepairDrill';
 import McqDrill from './McqDrill';
 import DrillResultCard from './DrillResultCard';
 import { callBackend } from '@/features/auth/services/authClient';
+import { useMomentum } from '@/features/student/Context/MomentumContext';
 import { ArrowLeft, Target, Loader2 } from 'lucide-react';
 
 export default function DrillScreen() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { syncMomentum } = useMomentum();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  
-  const skill = searchParams.get('skill') || 'SPEAKING';
+
+  const skill    = searchParams.get('skill')     || 'SPEAKING';
   const subSkill = searchParams.get('sub_skill') || 'PRONUNCIATION';
-  const level = searchParams.get('level') || 'INTERMEDIATE';
-  
+  const level    = searchParams.get('level')     || 'INTERMEDIATE';
+  const isExtra  = searchParams.get('extra')     === 'true';
+
+  const QUESTIONS_PER_SESSION = 5;
+
   // Drill State
-  const [prompts, setPrompts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [prompts, setPrompts]                   = useState<any[]>([]);
+  const [loading, setLoading]                   = useState(true);
   const [currentPromptIndex, setCurrentPromptIndex] = useState(0);
-  
+
   // Scoring State
-  const [targetCount, setTargetCount] = useState(5); // Randomized between 4-6
-  const [correctAnswersCount, setCorrectAnswersCount] = useState(0); 
-  const [momentumScore, setMomentumScore] = useState(0); // Will show the raw percentage 0-100
-  const [isComplete, setIsComplete] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const totalPrompts = prompts.length || targetCount;
+  const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
+  const [momentumScore, setMomentumScore]             = useState(0);
+  const [isComplete, setIsComplete]                   = useState(false);
+  const [isSubmitting, setIsSubmitting]               = useState(false);
+
+  const totalPrompts = prompts.length || QUESTIONS_PER_SESSION;
 
   useEffect(() => {
-    // Determine random question count (4, 5, or 6) only ONCE when skill/subskill changes
-    const randomCount = Math.floor(Math.random() * 3) + 4;
-    setTargetCount(randomCount);
-
     const fetchQuestions = async () => {
       try {
         setLoading(true);
         const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
-        const url = `${backendUrl}/api/drills/questions?skill=${encodeURIComponent(skill.toUpperCase())}&subskill=${encodeURIComponent(subSkill.toUpperCase().replace(/\s+/g, '_'))}&level=${encodeURIComponent(level.toUpperCase())}&count=${randomCount}`;
-        
+        const url = `${backendUrl}/api/drills/questions?skill=${encodeURIComponent(skill.toUpperCase())}&subskill=${encodeURIComponent(subSkill.toUpperCase().replace(/\s+/g, '_'))}&level=${encodeURIComponent(level.toUpperCase())}`;
+
         const res = await callBackend(url);
         if (res.success && res.data) {
           setPrompts(res.data);
@@ -55,28 +55,32 @@ export default function DrillScreen() {
         setLoading(false);
       }
     };
-    
+
     fetchQuestions();
   }, [skill, subSkill, level]);
 
   const saveSessionAndComplete = async (finalCorrectCount: number) => {
-    const finalScoreFloat = (finalCorrectCount / totalPrompts) * 100;
-    const finalScore = Math.round(Number.isNaN(finalScoreFloat) ? 0 : finalScoreFloat);
-    
-    setMomentumScore(finalScore); 
+    // Backend calculates: 15 base + correct_answers * 10
+    const earned = 15 + finalCorrectCount * 10;
+    setMomentumScore(earned);
     setIsSubmitting(true);
 
     try {
       const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
-      await callBackend(`${backendUrl}/api/drills/session`, {
+      const res = await callBackend(`${backendUrl}/api/drills/session`, {
         method: 'POST',
         body: JSON.stringify({
-          skill: skill.toUpperCase(),
-          subskill: subSkill.toUpperCase().replace(/\s+/g, '_'),
+          skill:             skill.toUpperCase(),
+          subskill:          subSkill.toUpperCase().replace(/\s+/g, '_'),
           prompts_completed: totalPrompts,
-          momentum_earned: finalScore
+          correct_answers:   finalCorrectCount,
+          is_extra_session:  isExtra
         })
       });
+      // Sync the authoritative momentum_score from backend into the context
+      if (res.momentum_score !== undefined) {
+        syncMomentum(res.momentum_score);
+      }
     } catch (err) {
       console.error("Failed to save drill session", err);
     } finally {
