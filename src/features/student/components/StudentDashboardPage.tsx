@@ -132,6 +132,7 @@ const StudentDashboardPage = () => {
   const [currentStreak, setCurrentStreak] = useState(0);
   const [skillBands, setSkillBands] = useState<SkillBand[]>(SKILL_BANDS);
   const [completedDrills, setCompletedDrills] = useState<string[]>([]);
+  const [nextActionDrill, setNextActionDrill] = useState<any>(null);
 
   const { user, profile } = useAuth();
   const navigate = useNavigate();
@@ -280,6 +281,25 @@ const StudentDashboardPage = () => {
         }
       } catch (err) {
         console.error("[CompetencyScores] Fetch failed:", err);
+      }
+    };
+
+    const fetchNextActionDrill = async () => {
+      try {
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+        const resData = await callBackend(`${backendUrl}/api/student/next-action-drill`);
+        if (resData.success) {
+          if (resData.recommended_drills && resData.recommended_drills.length > 0) {
+            setNextActionDrill(resData.recommended_drills[0]);
+          } else {
+            setNextActionDrill({ sub_skill: "All Caught Up!", skill: "Overall", sub_skill_score: 9.0 });
+          }
+        } else {
+          setNextActionDrill({ sub_skill: "General Practice", skill: "Overall", sub_skill_score: 5.5 });
+        }
+      } catch (err) {
+        console.error("[NextActionDrill] Fetch failed:", err);
+        setNextActionDrill({ sub_skill: "General Practice", skill: "Overall", sub_skill_score: 5.5 });
       }
     };
 
