@@ -30,7 +30,8 @@ export const MomentumProvider = ({ children }: { children: ReactNode }) => {
 
   const [streak, setStreak] = useState<number>(() => {
     const stored = localStorage.getItem('testcrack_streak');
-    return stored !== null ? parseInt(stored, 10) : 2;
+    // Default 0 — backend authoritative value overwrites this on first load
+    return stored !== null ? parseInt(stored, 10) : 0;
   });
 
   /**

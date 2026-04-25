@@ -1,69 +1,119 @@
-# Technical Implementation Report — Drill Session & LexiGrid Flow
+# Implementation Report — Daily Drill & LexiGrid System
+> Phase 1 — Production Hardening Pass  
+> Last updated: 2026-04-25  
+> Status: **Complete ✓**
 
-> Last updated: 2026-04-24 (Phase 5 — Production hardening pass)
-> Scope: Daily drill lock/unlock system, LexiGrid gate, momentum economy, streak tracking, backend persistence
+---
+
+## Executive Summary
+
+This document covers the end-to-end build of the student's **Daily Learning Loop** — the core engagement mechanic that drives every session in the platform.
+
+### What Was Built
+
+Every day a student logs in, they go through a locked, structured sequence of activities before they can access the rest of the platform:
+
+1. **Drill 1** — An AI-guided 5-question assessment targeting their weakest IELTS sub-skill.
+2. **LexiGrid** — A vocabulary gate: the student must solve 5 Band 7–8 synonym puzzles to proceed.
+3. **Drill 2** — A second targeted drill. Completing it **unlocks the full platform** for the day.
+
+After the 2 free drills, students can spend Momentum points (75 pts each) to unlock up to 3 additional sessions (5 drills maximum per day).
+
+### Why It Was Built This Way
+
+- **Learning science**: spaced, low-stakes retrieval practice before open platform access trains consistent daily habits and prevents students from skipping foundational work.
+- **Engagement economy**: Momentum points are the platform's reward currency. Every correct answer, completed drill, and vocabulary word adds points. Missed assessments deduct them. This creates a visible feedback loop that motivates students.
+- **Data quality**: because drills are backend-persisted (not localStorage), the platform has reliable data for analytics, tutor dashboards, and AI recommendations.
+
+### Business Impact
+
+| Metric | Before | After |
+|---|---|---|
+| Streak tracking | localStorage-only, fake default "2" | Backend-authoritative, real-time |
+| Momentum source of truth | localStorage | PostgreSQL (synced to client) |
+| Drill completion tracking | localStorage | PostgreSQL drill_sessions table |
+| Word difficulty | Hardcoded INTERMEDIATE | Adapts to student's actual band score |
+| LexiGrid words | 8 hardcoded client-side words | 25 words in DB, 5 served per session by difficulty |
+| Platform flow enforcement | None — all sections always accessible | Gated: Drill 1 → LexiGrid → Drill 2 → Unlock |
+
+### Known Limitations (Non-Blocking for Phase 1)
+
+| Item | Status |
+|---|---|
+| Missed Assessment backend | Mock data — real backend endpoint not yet implemented |
+| Apply Drill idempotency | No double-submission guard on server side |
+| LexiGrid mid-session abandon | Backend record only written on session complete |
+| Internal Assessment trigger | Not yet implemented |
 
 ---
 
 ## 1. Database Schema
 
-### `institute_students` (existing table, extended)
+### `institute_students` (extended in Phase 5)
 
-| Column              | Type      | Default | Purpose                                                                                                                                                                          |
-| ------------------- | --------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `momentum_score`    | `INT`     | `0`     | Persisted authoritative momentum total. Updated server-side on every drill completion and LexiGrid completion. Replaces the previous localStorage-only value as source of truth. |
-| `daily_streak`      | `INT`     | `0`     | Number of consecutive days the student has completed ≥ 2 drills. Incremented in `saveDrillSession` when the 2nd drill of the day is saved.                                       |
-| `last_streak_date`  | `DATE`    | `NULL`  | The calendar date when `daily_streak` was last incremented. Used to detect gap days and decide whether to extend or reset the streak.                                            |
+| Column | Type | Default | Purpose |
+|---|---|---|---|
+| `momentum_score` | `INT` | `0` | Authoritative momentum total. Every drill, LexiGrid, and apply step increments this on the server. |
+| `daily_streak` | `INT` | `0` | Consecutive days with ≥ 2 completed drills. Incremented server-side — never trusts the client. |
+| `last_streak_date` | `DATE` | `NULL` | Last calendar day the streak was incremented. Detects gap days so the streak resets correctly. |
 
-### `drill_sessions` (existing table, extended)
+### `drill_sessions` (extended)
 
-| Column             | Type       | Default | Purpose                                                                                               |
-| ------------------ | ---------- | ------- | ----------------------------------------------------------------------------------------------------- |
-| `correct_answers`  | `SMALLINT` | `0`     | How many of the 5 MCQ prompts were answered correctly. Used server-side to compute `momentum_earned`. |
-| `total_questions`  | `SMALLINT` | `5`     | Always 5 — explicit for future queries and analytics.                                                 |
-| `is_extra_session` | `BOOLEAN`  | `false` | Marks sessions that were purchased with 75 pts beyond the 2 free daily sessions.                      |
+| Column | Type | Default | Purpose |
+|---|---|---|---|
+| `correct_answers` | `SMALLINT` | `0` | Drives momentum calculation: `15 + correct_answers × 10` per session. |
+| `total_questions` | `SMALLINT` | `5` | Always 5. Explicit for analytics queries. |
+| `is_extra_session` | `BOOLEAN` | `false` | Marks sessions bought beyond the 2 free daily sessions. |
 
 ### `student_game_scores` (new table)
 
-| Column            | Type          | Notes                                                |
-| ----------------- | ------------- | ---------------------------------------------------- |
-| `id`              | `UUID`        | PK                                                   |
-| `student_id`      | `UUID`        | FK → `institute_students.id`                         |
-| `game_type`       | `VARCHAR(30)` | `'LEXIGRID'` or `'GRAMMAR_SWIPE'` (future)           |
-| `session_date`    | `DATE`        | Calendar date of play. Unique per student+game+date. |
-| `words_solved`    | `INT`         | How many words the student solved (0–5 for LexiGrid) |
-| `total_attempts`  | `INT`         | Total letter submissions made across all words       |
-| `bonus_eligible`  | `BOOLEAN`     | `true` if every solved word used ≤ 3 attempts        |
-| `momentum_earned` | `INT`         | Awarded momentum (10 base + 5 bonus if eligible)     |
-| `completed`       | `BOOLEAN`     | `true` once `words_solved >= 5`                      |
-| `score_data`      | `JSONB`       | Flexible extension slot (unused for now)             |
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `UUID` | PK |
+| `student_id` | `UUID` | FK → `institute_students.id` |
+| `game_type` | `VARCHAR(30)` | `'LEXIGRID'` today; extensible for future mini-games |
+| `session_date` | `DATE` | Calendar day. Unique per student + game + date — prevents duplicate scoring. |
+| `words_solved` | `INT` | 0–5 for LexiGrid |
+| `total_attempts` | `INT` | Total letter submissions across the session |
+| `bonus_eligible` | `BOOLEAN` | `true` if every word was solved within 3 attempts |
+| `momentum_earned` | `INT` | 10 base + 5 bonus if eligible |
+| `completed` | `BOOLEAN` | `true` when words_solved ≥ 5 |
+| `score_data` | `JSONB` | Extension slot for future per-word analytics |
 
-**Constraint:** `UNIQUE(student_id, game_type, session_date)` — enforces one LexiGrid session per student per calendar day.
+**Constraint:** `UNIQUE(student_id, game_type, session_date)` — upsert on conflict; safe to call multiple times.
+
+### `lexigrid_words` (new table)
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `UUID` | PK |
+| `base_word` | `VARCHAR(100)` | Common word shown to student (e.g. "HARMFUL") |
+| `target_word` | `VARCHAR(100)` | Band 7–8 synonym to type (e.g. "PERNICIOUS"), stored UPPERCASE |
+| `hint` | `TEXT` | Contextual definition shown on hint reveal |
+| `category` | `VARCHAR(50)` | `'academic'`, `'descriptive'`, or `'formal'` |
+| `difficulty` | `VARCHAR(20)` | `BEGINNER`, `INTERMEDIATE`, or `ADVANCED` |
+| `target_band` | `DECIMAL(2,1)` | IELTS band this word targets |
+| `is_active` | `BOOLEAN` | Soft-delete flag |
+| `times_served` | `INT` | Fire-and-forget usage counter for future rotation logic |
+
+Seeded with **25 words** across all three difficulty levels (8 BEGINNER, 10 INTERMEDIATE, 7 ADVANCED). Seed SQL: `docs/lexigrid-words-seed.sql`.
 
 ---
 
-## 2. SQL Queries (run in pgAdmin in order)
+## 2. SQL Migration Blocks (run in order in pgAdmin)
 
 ```sql
--- ═══════════════════════════════════════════════════════
--- BLOCK 1 — Add momentum_score to institute_students
--- ═══════════════════════════════════════════════════════
+-- BLOCK 1: momentum_score on institute_students
 ALTER TABLE institute_students
   ADD COLUMN IF NOT EXISTS momentum_score INTEGER NOT NULL DEFAULT 0;
 
-
--- ═══════════════════════════════════════════════════════
--- BLOCK 2 — Enrich drill_sessions with scoring fields
--- ═══════════════════════════════════════════════════════
+-- BLOCK 2: enriched drill session scoring
 ALTER TABLE drill_sessions
   ADD COLUMN IF NOT EXISTS correct_answers  SMALLINT NOT NULL DEFAULT 0,
   ADD COLUMN IF NOT EXISTS total_questions  SMALLINT NOT NULL DEFAULT 5,
   ADD COLUMN IF NOT EXISTS is_extra_session BOOLEAN  NOT NULL DEFAULT FALSE;
 
-
--- ═══════════════════════════════════════════════════════
--- BLOCK 3 — Generic mini-game scores table
--- ═══════════════════════════════════════════════════════
+-- BLOCK 3: mini-game scores table
 CREATE TABLE IF NOT EXISTS student_game_scores (
   id               UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
   student_id       UUID         NOT NULL REFERENCES institute_students(id) ON DELETE CASCADE,
@@ -76,131 +126,21 @@ CREATE TABLE IF NOT EXISTS student_game_scores (
   completed        BOOLEAN      NOT NULL DEFAULT FALSE,
   score_data       JSONB,
   created_at       TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-
   CONSTRAINT uq_student_game_date UNIQUE (student_id, game_type, session_date)
 );
-
 CREATE INDEX IF NOT EXISTS idx_game_scores_student ON student_game_scores(student_id);
 CREATE INDEX IF NOT EXISTS idx_game_scores_date    ON student_game_scores(session_date);
 
-
--- ═══════════════════════════════════════════════════════
--- BLOCK 4 — Streak tracking on institute_students (Phase 5)
--- ═══════════════════════════════════════════════════════
+-- BLOCK 4: streak tracking
 ALTER TABLE institute_students
   ADD COLUMN IF NOT EXISTS daily_streak     INTEGER NOT NULL DEFAULT 0,
   ADD COLUMN IF NOT EXISTS last_streak_date DATE;
 
-
--- ═══════════════════════════════════════════════════════
--- BLOCK 5 — LexiGrid test data
--- Replace '<YOUR_STUDENT_UUID>' with a real id from:
---   SELECT id FROM institute_students LIMIT 5;
--- ═══════════════════════════════════════════════════════
-
--- Simulate: student completed LexiGrid yesterday (for streak testing)
-INSERT INTO student_game_scores
-  (student_id, game_type, session_date, words_solved, total_attempts, bonus_eligible, momentum_earned, completed)
-VALUES
-  ('<YOUR_STUDENT_UUID>', 'LEXIGRID', CURRENT_DATE - INTERVAL '1 day', 5, 12, true,  15, true),
-  ('<YOUR_STUDENT_UUID>', 'LEXIGRID', CURRENT_DATE - INTERVAL '2 day', 5, 18, false, 10, true),
-  ('<YOUR_STUDENT_UUID>', 'LEXIGRID', CURRENT_DATE - INTERVAL '3 day', 3,  9, false,  0, false)
-ON CONFLICT (student_id, game_type, session_date) DO NOTHING;
-
--- Simulate: two drill sessions yesterday (so streak = 1 going into today)
--- First get the sub-skill enum values your DB uses:
---   SELECT unnest(enum_range(NULL::"IeltsSubSkillType"));
-INSERT INTO drill_sessions
-  (student_id, skill, sub_skill, prompts_completed, correct_answers, total_questions, momentum_earned, is_extra_session)
-VALUES
-  ('<YOUR_STUDENT_UUID>', 'SPEAKING', 'PRONUNCIATION', 5, 3, 5, 45, false),
-  ('<YOUR_STUDENT_UUID>', 'SPEAKING', 'FLUENCY',       5, 4, 5, 55, false)
-ON CONFLICT DO NOTHING;
-
--- Bump momentum and streak on the student row to match the test data
-UPDATE institute_students
-SET
-  momentum_score   = 120,
-  daily_streak     = 1,
-  last_streak_date = CURRENT_DATE - INTERVAL '1 day'
-WHERE id = '<YOUR_STUDENT_UUID>';
-
-
--- ═══════════════════════════════════════════════════════
--- BLOCK 6 — Sample MCQ drill questions (5 per sub-skill)
--- Adjust skill/sub_skill/level enums to match your DB
--- ═══════════════════════════════════════════════════════
-INSERT INTO drill_questions
-  (skill, sub_skill, level, drill_type, prompt_text, options, correct_answer, explanation, is_active)
-VALUES
-  -- SPEAKING / PRONUNCIATION / INTERMEDIATE
-  ('SPEAKING', 'PRONUNCIATION', 'INTERMEDIATE', 'MCQ',
-   'Which word has a different stress pattern from the others?',
-   '["A) phoTOgraphy", "B) phoTOgraph", "C) phoTOgraphic", "D) PHOtograph"]',
-   '"D"',
-   'PHOtograph has stress on the first syllable; the others stress the second.',
-   true),
-  ('SPEAKING', 'PRONUNCIATION', 'INTERMEDIATE', 'MCQ',
-   'The "th" in "thin" is pronounced as which sound?',
-   '["A) /d/", "B) /t/", "C) /θ/", "D) /ð/"]',
-   '"C"',
-   '/θ/ is the voiceless dental fricative used in "thin", "think", "therapy".',
-   true),
-  ('SPEAKING', 'PRONUNCIATION', 'INTERMEDIATE', 'MCQ',
-   'Which sentence uses the correct word stress?',
-   '["A) I need to reCORD this.", "B) Hand me the reCORD.", "C) Play the REcord.", "D) Both A and C"]',
-   '"D"',
-   'As a verb "record" stresses the second syllable; as a noun it stresses the first.',
-   true),
-  ('SPEAKING', 'PRONUNCIATION', 'INTERMEDIATE', 'MCQ',
-   'Which vowel sound is in the word "heat"?',
-   '["A) /ɪ/ as in hit", "B) /iː/ as in see", "C) /e/ as in bed", "D) /æ/ as in hat"]',
-   '"B"',
-   '"heat" uses the long /iː/ vowel, the same as "feet", "meet", "see".',
-   true),
-  ('SPEAKING', 'PRONUNCIATION', 'INTERMEDIATE', 'MCQ',
-   'In connected speech, "going to" is most naturally reduced to:',
-   '["A) gonna", "B) goin' to", "C) go to", "D) gonna or going to equally"]',
-   '"A"',
-   'In natural speech "going to" reduces to "gonna" before a verb; e.g. "I'm gonna study".',
-   true),
-
-  -- WRITING / GRAMMAR / INTERMEDIATE
-  ('WRITING', 'GRAMMAR', 'INTERMEDIATE', 'MCQ',
-   'Choose the correct sentence:',
-   '["A) Neither the students nor the teacher were ready.", "B) Neither the students nor the teacher was ready.", "C) Neither the students nor the teacher are ready.", "D) A and B are both acceptable."]',
-   '"B"',
-   'With "neither…nor", the verb agrees with the subject closest to it — here "the teacher" is singular.',
-   true),
-  ('WRITING', 'GRAMMAR', 'INTERMEDIATE', 'MCQ',
-   'Which is the correct use of the present perfect?',
-   '["A) I have seen that film yesterday.", "B) I saw that film since 2020.", "C) I have seen that film three times.", "D) I have seen that film last week."]',
-   '"C"',
-   'Present perfect is used with "three times" (indefinite time); "yesterday" and "last week" require simple past.',
-   true),
-  ('WRITING', 'GRAMMAR', 'INTERMEDIATE', 'MCQ',
-   'Identify the dangling modifier: "Running down the street, the bus drove past me."',
-   '["A) Running down the street", "B) the bus drove past me", "C) There is no error", "D) past me"]',
-   '"A"',
-   '"Running down the street" modifies the nearest noun, "the bus" — but the bus wasn''t running. The subject should be "I".',
-   true),
-  ('WRITING', 'GRAMMAR', 'INTERMEDIATE', 'MCQ',
-   'Which sentence correctly uses a relative clause?',
-   '["A) The book which I borrowed it was fascinating.", "B) The book that I borrowed was fascinating.", "C) The book, that I borrowed, was fascinating.", "D) The book which I borrowed it, was fascinating."]',
-   '"B"',
-   'Restrictive relative clauses don''t use commas and don''t repeat the pronoun (no "it").',
-   true),
-  ('WRITING', 'GRAMMAR', 'INTERMEDIATE', 'MCQ',
-   'Choose the sentence with correct subject-verb agreement:',
-   '["A) The data shows a clear trend.", "B) The data show a clear trend.", "C) Both are acceptable in academic writing.", "D) Neither is acceptable."]',
-   '"C"',
-   '"Data" can be treated as singular (formal American) or plural (traditional British); both are accepted in IELTS academic writing.',
-   true)
-ON CONFLICT DO NOTHING;
+-- BLOCK 5: LexiGrid words table + seed (see docs/lexigrid-words-seed.sql)
+-- Run the full contents of docs/lexigrid-words-seed.sql here.
 ```
 
-After running the SQL, regenerate the Prisma client:
-
+After all SQL blocks are applied:
 ```bash
 cd backend-study-mentor
 npx prisma generate
@@ -210,285 +150,260 @@ npx prisma generate
 
 ## 3. System Constants
 
-| Constant                   | Value    | Location                 |
-| -------------------------- | -------- | ------------------------ |
-| `FREE_SESSIONS_PER_DAY`    | `2`      | `gameScoreController.ts` |
-| `MAX_SESSIONS_PER_DAY`     | `5`      | `gameScoreController.ts` |
-| `EXTRA_SESSION_COST`       | `75 pts` | `gameScoreController.ts` |
-| `LEXIGRID_BASE_PTS`        | `10`     | `gameScoreController.ts` |
-| `LEXIGRID_BONUS_PTS`       | `5`      | `gameScoreController.ts` |
-| `DRILL_BASE_PTS`           | `15`     | `drillController.ts`     |
-| `DRILL_PER_CORRECT`        | `10`     | `drillController.ts`     |
-| `APPLY_DRILL_BONUS`        | `30`     | `drillController.ts`     |
-| `QUESTIONS_PER_SESSION`    | `5`      | `drillController.ts`     |
-| Max drill momentum/session | `65 pts` | `15 + 5×10`              |
-| Min drill momentum/session | `15 pts` | all wrong                |
-| Streak threshold           | `≥ 2 drills/day` | `drillController.ts` |
+| Constant | Value | File |
+|---|---|---|
+| Free drills per day | 2 | `gameScoreController.ts` |
+| Max drills per day | 5 | `gameScoreController.ts` |
+| Extra session cost | 75 pts | `gameScoreController.ts` |
+| LexiGrid base reward | 10 pts | `gameScoreController.ts` |
+| LexiGrid bonus (all ≤3 attempts) | +5 pts | `gameScoreController.ts` |
+| Drill base reward | 15 pts | `drillController.ts` |
+| Drill per correct answer | +10 pts | `drillController.ts` |
+| Apply drill bonus | +30 pts | `drillController.ts` |
+| Max drill momentum/session | 65 pts | `15 + 5×10` |
+| Streak threshold | ≥ 2 drills/day | `drillController.ts` |
+| Words per LexiGrid session | 5 | `lexiGridController.ts` |
 
 ---
 
-## 4. Backend — API Endpoints
+## 4. Backend API Reference
 
 ### `GET /api/student/daily-drill-state`
 
-**Auth:** Required (STUDENT role)
-**Purpose:** Single source of truth the dashboard calls on mount to determine the student's exact position in the day's flow.
+**Auth:** STUDENT role required  
+**Purpose:** Single source of truth the dashboard calls on mount to determine what the student should do next.
 
-**Logic:**
+**Response fields:**
 
-1. Queries `drill_sessions` where `created_at >= today_midnight` → `drills_completed_today`
-2. Queries `student_game_scores` where `game_type = 'LEXIGRID'` AND `session_date >= today_midnight` AND `completed = true` → `lexigrid_completed_today`
-3. Derives `dashboard_unlocked = drills_completed_today >= 2`
-4. Computes `next_action` via this decision tree:
+| Field | Type | Description |
+|---|---|---|
+| `drills_completed_today` | `number` | Sessions saved since midnight |
+| `lexigrid_completed_today` | `boolean` | Whether today's LexiGrid is done |
+| `dashboard_unlocked` | `boolean` | `true` when drills_today ≥ 2 |
+| `next_action` | `string` | See decision tree below |
+| `momentum_score` | `number` | Authoritative current total |
+| `daily_streak` | `number` | Current streak (backend-computed) |
+| `target_band` | `number` | Student's target IELTS band |
+| `current_band` | `number` | Avg of 4 skill band scores (rounded to nearest 0.5) |
+| `can_buy_extra` | `boolean` | Whether student can unlock an extra session |
+| `sessions_remaining` | `number` | Sessions left before daily cap |
+| `extra_session_cost` | `number` | Points cost per extra session |
 
+**`next_action` decision tree:**
 ```
-drills_today = 0                              → DRILL_1
-drills_today = 1, lexigrid_done = false       → LEXIGRID
-drills_today = 1, lexigrid_done = true        → DRILL_2
-drills_today >= MAX (5)                       → DAILY_LIMIT_REACHED
-drills_today >= FREE (2), momentum >= 75      → EXTRA_DRILL_AVAILABLE
-drills_today >= FREE (2), momentum < 75       → DRILL_LOCKED_INSUFFICIENT_PTS
+drills_today = 0                           → DRILL_1
+drills_today = 1, lexigrid done = false    → LEXIGRID
+drills_today = 1, lexigrid done = true     → DRILL_2
+drills_today >= 5                          → DAILY_LIMIT_REACHED
+drills_today >= 2, momentum >= 75          → EXTRA_DRILL_AVAILABLE
+drills_today >= 2, momentum < 75           → DRILL_LOCKED_INSUFFICIENT_PTS
 ```
-
-**Returns:** `drills_completed_today`, `lexigrid_completed_today`, `dashboard_unlocked`, `next_action`, `extra_sessions_today`, `sessions_remaining`, `momentum_score`, **`daily_streak`** (Phase 5), `can_buy_extra`, `free_sessions`, `extra_session_cost`
-
-**Critical detail:** The cutoff uses `todayStart.setHours(0,0,0,0)` — calendar-day boundary, not rolling 24-hour window. Sessions reset at midnight.
 
 ---
 
 ### `POST /api/student/game-score`
 
-**Auth:** Required (STUDENT role)
-**Body:** `{ game_type, words_solved, total_attempts, bonus_eligible }`
-**Purpose:** Called by LexiGrid when the student finishes their session (5 words solved or session ends).
+**Auth:** STUDENT role required  
+**Body:** `{ game_type, words_solved, total_attempts, bonus_eligible }`  
+**Purpose:** Called by LexiGrid when the student's session ends.
 
 **Logic:**
-
 1. `completed = words_solved >= 5`
-2. `momentum_earned = 10 + (bonus_eligible ? 5 : 0)` — only when completed
-3. Upserts `student_game_scores` — idempotent on `(student_id, game_type, session_date)`
-4. If `completed && momentum_earned > 0`: increments `institute_students.momentum_score`
-5. Returns: `{ momentum_earned, momentum_score, next_action }` where `next_action = 'DRILL_2'` on completion
+2. `momentum_earned = 10 + (bonus_eligible ? 5 : 0)` — only on completion
+3. Upserts `student_game_scores` — safe to call multiple times (idempotent per day)
+4. Awards momentum on first completion only
+
+**Response:** `{ momentum_earned, momentum_score, next_action }`
 
 ---
 
 ### `GET /api/student/next-action-drill`
 
-**Auth:** Required (STUDENT role)
-**Purpose:** Returns the prioritized ordered list of sub-skills to drill today, filtered to exclude what was already done today.
+**Auth:** STUDENT role required  
+**Purpose:** Returns the prioritized list of sub-skills for today's drill.
 
-**Logic:**
+**Ranking logic:**
+1. Pulls `StudentCompetencyMatrix` — one row per IELTS skill
+2. Within each skill, ranks sub-skills by band score ascending (weakest first)
+3. Interleaves skills in round-robin so the student alternates rather than exhausting one skill
+4. Filters sub-skills already drilled today
+5. Returns up to `MAX_DAILY_SESSIONS` recommendations
 
-1. Builds `DrillItem[]` from `StudentCompetencyMatrix` — maps each sub-score into `{ skill, sub_skill, skill_band_score, sub_skill_score }`
-2. Groups by skill, sorts within each skill by score ascending (weakest first)
-3. Ranks skill queues by their lowest sub-skill score (weakest skill prioritised)
-4. Interleaves queues in round-robin — alternates skills instead of exhausting one skill before moving to the next
-5. Filters out sub-skills already practiced today (same calendar-day boundary)
-6. Early-returns empty list if `drills_today >= MAX_DAILY_SESSIONS`
-7. Returns: `recommended_drills[]`, `daily_sessions_completed`, `daily_limit`, `sessions_remaining`, `message`
+**Response:** `{ recommended_drills[], daily_sessions_completed, sessions_remaining }`
 
 ---
 
 ### `GET /api/student/competency-scores`
 
-**Auth:** Required (STUDENT role)
-**Purpose:** Returns the student's competency matrix plus profile-level stats.
-**Returns:** `{ data: matrix[], target_band, momentum_score, daily_streak }` — (Phase 5) added `momentum_score` and `daily_streak` to allow the dashboard to initialize from the profile API as an alternative to `daily-drill-state`.
+**Auth:** STUDENT role required  
+**Purpose:** Full competency matrix for the student.
+
+**Response:** `{ data: matrix[], target_band, current_band, momentum_score, daily_streak }`
 
 ---
 
 ### `GET /api/drills/questions`
 
-**Auth:** Required (STUDENT role)
-**Query params:** `skill`, `subskill`, `level`
-**Purpose:** Fetches exactly 5 random active questions for the given skill/subskill/level.
+**Auth:** STUDENT role required  
+**Query params:** `skill`, `subskill`, `level`  
+**Purpose:** Returns exactly 5 random active MCQ questions for the given parameters.
 
-Uses Prisma `$queryRaw` with `ORDER BY RANDOM() LIMIT 5`. The `count` query param is no longer accepted from the client — always 5. Filters: `is_active = true`, exact Postgres enum casts.
+Implementation: Prisma `$queryRaw` with `ORDER BY RANDOM() LIMIT 5`. `level` maps to the `RecommendationLevel` enum: `BEGINNER | INTERMEDIATE | ADVANCED`. Level is inferred server-side from the student's actual band score — not hardcoded.
 
 ---
 
 ### `POST /api/drills/session`
 
-**Auth:** Required (STUDENT role)
-**Body:** `{ skill, subskill, prompts_completed, correct_answers, is_extra_session }`
-**Purpose:** Saves a completed drill session and awards momentum atomically.
+**Auth:** STUDENT role required  
+**Body:** `{ skill, subskill, prompts_completed, correct_answers, is_extra_session }`  
+**Purpose:** Persists a completed drill and awards momentum atomically.
 
 **Logic:**
-
-1. Validates required fields
-2. Computes `momentum_earned = 15 + correct_answers * 10`
-3. Runs a **Prisma `$transaction`** that atomically:
-   - Creates a `DrillSession` record with all fields
-   - Increments `institute_students.momentum_score` by `momentum_earned`
-4. **Streak logic (Phase 5):** After the transaction, counts today's sessions. If `drills_today === 2` (just crossed the 2-drill threshold):
+1. `momentum_earned = 15 + correct_answers × 10`
+2. Prisma `$transaction`: creates `DrillSession` + increments `momentum_score` atomically
+3. **Streak logic** (fires only when `drills_today === 2` exactly, never on 3rd+ session):
    - If `last_streak_date` was yesterday → `daily_streak += 1`
-   - Otherwise → `daily_streak = 1` (reset or start)
-   - Updates `daily_streak` and `last_streak_date = today` atomically
-5. Returns: `{ data: session, momentum_earned, momentum_score, daily_streak }`
+   - Otherwise → `daily_streak = 1` (streak starts fresh)
+   - Updates `daily_streak` + `last_streak_date` atomically
+
+**Response:** `{ data: session, momentum_earned, momentum_score, daily_streak }`
 
 ---
 
 ### `POST /api/drills/authorize-extra`
 
-**Auth:** Required (STUDENT role)
-**Purpose:** Pre-authorizes an extra drill session by deducting 75 pts before the student starts drilling.
+**Auth:** STUDENT role required  
+**Purpose:** Pre-authorizes one extra drill by deducting 75 pts.
 
-**Guards (all checked before deducting):**
-
-- `momentum_score >= 75` — student has enough pts
-- `drills_today >= FREE_SESSIONS_PER_DAY` — free sessions already used
-- `drills_today < MAX_SESSIONS_PER_DAY` — daily cap not hit
-
-Deducts via `institute_students.update({ momentum_score: { decrement: 75 } })`. Returns `{ momentum_score, sessions_remaining }`.
+**Guards (all enforced before deducting):**
+- `momentum_score >= 75`
+- `drills_today >= 2` (free sessions used)
+- `drills_today < 5` (daily cap not hit)
 
 ---
 
-### `POST /api/drills/apply-complete` *(Phase 5 — new)*
+### `POST /api/drills/apply-complete`
 
-**Auth:** Required (STUDENT role)
-**Body:** (none required)
-**Purpose:** Awards +30 momentum pts when the student submits the Apply Drill free-response step.
+**Auth:** STUDENT role required  
+**Purpose:** Awards +30 pts when the student submits the Apply Drill free-response step.
 
-**Logic:** Increments `institute_students.momentum_score` by 30. Returns `{ momentum_earned: 30, momentum_score }`. The frontend calls `syncMomentum(res.momentum_score)` to sync the context.
-
----
-
-## 5. Frontend — Component-Level Implementation
-
-### `MomentumContext.tsx`
-
-**Pattern:** React context + localStorage persistence with backend override capability.
-
-**State:**
-
-- `totalMomentum` — initialized from `localStorage['testcrack_momentum']` or `120` (default)
-- `streak` — initialized from `localStorage['testcrack_streak']` or `2`
-- `appliedPenalties` — `Set<string>` of cycle keys, prevents double-deduction on re-renders
-
-**Functions:**
-
-- `addPoints(pts)` — increments `totalMomentum`, persists to localStorage
-- `deductPoints(pts)` — decrements, floors at 0 (momentum cannot go negative)
-- `syncMomentum(serverScore)` — **overwrites** `totalMomentum` with the backend value. Called after every drill save, LexiGrid completion, apply-drill completion, and on dashboard mount.
-- `applyMissPenalty(missCount, cycleKey)` — checks `appliedPenalties` set; if key not seen, deducts 20 or 40 pts. Miss 1 = −20 pts, Miss 2 = −40 pts.
-
-**Known limitation:** `totalMomentum` initializes from localStorage on page load. The `fetchDailyDrillState()` call on dashboard mount overwrites it immediately via `syncMomentum`, so there is a brief flash of the stale localStorage value.
+**Response:** `{ momentum_earned: 30, momentum_score }`
 
 ---
 
-### `StudentDashboardPage.tsx` *(major Phase 5 refactor)*
+### `GET /api/student/lexigrid-words`
 
-**New state:**
+**Auth:** STUDENT role required  
+**Query params:** `difficulty` (BEGINNER | INTERMEDIATE | ADVANCED)  
+**Purpose:** Returns 5 random active LexiGrid words at the requested difficulty.
 
-- `dailyDrillState` — full response object from `GET /api/student/daily-drill-state`; type now includes `daily_streak`
-- `buyingExtra` — boolean, prevents double-click on the "Spend 75 pts" button
-- **Removed:** `completedDrills` state and all associated localStorage reads/writes
+**Fallback behaviour:** If fewer than 5 words exist at the requested difficulty, top-up from any difficulty. If the table is empty, returns `404` with a helpful message.
 
-**Extracted `useCallback` helpers (component-level, not inside useEffect):**
+**Fire-and-forget:** After responding, increments `times_served` on each served word via `updateMany` — never blocks the response.
 
-- `fetchDailyDrillState()` — fetches `/api/student/daily-drill-state`, calls `syncMomentum`
-- `fetchNextActionDrill()` — fetches `/api/student/next-action-drill`, populates `nextActionDrill`
+---
 
-**Effects:**
+## 5. Frontend Component Guide
 
-1. **Mount effect** (`deps: [fetchDailyDrillState, fetchNextActionDrill]`): calls `fetchCompetencyScores`, `fetchNextActionDrill`, `fetchDailyDrillState`, and attendance-streak localStorage tracker.
-2. **Auto-refresh effect** (`deps: [location.state?.drillCompleted, ...]`): when `ApplyDrillScreen` navigates back with `{ state: { drillCompleted: true } }`, this effect fires and calls `fetchDailyDrillState()` + `fetchNextActionDrill()` so the dashboard reflects the new state immediately.
+### Flow Control Logic (StudentDashboardPage)
 
-**`isLocked` logic (simplified):**
-
+The entire platform gate lives in one computed value:
 ```typescript
-// Backend is the sole truth — locked until state loads OR dashboard is unlocked
 const isLocked = !dailyDrillState || !dailyDrillState.dashboard_unlocked || missedData.misses >= 2;
 ```
 
-**`focusData` (Phase 5 — replaced `getPriorityFocusArea`):**
+The `next_action` field from the backend drives which cards are shown:
 
-```typescript
-const focusData = nextActionDrill
-  ? { sub_skill: nextActionDrill.sub_skill, band: nextActionDrill.sub_skill_score, skill: nextActionDrill.skill }
-  : { sub_skill: "Loading...", band: 5.0, skill: "Overall" };
-```
+| `next_action` | FocusAreaCard (Drill) | LexiGrid Card | Width |
+|---|---|---|---|
+| `DRILL_1` | Visible, active | Visible, blocked | 6 / 6 |
+| `LEXIGRID` | **Hidden** | Visible, active gate | **12 (full width)** |
+| `DRILL_2` | Visible, active | Visible, done badge | 6 / 6 |
+| `EXTRA_DRILL_AVAILABLE` | Visible + buy button | Visible, done badge | 6 / 6 |
+| `DAILY_LIMIT_REACHED` | Visible, locked | Visible, done badge | 6 / 6 |
 
-**Level inference (Phase 5):**
-Drill URL now includes `level` param computed from `focusData.band`:
+This is why Bug 1 existed: there was no `if (lexiGridIsGate) return null` guard on the drill card IIFE.
+
+---
+
+### MomentumContext
+
+Manages `totalMomentum` and `streak` with localStorage persistence and backend override.
+
+**Key functions:**
+- `syncMomentum(serverScore)` — overwrites local state with backend value. Called after every API mutation.
+- `updateStreak(n)` — sets streak and persists to localStorage. Called after `fetchDailyDrillState` and `saveDrillSession`.
+- `addPoints(pts)` — local-only increment (for immediate LexiGrid UI feedback).
+- `applyMissPenalty(missCount, cycleKey)` — deducts 20 or 40 pts once per unique cycle key. Idempotent.
+
+**Why streak was showing "2":** The localStorage default was hardcoded to `2`. Fixed to `0`. Backend value syncs within ~200ms of dashboard mount.
+
+---
+
+### StudentDashboardPage
+
+**State owned:**
+- `dailyDrillState` — full backend response; single source of truth for lock/flow state
+- `skillBands` — competency matrix mapped to display-friendly shape
+- `nextActionDrill` — top recommendation from `/api/student/next-action-drill`
+- `targetBand` — populated from backend; overrides the static `READINESS.targetBand` constant
+
+**Effects:**
+1. **Mount** — fires `fetchCompetencyScores`, `fetchNextActionDrill`, `fetchDailyDrillState`
+2. **Auto-refresh** — fires when `location.state?.drillCompleted` is set (set by `ApplyDrillScreen` on navigate back)
+
+**Level inference** — determines question difficulty from band score:
 ```typescript
 const getLevelFromScore = (score: number): string => {
   if (score < 5.0) return 'BEGINNER';
   if (score < 7.0) return 'INTERMEDIATE';
   return 'ADVANCED';
 };
-// In onStart:
-const params = new URLSearchParams({ skill, sub_skill, level: getLevelFromScore(focusData.band), ... });
 ```
 
-**Hero section (Phase 5):**
-- Streak text uses `dailyDrillState?.daily_streak ?? currentStreak` (backend authoritative, localStorage fallback)
-- New "Momentum" stat card showing `totalMomentum` from context alongside the "Overall Band" card
+---
+
+### DrillScreen
+
+Reads `skill`, `sub_skill`, `level`, `extra` from URL params. After the 5th question:
+1. Calls `POST /api/drills/session`
+2. Calls `syncMomentum(res.momentum_score)`
+3. Calls `updateStreak(res.daily_streak)` ← new in Phase 1 bug fix
+
+Navigates to `DrillResultCard` which shows the video + reflection gate before proceeding to `ApplyDrillScreen`.
 
 ---
 
-### `DrillScreen.tsx`
+### DrillResultCard
 
-**URL params read:** `skill`, `sub_skill`, `level` (now passed from dashboard), `extra`
-
-**Question fetch:**
-`GET /api/drills/questions?skill=...&subskill=...&level=...` — always returns 5. `level` no longer hardcoded as `'INTERMEDIATE'`.
-
-**`saveSessionAndComplete(finalCorrectCount):`**
-
-- Posts to `POST /api/drills/session` with `{ skill, subskill, prompts_completed, correct_answers, is_extra_session }`
-- On success: calls `syncMomentum(res.momentum_score)` + `updateStreak(res.daily_streak)` (once `daily_streak` is returned)
+After the student watches the video and submits a ≥8-word reflection:
+- Calls `onUnlockNext()` — navigates to `/student/apply-drill`
+- **No longer writes to localStorage** — `drills_completed_today` is owned by the backend
 
 ---
 
-### `LexiGrid.tsx`
+### ApplyDrillScreen
 
-**New additions to the existing game:**
-
-**Refs added:**
-
-- `totalAttemptsRef` — accumulates total letter submissions across the entire session
-- `allBonusEligibleRef` — starts `true`, set to `false` if any single word took more than `MAX_TRIES` attempts
-
-**`triggerWinAnimation(attemptsForThisWord)`** (updated signature):
-
-- Receives `attemptsForThisWord = MAX_TRIES - triesLeft + 1`
-- If `attemptsForThisWord > MAX_TRIES` → sets `allBonusEligibleRef.current = false`
-- Adds to `totalAttemptsRef.current`
-- Calls `addPoints(POINTS_PER_WORD)` locally for immediate UI feedback
-
-**`submitLexiGridSession(finalWordsWon)`** (new):
-
-- Called when `nextIndex >= DAILY_LIMIT` (5th word processed)
-- Posts to `POST /api/student/game-score`
-- On success: calls `syncMomentum(res.momentum_score)`
+Displays a free-response prompt (audio for Speaking, text for Writing).  
+On submit:
+1. Calls `POST /api/drills/apply-complete` — awards +30 pts
+2. Calls `syncMomentum(res.momentum_score)`
+3. Navigates: `navigate('/student/dashboard', { state: { drillCompleted: true } })`  
+   The `state` object triggers the dashboard's auto-refresh effect.
 
 ---
 
-### `DrillResultCard.tsx` *(Phase 5 fix)*
+### LexiGrid
 
-After a drill completes:
+**Initialization:**
+1. Check localStorage for a valid today-dated save → resume if found
+2. Otherwise fetch `GET /api/student/lexigrid-words?difficulty=${difficulty}`
+3. Map DB columns (`base_word`, `target_word`, `hint`) → game shape (`base`, `target`, `hint`)
+4. On API failure → silently fall back to 8-word hardcoded bank + show offline warning banner
 
-- Shows momentum earned, total momentum, streak
-- Video recommendation gate (YouTube link, 30s timer before "Mark as Watched" enables)
-- Reflection submission (minimum 8 words)
-- On reflection submit: **no longer writes to `localStorage['completed_drills_today']`** — calls `onUnlockNext()` directly
-- Source of truth for "how many drills done" is now entirely the backend's `drills_completed_today`
+**Session complete trigger:** When `nextIndex >= 5` (all 5 words processed), calls `submitLexiGridSession(wordsWon)` → `POST /api/student/game-score`.
 
----
-
-### `ApplyDrillScreen.tsx` *(Phase 5 fix)*
-
-The free-response "apply" step shown after the video reflection.
-
-- **On submit:** calls `POST /api/drills/apply-complete` to persist +30 pts to the DB, then calls `syncMomentum(res.momentum_score)` to sync the context
-- **On navigate back to dashboard:** uses `navigate('/student/dashboard', { state: { drillCompleted: true } })` to trigger the auto-refresh effect in the dashboard
-
----
-
-### `StudentSidebar.tsx`
-
-Receives `isLocked` as a prop from the dashboard. Each nav item checks `isPlatformLocked`. Locked items render with a lock icon, reduced opacity, and disabled `pointer-events`.
+**Difficulty** is passed from the dashboard via `?difficulty=BEGINNER|INTERMEDIATE|ADVANCED`, computed from the student's overall band score.
 
 ---
 
@@ -497,61 +412,51 @@ Receives `isLocked` as a prop from the dashboard. Each nav item checks `isPlatfo
 ```
 LOGIN
   │
-  ├── Dashboard mounts
-  │     ├── fetchDailyDrillState()     → next_action = 'DRILL_1', daily_streak = N
-  │     ├── fetchNextActionDrill()     → recommended_drills[0] = weakest sub-skill
-  │     └── fetchCompetencyScores()   → skillBands populated
-  │     isLocked = true (0/2 drills)
-  │     Hero shows: streak = daily_streak from backend, momentum = totalMomentum from context
+  └── Dashboard mounts
+        fetchDailyDrillState()  → next_action='DRILL_1', streak=N, target_band, current_band
+        fetchNextActionDrill()  → weakest sub-skill
+        fetchCompetencyScores() → all 4 skill bands
+        isLocked = true (0/2 drills done)
+        Streak synced to backend value (Bug 3 fix)
+        FocusAreaCard shows  |  LexiGrid shows (blocked)
+
+  ── Student clicks Start Drill ──────────────────────────────────────
+  │   → /student/drill?skill=X&sub_skill=Y&level=BEGINNER|INTERMEDIATE|ADVANCED
   │
-  ├── Student clicks "Start Drill" on FocusAreaCard
-  │     → /student/drill?skill=X&sub_skill=Y&level=BEGINNER|INTERMEDIATE|ADVANCED
+  ├── DrillScreen: 5 MCQ questions fetched from /api/drills/questions?level=...
+  ├── Student answers 5 questions
+  ├── POST /api/drills/session → momentum + streak synced
+  ├── DrillResultCard: video (30s lock) + reflection (≥8 words)
+  ├── ApplyDrillScreen: free-response prompt
+  │   POST /api/drills/apply-complete → +30 pts synced
+  │   navigate('/student/dashboard', { state: { drillCompleted: true } })
   │
-  ├── DrillScreen fetches 5 MCQ questions from /api/drills/questions?level=...
+  └── Dashboard auto-refresh
+        fetchDailyDrillState() → next_action='LEXIGRID'
+        FocusAreaCard HIDDEN   |  LexiGrid FULL WIDTH, Active Gate badge  ← Bug 1 fix
+        Lock banner: "Complete LexiGrid to unlock your second drill"
+
+  ── Student plays LexiGrid ──────────────────────────────────────────
+  │   Difficulty = getLevelFromScore(overall band)
+  │   5 words from DB, served by difficulty
+  │   submitLexiGridSession() → POST /api/student/game-score → momentum synced
   │
-  ├── Student answers 5 prompts (McqDrill tracks correct/incorrect)
+  └── Student returns to dashboard (or navigates back)
+        fetchDailyDrillState() → next_action='DRILL_2'
+        FocusAreaCard reappears  |  LexiGrid shows ✓ Done badge
+
+  ── Student completes Drill 2 ────────────────────────────────────────
+  │   Same flow as Drill 1
+  │   POST /api/drills/session: drills_today hits 2 → streak incremented
   │
-  ├── DrillScreen calls POST /api/drills/session
-  │     ← { momentum_earned: 15+N*10, momentum_score: updated_total, daily_streak }
-  │     → syncMomentum(momentum_score)
-  │
-  ├── DrillResultCard → video → reflection (no localStorage write) → ApplyDrillScreen
-  │
-  ├── ApplyDrillScreen → POST /api/drills/apply-complete → +30 pts
-  │     → syncMomentum(res.momentum_score)
-  │     → navigate('/student/dashboard', { state: { drillCompleted: true } })
-  │
-  ├── Dashboard auto-refresh (location.state.drillCompleted)
-  │     → fetchDailyDrillState() → next_action = 'LEXIGRID'
-  │     → fetchNextActionDrill() → updated recommendations
-  │     isLocked = true (1/2 drills)
-  │     LexiGrid card shows "Active Gate" + teal border + pulse badge
-  │
-  ├── Student plays LexiGrid (5 words)
-  │     → submitLexiGridSession() → POST /api/student/game-score
-  │     ← { momentum_earned: 10(+5 bonus), momentum_score: updated }
-  │     → syncMomentum()
-  │
-  ├── (Student returns to dashboard — fetchDailyDrillState on mount)
-  │     → next_action = 'DRILL_2'
-  │
-  ├── Student does Drill 2
-  │     → same DrillScreen flow
-  │     → POST /api/drills/session (drills_today hits 2 → streak incremented)
-  │
-  ├── ApplyDrillScreen → navigate with drillCompleted: true
-  │
-  ├── Dashboard auto-refresh
-  │     → fetchDailyDrillState()
-  │     → dashboard_unlocked = true, next_action = 'EXTRA_DRILL_AVAILABLE'
-  │     isLocked = false  ← FULL SIDEBAR UNLOCKED
-  │     daily_streak in hero reflects new streak value
-  │     "Spend 75 pts" button appears
-  │
-  └── Student can spend 75 pts × up to 3 more times → up to 5 drills total
-        POST /api/drills/authorize-extra → deducts 75 pts
-        → /student/drill?...&extra=true
-        → POST /api/drills/session with is_extra_session=true
+  └── Dashboard auto-refresh
+        dashboard_unlocked = true
+        isLocked = false  ← FULL SIDEBAR UNLOCKED
+        daily_streak reflects new value in hero text
+
+  ── Optional: Extra Drills ───────────────────────────────────────────
+        POST /api/drills/authorize-extra → deduct 75 pts
+        Up to 3 more sessions (5 total per day)
 ```
 
 ---
@@ -560,36 +465,35 @@ LOGIN
 
 ### Backend (`backend-study-mentor/`)
 
-| File                                     | Change                                                                                                                                                                                                                                                                                        |
-| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `prisma/schema.prisma`                   | Added `momentum_score`, `daily_streak`, `last_streak_date` to `institute_students`; added `correct_answers`, `total_questions`, `is_extra_session` to `DrillSession`; added new `StudentGameScore` model                                                                                      |
-| `src/controllers/drillController.ts`     | `saveDrillSession` now has streak logic (updates `daily_streak` + `last_streak_date` when drills_today hits 2); `getDrillQuestions` pinned to 5 questions; `getNextActionDrill` calendar-day cutoff; **new** `completeApplyDrill` function (+30 pts for apply step)                            |
-| `src/controllers/gameScoreController.ts` | `getDailyDrillState` now returns `daily_streak`                                                                                                                                                                                                                                               |
-| `src/controllers/studentController.ts`   | `getCompetencyScores` now returns `momentum_score` and `daily_streak`                                                                                                                                                                                                                         |
-| `src/routes/studentRoutes.ts`            | Added `GET /daily-drill-state`, `POST /game-score`                                                                                                                                                                                                                                            |
-| `src/routes/drillRoutes.ts`              | Added `POST /authorize-extra`, **`POST /apply-complete`** (Phase 5)                                                                                                                                                                                                                           |
+| File | Change |
+|---|---|
+| `prisma/schema.prisma` | Added `daily_streak`, `last_streak_date` to `institute_students`; added `correct_answers`, `total_questions`, `is_extra_session` to `DrillSession`; added `StudentGameScore` and `LexiGridWord` models |
+| `src/controllers/drillController.ts` | `saveDrillSession`: streak logic when drills_today hits 2; `getDrillQuestions` pinned to 5; new `completeApplyDrill` (+30 pts) |
+| `src/controllers/gameScoreController.ts` | `getDailyDrillState` now returns `daily_streak`, `target_band`, `current_band` (avg of matrix scores); `saveGameScore` is idempotent upsert |
+| `src/controllers/studentController.ts` | `getCompetencyScores` returns `current_band` + `daily_streak` |
+| `src/controllers/lexiGridController.ts` | **New** — `getLexiGridWords`: 5 random words by difficulty, graceful fallback, fire-and-forget `times_served` increment |
+| `src/routes/drillRoutes.ts` | Added `POST /apply-complete` |
+| `src/routes/studentRoutes.ts` | Added `GET /lexigrid-words` |
 
 ### Frontend (`ai-study-mentor/`)
 
-| File                                                       | Change                                                                                                                                                                                                                                                                                                                                         |
-| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/features/student/Context/MomentumContext.tsx`         | Added `syncMomentum(serverScore)` to interface and implementation                                                                                                                                                                                                                                                                              |
-| `src/features/student/components/Drills/DrillScreen.tsx`   | Reads `extra` URL param; sends `correct_answers` + `is_extra_session`; calls `syncMomentum` after session save                                                                                                                                                                                                                                 |
-| `src/features/student/components/LexiGrid.tsx`             | Added `totalAttemptsRef`, `allBonusEligibleRef`; added `submitLexiGridSession()`; updated `triggerWinAnimation` signature; calls backend on 5th word completion                                                                                                                                                                                |
-| `src/features/student/components/StudentDashboardPage.tsx` | **Phase 5:** extracted `fetchDailyDrillState`/`fetchNextActionDrill` as `useCallback`; added auto-refresh effect; removed `completedDrills` state + localStorage; replaced `focusData` with `nextActionDrill`; added `level` param to drill URL; added momentum stat card to hero; hero streak uses `dailyDrillState?.daily_streak` from backend |
-| `src/features/student/components/Drills/DrillResultCard.tsx` | Removed `localStorage['completed_drills_today']` write from `handleSubmitReflection`                                                                                                                                                                                                                                                          |
-| `src/features/student/components/Drills/ApplyDrillScreen.tsx` | Replaced local `addPoints(initialScore + 30)` with `POST /api/drills/apply-complete` + `syncMomentum`; navigate back to dashboard passes `{ state: { drillCompleted: true } }` for auto-refresh                                                                                                                                               |
+| File | Change |
+|---|---|
+| `src/features/student/Context/MomentumContext.tsx` | Streak default changed `2` → `0`; added `updateStreak`, `syncMomentum` |
+| `src/features/student/components/StudentDashboardPage.tsx` | Extracts `fetchDailyDrillState`/`fetchNextActionDrill` as `useCallback`; auto-refresh on `location.state.drillCompleted`; hides drill card when `next_action=LEXIGRID`; LexiGrid expands to full width as gate; `targetBand` state driven from backend; `updateStreak` called after every fetch; `focusData` from backend recommendation |
+| `src/features/student/components/Drills/DrillScreen.tsx` | Calls `updateStreak(res.daily_streak)` after session save; reads `level` from URL param instead of hardcoding |
+| `src/features/student/components/Drills/DrillResultCard.tsx` | Removed all `localStorage['completed_drills_today']` writes |
+| `src/features/student/components/Drills/ApplyDrillScreen.tsx` | Replaced local `addPoints` with `POST /api/drills/apply-complete` + `syncMomentum`; navigates with `{ state: { drillCompleted: true } }` |
+| `src/features/student/components/LexiGrid.tsx` | DB-backed word fetch with `useSearchParams` difficulty; `FALLBACK_WORD_BANK` for offline; `fetchError` banner; `Loader2` spinner; `submitLexiGridSession` on completion |
 
 ---
 
-## 8. Known Gaps & Pending Work
+## 8. Known Gaps (Post Phase 1 Backlog)
 
-| Gap                                              | Detail                                                                                                                                                                                                                                                  |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Prisma client stale**                          | All new columns/models throw TypeScript errors until `npx prisma generate` is run after SQL blocks 1–4 are applied                                                                                                                                      |
-| `**missedData` is mock**                         | `MOCK_MISSED_STATE = 1` hardcoded in `StudentDashboardPage`. Tutor-alert and IA miss penalties not yet wired to a real backend endpoint                                                                                                                  |
-| **`ApplyDrillScreen` +30 pts idempotency**       | A student who submits the apply form twice will earn +30 pts twice. No server-side guard against double-submission. Mitigation: add a `content_completions` row on first call and guard on re-calls                                                      |
-| **LexiGrid mid-session abandon**                 | If a student solves 3/5 words and closes the tab, `submitLexiGridSession` is never called. localStorage preserves progress but the backend has no partial record until they return and finish                                                            |
-| **No IA (Internal Assessment) backend**          | The IA trigger (6 drill sessions + 2 calendar days + avg DCS ≥ 40%) is not yet implemented                                                                                                                                                              |
-| `**getNextActionDrill` vs `getDailyDrillState`** | Both called independently on mount. `getNextActionDrill` does not enforce the free/paid session boundary — lock enforcement lives solely in `getDailyDrillState`                                                                                          |
-| **`DrillScreen` → dashboard auto-refresh path**  | Auto-refresh fires when `ApplyDrillScreen` navigates back. If the student presses browser Back from `DrillResultCard` without completing the apply step, `fetchDailyDrillState` won't re-run until the component unmounts and remounts (next page visit) |
+| Gap | Priority | Detail |
+|---|---|---|
+| `missedData` is mocked | High | `MOCK_MISSED_STATE = 1` hardcoded. Needs a `/api/student/missed-assessments` endpoint returning `consecutive_misses` and `missed_sub_skills`. |
+| Apply Drill double-submission | Medium | No server-side idempotency guard. A student who submits twice earns +60 pts. Fix: insert into `content_completions` on first call and reject duplicates. |
+| LexiGrid mid-session abandon | Low | `submitLexiGridSession` is never called if the tab is closed mid-session. localStorage preserves progress; backend never gets a partial record. |
+| Internal Assessment (IA) backend | High | IA trigger (6 drills + 2 days + avg DCS ≥ 40%) is not yet implemented. |
+| `DrillScreen` → dashboard refresh path | Low | If student presses browser Back from `DrillResultCard` without completing the apply step, `fetchDailyDrillState` won't re-run until a fresh mount. |

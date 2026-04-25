@@ -13,7 +13,7 @@ import { ArrowLeft, Target, Loader2 } from 'lucide-react';
 export default function DrillScreen() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { syncMomentum } = useMomentum();
+  const { syncMomentum, updateStreak } = useMomentum();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const skill    = searchParams.get('skill')     || 'SPEAKING';
@@ -77,10 +77,9 @@ export default function DrillScreen() {
           is_extra_session:  isExtra
         })
       });
-      // Sync the authoritative momentum_score from backend into the context
-      if (res.momentum_score !== undefined) {
-        syncMomentum(res.momentum_score);
-      }
+      if (res.momentum_score !== undefined) syncMomentum(res.momentum_score);
+      // Streak is incremented server-side when drills_today hits 2; sync it here
+      if (res.daily_streak   !== undefined) updateStreak(res.daily_streak);
     } catch (err) {
       console.error("Failed to save drill session", err);
     } finally {

@@ -109,6 +109,8 @@ const StudentDashboardPage = () => {
   const [currentStreak, setCurrentStreak] = useState(0);
   const [skillBands, setSkillBands] = useState<SkillBand[]>(SKILL_BANDS);
   const [nextActionDrill, setNextActionDrill] = useState<any>(null);
+  // Real target band from student profile (overrides the static constant)
+  const [targetBand, setTargetBand] = useState(READINESS.targetBand);
 
   // Daily drill state (from backend) — single source of truth
   const [dailyDrillState, setDailyDrillState] = useState<{
@@ -128,7 +130,7 @@ const StudentDashboardPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { applyMissPenalty, syncMomentum, totalMomentum } = useMomentum();
+  const { applyMissPenalty, syncMomentum, updateStreak, totalMomentum } = useMomentum();
 
   // ─── Guards ──────────────────────────────────────────────────────────────────
   // Prevent firing the tutor alert more than once per session even if the
@@ -153,7 +155,8 @@ const StudentDashboardPage = () => {
   };
 
   // ─── Dynamic Readiness ───────────────────────────────────────────────────────
-  const dynamicReadiness = { ...READINESS };
+  // targetBand is loaded from the backend; override the static READINESS constant.
+  const dynamicReadiness = { ...READINESS, targetBand };
   if (missedData.misses === 1) {
     dynamicReadiness.targetDate = "2026-06-19";
     dynamicReadiness.daysLeft = 87;
@@ -180,11 +183,14 @@ const StudentDashboardPage = () => {
       if (resData.success) {
         setDailyDrillState(resData);
         syncMomentum(resData.momentum_score);
+        // Authoritative streak from backend overwrites any stale localStorage value
+        if (resData.daily_streak !== undefined) updateStreak(resData.daily_streak);
+        if (resData.target_band !== undefined) setTargetBand(Number(resData.target_band));
       }
     } catch (err) {
       console.error("[DailyDrillState] Fetch failed:", err);
     }
-  }, [syncMomentum]);
+  }, [syncMomentum, updateStreak]);
 
   const fetchNextActionDrill = useCallback(async () => {
     try {
@@ -272,7 +278,8 @@ const StudentDashboardPage = () => {
         const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
         const resData = await callBackend(`${backendUrl}/api/student/competency-scores`);
         if (resData.success && resData.data) {
-          const fetchedTarget = resData.target_band || 7.0;
+          const fetchedTarget = Number(resData.target_band) || 7.0;
+          setTargetBand(fetchedTarget);
           setSkillBands((prevBands) =>
             prevBands.map((band) => {
               const dbRecord = resData.data.find(
@@ -282,12 +289,12 @@ const StudentDashboardPage = () => {
                 return {
                   ...band,
                   score: Number(dbRecord.band_score) || 0.0,
-                  target: Number(fetchedTarget) || 7.0,
+                  target: fetchedTarget,
                   delta: 0,
                   subScores: dbRecord.sub_scores || {},
                 };
               }
-              return { ...band, target: Number(fetchedTarget) || 7.0 };
+              return { ...band, target: fetchedTarget };
             })
           );
         }
@@ -475,8 +482,10 @@ const StudentDashboardPage = () => {
                   </h3>
                   <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
                     {dailyDrillState.next_action === 'LEXIGRID'
-                      ? <>Complete <strong className="text-teal-500">LexiGrid</strong> (5 words) to unlock Drill 2.</>
-                      : <>Complete <strong className="text-indigo-500">{2 - dailyDrillState.drills_completed_today} more priority drill{2 - dailyDrillState.drills_completed_today !== 1 ? 's' : ''}</strong> to unlock full access today.</>
+                      ? <>Complete <strong className="text-teal-500">LexiGrid</strong> (5 words) to unlock your second drill.</>
+                      : dailyDrillState.next_action === 'DRILL_2'
+                        ? <>You cleared LexiGrid — start <strong className="text-indigo-500">Drill 2</strong> to unlock full access.</>
+                        : <>Complete <strong className="text-indigo-500">{2 - dailyDrillState.drills_completed_today} more priority drill{2 - dailyDrillState.drills_completed_today !== 1 ? 's' : ''}</strong> to unlock full access today.</>
                     }
                   </p>
                 </div>
@@ -496,6 +505,9 @@ const StudentDashboardPage = () => {
               {missedData.misses < 2 && (() => {
                 const drillsToday   = dailyDrillState?.drills_completed_today ?? 0;
                 const nextAction    = dailyDrillState?.next_action ?? 'DRILL_1';
+                // When LexiGrid is the active gate, hide the drill card entirely —
+                // the student cannot start Drill 2 until the gate is cleared.
+                const lexiGridIsGate = nextAction === 'LEXIGRID';
                 const drillLocked   = nextAction === 'DRILL_LOCKED_INSUFFICIENT_PTS'
                                    || nextAction === 'DAILY_LIMIT_REACHED';
                 const canBuyExtra   = dailyDrillState?.can_buy_extra ?? false;
@@ -526,6 +538,7 @@ const StudentDashboardPage = () => {
                       band={focusData.band}
                       skill={focusData.skill}
                       isLocked={isLocked || drillLocked}
+                      isGated={lexiGridIsGate}
                       drillsLeft={drillsLeft}
                       onStart={() => {
                         const params = new URLSearchParams({
@@ -566,7 +579,6 @@ const StudentDashboardPage = () => {
                 const lexiDone     = dailyDrillState?.lexigrid_completed_today ?? false;
                 // LexiGrid is accessible when: it's the active gate, OR dashboard is already unlocked
                 const lexiBlocked  = !isLexiGate && isLocked;
-
                 return (
                   <div
                     className={cn(
@@ -717,7 +729,7 @@ const StudentDashboardPage = () => {
 
 // ─── SUB-COMPONENTS ───────────────────────────────────────────────────────────
 
-const FocusAreaCard = ({ sub_skill, band, skill, onStart, isLocked, drillsLeft }: any) => {
+const FocusAreaCard = ({ sub_skill, band, skill, onStart, isLocked, isGated, drillsLeft }: any) => {
   if (band === 9.0 && sub_skill === "All Caught Up!") {
     return (
       <div className="h-full rounded-3xl border border-emerald-200 dark:border-emerald-500/20 p-6 bg-emerald-50 dark:bg-emerald-500/10 flex flex-col items-center justify-center text-center shadow-sm">
@@ -780,12 +792,18 @@ const FocusAreaCard = ({ sub_skill, band, skill, onStart, isLocked, drillsLeft }
       </div>
 
       <div className="mt-auto">
-        <button
-          onClick={onStart}
-          className="w-full flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold text-sm py-3.5 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
-        >
-          Start Priority Drill <ArrowRight className="h-4 w-4" />
-        </button>
+        {isGated ? (
+          <div className="w-full flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 font-semibold text-sm py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 cursor-not-allowed select-none">
+            <Lock className="h-4 w-4" /> Complete LexiGrid to unlock
+          </div>
+        ) : (
+          <button
+            onClick={onStart}
+            className="w-full flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold text-sm py-3.5 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
+          >
+            Start Priority Drill <ArrowRight className="h-4 w-4" />
+          </button>
+        )}
       </div>
     </div>
   );
