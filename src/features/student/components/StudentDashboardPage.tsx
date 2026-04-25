@@ -122,9 +122,12 @@ const StudentDashboardPage = () => {
     sessions_remaining: number;
     momentum_score: number;
     daily_streak: number;
+    daily_dcs: number;
     extra_session_cost: number;
+    dcs_threshold: number;
   } | null>(null);
-  const [buyingExtra, setBuyingExtra] = useState(false);
+  const [buyingExtra, setBuyingExtra]   = useState(false);
+  const [confirmExtra, setConfirmExtra] = useState(false);
 
   const { user, profile } = useAuth();
   const navigate = useNavigate();
@@ -485,9 +488,7 @@ const StudentDashboardPage = () => {
                       ? <>Finish <strong className="text-indigo-500">2 drills</strong> today to unlock the full platform.</>
                       : dailyDrillState.next_action === 'LEXIGRID'
                         ? <>Complete <strong className="text-teal-500">LexiGrid</strong> (5 words) to unlock your second drill.</>
-                        : dailyDrillState.next_action === 'DRILL_2'
-                          ? <>LexiGrid done — complete <strong className="text-indigo-500">1 more drill</strong> to unlock full access.</>
-                          : <>Complete <strong className="text-indigo-500">{2 - dailyDrillState.drills_completed_today} more drill{2 - dailyDrillState.drills_completed_today !== 1 ? 's' : ''}</strong> to unlock full access today.</>
+                        : <>LexiGrid done — complete <strong className="text-indigo-500">1 more drill</strong> to unlock full access.</>
                     }
                   </p>
                 </div>
@@ -505,73 +506,73 @@ const StudentDashboardPage = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
               {missedData.misses < 2 && (() => {
-                const drillsToday   = dailyDrillState?.drills_completed_today ?? 0;
-                const nextAction    = dailyDrillState?.next_action ?? 'DRILL_1';
-                // When LexiGrid is the active gate, hide the drill card entirely —
-                // the student cannot start Drill 2 until the gate is cleared.
+                const drillsToday    = dailyDrillState?.drills_completed_today ?? 0;
+                const nextAction     = dailyDrillState?.next_action ?? 'DRILL_1';
                 const lexiGridIsGate = nextAction === 'LEXIGRID';
-                const drillLocked   = nextAction === 'DRILL_LOCKED_INSUFFICIENT_PTS'
-                                   || nextAction === 'DAILY_LIMIT_REACHED';
-                const canBuyExtra   = dailyDrillState?.can_buy_extra ?? false;
-                const drillsLeft    = Math.max(0, 2 - drillsToday);
+                const drillLocked    = nextAction === 'DRILL_LOCKED_INSUFFICIENT_PTS'
+                                    || nextAction === 'DRILL_LOCKED_LOW_DCS'
+                                    || nextAction === 'DAILY_LIMIT_REACHED';
+                const canBuyExtra    = dailyDrillState?.can_buy_extra ?? false;
+                const dailyDCS       = dailyDrillState?.daily_dcs ?? 0;
+                const dcsThreshold   = dailyDrillState?.dcs_threshold ?? 75;
+                // Drills left until platform unlock (threshold = 2)
+                const drillsToUnlock = Math.max(0, 2 - drillsToday);
 
                 const handleBuyExtra = async () => {
                   setBuyingExtra(true);
+                  setConfirmExtra(false);
                   try {
                     const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
                     const res = await callBackend(`${backendUrl}/api/drills/authorize-extra`, { method: 'POST' });
                     if (res.success) {
                       syncMomentum(res.momentum_score);
-                      // Refresh daily state so the card re-enables
-                      const stateRes = await callBackend(`${backendUrl}/api/student/daily-drill-state`);
-                      if (stateRes.success) setDailyDrillState(stateRes);
+                      // Navigate immediately — no state refresh, we're leaving the page
+                      const params = new URLSearchParams({
+                        skill:     focusData.skill,
+                        sub_skill: focusData.sub_skill,
+                        level:     getLevelFromScore(focusData.band),
+                        extra:     'true'
+                      });
+                      navigate(`/student/drill?${params.toString()}`);
+                      return; // skip finally reset — component unmounts on navigate
                     }
+                    setBuyingExtra(false);
                   } catch (err) {
                     console.error('[BuyExtra] failed:', err);
-                  } finally {
                     setBuyingExtra(false);
                   }
                 };
 
+                const handleStartDrill = () => {
+                  const params = new URLSearchParams({
+                    skill:     focusData.skill,
+                    sub_skill: focusData.sub_skill,
+                    level:     getLevelFromScore(focusData.band),
+                    ...(nextAction === 'EXTRA_DRILL_AVAILABLE' ? { extra: 'true' } : {})
+                  });
+                  navigate(`/student/drill?${params.toString()}`);
+                };
+
                 return (
-                  <div className="lg:col-span-6 flex flex-col h-full gap-3">
+                  <div className="lg:col-span-6 h-full">
                     <FocusAreaCard
                       sub_skill={focusData.sub_skill}
                       band={focusData.band}
                       skill={focusData.skill}
-                      isLocked={isLocked || drillLocked}
-                      isGated={lexiGridIsGate}
-                      drillsLeft={drillsLeft}
-                      onStart={() => {
-                        const params = new URLSearchParams({
-                          skill:     focusData.skill,
-                          sub_skill: focusData.sub_skill,
-                          level:     getLevelFromScore(focusData.band),
-                          ...(nextAction !== 'DRILL_1' && nextAction !== 'DRILL_2' ? { extra: 'true' } : {})
-                        });
-                        navigate(`/student/drill?${params.toString()}`);
-                      }}
+                      isLocked={isLocked}
+                      drillsLeft={drillsToUnlock}
+                      nextAction={nextAction}
+                      dailyDCS={dailyDCS}
+                      dcsThreshold={dcsThreshold}
+                      extraCost={dailyDrillState?.extra_session_cost ?? 75}
+                      totalMomentum={totalMomentum}
+                      buyingExtra={buyingExtra}
+                      confirmExtra={confirmExtra}
+                      onStartDrill={handleStartDrill}
+                      onRequestConfirm={() => setConfirmExtra(true)}
+                      onCancelConfirm={() => setConfirmExtra(false)}
+                      onConfirmBuy={handleBuyExtra}
                     />
-                    {/* Extra session purchase button — visible after 2 free drills */}
-                    {drillsToday >= 2 && nextAction !== 'DAILY_LIMIT_REACHED' && (
-                      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex items-center justify-between gap-4">
-                        <div>
-                          <p className="text-sm font-bold text-slate-800 dark:text-white">
-                            {drillLocked ? "Drill Session Locked" : `${dailyDrillState?.sessions_remaining ?? 0} sessions left today`}
-                          </p>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            Spend <strong className="text-amber-500">{dailyDrillState?.extra_session_cost ?? 75} pts</strong> to unlock one extra drill session
-                          </p>
-                        </div>
-                        <button
-                          onClick={handleBuyExtra}
-                          disabled={!canBuyExtra || buyingExtra}
-                          className="shrink-0 px-4 py-2 rounded-xl bg-amber-500 text-white font-bold text-sm hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                        >
-                          {buyingExtra ? "..." : `Unlock (+75 pts)`}
-                        </button>
-                      </div>
-                    )}
                   </div>
                 );
               })()}
@@ -583,18 +584,19 @@ const StudentDashboardPage = () => {
 
                 // ── DEBUG: remove before production ──────────────────────────
                 console.group('%c[Dashboard State]', 'color:#818cf8;font-weight:bold');
-                console.log('next_action          :', dailyDrillState?.next_action   ?? '(loading)');
+                console.log('next_action           :', dailyDrillState?.next_action            ?? '(loading)');
                 console.log('drills_completed_today:', dailyDrillState?.drills_completed_today ?? 0);
-                console.log('lexigrid_completed   :', lexiDone);
-                console.log('dashboard_unlocked   :', dailyDrillState?.dashboard_unlocked ?? false);
-                console.log('daily_streak         :', dailyDrillState?.daily_streak   ?? 0);
-                console.log('momentum_score       :', dailyDrillState?.momentum_score ?? 0);
+                console.log('lexigrid_completed    :', lexiDone);
+                console.log('dashboard_unlocked    :', dailyDrillState?.dashboard_unlocked     ?? false);
+                console.log('daily_streak          :', dailyDrillState?.daily_streak           ?? 0);
+                console.log('momentum_score        :', dailyDrillState?.momentum_score         ?? 0);
+                console.log('daily_dcs             :', dailyDrillState?.daily_dcs              ?? 0, '%  ← need', (dailyDrillState?.dcs_threshold ?? 75), '% for extra drill');
                 console.log('--- computed ---');
-                console.log('isLocked (platform)  :', isLocked,   '← !dailyDrillState || !dashboard_unlocked || misses≥2');
-                console.log('isLexiGate           :', isLexiGate, '← next_action === LEXIGRID');
-                console.log('lexiDone             :', lexiDone,   '← lexigrid_completed_today from backend');
-                console.log('lexiBlocked          :', lexiBlocked,'← !isLexiGate && isLocked && !lexiDone');
-                console.log('lexiGridIsGate(drill):', dailyDrillState?.next_action === 'LEXIGRID', '← controls drill isGated prop');
+                console.log('isLocked (platform)   :', isLocked,    '← !dailyDrillState || !dashboard_unlocked || misses≥2');
+                console.log('isLexiGate            :', isLexiGate,  '← next_action === LEXIGRID');
+                console.log('lexiDone              :', lexiDone,    '← lexigrid_completed_today from backend');
+                console.log('lexiBlocked           :', lexiBlocked, '← !isLexiGate && isLocked && !lexiDone');
+                console.log('lexiGridIsGate(drill) :', isLexiGate, '← controls drill isGated prop');
                 console.groupEnd();
                 // ─────────────────────────────────────────────────────────────
                 return (
@@ -747,33 +749,46 @@ const StudentDashboardPage = () => {
 
 // ─── SUB-COMPONENTS ───────────────────────────────────────────────────────────
 
-const FocusAreaCard = ({ sub_skill, band, skill, onStart, isLocked, isGated, drillsLeft }: any) => {
+const FocusAreaCard = ({
+  sub_skill, band, skill, isLocked, drillsLeft,
+  nextAction, dailyDCS, dcsThreshold, extraCost, totalMomentum,
+  buyingExtra, confirmExtra, onStartDrill, onRequestConfirm, onCancelConfirm, onConfirmBuy
+}: any) => {
   if (band === 9.0 && sub_skill === "All Caught Up!") {
     return (
       <div className="h-full rounded-3xl border border-emerald-200 dark:border-emerald-500/20 p-6 bg-emerald-50 dark:bg-emerald-500/10 flex flex-col items-center justify-center text-center shadow-sm">
         <div className="h-16 w-16 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center mb-4">
           <CheckCircle2 className="h-8 w-8 text-emerald-500" />
         </div>
-        <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-2 tracking-tight">
-          Daily Priorities Knocked Out!
-        </h2>
+        <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-2 tracking-tight">Daily Priorities Knocked Out!</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400">
           You have completed the required drills for your weakest sub-skills today.
-          Great job keeping your momentum up!
         </p>
       </div>
     );
   }
 
+  // ── derived flags ────────────────────────────────────────────────────────
+  const isFreeDrill      = ['DRILL_1', 'DRILL_2', 'DRILL_3'].includes(nextAction);
+  const isLexiGate       = nextAction === 'LEXIGRID';
+  const isExtraReady     = nextAction === 'EXTRA_DRILL_AVAILABLE';
+  const isExtraPrepaid   = nextAction === 'EXTRA_DRILL_READY';  // already paid, just start
+  const isLowDCS         = nextAction === 'DRILL_LOCKED_LOW_DCS';
+  const isLowPts         = nextAction === 'DRILL_LOCKED_INSUFFICIENT_PTS';
+  const isExtraLocked    = isLowDCS || isLowPts || isExtraReady || isExtraPrepaid;
+  const showDCSMeter     = isLowDCS || isLowPts || isExtraReady; // not shown for prepaid (already cleared)
+
+  // card accent: blue when actively drillable, muted when waiting/locked
+  const cardBg = isLocked
+    ? "bg-white dark:bg-slate-900 border-indigo-200 dark:border-indigo-500/30 ring-1 ring-indigo-500/20"
+    : isExtraLocked
+      ? "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+      : "bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/25";
+
   return (
-    <div
-      className={cn(
-        "h-full rounded-3xl border p-6 flex flex-col transition-all duration-500 shadow-sm",
-        isLocked
-          ? "bg-white dark:bg-slate-900 border-indigo-200 dark:border-indigo-500/30 shadow-[0_8px_30px_rgba(99,102,241,0.1)] ring-1 ring-indigo-500/20"
-          : "bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/25"
-      )}
-    >
+    <div className={cn("h-full rounded-3xl border p-6 flex flex-col transition-all duration-500 shadow-sm", cardBg)}>
+
+      {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <Zap className="h-5 w-5 text-indigo-500" />
@@ -781,13 +796,19 @@ const FocusAreaCard = ({ sub_skill, band, skill, onStart, isLocked, isGated, dri
             Next Best Action
           </h2>
         </div>
-        {isLocked && (
+        {isLocked && drillsLeft > 0 && (
           <span className="text-[10px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 px-3 py-1 rounded-full animate-pulse">
             Required: {drillsLeft} Left
           </span>
         )}
+        {isExtraLocked && (
+          <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 px-3 py-1 rounded-full">
+            3 / 3 Done
+          </span>
+        )}
       </div>
 
+      {/* Drill info */}
       <div className="flex items-center gap-5 mb-6">
         <div className="flex-shrink-0 h-16 w-16 rounded-2xl bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center border border-indigo-200 dark:border-indigo-500/30">
           <Target className="h-8 w-8 text-indigo-500" />
@@ -799,29 +820,108 @@ const FocusAreaCard = ({ sub_skill, band, skill, onStart, isLocked, isGated, dri
           <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
             <span>{skill}</span>
             <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
-            <span>
-              Sub-score:{" "}
-              <strong className="text-indigo-600 dark:text-indigo-400 font-semibold">
-                {band.toFixed(1)}
-              </strong>
-            </span>
+            <span>Sub-score: <strong className="text-indigo-600 dark:text-indigo-400">{band.toFixed(1)}</strong></span>
           </div>
         </div>
       </div>
 
-      <div className="mt-auto">
-        {isGated ? (
+      {/* ── CTA area — driven entirely by nextAction ── */}
+      <div className="mt-auto space-y-3">
+
+        {/* DCS meter — shown for all post-free states */}
+        {showDCSMeter && (
+          <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Daily Competency Score</p>
+                <p className="text-base font-black text-slate-800 dark:text-white">
+                  {dailyDCS}%
+                  <span className="text-xs font-normal text-slate-400 ml-1">/ need {dcsThreshold}%</span>
+                </p>
+              </div>
+              <span className={cn(
+                "text-[10px] font-bold px-2.5 py-1 rounded-full",
+                dailyDCS >= dcsThreshold
+                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400"
+                  : "bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400"
+              )}>
+                {dailyDCS >= dcsThreshold ? "✓ Eligible" : "Not eligible"}
+              </span>
+            </div>
+            <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+              <div
+                className={cn("h-full rounded-full transition-all duration-500",
+                  dailyDCS >= dcsThreshold ? "bg-emerald-500" : "bg-rose-400")}
+                style={{ width: `${Math.min(100, dailyDCS)}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Buttons */}
+        {isLexiGate && (
           <div className="w-full flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 font-semibold text-sm py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 cursor-not-allowed select-none">
             <Lock className="h-4 w-4" /> Complete LexiGrid to unlock
           </div>
-        ) : (
+        )}
+
+        {isLowDCS && (
+          <div className="w-full flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 font-semibold text-sm py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 cursor-not-allowed select-none">
+            <Lock className="h-4 w-4" /> Improve accuracy to unlock extra
+          </div>
+        )}
+
+        {isLowPts && (
+          <div className="w-full flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 font-semibold text-sm py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 cursor-not-allowed select-none">
+            <Lock className="h-4 w-4" /> Need {extraCost} pts to unlock
+          </div>
+        )}
+
+        {/* Already paid — credit is waiting, just start the drill */}
+        {isExtraPrepaid && (
           <button
-            onClick={onStart}
+            onClick={onStartDrill}
+            className="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm py-3.5 rounded-xl transition-all shadow-md active:scale-[0.98]"
+          >
+            <CheckCircle2 className="h-4 w-4" /> Start Extra Drill — Session Ready
+          </button>
+        )}
+
+        {isExtraReady && !confirmExtra && (
+          <button
+            onClick={onRequestConfirm}
+            disabled={buyingExtra}
+            className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm py-3.5 rounded-xl transition-all shadow-md active:scale-[0.98] disabled:opacity-40"
+          >
+            <Zap className="h-4 w-4" /> Unlock Extra Drill — {extraCost} pts
+          </button>
+        )}
+
+        {isExtraReady && confirmExtra && (
+          <div className="space-y-2">
+            <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
+              Spend <strong className="text-amber-500">{extraCost} pts</strong> from your {totalMomentum} pts balance?
+            </p>
+            <div className="flex gap-2">
+              <button onClick={onCancelConfirm} className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                Cancel
+              </button>
+              <button onClick={onConfirmBuy} disabled={buyingExtra} className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm transition-colors disabled:opacity-40">
+                {buyingExtra ? "Unlocking…" : "Confirm — Spend " + extraCost + " pts"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {isFreeDrill && (
+          <button
+            onClick={onStartDrill}
             className="w-full flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold text-sm py-3.5 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
           >
             Start Priority Drill <ArrowRight className="h-4 w-4" />
           </button>
         )}
+
       </div>
     </div>
   );

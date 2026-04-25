@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { 
   GraduationCap, LayoutDashboard, Mic, PenTool, Headphones, 
   ClipboardCheck, History, Sparkles, Settings, LogOut,
@@ -35,32 +35,13 @@ export const StudentSidebar = ({
   const navigate = useNavigate();
   const location = useLocation();
   
-  const [completedDrills, setCompletedDrills] = useState<string[]>([]);
-
-  useEffect(() => {
-    const checkLockStatus = () => {
-      const todayDate = new Date().toISOString().split('T')[0];
-      const stored = localStorage.getItem('completed_drills_today');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed.date === todayDate) {
-          setCompletedDrills(parsed.completed);
-        } else {
-          setCompletedDrills([]);
-        }
-      }
-    };
-    checkLockStatus();
-    window.addEventListener('storage', checkLockStatus);
-    return () => window.removeEventListener('storage', checkLockStatus);
-  }, [location.pathname]);
-
-  const isPlatformLocked = completedDrills.length < 2;
+  // Lock state comes from the dashboard (backend-driven via dailyDrillState.dashboard_unlocked).
+  // The old localStorage-based check is removed — it was always stale after Phase 1.
   const isActivelyDrilling = location.pathname.includes('/drill');
 
   const isItemDisabled = (itemId: string) => {
-    if (isActivelyDrilling) return true; 
-    if (isPlatformLocked && itemId !== 'dashboard') return true; 
+    if (isActivelyDrilling) return true;
+    if (isLocked && itemId !== 'dashboard') return true;
     return false;
   };
   
