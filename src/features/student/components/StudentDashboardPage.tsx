@@ -320,13 +320,13 @@ const StudentDashboardPage = () => {
     setCurrentStreak(calculateStreak(dates));
   }, [fetchDailyDrillState, fetchNextActionDrill]);
 
-  // ─── Effect: Refresh drill state when returning from drill/apply screens ──────
+  // ─── Effect: Refresh drill state when returning from drill/apply/lexigrid ────
   useEffect(() => {
-    if (location.state?.drillCompleted) {
+    if (location.state?.drillCompleted || location.state?.lexigridCompleted) {
       fetchDailyDrillState();
       fetchNextActionDrill();
     }
-  }, [location.state?.drillCompleted, fetchDailyDrillState, fetchNextActionDrill]);
+  }, [location.state?.drillCompleted, location.state?.lexigridCompleted, fetchDailyDrillState, fetchNextActionDrill]);
 
   // focusData is driven purely by the backend's prioritized drill recommendation
   const focusData = nextActionDrill
@@ -481,11 +481,13 @@ const StudentDashboardPage = () => {
                     Platform Locked
                   </h3>
                   <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                    {dailyDrillState.next_action === 'LEXIGRID'
-                      ? <>Complete <strong className="text-teal-500">LexiGrid</strong> (5 words) to unlock your second drill.</>
-                      : dailyDrillState.next_action === 'DRILL_2'
-                        ? <>You cleared LexiGrid — start <strong className="text-indigo-500">Drill 2</strong> to unlock full access.</>
-                        : <>Complete <strong className="text-indigo-500">{2 - dailyDrillState.drills_completed_today} more priority drill{2 - dailyDrillState.drills_completed_today !== 1 ? 's' : ''}</strong> to unlock full access today.</>
+                    {dailyDrillState.next_action === 'DRILL_1'
+                      ? <>Finish <strong className="text-indigo-500">2 drills</strong> today to unlock the full platform.</>
+                      : dailyDrillState.next_action === 'LEXIGRID'
+                        ? <>Complete <strong className="text-teal-500">LexiGrid</strong> (5 words) to unlock your second drill.</>
+                        : dailyDrillState.next_action === 'DRILL_2'
+                          ? <>LexiGrid done — complete <strong className="text-indigo-500">1 more drill</strong> to unlock full access.</>
+                          : <>Complete <strong className="text-indigo-500">{2 - dailyDrillState.drills_completed_today} more drill{2 - dailyDrillState.drills_completed_today !== 1 ? 's' : ''}</strong> to unlock full access today.</>
                     }
                   </p>
                 </div>
@@ -577,8 +579,24 @@ const StudentDashboardPage = () => {
               {(() => {
                 const isLexiGate   = dailyDrillState?.next_action === 'LEXIGRID';
                 const lexiDone     = dailyDrillState?.lexigrid_completed_today ?? false;
-                // LexiGrid is accessible when: it's the active gate, OR dashboard is already unlocked
-                const lexiBlocked  = !isLexiGate && isLocked;
+                const lexiBlocked  = !isLexiGate && isLocked && !lexiDone;
+
+                // ── DEBUG: remove before production ──────────────────────────
+                console.group('%c[Dashboard State]', 'color:#818cf8;font-weight:bold');
+                console.log('next_action          :', dailyDrillState?.next_action   ?? '(loading)');
+                console.log('drills_completed_today:', dailyDrillState?.drills_completed_today ?? 0);
+                console.log('lexigrid_completed   :', lexiDone);
+                console.log('dashboard_unlocked   :', dailyDrillState?.dashboard_unlocked ?? false);
+                console.log('daily_streak         :', dailyDrillState?.daily_streak   ?? 0);
+                console.log('momentum_score       :', dailyDrillState?.momentum_score ?? 0);
+                console.log('--- computed ---');
+                console.log('isLocked (platform)  :', isLocked,   '← !dailyDrillState || !dashboard_unlocked || misses≥2');
+                console.log('isLexiGate           :', isLexiGate, '← next_action === LEXIGRID');
+                console.log('lexiDone             :', lexiDone,   '← lexigrid_completed_today from backend');
+                console.log('lexiBlocked          :', lexiBlocked,'← !isLexiGate && isLocked && !lexiDone');
+                console.log('lexiGridIsGate(drill):', dailyDrillState?.next_action === 'LEXIGRID', '← controls drill isGated prop');
+                console.groupEnd();
+                // ─────────────────────────────────────────────────────────────
                 return (
                   <div
                     className={cn(

@@ -405,8 +405,8 @@ export default function LexiGrid() {
                 </div>
               </div>
 
-              <button 
-                onClick={() => navigate('/student/dashboard')} 
+              <button
+                onClick={() => navigate('/student/dashboard', { state: { lexigridCompleted: true } })}
                 className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-lg py-4 rounded-2xl transition-all shadow-lg hover:shadow-indigo-500/25 active:scale-[0.98]"
               >
                 Return to Dashboard
