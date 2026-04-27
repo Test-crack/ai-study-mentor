@@ -3,7 +3,7 @@
 > **Version:** 1.0.0 — Production Release  
 > **Date:** 2026-04-25  
 > **Status:** ✅ Shipped — Ready for Live Users  
-> **Authors:** Engineering Team  
+> **Authors:** Sarthak Yadav
 
 ---
 

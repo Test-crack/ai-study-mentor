@@ -51,29 +51,6 @@ const LEVEL = {
 
 // ─── UTILS ────────────────────────────────────────────────────────────────────
 
-const calculateStreak = (dates: string[]): number => {
-  if (!dates || dates.length === 0) return 0;
-  const sortedDates = [...new Set(dates)].sort().reverse();
-  let streak = 0;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const lastAttendance = new Date(sortedDates[0]);
-  lastAttendance.setHours(0, 0, 0, 0);
-  if (lastAttendance.getTime() < yesterday.getTime()) return 0;
-  for (let i = 0; i < sortedDates.length; i++) {
-    const current = new Date(sortedDates[i]);
-    current.setHours(0, 0, 0, 0);
-    const expected = new Date(today);
-    expected.setDate(expected.getDate() - streak);
-    expected.setHours(0, 0, 0, 0);
-    if (current.getTime() === expected.getTime()) streak++;
-    else if (current.getTime() < expected.getTime()) break;
-  }
-  return streak;
-};
-
 const overallBand = (bands: SkillBand[]) =>
   Math.round((bands.reduce((s, b) => s + b.score, 0) / bands.length) * 2) / 2;
 
@@ -106,7 +83,6 @@ const StudentDashboardPage = () => {
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
-  const [currentStreak, setCurrentStreak] = useState(0);
   const [skillBands, setSkillBands] = useState<SkillBand[]>(SKILL_BANDS);
   const [nextActionDrill, setNextActionDrill] = useState<any>(null);
   // Real target band from student profile (overrides the static constant)
@@ -309,18 +285,6 @@ const StudentDashboardPage = () => {
     fetchCompetencyScores();
     fetchNextActionDrill();
     fetchDailyDrillState();
-
-    // Attendance streak (localStorage-based fallback; backend daily_streak takes over once loaded)
-    const today = new Date();
-    const offset = today.getTimezoneOffset() * 60000;
-    const localISO = new Date(today.getTime() - offset).toISOString().split("T")[0];
-    const storedAttendance = localStorage.getItem("student_attendance");
-    let dates: string[] = storedAttendance ? JSON.parse(storedAttendance) : [];
-    if (!dates.includes(localISO)) {
-      dates.push(localISO);
-      localStorage.setItem("student_attendance", JSON.stringify(dates));
-    }
-    setCurrentStreak(calculateStreak(dates));
   }, [fetchDailyDrillState, fetchNextActionDrill]);
 
   // ─── Effect: Refresh drill state when returning from drill/apply/lexigrid ────
@@ -388,7 +352,7 @@ const StudentDashboardPage = () => {
                 <p className="text-indigo-100 max-w-xl text-sm sm:text-base">
                   You're on a{" "}
                   <span className="font-bold text-white">
-                    {dailyDrillState?.daily_streak ?? currentStreak}-day streak
+                    {dailyDrillState?.daily_streak ?? 0}-day streak
                   </span>{" "}
                   — great momentum! Overall band:{" "}
                   <span className="font-bold text-white">{overall}</span>.
@@ -700,7 +664,7 @@ const StudentDashboardPage = () => {
                     title="Streak"
                     icon={<Flame className="h-5 w-5 text-orange-500" />}
                   >
-                    <AttendanceStreakTracker currentStreak={currentStreak} goal={7} />
+                    <AttendanceStreakTracker currentStreak={dailyDrillState?.daily_streak ?? 0} goal={7} />
                   </DashboardCard>
                 </div>
               </div>

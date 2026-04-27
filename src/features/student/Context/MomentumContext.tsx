@@ -23,16 +23,11 @@ export const MomentumProvider = ({ children }: { children: ReactNode }) => {
 
   // ── Core State ──────────────────────────────────────────────────────────────
 
-  const [totalMomentum, setTotalMomentum] = useState<number>(() => {
-    const stored = localStorage.getItem('testcrack_momentum');
-    return stored !== null ? parseInt(stored, 10) : 120;
-  });
+  // Start at 0 — syncMomentum() from getDailyDrillState overwrites this on mount
+  const [totalMomentum, setTotalMomentum] = useState<number>(0);
 
-  const [streak, setStreak] = useState<number>(() => {
-    const stored = localStorage.getItem('testcrack_streak');
-    // Default 0 — backend authoritative value overwrites this on first load
-    return stored !== null ? parseInt(stored, 10) : 0;
-  });
+  // Start at 0 — updateStreak() from backend response overwrites this on mount
+  const [streak, setStreak] = useState<number>(0);
 
   /**
    * Tracks which penalty cycles have already been applied.
@@ -47,10 +42,7 @@ export const MomentumProvider = ({ children }: { children: ReactNode }) => {
 
   // ── Persistence Side-Effects ─────────────────────────────────────────────────
 
-  useEffect(() => {
-    localStorage.setItem('testcrack_momentum', totalMomentum.toString());
-  }, [totalMomentum]);
-
+  // Only penalties are persisted — momentum and streak come from the backend on every mount
   useEffect(() => {
     localStorage.setItem(
       'testcrack_applied_penalties',
@@ -80,7 +72,6 @@ export const MomentumProvider = ({ children }: { children: ReactNode }) => {
 
   const updateStreak = useCallback((newStreak: number) => {
     setStreak(newStreak);
-    localStorage.setItem('testcrack_streak', newStreak.toString());
   }, []);
 
   /**

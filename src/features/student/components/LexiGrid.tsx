@@ -96,51 +96,61 @@ export default function LexiGrid() {
   // --- Persistence & Initialization ---
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
-    const savedData = localStorage.getItem('lexigrid_state');
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
 
-    // Try to resume a saved session for today
-    if (savedData) {
+    const init = async () => {
+      // 1. Always check backend first — this is the only cross-browser source of truth.
+      //    Prevents replay in a new browser and corrects stale localStorage scores.
       try {
-        const parsed = JSON.parse(savedData);
-        if (parsed.date === today && Array.isArray(parsed.words) && parsed.words.length > 0) {
-          setDailyWords(parsed.words);
-          setCurrentIndex(parsed.currentIndex || 0);
-          setTriesLeft(parsed.triesLeft ?? MAX_TRIES);
-          setCurrentGuess(parsed.currentGuess || "");
-          setWordsWon(parsed.wordsWon || 0);
-          if (parsed.currentIndex >= DAILY_LIMIT) setGameStatus('completed_day');
+        const stateRes = await callBackend(`${backendUrl}/api/student/daily-drill-state`);
+        if (stateRes.success && stateRes.lexigrid_completed_today) {
+          setWordsWon(stateRes.lexigrid_words_solved ?? 0);
+          setGameStatus('completed_day');
           setIsInitializing(false);
-          return; // No fetch needed — local state is valid for today
+          return;
         }
       } catch {
-        console.warn('[LexiGrid] Corrupted save data. Clearing...');
-        localStorage.removeItem('lexigrid_state');
+        // Backend unreachable — fall through to localStorage/fallback
       }
-    }
 
-    // No valid save for today — fetch fresh words from backend
-    const fetchWords = async () => {
+      // 2. Resume an in-progress session from localStorage (same browser, mid-game)
+      const savedData = localStorage.getItem('lexigrid_state');
+      if (savedData) {
+        try {
+          const parsed = JSON.parse(savedData);
+          if (parsed.date === today && Array.isArray(parsed.words) && parsed.words.length > 0) {
+            setDailyWords(parsed.words);
+            setCurrentIndex(parsed.currentIndex || 0);
+            setTriesLeft(parsed.triesLeft ?? MAX_TRIES);
+            setCurrentGuess(parsed.currentGuess || "");
+            setWordsWon(parsed.wordsWon || 0);
+            // completed_day via localStorage only reached if backend was unreachable above
+            if (parsed.currentIndex >= DAILY_LIMIT) setGameStatus('completed_day');
+            setIsInitializing(false);
+            return;
+          }
+        } catch {
+          console.warn('[LexiGrid] Corrupted save data. Clearing...');
+          localStorage.removeItem('lexigrid_state');
+        }
+      }
+
+      // 3. Fresh session — fetch today's words from backend
       try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
         const res = await callBackend(
           `${backendUrl}/api/student/lexigrid-words?difficulty=${encodeURIComponent(difficulty)}`
         );
 
         let words: WordItem[];
-
         if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-          // Map DB column names → game shape; normalise to uppercase
           words = (res.data as any[]).map((w) => ({
             base:   w.base_word.toUpperCase(),
             target: w.target_word.toUpperCase(),
             hint:   w.hint,
           }));
         } else {
-          // Backend returned no words — use offline fallback
           console.warn('[LexiGrid] No words from API, using fallback bank.');
-          words = [...FALLBACK_WORD_BANK]
-            .sort(() => 0.5 - Math.random())
-            .slice(0, DAILY_LIMIT);
+          words = [...FALLBACK_WORD_BANK].sort(() => 0.5 - Math.random()).slice(0, DAILY_LIMIT);
         }
 
         setDailyWords(words);
@@ -150,20 +160,12 @@ export default function LexiGrid() {
         setWordsWon(0);
 
         localStorage.setItem('lexigrid_state', JSON.stringify({
-          date: today,
-          words,
-          currentIndex: 0,
-          triesLeft: MAX_TRIES,
-          currentGuess: '',
-          wordsWon: 0,
+          date: today, words, currentIndex: 0, triesLeft: MAX_TRIES, currentGuess: '', wordsWon: 0,
         }));
       } catch (err) {
         console.error('[LexiGrid] Failed to fetch words from API:', err);
         setFetchError(true);
-        // Use offline fallback so the game is still playable
-        const words = [...FALLBACK_WORD_BANK]
-          .sort(() => 0.5 - Math.random())
-          .slice(0, DAILY_LIMIT);
+        const words = [...FALLBACK_WORD_BANK].sort(() => 0.5 - Math.random()).slice(0, DAILY_LIMIT);
         setDailyWords(words);
         setCurrentIndex(0);
         setTriesLeft(MAX_TRIES);
@@ -174,7 +176,7 @@ export default function LexiGrid() {
       }
     };
 
-    fetchWords();
+    init();
   }, [difficulty]);
 
   const saveState = (index: number, tries: number, guess: string, score: number) => {
