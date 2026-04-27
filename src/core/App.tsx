@@ -90,7 +90,8 @@ import DrillScreen from "@/features/student/components/Drills/DrillScreen";
 import { MomentumProvider } from "@/features/student/Context/MomentumContext";
 import ApplyDrillScreen from "@/features/student/components/Drills/ApplyDrillScreen";
 import LexiGrid from "@/features/student/components/LexiGrid";
-import Assessment from "@/features/student/components/Assessment";
+import InternalAssessmentPage from "@/features/student/components/Internalassessmentpage";
+
 import FullMockAssessment from "@/features/student/components/FullMockAssessment";
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -255,8 +256,7 @@ const AppRoutes = () => {
       <Route path="/student/drill" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><DrillScreen /></RoleProtectedRoute>} />
       <Route path="/student/apply-drill" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><ApplyDrillScreen /></RoleProtectedRoute>} />
       <Route path="/student/lexigrid" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><LexiGrid /></RoleProtectedRoute>} />
-      <Route path="/student/internal" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><Assessment/></RoleProtectedRoute>} />
-      <Route path="/student/mock" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><FullMockAssessment/></RoleProtectedRoute>} />
+<Route path="/student/internal" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><InternalAssessmentPage/></RoleProtectedRoute>} />      <Route path="/student/mock" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><FullMockAssessment/></RoleProtectedRoute>} />
       
   
       {/* Instructor Dashboard & Routes */}
