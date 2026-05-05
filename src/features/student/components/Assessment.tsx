@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { GraduationCap, ArrowRight, CheckCircle2, AlertCircle, Target, BookOpen, Headphones, PenLine, Mic, BrainCircuit, PlayCircle, Zap, Loader2 } from "lucide-react";
-import { useAuth } from "@/features/auth/hooks/useAuth"; 
+import { GraduationCap, ArrowRight, CheckCircle2, AlertCircle, Target, BookOpen, Headphones, PenLine, Mic, BrainCircuit, PlayCircle, Zap, Loader2, Lock, XCircle, CalendarClock } from "lucide-react";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useMomentum } from "@/features/student/Context/MomentumContext";
+import { callBackend } from "@/features/auth/services/authClient";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // API INTEGRATION LAYER (Ready for Sarthak's Endpoints)
@@ -40,6 +41,40 @@ interface AssessmentResult {
   criteria: CriterionScore[];
   priorityAction: string;
   completedAt: Date;
+}
+
+interface IAProgress {
+  drills_completed:       number;
+  drills_required:        number;
+  days_since_first_drill: number;
+  min_days_required:      number;
+  avg_dcs:                number;
+  dcs_required:           number;
+  cond_drills:            boolean;
+  cond_days:              boolean;
+  cond_dcs:               boolean;
+}
+
+interface IANextSlot {
+  number:         number;
+  date:           string;       // YYYY-MM-DD
+  date_formatted: string;       // "Wed, 7 May"
+  days_away:      number;
+}
+
+interface IAStatusResponse {
+  has_schedule:       boolean;
+  prerequisites_met:  boolean;
+  avg_dcs:            number;
+  dcs_required:       number;
+  dcs_eligible:       boolean;
+  is_ia_day:          boolean;
+  current_ia_number:  number | null;
+  can_start_test:     boolean;
+  next_ia:            IANextSlot | null;
+  upcoming_ias:       IANextSlot[];
+  reasons:            { key: string; message: string }[];
+  progress:           IAProgress;
 }
 
 const SKILL_ORDER: Skill[] = ["listening", "reading", "writing", "speaking"];
@@ -262,6 +297,10 @@ export default function Assessment() {
   const { profile } = useAuth() as any; 
   const { totalMomentum, addPoints } = useMomentum();
   
+  // IA status (schedule + eligibility + DCS)
+  const [eligibilityLoading, setEligibilityLoading] = useState(true);
+  const [iaStatus, setIaStatus]                     = useState<IAStatusResponse | null>(null);
+
   // App State
   const [phase, setPhase] = useState<Phase>("gate");
   const [skillIdx, setSkillIdx] = useState(0);
@@ -323,6 +362,29 @@ export default function Assessment() {
       phase, skillIdx, currentIdx, answers, recordedPrompts, timeLeft, allResults, sessionData, audioState
     }));
   }, [phase, skillIdx, currentIdx, answers, recordedPrompts, timeLeft, allResults, sessionData, audioState, isRestoring]);
+
+  // --- IA ELIGIBILITY CHECK ---
+  // Only check when the student lands on the gate screen (not mid-session resume).
+  useEffect(() => {
+    if (isRestoring) return;
+    // If a session is already in progress from localStorage, skip eligibility — don't block a resumed test.
+    if (phase !== "gate") {
+      setEligibilityLoading(false);
+      return;
+    }
+    const check = async () => {
+      try {
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+        const res = await callBackend(`${backendUrl}/api/ia/status`);
+        if (res.success) setIaStatus(res as IAStatusResponse);
+      } catch (err) {
+        console.error("[IA Status] fetch failed:", err);
+      } finally {
+        setEligibilityLoading(false);
+      }
+    };
+    void check();
+  }, [isRestoring, phase]);
 
 
   // --- MOCK API FETCH (Sarthak will replace this logic) ---
@@ -435,7 +497,7 @@ export default function Assessment() {
 
   // ── RENDERERS ──
 
-  if (isRestoring) {
+  if (isRestoring || eligibilityLoading) {
     return (
       <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
         <Loader2 className="w-10 h-10 text-indigo-700 animate-spin" />
@@ -443,12 +505,186 @@ export default function Assessment() {
     );
   }
 
+  // ── STATE 1: Prerequisites not yet met (< 6 drills or < 2 days) ─────────────
+  const renderNotEligible = () => {
+    const p = iaStatus!.progress;
+    const conditions = [
+      { key: "drills", label: "Drill Sessions",        met: p.cond_drills, value: `${p.drills_completed} / ${p.drills_required}`,       pct: Math.min(100, Math.round((p.drills_completed / p.drills_required) * 100)) },
+      { key: "days",   label: "Days Since First Drill", met: p.cond_days,   value: `${p.days_since_first_drill} / ${p.min_days_required}`, pct: Math.min(100, Math.round((p.days_since_first_drill / p.min_days_required) * 100)) },
+      { key: "dcs",    label: "Avg Drill Accuracy",    met: p.cond_dcs,    value: `${p.avg_dcs}% / ${p.dcs_required}%`,                  pct: Math.min(100, Math.round((p.avg_dcs / p.dcs_required) * 100)) }
+    ];
+    return (
+      <div className="max-w-2xl mx-auto animate-fade-in pt-12 px-4">
+        <div className="bg-white border-2 border-gray-900 rounded-2xl p-8 sm:p-10 shadow-[8px_8px_0_#0F0F0F]">
+          <div className="flex flex-col items-center text-center mb-8">
+            <div className="w-16 h-16 rounded-2xl bg-rose-100 border-2 border-gray-900 flex items-center justify-center mb-4 shadow-[4px_4px_0_#0F0F0F]">
+              <Lock className="w-8 h-8 text-rose-600" />
+            </div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded border-2 border-gray-900 bg-rose-600 text-white text-xs font-black tracking-widest uppercase mb-3 shadow-[2px_2px_0_#0F0F0F]">
+              <XCircle className="w-3.5 h-3.5" /> Not Eligible Yet
+            </div>
+            <h1 className="text-3xl font-black text-gray-900 tracking-tight uppercase">Internal Assessment Locked</h1>
+            <p className="text-gray-500 font-medium mt-2 max-w-md">Complete all three requirements below to unlock your Internal Assessment window.</p>
+          </div>
+          <div className="space-y-4 mb-8">
+            {conditions.map(c => (
+              <div key={c.key} className={`border-2 rounded-xl p-4 shadow-[3px_3px_0_#0F0F0F] ${c.met ? "border-emerald-400 bg-emerald-50" : "border-gray-300 bg-gray-50"}`}>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    {c.met ? <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" /> : <div className="w-5 h-5 rounded-full border-2 border-gray-400 flex-shrink-0" />}
+                    <span className="font-black text-sm text-gray-800 uppercase tracking-wide">{c.label}</span>
+                  </div>
+                  <span className={`font-black text-sm tabular-nums ${c.met ? "text-emerald-700" : "text-gray-500"}`}>{c.value}</span>
+                </div>
+                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className={`h-full rounded-full transition-all duration-500 ${c.met ? "bg-emerald-500" : "bg-indigo-500"}`} style={{ width: `${c.pct}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+          {iaStatus!.reasons.length > 0 && (
+            <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-4 mb-8 shadow-[3px_3px_0_#F59E0B]">
+              <p className="text-xs font-black text-amber-700 uppercase tracking-widest mb-2">What to do next</p>
+              <ul className="space-y-1.5">
+                {iaStatus!.reasons.map(r => (
+                  <li key={r.key} className="flex items-start gap-2 text-sm text-amber-900 font-medium"><span className="mt-0.5 flex-shrink-0">•</span>{r.message}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <button onClick={() => navigate('/student/dashboard')} className="w-full bg-gray-900 hover:bg-gray-800 text-white font-black text-sm uppercase tracking-wide py-4 rounded-xl border-2 border-gray-900 transition-all shadow-[4px_4px_0_#4338CA]">
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  // ── STATE 2: Prerequisites met but today is NOT an IA day ─────────────────
+  const renderScheduled = () => {
+    const next     = iaStatus!.next_ia;
+    const avg_dcs  = iaStatus!.avg_dcs;
+    const eligible = iaStatus!.dcs_eligible;
+    return (
+      <div className="max-w-2xl mx-auto animate-fade-in pt-12 px-4">
+        <div className="bg-white border-2 border-gray-900 rounded-2xl p-8 sm:p-10 shadow-[8px_8px_0_#0F0F0F]">
+          {/* Header */}
+          <div className="flex flex-col items-center text-center mb-8">
+            <div className="w-16 h-16 rounded-2xl bg-indigo-100 border-2 border-gray-900 flex items-center justify-center mb-4 shadow-[4px_4px_0_#0F0F0F]">
+              <CalendarClock className="w-8 h-8 text-indigo-700" />
+            </div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded border-2 border-gray-900 bg-indigo-700 text-white text-xs font-black tracking-widest uppercase mb-3 shadow-[2px_2px_0_#0F0F0F]">
+              <Zap className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> Internal Assessment
+            </div>
+            <h1 className="text-3xl font-black text-gray-900 tracking-tight uppercase mb-2">Next Assessment Scheduled</h1>
+            {next ? (
+              <p className="text-gray-500 font-medium">
+                Your next Internal Assessment opens on{" "}
+                <span className="font-black text-indigo-700">{next.date_formatted}</span>
+                {next.days_away === 1 ? " — tomorrow!" : next.days_away === 0 ? " — today!" : ` — in ${next.days_away} days`}
+              </p>
+            ) : (
+              <p className="text-gray-500 font-medium">No upcoming assessment slot found.</p>
+            )}
+          </div>
+
+          {/* DCS status block */}
+          <div className={`border-2 rounded-xl p-5 mb-6 shadow-[3px_3px_0_#0F0F0F] ${eligible ? "border-emerald-400 bg-emerald-50" : "border-rose-300 bg-rose-50"}`}>
+            <div className="flex items-center justify-between mb-3">
+              <span className="font-black text-sm uppercase tracking-wide text-gray-800">Your Avg DCS Score</span>
+              <span className={`text-2xl font-black tabular-nums ${eligible ? "text-emerald-700" : "text-rose-600"}`}>{avg_dcs}%</span>
+            </div>
+            <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden mb-3">
+              <div
+                className={`h-full rounded-full transition-all duration-700 ${eligible ? "bg-emerald-500" : "bg-rose-500"}`}
+                style={{ width: `${Math.min(100, avg_dcs)}%` }}
+              />
+            </div>
+            <p className={`text-sm font-semibold ${eligible ? "text-emerald-700" : "text-rose-700"}`}>
+              {eligible
+                ? "✓ Maintain your DCS score to stay eligible for your next IA."
+                : "✗ Improve your DCS score to be eligible — need 40% or above."}
+            </p>
+          </div>
+
+          {/* Next date callout */}
+          {next && (
+            <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-4 mb-6 flex items-center gap-4">
+              <div className="bg-indigo-700 border-2 border-gray-900 rounded-xl w-14 h-14 flex flex-col items-center justify-center flex-shrink-0 shadow-[3px_3px_0_#0F0F0F]">
+                <span className="text-white font-black text-xl leading-none">{next.date.split('-')[2]}</span>
+                <span className="text-indigo-200 text-[9px] font-black uppercase tracking-widest">{next.date_formatted.split(' ').slice(-1)[0]}</span>
+              </div>
+              <div>
+                <p className="font-black text-gray-900 text-sm uppercase tracking-wide">IA #{next.number} Window Opens</p>
+                <p className="text-gray-500 text-xs font-medium mt-0.5">{next.date_formatted} · {next.days_away === 1 ? "1 day away" : `${next.days_away} days away`}</p>
+              </div>
+            </div>
+          )}
+
+          <button onClick={() => navigate('/student/dashboard')} className="w-full bg-gray-900 hover:bg-gray-800 text-white font-black text-sm uppercase tracking-wide py-4 rounded-xl border-2 border-gray-900 transition-all shadow-[4px_4px_0_#4338CA]">
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  // ── STATE 3: It IS an IA day but DCS < 40% ────────────────────────────────
+  const renderIaDayLowDCS = () => {
+    const avg_dcs = iaStatus!.avg_dcs;
+    const num     = iaStatus!.current_ia_number;
+    return (
+      <div className="max-w-2xl mx-auto animate-fade-in pt-12 px-4">
+        <div className="bg-white border-2 border-gray-900 rounded-2xl p-8 sm:p-10 text-center shadow-[8px_8px_0_#0F0F0F]">
+          <div className="w-16 h-16 rounded-2xl bg-rose-100 border-2 border-gray-900 flex items-center justify-center mx-auto mb-4 shadow-[4px_4px_0_#0F0F0F]">
+            <AlertCircle className="w-8 h-8 text-rose-600" />
+          </div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded border-2 border-gray-900 bg-rose-600 text-white text-xs font-black tracking-widest uppercase mb-4 shadow-[2px_2px_0_#0F0F0F]">
+            IA #{num} Window · Today
+          </div>
+          <h1 className="text-3xl font-black text-gray-900 uppercase tracking-tight mb-3">Improve Your DCS to Take This IA</h1>
+          <p className="text-gray-500 font-medium mb-8 max-w-md mx-auto">
+            Today is your Internal Assessment window but your average accuracy is below the required threshold. Complete more drills today to bring it up.
+          </p>
+          {/* DCS meter */}
+          <div className="bg-rose-50 border-2 border-rose-300 rounded-xl p-5 mb-8 text-left shadow-[3px_3px_0_#F87171]">
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-black text-sm uppercase tracking-wide text-gray-800">Current Avg DCS</span>
+              <span className="text-2xl font-black text-rose-600 tabular-nums">{avg_dcs}%</span>
+            </div>
+            <div className="w-full h-3 bg-rose-100 rounded-full overflow-hidden mb-2">
+              <div className="h-full rounded-full bg-rose-500 transition-all duration-700" style={{ width: `${Math.min(100, avg_dcs)}%` }} />
+            </div>
+            <p className="text-xs font-bold text-rose-700">Need 40% — you're {40 - avg_dcs}% short. Complete drills to improve your score.</p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button onClick={() => navigate('/student/dashboard')} className="flex-1 px-6 py-4 rounded-xl border-2 border-gray-300 font-black text-gray-500 hover:bg-gray-50 uppercase tracking-wide transition-colors">
+              Dashboard
+            </button>
+            <button onClick={() => navigate('/student/drill')} className="flex-1 bg-indigo-700 hover:bg-indigo-600 text-white font-black text-sm uppercase tracking-wide py-4 rounded-xl border-2 border-gray-900 transition-all shadow-[4px_4px_0_#0F0F0F]">
+              Do a Drill Now →
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // ── STATE 4: IA day + all conditions met → Start Test ─────────────────────
   const renderGate = () => (
     <div className="max-w-2xl mx-auto animate-fade-in pt-12 px-4">
       <div className="bg-white border-2 border-gray-900 rounded-2xl p-8 sm:p-12 text-center shadow-[8px_8px_0_#0F0F0F]">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded border-2 border-gray-900 bg-indigo-700 text-white text-xs font-black tracking-widest uppercase mb-8 shadow-[3px_3px_0_#0F0F0F]">
-          <Zap className="w-4 h-4 fill-amber-400 text-amber-400" /> Full Mock Assessment
+          <Zap className="w-4 h-4 fill-amber-400 text-amber-400" /> Internal Assessment #{iaStatus?.current_ia_number ?? ""}
         </div>
+        {/* DCS badge */}
+        {iaStatus && (
+          <div className="flex justify-end -mt-4 mb-2">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-gray-200 bg-gray-50 text-xs font-black text-gray-500 uppercase tracking-wide">
+              Avg DCS <span className="text-indigo-600">{iaStatus.avg_dcs}%</span>
+            </span>
+          </div>
+        )}
         
         <h1 className="text-4xl sm:text-5xl font-black text-gray-900 tracking-tight uppercase mb-6">
           Ready to test your <span className="text-indigo-700">Limits?</span>
@@ -872,11 +1108,16 @@ export default function Assessment() {
       <div className="fixed inset-0 pointer-events-none z-0" style={{ backgroundImage: 'radial-gradient(circle, #d1d5db 1px, transparent 1px)', backgroundSize: '24px 24px', opacity: 0.5 }} />
       
       <div className="relative z-10 pt-16">
-        {phase === "gate" && renderGate()}
-        {phase === "session" && renderSession()}
-        {phase === "interim" && renderInterim()}
-        {phase === "scoring" && renderScoring()}
-        {phase === "results" && renderResults()}
+        {phase === "gate" && (() => {
+          if (!iaStatus?.has_schedule || !iaStatus?.prerequisites_met) return renderNotEligible();
+          if (!iaStatus.is_ia_day)                                       return renderScheduled();
+          if (!iaStatus.dcs_eligible)                                    return renderIaDayLowDCS();
+          return renderGate();
+        })()}
+        {phase === "session"  && renderSession()}
+        {phase === "interim"  && renderInterim()}
+        {phase === "scoring"  && renderScoring()}
+        {phase === "results"  && renderResults()}
       </div>
 
       <style>{`

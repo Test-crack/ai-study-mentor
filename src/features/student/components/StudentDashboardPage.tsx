@@ -5,6 +5,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { PremiumModal } from "@/features/payment/components/PremiumModal";
 import { useNavigate, useLocation } from "react-router-dom";
 import { callBackend } from "@/features/auth/services/authClient";
+import IAScheduleWidget from "./dashboard/IAScheduleWidget";
 import { useMomentum } from "@/features/student/Context/MomentumContext";
 import { cn } from "@/shared/utils";
 import {
@@ -653,19 +654,22 @@ const StudentDashboardPage = () => {
                 </div>
               </section>
 
-              {/* Weekly Rhythm / Readiness / Streak */}
+              {/* Weekly Rhythm / Readiness / Streak / IA Schedule */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div className="lg:col-span-5"><WeeklyRhythmIndicator /></div>
-                <div className="lg:col-span-4">
+                <div className="lg:col-span-4"><WeeklyRhythmIndicator /></div>
+                <div className="lg:col-span-3">
                   <PredictedReadinessCard readiness={dynamicReadiness} />
                 </div>
-                <div className="lg:col-span-3">
+                <div className="lg:col-span-2">
                   <DashboardCard
                     title="Streak"
                     icon={<Flame className="h-5 w-5 text-orange-500" />}
                   >
                     <AttendanceStreakTracker currentStreak={dailyDrillState?.daily_streak ?? 0} goal={7} />
                   </DashboardCard>
+                </div>
+                <div className="lg:col-span-3">
+                  <IAScheduleWidget />
                 </div>
               </div>
 

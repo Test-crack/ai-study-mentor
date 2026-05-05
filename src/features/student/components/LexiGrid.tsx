@@ -27,6 +27,19 @@ const DAILY_LIMIT = 5;
 const MAX_TRIES = 3;
 const POINTS_PER_WORD = 15;
 
+// IST date string (YYYY-MM-DD) — must match the backend's currentISTDate() boundary.
+// Using toISOString() gives a UTC date which is wrong for the 5.5-hour window after
+// midnight IST but before midnight UTC (00:00–05:30 IST = still previous UTC day).
+function todayIST(): string {
+  const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+  const ist = new Date(Date.now() + IST_OFFSET_MS);
+  return [
+    ist.getUTCFullYear(),
+    String(ist.getUTCMonth() + 1).padStart(2, '0'),
+    String(ist.getUTCDate()).padStart(2, '0')
+  ].join('-');
+}
+
 const KEYBOARD_ROWS = [
   ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
   ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
@@ -95,40 +108,68 @@ export default function LexiGrid() {
 
   // --- Persistence & Initialization ---
   useEffect(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = todayIST(); // IST date — matches backend's session_date boundary
     const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
 
     const init = async () => {
-      // 1. Always check backend first — this is the only cross-browser source of truth.
-      //    Prevents replay in a new browser and corrects stale localStorage scores.
+      // 1. Backend is the single source of truth for whether today's session is done.
+      //    Using IST on both sides prevents stale-localStorage false-positives in the
+      //    00:00–05:30 IST window (new IST day, same UTC day).
+      let backendReachable = false;
       try {
         const stateRes = await callBackend(`${backendUrl}/api/student/daily-drill-state`);
-        if (stateRes.success && stateRes.lexigrid_completed_today) {
-          setWordsWon(stateRes.lexigrid_words_solved ?? 0);
-          setGameStatus('completed_day');
-          setIsInitializing(false);
-          return;
+        if (stateRes.success) {
+          backendReachable = true;
+          if (stateRes.lexigrid_completed_today) {
+            setWordsWon(stateRes.lexigrid_words_solved ?? 0);
+            setGameStatus('completed_day');
+            setIsInitializing(false);
+            return;
+          }
+          // Backend confirmed NOT done today — any localStorage "completed" entry is stale.
+          // Clear it so the date-match check below cannot resurrect it.
+          const savedData = localStorage.getItem('lexigrid_state');
+          if (savedData) {
+            try {
+              const parsed = JSON.parse(savedData);
+              if (parsed.currentIndex >= DAILY_LIMIT) {
+                localStorage.removeItem('lexigrid_state');
+              }
+            } catch { localStorage.removeItem('lexigrid_state'); }
+          }
         }
       } catch {
         // Backend unreachable — fall through to localStorage/fallback
       }
 
-      // 2. Resume an in-progress session from localStorage (same browser, mid-game)
+      // 2. Resume an in-progress session from localStorage (same browser, mid-game).
+      //    Only trusted when: date matches today (IST), AND session is not yet complete.
+      //    If backend was reachable we already cleared stale completed entries above.
       const savedData = localStorage.getItem('lexigrid_state');
       if (savedData) {
         try {
           const parsed = JSON.parse(savedData);
-          if (parsed.date === today && Array.isArray(parsed.words) && parsed.words.length > 0) {
+          const sameDay    = parsed.date === today;
+          const inProgress = Array.isArray(parsed.words) && parsed.words.length > 0
+                             && parsed.currentIndex < DAILY_LIMIT;
+          if (sameDay && inProgress) {
             setDailyWords(parsed.words);
             setCurrentIndex(parsed.currentIndex || 0);
             setTriesLeft(parsed.triesLeft ?? MAX_TRIES);
             setCurrentGuess(parsed.currentGuess || "");
             setWordsWon(parsed.wordsWon || 0);
-            // completed_day via localStorage only reached if backend was unreachable above
-            if (parsed.currentIndex >= DAILY_LIMIT) setGameStatus('completed_day');
             setIsInitializing(false);
             return;
           }
+          // Stale or completed entry (different date, or completed when backend was offline)
+          if (!backendReachable && parsed.currentIndex >= DAILY_LIMIT && sameDay) {
+            // Backend was unreachable and localStorage shows completed — honour it
+            setWordsWon(parsed.wordsWon || 0);
+            setGameStatus('completed_day');
+            setIsInitializing(false);
+            return;
+          }
+          localStorage.removeItem('lexigrid_state');
         } catch {
           console.warn('[LexiGrid] Corrupted save data. Clearing...');
           localStorage.removeItem('lexigrid_state');
@@ -160,7 +201,7 @@ export default function LexiGrid() {
         setWordsWon(0);
 
         localStorage.setItem('lexigrid_state', JSON.stringify({
-          date: today, words, currentIndex: 0, triesLeft: MAX_TRIES, currentGuess: '', wordsWon: 0,
+          date: todayIST(), words, currentIndex: 0, triesLeft: MAX_TRIES, currentGuess: '', wordsWon: 0,
         }));
       } catch (err) {
         console.error('[LexiGrid] Failed to fetch words from API:', err);
@@ -180,9 +221,8 @@ export default function LexiGrid() {
   }, [difficulty]);
 
   const saveState = (index: number, tries: number, guess: string, score: number) => {
-    const today = new Date().toISOString().split('T')[0];
     localStorage.setItem('lexigrid_state', JSON.stringify({
-      date: today,
+      date: todayIST(),
       words: dailyWords,
       currentIndex: index,
       triesLeft: tries,
