@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Read(//e/FreeLance/edtech/backend-study-mentor/**)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(grep -E \"\\\\.ts$\")"
     ],
     "additionalDirectories": [
       "e:\\FreeLance\\edtech\\backend-study-mentor\\src\\controllers",

@@ -512,7 +512,7 @@ const StudentDashboardPage = () => {
                     skill:     focusData.skill,
                     sub_skill: focusData.sub_skill,
                     level:     getLevelFromScore(focusData.band),
-                    ...(nextAction === 'EXTRA_DRILL_AVAILABLE' ? { extra: 'true' } : {})
+                    ...(nextAction === 'EXTRA_DRILL_AVAILABLE' || nextAction === 'EXTRA_DRILL_READY' ? { extra: 'true' } : {})
                   });
                   navigate(`/student/drill?${params.toString()}`);
                 };

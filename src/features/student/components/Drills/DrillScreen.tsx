@@ -115,7 +115,7 @@ export default function DrillScreen() {
 
         <main className="flex-1 p-6 max-w-4xl mx-auto w-full animate-in fade-in">
           {/* Back Button */}
-          <button onClick={() => navigate(-1)} className="flex items-center text-slate-500 hover:text-slate-800 dark:hover:text-white mb-6 transition-colors">
+          <button onClick={() => navigate('/student/dashboard', { state: isComplete ? { drillCompleted: true } : undefined })} className="flex items-center text-slate-500 hover:text-slate-800 dark:hover:text-white mb-6 transition-colors">
             <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
           </button>
 
