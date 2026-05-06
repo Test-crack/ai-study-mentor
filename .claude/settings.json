@@ -3,13 +3,15 @@
     "allow": [
       "Read(//e/FreeLance/edtech/backend-study-mentor/**)",
       "Bash(npx tsc *)",
-      "Bash(grep -E \"\\\\.ts$\")"
+      "Bash(grep -E \"\\\\.ts$\")",
+      "Bash(findstr /i \"subskill\")"
     ],
     "additionalDirectories": [
       "e:\\FreeLance\\edtech\\backend-study-mentor\\src\\controllers",
       "e:\\FreeLance\\edtech\\backend-study-mentor\\src\\routes",
       "e:\\FreeLance\\edtech\\backend-study-mentor\\src\\lib",
-      "e:\\FreeLance\\edtech\\backend-study-mentor\\src"
+      "e:\\FreeLance\\edtech\\backend-study-mentor\\src",
+      "e:\\FreeLance\\edtech\\backend-study-mentor\\docs"
     ]
   }
 }
