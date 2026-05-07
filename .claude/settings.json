@@ -4,7 +4,11 @@
       "Read(//e/FreeLance/edtech/backend-study-mentor/**)",
       "Bash(npx tsc *)",
       "Bash(grep -E \"\\\\.ts$\")",
-      "Bash(findstr /i \"subskill\")"
+      "Bash(findstr /i \"subskill\")",
+      "Bash(xargs grep -l \"ia\\\\|IA\")",
+      "Bash(Get-ChildItem -Path \"e:\\\\FreeLance\\\\edtech\\\\backend-study-mentor\\\\src\" -Recurse -Include \"*.ts\")",
+      "Bash(Select-Object FullName)",
+      "Bash(Sort-Object)"
     ],
     "additionalDirectories": [
       "e:\\FreeLance\\edtech\\backend-study-mentor\\src\\controllers",

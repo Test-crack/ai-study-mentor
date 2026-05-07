@@ -1,0 +1,5282 @@
+[
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the grammatically correct sentence:",
+      "options": {
+        "A": "She don't like coffee.",
+        "B": "She doesn't likes coffee.",
+        "C": "She doesn't like coffee.",
+        "D": "She not like coffee."
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "Third-person singular requires 'doesn't' (does not) followed by the base form of the verb.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Fill in the blank: 'They ___ to the cinema yesterday.'",
+      "options": {
+        "A": "go",
+        "B": "goes",
+        "C": "went",
+        "D": "going"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "Past simple tense is required because of the time marker 'yesterday'.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which sentence uses the article correctly?",
+      "options": {
+        "A": "I bought a apple.",
+        "B": "I bought an apple.",
+        "C": "I bought the apple from a shop yesterday for first time.",
+        "D": "I bought apple."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Use 'an' before words that begin with a vowel sound, like 'apple'.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the correct plural form: 'There are three ___ in the garden.'",
+      "options": {
+        "A": "child",
+        "B": "childs",
+        "C": "children",
+        "D": "childrens"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "'Children' is the irregular plural form of 'child'.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which sentence is grammatically correct?",
+      "options": {
+        "A": "He can to swim.",
+        "B": "He can swim.",
+        "C": "He cans swim.",
+        "D": "He can swims."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Modal verbs like 'can' are followed by the base form of the verb without 'to'.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the correct preposition: 'The book is ___ the table.'",
+      "options": {
+        "A": "in",
+        "B": "at",
+        "C": "on",
+        "D": "by"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "'On' indicates a position resting upon a surface.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which is the correct comparative form?",
+      "options": {
+        "A": "She is more taller than her brother.",
+        "B": "She is taller than her brother.",
+        "C": "She is tallest than her brother.",
+        "D": "She is more tall than her brother."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Short adjectives form the comparative by adding '-er' (no 'more').",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Select the correct form: 'I ___ studying English for two years.'",
+      "options": {
+        "A": "am",
+        "B": "have been",
+        "C": "was",
+        "D": "will"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Present perfect continuous ('have been + -ing') is used for actions that began in the past and continue to the present.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Identify the error: 'My sister and me went to the park.'",
+      "options": {
+        "A": "My sister",
+        "B": "and",
+        "C": "me",
+        "D": "went to the park"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "The subject pronoun 'I' should be used here, not 'me'. Correct: 'My sister and I went to the park.'",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Find the error: 'He don't have any money.'",
+      "options": {
+        "A": "He",
+        "B": "don't",
+        "C": "any",
+        "D": "money"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Third-person singular requires 'doesn't', not 'don't'.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the correct conditional sentence:",
+      "options": {
+        "A": "If I will see him, I tell him.",
+        "B": "If I see him, I will tell him.",
+        "C": "If I see him, I tell him.",
+        "D": "If I would see him, I will tell him."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "First conditional uses 'if + present simple, will + base verb'.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Select the sentence with correct subject-verb agreement:",
+      "options": {
+        "A": "The team are winning the match.",
+        "B": "Each of the players are tired.",
+        "C": "Neither of the answers is correct.",
+        "D": "The information are useful."
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "'Neither' takes a singular verb. Also, 'information' is uncountable and takes a singular verb.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which sentence uses the passive voice correctly?",
+      "options": {
+        "A": "The cake was eaten by the children.",
+        "B": "The cake eaten by the children.",
+        "C": "The cake was ate by the children.",
+        "D": "The cake been eaten by the children."
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "Passive voice uses 'be + past participle'. The past participle of 'eat' is 'eaten'.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the correct relative clause:",
+      "options": {
+        "A": "The man which lives next door is friendly.",
+        "B": "The man who lives next door is friendly.",
+        "C": "The man what lives next door is friendly.",
+        "D": "The man whose lives next door is friendly."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Use 'who' as a relative pronoun referring to people.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Fill in: 'By the time we arrived, the film ___ already ___.'",
+      "options": {
+        "A": "had / started",
+        "B": "has / started",
+        "C": "was / starting",
+        "D": "did / start"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "Past perfect ('had + past participle') describes an action completed before another past action.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which sentence is correct?",
+      "options": {
+        "A": "I suggest him to go home.",
+        "B": "I suggest that he goes home.",
+        "C": "I suggest he to go home.",
+        "D": "I suggest him going home."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Suggest' is followed by a 'that' clause or a gerund, not 'someone to do something'.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Select the correct form: 'She ___ here since 2010.'",
+      "options": {
+        "A": "is living",
+        "B": "lives",
+        "C": "has been living",
+        "D": "lived"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "Present perfect continuous is used for ongoing actions starting in the past, especially with 'since'.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the sentence with correct article usage:",
+      "options": {
+        "A": "The honesty is the best policy.",
+        "B": "Honesty is the best policy.",
+        "C": "An honesty is the best policy.",
+        "D": "Honesty is best policy."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Abstract nouns used in a general sense do not take an article.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Identify the error: 'Despite of the rain, we enjoyed the picnic.'",
+      "options": {
+        "A": "Despite of",
+        "B": "the rain",
+        "C": "we enjoyed",
+        "D": "the picnic"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'Despite' is not followed by 'of'. Correct: 'Despite the rain' or 'In spite of the rain'.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Find the error: 'The committee have made their decision.'",
+      "options": {
+        "A": "The committee",
+        "B": "have made",
+        "C": "their",
+        "D": "decision"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "In British English 'committee' can take plural agreement, but in standard formal usage 'has made' (singular) is preferred.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the correct mixed conditional:",
+      "options": {
+        "A": "If I had studied harder, I would be a doctor now.",
+        "B": "If I would have studied harder, I will be a doctor now.",
+        "C": "If I studied harder, I would have been a doctor now.",
+        "D": "If I had studied harder, I will be a doctor now."
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "Mixed conditional: past unreal condition (had + p.p.) with present unreal result (would + base verb).",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which sentence demonstrates correct inversion?",
+      "options": {
+        "A": "Never I have seen such a beautiful sunset.",
+        "B": "Never have I seen such a beautiful sunset.",
+        "C": "Never I had see such a beautiful sunset.",
+        "D": "Never have seen I such a beautiful sunset."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Negative adverbials at the start of a sentence trigger subject-auxiliary inversion.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Select the correct subjunctive form:",
+      "options": {
+        "A": "It is essential that he is on time.",
+        "B": "It is essential that he be on time.",
+        "C": "It is essential that he being on time.",
+        "D": "It is essential that he was on time."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The mandative subjunctive after 'essential that' uses the bare infinitive form.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the correctly punctuated sentence with a participle clause:",
+      "options": {
+        "A": "Having finished his work, he went home.",
+        "B": "Having finished his work he went home.",
+        "C": "Having finished, his work he went home.",
+        "D": "Having, finished his work, he went home."
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "A participle clause at the start is set off by a comma; no other comma is needed.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which sentence uses the perfect infinitive correctly?",
+      "options": {
+        "A": "She seems to be lost her keys.",
+        "B": "She seems to lose her keys.",
+        "C": "She seems to have lost her keys.",
+        "D": "She seems to losing her keys."
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "The perfect infinitive ('to have + p.p.') refers to an action before the time of the main verb.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Select the correct cleft sentence:",
+      "options": {
+        "A": "It was John that broke the window.",
+        "B": "It was John who broke the window.",
+        "C": "Both A and B are correct.",
+        "D": "Neither A nor B is correct."
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "In cleft sentences referring to people, both 'that' and 'who' are acceptable.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the correct form: 'No sooner ___ the bell rung than the students rushed out.'",
+      "options": {
+        "A": "had",
+        "B": "did",
+        "C": "has",
+        "D": "was"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'No sooner... than' triggers inversion with past perfect: 'had + subject + past participle'.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which sentence uses the gerund/infinitive correctly?",
+      "options": {
+        "A": "I regret to inform you that your application was rejected.",
+        "B": "I regret informing you that your application was rejected.",
+        "C": "I regret to informing you that your application was rejected.",
+        "D": "I regret inform you that your application was rejected."
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'Regret + to-infinitive' is used to politely deliver bad news; 'regret + gerund' refers to past actions one wishes one hadn't done.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Identify the error: 'The data suggests that the hypothesis are correct.'",
+      "options": {
+        "A": "The data",
+        "B": "suggests",
+        "C": "the hypothesis",
+        "D": "are"
+      },
+      "correct_answer": "\"D\"",
+      "explanation": "'Hypothesis' is singular and requires 'is', not 'are'. Its plural is 'hypotheses'.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Find the error: 'Hardly had he left the room when the phone rang loudly and persistently for several minutes.'",
+      "options": {
+        "A": "Hardly had he left",
+        "B": "when the phone rang",
+        "C": "loudly and persistently",
+        "D": "No error"
+      },
+      "correct_answer": "\"D\"",
+      "explanation": "The sentence is correct: 'Hardly... when' is a fixed structure with inversion.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the word closest in meaning to 'big':",
+      "options": {
+        "A": "small",
+        "B": "tiny",
+        "C": "large",
+        "D": "narrow"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "'Large' is a synonym for 'big'.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which word means 'a feeling of being sad'?",
+      "options": {
+        "A": "happiness",
+        "B": "sorrow",
+        "C": "joy",
+        "D": "excitement"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Sorrow' means deep sadness or grief.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the opposite of 'difficult':",
+      "options": {
+        "A": "hard",
+        "B": "tough",
+        "C": "easy",
+        "D": "complex"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "'Easy' is the antonym of 'difficult'.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which word fits: 'She is a very ___ student who always finishes her homework.'",
+      "options": {
+        "A": "lazy",
+        "B": "diligent",
+        "C": "tired",
+        "D": "loud"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Diligent' means showing care and effort in one's work.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Select the correct word: 'Please ___ the door before you leave.'",
+      "options": {
+        "A": "close",
+        "B": "open",
+        "C": "look",
+        "D": "see"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'Close' is appropriate for shutting a door before leaving.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What does 'purchase' mean?",
+      "options": {
+        "A": "to sell",
+        "B": "to buy",
+        "C": "to give away",
+        "D": "to lose"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Purchase' is a more formal synonym for 'buy'.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the word closest in meaning to 'begin':",
+      "options": {
+        "A": "stop",
+        "B": "end",
+        "C": "start",
+        "D": "finish"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "'Start' is a synonym for 'begin'.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which word means 'a person who teaches'?",
+      "options": {
+        "A": "student",
+        "B": "doctor",
+        "C": "teacher",
+        "D": "driver"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "A 'teacher' is someone whose job is to teach.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the best word for the gap: 'The weather was ___, so we stayed indoors.'",
+      "options": {
+        "A": "lovely",
+        "B": "terrible",
+        "C": "warm",
+        "D": "sunny"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Terrible' weather provides a logical reason to stay indoors.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the best word for the gap: 'I'm very ___ to meet you.'",
+      "options": {
+        "A": "angry",
+        "B": "pleased",
+        "C": "tired",
+        "D": "hungry"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Pleased to meet you' is a common polite expression.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the word closest in meaning to 'significant':",
+      "options": {
+        "A": "trivial",
+        "B": "important",
+        "C": "small",
+        "D": "boring"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Significant' means having importance or meaning.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which word best replaces 'a lot of' in formal writing?",
+      "options": {
+        "A": "lots of",
+        "B": "loads of",
+        "C": "numerous",
+        "D": "tons of"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "'Numerous' is the most formal of these options.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Select the synonym for 'demonstrate':",
+      "options": {
+        "A": "hide",
+        "B": "show",
+        "C": "remove",
+        "D": "destroy"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Demonstrate' means to clearly show or prove.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which collocation is correct?",
+      "options": {
+        "A": "make a research",
+        "B": "do a research",
+        "C": "conduct research",
+        "D": "perform research"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "'Conduct research' is the standard collocation in academic English.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the most appropriate word: 'The government has ___ a new policy on education.'",
+      "options": {
+        "A": "made",
+        "B": "done",
+        "C": "implemented",
+        "D": "given"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "'Implement a policy' is the standard formal collocation.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which word means 'happening every year'?",
+      "options": {
+        "A": "monthly",
+        "B": "annual",
+        "C": "weekly",
+        "D": "daily"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Annual' means occurring once every year.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Select the antonym of 'temporary':",
+      "options": {
+        "A": "brief",
+        "B": "permanent",
+        "C": "short",
+        "D": "quick"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Permanent' (lasting indefinitely) is the opposite of 'temporary'.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the word closest in meaning to 'analyse':",
+      "options": {
+        "A": "guess",
+        "B": "examine",
+        "C": "ignore",
+        "D": "summarise"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Analyse' means to examine something carefully and in detail.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the best word: 'The new law had a ___ impact on small businesses.'",
+      "options": {
+        "A": "big",
+        "B": "huge",
+        "C": "substantial",
+        "D": "okay"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "'Substantial' is a formal adjective meaning considerable in size or importance — appropriate for academic writing.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the best word: 'Researchers ___ that the results are statistically significant.'",
+      "options": {
+        "A": "say",
+        "B": "tell",
+        "C": "conclude",
+        "D": "speak"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "'Conclude' is the appropriate formal verb for stating a research finding.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the word closest in meaning to 'ubiquitous':",
+      "options": {
+        "A": "rare",
+        "B": "everywhere",
+        "C": "ancient",
+        "D": "hidden"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Ubiquitous' means present, appearing, or found everywhere.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which word best fits: 'The professor's ___ knowledge of medieval history impressed the audience.'",
+      "options": {
+        "A": "shallow",
+        "B": "encyclopaedic",
+        "C": "minimal",
+        "D": "vague"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Encyclopaedic' means comprehensive and wide-ranging in knowledge.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Select the most appropriate academic synonym for 'big problem':",
+      "options": {
+        "A": "huge issue",
+        "B": "significant predicament",
+        "C": "massive trouble",
+        "D": "giant difficulty"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Significant predicament' is the most formal and academic phrasing.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the correct collocation:",
+      "options": {
+        "A": "to draw a conclusion",
+        "B": "to make a conclusion",
+        "C": "to do a conclusion",
+        "D": "to take a conclusion"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'Draw a conclusion' is the standard academic collocation.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which word means 'to make less severe'?",
+      "options": {
+        "A": "exacerbate",
+        "B": "mitigate",
+        "C": "intensify",
+        "D": "amplify"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Mitigate' means to make less severe, serious, or painful.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Select the word that best replaces 'showed' in academic writing:",
+      "options": {
+        "A": "told",
+        "B": "demonstrated",
+        "C": "said",
+        "D": "spoke"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Demonstrated' is the most formal academic synonym for 'showed'.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which is the most precise academic verb for 'looking into a problem'?",
+      "options": {
+        "A": "checking",
+        "B": "investigating",
+        "C": "seeing",
+        "D": "minding"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Investigating' is the precise academic verb for systematic enquiry.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the word closest in meaning to 'paradigm':",
+      "options": {
+        "A": "example",
+        "B": "model or framework",
+        "C": "rule",
+        "D": "exception"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "A 'paradigm' is a typical example or pattern; in academic contexts, a conceptual framework.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the best word: 'The findings ___ existing theories about climate change.'",
+      "options": {
+        "A": "support",
+        "B": "corroborate",
+        "C": "agree with",
+        "D": "go with"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Corroborate' means to confirm or give support to (a statement, theory, or finding) — the most academic option.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the best word: 'Despite the evidence, his arguments remained ___.'",
+      "options": {
+        "A": "wrong",
+        "B": "untenable",
+        "C": "bad",
+        "D": "weak"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Untenable' means a position that cannot be maintained or defended against objection — precise academic register.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the best linking word: 'I was tired, ___ I went to bed early.'",
+      "options": {
+        "A": "but",
+        "B": "so",
+        "C": "or",
+        "D": "because"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'So' shows result — being tired causes going to bed early.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which connector shows contrast?",
+      "options": {
+        "A": "and",
+        "B": "also",
+        "C": "however",
+        "D": "moreover"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "'However' introduces a contrasting idea.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the correct linker: 'I like tea, ___ I don't like coffee.'",
+      "options": {
+        "A": "but",
+        "B": "so",
+        "C": "and",
+        "D": "because"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'But' shows contrast between two preferences.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which word adds information?",
+      "options": {
+        "A": "however",
+        "B": "but",
+        "C": "also",
+        "D": "yet"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "'Also' is used to add information.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which sentence is the best opener for an essay?",
+      "options": {
+        "A": "Anyway, school is good.",
+        "B": "School plays an important role in society.",
+        "C": "I think school is okay maybe.",
+        "D": "Lol, school."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Formal essays should begin with a clear, neutral topic statement.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Pick the best paragraph order: (1) Conclusion (2) Introduction (3) Main points",
+      "options": {
+        "A": "1, 2, 3",
+        "B": "2, 3, 1",
+        "C": "3, 2, 1",
+        "D": "2, 1, 3"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Standard structure: Introduction → Main points → Conclusion.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the best linker: 'First, mix the flour. ___, add the eggs.'",
+      "options": {
+        "A": "Finally",
+        "B": "Next",
+        "C": "However",
+        "D": "Therefore"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Next' indicates the following step in a sequence.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which word signals a conclusion?",
+      "options": {
+        "A": "Firstly",
+        "B": "Moreover",
+        "C": "In conclusion",
+        "D": "For example"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "'In conclusion' signals the end / summary of an argument.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "WRITING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Write a short paragraph (80–100 words) describing your daily routine. Use at least three linking words (e.g., first, then, after that, finally).",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "WRITING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Write a short paragraph (80–100 words) about your favourite season. Organise your ideas with a clear opening sentence, two supporting points, and a closing sentence.",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the best linker: 'The weather was poor; ___, the event went ahead.'",
+      "options": {
+        "A": "therefore",
+        "B": "nevertheless",
+        "C": "moreover",
+        "D": "consequently"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Nevertheless' shows that something happened despite a difficulty.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which connector signals cause and effect?",
+      "options": {
+        "A": "in addition",
+        "B": "by contrast",
+        "C": "as a result",
+        "D": "similarly"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "'As a result' indicates that something is a consequence of what was just stated.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the best linker: 'He worked hard. ___, he failed the exam.'",
+      "options": {
+        "A": "Furthermore",
+        "B": "Nonetheless",
+        "C": "Additionally",
+        "D": "Likewise"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Nonetheless' introduces a surprising contrast — working hard usually leads to passing.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which expression introduces an example?",
+      "options": {
+        "A": "in conclusion",
+        "B": "for instance",
+        "C": "on the contrary",
+        "D": "as a consequence"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'For instance' introduces a specific example.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which sentence flows best after: 'Many students struggle with academic writing.'?",
+      "options": {
+        "A": "Cats are independent animals.",
+        "B": "This difficulty often stems from limited exposure to formal texts.",
+        "C": "I had pizza for dinner last night.",
+        "D": "The weather is unpredictable in spring."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Sentence B refers back to 'difficulty' and develops the topic.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Identify the best paragraph topic sentence:",
+      "options": {
+        "A": "There are several reasons why exercise improves mental health.",
+        "B": "I exercise sometimes I think.",
+        "C": "Anyway, exercising.",
+        "D": "Exercise stuff."
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "A topic sentence should clearly preview the paragraph's content.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which transition shows a similar idea?",
+      "options": {
+        "A": "in contrast",
+        "B": "however",
+        "C": "similarly",
+        "D": "but"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "'Similarly' signals comparison or likeness between ideas.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Pick the best closing sentence for a paragraph about renewable energy:",
+      "options": {
+        "A": "I like solar panels.",
+        "B": "Thus, renewable sources offer a viable path towards sustainability.",
+        "C": "Anyway that's my opinion.",
+        "D": "Renewable energy is a thing."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "A strong closing sentence summarises and reinforces the paragraph's argument.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "WRITING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Write a paragraph (150–180 words) discussing the advantages and disadvantages of working from home. Use at least four linking devices to organise your ideas (e.g., on one hand, however, in addition, overall).",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "WRITING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Write an introduction paragraph (120–150 words) for an essay on the topic: 'Technology has changed the way young people communicate.' Include a hook, background, and a clear thesis statement.",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the most precise linker: 'The proposal was rejected; ___, the committee acknowledged its merit.'",
+      "options": {
+        "A": "however",
+        "B": "that being said",
+        "C": "thus",
+        "D": "in addition"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'That being said' introduces a concession that nuances the previous statement.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which connector best concedes a counter-argument?",
+      "options": {
+        "A": "consequently",
+        "B": "admittedly",
+        "C": "furthermore",
+        "D": "for example"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Admittedly' acknowledges a point that may seem to weaken one's argument.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the best transition: 'Critics argue X. ___, supporters point to Y.'",
+      "options": {
+        "A": "Conversely",
+        "B": "Therefore",
+        "C": "Moreover",
+        "D": "Likewise"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'Conversely' introduces an opposing view, fitting the contrast structure.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which phrase signals an additional supporting point?",
+      "options": {
+        "A": "by the same token",
+        "B": "in any event",
+        "C": "to be sure",
+        "D": "all things considered"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'By the same token' introduces a parallel or related supporting argument.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Identify the most cohesive opening sentence for a paragraph that begins with the word 'This':",
+      "options": {
+        "A": "Previous studies have established that screen time correlates with poor sleep.",
+        "B": "Things are bad.",
+        "C": "Many ideas exist.",
+        "D": "Sleep is important to people."
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'This' needs a clear antecedent — option A provides the specific finding it would refer to.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which sentence best maintains lexical cohesion in a paragraph about urbanisation?",
+      "options": {
+        "A": "Cities expand rapidly. Frogs are amphibians.",
+        "B": "Cities expand rapidly. This metropolitan growth strains infrastructure.",
+        "C": "Cities expand rapidly. I went to Paris.",
+        "D": "Cities expand rapidly. The book was interesting."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Lexical cohesion is achieved through related vocabulary ('cities' → 'metropolitan growth').",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the linker that best signals a refinement of an earlier point:",
+      "options": {
+        "A": "by contrast",
+        "B": "more specifically",
+        "C": "by the way",
+        "D": "in spite of"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'More specifically' refines or narrows a previously stated idea.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which sentence demonstrates best cohesion through reference?",
+      "options": {
+        "A": "The findings are striking. The findings are striking. The findings are striking.",
+        "B": "The findings are striking. They challenge a long-held assumption.",
+        "C": "Findings happened.",
+        "D": "There are findings, also things."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Pronoun reference ('They') maintains cohesion without redundant repetition.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "WRITING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Write an essay (250+ words) responding to: 'Some people believe that artificial intelligence will replace human creativity. To what extent do you agree?' Demonstrate clear thesis development, paragraph cohesion, and a sophisticated range of linking devices.",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "COHERENCE",
+      "question_type": "WRITING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Write an essay (250+ words) on: 'The increasing globalisation of culture has both positive and negative consequences. Discuss both views and give your opinion.' Use signposting, lexical cohesion, and well-developed paragraphs.",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "If a question asks 'Describe a place you like', what should you include?",
+      "options": {
+        "A": "Only your name",
+        "B": "Details about the place and why you like it",
+        "C": "A list of foods",
+        "D": "A maths problem"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "A descriptive task requires details about the topic and personal reasons.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What is the main purpose of an opinion essay?",
+      "options": {
+        "A": "To list facts",
+        "B": "To tell a story",
+        "C": "To express and support a personal viewpoint",
+        "D": "To draw a picture"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "An opinion essay states and supports the writer's view.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "If asked to 'compare two cities', you should:",
+      "options": {
+        "A": "Describe only one city",
+        "B": "Discuss similarities and differences",
+        "C": "Write about food only",
+        "D": "Skip the question"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Comparison tasks require discussing both similarities and differences.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What does 'give your opinion' mean in a writing task?",
+      "options": {
+        "A": "Tell a joke",
+        "B": "State what you think and why",
+        "C": "Copy from a book",
+        "D": "Ask a question"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Giving an opinion means stating your view and providing reasons.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which task type asks: 'Write a letter to a friend'?",
+      "options": {
+        "A": "Formal essay",
+        "B": "Informal letter",
+        "C": "Report",
+        "D": "Story"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "A letter to a friend is informal in register and personal in tone.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Identify the task: 'Describe the chart and report main features.'",
+      "options": {
+        "A": "Narrative",
+        "B": "Argumentative essay",
+        "C": "Data description (Task 1)",
+        "D": "Personal letter"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "Describing charts/figures is typical of IELTS Academic Writing Task 1.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What does 'discuss' mean in a writing task?",
+      "options": {
+        "A": "Ignore the topic",
+        "B": "Talk about different sides of an issue",
+        "C": "Write a poem",
+        "D": "Make a list"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Discuss' means to consider and explore different aspects of an issue.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "If a task says 'Give reasons and examples', you should:",
+      "options": {
+        "A": "Only give reasons",
+        "B": "Only give examples",
+        "C": "Provide both reasons and examples",
+        "D": "Skip both"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "When the task asks for reasons AND examples, both must be included.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "WRITING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Write a short paragraph (80–100 words) describing your favourite hobby. Explain what you do and why you enjoy it.",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "WRITING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Write a short letter (80–100 words) to a friend inviting them to your birthday party. Include the date, place, and time.",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "An IELTS Task 2 prompt asks 'To what extent do you agree?' What is required?",
+      "options": {
+        "A": "Only summarise the topic",
+        "B": "Pick a side and justify with reasons and examples",
+        "C": "Describe a chart",
+        "D": "Tell a personal story"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'To what extent do you agree' requires a clear position with supporting reasons.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "If the task asks 'Discuss both views and give your opinion', you should:",
+      "options": {
+        "A": "Only discuss one view",
+        "B": "Discuss both views AND state your opinion",
+        "C": "Skip the opinion",
+        "D": "Only give the opinion"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "This task type requires balanced discussion plus a personal opinion.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What is the role of a thesis statement?",
+      "options": {
+        "A": "To summarise sources",
+        "B": "To present the main argument or position",
+        "C": "To list examples",
+        "D": "To greet the reader"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "A thesis statement clearly presents the writer's main argument or position.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which is a fully developed task response?",
+      "options": {
+        "A": "States a position only",
+        "B": "States position, gives 2–3 reasons with examples, and concludes",
+        "C": "Lists random ideas",
+        "D": "Repeats the question"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Full task response requires clear position, developed support, and conclusion.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What does 'evaluate the advantages and disadvantages' require?",
+      "options": {
+        "A": "Only list advantages",
+        "B": "Only list disadvantages",
+        "C": "Weigh both sides and possibly state which is greater",
+        "D": "Tell a story"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "Evaluation requires considering both sides and may involve a judgement.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which task type is: 'Some people think X, while others think Y. Discuss both views.'",
+      "options": {
+        "A": "Opinion essay",
+        "B": "Discussion essay",
+        "C": "Problem-solution",
+        "D": "Letter"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "This is a discussion essay where both viewpoints must be addressed.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What is required by 'Suggest possible solutions'?",
+      "options": {
+        "A": "List the problems only",
+        "B": "Describe the topic in general",
+        "C": "Propose specific actions to address the issue",
+        "D": "Give an opinion only"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "'Suggest solutions' requires concrete, specific actions to solve a stated problem.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Identify the task: 'Describe the trends shown in the graph between 2000 and 2020.'",
+      "options": {
+        "A": "Argumentative essay",
+        "B": "Task 1 data description",
+        "C": "Narrative",
+        "D": "Personal letter"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Describing trends in a graph is typical of IELTS Academic Task 1.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "WRITING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Write a response (180–220 words) to: 'Some people believe that public transport should be free. Discuss the advantages and disadvantages of this idea.'",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "WRITING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Write a response (180–220 words) to: 'Many young people are choosing to study abroad. What are the reasons for this trend, and what are the possible effects?'",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which response best addresses: 'To what extent do governments bear responsibility for citizens' health?'",
+      "options": {
+        "A": "Lists health problems",
+        "B": "States degree of agreement, justifies with multiple developed reasons, addresses counter-argument",
+        "C": "Describes one disease",
+        "D": "Tells a personal anecdote only"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Advanced task response requires nuance (degree), developed support, and counter-argument engagement.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What distinguishes a Band 7+ task response?",
+      "options": {
+        "A": "Long word count alone",
+        "B": "Clear position throughout, fully developed ideas, relevant extensions",
+        "C": "Many idioms",
+        "D": "Repetition of the prompt"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Band 7+ task response is judged on clarity, development, and relevance — not length or idioms.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "If the prompt asks for 'causes and consequences', the strongest response will:",
+      "options": {
+        "A": "Only list causes",
+        "B": "Address both causes and consequences with depth and examples",
+        "C": "Repeat the same point",
+        "D": "Avoid examples"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Both elements must be addressed and developed; strong responses use evidence to support each.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which is a hallmark of a sophisticated thesis?",
+      "options": {
+        "A": "A simple yes/no statement",
+        "B": "A nuanced position with qualified agreement or scope",
+        "C": "An emotional outburst",
+        "D": "A list of facts"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Sophisticated theses recognise complexity, often with qualifiers like 'while X, ultimately Y'.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "How should a 'two-part question' task be approached?",
+      "options": {
+        "A": "Answer only the first part",
+        "B": "Answer both parts with developed paragraphs and link them coherently",
+        "C": "Restate the question",
+        "D": "Skip parts"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Two-part questions require both parts to be addressed with full development and coherent linkage.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What is a 'qualified agreement' in academic writing?",
+      "options": {
+        "A": "Total disagreement",
+        "B": "Agreement with limitations or conditions",
+        "C": "Saying yes only",
+        "D": "Avoiding the question"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Qualified agreement acknowledges a position but specifies conditions or exceptions.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which best handles a 'problem-solution' task?",
+      "options": {
+        "A": "List solutions without context",
+        "B": "Define problem, analyse causes, propose targeted solutions, evaluate feasibility",
+        "C": "Describe the topic vaguely",
+        "D": "Only describe problems"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Strong problem-solution responses link causes to targeted solutions and evaluate them.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What is the function of a 'concession paragraph' in argumentative writing?",
+      "options": {
+        "A": "To agree fully with the opposition",
+        "B": "To acknowledge counter-arguments before refuting them",
+        "C": "To summarise the introduction",
+        "D": "To list facts"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Concession paragraphs strengthen arguments by acknowledging then refuting opposing views.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "WRITING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Write a 250+ word response: 'Some argue that economic growth is the only reliable measure of a nation's progress, while others believe well-being and environmental health matter more. Discuss both views and give your own opinion.' Demonstrate clear position, nuanced argument, and developed support.",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "WRITING",
+      "sub_skill": "TASK_RESPONSE",
+      "question_type": "WRITING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Write a 250+ word response: 'In an age of rapid technological change, traditional academic qualifications are losing their value. To what extent do you agree or disagree?' Address counter-arguments and provide qualified analysis.",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which is the most natural spoken response to 'How are you?'",
+      "options": {
+        "A": "I am fine, thank you. And you?",
+        "B": "I'm fine, thanks. You?",
+        "C": "Fine I shall be.",
+        "D": "I be fine."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Spoken English uses contractions and informal follow-ups like 'You?'",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the natural spoken form: 'Where ___ you go on holiday?'",
+      "options": {
+        "A": "do",
+        "B": "did",
+        "C": "does",
+        "D": "doing"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Past simple 'did' is required for completed past actions.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which is correct in spoken English?",
+      "options": {
+        "A": "I'm gonna go.",
+        "B": "I going to go.",
+        "C": "I goes go.",
+        "D": "I go going."
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'Gonna' (going to) is common in casual spoken English; the structure is 'be + going to + base'.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Pick the natural answer: 'Do you like pizza?' '___'",
+      "options": {
+        "A": "Yes, I do.",
+        "B": "Yes, I like.",
+        "C": "Yes, I am like.",
+        "D": "Yes, do."
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "Short answers in English use the auxiliary: Do you...? Yes, I do.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the correct question form:",
+      "options": {
+        "A": "You are ready?",
+        "B": "Are you ready?",
+        "C": "Ready you?",
+        "D": "Is you ready?"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Yes/no questions invert subject and 'be' verb: 'Are you ready?'",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which sentence is correct?",
+      "options": {
+        "A": "I have a brother and a sister.",
+        "B": "I has a brother and a sister.",
+        "C": "I am have a brother.",
+        "D": "I having a brother."
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "First-person singular 'I' takes 'have' (not 'has').",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the correct verb form: 'She ___ to school every day.'",
+      "options": {
+        "A": "go",
+        "B": "goes",
+        "C": "going",
+        "D": "gone"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Third-person singular present tense adds '-s' or '-es'.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which is correct?",
+      "options": {
+        "A": "There are five people here.",
+        "B": "There is five people here.",
+        "C": "There be five people here.",
+        "D": "It is five people here."
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'There are' is used with plural nouns ('five people').",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "In spoken English, which contraction is most natural?",
+      "options": {
+        "A": "I am not",
+        "B": "I'm not",
+        "C": "I be not",
+        "D": "Not I am"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Contractions ('I'm not') are standard in everyday speech.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which is appropriate for casual spoken English?",
+      "options": {
+        "A": "Could you please indicate the location of the restroom?",
+        "B": "Where's the toilet?",
+        "C": "Inform me of the toilet's whereabouts.",
+        "D": "Toilet, where?"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Casual speech uses contractions and direct, simple phrasing.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the natural spoken response: 'If I had more time, I ___ travel more.'",
+      "options": {
+        "A": "will",
+        "B": "would",
+        "C": "did",
+        "D": "do"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Second conditional uses 'would + base verb' in the result clause.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which is most natural in conversation?",
+      "options": {
+        "A": "I have been to Paris.",
+        "B": "I have went to Paris.",
+        "C": "I have gone to Paris and I am still there.",
+        "D": "I been Paris."
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'Have been to' indicates a completed past visit; 'have gone to' implies still being there.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the correct tag question: 'You're coming, ___?'",
+      "options": {
+        "A": "isn't you",
+        "B": "aren't you",
+        "C": "don't you",
+        "D": "doesn't you"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Tag questions reverse the auxiliary; 'are' becomes 'aren't'.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Pick the most natural spoken phrase:",
+      "options": {
+        "A": "I had been having had dinner.",
+        "B": "I had had dinner.",
+        "C": "I had dinner already when she called.",
+        "D": "I have had dinner once."
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "Past simple with 'already' is natural and clear in conversation.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which sentence uses reported speech correctly?",
+      "options": {
+        "A": "She said me she was tired.",
+        "B": "She told me she was tired.",
+        "C": "She say me she tired.",
+        "D": "She told to me she was tired."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Tell' takes a direct object ('told me'); 'say' does not ('said to me').",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the natural form: 'I ___ rather stay in tonight.'",
+      "options": {
+        "A": "would",
+        "B": "will",
+        "C": "have",
+        "D": "do"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'Would rather' expresses preference.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which is grammatically correct?",
+      "options": {
+        "A": "I'm used to wake up early.",
+        "B": "I'm used to waking up early.",
+        "C": "I used to waking up early.",
+        "D": "I'm using to wake up early."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Be used to + gerund' means accustomed to; 'used to + base' refers to past habits.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the correct sentence:",
+      "options": {
+        "A": "She's been working here since five years.",
+        "B": "She's been working here for five years.",
+        "C": "She's been working here from five years.",
+        "D": "She's been working here since five years ago is true."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Use 'for' with a duration ('five years'); 'since' with a starting point ('2020').",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "In a job interview, which is more appropriate?",
+      "options": {
+        "A": "I wanna work here.",
+        "B": "I want to work here.",
+        "C": "I wants to work here.",
+        "D": "I am wanting to work here."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Formal contexts (interviews) avoid contractions like 'wanna'.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which spoken hedge is most appropriate when unsure?",
+      "options": {
+        "A": "Definitely it's true.",
+        "B": "I think it might be...",
+        "C": "I know everything.",
+        "D": "It is certainly true that."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'I think it might be' is a natural hedging phrase showing uncertainty.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the most natural spoken form: 'Had I known earlier, I ___ have called.'",
+      "options": {
+        "A": "will",
+        "B": "would",
+        "C": "do",
+        "D": "did"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Inverted third conditional: 'Had I known' (= If I had known) takes 'would have + p.p.' in the result.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which sentence demonstrates correct use of 'would' for past habits?",
+      "options": {
+        "A": "When I was a child, I would often play in the park.",
+        "B": "When I was a child, I will often play in the park.",
+        "C": "When I was a child, I would often played in the park.",
+        "D": "When I was a child, I would often playing in the park."
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'Would + base verb' describes repeated past habits.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the correct form: 'I'd rather you ___ that.'",
+      "options": {
+        "A": "don't do",
+        "B": "didn't do",
+        "C": "haven't done",
+        "D": "won't do"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Would rather + subject + past simple' expresses preference about another's actions.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which sentence uses inversion correctly in speech?",
+      "options": {
+        "A": "Only after the meeting did I understand.",
+        "B": "Only after the meeting I did understand.",
+        "C": "After the meeting only did I understand.",
+        "D": "Only after the meeting I understood."
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'Only after...' triggers subject-auxiliary inversion.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Pick the correct sentence:",
+      "options": {
+        "A": "Should you need help, please ask.",
+        "B": "Should you needing help, please ask.",
+        "C": "Shall you need help, please ask.",
+        "D": "Would you need help, please ask."
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'Should + subject + base verb' is a formal inverted conditional ('If you should need help').",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which sentence shows correct use of the past perfect in speech?",
+      "options": {
+        "A": "By the time she arrived, the meeting had already ended.",
+        "B": "By the time she arrived, the meeting has already ended.",
+        "C": "By the time she arrived, the meeting already ended.",
+        "D": "By the time she arrived, the meeting will already end."
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "Past perfect ('had ended') describes the earlier of two past events.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the correct emphatic form: 'I ___ tell you, but I forgot.'",
+      "options": {
+        "A": "did intend to",
+        "B": "do intend to",
+        "C": "intended to do",
+        "D": "intend"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "Emphatic 'did + base verb' adds emphasis to a past intention.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which sentence is appropriate for academic speech?",
+      "options": {
+        "A": "It seems like the data sort of suggests something maybe.",
+        "B": "The data appears to suggest a correlation, though further research is needed.",
+        "C": "Data, you know, says stuff.",
+        "D": "Data, like, totally says it."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Academic speech uses precise verbs and qualified statements.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which is most appropriate in a formal speaking exam answer?",
+      "options": {
+        "A": "Yeah, kinda. I dunno.",
+        "B": "I would argue that, on the whole, the issue is multifaceted.",
+        "C": "It's a thing I guess?",
+        "D": "Whatever, mate."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Formal speaking requires academic register and developed argumentation.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "GRAMMAR",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which discourse marker softens disagreement most effectively?",
+      "options": {
+        "A": "You're completely wrong.",
+        "B": "I see your point, but I'd suggest a slightly different perspective.",
+        "C": "No way.",
+        "D": "That's nonsense."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Polite disagreement begins with acknowledgement before introducing the alternative view.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which word best describes a film you really enjoyed?",
+      "options": {
+        "A": "boring",
+        "B": "great",
+        "C": "okay",
+        "D": "average"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Great' clearly expresses strong enjoyment.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "How would you say you are very happy in a casual conversation?",
+      "options": {
+        "A": "I'm thrilled.",
+        "B": "I'm dead.",
+        "C": "I'm broke.",
+        "D": "I'm starving."
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'Thrilled' means very happy or excited.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which expression means 'I don't know' casually?",
+      "options": {
+        "A": "No idea.",
+        "B": "I am uncertain.",
+        "C": "Unknown to me.",
+        "D": "Not aware."
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'No idea' is the casual spoken form of 'I don't know'.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What word means a meal you enjoy often?",
+      "options": {
+        "A": "favourite",
+        "B": "least",
+        "C": "worst",
+        "D": "boring"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "Your 'favourite' meal is the one you like most.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the natural word: 'My friend is very ___ — she always makes me laugh.'",
+      "options": {
+        "A": "boring",
+        "B": "funny",
+        "C": "tired",
+        "D": "shy"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Funny' means causing laughter or amusement.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which is a casual greeting?",
+      "options": {
+        "A": "I greet you formally.",
+        "B": "Hi! How's it going?",
+        "C": "Salutations to thee.",
+        "D": "I bid thee welcome."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Hi! How's it going?' is the casual everyday greeting.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What does 'tired' mean?",
+      "options": {
+        "A": "feeling sleepy or exhausted",
+        "B": "feeling angry",
+        "C": "feeling hungry",
+        "D": "feeling cold"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'Tired' means in need of rest or sleep.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which adjective describes good weather?",
+      "options": {
+        "A": "stormy",
+        "B": "sunny",
+        "C": "rainy",
+        "D": "freezing"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Sunny' describes clear, warm, pleasant weather.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "In spoken English, which is the most natural way to agree?",
+      "options": {
+        "A": "I concur.",
+        "B": "Affirmative.",
+        "C": "Yeah, totally.",
+        "D": "It is so."
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "'Yeah, totally' is natural casual spoken agreement.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which is the best casual word for 'food'?",
+      "options": {
+        "A": "sustenance",
+        "B": "nourishment",
+        "C": "grub",
+        "D": "provisions"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "'Grub' is informal slang for food in casual conversation.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which word best replaces 'very tired' in spoken English?",
+      "options": {
+        "A": "exhausted",
+        "B": "sleepy",
+        "C": "lazy",
+        "D": "bored"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'Exhausted' conveys extreme tiredness.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the natural collocation: 'I ___ a great holiday last summer.'",
+      "options": {
+        "A": "made",
+        "B": "did",
+        "C": "had",
+        "D": "took"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "'Have a holiday' is the standard collocation.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which expression means 'a great experience'?",
+      "options": {
+        "A": "a pain in the neck",
+        "B": "a piece of cake",
+        "C": "a once-in-a-lifetime experience",
+        "D": "a drag"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "'Once-in-a-lifetime' means an exceptional, memorable experience.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which collocation is correct?",
+      "options": {
+        "A": "make a decision",
+        "B": "do a decision",
+        "C": "have a decision",
+        "D": "give a decision"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'Make a decision' is the standard collocation.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the natural word: 'The exam was ___ — much harder than I expected.'",
+      "options": {
+        "A": "easy",
+        "B": "tough",
+        "C": "boring",
+        "D": "small"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Tough' means difficult or challenging.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which word best describes a person who works very hard?",
+      "options": {
+        "A": "lazy",
+        "B": "hardworking",
+        "C": "shy",
+        "D": "rude"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Hardworking' describes someone who puts in a lot of effort.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Pick the natural phrase: 'I ___ travelling because I love new cultures.'",
+      "options": {
+        "A": "am keen on",
+        "B": "am bored of",
+        "C": "dislike",
+        "D": "don't mind"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'Be keen on' means to be enthusiastic about something.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the best phrase: 'I was ___ when I won the competition.'",
+      "options": {
+        "A": "over the moon",
+        "B": "down in the dumps",
+        "C": "under the weather",
+        "D": "out of the blue"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'Over the moon' means extremely happy.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which is the best spoken substitute for 'I think it's important'?",
+      "options": {
+        "A": "I believe it's vital.",
+        "B": "I, like, kinda feel it might be sort of important.",
+        "C": "Important is what I deem it.",
+        "D": "Important it is."
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "Concise and clear: 'I believe it's vital' is precise spoken English.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Pick the best natural reply to 'How was your weekend?'",
+      "options": {
+        "A": "It was satisfactory in nature.",
+        "B": "Pretty good — I caught up with some friends.",
+        "C": "Weekend, was good.",
+        "D": "Affirmative weekend."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Casual fluent reply with elaboration is most natural.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which word best replaces 'very important' in formal speech?",
+      "options": {
+        "A": "kinda big",
+        "B": "crucial",
+        "C": "really nice",
+        "D": "a thing"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Crucial' is a precise, formal synonym for 'very important'.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the most sophisticated way to say 'I disagree':",
+      "options": {
+        "A": "Nope.",
+        "B": "I'd respectfully take a different view.",
+        "C": "Wrong.",
+        "D": "No."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Polite, sophisticated disagreement uses formal hedging.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which collocation is most academic?",
+      "options": {
+        "A": "make a research",
+        "B": "carry out research",
+        "C": "do a research",
+        "D": "have a research"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Carry out research' is the standard academic collocation.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which word best fits: 'The novel had a ___ effect on its readers.'",
+      "options": {
+        "A": "good",
+        "B": "profound",
+        "C": "okay",
+        "D": "small-ish"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Profound' means having deep meaning or impact — appropriate for a Band 7+ answer.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the most precise verb: 'The committee ___ the proposal after extensive deliberation.'",
+      "options": {
+        "A": "okayed",
+        "B": "endorsed",
+        "C": "said yes to",
+        "D": "thumbs-upped"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Endorsed' is the precise formal verb for officially approving.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which expression best fits Band 7+ speaking?",
+      "options": {
+        "A": "I'd argue that the issue is somewhat multifaceted.",
+        "B": "It's a thing.",
+        "C": "Issues, you know, are issues.",
+        "D": "Whatever happens, happens."
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "Sophisticated phrasing with hedging and academic vocabulary.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which collocation is correct?",
+      "options": {
+        "A": "reach a conclusion",
+        "B": "make a conclusion",
+        "C": "do a conclusion",
+        "D": "have a conclusion"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'Reach a conclusion' is the standard formal collocation.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choose the most precise word: 'The findings ___ a long-held assumption.'",
+      "options": {
+        "A": "go against",
+        "B": "challenge",
+        "C": "fight",
+        "D": "disagree"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Challenge' is the precise verb for questioning or contesting an assumption.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "In a formal speaking exam, which is the most appropriate hedge?",
+      "options": {
+        "A": "It might be argued that...",
+        "B": "It's totally true that...",
+        "C": "Definitely 100%...",
+        "D": "No question, it's..."
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "Formal hedging acknowledges that arguments can be contested — a Band 7+ feature.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "VOCABULARY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Pick the most idiomatic Band 7+ expression:",
+      "options": {
+        "A": "very busy",
+        "B": "snowed under with work",
+        "C": "having lots of work which is much",
+        "D": "I have so much to do that's really a lot"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Snowed under' is a natural idiom — using idiomatic language is a Band 7+ feature.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What is fluency in speaking?",
+      "options": {
+        "A": "Speaking very fast",
+        "B": "Speaking smoothly without long pauses",
+        "C": "Using big words",
+        "D": "Speaking loudly"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Fluency means speaking smoothly and continuously, not necessarily fast.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which strategy improves fluency?",
+      "options": {
+        "A": "Memorising scripts word-for-word",
+        "B": "Practising speaking regularly with simple topics",
+        "C": "Avoiding all conversation",
+        "D": "Speaking only formally"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Regular practice with familiar topics builds natural fluency.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What should you do if you forget a word while speaking?",
+      "options": {
+        "A": "Stop and stay silent for two minutes",
+        "B": "Use a synonym or describe the word",
+        "C": "Switch to your native language",
+        "D": "Give up speaking"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Paraphrasing or describing the word maintains fluency.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which filler is acceptable in casual spoken English?",
+      "options": {
+        "A": "blah blah",
+        "B": "um, well",
+        "C": "lalala",
+        "D": "just keep silent"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Um' and 'well' are natural fillers used in everyday conversation.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "How should you structure a short answer about your hometown?",
+      "options": {
+        "A": "List random facts",
+        "B": "Briefly say where it is, what it's like, and one thing you like about it",
+        "C": "Tell a long story",
+        "D": "Say nothing"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Simple structure: location, description, personal feeling — clear and complete.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which is the best opener for describing a person you know?",
+      "options": {
+        "A": "I want to talk about my friend, Sara.",
+        "B": "Person, yes, friend.",
+        "C": "Description?",
+        "D": "Sara person know I."
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "Clear topic introduction is good spoken structure.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What is a basic structure for answering 'Tell me about your hobby'?",
+      "options": {
+        "A": "What it is → why you like it → how often you do it",
+        "B": "Random facts",
+        "C": "Only the name",
+        "D": "Skip the question"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "A clear three-part answer covers content, reason, and frequency.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which sentence flows best in spoken English?",
+      "options": {
+        "A": "I, every day, exercising do.",
+        "B": "Every day I do exercise.",
+        "C": "I exercise every day.",
+        "D": "Do I exercise every day."
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "Subject-verb-object order with adverb at the end is the natural pattern.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "SPEAKING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Talk for 1–2 minutes about your hometown. You should say: where it is, what it is like, and what you like about it.",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "SPEAKING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Describe your typical day. You should say: when you wake up, what you do in the morning, afternoon, and evening, and what part of the day you enjoy most.",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What is the best response to a question you don't fully understand?",
+      "options": {
+        "A": "Stay silent",
+        "B": "'Sorry, could you repeat that?' or 'Do you mean...?'",
+        "C": "Answer randomly",
+        "D": "Walk away"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Asking for clarification politely maintains the conversation and shows fluency strategies.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which fluency strategy is most effective?",
+      "options": {
+        "A": "Long memorised paragraphs",
+        "B": "Using natural fillers, paraphrasing, and self-correction",
+        "C": "Speaking in only one tense",
+        "D": "Avoiding all idioms"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Natural fluency uses fillers, paraphrasing, and self-correction without breakdown.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "How can you extend a short answer naturally?",
+      "options": {
+        "A": "Repeat the question",
+        "B": "Add reasons, examples, or comparisons",
+        "C": "Speak louder",
+        "D": "Speak in a different language"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Extending answers with reasons and examples shows fluency development.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which is a good way to buy time while thinking?",
+      "options": {
+        "A": "Long silence",
+        "B": "'That's a good question, let me think...'",
+        "C": "Switching topics abruptly",
+        "D": "Saying 'I don't know' immediately"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Polite stalling phrases give thinking time without breaking fluency.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What is the best way to structure a 2-minute answer?",
+      "options": {
+        "A": "Introduction, 2–3 points with examples, brief conclusion",
+        "B": "One short sentence",
+        "C": "Random list of words",
+        "D": "Many tangents"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "Clear structure with introduction, supporting points, and conclusion shows organisation.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which discourse marker introduces an example?",
+      "options": {
+        "A": "However",
+        "B": "For instance",
+        "C": "On the other hand",
+        "D": "In contrast"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'For instance' / 'for example' introduces specific illustration.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which transition signals a shift to a new point?",
+      "options": {
+        "A": "Furthermore",
+        "B": "Moving on",
+        "C": "Likewise",
+        "D": "Similarly"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Moving on' clearly signals topic transition in spoken English.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "How should you conclude a long answer?",
+      "options": {
+        "A": "Stop suddenly",
+        "B": "'So, overall, that's why I think...' or 'All in all,...'",
+        "C": "Repeat the question",
+        "D": "Apologise"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Concluding phrases signal that you are wrapping up — a feature of organised speech.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "SPEAKING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Talk for 1–2 minutes about a memorable trip you have taken. You should say: where you went, who you went with, what you did there, and why it was memorable.",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "SPEAKING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Describe a skill you would like to learn. You should say: what the skill is, why you want to learn it, how you would learn it, and how it would benefit you.",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which feature characterises Band 7+ fluency?",
+      "options": {
+        "A": "Frequent long pauses",
+        "B": "Speaking at length on most topics with only occasional self-correction",
+        "C": "Memorised speeches",
+        "D": "Avoiding all errors"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Band 7+ fluency means extended discourse with natural self-correction, not perfection.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which technique reflects sophisticated fluency?",
+      "options": {
+        "A": "Reciting prepared answers",
+        "B": "Using a range of cohesive devices and discourse markers naturally",
+        "C": "Speaking very fast",
+        "D": "Using only short sentences"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "A range of natural cohesive devices and discourse markers is a Band 7+ marker.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "How should you handle an unfamiliar abstract topic in Part 3?",
+      "options": {
+        "A": "Refuse to answer",
+        "B": "Hedge, define your interpretation, then develop a reasoned response",
+        "C": "Repeat the question and stop",
+        "D": "Switch to a known topic"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Hedging and developing a reasoned response demonstrates flexibility and intellectual fluency.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which is a hallmark of advanced spoken fluency?",
+      "options": {
+        "A": "Using idioms and collocations naturally without overuse",
+        "B": "Memorising word lists",
+        "C": "Speaking only in formal register",
+        "D": "Avoiding all spontaneous speech"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "Natural idiomatic language without forced use marks Band 7+ fluency.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which response best demonstrates organised academic argumentation?",
+      "options": {
+        "A": "I think it's good. Yeah.",
+        "B": "On one hand X is true; on the other, Y complicates this — overall, it depends on context.",
+        "C": "Whatever, it's fine.",
+        "D": "I have no idea."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Balanced argumentation with clear position and qualification reflects advanced organisation.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which feature distinguishes Part 3 (discussion) from Part 1 (interview) answers?",
+      "options": {
+        "A": "Length only",
+        "B": "Part 3 requires abstract analysis and developed argumentation",
+        "C": "Part 3 is shorter",
+        "D": "Part 3 uses only personal anecdotes"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Part 3 demands abstract reasoning and analytical depth, going beyond personal experience.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which discourse marker best introduces a counter-argument?",
+      "options": {
+        "A": "Likewise",
+        "B": "On the contrary",
+        "C": "Furthermore",
+        "D": "Similarly"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'On the contrary' introduces a directly opposing view.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which sentence flows best at Band 7+?",
+      "options": {
+        "A": "It is somewhat the case that, broadly speaking, the situation is nuanced.",
+        "B": "I think there are several factors at play, ranging from cultural to economic.",
+        "C": "Stuff happens, you know.",
+        "D": "Yes no maybe."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Concise, layered, and natural — typical of Band 7+ argumentation.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "SPEAKING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Discuss the following for 2 minutes: 'Some argue that traditional skills are being lost as society modernises. How serious is this concern, and what role, if any, should governments play in preserving them?'",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "FLUENCY",
+      "question_type": "SPEAKING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Discuss for 2 minutes: 'In an increasingly globalised world, is it still meaningful to speak of distinct national cultures? Develop a nuanced argument with examples.'",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "How is the 'th' in 'think' pronounced?",
+      "options": {
+        "A": "as 'd'",
+        "B": "as a soft 'th' sound (voiceless)",
+        "C": "as 't'",
+        "D": "as 's'"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Th' in 'think' is voiceless — like a soft hissing 'th'.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which word has the same vowel sound as 'cat'?",
+      "options": {
+        "A": "cot",
+        "B": "cut",
+        "C": "cap",
+        "D": "code"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "'Cap' has the same /æ/ vowel sound as 'cat'.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "How is the final 's' pronounced in 'cats'?",
+      "options": {
+        "A": "as 'z'",
+        "B": "as 's'",
+        "C": "as 'ish'",
+        "D": "as 'sh'"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "After voiceless sounds (like 't'), the plural 's' is pronounced /s/.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which word rhymes with 'sea'?",
+      "options": {
+        "A": "say",
+        "B": "see",
+        "C": "sigh",
+        "D": "saw"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'See' /siː/ rhymes with 'sea' /siː/ — same long-e sound.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which syllable is stressed in 'banana'?",
+      "options": {
+        "A": "ba",
+        "B": "na (middle)",
+        "C": "na (end)",
+        "D": "all equal"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The stress in 'banana' falls on the middle syllable: ba-NA-na.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which intonation pattern is used for yes/no questions?",
+      "options": {
+        "A": "rising",
+        "B": "falling",
+        "C": "flat",
+        "D": "pulsing"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "Yes/no questions typically have rising intonation.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Where is the stress in 'computer'?",
+      "options": {
+        "A": "first syllable",
+        "B": "second syllable (com-PU-ter)",
+        "C": "third syllable",
+        "D": "no stress"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Stress in 'computer' falls on the second syllable: com-PU-ter.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What intonation does a statement typically use?",
+      "options": {
+        "A": "rising",
+        "B": "falling",
+        "C": "flat",
+        "D": "rising-falling"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Statements usually have falling intonation at the end.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "SPEAKING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Read the following sentence aloud and pay attention to word stress: 'I would like to study English at a university because it is an international language.'",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "SPEAKING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Practise saying the following pairs aloud, noting the difference in pronunciation: ship/sheep, bit/beat, fit/feet, live/leave. Then use one word from each pair in a short sentence.",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "How is '-ed' pronounced in 'wanted'?",
+      "options": {
+        "A": "as 't'",
+        "B": "as 'd'",
+        "C": "as 'id'",
+        "D": "silent"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "After 't' or 'd' sounds, '-ed' is pronounced /ɪd/.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which sound does 'gh' make in 'enough'?",
+      "options": {
+        "A": "g",
+        "B": "f",
+        "C": "silent",
+        "D": "k"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "In 'enough', 'gh' is pronounced /f/.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which word has the same 'oo' sound as 'food'?",
+      "options": {
+        "A": "good",
+        "B": "book",
+        "C": "moon",
+        "D": "look"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "'Moon' shares the long /uː/ sound with 'food'; 'good', 'book', 'look' all have short /ʊ/.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "How is 'h' pronounced in 'honest'?",
+      "options": {
+        "A": "as 'h'",
+        "B": "silent",
+        "C": "as 'ah'",
+        "D": "as 'k'"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The 'h' in 'honest' is silent.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which syllable is stressed in 'photograph' vs 'photographer'?",
+      "options": {
+        "A": "photo / GRAPH; pho / TO / grapher",
+        "B": "PHO-to-graph; pho-TO-grapher",
+        "C": "Both stress the same syllable",
+        "D": "Both have no stress"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "'Photograph' = PHO-to-graph; 'photographer' = pho-TO-grapher — stress shifts with suffix.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which intonation pattern signals a list?",
+      "options": {
+        "A": "All rising",
+        "B": "Rising on each item, falling on last",
+        "C": "All falling",
+        "D": "Flat"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "List intonation: rising on items, falling on the final item to signal closure.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Where is the primary stress in 'understand'?",
+      "options": {
+        "A": "first syllable",
+        "B": "second syllable",
+        "C": "third syllable (un-der-STAND)",
+        "D": "no stress"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "Primary stress in 'understand' falls on the third syllable.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which intonation signals genuine surprise in 'Really?'",
+      "options": {
+        "A": "flat",
+        "B": "high rising",
+        "C": "low falling",
+        "D": "monotone"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Genuine surprise is conveyed by a high rising intonation.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "SPEAKING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Read the following passage aloud, paying attention to sentence stress and intonation: 'Although the weather was unpleasant, we decided to go for a walk because we hadn't been outside all week.' Then explain what you find difficult to pronounce in English.",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "SPEAKING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Read these minimal pairs aloud, focusing on the stress shift: PRO-duce (noun) / pro-DUCE (verb), RE-cord (noun) / re-CORD (verb). Then use one of each in a sentence.",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which feature characterises connected speech in fluent English?",
+      "options": {
+        "A": "Pronouncing every word fully separately",
+        "B": "Linking, weak forms, and assimilation between words",
+        "C": "Speaking very loudly",
+        "D": "Stressing every syllable equally"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Connected speech features (linking, weak forms, assimilation) are key to natural fluent pronunciation.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "How is 'going to' often pronounced in connected casual speech?",
+      "options": {
+        "A": "go-ing to (full)",
+        "B": "gonna /ˈɡənə/",
+        "C": "go-NU-to",
+        "D": "going-to (each syllable equal)"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "In casual connected speech, 'going to' typically reduces to /ˈɡənə/ ('gonna').",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What is the schwa /ə/ used for?",
+      "options": {
+        "A": "Stressed vowels",
+        "B": "The neutral vowel in unstressed syllables",
+        "C": "Long vowels only",
+        "D": "Consonants"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The schwa /ə/ is the most common vowel in English, found in unstressed syllables.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which is correct about word stress in compound nouns?",
+      "options": {
+        "A": "Stress is always on the second word",
+        "B": "Stress is typically on the first element (e.g. BLACKboard)",
+        "C": "Stress is always on the last syllable",
+        "D": "Compound nouns have no stress"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Compound nouns generally take primary stress on the first element.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which intonation pattern conveys uncertainty?",
+      "options": {
+        "A": "Falling final",
+        "B": "Rising final",
+        "C": "Flat monotone",
+        "D": "High level"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Rising intonation, especially at the end of statements, signals uncertainty or seeking confirmation.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What is 'sentence stress'?",
+      "options": {
+        "A": "Stress on every word",
+        "B": "Stress on the most important content words",
+        "C": "Stress on the first word only",
+        "D": "Stress on function words"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Sentence stress falls on content words (nouns, main verbs, adjectives, adverbs) carrying the meaning.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which feature signals 'tonic prominence' or 'nucleus'?",
+      "options": {
+        "A": "The most prominent stress in a tone unit, often the final content word",
+        "B": "The first word in a sentence",
+        "C": "The shortest word",
+        "D": "Function words"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "The tonic / nucleus is the most prominent stressed syllable in a tone unit.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "How does intonation distinguish 'Are you coming?' (genuine question) from 'Are you coming.' (rhetorical)?",
+      "options": {
+        "A": "By the speed",
+        "B": "By rising vs falling intonation",
+        "C": "By volume only",
+        "D": "There is no difference"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Rising intonation = genuine question; falling intonation = rhetorical or insistent.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "SPEAKING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Read the following aloud, applying connected speech features (linking, weak forms, assimilation): 'I'd've gone to the meeting if I'd known about it earlier, but nobody told me until yesterday afternoon.' Then explain which features you applied.",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "SPEAKING",
+      "sub_skill": "PRONUNCIATION",
+      "question_type": "SPEAKING_PROMPT",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Discuss for 1–2 minutes: 'How important is pronunciation accuracy versus fluency in effective spoken communication?' Aim to demonstrate natural sentence stress, varied intonation, and fluent connected speech.",
+      "options": null,
+      "correct_answer": null,
+      "explanation": null,
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "TFNG",
+      "passage_id": "R_BEG_P1",
+      "passage_text": "Bees are small flying insects that play a vital role in nature. They live in colonies, with each colony consisting of a queen, worker bees, and drones. Worker bees fly from flower to flower collecting nectar and pollen, which they bring back to the hive. The nectar is turned into honey, and the pollen helps plants reproduce — this process is called pollination. Many of the fruits and vegetables we eat depend on bees for pollination. In recent years, scientists have noticed that bee populations are decreasing in many countries. Some people believe that pesticides used in farming are harming bees, while others think that diseases or climate change are to blame. Many gardeners now plant special flowers to help local bees, and some cities have started keeping beehives in parks and on rooftops.",
+      "audio_url": null,
+      "prompt_text": "Bees live alone, not in colonies.",
+      "options": {
+        "A": "TRUE",
+        "B": "FALSE",
+        "C": "NOT GIVEN",
+        "D": null
+      },
+      "correct_answer": "\"FALSE\"",
+      "explanation": "The passage states bees live in colonies with a queen, workers, and drones.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "TFNG",
+      "passage_id": "R_BEG_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Worker bees collect nectar and pollen from flowers.",
+      "options": {
+        "A": "TRUE",
+        "B": "FALSE",
+        "C": "NOT GIVEN",
+        "D": null
+      },
+      "correct_answer": "\"TRUE\"",
+      "explanation": "The passage explicitly states this in the second sentence about worker bees.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "TFNG",
+      "passage_id": "R_BEG_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Honey is made directly from pollen.",
+      "options": {
+        "A": "TRUE",
+        "B": "FALSE",
+        "C": "NOT GIVEN",
+        "D": null
+      },
+      "correct_answer": "\"FALSE\"",
+      "explanation": "The passage says nectar is turned into honey, not pollen.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "TFNG",
+      "passage_id": "R_BEG_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "All bees in a colony lay eggs.",
+      "options": {
+        "A": "TRUE",
+        "B": "FALSE",
+        "C": "NOT GIVEN",
+        "D": null
+      },
+      "correct_answer": "\"NOT GIVEN\"",
+      "explanation": "The passage does not mention which bees lay eggs.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "TFNG",
+      "passage_id": "R_BEG_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Some cities have beehives in parks and on rooftops.",
+      "options": {
+        "A": "TRUE",
+        "B": "FALSE",
+        "C": "NOT GIVEN",
+        "D": null
+      },
+      "correct_answer": "\"TRUE\"",
+      "explanation": "The final sentence of the passage states this directly.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "MCQ",
+      "passage_id": "R_BEG_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What is the main role of worker bees according to the passage?",
+      "options": {
+        "A": "Laying eggs",
+        "B": "Collecting nectar and pollen",
+        "C": "Defending the hive",
+        "D": "Producing wax"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The passage states worker bees fly from flower to flower collecting nectar and pollen.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "MCQ",
+      "passage_id": "R_BEG_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What process helps plants reproduce?",
+      "options": {
+        "A": "Pollination",
+        "B": "Photosynthesis",
+        "C": "Hibernation",
+        "D": "Migration"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "The passage defines pollination as the process where pollen helps plants reproduce.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "MCQ",
+      "passage_id": "R_BEG_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What is one possible reason for declining bee populations mentioned in the passage?",
+      "options": {
+        "A": "Too many flowers",
+        "B": "Pesticides used in farming",
+        "C": "Lack of water",
+        "D": "Increased honey production"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The passage mentions pesticides as a suspected cause of bee population decline.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "MCQ",
+      "passage_id": "R_BEG_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which of the following depends on bees according to the passage?",
+      "options": {
+        "A": "Cars",
+        "B": "Many fruits and vegetables",
+        "C": "Computers",
+        "D": "Rivers"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The passage states many fruits and vegetables we eat depend on bees for pollination.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "MCQ",
+      "passage_id": "R_BEG_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What are gardeners doing to help bees?",
+      "options": {
+        "A": "Selling honey",
+        "B": "Planting special flowers",
+        "C": "Buying more pesticides",
+        "D": "Cutting down trees"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The passage states many gardeners now plant special flowers to help local bees.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "TFNG",
+      "passage_id": "R_INT_P1",
+      "passage_text": "Urbanisation has accelerated dramatically over the past century. In 1900, fewer than fifteen percent of the world's population lived in cities; today, more than half do. This shift has profound implications for how we live, work, and interact. Modern cities offer significant advantages: better access to education, healthcare, and employment. They also tend to be hubs of cultural and intellectual exchange, drawing people from diverse backgrounds. However, rapid urban growth presents serious challenges. Housing shortages, traffic congestion, and air pollution are common problems in fast-growing cities. In some developing countries, urbanisation has outpaced the construction of infrastructure, leading to informal settlements that lack basic services. Meanwhile, rural areas often experience population decline, which can weaken local economies. Urban planners now face the complex task of designing cities that are sustainable, equitable, and liveable — balancing growth with environmental and social well-being. Many experts argue that the next century will be defined by how successfully societies manage this transition.",
+      "audio_url": null,
+      "prompt_text": "More than half of the global population lived in cities in 1900.",
+      "options": {
+        "A": "TRUE",
+        "B": "FALSE",
+        "C": "NOT GIVEN",
+        "D": null
+      },
+      "correct_answer": "\"FALSE\"",
+      "explanation": "The passage states fewer than fifteen percent lived in cities in 1900.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "TFNG",
+      "passage_id": "R_INT_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Modern cities tend to offer better access to healthcare than rural areas.",
+      "options": {
+        "A": "TRUE",
+        "B": "FALSE",
+        "C": "NOT GIVEN",
+        "D": null
+      },
+      "correct_answer": "\"TRUE\"",
+      "explanation": "The passage lists healthcare among the advantages cities offer.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "TFNG",
+      "passage_id": "R_INT_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "All informal settlements have access to basic services.",
+      "options": {
+        "A": "TRUE",
+        "B": "FALSE",
+        "C": "NOT GIVEN",
+        "D": null
+      },
+      "correct_answer": "\"FALSE\"",
+      "explanation": "The passage says some informal settlements lack basic services.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "TFNG",
+      "passage_id": "R_INT_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Most urban planners are based in developing countries.",
+      "options": {
+        "A": "TRUE",
+        "B": "FALSE",
+        "C": "NOT GIVEN",
+        "D": null
+      },
+      "correct_answer": "\"NOT GIVEN\"",
+      "explanation": "The passage does not specify where urban planners are based.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "TFNG",
+      "passage_id": "R_INT_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Urbanisation has affected rural economies negatively.",
+      "options": {
+        "A": "TRUE",
+        "B": "FALSE",
+        "C": "NOT GIVEN",
+        "D": null
+      },
+      "correct_answer": "\"TRUE\"",
+      "explanation": "The passage states rural areas experience population decline, which can weaken local economies.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "MCQ",
+      "passage_id": "R_INT_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What is the main idea of the passage?",
+      "options": {
+        "A": "Cities are dangerous places.",
+        "B": "Urbanisation brings both benefits and challenges.",
+        "C": "Rural life is preferable.",
+        "D": "Cities are growing too slowly."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The passage discusses both advantages and challenges of urbanisation, suggesting balance.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "MCQ",
+      "passage_id": "R_INT_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which is NOT mentioned as an advantage of cities?",
+      "options": {
+        "A": "Education access",
+        "B": "Cultural exchange",
+        "C": "Cleaner air than rural areas",
+        "D": "Employment opportunities"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "The passage mentions air pollution as a problem, not clean air as an advantage.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "MCQ",
+      "passage_id": "R_INT_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What problem arises when urbanisation outpaces infrastructure?",
+      "options": {
+        "A": "Increased agriculture",
+        "B": "Lack of basic services in informal settlements",
+        "C": "Decline in technology",
+        "D": "More green spaces"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The passage states this leads to informal settlements without basic services.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "MCQ",
+      "passage_id": "R_INT_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What challenge do urban planners face according to the passage?",
+      "options": {
+        "A": "Lack of building materials",
+        "B": "Designing sustainable, equitable, and liveable cities",
+        "C": "Convincing people to move to cities",
+        "D": "Reducing population growth"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The passage explicitly describes this as the planners' complex task.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "MCQ",
+      "passage_id": "R_INT_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What do many experts believe about the next century?",
+      "options": {
+        "A": "It will be defined by how well societies manage urbanisation.",
+        "B": "Cities will disappear.",
+        "C": "Rural areas will dominate.",
+        "D": "Population will fall."
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "The passage states this in the closing sentence.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "TFNG",
+      "passage_id": "R_ADV_P1",
+      "passage_text": "The notion that human beings are uniquely rational has long been a foundational assumption of Western philosophy and economics. Classical economic theory, in particular, presupposes that individuals act in their own self-interest, weighing costs and benefits in a consistent manner to maximise utility. Yet, behavioural economists such as Daniel Kahneman and Amos Tversky have systematically challenged this assumption. Their pioneering research demonstrated that human decision-making is frequently shaped by cognitive biases — heuristics, or mental shortcuts, that often lead to predictable errors. The availability heuristic, for instance, causes people to overestimate the likelihood of events that are vivid or recent in memory, while loss aversion describes the tendency to weight losses more heavily than equivalent gains. These deviations from rationality are not random; they follow systematic patterns that, paradoxically, make human behaviour more predictable, not less. The implications extend far beyond economics. Public policy, medical decision-making, and even legal systems have begun to incorporate these insights, designing 'choice architectures' that nudge individuals towards better outcomes without restricting their freedom. Critics, however, caution that such interventions raise ethical concerns about autonomy and paternalism. The debate continues as to whether designing decision environments constitutes empowerment or manipulation.",
+      "audio_url": null,
+      "prompt_text": "Classical economic theory assumes individuals always act irrationally.",
+      "options": {
+        "A": "TRUE",
+        "B": "FALSE",
+        "C": "NOT GIVEN",
+        "D": null
+      },
+      "correct_answer": "\"FALSE\"",
+      "explanation": "The passage says classical theory assumes individuals act rationally in self-interest, the opposite.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "TFNG",
+      "passage_id": "R_ADV_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Kahneman and Tversky proposed that cognitive biases lead to systematic, predictable errors.",
+      "options": {
+        "A": "TRUE",
+        "B": "FALSE",
+        "C": "NOT GIVEN",
+        "D": null
+      },
+      "correct_answer": "\"TRUE\"",
+      "explanation": "The passage states their research showed exactly this.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "TFNG",
+      "passage_id": "R_ADV_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Loss aversion means people value losses and equivalent gains equally.",
+      "options": {
+        "A": "TRUE",
+        "B": "FALSE",
+        "C": "NOT GIVEN",
+        "D": null
+      },
+      "correct_answer": "\"FALSE\"",
+      "explanation": "The passage defines loss aversion as weighting losses more heavily than equivalent gains.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "TFNG",
+      "passage_id": "R_ADV_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Choice architecture has been universally accepted as ethical.",
+      "options": {
+        "A": "TRUE",
+        "B": "FALSE",
+        "C": "NOT GIVEN",
+        "D": null
+      },
+      "correct_answer": "\"FALSE\"",
+      "explanation": "The passage notes critics raise ethical concerns about autonomy and paternalism.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "TFNG",
+      "passage_id": "R_ADV_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Kahneman won a Nobel Prize for his work in behavioural economics.",
+      "options": {
+        "A": "TRUE",
+        "B": "FALSE",
+        "C": "NOT GIVEN",
+        "D": null
+      },
+      "correct_answer": "\"NOT GIVEN\"",
+      "explanation": "The passage does not mention any awards or prizes.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "MCQ",
+      "passage_id": "R_ADV_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What is the central argument of the passage?",
+      "options": {
+        "A": "Humans are perfectly rational decision-makers.",
+        "B": "Behavioural economics has revealed that human decisions follow predictable irrational patterns.",
+        "C": "Economics should be abandoned.",
+        "D": "All decisions are random."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The passage establishes this throughout, contrasting classical assumptions with behavioural findings.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "MCQ",
+      "passage_id": "R_ADV_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What does the availability heuristic cause?",
+      "options": {
+        "A": "Underestimating recent events",
+        "B": "Overestimating the likelihood of vivid or recent events",
+        "C": "Random decision-making",
+        "D": "Always making the right choice"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The passage defines this clearly as overestimation of vivid or recent events.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "MCQ",
+      "passage_id": "R_ADV_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "Which fields are mentioned as incorporating behavioural insights?",
+      "options": {
+        "A": "Only economics",
+        "B": "Public policy, medical decision-making, and legal systems",
+        "C": "Sports and entertainment",
+        "D": "Art and music"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The passage explicitly lists these three fields.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "MCQ",
+      "passage_id": "R_ADV_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What concern do critics raise about choice architecture?",
+      "options": {
+        "A": "It is too expensive.",
+        "B": "It raises ethical concerns about autonomy and paternalism.",
+        "C": "It works too slowly.",
+        "D": "It only helps the rich."
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The passage explicitly states these are the critics' concerns.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "READING",
+      "sub_skill": "READING",
+      "question_type": "MCQ",
+      "passage_id": "R_ADV_P1",
+      "passage_text": null,
+      "audio_url": null,
+      "prompt_text": "What does the word 'paradoxically' in the passage suggest?",
+      "options": {
+        "A": "Predictable irrationality is a contradiction in expectation, not in fact.",
+        "B": "Decisions are completely random.",
+        "C": "Humans never err.",
+        "D": "Economics is correct."
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "'Paradoxically' indicates a seeming contradiction (errors making behaviour more predictable, not less).",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_beg_1.mp3",
+      "prompt_text": "Where does the conversation take place?",
+      "options": {
+        "A": "At a gym",
+        "B": "At a restaurant",
+        "C": "At a library",
+        "D": "At a hospital"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "The audio is set at a gym, where the speaker enquires about classes and membership.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_beg_1.mp3",
+      "prompt_text": "What does the speaker want to do?",
+      "options": {
+        "A": "Cancel a membership",
+        "B": "Sign up for a yoga class",
+        "C": "Buy a smoothie",
+        "D": "Meet a friend"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The speaker explicitly says they want to sign up for a yoga class.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_beg_1.mp3",
+      "prompt_text": "On which day is the yoga class held?",
+      "options": {
+        "A": "Monday",
+        "B": "Tuesday",
+        "C": "Wednesday",
+        "D": "Thursday"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "The receptionist states that the yoga class is on Wednesdays.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_beg_1.mp3",
+      "prompt_text": "What time does the class start?",
+      "options": {
+        "A": "5 pm",
+        "B": "6 pm",
+        "C": "7 pm",
+        "D": "8 pm"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The class starts at 6 pm, as confirmed in the audio.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_beg_1.mp3",
+      "prompt_text": "How much does the class cost?",
+      "options": {
+        "A": "£5",
+        "B": "£10",
+        "C": "£15",
+        "D": "£20"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The receptionist states the class fee is £10.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_beg_1.mp3",
+      "prompt_text": "What does the speaker need to bring?",
+      "options": {
+        "A": "A swimsuit",
+        "B": "A yoga mat",
+        "C": "Running shoes",
+        "D": "A towel only"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The receptionist mentions that participants should bring their own yoga mat.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_beg_1.mp3",
+      "prompt_text": "Where can the speaker change clothes?",
+      "options": {
+        "A": "In the lobby",
+        "B": "In the changing room near the entrance",
+        "C": "Outside",
+        "D": "There is no changing room"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The receptionist directs the speaker to the changing room near the entrance.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_beg_1.mp3",
+      "prompt_text": "How does the speaker pay?",
+      "options": {
+        "A": "Cash",
+        "B": "By card",
+        "C": "By cheque",
+        "D": "Bank transfer"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The speaker pays by card.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_beg_1.mp3",
+      "prompt_text": "Is parking available at the gym?",
+      "options": {
+        "A": "Yes, free parking",
+        "B": "Yes, paid parking",
+        "C": "No parking available",
+        "D": "Only on weekends"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "The audio mentions free parking is available at the gym.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_beg_1.mp3",
+      "prompt_text": "When should the speaker arrive for the first class?",
+      "options": {
+        "A": "10 minutes early",
+        "B": "Right on time",
+        "C": "5 minutes late",
+        "D": "An hour early"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "The receptionist suggests arriving 10 minutes early to the first class.",
+      "difficulty": "BEGINNER"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_int_1.mp3",
+      "prompt_text": "What is the main topic of the discussion?",
+      "options": {
+        "A": "Choosing a research project topic",
+        "B": "Holiday plans",
+        "C": "A new café opening",
+        "D": "A textbook recommendation"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "The student and tutor are discussing the student's research project topic.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_int_1.mp3",
+      "prompt_text": "What is the student's initial idea?",
+      "options": {
+        "A": "Climate change in cities",
+        "B": "The history of jazz music",
+        "C": "Renewable energy in rural communities",
+        "D": "Online learning trends"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "The student initially proposes researching renewable energy in rural communities.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_int_1.mp3",
+      "prompt_text": "What concern does the tutor raise?",
+      "options": {
+        "A": "The topic is too narrow",
+        "B": "The topic is too broad to manage in the time available",
+        "C": "The topic has been done many times before",
+        "D": "The student lacks the right background"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The tutor expresses concern that the topic is too broad for the time frame.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_int_1.mp3",
+      "prompt_text": "What does the tutor suggest?",
+      "options": {
+        "A": "Choosing a different topic entirely",
+        "B": "Narrowing the focus to one specific community",
+        "C": "Working with a partner",
+        "D": "Submitting an essay instead"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The tutor recommends focusing on one specific rural community as a case study.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_int_1.mp3",
+      "prompt_text": "What deadline is mentioned?",
+      "options": {
+        "A": "Two weeks",
+        "B": "One month",
+        "C": "Three months",
+        "D": "Six months"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "The deadline mentioned is three months for the final report.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_int_1.mp3",
+      "prompt_text": "Which research method does the tutor recommend?",
+      "options": {
+        "A": "Surveys only",
+        "B": "Interviews and document analysis",
+        "C": "Lab experiments",
+        "D": "Random sampling on social media"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The tutor recommends combining interviews with document analysis.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_int_1.mp3",
+      "prompt_text": "Where can the student find primary sources?",
+      "options": {
+        "A": "Only the internet",
+        "B": "The university archive and local council records",
+        "C": "Newspapers from the 1900s",
+        "D": "Other students' essays"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The tutor mentions the university archive and local council records as primary sources.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_int_1.mp3",
+      "prompt_text": "What does the student plan to do first?",
+      "options": {
+        "A": "Visit the council office",
+        "B": "Read three relevant academic articles",
+        "C": "Begin interviewing immediately",
+        "D": "Write the introduction first"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The student says they will start by reading three relevant academic articles.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_int_1.mp3",
+      "prompt_text": "When will the next meeting take place?",
+      "options": {
+        "A": "Tomorrow",
+        "B": "In one week",
+        "C": "In two weeks",
+        "D": "In a month"
+      },
+      "correct_answer": "\"C\"",
+      "explanation": "They agree to meet in two weeks to review progress.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_int_1.mp3",
+      "prompt_text": "What is the tutor's overall attitude to the project?",
+      "options": {
+        "A": "Sceptical and discouraging",
+        "B": "Enthusiastic but cautious about scope",
+        "C": "Indifferent",
+        "D": "Confused"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The tutor is enthusiastic about the topic but emphasises careful scoping.",
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_adv_1.mp3",
+      "prompt_text": "What is the main topic of the lecture?",
+      "options": {
+        "A": "Theories of human memory and how memories are formed",
+        "B": "The history of psychology",
+        "C": "Modern neuroimaging techniques",
+        "D": "Sleep and dreams"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "The lecture focuses on theories of memory formation.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_adv_1.mp3",
+      "prompt_text": "Which model of memory does the lecturer first describe?",
+      "options": {
+        "A": "The unitary memory model",
+        "B": "The Atkinson-Shiffrin multi-store model",
+        "C": "The connectionist model",
+        "D": "Freud's theory of repression"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The lecturer begins with the multi-store model proposed by Atkinson and Shiffrin.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_adv_1.mp3",
+      "prompt_text": "What is the typical duration of short-term memory?",
+      "options": {
+        "A": "A few seconds, around 15–30 seconds",
+        "B": "Several minutes",
+        "C": "An hour",
+        "D": "Indefinite"
+      },
+      "correct_answer": "\"A\"",
+      "explanation": "The lecturer states short-term memory typically holds information for 15–30 seconds.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_adv_1.mp3",
+      "prompt_text": "What process moves information from short-term to long-term memory?",
+      "options": {
+        "A": "Forgetting",
+        "B": "Rehearsal and meaningful encoding",
+        "C": "Sleep alone",
+        "D": "Random retrieval"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Rehearsal and meaningful encoding are described as key processes for transfer to long-term memory.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_adv_1.mp3",
+      "prompt_text": "How does Baddeley's working memory model differ from earlier views?",
+      "options": {
+        "A": "It treats short-term memory as unitary",
+        "B": "It introduces multiple components, including the central executive and a phonological loop",
+        "C": "It denies short-term memory exists",
+        "D": "It only addresses long-term memory"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "Baddeley's model breaks short-term memory into specialised components.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_adv_1.mp3",
+      "prompt_text": "What does the lecturer suggest about emotional memories?",
+      "options": {
+        "A": "They are remembered less accurately",
+        "B": "They are often more vivid but not always more accurate",
+        "C": "They cannot be recalled",
+        "D": "They fade more quickly than neutral memories"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The lecturer notes emotional memories feel more vivid but accuracy is not always greater.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_adv_1.mp3",
+      "prompt_text": "Which brain region is highlighted as essential for forming new memories?",
+      "options": {
+        "A": "Cerebellum",
+        "B": "Hippocampus",
+        "C": "Brainstem",
+        "D": "Spinal cord"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The lecturer identifies the hippocampus as critical for memory formation.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_adv_1.mp3",
+      "prompt_text": "What is the 'misinformation effect'?",
+      "options": {
+        "A": "Forgetting all events",
+        "B": "Memory distortion caused by exposure to misleading information after the event",
+        "C": "A failure to encode in short-term memory",
+        "D": "An inability to forget"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The lecturer defines the misinformation effect as memory distortion from misleading post-event information.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_adv_1.mp3",
+      "prompt_text": "What practical implication of memory research does the lecturer emphasise?",
+      "options": {
+        "A": "It changes how we cook",
+        "B": "It informs the reliability of eyewitness testimony in legal contexts",
+        "C": "It improves athletic performance directly",
+        "D": "It has no real-world relevance"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The lecturer highlights the implications of memory research for eyewitness testimony.",
+      "difficulty": "ADVANCED"
+    },
+    {
+      "skill": "LISTENING",
+      "sub_skill": "LISTENING",
+      "question_type": "MCQ",
+      "passage_id": null,
+      "passage_text": null,
+      "audio_url": "/ia/audio/listening_adv_1.mp3",
+      "prompt_text": "What is the lecturer's conclusion?",
+      "options": {
+        "A": "Memory is a perfect recording of past events",
+        "B": "Memory is reconstructive and shaped by many factors",
+        "C": "Memory cannot be studied scientifically",
+        "D": "Memory is purely physical"
+      },
+      "correct_answer": "\"B\"",
+      "explanation": "The lecturer concludes that memory is reconstructive and shaped by various factors.",
+      "difficulty": "ADVANCED"
+    }
+  ]

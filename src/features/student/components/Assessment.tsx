@@ -96,17 +96,18 @@ interface IASection {
 }
 
 interface IASessionResponse {
-  success:            boolean;
-  session_id:         string;
-  ia_number:          number;
-  resume:             boolean;
-  selected_subskills: { skill: string; sub_skill: string }[];
-  sections:           IASection[];
-  saved_answers:      Record<string, string>;
-  window_closes_at:   string;
-  time_remaining_ms:  number;
-  already_done?:      boolean;
-  status?:            string;
+  success:             boolean;
+  session_id:          string;
+  ia_number:           number;
+  resume:              boolean;
+  current_section_idx?: number;
+  selected_subskills:  { skill: string; sub_skill: string }[];
+  sections:            IASection[];
+  saved_answers:       Record<string, string>;
+  window_closes_at:    string;
+  time_remaining_ms:   number;
+  already_done?:       boolean;
+  status?:             string;
 }
 
 const SKILL_LABEL: Record<string, string> = {
@@ -122,127 +123,6 @@ const SKILL_ORDER: Skill[] = ["listening", "reading", "writing", "speaking"];
 const STORAGE_KEY = "tc_full_assessment_state";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MOCK DATA & RANDOMIZED LISTENING POOLS
-// ─────────────────────────────────────────────────────────────────────────────
-
-const LISTENING_POOLS = [
-  {
-    audio_url: "/diagnostics/audio/RentingFlat.mp3",
-    context: "Listen to the 'Renting a Flat' conversation carefully. It will only play once.",
-    questions: [
-      { id: "L1_1", subskill: "Vocabulary Recognition", text: "Name of the estate agency: ___________________________", options: [] },
-      { id: "L1_2", subskill: "Vocabulary Recognition", text: "Location of the flat: ___________________________", options: [] },
-      { id: "L1_3", subskill: "Vocabulary Recognition", text: "Size of the flat: ___________________________", options: [] },
-      { id: "L1_4", subskill: "Vocabulary Recognition", text: "Monthly rent (not including bills): £ ___________________________", options: [] },
-      { id: "L1_5", subskill: "Vocabulary Recognition", text: "Extra monthly cost for parking: £ ___________________________", options: [] },
-      { id: "L1_6", subskill: "Vocabulary Recognition", text: "The flat has a sofa, a bed, and wardrobes but NO ___________________________", options: [] },
-      { id: "L1_7", subskill: "Coherence & Context", text: "Bus number that stops at the end of the street: ___________________________", options: [] },
-      { id: "L1_8", subskill: "Coherence & Context", text: "Distance to the nearest train station: ___________________________", options: [] },
-      { id: "L1_9", subskill: "Coherence & Context", text: "Viewing day and time chosen by Mike: ___________________________", options: [] },
-      { id: "L1_10", subskill: "Coherence & Context", text: "Mike's phone number: ___________________________", options: [] }
-    ]
-  },
-  {
-    audio_url: "/diagnostics/audio/Greenfield Shopping Centre.mp3",
-    context: "Listen to the 'Greenfield Shopping Centre' monologue carefully. It will only play once.",
-    questions: [
-      { id: "L2_1", subskill: "Vocabulary Recognition", text: "Weekday opening hours: ___________________________", options: [] },
-      { id: "L2_2", subskill: "Vocabulary Recognition", text: "Sunday closing time: ___________________________", options: [] },
-      { id: "L2_3", subskill: "Vocabulary Recognition", text: "Total number of shops: ___________________________", options: [] },
-      { id: "L2_4", subskill: "Vocabulary Recognition", text: "Number of floors: ___________________________", options: [] },
-      { id: "L2_5", subskill: "Vocabulary Recognition", text: "FreshMart (supermarket) opens at: ___________________________", options: [] },
-      { id: "L2_6", subskill: "Vocabulary Recognition", text: "Children's play area is supervised until: ___________________________", options: [] },
-      { id: "L2_7", subskill: "Coherence & Context", text: "Number of restaurants in the food court: ___________________________", options: [] },
-      { id: "L2_8", subskill: "Coherence & Context", text: "Number of cinema screens: ___________________________", options: [] },
-      { id: "L2_9", subskill: "Coherence & Context", text: "Parking cost after the first two free hours: ___________________________", options: [] },
-      { id: "L2_10", subskill: "Coherence & Context", text: "Bus numbers that stop outside the centre: ___________________________", options: [] }
-    ]
-  },
-  {
-    audio_url: "/diagnostics/audio/Housing Survey Project.mp3",
-    context: "Listen to the 'Housing Survey Project' discussion carefully. It will only play once.",
-    questions: [
-      { id: "L3_1", subskill: "Detail Recognition", text: "How many questionnaire responses did the students collect?", options: ["A. 80", "B. 100", "C. 120", "D. 150"] },
-      { id: "L3_2", subskill: "Detail Recognition", text: "What were the two main topics of the survey?", options: ["A. Housing costs and green spaces", "B. Housing costs and transport", "C. Transport and population", "D. Rent and employment"] },
-      { id: "L3_3", subskill: "Detail Recognition", text: "What percentage of people said they could not afford to live in the city centre?", options: ["A. More than 40%", "B. Exactly 50%", "C. More than 60%", "D. Nearly 80%"] },
-      { id: "L3_4", subskill: "Detail Recognition", text: "What did most respondents say was the biggest problem?", options: ["A. Buying a house", "B. Lack of transport", "C. High rent", "D. Noise levels"] },
-      { id: "L3_5", subskill: "Detail Recognition", text: "What surprised the students about younger people's preferences?", options: ["A. They wanted to live near universities", "B. They preferred the suburbs over the city", "C. They chose transport over price", "D. They preferred city centre shopping"] },
-      { id: "L3_6", subskill: "Detail Recognition", text: "What did younger people say was very important to them? ___________________________", options: [] },
-      { id: "L3_7", subskill: "Inference", text: "Who will design the charts and graphs for the project? ___________________________", options: [] },
-      { id: "L3_8", subskill: "Inference", text: "Who will write the main report? ___________________________", options: [] },
-      { id: "L3_9", subskill: "Inference", text: "When will the students give their presentation? ___________________________", options: [] },
-      { id: "L3_10", subskill: "Inference", text: "What did Dr. Brown advise them to add at the end of the project? ___________________________", options: [] }
-    ]
-  },
-  {
-    audio_url: "/diagnostics/audio/Shopping Habits in Modern Life.mp3",
-    context: "Listen to the 'Shopping Habits in Modern Life' academic talk carefully. It will only play once.",
-    questions: [
-      { id: "L4_1", subskill: "Detail Recognition", text: "Estimated percentage of shopping now done online: ___________________________", options: [] },
-      { id: "L4_2", subskill: "Detail Recognition", text: "What happened to many small shops when large shopping centres opened? ___________________________", options: [] },
-      { id: "L4_3", subskill: "Detail Recognition", text: "One advantage of online shopping mentioned: ___________________________", options: [] },
-      { id: "L4_4", subskill: "Detail Recognition", text: "What problem has the rise of online shopping caused for the high street? ___________________________", options: [] },
-      { id: "L4_5", subskill: "Detail Recognition", text: "Fraction of shops that are now empty in some towns: ___________________________", options: [] },
-      { id: "L4_6", subskill: "Detail Recognition", text: "What are empty shop buildings being turned into?", options: ["A. Offices and car parks", "B. Schools and hospitals", "C. Flats, cafes and community spaces", "D. Warehouses and factories"] },
-      { id: "L4_7", subskill: "Inference", text: "According to research, people now prefer to spend money on:", options: ["A. Technology and gadgets", "B. Restaurants, entertainment and travel", "C. Home improvements", "D. Clothing and fashion"] },
-      { id: "L4_8", subskill: "Inference", text: "What must future shopping centres offer to be successful?", options: ["A. Lower prices than online stores", "B. More parking spaces", "C. Experiences and reasons to spend time there", "D. A wider range of products"] },
-      { id: "L4_9", subskill: "Inference", text: "What will next week's lecture focus on?", options: ["A. Online shopping statistics", "B. Urban planning policies", "C. Case studies from different countries", "D. The history of markets"] },
-      { id: "L4_10", subskill: "Inference", text: "What must students read before the next class?", options: ["A. A journal article on e-commerce", "B. The chapter on urban retail development", "C. A report on housing trends", "D. A case study on consumer behaviour"] }
-    ]
-  }
-];
-
-const READING_DATA = {
-  passage: `The Rise of Urban Vertical Farming\n\nParagraph A: In recent years, vertical farming has emerged as one of the most talked-about innovations in urban food production. Unlike conventional agriculture, which relies on large areas of flat land, vertical farms stack crops in layers inside controlled indoor environments. Proponents argue that this model can produce food closer to consumers, reduce transportation costs, and operate with significantly less water than traditional methods.\n\nParagraph B: The technology behind vertical farms depends heavily on artificial lighting, most commonly LED systems tuned to specific wavelengths that promote plant growth. Climate control systems maintain optimal temperature and humidity around the clock, removing the unpredictability associated with outdoor farming. These conditions allow crops such as leafy greens, herbs, and strawberries to grow up to three times faster than they would in a field.\n\nParagraph C: Critics, however, raise serious concerns about the energy demands of indoor farming. Powering the lights and climate systems of a large vertical farm can consume considerably more electricity per kilogram of produce than greenhouse farming or open-field agriculture. Unless facilities are powered by renewable energy sources, the carbon footprint of vertically farmed food may actually exceed that of food transported from rural areas.\n\nParagraph D: Water efficiency is frequently cited as a major advantage. Hydroponic and aeroponic systems, commonly used in vertical farms, recirculate water so that as little as ten percent of the amount used in field farming is needed to grow the same quantity of produce. Some facilities report even lower consumption figures. This is particularly relevant in regions where fresh water is a scarce resource.\n\nParagraph E: The economic viability of vertical farming remains a point of debate. Construction and operational costs are substantially higher than those of conventional farms. Investors have poured billions of dollars into the sector, but several high-profile companies have faced financial difficulties due to the gap between operating costs and the prices consumers are willing to pay for the produce. Supporters believe that as technology matures and energy costs fall, vertical farming will become commercially sustainable on a larger scale.`,
-  questions: [
-    { id: "R1", subskill: "Grammatical Parsing", text: "Vertical farms require a large amount of flat land to operate.", options: ["TRUE", "FALSE", "NOT GIVEN"] },
-    { id: "R2", subskill: "Grammatical Parsing", text: "LED lighting is used to provide specific wavelengths of light that help plants grow.", options: ["TRUE", "FALSE", "NOT GIVEN"] },
-    { id: "R3", subskill: "Grammatical Parsing", text: "Vertical farms can grow all types of vegetables and fruit equally well.", options: ["TRUE", "FALSE", "NOT GIVEN"] },
-    { id: "R4", subskill: "Grammatical Parsing", text: "The carbon footprint of vertical farming is always lower than that of field farming.", options: ["TRUE", "FALSE", "NOT GIVEN"] },
-    { id: "R5", subskill: "Grammatical Parsing", text: "Hydroponic systems use considerably less water than traditional field agriculture.", options: ["TRUE", "FALSE", "NOT GIVEN"] },
-    { id: "R6", subskill: "Vocabulary & Inference", text: "Choose the heading for Paragraph C:", options: ["i. The Economic Challenges Facing the Industry", "ii. How Controlled Environments Accelerate Growth", "iii. The Energy Cost Controversy", "iv. Water Conservation as a Key Benefit", "v. Consumer Attitudes Towards Indoor Produce"] },
-    { id: "R7", subskill: "Vocabulary & Inference", text: "Choose the heading for Paragraph D:", options: ["i. The Economic Challenges Facing the Industry", "ii. How Controlled Environments Accelerate Growth", "iii. The Energy Cost Controversy", "iv. Water Conservation as a Key Benefit", "v. Consumer Attitudes Towards Indoor Produce"] },
-    { id: "R8", subskill: "Vocabulary & Inference", text: "What two systems are commonly used in vertical farms to reduce water use?", options: [] },
-    { id: "R9", subskill: "Vocabulary & Inference", text: "What is the main reason several vertical farming companies have experienced financial difficulties?", options: [] },
-    { id: "R10", subskill: "Vocabulary & Inference", text: "What condition, according to supporters, would make vertical farming commercially sustainable on a larger scale?", options: [] }
-  ]
-};
-
-const WRITING_DATA = {
-  context_task1: "Task 1 Chart Context:\n\nThe bar chart below shows the percentage of adults in four countries (UK, USA, Australia, India) who used the internet daily in 2010 and 2022.\n\nStudy the context and answer the short-form questions to build your report.",
-  context_task2: "Task 2 Essay Context:\n\nSome people think that universities should only offer courses that lead directly to employment. Others believe universities should offer a wider range of subjects. Discuss both views and give your own opinion.",
-  questions: [
-    { id: "W1", subskill: "Coherence & Task Response", text: "Write an overview sentence that identifies the most significant trend across all four countries between 2010 and 2022." },
-    { id: "W2", subskill: "Coherence & Task Response", text: "Write one sentence comparing the country with the highest and the country with the lowest daily internet usage in 2022." },
-    { id: "W3", subskill: "Coherence & Task Response", text: "Use an approximate figure to describe India's internet usage in 2010. Begin your sentence with: 'In 2010, approximately …'" },
-    { id: "W4", subskill: "Coherence & Task Response", text: "Rewrite the following sentence using a different comparison structure: 'The UK had a higher percentage than India in both years.'" },
-    { id: "W5", subskill: "Coherence & Task Response", text: "Write a short concluding sentence (one to two sentences) that summarises the overall pattern shown in the chart without introducing new data." },
-    { id: "W6", subskill: "Grammar & Vocabulary", text: "Write a paraphrase of the essay question to use as your introduction (2–3 sentences). Do not copy the original wording." },
-    { id: "W7", subskill: "Grammar & Vocabulary", text: "List TWO arguments in favour of offering only employment-focused courses." },
-    { id: "W8", subskill: "Grammar & Vocabulary", text: "List TWO arguments in favour of offering a wider range of subjects." },
-    { id: "W9", subskill: "Grammar & Vocabulary", text: "Write a topic sentence for a body paragraph that presents the view supporting employment-focused courses." },
-    { id: "W10", subskill: "Grammar & Vocabulary", text: "Write a two-sentence conclusion stating your own opinion and summarising the two main perspectives from the essay." }
-  ]
-};
-
-const SPEAKING_DATA = {
-  context_part12: "Speaking Parts 1 & 2 Context:\n\nIn Part 1, the examiner will ask you familiar, everyday questions about your life, work, or hobbies.\n\nIn Part 2 (Cue Card), you will be given a topic and asked to speak continuously for 1 to 2 minutes.",
-  context_part3: "Speaking Part 3 Context:\n\nIn Part 3, you will engage in a two-way discussion with the examiner. The questions will be more abstract, complex, and related to the broader themes introduced in Part 2.",
-  questions: [
-    { id: "S1", subskill: "Fluency & Pronunciation", text: "What kind of work or studies are you currently involved in, and what do you enjoy most about it?" },
-    { id: "S2", subskill: "Fluency & Pronunciation", text: "How do you usually spend your free time? Has this changed compared to a few years ago?" },
-    { id: "S3", subskill: "Fluency & Pronunciation", text: "How important is it to you to keep up with the news? What is your preferred way of following current events?" },
-    { id: "S4", subskill: "Fluency & Pronunciation", text: "Do you prefer living in a city or a smaller town? Why?" },
-    { id: "S5", subskill: "Fluency & Pronunciation", text: "CUE CARD: Describe a skill you have learned that you consider useful in everyday life. Explain what it is, when/how you learned it, and why it's valuable." },
-    { id: "S6", subskill: "Grammar & Vocabulary", text: "Why do you think some people find it difficult to learn new skills as adults compared to when they were children?" },
-    { id: "S7", subskill: "Grammar & Vocabulary", text: "In what ways can schools better prepare students with practical life skills?" },
-    { id: "S8", subskill: "Grammar & Vocabulary", text: "Some people argue that online learning platforms have made acquiring new skills easier for everyone. Do you agree?" },
-    { id: "S9", subskill: "Grammar & Vocabulary", text: "How do you think technology will change the kinds of skills that are valued in the workplace over the next twenty years?" },
-    { id: "S10", subskill: "Grammar & Vocabulary", text: "Do you think governments have a responsibility to fund adult education and skills training programmes? Why or why not?" }
-  ]
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
 // UTILS
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -254,34 +134,6 @@ function formatTime(seconds: number): string {
 
 const SKILL_LABELS: Record<Skill, string> = { listening: "Listening", reading: "Reading", writing: "Writing", speaking: "Speaking" };
 const SKILL_ICONS: Record<Skill, string> = { listening: "🎧", reading: "📖", writing: "✍️", speaking: "🎤" };
-
-function generateMockResult(skill: Skill): AssessmentResult {
-  const prev = 5.5;
-  const nw = 6.0 + (Math.random() * 1.5); 
-  const roundedNw = Math.round(nw * 2) / 2;
-  
-  const criteriaMap: Record<Skill, string[]> = {
-    listening: ["Vocabulary Recognition", "Multiple Choice", "Detail Recognition", "Coherence & Context"],
-    reading: ["Grammatical Parsing", "Heading Matching", "Short Answer", "Vocabulary & Inference"],
-    writing: ["Coherence & Task Response", "Task 2 Arguments", "Lexical Resource", "Grammar & Vocabulary"],
-    speaking: ["Fluency & Pronunciation", "Lexical Resource", "Grammar & Vocabulary", "Pronunciation Analysis"],
-  };
-
-  return {
-    skill,
-    previousBand: prev,
-    newBand: roundedNw,
-    delta: roundedNw - prev,
-    completedAt: new Date(),
-    priorityAction: `Your lowest sub-score was ${criteriaMap[skill][3]}. Focus on this criterion in your daily drills.`,
-    criteria: [
-      { name: criteriaMap[skill][0], score: roundedNw + 0.5, feedback: "Solid performance, minor errors." },
-      { name: criteriaMap[skill][1], score: roundedNw, feedback: "Excellent grasp of this criterion." },
-      { name: criteriaMap[skill][2], score: roundedNw - 0.5, feedback: "Good, but room for expansion." },
-      { name: criteriaMap[skill][3], score: roundedNw - 1.0, feedback: "Needs work. Errors disrupted understanding." },
-    ]
-  };
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // COMPONENTS
@@ -365,47 +217,17 @@ export default function Assessment() {
   const [isRecording, setIsRecording]         = useState(false);
   const [animBars] = useState(() => Array.from({ length: 12 }, () => Math.random()));
 
-  // Timer (20 min total across entire IA)
+  // Timer: 20 min per section (2 sections = 40 min total). Resets on section advance.
   const [timeLeft, setTimeLeft]               = useState(20 * 60);
 
   // Restore flag (kept for localStorage persistence hook)
-  const [isRestoring, setIsRestoring]         = useState(true);
+  const [isRestoring, setIsRestoring]         = useState(false);
 
   // Convenience: current section and question
   const currentSection  = iaSections?.[currentSectionIdx] ?? null;
   const sessionData     = currentSection; // alias so existing helpers still compile
   const isLoadingSession = isLoadingQuestions;
 
-  // --- PERSISTENCE: Restore State on Mount ---
-  useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setPhase(parsed.phase || "gate");
-        setSkillIdx(parsed.skillIdx || 0);
-        setCurrentIdx(parsed.currentIdx || 0);
-        setAnswers(parsed.answers || {});
-        setRecordedPrompts(parsed.recordedPrompts || {});
-        setTimeLeft(parsed.timeLeft || 0);
-        setAllResults(parsed.allResults || { listening: null, reading: null, writing: null, speaking: null });
-        setSessionData(parsed.sessionData || null);
-        setAudioState(parsed.audioState === 'playing' ? 'idle' : (parsed.audioState || 'idle'));
-      } catch (e) {
-        console.error("Corrupted save data found. Starting fresh.");
-        localStorage.removeItem(STORAGE_KEY);
-      }
-    }
-    setIsRestoring(false);
-  }, []);
-
-  // --- PERSISTENCE: Save State on Change ---
-  useEffect(() => {
-    if (isRestoring || phase === "gate") return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      phase, skillIdx, currentIdx, answers, recordedPrompts, timeLeft, allResults, sessionData, audioState
-    }));
-  }, [phase, skillIdx, currentIdx, answers, recordedPrompts, timeLeft, allResults, sessionData, audioState, isRestoring]);
 
   // --- IA ELIGIBILITY CHECK ---
   // Only check when the student lands on the gate screen (not mid-session resume).
@@ -431,37 +253,6 @@ export default function Assessment() {
   }, [isRestoring, phase]);
 
 
-  // --- MOCK API FETCH (Sarthak will replace this logic) ---
-  const fetchAssessmentData = async (targetSkill: Skill) => {
-    await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
-    
-    if (targetSkill === 'listening') {
-      // Pick a random listening audio pool from our options
-      const randomPool = LISTENING_POOLS[Math.floor(Math.random() * LISTENING_POOLS.length)];
-      return randomPool;
-    } else if (targetSkill === 'reading') {
-      return READING_DATA;
-    } else if (targetSkill === 'writing') {
-      return WRITING_DATA;
-    } else if (targetSkill === 'speaking') {
-      return SPEAKING_DATA;
-    }
-  };
-
-  const initializeSessionState = async (targetSkill: Skill) => {
-    setIsLoadingSession(true);
-    setCurrentIdx(0);
-    setAnswers({});
-    setRecordedPrompts({});
-    setIsRecording(false);
-    setAudioState('idle'); 
-    
-    const data = await fetchAssessmentData(targetSkill);
-    setSessionData(data);
-    
-    setTimeLeft(20 * 60); // Strict 20 min timer per section
-    setIsLoadingSession(false);
-  };
 
   /** Save one answer to backend — fire-and-forget, never blocks UI. */
   const persistAnswer = (questionId: string, answer: string) => {
@@ -493,9 +284,10 @@ export default function Assessment() {
         return;
       }
 
+      const resumeSection = res.current_section_idx ?? 0;
       setIaSessionId(res.session_id);
       setIaSections(res.sections);
-      setCurrentSectionIdx(0);
+      setCurrentSectionIdx(resumeSection);
       setCurrentIdx(0);
       setAnswers(res.saved_answers ?? {});
       setAudioState('idle');
@@ -538,9 +330,18 @@ export default function Assessment() {
 
   const advanceToNextSection = () => {
     const nextIdx = currentSectionIdx + 1;
+    // Stamp section start on backend so the per-section timer survives a mid-section exit
+    if (iaSessionId) {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+      callBackend(`${backendUrl}/api/ia/answer`, {
+        method: 'POST',
+        body: JSON.stringify({ session_id: iaSessionId, section_advance: nextIdx })
+      }).catch(e => console.warn('[IA] section advance stamp failed:', e));
+    }
     setCurrentSectionIdx(nextIdx);
     setCurrentIdx(0);
     setAnswers({});
+    setTimeLeft(20 * 60);   // reset to full 20 min for new section
     setAudioState('idle');
     setShowPassage(false);
     setIsRecording(false);
@@ -571,11 +372,11 @@ export default function Assessment() {
     return () => clearInterval(t);
   }, [phase, timeLeft, isLoadingSession, isRestoring]);
 
-  // Auto-submit entire IA when 20-min global timer hits 0
+  // Section timer expired: force-complete current section (advances to next or submits if last)
   useEffect(() => {
     if (phase === "session" && timeLeft === 0 && !isLoadingQuestions) {
       setIsRecording(false);
-      void handleSectionComplete(); // force submit whatever section we're on
+      void handleSectionComplete();
     }
   }, [timeLeft, phase, isLoadingQuestions, handleSectionComplete]);
 
