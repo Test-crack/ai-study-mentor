@@ -78,22 +78,18 @@ interface IAStatusResponse {
   upcoming_ias:          IANextSlot[];
   reasons:               { key: string; message: string }[];
   progress:              IAProgress;
-  today_completed_session?: {
-    session_id: string;
-    ia_number: number;
-    scores: Array<{
-      skill: string;
-      sub_skill: string;
-      band: number;
-      correct?: number;
-      total?: number;
-      ai_graded?: boolean;
-      previous_band?: number | null;
-      delta?: number | null;
-    }>;
-    momentum_awarded: number;
-    time_submitted_at: string;
-  };
+  has_completed_session?: boolean;
+  completed_session_scores?: Array<{
+    skill: string;
+    sub_skill: string;
+    band: number;
+    correct?: number;
+    total?: number;
+    ai_graded?: boolean;
+    previous_band?: number | null;
+    delta?: number | null;
+  }> | null;
+  completed_session_momentum?: number | null;
 }
 
 interface IAQuestion {
@@ -655,15 +651,19 @@ export default function Assessment() {
 
   // ── STATE 3.5: IA completed today — Show results ──────────────────────────
   const renderCompletedToday = () => {
-    const session = iaStatus!.today_completed_session!;
-    const isFirstIA = session.ia_number === 1;
+    if (!iaStatus?.completed_session_scores) return null;
+    
+    const scores = iaStatus.completed_session_scores;
+    const momentumAwarded = iaStatus.completed_session_momentum ?? 0;
+    const iaNumber = iaStatus.current_ia_number ?? 1;
+    const isFirstIA = iaNumber === 1;
     const comparisonLabel = isFirstIA ? 'vs Diagnostic' : 'vs Last IA';
 
     return (
       <div className="max-w-3xl mx-auto animate-fade-in pt-8 pb-24 px-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tight">IA #{session.ia_number} Complete</h2>
+          <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tight">IA #{iaNumber} Complete</h2>
           <button
             onClick={() => navigate('/student/dashboard')}
             className="px-6 py-3 bg-gray-900 text-white rounded-xl font-black text-sm uppercase tracking-wide hover:bg-gray-800 shadow-[4px_4px_0_#4338CA]">
@@ -678,7 +678,7 @@ export default function Assessment() {
             <CheckCircle2 className="w-5 h-5 text-emerald-500" /> Assessment Completed Today
           </div>
           <p className="text-emerald-100 font-bold text-lg mb-2">
-            Submitted at {new Date(session.time_submitted_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+            Submitted earlier today
           </p>
           <p className="text-emerald-200 font-medium">
             Your competency matrix has been updated with today's results
@@ -686,17 +686,17 @@ export default function Assessment() {
         </div>
 
         {/* Momentum earned */}
-        {session.momentum_awarded > 0 && (
+        {momentumAwarded > 0 && (
           <div className="bg-indigo-700 border-2 border-gray-900 rounded-2xl p-6 mb-6 text-center shadow-[6px_6px_0_#0F0F0F]">
             <p className="text-indigo-200 font-black uppercase tracking-widest mb-1 text-sm">Momentum Earned</p>
-            <div className="text-5xl font-black text-amber-400">+{session.momentum_awarded}</div>
+            <div className="text-5xl font-black text-amber-400">+{momentumAwarded}</div>
           </div>
         )}
 
         {/* Per sub-skill score cards */}
-        {session.scores.length > 0 && (
+        {scores.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
-            {session.scores.map((s, i) => {
+            {scores.map((s, i) => {
               const hasDelta  = s.delta !== null && s.delta !== undefined;
               const isUp      = hasDelta && s.delta! > 0;
               const isDown    = hasDelta && s.delta! < 0;
@@ -1008,116 +1008,6 @@ export default function Assessment() {
         </p>
       </div>
     );
-
-    // eslint-disable-next-line no-unreachable
-    const overallBand = 0;
-    const weakestResult = null;
-
-    return (
-      <div className="max-w-5xl mx-auto animate-fade-in pt-8 pb-24 px-4">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl sm:text-4xl font-black text-gray-900 uppercase tracking-tight">Final Results</h2>
-          <button 
-            onClick={() => {
-              localStorage.removeItem(STORAGE_KEY);
-              navigate('/student/dashboard');
-            }} 
-            className="px-6 py-3 bg-gray-900 text-white rounded-xl font-black text-sm uppercase tracking-wide hover:bg-gray-800 transition-colors shadow-[4px_4px_0_#4338CA]"
-          >
-            Dashboard
-          </button>
-        </div>
-
-        {/* OVERALL SCORE BANNER */}
-        <div className="bg-indigo-700 border-2 border-gray-900 rounded-2xl p-8 sm:p-12 mb-8 text-center relative overflow-hidden shadow-[8px_8px_0_#0F0F0F]">
-          <div className="absolute -top-10 -right-10 text-[200px] opacity-10 pointer-events-none">🎯</div>
-          <p className="text-indigo-200 font-black uppercase tracking-widest mb-4">Overall Real Band Score</p>
-          <div className="text-8xl sm:text-[120px] font-black text-white tabular-nums leading-none drop-shadow-md">
-            {overallBand.toFixed(1)}
-          </div>
-          <div className="mt-8 inline-flex items-center gap-2 bg-white text-indigo-900 px-6 py-2 rounded-lg font-black uppercase tracking-wide shadow-[4px_4px_0_#0F0F0F]">
-            <CheckCircle2 className="w-5 h-5 text-emerald-500" /> Full Assessment Complete
-          </div>
-        </div>
-
-        {/* 4 SKILL GRID with DELTAS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {SKILL_ORDER.map(s => {
-            const r = allResults[s]!;
-            const isUp = r.delta > 0;
-            const isSame = r.delta === 0;
-            
-            return (
-              <div key={s} className="bg-white border-2 border-gray-900 rounded-xl p-6 shadow-[4px_4px_0_#0F0F0F] flex flex-col items-center text-center">
-                <span className="text-4xl mb-4">{SKILL_ICONS[s]}</span>
-                
-                <p className="text-gray-500 font-black uppercase tracking-widest text-xs mb-1">{SKILL_LABELS[s]}</p>
-                <div className="flex items-center justify-center gap-3 w-full mb-4">
-                   <span className="text-xl font-black text-gray-400 line-through decoration-2 decoration-gray-400">{r.previousBand.toFixed(1)}</span>
-                   <ArrowRight className="w-5 h-5 text-gray-300" />
-                   <span className={`text-4xl font-black ${isUp ? 'text-emerald-600' : isSame ? 'text-gray-900' : 'text-rose-600'}`}>{r.newBand.toFixed(1)}</span>
-                </div>
-                
-                <div className={`text-[10px] font-black uppercase tracking-wide px-2.5 py-1 rounded border-2 ${isUp ? 'bg-emerald-100 text-emerald-700 border-emerald-300' : isSame ? 'bg-gray-100 text-gray-600 border-gray-300' : 'bg-rose-100 text-rose-700 border-rose-300'}`}>
-                  {isUp ? `+${r.delta.toFixed(1)} Improved` : isSame ? 'Maintained' : `${Math.abs(r.delta).toFixed(1)} Dropped`}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-
-        {/* DETAILED CRITERION SCORES (Reading Example) */}
-        <div className="bg-white border-2 border-gray-900 rounded-xl p-8 mb-8 shadow-[6px_6px_0_#0F0F0F]">
-           <h3 className="text-xl font-black text-gray-900 uppercase tracking-wide mb-6 flex items-center gap-2">
-             <BrainCircuit className="w-6 h-6 text-indigo-700" /> Full Criterion Breakdown
-           </h3>
-           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {allResults['reading']!.criteria.map((crit, i) => (
-                <div key={i} className="bg-gray-50 border-2 border-gray-200 p-5 rounded-lg">
-                  <div className="flex justify-between items-center mb-3 border-b-2 border-gray-200 pb-2">
-                    <span className="font-black text-sm text-gray-900 uppercase tracking-wide">{crit.name}</span>
-                    <span className="font-black text-xl text-indigo-700">{crit.score.toFixed(1)}</span>
-                  </div>
-                  <p className="text-sm text-gray-600 font-medium leading-relaxed">{crit.feedback}</p>
-                </div>
-              ))}
-            </div>
-        </div>
-
-        {/* PRIORITY ACTION */}
-        <div className="bg-red-50 border-2 border-gray-900 rounded-2xl p-8 shadow-[6px_6px_0_#0F0F0F] mb-8">
-          <div className="flex flex-col sm:flex-row gap-6 items-start">
-            <div className="bg-red-500 border-2 border-gray-900 rounded-xl p-4 shrink-0 shadow-[4px_4px_0_#0F0F0F]">
-              <AlertCircle className="w-10 h-10 text-white" />
-            </div>
-            <div>
-              <h4 className="font-black text-gray-900 text-xl mb-2 uppercase tracking-wide">Priority Action Plan</h4>
-              <p className="text-gray-700 font-medium leading-relaxed mb-6">
-                Your weakest overall area in this mock test was <strong className="text-gray-900 uppercase">{SKILL_LABELS[weakestResult!.skill]}</strong>. {weakestResult!.priorityAction}
-              </p>
-              <button 
-                onClick={() => {
-                  localStorage.removeItem(STORAGE_KEY);
-                  navigate('/student/dashboard');
-                }} 
-                className="bg-white text-gray-900 font-black text-sm uppercase tracking-wide px-8 py-4 rounded-xl border-2 border-gray-900 hover:bg-gray-50 transition-colors neo-btn shadow-[4px_4px_0_#0F0F0F]"
-              >
-                Update My Dashboard Rhythm →
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* MOMENTUM POINTS AWARD (Separate at Bottom) */}
-        <div className="flex items-center justify-center gap-4 bg-indigo-50 border-2 border-indigo-700 rounded-2xl p-6 shadow-[4px_4px_0_#4338CA]">
-           <div className="bg-amber-400 p-2 rounded-full border-2 border-gray-900"><Zap className="w-6 h-6 text-gray-900 fill-gray-900" /></div>
-           <p className="text-lg font-black text-indigo-900 uppercase tracking-wide">
-             Session Complete! You earned <strong className="text-indigo-700 text-2xl mx-1">+{sessionMomentumAward}</strong> Momentum Points.
-           </p>
-        </div>
-
-      </div>
-    );
   };
 
   const renderSession = () => {
@@ -1423,7 +1313,7 @@ export default function Assessment() {
         {phase === "gate" && (() => {
           if (!iaStatus?.has_schedule || !iaStatus?.prerequisites_met) return renderNotEligible();
           if (!iaStatus.is_ia_day)                                       return renderScheduled();
-          if (iaStatus.today_completed_session)                          return renderCompletedToday();
+          if (iaStatus.has_completed_session && iaStatus.completed_session_scores) return renderCompletedToday();
           if (!iaStatus.dcs_eligible)                                    return renderIaDayLowDCS();
           return renderGate();
         })()}
