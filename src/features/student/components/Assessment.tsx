@@ -4,6 +4,7 @@ import { GraduationCap, ArrowRight, CheckCircle2, AlertCircle, Target, BookOpen,
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useMomentum } from "@/features/student/Context/MomentumContext";
 import { callBackend } from "@/features/auth/services/authClient";
+import { transformSectionAudioUrls } from "@/features/student/utils/iaAudioUtils";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // API INTEGRATION LAYER (Ready for Sarthak's Endpoints)
@@ -351,8 +352,12 @@ export default function Assessment() {
       }
 
       const resumeSection = res.current_section_idx ?? 0;
+      
+      // Transform audio URLs to use public folder paths
+      const sectionsWithPublicAudioUrls = transformSectionAudioUrls(res.sections);
+
       setIaSessionId(res.session_id);
-      setIaSections(res.sections);
+      setIaSections(sectionsWithPublicAudioUrls);
       setCurrentSectionIdx(resumeSection);
       setCurrentIdx(0);
       setAnswers(res.saved_answers ?? {});
@@ -1058,7 +1063,12 @@ export default function Assessment() {
             {currentSection.section_type === 'AUDIO' && currentSection.audio_url ? (
               <div className="bg-indigo-50 border-2 border-gray-900 rounded-xl p-8 text-center flex flex-col items-center" style={{ boxShadow: '6px 6px 0 #0F0F0F' }}>
                 <button
-                  onClick={() => { if (audioState === 'idle' && audioRef.current) { audioRef.current.play(); setAudioState('playing'); } }}
+                  onClick={() => { 
+                    if (audioState === 'idle' && audioRef.current) { 
+                      audioRef.current.play(); 
+                      setAudioState('playing'); 
+                    } 
+                  }}
                   disabled={audioState !== 'idle'}
                   className={`w-24 h-24 border-2 border-gray-900 rounded-full flex items-center justify-center text-white mb-6 transition-all shadow-[4px_4px_0_#0F0F0F] ${
                     audioState === 'idle' ? 'bg-indigo-700 hover:bg-indigo-600' : audioState === 'playing' ? 'bg-amber-500' : 'bg-emerald-500'
@@ -1070,7 +1080,12 @@ export default function Assessment() {
                 </button>
                 <p className="text-gray-900 font-black text-lg uppercase tracking-wide mb-2">Listening Audio</p>
                 <p className="text-gray-600 font-medium text-sm">{audioState === 'played' ? 'Playback complete — answer the questions.' : 'Listen carefully. The audio plays once.'}</p>
-                <audio ref={audioRef} src={currentSection.audio_url} preload="auto" onEnded={() => setAudioState('played')} />
+                <audio 
+                  ref={audioRef} 
+                  src={currentSection.audio_url} 
+                  preload="auto" 
+                  onEnded={() => setAudioState('played')}
+                />
               </div>
             ) : currentSection.section_type === 'PASSAGE' && currentSection.passage_text ? (
               <div className="bg-white border-2 border-gray-900 rounded-xl flex flex-col max-h-[700px]" style={{ boxShadow: '6px 6px 0 #0F0F0F' }}>
