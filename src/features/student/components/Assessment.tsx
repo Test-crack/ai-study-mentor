@@ -78,6 +78,22 @@ interface IAStatusResponse {
   upcoming_ias:          IANextSlot[];
   reasons:               { key: string; message: string }[];
   progress:              IAProgress;
+  today_completed_session?: {
+    session_id: string;
+    ia_number: number;
+    scores: Array<{
+      skill: string;
+      sub_skill: string;
+      band: number;
+      correct?: number;
+      total?: number;
+      ai_graded?: boolean;
+      previous_band?: number | null;
+      delta?: number | null;
+    }>;
+    momentum_awarded: number;
+    time_submitted_at: string;
+  };
 }
 
 interface IAQuestion {
@@ -633,6 +649,127 @@ export default function Assessment() {
             </button>
           </div>
         </div>
+      </div>
+    );
+  };
+
+  // ── STATE 3.5: IA completed today — Show results ──────────────────────────
+  const renderCompletedToday = () => {
+    const session = iaStatus!.today_completed_session!;
+    const isFirstIA = session.ia_number === 1;
+    const comparisonLabel = isFirstIA ? 'vs Diagnostic' : 'vs Last IA';
+
+    return (
+      <div className="max-w-3xl mx-auto animate-fade-in pt-8 pb-24 px-4">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tight">IA #{session.ia_number} Complete</h2>
+          <button
+            onClick={() => navigate('/student/dashboard')}
+            className="px-6 py-3 bg-gray-900 text-white rounded-xl font-black text-sm uppercase tracking-wide hover:bg-gray-800 shadow-[4px_4px_0_#4338CA]">
+            Dashboard
+          </button>
+        </div>
+
+        {/* Completion banner */}
+        <div className="bg-emerald-600 border-2 border-gray-900 rounded-2xl p-8 mb-6 text-center shadow-[8px_8px_0_#0F0F0F] relative overflow-hidden">
+          <div className="absolute -top-8 -right-8 text-[140px] opacity-10 pointer-events-none select-none">✓</div>
+          <div className="inline-flex items-center gap-2 bg-white text-emerald-900 px-5 py-2 rounded-lg font-black uppercase shadow-[3px_3px_0_#0F0F0F] mb-4">
+            <CheckCircle2 className="w-5 h-5 text-emerald-500" /> Assessment Completed Today
+          </div>
+          <p className="text-emerald-100 font-bold text-lg mb-2">
+            Submitted at {new Date(session.time_submitted_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+          </p>
+          <p className="text-emerald-200 font-medium">
+            Your competency matrix has been updated with today's results
+          </p>
+        </div>
+
+        {/* Momentum earned */}
+        {session.momentum_awarded > 0 && (
+          <div className="bg-indigo-700 border-2 border-gray-900 rounded-2xl p-6 mb-6 text-center shadow-[6px_6px_0_#0F0F0F]">
+            <p className="text-indigo-200 font-black uppercase tracking-widest mb-1 text-sm">Momentum Earned</p>
+            <div className="text-5xl font-black text-amber-400">+{session.momentum_awarded}</div>
+          </div>
+        )}
+
+        {/* Per sub-skill score cards */}
+        {session.scores.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
+            {session.scores.map((s, i) => {
+              const hasDelta  = s.delta !== null && s.delta !== undefined;
+              const isUp      = hasDelta && s.delta! > 0;
+              const isDown    = hasDelta && s.delta! < 0;
+              const deltaText = hasDelta
+                ? (isUp ? `+${s.delta!.toFixed(1)}` : isDown ? s.delta!.toFixed(1) : '±0.0')
+                : null;
+
+              return (
+                <div key={i} className="bg-white border-2 border-gray-900 rounded-xl p-6 shadow-[4px_4px_0_#0F0F0F]">
+                  {/* Sub-skill header */}
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-2xl">{SKILL_ICON[s.skill] ?? '📝'}</span>
+                    <div>
+                      <p className="font-black text-gray-900 text-sm uppercase tracking-wide">{SKILL_LABEL[s.sub_skill] ?? s.sub_skill}</p>
+                      <p className="text-gray-400 text-[10px] font-bold uppercase">{s.skill}{s.ai_graded ? ' · AI Graded' : ''}</p>
+                    </div>
+                  </div>
+
+                  {/* Band score + delta */}
+                  <div className="flex items-end gap-4">
+                    <span className="text-5xl font-black text-gray-900 leading-none">
+                      {s.band > 0 ? s.band.toFixed(1) : '—'}
+                    </span>
+                    {hasDelta && (
+                      <div className="mb-1">
+                        <span className={`text-lg font-black ${isUp ? 'text-emerald-600' : isDown ? 'text-rose-600' : 'text-gray-500'}`}>
+                          {deltaText}
+                        </span>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase">{comparisonLabel}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Previous band */}
+                  {s.previous_band !== null && s.previous_band !== undefined && (
+                    <p className="text-xs text-gray-400 font-medium mt-2">
+                      Previous: <span className="font-black">{s.previous_band.toFixed(1)}</span>
+                      {isUp && <span className="text-emerald-600 ml-1 font-black">↑ Improved</span>}
+                      {isDown && <span className="text-rose-600 ml-1 font-black">↓ Dropped</span>}
+                    </p>
+                  )}
+
+                  {/* MCQ score (if present) */}
+                  {s.correct != null && s.total != null && s.total > 0 && (
+                    <p className="text-xs text-gray-400 font-bold mt-1">{s.correct} / {s.total} MCQ correct</p>
+                  )}
+
+                  {/* Delta badge */}
+                  {hasDelta && (
+                    <div className={`mt-3 inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide px-2.5 py-1 rounded border-2 ${
+                      isUp   ? 'bg-emerald-50 text-emerald-700 border-emerald-300' :
+                      isDown ? 'bg-rose-50 text-rose-700 border-rose-300' :
+                               'bg-gray-100 text-gray-600 border-gray-300'
+                    }`}>
+                      {isUp ? '↑ Improved' : isDown ? '↓ Dropped' : '● Maintained'}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Next IA info */}
+        {iaStatus!.next_ia && (
+          <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-6 text-center">
+            <p className="text-gray-500 font-medium mb-2">Next Internal Assessment</p>
+            <p className="text-2xl font-black text-gray-900">{iaStatus!.next_ia.date_formatted}</p>
+            <p className="text-sm text-gray-400 font-bold mt-1">
+              {iaStatus!.next_ia.days_away === 1 ? 'Tomorrow' : `In ${iaStatus!.next_ia.days_away} days`}
+            </p>
+          </div>
+        )}
       </div>
     );
   };
@@ -1286,6 +1423,7 @@ export default function Assessment() {
         {phase === "gate" && (() => {
           if (!iaStatus?.has_schedule || !iaStatus?.prerequisites_met) return renderNotEligible();
           if (!iaStatus.is_ia_day)                                       return renderScheduled();
+          if (iaStatus.today_completed_session)                          return renderCompletedToday();
           if (!iaStatus.dcs_eligible)                                    return renderIaDayLowDCS();
           return renderGate();
         })()}
