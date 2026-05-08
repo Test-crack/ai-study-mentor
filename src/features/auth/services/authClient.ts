@@ -46,6 +46,9 @@ export async function callBackend(path: string, options: RequestInit = {}): Prom
   });
 
   if (!res.ok) {
+    if (res.status === 401) {
+      window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+    }
     const errorData = await res.json().catch(() => ({}));
     throw new Error(errorData.error || `API error: ${res.status}`);
   }
@@ -55,7 +58,7 @@ export async function callBackend(path: string, options: RequestInit = {}): Prom
 
 /**
  * Upload a file to the backend
- * 
+ *
  * @param path - API path
  * @param formData - FormData object containing the file
  * @param method - HTTP method (default PUT)
@@ -73,6 +76,9 @@ export async function uploadFileToBackend(path: string, formData: FormData, meth
   });
 
   if (!res.ok) {
+    if (res.status === 401) {
+      window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+    }
     const errorData = await res.json().catch(() => ({}));
     throw new Error(errorData.error || `API error: ${res.status}`);
   }

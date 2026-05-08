@@ -4,12 +4,14 @@ import { StudentSidebar } from './dashboard/StudentSidebar';
 import { StudentTopbar } from './dashboard/StudentTopbar';
 import { Button } from '@/shared/components/ui/button';
 import { useToast } from '@/shared/hooks/use-toast';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
+import { Badge } from '@/shared/components/ui/badge';
+import { useMomentum } from "@/features/student/Context/MomentumContext";
+import { stampPassportSlot } from '@/features/student/utils/passportUtils';
 import {
   ArrowLeft, Send, Headphones, Info,
   Sparkles, Play, Trophy, RotateCcw, CheckCircle2, XCircle, Clock, Map, Image as ImageIcon
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
-import { Badge } from '@/shared/components/ui/badge';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -309,8 +311,6 @@ const MAP_PROJECTIONS_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
   <text x="390" y="250" text-anchor="middle" font-size="10" fill="#6b7280">Equal-area, proposed 1974</text>
 </svg>
 `)}`;
-
-// ── IELTS Data ────────────────────────────────────────────────────────────────
 
 const IELTS_TASKS: ListeningTask[] = [
   // --- TEST 1 ---
@@ -1266,8 +1266,10 @@ type ScreenView = 'home' | 'test' | 'results';
 export default function ListeningPractice() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { addPoints } = useMomentum();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarHovered, setIsSidebarHovered] = useState(false); // ADDED HOVER STATE
   const [screen, setScreen] = useState<ScreenView>('home');
   const [selectedTask, setSelectedTask] = useState<ListeningTask | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -1402,8 +1404,13 @@ export default function ListeningPractice() {
         const filtered = prev.filter(r => r.taskId !== selectedTask.id);
         return [...filtered, { taskId: selectedTask.id, results }];
       });
+      
       const score = results.filter(r => r.correct).length;
       setSubmitting(false);
+
+      addPoints(50, 'Completed Listening Module');
+      stampPassportSlot('listening');
+
       toast({
         title: `${selectedTask.title} Complete!`,
         description: `You scored ${score} out of ${selectedTask.questions.length}.`,
@@ -1913,10 +1920,12 @@ export default function ListeningPractice() {
         activeTab="listening"
         isCollapsed={isSidebarCollapsed}
         toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        onMouseEnter={() => setIsSidebarHovered(true)}
+        onMouseLeave={() => setIsSidebarHovered(false)}
       />
-      <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-24' : 'lg:pl-72'} flex flex-col min-h-screen`}>
+      <div className={`transition-all duration-300 ease-in-out pl-0 ${isSidebarHovered ? 'md:pl-[288px]' : 'md:pl-[116px]'} flex flex-col min-h-screen`}>
         <StudentTopbar onUpgradeClick={() => {}} />
-        <main className="flex-1 p-6 max-w-7xl mx-auto w-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 w-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
           {screen === 'home' && renderHome()}
           {screen === 'test' && renderTest()}
           {screen === 'results' && renderResults()}

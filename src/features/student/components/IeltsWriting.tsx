@@ -8,22 +8,22 @@ import { ArrowLeft, Send, PenTool, BookOpen, Sparkles, History, CheckCircle, Bar
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
 import { fetchWritingTasks, submitWritingSession, fetchWritingHistory, WritingAssessmentHistoryItem, WritingTask } from '../services/ieltsWritingService';
-
+import { useMomentum } from "@/features/student/Context/MomentumContext";
+import { stampPassportSlot } from '@/features/student/utils/passportUtils';
 
 type ViewState = 'library' | 'writing' | 'history' | 'results';
 
-// Ensure the API url is retrieved
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 const MOCK_ASSIGNMENTS: WritingTask[] = [];
 
 export default function IeltsWriting() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  
-  // Layout State
+  const { addPoints } = useMomentum();
+
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  
-  // Writing Task State
+  const [isSidebarHovered,   setIsSidebarHovered]   = useState(false);
+
   const [view, setView] = useState<ViewState>('library');
   const [assignments, setAssignments] = useState<WritingTask[]>([]);
   const [history, setHistory] = useState<WritingAssessmentHistoryItem[]>([]);
@@ -33,10 +33,8 @@ export default function IeltsWriting() {
   const [essayText, setEssayText] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Dynamic Word Count Target based on Task Type
   const targetWordCount = selectedAssignment?.title.includes('Task 1') ? 150 : 250;
 
-  // Calculate word count dynamically
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -50,10 +48,8 @@ export default function IeltsWriting() {
         } else {
           setAssignments(MOCK_ASSIGNMENTS);
         }
-        
         const hist = await fetchWritingHistory();
         if (hist) setHistory(hist);
-        
       } catch (error) {
         console.error('Failed to fetch data:', error);
         setAssignments(MOCK_ASSIGNMENTS);
@@ -85,18 +81,19 @@ export default function IeltsWriting() {
 
   const handleSubmit = async () => {
     if (wordCount < targetWordCount) {
-      toast({ 
-        title: 'Word count too low', 
-        description: `Please write at least ${targetWordCount} words before submitting.`, 
-        variant: 'destructive' 
+      toast({
+        title: 'Word count too low',
+        description: `Please write at least ${targetWordCount} words before submitting.`,
+        variant: 'destructive'
       });
       return;
     }
-
     setSubmitting(true);
     try {
       const result = await submitWritingSession(selectedAssignment.id, essayText, wordCount);
       setEvaluationResult(result);
+      addPoints(50, 'Completed Writing Module');
+      stampPassportSlot('writing');
       setView('results');
       toast({ title: 'Success!', description: 'Writing submitted successfully for analysis.' });
     } catch (error: any) {
@@ -108,27 +105,24 @@ export default function IeltsWriting() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
-      <StudentSidebar 
-        activeTab="writing" 
+      <StudentSidebar
+        activeTab="writing"
         isCollapsed={isSidebarCollapsed}
         toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        onMouseEnter={() => setIsSidebarHovered(true)}
+        onMouseLeave={() => setIsSidebarHovered(false)}
       />
 
-      <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-24' : 'lg:pl-72'} flex flex-col min-h-screen`}>
+      <div className={`transition-all duration-300 ease-in-out pl-0 ${isSidebarHovered ? 'md:pl-[288px]' : 'md:pl-[116px]'} flex flex-col min-h-screen`}>
         <StudentTopbar onUpgradeClick={() => {}} />
 
-        {/* Dynamic Main Content Area */}
-        <main className="flex-1 p-6 max-w-7xl mx-auto w-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
-          
-          {/* --- VIEW 1: Card Selection Screen --- */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 w-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+          {/* VIEW 1: Library */}
           {view === 'library' && (
             <div className="space-y-8 h-full">
-              
-              {/* --- NEW COLORED BANNER --- */}
               <div className="bg-[#7B61FF] rounded-2xl p-8 md:p-10 text-white shadow-md relative overflow-hidden">
-                {/* Optional decorative element */}
                 <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
-                
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                   <div>
                     <h1 className="text-3xl font-bold mb-3 flex items-center gap-2">
@@ -138,8 +132,8 @@ export default function IeltsWriting() {
                       Master your writing skills with detailed, AI-powered feedback. Select a prompt below, aim for your target word count, and get instant insights on your grammar, vocabulary, and task coherence to push for a band 7+.
                     </p>
                   </div>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="bg-white/10 border-white/20 text-white hover:bg-white/20 whitespace-nowrap"
                     onClick={() => setView('history')}
                   >
@@ -161,7 +155,7 @@ export default function IeltsWriting() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {assignments.map((assignment) => (
-                    <Card 
+                    <Card
                       key={assignment.id}
                       onClick={() => handleSelectAssignment(assignment)}
                       className="border border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900 hover:shadow-md hover:border-[#7B61FF] dark:hover:border-[#7B61FF] transition-all cursor-pointer flex flex-col h-64 group"
@@ -194,7 +188,7 @@ export default function IeltsWriting() {
             </div>
           )}
 
-          {/* --- VIEW 2: HISTORY SCREEN --- */}
+          {/* VIEW 2: History */}
           {view === 'history' && (
             <div className="space-y-8 h-full">
               <div className="flex items-center gap-4">
@@ -203,18 +197,16 @@ export default function IeltsWriting() {
                 </Button>
                 <h2 className="text-2xl font-bold dark:text-white">Past Analytics</h2>
               </div>
-              
               {history.length === 0 && !isLoading ? (
                 <Card className="p-8 text-center text-slate-500">No past writings found.</Card>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {history.map((item) => (
                     <Card key={item.id} className="cursor-pointer hover:border-[#7B61FF]" onClick={() => {
-                        setEvaluationResult(item);
-                        setSelectedAssignment(item.IeltsWritingTask || null);
-                        setView('results');
-                      }}
-                    >
+                      setEvaluationResult(item);
+                      setSelectedAssignment(item.IeltsWritingTask || null);
+                      setView('results');
+                    }}>
                       <CardHeader className="pb-2">
                         <CardTitle className="line-clamp-1">{item.IeltsWritingTask?.title || 'Unknown Task'}</CardTitle>
                         <CardDescription>{new Date(item.createdAt).toLocaleDateString()}</CardDescription>
@@ -232,22 +224,20 @@ export default function IeltsWriting() {
             </div>
           )}
 
-          {/* --- VIEW 3: Split Screen Writing Interface --- */}
+          {/* VIEW 3: Writing Interface */}
           {view === 'writing' && selectedAssignment && (
             <div className="flex flex-col h-full flex-1 min-h-[calc(100vh-140px)]">
-              {/* Header - UPDATED FOR MOBILE RESPONSIVENESS */}
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   onClick={handleBack}
                   className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 -ml-2 w-fit"
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Assignments
                 </Button>
-                
-                <Button 
-                  onClick={handleSubmit} 
+                <Button
+                  onClick={handleSubmit}
                   disabled={submitting}
                   className="bg-[#7B61FF] hover:bg-[#6a50e5] text-white shadow-sm w-full sm:w-auto"
                 >
@@ -259,10 +249,7 @@ export default function IeltsWriting() {
                 </Button>
               </div>
 
-              {/* Split Content Area */}
               <div className="flex flex-col lg:flex-row gap-6 flex-grow min-h-0">
-                
-                {/* Left Section: Topic/Prompt */}
                 <div className="w-full lg:w-[40%] flex flex-col gap-6 overflow-y-auto pr-1">
                   <Card className="border-none shadow-sm bg-white dark:bg-slate-900 flex-shrink-0">
                     <CardHeader className="pb-4">
@@ -293,22 +280,20 @@ export default function IeltsWriting() {
                   </Card>
                 </div>
 
-                {/* Right Section: Text Editor */}
                 <Card className="w-full lg:w-[60%] border border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900 flex flex-col overflow-hidden">
                   <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
                     <h3 className="font-semibold text-slate-700 dark:text-slate-200 text-sm">Your Response</h3>
-                    <Badge 
+                    <Badge
                       variant="secondary"
                       className={`font-medium ${
-                        wordCount >= targetWordCount 
-                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' 
+                        wordCount >= targetWordCount
+                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
                           : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
                       }`}
                     >
                       {wordCount} / {targetWordCount} words
                     </Badge>
                   </div>
-                  
                   <textarea
                     value={essayText}
                     onChange={(e) => setEssayText(e.target.value)}
@@ -317,12 +302,11 @@ export default function IeltsWriting() {
                     spellCheck={false}
                   />
                 </Card>
-
               </div>
             </div>
           )}
 
-          {/* --- VIEW 4: RESULTS SCREEN --- */}
+          {/* VIEW 4: Results */}
           {view === 'results' && evaluationResult && (
             <div className="space-y-6 max-w-4xl mx-auto h-full overflow-y-auto pb-12">
               <Button variant="ghost" onClick={handleBack} className="text-slate-600 hover:bg-slate-100 -ml-2">
@@ -342,28 +326,16 @@ export default function IeltsWriting() {
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Card className="text-center p-4">
-                  <p className="text-xs font-bold text-slate-400 uppercase">Grammar</p>
-                  <p className="text-2xl font-black text-[#7B61FF]">{evaluationResult.aiGrammarScore}</p>
-                </Card>
-                <Card className="text-center p-4">
-                  <p className="text-xs font-bold text-slate-400 uppercase">Vocabulary</p>
-                  <p className="text-2xl font-black text-[#7B61FF]">{evaluationResult.aiVocabularyScore}</p>
-                </Card>
-                <Card className="text-center p-4">
-                  <p className="text-xs font-bold text-slate-400 uppercase">Coherence</p>
-                  <p className="text-2xl font-black text-[#7B61FF]">{evaluationResult.aiCoherenceScore}</p>
-                </Card>
-                <Card className="text-center p-4">
-                  <p className="text-xs font-bold text-slate-400 uppercase">Task Response</p>
-                  <p className="text-2xl font-black text-[#7B61FF]">{evaluationResult.aiTaskResponseScore}</p>
-                </Card>
+                <Card className="text-center p-4"><p className="text-xs font-bold text-slate-400 uppercase">Grammar</p><p className="text-2xl font-black text-[#7B61FF]">{evaluationResult.aiGrammarScore}</p></Card>
+                <Card className="text-center p-4"><p className="text-xs font-bold text-slate-400 uppercase">Vocabulary</p><p className="text-2xl font-black text-[#7B61FF]">{evaluationResult.aiVocabularyScore}</p></Card>
+                <Card className="text-center p-4"><p className="text-xs font-bold text-slate-400 uppercase">Coherence</p><p className="text-2xl font-black text-[#7B61FF]">{evaluationResult.aiCoherenceScore}</p></Card>
+                <Card className="text-center p-4"><p className="text-xs font-bold text-slate-400 uppercase">Task Response</p><p className="text-2xl font-black text-[#7B61FF]">{evaluationResult.aiTaskResponseScore}</p></Card>
               </div>
 
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <BarChart2 className="w-5 h-5 text-[#7B61FF]"/> Coach Feedback
+                    <BarChart2 className="w-5 h-5 text-[#7B61FF]" /> Coach Feedback
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 text-sm text-slate-700 dark:text-slate-300">

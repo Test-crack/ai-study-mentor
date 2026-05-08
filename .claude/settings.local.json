@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /e/FreeLance/edtech/ai-study-mentor log --oneline --all -20)",
+      "Bash(git -C /e/FreeLance/edtech/ai-study-mentor show fcc9f98 --stat)"
+    ]
+  }
+}

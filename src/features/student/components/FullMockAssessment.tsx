@@ -11,7 +11,6 @@ import { useMomentum } from "@/features/student/Context/MomentumContext";
 // TYPES
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ✅ Fixed: "checking" and "locked" added to Phase union
 type Phase = "checking" | "locked" | "gate" | "session" | "interim" | "scoring" | "results";
 type Skill = "listening" | "reading" | "writing" | "speaking";
 
@@ -65,7 +64,7 @@ const LS_DIAGNOSTIC_BANDS = "diagnostic_band_scores";
 const STORAGE_KEY         = "tc_full_mock_assessment_state";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// GATE HELPERS
+// GATE HELPERS (unchanged logic)
 // ─────────────────────────────────────────────────────────────────────────────
 
 const getCalendarMonth = () => new Date().toISOString().slice(0, 7);
@@ -100,7 +99,6 @@ const writeMockUsage = (
   } catch { /* ignore */ }
 };
 
-// TODO (Sarthak): Replace with real API call — GET /api/student/diagnostic-bands
 const readDiagnosticBands = (): Record<Skill, number> => {
   try {
     const stored = localStorage.getItem(LS_DIAGNOSTIC_BANDS);
@@ -127,7 +125,6 @@ const readLastIABands = (): Record<Skill, number | null> => {
   return result;
 };
 
-// Real Band formula: (Mock × 0.60) + (Last IA × 0.40), rounded to nearest 0.5
 const calcRealBand = (mockBand: number, lastIABand: number | null): number => {
   const raw = lastIABand !== null
     ? mockBand * 0.60 + lastIABand * 0.40
@@ -136,7 +133,6 @@ const calcRealBand = (mockBand: number, lastIABand: number | null): number => {
 };
 
 const checkMockEligibility = (totalMomentum: number): MockEligibility => {
-  // ── Read IA tracker ────────────────────────────────────────────────────────
   let iasCompleted = 0;
   const iasPerSkill: Record<Skill, number> = {
     listening: 0, reading: 0, writing: 0, speaking: 0,
@@ -146,7 +142,6 @@ const checkMockEligibility = (totalMomentum: number): MockEligibility => {
     if (stored) {
       const tracker = JSON.parse(stored);
       iasCompleted  = tracker.totalCompleted || 0;
-      // TODO (Sarthak): Replace with real per-skill IA count from backend
       const perSkill  = Math.floor(iasCompleted / 4);
       const remainder = iasCompleted % 4;
       SKILL_ORDER.forEach((s, i) => {
@@ -155,7 +150,6 @@ const checkMockEligibility = (totalMomentum: number): MockEligibility => {
     }
   } catch { /* ignore */ }
 
-  // ── Band improvement check ─────────────────────────────────────────────────
   const diagnosticBands = readDiagnosticBands();
   const lastIABands     = readLastIABands();
   let   bestImprovement = 0;
@@ -169,7 +163,6 @@ const checkMockEligibility = (totalMomentum: number): MockEligibility => {
   });
   const bandImproved = bestImprovement >= 0.5;
 
-  // ── Days on platform ───────────────────────────────────────────────────────
   let daysOnPlatform = 0;
   try {
     const totalDrills = localStorage.getItem("total_drill_sessions");
@@ -185,18 +178,14 @@ const checkMockEligibility = (totalMomentum: number): MockEligibility => {
     }
   } catch { /* ignore */ }
 
-  // ── Monthly usage ──────────────────────────────────────────────────────────
   const usage = readMockUsageThisMonth();
 
-  // ── Per-skill coverage ─────────────────────────────────────────────────────
   const allSkillsCovered = SKILL_ORDER.every(s => iasPerSkill[s] >= 1);
 
-  // ── Standard path ─────────────────────────────────────────────────────────
   const standardGatePassed    = iasCompleted >= 6 && allSkillsCovered && bandImproved;
   const standardSlotAvailable = usage.standard < 1;
   const canTakeStandard       = standardGatePassed && standardSlotAvailable;
 
-  // ── Exchange path ──────────────────────────────────────────────────────────
   const totalMocksThisMonth   = usage.standard + usage.exchange;
   const exchangeSlotAvailable = usage.exchange < 1 && totalMocksThisMonth < 2;
   const canTakeExchange = (
@@ -207,7 +196,6 @@ const checkMockEligibility = (totalMomentum: number): MockEligibility => {
     exchangeSlotAvailable
   );
 
-  // ── Lock reason ────────────────────────────────────────────────────────────
   let lockReason: string | null = null;
   if (!canTakeStandard && !canTakeExchange) {
     if (iasCompleted < 6) {
@@ -233,7 +221,7 @@ const checkMockEligibility = (totalMomentum: number): MockEligibility => {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FULL IELTS MOCK DATA
+// FULL IELTS MOCK DATA (unchanged)
 // ─────────────────────────────────────────────────────────────────────────────
 
 const LISTENING_DATA = {
@@ -344,19 +332,43 @@ function countWords(text: string): number {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SUB-COMPONENTS
+// SUB-COMPONENTS — SCI-FI GLASSMORPHISM REDESIGN
 // ─────────────────────────────────────────────────────────────────────────────
 
 function TopNavBar() {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b-2 border-gray-900">
+    <nav className="fixed top-0 left-0 right-0 z-50" style={{
+      background: 'rgba(5, 8, 22, 0.85)',
+      backdropFilter: 'blur(20px)',
+      borderBottom: '1px solid rgba(0, 240, 255, 0.15)',
+      boxShadow: '0 0 40px rgba(0, 240, 255, 0.05)',
+    }}>
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div className="flex items-center space-x-2.5">
-            <div className="p-2 bg-indigo-700 border-2 border-gray-900 rounded-lg" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
-              <GraduationCap className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-xl font-black text-gray-900 uppercase tracking-tight">TestCrack Mock</span>
+        <div className="flex items-center space-x-3">
+  <div style={{
+    background: '#4338ca',
+    borderRadius: '10px',
+    padding: '8px',
+  }}>
+    <GraduationCap className="h-5 w-5" style={{ color: '#ffffff' }} />
+  </div>
+  <span style={{
+    fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+    fontWeight: 800,
+    fontSize: '1.1rem',
+    letterSpacing: '0.15em',
+    color: '#4338ca',
+    WebkitTextFillColor: '#4338ca',
+  }}>TESTCRACK / MOCK</span>
+</div>
+          <div style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: '0.65rem',
+            color: 'rgba(0,240,255,0.5)',
+            letterSpacing: '0.1em',
+          }}>
+            SYS::ACTIVE
           </div>
         </div>
       </div>
@@ -370,16 +382,19 @@ const CircleTimer: React.FC<{ timeLeft: number; total: number; size?: number }> 
   const circ     = 2 * Math.PI * r;
   const dash     = circ * pct;
   const isUrgent = pct < 0.1;
-  const color    = isUrgent ? "#EF4444" : pct < 0.5 ? "#F59E0B" : "#4338CA";
+  const color    = isUrgent ? "#ff4466" : pct < 0.5 ? "#f59e0b" : "#00f0ff";
   return (
     <svg width={size} height={size} style={{ transform: "rotate(-90deg)", flexShrink: 0 }}>
-      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#E5E7EB" strokeWidth={6} />
-      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={6}
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={5} />
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={5}
         strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
-        style={{ transition: "stroke-dasharray 0.5s linear, stroke 0.3s" }} />
+        style={{
+          transition: "stroke-dasharray 0.5s linear, stroke 0.3s",
+          filter: `drop-shadow(0 0 6px ${color})`,
+        }} />
       <text x={size/2} y={size/2+1} textAnchor="middle" dominantBaseline="middle"
-        fill={isUrgent ? "#EF4444" : "#111827"} fontSize={size/4.2} fontWeight="900"
-        fontFamily="monospace"
+        fill={isUrgent ? "#ff4466" : "#00f0ff"} fontSize={size/4.5} fontWeight="700"
+        fontFamily="'JetBrains Mono', monospace"
         style={{ transform: "rotate(90deg)", transformOrigin: `${size/2}px ${size/2}px` }}>
         {formatTime(timeLeft)}
       </text>
@@ -387,19 +402,70 @@ const CircleTimer: React.FC<{ timeLeft: number; total: number; size?: number }> 
   );
 };
 
+const GlassCard: React.FC<{
+  children: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
+  glow?: 'cyan' | 'violet' | 'amber' | 'rose' | 'emerald' | 'none';
+}> = ({ children, className = "", style = {}, glow = 'none' }) => {
+  const glowColors: Record<string, string> = {
+    cyan:    'rgba(0,240,255,0.12)',
+    violet:  'rgba(139,92,246,0.12)',
+    amber:   'rgba(245,158,11,0.12)',
+    rose:    'rgba(244,63,94,0.12)',
+    emerald: 'rgba(52,211,153,0.12)',
+    none:    'transparent',
+  };
+  const borderColors: Record<string, string> = {
+    cyan:    'rgba(0,240,255,0.25)',
+    violet:  'rgba(139,92,246,0.3)',
+    amber:   'rgba(245,158,11,0.25)',
+    rose:    'rgba(244,63,94,0.25)',
+    emerald: 'rgba(52,211,153,0.25)',
+    none:    'rgba(255,255,255,0.07)',
+  };
+  return (
+    <div className={className} style={{
+      background: `linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%), ${glowColors[glow]}`,
+      backdropFilter: 'blur(24px)',
+      border: `1px solid ${borderColors[glow]}`,
+      borderRadius: '16px',
+      ...style,
+    }}>
+      {children}
+    </div>
+  );
+};
+
 const RequirementRow = ({
   met, label, detail, compact = false,
 }: { met: boolean; label: string; detail: string; compact?: boolean }) => (
-  <div className={`flex items-start gap-3 ${compact ? 'py-1' : 'p-3 bg-white border border-gray-200 rounded-xl'}`}>
-    <div className={`shrink-0 ${compact ? 'mt-0.5' : 'mt-0'}`}>
+  <div className={`flex items-start gap-3 ${compact ? 'py-1.5' : 'p-3'}`} style={{
+    background: 'rgba(255,255,255,0.02)',
+    borderRadius: '10px',
+    border: `1px solid ${met ? 'rgba(52,211,153,0.2)' : 'rgba(245,158,11,0.15)'}`,
+    marginBottom: '6px',
+  }}>
+    <div className={`shrink-0 ${compact ? 'mt-0.5' : 'mt-0.5'}`}>
       {met
-        ? <CheckCircle2 className={`${compact ? 'w-4 h-4' : 'w-5 h-5'} text-emerald-500`} />
-        : <AlertTriangle className={`${compact ? 'w-4 h-4' : 'w-5 h-5'} text-amber-500`} />
+        ? <CheckCircle2 className={`${compact ? 'w-4 h-4' : 'w-5 h-5'}`} style={{ color: '#34d399', filter: 'drop-shadow(0 0 6px #34d399)' }} />
+        : <AlertTriangle className={`${compact ? 'w-4 h-4' : 'w-5 h-5'}`} style={{ color: '#f59e0b', filter: 'drop-shadow(0 0 6px #f59e0b)' }} />
       }
     </div>
     <div className="flex-1 min-w-0">
-      <p className={`font-bold text-gray-900 ${compact ? 'text-xs' : 'text-sm'}`}>{label}</p>
-      {detail && <p className={`text-gray-500 ${compact ? 'text-[10px]' : 'text-xs'} mt-0.5`}>{detail}</p>}
+      <p style={{
+        fontFamily: "'JetBrains Mono', monospace",
+        fontWeight: 600,
+        fontSize: compact ? '0.7rem' : '0.75rem',
+        color: met ? '#e0f7f7' : '#fde68a',
+        letterSpacing: '0.03em',
+      }}>{label}</p>
+      {detail && <p style={{
+        fontFamily: "'JetBrains Mono', monospace",
+        fontSize: compact ? '0.6rem' : '0.65rem',
+        color: 'rgba(255,255,255,0.35)',
+        marginTop: '2px',
+      }}>{detail}</p>}
     </div>
   </div>
 );
@@ -468,7 +534,6 @@ export default function FullMockAssessment() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Persist in-progress state ──────────────────────────────────────────────
   useEffect(() => {
     if (isRestoring || phase === "gate" || phase === "checking" || phase === "locked") return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -477,7 +542,6 @@ export default function FullMockAssessment() {
     }));
   }, [phase, skillIdx, currentIdx, answers, recordedPrompts, timeLeft, allResults, sessionData, audioState, mockType, isRestoring]);
 
-  // ── Session data ───────────────────────────────────────────────────────────
   const fetchAssessmentData = async (targetSkill: Skill) => {
     await new Promise(resolve => setTimeout(resolve, 800));
     if (targetSkill === 'listening') return LISTENING_DATA;
@@ -570,8 +634,21 @@ export default function FullMockAssessment() {
 
   if (isRestoring || phase === "checking") {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-indigo-700 animate-spin" />
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#050816' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '60px', height: '60px', margin: '0 auto 16px',
+            border: '2px solid transparent',
+            borderTop: '2px solid #00f0ff',
+            borderRight: '2px solid rgba(0,240,255,0.3)',
+            borderRadius: '50%',
+            animation: 'spin 0.8s linear infinite',
+            boxShadow: '0 0 20px rgba(0,240,255,0.3)',
+          }} />
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", color: 'rgba(0,240,255,0.6)', fontSize: '0.7rem', letterSpacing: '0.2em' }}>
+            INITIALIZING...
+          </p>
+        </div>
       </div>
     );
   }
@@ -583,27 +660,55 @@ export default function FullMockAssessment() {
     const monthUsed        = readMockUsageThisMonth();
 
     return (
-      <div className="max-w-2xl mx-auto pt-12 px-4 pb-16 animate-fade-in">
-        <div className="bg-white border-2 border-gray-900 rounded-2xl p-8 shadow-[8px_8px_0_#0F0F0F]">
-          <div className="flex items-center justify-center w-20 h-20 rounded-full bg-slate-100 border-2 border-gray-900 mx-auto mb-6 shadow-[4px_4px_0_#0F0F0F]">
-            <Lock className="w-10 h-10 text-slate-500" />
+      <div className="tc-fade-in" style={{ maxWidth: '600px', margin: '0 auto', padding: '48px 16px 80px' }}>
+        <GlassCard glow="none" style={{ padding: '40px' }}>
+          {/* Lock icon */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
+            <div style={{
+              width: '80px', height: '80px', borderRadius: '50%',
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 0 40px rgba(139,92,246,0.1)',
+            }}>
+              <Lock style={{ width: '36px', height: '36px', color: 'rgba(255,255,255,0.3)' }} />
+            </div>
           </div>
-          <h1 className="text-3xl font-black text-gray-900 uppercase tracking-tight text-center mb-2">Mock Test Locked</h1>
-          <p className="text-gray-500 text-center font-medium mb-8 max-w-md mx-auto">
+
+          <h1 style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontWeight: 800, fontSize: '1.6rem', letterSpacing: '0.1em',
+            color: '#e2e8f0', textAlign: 'center', marginBottom: '8px',
+          }}>ACCESS DENIED</h1>
+
+          <p style={{
+            fontFamily: "'JetBrains Mono', monospace", fontSize: '0.72rem',
+            color: 'rgba(255,255,255,0.35)', textAlign: 'center',
+            letterSpacing: '0.05em', marginBottom: '32px', lineHeight: 1.7,
+            maxWidth: '420px', margin: '0 auto 32px',
+          }}>
             {eligibility.lockReason || "Complete the requirements below to unlock the Full Mock Test."}
           </p>
 
-          <div className="space-y-3 mb-8">
-            <RequirementRow met={iasCompleted >= 6}    label="Complete 6 Internal Assessments"               detail={`${iasCompleted} / 6 done`} />
-            <RequirementRow met={allSkillsCovered}     label="At least 1 IA per skill"                       detail={SKILL_ORDER.map(s => `${SKILL_LABELS[s]}: ${iasPerSkill[s]}`).join(" · ")} />
-            <RequirementRow met={bandImproved}         label="≥ 0.5 band improvement on any skill vs diagnostic" detail={bandImproved ? `Best: +${bestBandImprovement.toFixed(1)}` : "Not yet achieved"} />
-            <RequirementRow met={monthUsed.standard < 1} label="Monthly slot available"                      detail={monthUsed.standard >= 1 ? "Used this month — resets next calendar month" : "Available"} />
+          {/* Requirements */}
+          <div style={{ marginBottom: '24px' }}>
+            <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.6rem', color: 'rgba(0,240,255,0.5)', letterSpacing: '0.15em', marginBottom: '12px' }}>
+              // STANDARD_PATH :: REQUIREMENTS
+            </p>
+            <RequirementRow met={iasCompleted >= 6}    label="6 Internal Assessments completed"            detail={`${iasCompleted} / 6 done`} />
+            <RequirementRow met={allSkillsCovered}     label="Min 1 IA per skill"                          detail={SKILL_ORDER.map(s => `${SKILL_LABELS[s]}: ${iasPerSkill[s]}`).join(" · ")} />
+            <RequirementRow met={bandImproved}         label="≥ 0.5 band improvement on any skill"         detail={bandImproved ? `Best: +${bestBandImprovement.toFixed(1)}` : "Not yet achieved"} />
+            <RequirementRow met={monthUsed.standard < 1} label="Monthly slot available"                   detail={monthUsed.standard >= 1 ? "Used this month — resets next calendar month" : "Available"} />
           </div>
 
           {monthUsed.standard >= 1 && (
-            <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-4 mb-6">
-              <p className="text-sm font-bold text-amber-800 flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
+            <div style={{
+              background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)',
+              borderRadius: '12px', padding: '14px 16px', marginBottom: '20px',
+              display: 'flex', gap: '10px', alignItems: 'flex-start',
+            }}>
+              <Calendar style={{ width: '16px', height: '16px', color: '#f59e0b', marginTop: '2px', flexShrink: 0 }} />
+              <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.68rem', color: '#fde68a', lineHeight: 1.6 }}>
                 Standard mock used this month.{" "}
                 {eligibility.canTakeExchange
                   ? "You can still take an exchange mock below."
@@ -612,32 +717,42 @@ export default function FullMockAssessment() {
             </div>
           )}
 
-          <div className="border-2 border-gray-200 rounded-xl p-5 bg-gray-50">
-            <div className="flex items-start gap-3 mb-4">
-              <Zap className="w-5 h-5 text-amber-500 fill-amber-500 shrink-0 mt-0.5" />
+          {/* Exchange path */}
+          <div style={{
+            background: 'rgba(139,92,246,0.06)', border: '1px solid rgba(139,92,246,0.2)',
+            borderRadius: '14px', padding: '20px',
+          }}>
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '14px' }}>
+              <Zap style={{ width: '18px', height: '18px', color: '#a855f7', filter: 'drop-shadow(0 0 8px #a855f7)', flexShrink: 0 }} />
               <div>
-                <h3 className="font-black text-gray-900 text-sm uppercase tracking-wide mb-1">Momentum Exchange Path</h3>
-                <p className="text-xs text-gray-500 font-medium">
+                <h3 style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: '0.72rem', letterSpacing: '0.1em', color: '#c084fc', marginBottom: '4px' }}>
+                  MOMENTUM_EXCHANGE :: ALTERNATE PATH
+                </h3>
+                <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.62rem', color: 'rgba(255,255,255,0.35)', lineHeight: 1.6 }}>
                   Spend 1500 Momentum points for an extra mock. Requires min 4 IAs, 14 days on platform, and band improvement shown.
                 </p>
               </div>
             </div>
-            <div className="space-y-2">
-              <RequirementRow met={iasCompleted >= 4}      label="Min 4 IAs completed"       detail={`${iasCompleted} / 4`}              compact />
-              <RequirementRow met={totalMomentum >= 1500}  label="1500 Momentum pts"         detail={`${totalMomentum} pts`}             compact />
-              <RequirementRow met={daysOnPlatform >= 14}   label="14 days on platform"       detail={`${daysOnPlatform} days`}           compact />
-              <RequirementRow met={bandImproved}            label="Band improvement ≥ 0.5"   detail=""                                   compact />
-              <RequirementRow met={monthUsed.exchange < 1} label="Exchange slot available"   detail={monthUsed.exchange >= 1 ? "Used this month" : "Available"} compact />
-            </div>
+            <RequirementRow met={iasCompleted >= 4}      label="Min 4 IAs completed"     detail={`${iasCompleted} / 4`}              compact />
+            <RequirementRow met={totalMomentum >= 1500}  label="1500 Momentum pts"       detail={`${totalMomentum} pts`}             compact />
+            <RequirementRow met={daysOnPlatform >= 14}   label="14 days on platform"     detail={`${daysOnPlatform} days`}           compact />
+            <RequirementRow met={bandImproved}            label="Band improvement ≥ 0.5" detail=""                                   compact />
+            <RequirementRow met={monthUsed.exchange < 1} label="Exchange slot available" detail={monthUsed.exchange >= 1 ? "Used this month" : "Available"} compact />
           </div>
 
-          <div className="flex gap-3 mt-6">
-            <button onClick={() => navigate('/student/dashboard')}
-              className="flex-1 py-3.5 border-2 border-gray-300 rounded-xl font-black text-gray-500 hover:bg-gray-50 uppercase text-sm tracking-wide transition-colors">
-              Back to Dashboard
-            </button>
-          </div>
-        </div>
+          <button onClick={() => navigate('/student/dashboard')} style={{
+            width: '100%', marginTop: '24px', padding: '14px',
+            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '12px', cursor: 'pointer',
+            fontFamily: "'JetBrains Mono', monospace", fontWeight: 700,
+            fontSize: '0.72rem', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.4)',
+            transition: 'all 0.2s',
+          }}
+          onMouseOver={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
+          onMouseOut={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}>
+            ← BACK TO DASHBOARD
+          </button>
+        </GlassCard>
       </div>
     );
   };
@@ -647,24 +762,61 @@ export default function FullMockAssessment() {
     const monthUsed = readMockUsageThisMonth();
 
     return (
-      <div className="max-w-3xl mx-auto animate-fade-in pt-12 px-4">
-        <div className="bg-white border-2 border-gray-900 rounded-2xl p-8 sm:p-12 text-center shadow-[8px_8px_0_#0F0F0F]">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded border-2 border-gray-900 bg-red-500 text-white text-xs font-black tracking-widest uppercase mb-8 shadow-[3px_3px_0_#0F0F0F]">
-            <AlertCircle className="w-4 h-4" /> Full Official Mock Exam
+      <div className="tc-fade-in" style={{ maxWidth: '860px', margin: '0 auto', padding: '48px 16px' }}>
+        <GlassCard glow="cyan" style={{ padding: '48px', textAlign: 'center' }}>
+
+          {/* Badge */}
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: '8px',
+            padding: '6px 14px', borderRadius: '100px',
+            background: 'rgba(244,63,94,0.1)', border: '1px solid rgba(244,63,94,0.3)',
+            marginBottom: '32px',
+          }}>
+            <AlertCircle style={{ width: '14px', height: '14px', color: '#f43f5e' }} />
+            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.62rem', letterSpacing: '0.15em', color: '#f43f5e', fontWeight: 700 }}>
+              FULL OFFICIAL MOCK EXAM
+            </span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-black text-gray-900 tracking-tight uppercase mb-6">
-            Ready for the <span className="text-indigo-700">Real Deal?</span>
+
+          <h1 style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontWeight: 900, fontSize: 'clamp(1.8rem, 4vw, 3rem)',
+            letterSpacing: '0.05em', marginBottom: '20px',
+            lineHeight: 1.1,
+          }}>
+            <span style={{ color: '#e2e8f0' }}>READY FOR THE </span>
+            <span style={{
+              background: 'linear-gradient(135deg, #00f0ff, #a855f7)',
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+            }}>REAL DEAL?</span>
           </h1>
-          <p className="text-gray-600 leading-relaxed font-medium mb-10 max-w-xl mx-auto">
-            This is a full-length, strict-timed IELTS simulation. Set aside approximately <strong>2 hours and 45 minutes</strong> in a quiet environment. You cannot pause the timers once started.
+
+          <p style={{
+            fontFamily: "'JetBrains Mono', monospace", fontSize: '0.78rem',
+            color: 'rgba(255,255,255,0.45)', lineHeight: 1.8,
+            maxWidth: '520px', margin: '0 auto 40px',
+          }}>
+            Full-length, strict-timed IELTS simulation. Set aside{' '}
+            <span style={{ color: '#00f0ff' }}>2 hours and 45 minutes</span>{' '}
+            in a quiet environment. Timers cannot be paused once started.
           </p>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
-            {SKILL_ORDER.map(s => (
-              <div key={s} className="bg-gray-50 border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-2">
-                <span className="text-3xl">{SKILL_ICONS[s]}</span>
-                <span className="text-[10px] font-black uppercase tracking-widest text-gray-900">{SKILL_LABELS[s]}</span>
-                <span className="text-[10px] font-bold text-gray-500">
+          {/* Skill cards */}
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '40px',
+          }}>
+            {SKILL_ORDER.map((s, i) => (
+              <div key={s} style={{
+                background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(0,240,255,0.12)',
+                borderRadius: '14px', padding: '20px 12px',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+                transition: 'all 0.3s',
+              }}>
+                <span style={{ fontSize: '1.8rem' }}>{SKILL_ICONS[s]}</span>
+                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: '0.6rem', letterSpacing: '0.15em', color: '#00f0ff' }}>
+                  {SKILL_LABELS[s].toUpperCase()}
+                </span>
+                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)' }}>
                   {s === 'listening' ? '40 Qs / 30m' : s === 'reading' ? '40 Qs / 60m' : s === 'writing' ? '2 Tasks / 60m' : '3 Parts / 14m'}
                 </span>
               </div>
@@ -672,34 +824,62 @@ export default function FullMockAssessment() {
           </div>
 
           {monthUsed.standard >= 1 && eligibility.canTakeExchange && (
-            <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-4 mb-6 text-left">
-              <p className="text-sm font-bold text-amber-800 flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
+            <div style={{
+              background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)',
+              borderRadius: '12px', padding: '14px 18px', marginBottom: '24px', textAlign: 'left',
+              display: 'flex', gap: '10px',
+            }}>
+              <Calendar style={{ width: '16px', height: '16px', color: '#f59e0b', flexShrink: 0, marginTop: '2px' }} />
+              <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.68rem', color: '#fde68a', lineHeight: 1.6 }}>
                 Standard mock used this month. You're taking an exchange mock (−1500 pts from Momentum).
               </p>
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
-            <button onClick={() => navigate(-1)}
-              className="px-6 py-4 rounded-xl border-2 border-gray-300 font-black text-gray-500 hover:bg-gray-50 hover:border-gray-400 transition-colors uppercase tracking-wide">
-              Exit
+          {/* Action buttons */}
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button onClick={() => navigate(-1)} style={{
+              padding: '14px 28px', borderRadius: '12px', cursor: 'pointer',
+              background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)',
+              fontFamily: "'JetBrains Mono', monospace", fontWeight: 700,
+              fontSize: '0.72rem', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.4)',
+              transition: 'all 0.2s',
+            }}
+            onMouseOver={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)')}
+            onMouseOut={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)')}>
+              EXIT
             </button>
+
             {eligibility.canTakeStandard && (
-              <button onClick={() => beginMock("standard")}
-                className="flex-1 bg-indigo-700 hover:bg-indigo-600 text-white font-black text-base uppercase tracking-wide rounded-xl border-2 border-gray-900 transition-all neo-btn shadow-[4px_4px_0_#0F0F0F]">
-                Start Exam →
+              <button onClick={() => beginMock("standard")} className="tc-glow-btn" style={{
+                padding: '14px 36px', borderRadius: '12px', cursor: 'pointer',
+                background: 'linear-gradient(135deg, rgba(0,240,255,0.15), rgba(139,92,246,0.15))',
+                border: '1px solid rgba(0,240,255,0.4)',
+                fontFamily: "'JetBrains Mono', monospace", fontWeight: 800,
+                fontSize: '0.78rem', letterSpacing: '0.12em', color: '#00f0ff',
+                boxShadow: '0 0 30px rgba(0,240,255,0.15)',
+                transition: 'all 0.2s', minWidth: '180px',
+              }}>
+                INITIATE EXAM →
               </button>
             )}
+
             {!eligibility.canTakeStandard && eligibility.canTakeExchange && (
-              <button onClick={() => beginMock("exchange")}
-                className="flex-1 bg-amber-500 hover:bg-amber-400 text-gray-900 font-black text-base uppercase tracking-wide rounded-xl border-2 border-gray-900 transition-all neo-btn shadow-[4px_4px_0_#0F0F0F]">
-                <Zap className="w-4 h-4 inline mr-2 fill-gray-900" />
-                Exchange Mock (−1500 pts) →
+              <button onClick={() => beginMock("exchange")} className="tc-glow-btn-amber" style={{
+                padding: '14px 36px', borderRadius: '12px', cursor: 'pointer',
+                background: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(239,68,68,0.1))',
+                border: '1px solid rgba(245,158,11,0.4)',
+                fontFamily: "'JetBrains Mono', monospace", fontWeight: 800,
+                fontSize: '0.78rem', letterSpacing: '0.1em', color: '#fbbf24',
+                boxShadow: '0 0 30px rgba(245,158,11,0.1)',
+                transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px',
+              }}>
+                <Zap style={{ width: '16px', height: '16px', fill: '#fbbf24' }} />
+                EXCHANGE MOCK (−1500 PTS)
               </button>
             )}
           </div>
-        </div>
+        </GlassCard>
       </div>
     );
   };
@@ -707,40 +887,107 @@ export default function FullMockAssessment() {
   const renderInterim = () => {
     const nextSkill = SKILL_ORDER[skillIdx + 1];
     return (
-      <div className="min-h-[70vh] flex items-center justify-center animate-fade-in px-4 pt-12">
-        <div className="max-w-lg w-full bg-white border-2 border-gray-900 rounded-2xl p-10 text-center shadow-[8px_8px_0_#0F0F0F]">
-          <div className="w-20 h-20 bg-emerald-100 border-2 border-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[4px_4px_0_#10B981]">
-            <CheckCircle2 className="w-10 h-10 text-emerald-600" />
+      <div className="tc-fade-in" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 16px' }}>
+        <GlassCard glow="emerald" style={{ maxWidth: '500px', width: '100%', padding: '48px', textAlign: 'center' }}>
+          <div style={{
+            width: '72px', height: '72px', borderRadius: '50%',
+            background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.4)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 24px',
+            boxShadow: '0 0 40px rgba(52,211,153,0.15)',
+          }}>
+            <CheckCircle2 style={{ width: '36px', height: '36px', color: '#34d399', filter: 'drop-shadow(0 0 8px #34d399)' }} />
           </div>
-          <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tight mb-2">{SKILL_LABELS[activeSkill]} Complete</h2>
-          <p className="text-gray-500 font-medium mb-10">Great job. Take a quick break before the next section begins.</p>
-          <div className="bg-indigo-50 border-2 border-gray-900 rounded-xl p-6 mb-8 text-left shadow-[4px_4px_0_#0F0F0F]">
-            <p className="text-xs font-black text-indigo-700 uppercase tracking-widest mb-1">Up Next</p>
-            <div className="flex items-center gap-3">
-              <span className="text-3xl">{SKILL_ICONS[nextSkill]}</span>
-              <h3 className="text-2xl font-black text-gray-900 uppercase tracking-wide">{SKILL_LABELS[nextSkill]}</h3>
+
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.6rem', color: 'rgba(52,211,153,0.7)', letterSpacing: '0.2em', marginBottom: '8px' }}>
+            SECTION_COMPLETE
+          </p>
+          <h2 style={{
+            fontFamily: "'JetBrains Mono', monospace", fontWeight: 800,
+            fontSize: '1.8rem', letterSpacing: '0.08em', color: '#e2e8f0', marginBottom: '8px',
+          }}>
+            {SKILL_LABELS[activeSkill].toUpperCase()}
+          </h2>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', marginBottom: '36px', lineHeight: 1.6 }}>
+            Section recorded. Take a short break before the next module.
+          </p>
+
+          <div style={{
+            background: 'rgba(0,240,255,0.04)', border: '1px solid rgba(0,240,255,0.15)',
+            borderRadius: '14px', padding: '24px', marginBottom: '32px', textAlign: 'left',
+          }}>
+            <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.55rem', color: 'rgba(0,240,255,0.5)', letterSpacing: '0.15em', marginBottom: '12px' }}>
+              // NEXT_MODULE
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <span style={{ fontSize: '2rem' }}>{SKILL_ICONS[nextSkill]}</span>
+              <div>
+                <h3 style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: '1.3rem', color: '#00f0ff', letterSpacing: '0.08em' }}>
+                  {SKILL_LABELS[nextSkill].toUpperCase()}
+                </h3>
+                <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.62rem', color: 'rgba(255,255,255,0.35)', marginTop: '4px' }}>
+                  TIMER :: {SKILL_DURATIONS[nextSkill] / 60}:00 MINUTES
+                </p>
+              </div>
             </div>
-            <p className="text-sm font-bold text-gray-600 mt-2">Timer: {SKILL_DURATIONS[nextSkill] / 60} Minutes</p>
           </div>
-          <button onClick={advanceToNextSkill}
-            className="w-full bg-gray-900 hover:bg-gray-800 text-white font-black text-lg py-4 rounded-xl border-2 border-gray-900 transition-all neo-btn shadow-[5px_5px_0_#4338CA]">
-            Start {SKILL_LABELS[nextSkill]} <ArrowRight className="w-5 h-5 inline ml-1" />
+
+          <button onClick={advanceToNextSkill} className="tc-glow-btn" style={{
+            width: '100%', padding: '16px', borderRadius: '12px', cursor: 'pointer',
+            background: 'linear-gradient(135deg, rgba(0,240,255,0.12), rgba(139,92,246,0.12))',
+            border: '1px solid rgba(0,240,255,0.35)',
+            fontFamily: "'JetBrains Mono', monospace", fontWeight: 800,
+            fontSize: '0.78rem', letterSpacing: '0.15em', color: '#00f0ff',
+            boxShadow: '0 0 30px rgba(0,240,255,0.1)',
+          }}>
+            BEGIN {SKILL_LABELS[nextSkill].toUpperCase()} →
           </button>
-        </div>
+        </GlassCard>
       </div>
     );
   };
 
   const renderScoring = () => (
-    <div className="flex flex-col items-center justify-center min-h-[70vh] animate-fade-in">
-      <div className="relative mb-8">
-        <div className="w-24 h-24 rounded-full border-[6px] border-gray-200 border-t-indigo-700 animate-spin" />
-        <span className="absolute inset-0 flex items-center justify-center text-4xl">🧠</span>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '70vh' }} className="tc-fade-in">
+      {/* Orbital spinner */}
+      <div style={{ position: 'relative', width: '100px', height: '100px', marginBottom: '32px' }}>
+        <div style={{
+          position: 'absolute', inset: 0, borderRadius: '50%',
+          border: '2px solid transparent',
+          borderTop: '2px solid #00f0ff',
+          borderRight: '2px solid rgba(0,240,255,0.2)',
+          animation: 'spin 1s linear infinite',
+          boxShadow: '0 0 30px rgba(0,240,255,0.25)',
+        }} />
+        <div style={{
+          position: 'absolute', inset: '12px', borderRadius: '50%',
+          border: '2px solid transparent',
+          borderBottom: '2px solid #a855f7',
+          borderLeft: '2px solid rgba(168,85,247,0.2)',
+          animation: 'spin 1.5s linear infinite reverse',
+          boxShadow: '0 0 20px rgba(168,85,247,0.2)',
+        }} />
+        <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem' }}>🧠</span>
       </div>
-      <h2 className="text-3xl font-black text-gray-900 uppercase tracking-wide mb-3">Compiling Final Report...</h2>
-      <p className="text-gray-500 font-medium text-lg text-center max-w-md">
-        AI is evaluating your 40 reading/listening answers and scoring your essays and recordings.
+      <h2 style={{
+        fontFamily: "'JetBrains Mono', monospace", fontWeight: 800,
+        fontSize: '1.6rem', letterSpacing: '0.1em', color: '#e2e8f0', marginBottom: '12px',
+      }}>COMPILING FINAL REPORT</h2>
+      <p style={{
+        fontFamily: "'JetBrains Mono', monospace", fontSize: '0.72rem',
+        color: 'rgba(255,255,255,0.35)', textAlign: 'center', maxWidth: '380px', lineHeight: 1.8,
+      }}>
+        Neural evaluation in progress. Scoring 40 responses + essays + audio recordings.
       </p>
+      <div style={{ marginTop: '24px', display: 'flex', gap: '6px' }}>
+        {[0,1,2,3,4].map(i => (
+          <div key={i} style={{
+            width: '8px', height: '8px', borderRadius: '50%',
+            background: '#00f0ff', boxShadow: '0 0 8px #00f0ff',
+            animation: `pulse 1.2s ease-in-out ${i * 0.15}s infinite`,
+          }} />
+        ))}
+      </div>
     </div>
   );
 
@@ -762,133 +1009,203 @@ export default function FullMockAssessment() {
     }
 
     return (
-      <div className="max-w-5xl mx-auto animate-fade-in pt-8 pb-24 px-4">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl sm:text-4xl font-black text-gray-900 uppercase tracking-tight">Official Mock Results</h2>
-          <button onClick={() => { localStorage.removeItem(STORAGE_KEY); navigate('/student/dashboard'); }}
-            className="px-6 py-3 bg-gray-900 text-white rounded-xl font-black text-sm uppercase tracking-wide hover:bg-gray-800 transition-colors shadow-[4px_4px_0_#4338CA]">
-            Dashboard
+      <div className="tc-fade-in" style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 16px 96px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.6rem', color: 'rgba(0,240,255,0.5)', letterSpacing: '0.15em', marginBottom: '4px' }}>
+              // ASSESSMENT_COMPLETE
+            </p>
+            <h2 style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 800, fontSize: 'clamp(1.4rem, 3vw, 2rem)', letterSpacing: '0.06em', color: '#e2e8f0' }}>
+              OFFICIAL MOCK RESULTS
+            </h2>
+          </div>
+          <button onClick={() => { localStorage.removeItem(STORAGE_KEY); navigate('/student/dashboard'); }} style={{
+            padding: '12px 24px', borderRadius: '10px', cursor: 'pointer',
+            background: 'rgba(0,240,255,0.06)', border: '1px solid rgba(0,240,255,0.2)',
+            fontFamily: "'JetBrains Mono', monospace", fontWeight: 700,
+            fontSize: '0.65rem', letterSpacing: '0.12em', color: '#00f0ff',
+          }}>
+            DASHBOARD →
           </button>
         </div>
 
-        {/* Overall band */}
-        <div className="bg-indigo-700 border-2 border-gray-900 rounded-2xl p-8 sm:p-12 mb-4 text-center relative overflow-hidden shadow-[8px_8px_0_#0F0F0F]">
-          <div className="absolute -top-10 -right-10 text-[200px] opacity-10 pointer-events-none">🏆</div>
-          <p className="text-indigo-200 font-black uppercase tracking-widest mb-1">Real Band Score</p>
-          <p className="text-indigo-300 text-xs font-bold mb-4 uppercase tracking-widest">Mock × 0.60 + Last IA × 0.40</p>
-          <div className="text-8xl sm:text-[120px] font-black text-white tabular-nums leading-none drop-shadow-md">
+        {/* Overall band hero */}
+        <GlassCard glow="violet" style={{
+          padding: '48px', textAlign: 'center', marginBottom: '12px', position: 'relative', overflow: 'hidden',
+        }}>
+          <div style={{
+            position: 'absolute', top: '-60px', right: '-60px',
+            fontSize: '200px', opacity: 0.04, pointerEvents: 'none', lineHeight: 1,
+          }}>🏆</div>
+          {/* Scan line effect */}
+          <div style={{
+            position: 'absolute', inset: 0, background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,240,255,0.015) 2px, rgba(0,240,255,0.015) 4px)',
+            pointerEvents: 'none', borderRadius: '16px',
+          }} />
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.6rem', color: 'rgba(0,240,255,0.5)', letterSpacing: '0.2em', marginBottom: '4px' }}>
+            COMPOSITE_REAL_BAND
+          </p>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.55rem', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.12em', marginBottom: '20px' }}>
+            MOCK × 0.60 + LAST_IA × 0.40
+          </p>
+          <div style={{
+            fontFamily: "'JetBrains Mono', monospace", fontWeight: 900,
+            fontSize: 'clamp(5rem, 12vw, 8rem)', lineHeight: 1,
+            background: 'linear-gradient(135deg, #00f0ff 0%, #a855f7 60%, #f43f5e 100%)',
+            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+            filter: 'drop-shadow(0 0 40px rgba(0,240,255,0.3))',
+          }}>
             {overallReal.toFixed(1)}
           </div>
           {overallImproved && (
-            <div className="inline-flex items-center gap-2 mt-6 bg-emerald-400/20 border border-emerald-400/40 text-emerald-200 font-black text-sm px-4 py-2 rounded-full">
-              <Trophy className="w-4 h-4" /> New band threshold crossed! +500 Momentum
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: '8px', marginTop: '20px',
+              background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.25)',
+              padding: '8px 18px', borderRadius: '100px',
+            }}>
+              <Trophy style={{ width: '14px', height: '14px', color: '#34d399' }} />
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.65rem', color: '#34d399', letterSpacing: '0.1em' }}>
+                NEW BAND THRESHOLD CROSSED · +500 MOMENTUM
+              </span>
             </div>
           )}
-        </div>
+        </GlassCard>
 
         {/* Diagnostic vs today */}
-        <div className="bg-gray-100 border-2 border-gray-300 rounded-xl px-5 py-3 mb-8 text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">
-            Diagnostic baseline: <span className="text-gray-900">{overallDiag.toFixed(1)}</span>
-            {" → "}
-            Today: <span className={overallImproved ? "text-emerald-600" : "text-gray-900"}>{overallReal.toFixed(1)}</span>
-            {" "}
+        <div style={{
+          background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)',
+          borderRadius: '10px', padding: '12px 20px', marginBottom: '28px', textAlign: 'center',
+        }}>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.65rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.06em' }}>
+            BASELINE: <span style={{ color: '#94a3b8' }}>{overallDiag.toFixed(1)}</span>
+            {' → '}
+            TODAY: <span style={{ color: overallImproved ? '#34d399' : overallReal < overallDiag ? '#f43f5e' : '#94a3b8' }}>{overallReal.toFixed(1)}</span>
+            {' '}
             {overallImproved
-              ? <span className="text-emerald-600">(+{(overallReal - overallDiag).toFixed(1)} improvement)</span>
+              ? <span style={{ color: '#34d399' }}>(+{(overallReal - overallDiag).toFixed(1)} IMPROVEMENT)</span>
               : overallReal < overallDiag
-              ? <span className="text-red-500">({(overallReal - overallDiag).toFixed(1)} vs diagnostic)</span>
-              : <span className="text-gray-500">(no change)</span>
+              ? <span style={{ color: '#f43f5e' }}>({(overallReal - overallDiag).toFixed(1)} VS DIAGNOSTIC)</span>
+              : <span style={{ color: 'rgba(255,255,255,0.25)' }}>(MAINTAINED)</span>
             }
           </p>
         </div>
 
         {/* Per-skill cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
           {SKILL_ORDER.map(s => {
             const diagBand = diagnosticBands[s] || 5.0;
             const mockBand = mockBands[s];
             const realBand = realBands[s];
             const lastIA   = lastIABands[s];
             const improved = realBand > diagBand;
+            const dropped  = realBand < diagBand;
 
             return (
-              <div key={s} className="bg-white border-2 border-gray-900 rounded-xl p-6 shadow-[4px_4px_0_#0F0F0F] flex flex-col items-center text-center">
-                <span className="text-4xl mb-3">{SKILL_ICONS[s]}</span>
-                <p className="text-gray-500 font-black uppercase tracking-widest text-xs mb-4">{SKILL_LABELS[s]}</p>
+              <GlassCard key={s} glow={improved ? 'emerald' : dropped ? 'rose' : 'none'} style={{ padding: '28px 20px', textAlign: 'center' }}>
+                <span style={{ fontSize: '2.2rem', display: 'block', marginBottom: '10px' }}>{SKILL_ICONS[s]}</span>
+                <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.55rem', letterSpacing: '0.2em', color: 'rgba(0,240,255,0.5)', marginBottom: '16px' }}>
+                  {SKILL_LABELS[s].toUpperCase()}
+                </p>
 
-                <div className="flex items-center gap-2 mb-3 w-full justify-center">
-                  <div className="text-center">
-                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Diagnostic</p>
-                    <p className="text-xl font-black text-gray-400 line-through decoration-gray-400">{diagBand.toFixed(1)}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'center', marginBottom: '14px' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.5rem', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.1em', marginBottom: '2px' }}>
+                      BASELINE
+                    </p>
+                    <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '1.3rem', fontWeight: 700, color: 'rgba(255,255,255,0.2)', textDecoration: 'line-through' }}>
+                      {diagBand.toFixed(1)}
+                    </p>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-gray-300 shrink-0" />
-                  <div className="text-center">
-                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Real Band</p>
-                    <p className={`text-4xl font-black ${improved ? 'text-emerald-600' : realBand < diagBand ? 'text-red-500' : 'text-gray-900'}`}>
+                  <ArrowRight style={{ width: '14px', height: '14px', color: 'rgba(255,255,255,0.15)', flexShrink: 0 }} />
+                  <div style={{ textAlign: 'center' }}>
+                    <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.5rem', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.1em', marginBottom: '2px' }}>
+                      REAL BAND
+                    </p>
+                    <p style={{
+                      fontFamily: "'JetBrains Mono', monospace", fontSize: '2.4rem', fontWeight: 900, lineHeight: 1,
+                      color: improved ? '#34d399' : dropped ? '#f43f5e' : '#e2e8f0',
+                      filter: improved ? 'drop-shadow(0 0 12px #34d399)' : dropped ? 'drop-shadow(0 0 12px #f43f5e)' : 'none',
+                    }}>
                       {realBand.toFixed(1)}
                     </p>
                   </div>
                 </div>
 
-                <div className="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-[9px] font-bold text-gray-500 space-y-0.5">
-                  <p>Mock: {mockBand.toFixed(1)} × 0.60 = {(mockBand * 0.6).toFixed(2)}</p>
-                  <p>
-                    Last IA: {lastIA !== null
-                      ? `${lastIA.toFixed(1)} × 0.40 = ${(lastIA * 0.4).toFixed(2)}`
-                      : "No IA — using mock only"}
+                <div style={{
+                  background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)',
+                  borderRadius: '8px', padding: '8px', marginBottom: '10px',
+                }}>
+                  <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.55rem', color: 'rgba(255,255,255,0.25)', lineHeight: 1.8 }}>
+                    MOCK: {mockBand.toFixed(1)} × 0.60 = {(mockBand * 0.6).toFixed(2)}<br />
+                    IA: {lastIA !== null ? `${lastIA.toFixed(1)} × 0.40 = ${(lastIA * 0.4).toFixed(2)}` : 'NO IA — MOCK ONLY'}
                   </p>
                 </div>
 
-                <div className={`mt-3 text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded border ${
-                  improved
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                    : realBand < diagBand
-                    ? 'bg-red-50 text-red-600 border-red-200'
-                    : 'bg-gray-100 text-gray-600 border-gray-200'
-                }`}>
-                  {improved
-                    ? `+${(realBand - diagBand).toFixed(1)} improved`
-                    : realBand < diagBand
-                    ? `${(realBand - diagBand).toFixed(1)} dropped`
-                    : 'maintained'}
+                <div style={{
+                  display: 'inline-block', padding: '4px 10px', borderRadius: '100px', fontSize: '0.55rem',
+                  fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, letterSpacing: '0.1em',
+                  background: improved ? 'rgba(52,211,153,0.1)' : dropped ? 'rgba(244,63,94,0.1)' : 'rgba(255,255,255,0.05)',
+                  color: improved ? '#34d399' : dropped ? '#f43f5e' : 'rgba(255,255,255,0.3)',
+                  border: `1px solid ${improved ? 'rgba(52,211,153,0.2)' : dropped ? 'rgba(244,63,94,0.2)' : 'rgba(255,255,255,0.08)'}`,
+                }}>
+                  {improved ? `+${(realBand - diagBand).toFixed(1)} IMPROVED` : dropped ? `${(realBand - diagBand).toFixed(1)} DROPPED` : 'MAINTAINED'}
                 </div>
-              </div>
+              </GlassCard>
             );
           })}
         </div>
 
-        {/* Priority action per skill */}
-        <div className="bg-white border-2 border-gray-900 rounded-2xl p-8 shadow-[6px_6px_0_#0F0F0F] mb-8">
-          <h3 className="text-xl font-black text-gray-900 uppercase tracking-wide mb-6 flex items-center gap-2">
-            <Target className="w-5 h-5 text-indigo-700" /> Priority Action Per Skill
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Priority action */}
+        <GlassCard glow="cyan" style={{ padding: '32px', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
+            <Target style={{ width: '18px', height: '18px', color: '#00f0ff', filter: 'drop-shadow(0 0 8px #00f0ff)' }} />
+            <h3 style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: '0.75rem', letterSpacing: '0.15em', color: '#00f0ff' }}>
+              PRIORITY_ACTION :: PER SKILL
+            </h3>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
             {SKILL_ORDER.map(s => (
-              <div key={s} className="bg-gray-50 border-2 border-gray-200 rounded-xl p-5">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xl">{SKILL_ICONS[s]}</span>
-                  <span className="font-black text-sm text-gray-900 uppercase">{SKILL_LABELS[s]}</span>
-                  <span className="ml-auto font-black text-lg text-indigo-700">{realBands[s].toFixed(1)}</span>
+              <div key={s} style={{
+                background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)',
+                borderRadius: '12px', padding: '18px',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                  <span style={{ fontSize: '1.2rem' }}>{SKILL_ICONS[s]}</span>
+                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: '0.62rem', letterSpacing: '0.1em', color: '#e2e8f0' }}>
+                    {SKILL_LABELS[s].toUpperCase()}
+                  </span>
+                  <span style={{ marginLeft: 'auto', fontFamily: "'JetBrains Mono', monospace", fontWeight: 800, fontSize: '1rem', color: '#a855f7' }}>
+                    {realBands[s].toFixed(1)}
+                  </span>
                 </div>
-                <p className="text-xs text-gray-600 font-medium leading-relaxed">
-                  {/* TODO (Sarthak): Replace with real AI-generated priority action per skill */}
+                <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.62rem', color: 'rgba(255,255,255,0.3)', lineHeight: 1.7 }}>
                   Focus on your weakest sub-skill in {SKILL_LABELS[s]}. Continue daily drills targeting the lowest DCS sub-skill next cycle.
                 </p>
               </div>
             ))}
           </div>
-        </div>
+        </GlassCard>
 
         {/* Momentum award */}
-        <div className="flex items-center justify-center gap-4 bg-indigo-50 border-2 border-indigo-700 rounded-2xl p-6 shadow-[4px_4px_0_#4338CA]">
-          <div className="bg-amber-400 p-2 rounded-full border-2 border-gray-900">
-            <Zap className="w-6 h-6 text-gray-900 fill-gray-900" />
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '16px',
+          background: 'rgba(168,85,247,0.06)', border: '1px solid rgba(168,85,247,0.2)',
+          borderRadius: '16px', padding: '24px',
+          boxShadow: '0 0 40px rgba(168,85,247,0.06)',
+        }}>
+          <div style={{
+            width: '48px', height: '48px', borderRadius: '50%', flexShrink: 0,
+            background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 0 20px rgba(245,158,11,0.15)',
+          }}>
+            <Zap style={{ width: '22px', height: '22px', color: '#fbbf24', fill: '#fbbf24' }} />
           </div>
           <div>
-            <p className="text-lg font-black text-indigo-900 uppercase tracking-wide">
-              +200 Momentum{overallImproved ? " +500 bonus" : ""} earned
+            <p style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: '0.85rem', color: '#e2e8f0', letterSpacing: '0.08em' }}>
+              +200 MOMENTUM{overallImproved ? " · +500 BONUS" : ""} CREDITED
             </p>
-            <p className="text-xs text-indigo-600 font-medium mt-0.5">
+            <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.62rem', color: 'rgba(255,255,255,0.3)', marginTop: '4px', lineHeight: 1.6 }}>
               Drill cycle resumes with updated priorities. Next mock available{" "}
               {mockType === "exchange" ? "via next exchange (1500 pts)" : "next calendar month"}.
             </p>
@@ -901,9 +1218,16 @@ export default function FullMockAssessment() {
   const renderSession = () => {
     if (isLoadingSession || !sessionData) {
       return (
-        <div className="min-h-[70vh] flex flex-col items-center justify-center animate-fade-in">
-          <Loader2 className="w-12 h-12 text-indigo-700 animate-spin mb-4" />
-          <p className="text-gray-500 font-black uppercase tracking-widest text-sm">Building Section...</p>
+        <div style={{ minHeight: '70vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }} className="tc-fade-in">
+          <div style={{
+            width: '48px', height: '48px', borderRadius: '50%',
+            border: '2px solid transparent', borderTop: '2px solid #00f0ff',
+            animation: 'spin 0.8s linear infinite', marginBottom: '16px',
+            boxShadow: '0 0 20px rgba(0,240,255,0.25)',
+          }} />
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.65rem', letterSpacing: '0.2em', color: 'rgba(0,240,255,0.5)' }}>
+            BUILDING SECTION...
+          </p>
         </div>
       );
     }
@@ -931,46 +1255,75 @@ export default function FullMockAssessment() {
     }
 
     return (
-      <div className="max-w-6xl mx-auto pt-6 pb-16 px-4 animate-fade-in">
+      <div className="tc-fade-in" style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px 16px 80px' }}>
 
-        {/* Skill progress */}
-        <div className="flex items-center justify-center gap-2 sm:gap-4 mb-8">
+        {/* Skill progress tracker */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '24px', flexWrap: 'wrap' }}>
           {SKILL_ORDER.map((s, i) => (
-            <div key={s} className="flex items-center gap-2 sm:gap-4">
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 font-black text-xs uppercase tracking-widest ${
-                i < skillIdx  ? 'bg-emerald-400 border-gray-900 text-gray-900' :
-                i === skillIdx ? 'bg-gray-900 border-gray-900 text-white' :
-                                 'bg-white border-gray-300 text-gray-400'
-              }`} style={i <= skillIdx ? { boxShadow: '2px 2px 0 #0F0F0F' } : {}}>
-                {i < skillIdx ? <CheckCircle2 className="w-4 h-4" /> : <span>{SKILL_ICONS[s]}</span>}
-                <span className="hidden sm:inline">{SKILL_LABELS[s]}</span>
+            <div key={s} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '6px 14px', borderRadius: '100px',
+                background: i < skillIdx ? 'rgba(52,211,153,0.12)' : i === skillIdx ? 'rgba(0,240,255,0.12)' : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${i < skillIdx ? 'rgba(52,211,153,0.4)' : i === skillIdx ? 'rgba(0,240,255,0.4)' : 'rgba(255,255,255,0.08)'}`,
+                boxShadow: i === skillIdx ? '0 0 16px rgba(0,240,255,0.15)' : 'none',
+                transition: 'all 0.3s',
+              }}>
+                {i < skillIdx
+                  ? <CheckCircle2 style={{ width: '12px', height: '12px', color: '#34d399' }} />
+                  : <span style={{ fontSize: '12px' }}>{SKILL_ICONS[s]}</span>
+                }
+                <span style={{
+                  fontFamily: "'JetBrains Mono', monospace", fontWeight: 600,
+                  fontSize: '0.6rem', letterSpacing: '0.1em',
+                  color: i < skillIdx ? '#34d399' : i === skillIdx ? '#00f0ff' : 'rgba(255,255,255,0.2)',
+                }}>
+                  {SKILL_LABELS[s].toUpperCase()}
+                </span>
               </div>
               {i < SKILL_ORDER.length - 1 && (
-                <div className={`w-4 sm:w-8 h-1 ${i < skillIdx ? 'bg-gray-900' : 'bg-gray-300'}`} />
+                <div style={{ width: '24px', height: '1px', background: i < skillIdx ? 'rgba(52,211,153,0.4)' : 'rgba(255,255,255,0.08)' }} />
               )}
             </div>
           ))}
         </div>
 
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white border-2 border-gray-900 rounded-xl p-4 sm:p-6 mb-6 gap-4" style={{ boxShadow: '6px 6px 0 #0F0F0F' }}>
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-indigo-700 border-2 border-gray-900 rounded-xl flex items-center justify-center text-3xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+        {/* Session header */}
+        <GlassCard glow="none" style={{
+          display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between',
+          padding: '20px 28px', marginBottom: '20px', gap: '16px',
+          borderColor: 'rgba(0,240,255,0.12)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{
+              width: '52px', height: '52px', borderRadius: '12px', flexShrink: 0,
+              background: 'rgba(0,240,255,0.06)', border: '1px solid rgba(0,240,255,0.2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.6rem',
+            }}>
               {SKILL_ICONS[activeSkill!]}
             </div>
             <div>
-              <p className="text-gray-900 font-black text-lg uppercase tracking-wide">{SKILL_LABELS[activeSkill!]} Section</p>
-              <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1">
-                {activeSkill === 'writing' ? `Task ${currentIdx + 1} of 2` : `Question ${currentIdx + 1} of ${totalQ}`}
+              <p style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: '0.88rem', letterSpacing: '0.08em', color: '#e2e8f0' }}>
+                {SKILL_LABELS[activeSkill!].toUpperCase()} MODULE
+              </p>
+              <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.6rem', color: 'rgba(0,240,255,0.5)', letterSpacing: '0.1em', marginTop: '3px' }}>
+                {activeSkill === 'writing' ? `TASK ${currentIdx + 1} OF 2` : `Q.${currentIdx + 1} / ${totalQ}`}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center bg-gray-50 border-2 border-gray-900 px-4 py-2 rounded-xl" style={{ boxShadow: 'inset 2px 2px 0 rgba(0,0,0,0.05)' }}>
-              <CircleTimer timeLeft={timeLeft} total={SKILL_DURATIONS[activeSkill]} size={48} />
-              <div className="ml-3">
-                <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Section Time</p>
-                <p className="text-lg font-black text-gray-900 leading-none">{formatTime(timeLeft)}</p>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '12px',
+              background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(0,240,255,0.12)',
+              borderRadius: '12px', padding: '10px 16px',
+            }}>
+              <CircleTimer timeLeft={timeLeft} total={SKILL_DURATIONS[activeSkill]} size={44} />
+              <div>
+                <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.5rem', color: 'rgba(0,240,255,0.4)', letterSpacing: '0.12em' }}>SECTION TIME</p>
+                <p style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 800, fontSize: '1.1rem', color: '#00f0ff', letterSpacing: '0.06em' }}>
+                  {formatTime(timeLeft)}
+                </p>
               </div>
             </div>
             <button
@@ -980,17 +1333,26 @@ export default function FullMockAssessment() {
                   navigate('/student/dashboard');
                 }
               }}
-              className="hidden sm:block text-xs font-black text-gray-400 hover:text-red-500 uppercase tracking-widest transition-colors">
-              Abort
+              style={{
+                fontFamily: "'JetBrains Mono', monospace", fontSize: '0.6rem',
+                fontWeight: 600, letterSpacing: '0.1em',
+                color: 'rgba(255,255,255,0.2)', background: 'none', border: 'none', cursor: 'pointer',
+                transition: 'color 0.2s',
+              }}
+              onMouseOver={e => (e.currentTarget.style.color = '#f43f5e')}
+              onMouseOut={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.2)')}>
+              ABORT
             </button>
           </div>
-        </div>
+        </GlassCard>
 
         {/* Split view */}
-        <div className="flex flex-col lg:flex-row gap-6">
-          <div className="w-full lg:w-1/2 flex flex-col gap-4">
+        <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+
+          {/* Left panel */}
+          <div style={{ flex: '1 1 400px', minWidth: 0 }}>
             {activeSkill === 'listening' ? (
-              <div className="bg-indigo-50 border-2 border-gray-900 rounded-xl p-8 text-center flex flex-col items-center" style={{ boxShadow: '6px 6px 0 #0F0F0F' }}>
+              <GlassCard glow="violet" style={{ padding: '40px', textAlign: 'center', minHeight: '400px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <button
                   onClick={() => {
                     if (audioState === 'idle' && audioRef.current) {
@@ -999,136 +1361,240 @@ export default function FullMockAssessment() {
                     }
                   }}
                   disabled={audioState !== 'idle'}
-                  className={`w-24 h-24 border-2 border-gray-900 rounded-full flex items-center justify-center text-white mb-6 transition-all shadow-[4px_4px_0_#0F0F0F] ${
-                    audioState === 'idle'    ? 'bg-indigo-700 hover:bg-indigo-600 active:translate-y-1 active:shadow-[2px_2px_0_#0F0F0F]' :
-                    audioState === 'playing' ? 'bg-amber-500' : 'bg-emerald-500'
-                  }`}>
-                  {audioState === 'idle'    && <PlayCircle className="w-12 h-12 ml-1" />}
+                  style={{
+                    width: '88px', height: '88px', borderRadius: '50%', cursor: audioState === 'idle' ? 'pointer' : 'default',
+                    background: audioState === 'idle' ? 'rgba(139,92,246,0.15)' : audioState === 'playing' ? 'rgba(245,158,11,0.15)' : 'rgba(52,211,153,0.15)',
+                    border: `2px solid ${audioState === 'idle' ? 'rgba(139,92,246,0.5)' : audioState === 'playing' ? 'rgba(245,158,11,0.5)' : 'rgba(52,211,153,0.5)'}`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px',
+                    boxShadow: `0 0 40px ${audioState === 'idle' ? 'rgba(139,92,246,0.2)' : audioState === 'playing' ? 'rgba(245,158,11,0.2)' : 'rgba(52,211,153,0.2)'}`,
+                    transition: 'all 0.3s',
+                  }}>
+                  {audioState === 'idle'    && <PlayCircle style={{ width: '40px', height: '40px', color: '#a855f7' }} />}
                   {audioState === 'playing' && (
-                    <div className="flex items-center gap-1.5 h-10">
-                      <div className="w-2 bg-white rounded-full animate-pulse h-full" />
-                      <div className="w-2 bg-white rounded-full animate-pulse h-2/3" style={{animationDelay: '0.2s'}} />
-                      <div className="w-2 bg-white rounded-full animate-pulse h-4/5" style={{animationDelay: '0.4s'}} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', height: '36px' }}>
+                      {[0,1,2].map(i => (
+                        <div key={i} style={{
+                          width: '6px', borderRadius: '3px', background: '#f59e0b',
+                          animation: `soundbar 0.8s ease-in-out ${i * 0.15}s infinite alternate`,
+                          boxShadow: '0 0 8px #f59e0b',
+                        }} />
+                      ))}
                     </div>
                   )}
-                  {audioState === 'played'  && <CheckCircle2 className="w-12 h-12" />}
+                  {audioState === 'played'  && <CheckCircle2 style={{ width: '40px', height: '40px', color: '#34d399' }} />}
                 </button>
-                <p className="text-gray-900 font-black text-xl uppercase tracking-wide mb-2">Test Audio Track</p>
-                <p className="text-gray-600 font-medium">{audioState === 'played' ? "Audio playback complete." : sessionData.context}</p>
+                <p style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: '0.88rem', letterSpacing: '0.1em', color: '#e2e8f0', marginBottom: '8px' }}>
+                  TEST AUDIO TRACK
+                </p>
+                <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.65rem', color: 'rgba(255,255,255,0.35)', lineHeight: 1.7 }}>
+                  {audioState === 'played' ? "Audio playback complete." : sessionData.context}
+                </p>
                 <audio ref={audioRef} src={sessionData.audio_url} preload="auto" onEnded={() => setAudioState('played')} />
-              </div>
+              </GlassCard>
             ) : (
-              <div className="bg-white border-2 border-gray-900 rounded-xl flex flex-col h-[700px]" style={{ boxShadow: '6px 6px 0 #0F0F0F' }}>
-                <div className="p-5 border-b-2 border-gray-900 bg-gray-50 flex items-center justify-between">
-                  <span className="font-black text-sm uppercase tracking-widest text-gray-500">
-                    {activeSkill === 'writing' ? 'Task Context' : activeSkill === 'speaking' ? 'Speaking Instructions' : passageTitle}
+              <GlassCard glow="none" style={{ display: 'flex', flexDirection: 'column', height: '680px' }}>
+                <div style={{
+                  padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)',
+                  background: 'rgba(0,0,0,0.2)', borderRadius: '16px 16px 0 0',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                }}>
+                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.55rem', color: 'rgba(0,240,255,0.4)', letterSpacing: '0.15em' }}>
+                    {activeSkill === 'writing' ? '// TASK_CONTEXT' : activeSkill === 'speaking' ? '// INSTRUCTIONS' : `// ${passageTitle?.toUpperCase()}`}
                   </span>
-                  <button onClick={() => setShowPassage(!showPassage)} className="lg:hidden font-black text-sm text-indigo-700 uppercase">Toggle</button>
+                  <button onClick={() => setShowPassage(!showPassage)} style={{
+                    display: 'block', fontFamily: "'JetBrains Mono', monospace", fontSize: '0.6rem',
+                    color: '#00f0ff', background: 'none', border: 'none', cursor: 'pointer', letterSpacing: '0.1em',
+                  }}>
+                    TOGGLE
+                  </button>
                 </div>
-                <div className={`p-8 overflow-y-auto ${!showPassage ? 'hidden lg:block' : 'block'}`}>
-                  <pre className="font-serif whitespace-pre-wrap text-base text-gray-800 leading-loose">
+                <div style={{ flex: 1, padding: '28px', overflowY: 'auto', display: showPassage ? 'block' : undefined }}>
+                  <pre style={{
+                    fontFamily: "'JetBrains Mono', monospace", whiteSpace: 'pre-wrap',
+                    fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.9,
+                  }}>
                     {activeSkill === 'writing' ? currentQ.context : activeSkill === 'reading' ? displayPassage : ""}
                   </pre>
                 </div>
-              </div>
+              </GlassCard>
             )}
           </div>
 
-          <div className="w-full lg:w-1/2 flex flex-col gap-4 h-auto lg:h-[700px] overflow-y-auto pb-4 pr-2">
-            <div className="bg-white border-2 border-gray-900 rounded-xl p-6 sm:p-8" style={{ boxShadow: '6px 6px 0 #0F0F0F' }}>
-              <div className="flex justify-between items-center mb-8">
-                <span className="bg-gray-100 text-gray-500 text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded border-2 border-gray-200">
-                  {activeSkill === 'writing' ? currentQ.section : `Question ${currentIdx + 1}`}
+          {/* Right panel — question + answer */}
+          <div style={{ flex: '1 1 400px', minWidth: 0, height: '680px', overflowY: 'auto' }}>
+            <GlassCard glow="none" style={{ padding: '32px', height: '100%', boxSizing: 'border-box' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px' }}>
+                <span style={{
+                  fontFamily: "'JetBrains Mono', monospace", fontSize: '0.6rem',
+                  color: 'rgba(255,255,255,0.25)', background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.06)', borderRadius: '6px',
+                  padding: '4px 10px', letterSpacing: '0.1em',
+                }}>
+                  {activeSkill === 'writing' ? currentQ.section.toUpperCase() : `Q_${currentIdx + 1}`}
                 </span>
-                <span className="bg-indigo-100 text-indigo-800 border-2 border-indigo-300 text-[11px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-[2px_2px_0_#4F46E5]">
-                  {currentQ.section || "Answer"}
+                <span style={{
+                  fontFamily: "'JetBrains Mono', monospace", fontSize: '0.55rem',
+                  color: '#a855f7', background: 'rgba(168,85,247,0.08)',
+                  border: '1px solid rgba(168,85,247,0.2)', borderRadius: '6px',
+                  padding: '4px 10px', letterSpacing: '0.1em',
+                }}>
+                  {currentQ.section?.toUpperCase() || "ANSWER"}
                 </span>
               </div>
 
               {activeSkill !== 'writing' && (
-                <h3 className="text-xl font-black text-gray-900 mb-8 leading-snug">
+                <h3 style={{
+                  fontFamily: activeSkill === 'speaking' ? "'JetBrains Mono', monospace" : "Georgia, serif",
+                  fontWeight: 600, fontSize: '1rem', color: '#e2e8f0',
+                  lineHeight: 1.65, marginBottom: '28px',
+                  fontStyle: activeSkill === 'speaking' ? 'normal' : 'normal',
+                }}>
                   {activeSkill === 'speaking' ? `"${currentQ.text}"` : currentQ.text}
                 </h3>
               )}
 
+              {/* Answer area */}
               {activeSkill === 'speaking' ? (
-                <div className="bg-gray-50 border-2 border-gray-300 rounded-2xl p-8 max-w-sm mx-auto mb-4 shadow-inner text-center">
+                <div style={{
+                  background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.06)',
+                  borderRadius: '16px', padding: '32px', textAlign: 'center', marginBottom: '16px',
+                }}>
                   {isRecording ? (
-                    <div className="flex flex-col items-center">
-                      <div className="flex items-center gap-2 h-16 mb-6">
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '60px', marginBottom: '24px' }}>
                         {animBars.map((h, i) => (
-                          <div key={i} className="w-2.5 bg-rose-500 rounded-full animate-pulse" style={{ height: `${20 + h * 50}px`, animationDelay: `${i * 0.1}s` }} />
+                          <div key={i} style={{
+                            width: '5px', borderRadius: '3px',
+                            background: 'linear-gradient(to top, #f43f5e, #a855f7)',
+                            height: `${20 + h * 40}px`,
+                            animation: `soundbar 0.6s ease-in-out ${i * 0.08}s infinite alternate`,
+                            boxShadow: '0 0 6px rgba(244,63,94,0.5)',
+                          }} />
                         ))}
                       </div>
                       <button
                         onClick={() => { setIsRecording(false); setRecordedPrompts(prev => ({ ...prev, [currentQ.id]: true })); }}
-                        className="flex items-center gap-3 bg-rose-100 hover:bg-rose-200 text-rose-700 font-black text-sm px-6 py-3 rounded-lg border-2 border-rose-700 transition-colors uppercase tracking-wide shadow-[3px_3px_0_#BE123C]">
-                        Stop Recording
+                        style={{
+                          padding: '12px 24px', borderRadius: '10px', cursor: 'pointer',
+                          background: 'rgba(244,63,94,0.1)', border: '1px solid rgba(244,63,94,0.35)',
+                          fontFamily: "'JetBrains Mono', monospace", fontWeight: 700,
+                          fontSize: '0.65rem', letterSpacing: '0.12em', color: '#f43f5e',
+                        }}>
+                        STOP RECORDING
                       </button>
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center">
-                      <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-6 border-2 transition-all ${recordedPrompts[currentQ.id] ? 'bg-emerald-100 border-emerald-600 shadow-[3px_3px_0_#059669]' : 'bg-indigo-100 border-indigo-700 shadow-[3px_3px_0_#4338CA]'}`}>
-                        {recordedPrompts[currentQ.id] ? <CheckCircle2 className="w-8 h-8 text-emerald-600" /> : <Mic className="w-8 h-8 text-indigo-700" />}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <div style={{
+                        width: '64px', height: '64px', borderRadius: '50%', marginBottom: '20px',
+                        background: recordedPrompts[currentQ.id] ? 'rgba(52,211,153,0.1)' : 'rgba(0,240,255,0.08)',
+                        border: `1px solid ${recordedPrompts[currentQ.id] ? 'rgba(52,211,153,0.4)' : 'rgba(0,240,255,0.3)'}`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        boxShadow: recordedPrompts[currentQ.id] ? '0 0 20px rgba(52,211,153,0.15)' : '0 0 20px rgba(0,240,255,0.1)',
+                      }}>
+                        {recordedPrompts[currentQ.id]
+                          ? <CheckCircle2 style={{ width: '28px', height: '28px', color: '#34d399' }} />
+                          : <Mic style={{ width: '28px', height: '28px', color: '#00f0ff' }} />
+                        }
                       </div>
                       <button
                         onClick={() => setIsRecording(true)}
-                        className={`font-black text-sm uppercase tracking-wide px-8 py-4 rounded-xl border-2 border-gray-900 transition-all neo-btn ${recordedPrompts[currentQ.id] ? 'bg-white text-gray-900 hover:bg-gray-50' : 'bg-indigo-700 hover:bg-indigo-600 text-white'}`}
-                        style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>
-                        {recordedPrompts[currentQ.id] ? 'Re-record Answer' : 'Start Speaking'}
+                        style={{
+                          padding: '12px 32px', borderRadius: '10px', cursor: 'pointer',
+                          background: recordedPrompts[currentQ.id] ? 'rgba(255,255,255,0.04)' : 'rgba(0,240,255,0.1)',
+                          border: `1px solid ${recordedPrompts[currentQ.id] ? 'rgba(255,255,255,0.12)' : 'rgba(0,240,255,0.35)'}`,
+                          fontFamily: "'JetBrains Mono', monospace", fontWeight: 700,
+                          fontSize: '0.65rem', letterSpacing: '0.12em',
+                          color: recordedPrompts[currentQ.id] ? 'rgba(255,255,255,0.4)' : '#00f0ff',
+                        }}>
+                        {recordedPrompts[currentQ.id] ? 'RE-RECORD' : 'START SPEAKING'}
                       </button>
                     </div>
                   )}
                 </div>
               ) : currentQ.options?.length > 0 ? (
-                <div className="flex flex-col gap-4">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {currentQ.options.map((opt: string) => {
                     const selected = answers[currentQ.id] === opt;
                     return (
                       <button key={opt} onClick={() => setAnswers(p => ({ ...p, [currentQ.id]: opt }))}
-                        className={`text-left p-5 rounded-xl border-2 font-bold text-base transition-colors ${selected ? 'bg-gray-900 border-gray-900 text-white' : 'bg-white border-gray-300 text-gray-700 hover:border-gray-900'}`}
-                        style={selected ? { boxShadow: '4px 4px 0 #0F0F0F' } : {}}>
+                        style={{
+                          textAlign: 'left', padding: '16px 18px', borderRadius: '12px', cursor: 'pointer',
+                          background: selected ? 'rgba(0,240,255,0.1)' : 'rgba(255,255,255,0.02)',
+                          border: `1px solid ${selected ? 'rgba(0,240,255,0.45)' : 'rgba(255,255,255,0.06)'}`,
+                          fontFamily: "'JetBrains Mono', monospace", fontWeight: 600,
+                          fontSize: '0.72rem', color: selected ? '#00f0ff' : 'rgba(255,255,255,0.5)',
+                          boxShadow: selected ? '0 0 16px rgba(0,240,255,0.08)' : 'none',
+                          transition: 'all 0.2s', letterSpacing: '0.03em',
+                        }}>
                         {opt}
                       </button>
                     );
                   })}
                 </div>
               ) : (
-                <div className="relative">
+                <div style={{ position: 'relative' }}>
                   <textarea
-                    placeholder={activeSkill === 'writing' ? "Write your essay here..." : "Type your answer..."}
-                    rows={activeSkill === 'writing' ? 14 : 2}
+                    placeholder={activeSkill === 'writing' ? "Write your response here..." : "Type your answer..."}
+                    rows={activeSkill === 'writing' ? 14 : 3}
                     value={answers[currentQ.id] || ""}
                     onChange={e => setAnswers(p => ({ ...p, [currentQ.id]: e.target.value }))}
-                    className="w-full p-5 border-2 border-gray-900 rounded-xl text-base font-bold outline-none focus:ring-2 focus:ring-indigo-200 transition-shadow bg-gray-50 resize-none"
-                    style={{ boxShadow: 'inset 3px 3px 0 rgba(0,0,0,0.05)' }}
+                    style={{
+                      width: '100%', padding: '18px', boxSizing: 'border-box',
+                      background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)',
+                      borderRadius: '12px', color: '#e2e8f0', resize: 'none', outline: 'none',
+                      fontFamily: "'JetBrains Mono', monospace", fontSize: '0.75rem', lineHeight: 1.8,
+                      transition: 'border-color 0.2s',
+                    }}
+                    onFocus={e => (e.target.style.borderColor = 'rgba(0,240,255,0.3)')}
+                    onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.08)')}
                   />
                   {activeSkill === 'writing' && (
-                    <div className={`absolute bottom-4 right-4 border-2 border-gray-900 px-3 py-1 rounded-lg text-xs font-black font-mono transition-colors ${
-                      countWords(answers[currentQ.id] || "") >= currentQ.minWords ? 'bg-emerald-400 text-gray-900' : 'bg-white text-gray-500'
-                    }`} style={{ boxShadow: '2px 2px 0 #0F0F0F' }}>
+                    <div style={{
+                      position: 'absolute', bottom: '14px', right: '14px',
+                      padding: '4px 10px', borderRadius: '6px',
+                      background: countWords(answers[currentQ.id] || "") >= currentQ.minWords ? 'rgba(52,211,153,0.15)' : 'rgba(0,0,0,0.5)',
+                      border: `1px solid ${countWords(answers[currentQ.id] || "") >= currentQ.minWords ? 'rgba(52,211,153,0.3)' : 'rgba(255,255,255,0.08)'}`,
+                      fontFamily: "'JetBrains Mono', monospace", fontWeight: 700,
+                      fontSize: '0.55rem', letterSpacing: '0.08em',
+                      color: countWords(answers[currentQ.id] || "") >= currentQ.minWords ? '#34d399' : 'rgba(255,255,255,0.3)',
+                    }}>
                       {countWords(answers[currentQ.id] || "")} / {currentQ.minWords}
                     </div>
                   )}
                 </div>
               )}
 
-              <div className="mt-10 flex gap-4">
+              {/* Nav buttons */}
+              <div style={{ display: 'flex', gap: '10px', marginTop: '28px' }}>
                 <button onClick={() => setCurrentIdx(i => i - 1)} disabled={currentIdx === 0}
-                  className="px-6 py-4 border-2 border-gray-900 rounded-xl font-black text-gray-600 disabled:opacity-30 disabled:pointer-events-none hover:bg-gray-50 uppercase text-sm tracking-wide">
-                  Prev
+                  style={{
+                    padding: '14px 20px', borderRadius: '10px', cursor: currentIdx === 0 ? 'not-allowed' : 'pointer',
+                    background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)',
+                    fontFamily: "'JetBrains Mono', monospace", fontWeight: 700,
+                    fontSize: '0.65rem', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.25)',
+                    opacity: currentIdx === 0 ? 0.3 : 1, transition: 'all 0.2s',
+                  }}>
+                  ← PREV
                 </button>
                 <button
                   onClick={handleNextQuestion}
                   disabled={!canProceed || (activeSkill === 'speaking' && isRecording)}
-                  className={`flex-1 font-black text-sm uppercase tracking-wide border-2 border-gray-900 rounded-xl transition-all ${
-                    !canProceed ? 'bg-gray-100 text-gray-400 opacity-60 cursor-not-allowed' : 'bg-indigo-700 text-white hover:bg-indigo-600 neo-btn'
-                  }`}
-                  style={canProceed ? { boxShadow: '4px 4px 0 #0F0F0F' } : {}}>
-                  {currentIdx === totalQ - 1 ? 'Complete Section' : 'Next →'}
+                  style={{
+                    flex: 1, padding: '14px', borderRadius: '10px',
+                    cursor: !canProceed ? 'not-allowed' : 'pointer',
+                    background: !canProceed ? 'rgba(255,255,255,0.02)' : 'linear-gradient(135deg, rgba(0,240,255,0.12), rgba(139,92,246,0.12))',
+                    border: `1px solid ${!canProceed ? 'rgba(255,255,255,0.06)' : 'rgba(0,240,255,0.35)'}`,
+                    fontFamily: "'JetBrains Mono', monospace", fontWeight: 800,
+                    fontSize: '0.72rem', letterSpacing: '0.12em',
+                    color: !canProceed ? 'rgba(255,255,255,0.2)' : '#00f0ff',
+                    boxShadow: canProceed ? '0 0 20px rgba(0,240,255,0.08)' : 'none',
+                    transition: 'all 0.2s',
+                  }}>
+                  {currentIdx === totalQ - 1 ? 'COMPLETE SECTION →' : 'NEXT →'}
                 </button>
               </div>
-            </div>
+            </GlassCard>
           </div>
         </div>
       </div>
@@ -1136,11 +1602,40 @@ export default function FullMockAssessment() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans text-gray-900 selection:bg-indigo-200">
+    <div style={{ minHeight: '100vh', background: '#050816', color: '#e2e8f0', fontFamily: 'Georgia, serif' }}>
       <TopNavBar />
-      <div className="fixed inset-0 pointer-events-none z-0" style={{ backgroundImage: 'radial-gradient(circle, #d1d5db 1px, transparent 1px)', backgroundSize: '24px 24px', opacity: 0.5 }} />
-      <div className="relative z-10 pt-16">
-        {(phase === "checking")  && <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="w-10 h-10 text-indigo-700 animate-spin" /></div>}
+
+      {/* Background: layered nebula + grid */}
+      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
+        {/* Deep radial nebula */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'radial-gradient(ellipse 80% 60% at 20% 20%, rgba(0,60,90,0.5) 0%, transparent 60%), radial-gradient(ellipse 60% 80% at 80% 80%, rgba(60,0,90,0.4) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 50% 50%, rgba(0,0,40,0.8) 0%, transparent 100%)',
+        }} />
+        {/* Dot grid */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: 'radial-gradient(circle, rgba(0,240,255,0.06) 1px, transparent 1px)',
+          backgroundSize: '32px 32px',
+        }} />
+        {/* Horizontal scan lines */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,240,255,0.008) 3px, rgba(0,240,255,0.008) 4px)',
+        }} />
+      </div>
+
+      <div style={{ position: 'relative', zIndex: 10, paddingTop: '64px' }}>
+        {phase === "checking"  && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+            <div style={{
+              width: '48px', height: '48px', borderRadius: '50%',
+              border: '2px solid rgba(0,240,255,0.2)', borderTop: '2px solid #00f0ff',
+              animation: 'spin 0.8s linear infinite',
+              boxShadow: '0 0 20px rgba(0,240,255,0.3)',
+            }} />
+          </div>
+        )}
         {phase === "locked"   && renderLocked()}
         {phase === "gate"     && renderGate()}
         {phase === "session"  && renderSession()}
@@ -1148,12 +1643,64 @@ export default function FullMockAssessment() {
         {phase === "scoring"  && renderScoring()}
         {phase === "results"  && renderResults()}
       </div>
+
       <style>{`
-        @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .neo-btn { transition: transform 0.1s ease, box-shadow 0.1s ease; }
-        .neo-btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 #0F0F0F !important; }
-        .neo-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #0F0F0F !important; }
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800;900&display=swap');
+
+        * { box-sizing: border-box; }
+
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50%       { opacity: 0.4; transform: scale(0.7); }
+        }
+        @keyframes soundbar {
+          from { transform: scaleY(0.4); }
+          to   { transform: scaleY(1); }
+        }
+        @keyframes fade-in-up {
+          from { opacity: 0; transform: translateY(16px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes glow-pulse {
+          0%, 100% { box-shadow: 0 0 30px rgba(0,240,255,0.15); }
+          50%       { box-shadow: 0 0 50px rgba(0,240,255,0.3); }
+        }
+
+        .tc-fade-in {
+          animation: fade-in-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .tc-glow-btn:hover {
+          box-shadow: 0 0 40px rgba(0,240,255,0.25) !important;
+          transform: translateY(-2px);
+        }
+        .tc-glow-btn:active {
+          transform: translateY(0);
+        }
+        .tc-glow-btn-amber:hover {
+          box-shadow: 0 0 40px rgba(245,158,11,0.2) !important;
+          transform: translateY(-2px);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb {
+          background: rgba(0,240,255,0.2);
+          border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: rgba(0,240,255,0.4);
+        }
+
+        textarea::placeholder {
+          font-family: 'JetBrains Mono', monospace !important;
+          color: rgba(255,255,255,0.2) !important;
+        }
       `}</style>
     </div>
   );

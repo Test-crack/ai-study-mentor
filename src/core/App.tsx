@@ -93,6 +93,7 @@ import LexiGrid from "@/features/student/components/LexiGrid";
 import InternalAssessmentPage from "@/features/student/components/Internalassessmentpage";
 
 import FullMockAssessment from "@/features/student/components/FullMockAssessment";
+import QuestionBankManager from "@/features/TestCrackSuperAdmin/dashboard/Questionbankmanager";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -210,6 +211,7 @@ const AppRoutes = () => {
       <Route path="/superadmin/priceconfig" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><PricingConfig /></RoleProtectedRoute>} />
       <Route path="/superadmin/supportickets" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SupportTicket /></RoleProtectedRoute>} />
       <Route path="/superadmin/platform" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><PlatformAnalytics /></RoleProtectedRoute>} />
+      <Route path="/superadmin/question" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><QuestionBankManager/></RoleProtectedRoute>} />
       <Route path="/superadmin/allusers" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><AllUsers /></RoleProtectedRoute>} />
 
       <Route path="/login" element={user ? <LoginRedirect /> : <LoginPage />} />

@@ -41,6 +41,7 @@ export default function StudentReadingAssessmentPage() {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarHovered, setIsSidebarHovered] = useState(false); // ADDED HOVER STATE
   const [activeBand, setActiveBand] = useState<BandLevel>('All');
   const [selectedTopic, setSelectedTopic] = useState<IeltsReadingPractice | null>(null);
   const [topics, setTopics] = useState<IeltsReadingPracticeList[]>([]);
@@ -300,8 +301,6 @@ export default function StudentReadingAssessmentPage() {
     );
   };
 
-  // FIX: This is now a simple render function instead of a nested component.
-  // This completely stops the button from unmounting and flashing when the timer ticks!
   const renderRecordingControls = (onStop: () => void, isLoadingAction = false) => {
     return (
       <div className="flex flex-col items-center justify-center mt-10 space-y-6">
@@ -317,7 +316,6 @@ export default function StudentReadingAssessmentPage() {
         ) : (
           <div className="flex flex-col items-center animate-in zoom-in duration-300">
             <div className="text-4xl font-mono font-black text-rose-500 mb-6 tracking-widest flex items-center justify-center gap-4 bg-rose-50 px-8 py-3 rounded-2xl shadow-inner border border-rose-100">
-              {/* Only this red dot pulses now */}
               <span className="w-4 h-4 rounded-full bg-rose-600 animate-pulse shadow-[0_0_15px_rgba(225,29,72,0.6)]" />
               {formatTime(recordingTime)}
             </div>
@@ -345,12 +343,14 @@ export default function StudentReadingAssessmentPage() {
         onTabChange={(tab) => navigate(`/${profile?.role?.toLowerCase()}/${tab}`)}
         isCollapsed={isSidebarCollapsed} 
         toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
+        onMouseEnter={() => setIsSidebarHovered(true)}
+        onMouseLeave={() => setIsSidebarHovered(false)}
       />
 
-      <div className={cn("transition-all duration-300 min-h-screen flex flex-col", isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64')}>
+      <div className={`transition-all duration-300 ease-in-out pl-0 ${isSidebarHovered ? 'md:pl-[288px]' : 'md:pl-[116px]'} flex flex-col min-h-screen`}>
         <StudentTopbar onUpgradeClick={() => {}} />
 
-        <main className="p-6 md:p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 w-full">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 animate-in fade-in duration-500 w-full">
           {!selectedTopic ? (
             /* LANDING VIEW */
             <>

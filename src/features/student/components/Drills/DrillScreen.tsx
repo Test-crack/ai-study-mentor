@@ -1,226 +1,132 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { StudentSidebar } from '../dashboard/StudentSidebar';
 import { StudentTopbar } from '../dashboard/StudentTopbar';
 import AudioResponseDrill from './AudioResponseDrill';
 import ParagraphRepairDrill from './ParagraphRepairDrill';
+import McqDrill from './McqDrill';
 import DrillResultCard from './DrillResultCard';
-import { useMomentum } from "@/features/student/Context/MomentumContext";
-import { ArrowLeft, Target } from 'lucide-react';
-
-// ─────────────────────────────────────────────────────────────────────────────
-// localStorage schema:
-//
-// completed_drills_today:  { date, completed: string[], sessionCount: number }
-//   → today's drills only. ACTIVELY DELETED when date !== today on mount.
-//
-// total_drill_sessions:    { count, firstSessionDate, lastSessionDate }
-//   → cumulative all-time count. Never resets. Used for IA eligibility.
-//
-// NOTE: fourth_drill_unlocked and daily limit logic have been removed.
-//       There is no cap on drills per day.
-// ─────────────────────────────────────────────────────────────────────────────
+import { callBackend } from '@/features/auth/services/authClient';
+import { useMomentum } from '@/features/student/Context/MomentumContext';
+import { ArrowLeft, Target, Loader2 } from 'lucide-react';
+import {
+  stampPassportSlot,
+  PASSPORT_BONUS_PTS,
+  PASSPORT_STREAK_BONUS_PTS,
+} from '@/features/student/utils/passportUtils';
 
 export default function DrillScreen() {
   const [searchParams] = useSearchParams();
   const navigate       = useNavigate();
-  const { addPoints }  = useMomentum();
-
+  const { syncMomentum, updateStreak, addPoints } = useMomentum();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  const skill       = searchParams.get('skill')      || 'Speaking';
-  const subSkill    = searchParams.get('sub_skill')  || 'Pronunciation';
-  // No Math.min cap — drillNumber can be any positive integer
-  const drillNumber = Math.max(1, parseInt(searchParams.get('drillNumber') || '1', 10));
+  const skill    = searchParams.get('skill')     || 'SPEAKING';
+  const subSkill = searchParams.get('sub_skill') || 'PRONUNCIATION';
+  const level    = searchParams.get('level')     || 'INTERMEDIATE';
+  const isExtra  = searchParams.get('extra')     === 'true';
 
-  // ── Drill state ────────────────────────────────────────────────────────────
-  const [limitChecked,       setLimitChecked]       = useState(false);
-  const [currentPromptIndex, setCurrentPromptIndex] = useState(0);
-  const [momentumScore,      setMomentumScore]      = useState(0);
-  const [isComplete,         setIsComplete]          = useState(false);
+  const QUESTIONS_PER_SESSION = 5;
 
-  const totalPrompts = 5;
-  const drillType    = skill.toLowerCase() === 'writing' ? 'paragraph_repair' : 'audio_response';
+  const [prompts, setPrompts]                         = useState<any[]>([]);
+  const [loading, setLoading]                         = useState(true);
+  const [currentPromptIndex, setCurrentPromptIndex]   = useState(0);
+  const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
+  const [momentumScore, setMomentumScore]             = useState(0);
+  const [isComplete, setIsComplete]                   = useState(false);
+  const [isSubmitting, setIsSubmitting]               = useState(false);
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // STALE DATA CLEANUP
-  //
-  // Actively DELETES stored daily-scoped data when the stored date doesn't
-  // match today. This guarantees a fresh start every calendar day.
-  // Runs before every limit check so the check always reads clean data.
-  // ══════════════════════════════════════════════════════════════════════════
-  const cleanupStaleDailyData = useCallback((todayDate: string) => {
-    const dailyKeys = [
-      'completed_drills_today',
-      'fourth_drill_unlocked', // legacy key — safe to clean up
-      'drill2_accessed',
-      'lexigrid_gate_cleared',
-    ];
+  // ── Trap word tracking ────────────────────────────────────────────────────
+  // Counts how many MCQ questions the student went through the trap word
+  // phase for. Passed to DrillResultCard for the session summary.
+  const [trapWordsEncountered, setTrapWordsEncountered] = useState<string[]>([]);
 
-    dailyKeys.forEach(key => {
+  const totalPrompts = prompts.length || QUESTIONS_PER_SESSION;
+
+  useEffect(() => {
+    const fetchQuestions = async () => {
       try {
-        const stored = localStorage.getItem(key);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (parsed.date && parsed.date !== todayDate) {
-            localStorage.removeItem(key);
-            console.info(`[DrillScreen] Cleared stale ${key} from`, parsed.date);
-          }
+        setLoading(true);
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+        const url = `${backendUrl}/api/drills/questions?skill=${encodeURIComponent(skill.toUpperCase())}&subskill=${encodeURIComponent(subSkill.toUpperCase().replace(/\s+/g, '_'))}&level=${encodeURIComponent(level.toUpperCase())}`;
+        const res = await callBackend(url);
+        if (res.success && res.data) {
+          setPrompts(res.data);
+        } else {
+          setPrompts([]);
         }
-      } catch {
-        localStorage.removeItem(key);
+      } catch (err) {
+        console.error('Failed to fetch drills', err);
+      } finally {
+        setLoading(false);
       }
-    });
-  }, []);
+    };
+    fetchQuestions();
+  }, [skill, subSkill, level]);
 
-  // ── Helper: read today's session count (assumes cleanup already ran) ──────
-  const getStoredSessionCount = useCallback((todayDate: string): number => {
+  const saveSessionAndComplete = async (finalCorrectCount: number) => {
+    const earned = 15 + finalCorrectCount * 10;
+    setMomentumScore(earned);
+    setIsSubmitting(true);
+
     try {
-      const stored = localStorage.getItem('completed_drills_today');
-      if (!stored) return 0;
-      const parsed = JSON.parse(stored);
-      if (parsed.date !== todayDate) return 0;
-      return parsed.sessionCount ?? (parsed.completed?.length || 0);
-    } catch { return 0; }
-  }, []);
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+      const res = await callBackend(`${backendUrl}/api/drills/session`, {
+        method: 'POST',
+        body: JSON.stringify({
+          skill:             skill.toUpperCase(),
+          subskill:          subSkill.toUpperCase().replace(/\s+/g, '_'),
+          prompts_completed: totalPrompts,
+          correct_answers:   finalCorrectCount,
+          is_extra_session:  isExtra,
+        }),
+      });
+      if (res.momentum_score !== undefined) syncMomentum(res.momentum_score);
+      if (res.daily_streak   !== undefined) updateStreak(res.daily_streak);
+    } catch (err) {
+      console.error('Failed to save drill session', err);
+    } finally {
+      setIsSubmitting(false);
+      setIsComplete(true);
+    }
 
-  // ── Initialise: clean stale data and mark ready ────────────────────────────
-  // No blocking limit check needed anymore — just clean and proceed.
-  const runLimitCheck = useCallback(() => {
-    const todayDate = new Date().toISOString().split('T')[0];
-    cleanupStaleDailyData(todayDate);
-    // getStoredSessionCount kept here in case future logic needs it
-    getStoredSessionCount(todayDate);
-    setLimitChecked(true);
-    window.dispatchEvent(new Event('storage'));
-  }, [cleanupStaleDailyData, getStoredSessionCount]);
+    const { bonusJustUnlocked, streakBonusJustUnlocked } = stampPassportSlot('speaking');
+    if (bonusJustUnlocked) {
+      addPoints(PASSPORT_BONUS_PTS, 'Skill Passport complete — all 5 slots stamped this week');
+    }
+    if (streakBonusJustUnlocked) {
+      addPoints(PASSPORT_STREAK_BONUS_PTS, 'Skill Passport — 3-week consecutive streak bonus');
+    }
+  };
 
-  // ── STATE RESET + INIT ON DRILL NUMBER CHANGE ────────────────────────────
-  useEffect(() => {
-    setCurrentPromptIndex(0);
-    setMomentumScore(0);
-    setIsComplete(false);
-    setLimitChecked(false);
-    runLimitCheck();
-  }, [drillNumber, runLimitCheck]);
+  // ── Updated handleNextPrompt — now receives usedTrapPhase from McqDrill ──
+  const handleNextPrompt = (pointsEarnedThisPrompt: number = 5, usedTrapPhase?: boolean) => {
+    const isCorrect       = pointsEarnedThisPrompt === 10;
+    const newCorrectCount = isCorrect ? correctAnswersCount + 1 : correctAnswersCount;
+    if (isCorrect) setCorrectAnswersCount(prev => prev + 1);
 
-  // ── SIDEBAR UNLOCK marker (drill 2 accessed) ──────────────────────────────
-  useEffect(() => {
-    if (drillNumber !== 2) return;
-    const todayDate = new Date().toISOString().split('T')[0];
-    localStorage.setItem('drill2_accessed', JSON.stringify({ date: todayDate, accessed: true }));
-    window.dispatchEvent(new Event('storage'));
-  }, [drillNumber]);
-
-  // ── PROMPTS ───────────────────────────────────────────────────────────────
-  const prompts = Array.from({ length: totalPrompts }).map((_, i) => ({
-    id:   i + 1,
-    text: drillType === 'audio_response'
-      ? `Describe a time when you experienced something new. (Prompt ${i + 1})`
-      : `Fix the missing linking words in this paragraph. (Prompt ${i + 1})`,
-  }));
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // HANDLE NEXT PROMPT
-  //
-  // On LAST prompt, writes localStorage SYNCHRONOUSLY:
-  //   1. completed_drills_today  — today's count (routing + display)
-  //   2. total_drill_sessions    — cumulative all-time (IA eligibility)
-  // ══════════════════════════════════════════════════════════════════════════
-  const handleNextPrompt = () => {
-    const points = Math.floor(Math.random() * 3) + 4;
+    // Collect any trap words from the current prompt for the session summary
+    if (usedTrapPhase) {
+      const currentPrompt = prompts[currentPromptIndex];
+      if (currentPrompt?.prompt_text) {
+        // Simple re-scan to get the words for the summary — lightweight
+        const TRAP_WORDS = ['NOT','EXCEPT','ONLY','ALWAYS','NEVER','LEAST','MOST','BEST','WORST','ALL','NONE','EVERY','UNLESS','WITHOUT','INCORRECT','FALSE'];
+        const found = TRAP_WORDS.filter(w =>
+          new RegExp(`\\b${w}\\b`, 'i').test(currentPrompt.prompt_text)
+        );
+        if (found.length > 0) {
+          setTrapWordsEncountered(prev => [...new Set([...prev, ...found])]);
+        }
+      }
+    }
 
     if (currentPromptIndex < totalPrompts - 1) {
       setCurrentPromptIndex(prev => prev + 1);
-      setMomentumScore(prev => prev + points);
-      return;
-    }
-
-    // Last prompt
-    const finalScore = momentumScore + points;
-    setMomentumScore(finalScore);
-
-    const todayDate = new Date().toISOString().split('T')[0];
-
-    // 1) completed_drills_today
-    try {
-      const stored = localStorage.getItem('completed_drills_today');
-      let completedList: string[]  = [];
-      let currentSessionCount      = 0;
-
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed.date === todayDate) {
-          completedList       = parsed.completed    || [];
-          currentSessionCount = parsed.sessionCount ?? completedList.length;
-        }
-      }
-
-      if (!completedList.includes(subSkill)) completedList.push(subSkill);
-
-      localStorage.setItem('completed_drills_today', JSON.stringify({
-        date:         todayDate,
-        completed:    completedList,
-        sessionCount: currentSessionCount + 1,
-      }));
-    } catch (e) {
-      console.error('[DrillScreen] Failed to write completed_drills_today:', e);
-    }
-
-    // 2) total_drill_sessions (cumulative — NEVER resets)
-    // TODO (Sarthak): Also POST /api/student/drill-complete so backend tracks DCS.
-    try {
-      const totalStored = localStorage.getItem('total_drill_sessions');
-      let totalData: { count: number; firstSessionDate: string; lastSessionDate: string };
-
-      if (totalStored) {
-        const parsed = JSON.parse(totalStored);
-        totalData = {
-          count:            (parsed.count || 0) + 1,
-          firstSessionDate: parsed.firstSessionDate || todayDate,
-          lastSessionDate:  todayDate,
-        };
-      } else {
-        totalData = { count: 1, firstSessionDate: todayDate, lastSessionDate: todayDate };
-      }
-
-      localStorage.setItem('total_drill_sessions', JSON.stringify(totalData));
-    } catch (e) {
-      console.error('[DrillScreen] Failed to write total_drill_sessions:', e);
-    }
-
-    window.dispatchEvent(new Event('storage'));
-    addPoints(finalScore, `Drill ${drillNumber} completed — ${subSkill}`);
-    setIsComplete(true);
-  };
-
-  // ── POST-DRILL NAVIGATION ─────────────────────────────────────────────────
-  // Drill 1 → LexiGrid gate
-  // Drill 2 → Drill 3
-  // Drill 3+ → next numbered drill (no ceiling)
-  const handleUnlockNext = () => {
-    const base = `skill=${encodeURIComponent(skill)}&sub_skill=${encodeURIComponent(subSkill)}`;
-    if (drillNumber === 1) {
-      navigate(`/student/lexigrid?from=drill&${base}`);
-    } else if (drillNumber === 2) {
-      navigate(`/student/drill?${base}&drillNumber=3`);
     } else {
-      navigate(`/student/drill?${base}&drillNumber=${drillNumber + 1}`);
+      saveSessionAndComplete(newCorrectCount);
     }
   };
 
-  // ── LOADING ───────────────────────────────────────────────────────────────
-  if (!limitChecked) {
-    return (
-      <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 flex items-center justify-center">
-        <div className="animate-pulse text-slate-400 font-medium tracking-wide">Loading...</div>
-      </div>
-    );
-  }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // DRILL SCREEN
-  // ══════════════════════════════════════════════════════════════════════════
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
       <StudentSidebar
@@ -228,10 +134,11 @@ export default function DrillScreen() {
         isCollapsed={isSidebarCollapsed}
         toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
+
       <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'} flex flex-col min-h-screen`}>
         <StudentTopbar onUpgradeClick={() => {}} />
-        <main className="flex-1 p-6 max-w-4xl mx-auto w-full animate-in fade-in">
 
+        <main className="flex-1 p-6 max-w-4xl mx-auto w-full animate-in fade-in">
           <button
             onClick={() => navigate(-1)}
             className="flex items-center text-slate-500 hover:text-slate-800 dark:hover:text-white mb-6 transition-colors"
@@ -239,66 +146,83 @@ export default function DrillScreen() {
             <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
           </button>
 
-          {!isComplete ? (
+          {loading || isSubmitting ? (
+            <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+              <Loader2 className="w-10 h-10 animate-spin mb-4 text-[#7B61FF]" />
+              <p className="font-medium text-slate-500">
+                {isSubmitting ? 'Saving session results...' : 'Loading your customized drills...'}
+              </p>
+            </div>
+
+          ) : prompts.length === 0 ? (
+            <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
+              <p className="text-slate-500 font-medium">No drills available for this topic right now.</p>
+            </div>
+
+          ) : !isComplete ? (
             <>
               <div className="mb-8 text-center space-y-2">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-rose-100 text-rose-500 mb-2">
                   <Target className="w-6 h-6" />
                 </div>
-
-                <div className="flex items-center justify-center gap-2 mb-1 flex-wrap">
-                  <span className="bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 font-bold text-xs px-3 py-1 rounded-full uppercase tracking-wider">
-                    Drill {drillNumber}
-                  </span>
-                  {drillNumber === 2 && (
-                    <span className="bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 font-bold text-xs px-3 py-1 rounded-full uppercase tracking-wider">
-                      Full platform unlocked ✓
-                    </span>
-                  )}
-                </div>
-
-                <h1 className="text-3xl font-black text-slate-800 dark:text-white">
-                  {skill} — {subSkill}
+                <h1 className="text-3xl font-black text-slate-800 dark:text-white capitalize">
+                  Today's Focus: {skill.toLowerCase()} {subSkill.toLowerCase()}
                 </h1>
                 <p className="text-slate-500 font-medium tracking-wide uppercase text-sm">
                   Prompt {currentPromptIndex + 1} of {totalPrompts}
                 </p>
-
                 <div className="flex justify-center items-center gap-2 mt-4">
-                  <span className="text-xs font-bold text-amber-500 uppercase tracking-widest">Momentum</span>
+                  <span className="text-xs font-bold text-amber-500 uppercase tracking-widest">Progress</span>
                   <div className="w-32 h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-amber-500 transition-all duration-500"
-                      style={{ width: `${(momentumScore / (totalPrompts * 10)) * 100}%` }}
+                      style={{ width: `${(currentPromptIndex / totalPrompts) * 100}%` }}
                     />
                   </div>
-                  <span className="text-xs font-bold text-amber-500">{momentumScore}</span>
                 </div>
               </div>
 
               <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-sm border border-slate-200 dark:border-slate-800">
-                {drillType === 'audio_response' && (
-                  <AudioResponseDrill prompt={prompts[currentPromptIndex]} onComplete={handleNextPrompt} />
-                )}
-                {drillType === 'paragraph_repair' && (
-                  <ParagraphRepairDrill prompt={prompts[currentPromptIndex]} onComplete={handleNextPrompt} />
-                )}
+                {(() => {
+                  const currentPrompt = prompts[currentPromptIndex];
+                  if (!currentPrompt) return null;
+
+                  if (currentPrompt.drill_type === 'MCQ') {
+                    return (
+                      <McqDrill
+                        prompt={currentPrompt}
+                        onComplete={(pts, usedTrap) => handleNextPrompt(pts, usedTrap)}
+                      />
+                    );
+                  }
+                  if (skill.toLowerCase() === 'writing') {
+                    return (
+                      <ParagraphRepairDrill
+                        prompt={{ id: currentPrompt.id || 0, text: currentPrompt.prompt_text || 'Mock Prompt' }}
+                        onComplete={() => handleNextPrompt(5)}
+                      />
+                    );
+                  }
+                  return (
+                    <AudioResponseDrill
+                      prompt={{ id: currentPrompt.id || 0, text: currentPrompt.prompt_text || 'Mock Prompt' }}
+                      onComplete={() => handleNextPrompt(5)}
+                    />
+                  );
+                })()}
               </div>
             </>
+
           ) : (
             <DrillResultCard
               skill={skill}
               subSkill={subSkill}
-              drillNumber={drillNumber}
               momentumScore={momentumScore}
-              feedback={[
-                "Good attempt, but watch your syllable stress on 'development'.",
-                "Clear intonation, try to maintain a steadier pace.",
-                "Great use of linking words here.",
-                "A bit hesitant — practice speaking without pausing mid-sentence.",
-                "Excellent pronunciation of the target vocabulary.",
-              ]}
-              onUnlockNext={handleUnlockNext}
+              feedback={[]}
+              trapWordsEncountered={trapWordsEncountered}
+              onUnlockNext={() => {
+                navigate(`/student/apply-drill?skill=${skill}&sub_skill=${subSkill}&score=${momentumScore}`);
+              }}
             />
           )}
         </main>

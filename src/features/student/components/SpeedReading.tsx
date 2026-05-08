@@ -52,6 +52,7 @@ export default function SpeedReading() {
   const [activeTab, setActiveTab] = useState("speed-reading");
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarHovered,   setIsSidebarHovered]   = useState(false);
   const [reports, setReports] = useState<SpeedReadingReportSummary[]>([]);
   const [loadingReports, setLoadingReports] = useState(true);
   const [reportsError, setReportsError] = useState<string | null>(null);
@@ -168,9 +169,16 @@ export default function SpeedReading() {
 
   return (
     <div className="min-h-screen bg-[#f1f3f9] dark:bg-slate-950 transition-colors duration-300 font-sans text-slate-800 dark:text-slate-200">
-      <StudentSidebar activeTab='speed' onTabChange={setActiveTab} isCollapsed={isSidebarCollapsed} toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} />
+      <StudentSidebar
+        activeTab='speed'
+        onTabChange={setActiveTab}
+        isCollapsed={isSidebarCollapsed}
+        toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        onMouseEnter={() => setIsSidebarHovered(true)}
+        onMouseLeave={() => setIsSidebarHovered(false)}
+      />
 
-      <div className={`min-h-screen flex flex-col transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
+      <div className={`min-h-screen flex flex-col transition-all duration-300 ease-in-out pl-0 ${isSidebarHovered ? 'md:pl-[288px]' : 'md:pl-[116px]'}`}>
         <StudentTopbar onUpgradeClick={() => setShowPremiumModal(true)} />
 
         <main className="flex-1 p-4 md:p-6 lg:p-8 flex justify-center items-start animate-in fade-in duration-500 w-full">
@@ -178,10 +186,8 @@ export default function SpeedReading() {
 
             {view === 'dashboard' && (
               <>
-                {/* --- NEW COLORED BANNER --- */}
                 <div className="bg-[#7B61FF] rounded-2xl p-8 md:p-10 text-white shadow-md relative overflow-hidden mb-8">
                   <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
-                  
                   <div className="relative z-10">
                     <h1 className="text-3xl font-bold mb-3 flex items-center gap-2">
                       Speed Reading <Sparkles className="h-6 w-6 text-yellow-300" fill="currentColor" />
@@ -189,12 +195,6 @@ export default function SpeedReading() {
                     <p className="text-indigo-50 max-w-2xl text-base md:text-lg leading-relaxed mb-6">
                       Read faster and improve comprehension with RSVP technology. Select a category below, set your target WPM, and push your reading efficiency to the next level.
                     </p>
-{/*                     
-                    <div className="flex gap-3">
-                       <button className="bg-white text-[#7B61FF] hover:bg-slate-100 font-semibold rounded-full px-6 py-2 shadow-sm text-sm">
-                         View Progress
-                       </button>
-                    </div> */}
                   </div>
                 </div>
 
@@ -209,7 +209,6 @@ export default function SpeedReading() {
                     </div>
                   ) : (
                     <>
-                      {/* Mobile scrollable tabs */}
                       <div className="flex overflow-x-auto gap-2 mb-6 border-b border-slate-200 dark:border-slate-800 pb-4 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
                         {cats.map(cat => {
                           const m = getCategoryMeta(cat);
@@ -278,41 +277,35 @@ export default function SpeedReading() {
 
             {view === 'reader' && fullReport && (
               <div className="w-full flex flex-col h-[calc(100vh-120px)] md:h-[80vh] min-h-[500px] md:min-h-[600px] justify-between text-slate-900 dark:text-white max-w-4xl mx-auto">
-                {/* Mobile-optimized Reader Header */}
                 <div className="flex flex-col gap-3 md:gap-4 mb-2 md:mb-4">
-                  {/* Top row: Back button & WPM slider */}
                   <div className="flex items-center justify-between w-full">
                     <button onClick={handleBack} className="p-2 md:px-4 md:py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-lg text-sm font-medium transition-colors shrink-0">
                       <ArrowLeft size={18} className="md:mr-2 inline" /><span className="hidden md:inline">Back</span>
                     </button>
-
                     <div className="flex items-center gap-2 md:gap-3 bg-white dark:bg-slate-900 px-3 md:px-4 py-2 rounded-lg border border-slate-200 shadow-sm flex-1 md:flex-none max-w-[200px] md:max-w-none ml-2 md:ml-0">
                       <input type="range" min="200" max="800" step="25" value={wpm} onChange={e => setWpm(Number(e.target.value))}
                         className="w-full md:w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#7B61FF]" />
                       <span className="text-xs md:text-sm font-bold text-slate-800 dark:text-white w-12 md:w-14 text-right shrink-0">{wpm} WPM</span>
                     </div>
                   </div>
-
-                  {/* Bottom row: Title & Play/Pause */}
                   <div className="flex items-center justify-between w-full gap-2">
-                     <div className="flex-1 min-w-0">
-                       <h2 className="text-sm md:text-lg font-bold text-[#0b132b] dark:text-white truncate">{fullReport.title}</h2>
-                       <p className="text-[10px] md:text-xs text-slate-500 mt-0.5 uppercase tracking-wider truncate">{fullReport.source}</p>
-                     </div>
-                     <button onClick={() => setIsPlaying(!isPlaying)} disabled={isFinished}
-                       className="flex items-center justify-center gap-1.5 md:gap-2 px-4 md:px-6 py-2 md:py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-colors disabled:opacity-50 shrink-0 bg-[#7B61FF] hover:bg-[#6a50e5] text-white">
-                       {isPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
-                       <span className="hidden sm:inline">{isPlaying ? 'Pause' : 'Resume'}</span>
-                     </button>
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-sm md:text-lg font-bold text-[#0b132b] dark:text-white truncate">{fullReport.title}</h2>
+                      <p className="text-[10px] md:text-xs text-slate-500 mt-0.5 uppercase tracking-wider truncate">{fullReport.source}</p>
+                    </div>
+                    <button onClick={() => setIsPlaying(!isPlaying)} disabled={isFinished}
+                      className="flex items-center justify-center gap-1.5 md:gap-2 px-4 md:px-6 py-2 md:py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-colors disabled:opacity-50 shrink-0 bg-[#7B61FF] hover:bg-[#6a50e5] text-white">
+                      {isPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
+                      <span className="hidden sm:inline">{isPlaying ? 'Pause' : 'Resume'}</span>
+                    </button>
                   </div>
                 </div>
 
-                {/* RSVP Display */}
                 <div className="flex-1 my-2 md:my-4 bg-white dark:bg-slate-900 rounded-xl md:rounded-2xl flex flex-col items-center justify-center relative overflow-hidden shadow-sm">
                   {isFinished ? (
                     <div className="text-center px-4 md:px-6 space-y-4 md:space-y-6 animate-in zoom-in-95 duration-500">
                       <div className="inline-flex items-center gap-1.5 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-[#10b981]/10 text-[#10b981] text-xs md:text-sm font-bold uppercase tracking-widest">
-                         <CheckCircle size={14} className="md:w-4 md:h-4" /> Reading Complete
+                        <CheckCircle size={14} className="md:w-4 md:h-4" /> Reading Complete
                       </div>
                       <div>
                         <span className="text-5xl md:text-6xl font-black text-[#0b132b] dark:text-white">{words.length}</span>
@@ -325,14 +318,13 @@ export default function SpeedReading() {
                         </button>
                       ) : (
                         <button onClick={handleBack} className="flex items-center justify-center gap-2 w-full md:w-auto md:mx-auto bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-white px-6 py-3 rounded-xl font-semibold transition-colors mt-2 md:mt-4">
-                           Back to Reports
+                          Back to Reports
                         </button>
                       )}
                     </div>
                   ) : renderWord(words[wordIdx])}
                 </div>
 
-                {/* Mobile-optimized Footer stats */}
                 <div className="space-y-3 md:space-y-4">
                   <div className="flex items-center gap-2 md:gap-4 px-1 md:px-2">
                     <span className="text-[10px] md:text-xs font-semibold text-slate-400 uppercase tracking-wider w-12 md:w-16">Progress</span>
@@ -341,7 +333,6 @@ export default function SpeedReading() {
                     </div>
                     <span className="text-[10px] md:text-xs font-bold text-slate-500 w-12 md:w-16 text-right">{wordIdx + (isFinished ? 1 : 0)} / {words.length}</span>
                   </div>
-
                   <div className="grid grid-cols-3 gap-2 md:gap-4">
                     <div className="bg-white dark:bg-slate-900 rounded-xl md:rounded-2xl p-2 md:p-4 shadow-sm flex flex-col items-center justify-center">
                       <div className="text-lg md:text-2xl font-bold text-[#7B61FF] mb-0.5 md:mb-1">{wpm}</div>
@@ -363,15 +354,14 @@ export default function SpeedReading() {
             {view === 'quiz' && fullReport && curQ && (
               <div className="w-full mt-2 md:mt-4 max-w-3xl mx-auto space-y-4 md:space-y-6">
                 <div className="flex flex-row justify-between items-center gap-2 md:gap-4 mb-2 md:mb-4">
-                    <button onClick={handleBack} className="p-2 md:py-1 md:px-0 flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-900 bg-white md:bg-transparent rounded-lg md:rounded-none shadow-sm md:shadow-none">
-                      <ChevronLeft size={18} className="md:w-4 md:h-4" /> <span className="hidden md:inline">Back</span>
-                    </button>
-                    <span className="inline-flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1 md:py-1.5 rounded-md bg-indigo-50 dark:bg-[#7B61FF]/10 text-[#7B61FF] text-[10px] md:text-xs font-bold uppercase tracking-widest shadow-sm">
-                      <Brain size={12} className="md:w-3.5 md:h-3.5" /> Quiz
-                    </span>
+                  <button onClick={handleBack} className="p-2 md:py-1 md:px-0 flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-900 bg-white md:bg-transparent rounded-lg md:rounded-none shadow-sm md:shadow-none">
+                    <ChevronLeft size={18} className="md:w-4 md:h-4" /> <span className="hidden md:inline">Back</span>
+                  </button>
+                  <span className="inline-flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1 md:py-1.5 rounded-md bg-indigo-50 dark:bg-[#7B61FF]/10 text-[#7B61FF] text-[10px] md:text-xs font-bold uppercase tracking-widest shadow-sm">
+                    <Brain size={12} className="md:w-3.5 md:h-3.5" /> Quiz
+                  </span>
                 </div>
 
-                {/* Mobile scrollable step circles */}
                 <div className="flex overflow-x-auto items-center justify-start md:justify-center gap-2 md:gap-3 mb-4 md:mb-8 pb-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
                   {qs.map((q, i) => (
                     <button key={q.id} onClick={() => setQuizIdx(i)}
@@ -387,14 +377,11 @@ export default function SpeedReading() {
 
                 <div className="bg-white dark:bg-slate-900 rounded-2xl md:rounded-3xl p-5 md:p-10 shadow-sm transition-colors animate-in slide-in-from-right-4 duration-300">
                   <div className="flex items-center justify-between mb-4 md:mb-6">
-                    <span className={`inline-flex items-center px-2 md:px-3 py-1 rounded-md text-[10px] md:text-xs font-bold uppercase tracking-widest ${
-                      curQ.type === 'MCQ' ? 'bg-indigo-50 text-[#7B61FF]' : 'bg-blue-50 text-blue-600'
-                    }`}>
+                    <span className={`inline-flex items-center px-2 md:px-3 py-1 rounded-md text-[10px] md:text-xs font-bold uppercase tracking-widest ${curQ.type === 'MCQ' ? 'bg-indigo-50 text-[#7B61FF]' : 'bg-blue-50 text-blue-600'}`}>
                       {curQ.type === 'MCQ' ? 'Multiple Choice' : 'T / F / NG'}
                     </span>
                     <span className="text-xs md:text-sm text-slate-400 font-bold">{quizIdx + 1} of {qs.length}</span>
                   </div>
-
                   <h3 className="text-xl md:text-3xl font-bold text-[#0b132b] dark:text-white leading-tight mb-6 md:mb-8">{curQ.stem}</h3>
 
                   {curQ.type === 'MCQ' && (
@@ -445,11 +432,11 @@ export default function SpeedReading() {
                     </button>
                   ) : (
                     <div className="flex-1 sm:flex-none flex flex-col items-center w-full sm:w-auto">
-                        <button onClick={handleSubmitQuiz} disabled={!allAnswered || submitting}
+                      <button onClick={handleSubmitQuiz} disabled={!allAnswered || submitting}
                         className="w-full flex items-center justify-center gap-1.5 md:gap-2 px-4 md:px-8 py-3 rounded-xl bg-[#7B61FF] hover:bg-[#6a50e5] disabled:opacity-50 text-white font-bold shadow-sm text-sm md:text-base">
                         {submitting ? <Loader2 size={16} className="animate-spin md:w-[18px] md:h-[18px]" /> : <Target size={16} className="md:w-[18px] md:h-[18px]" />}
                         {submitting ? 'Wait...' : 'Submit'}
-                        </button>
+                      </button>
                     </div>
                   )}
                 </div>
@@ -459,8 +446,8 @@ export default function SpeedReading() {
             {view === 'analysis' && evaluation && fullReport && (
               <div className="w-full mt-2 md:mt-4 space-y-6 md:space-y-8 max-w-4xl mx-auto animate-in fade-in duration-500 flex flex-col items-center">
                 <div className="text-center space-y-1 md:space-y-2 mb-2 w-full">
-                    <h2 className="text-2xl md:text-3xl font-extrabold text-[#0b132b] dark:text-white">Results</h2>
-                    <span className="inline-block px-2 md:px-3 py-1 bg-indigo-50 text-[#7B61FF] rounded-full text-[8px] md:text-[10px] font-bold uppercase tracking-widest mt-1 md:mt-2">{evaluation.speedCategory}</span>
+                  <h2 className="text-2xl md:text-3xl font-extrabold text-[#0b132b] dark:text-white">Results</h2>
+                  <span className="inline-block px-2 md:px-3 py-1 bg-indigo-50 text-[#7B61FF] rounded-full text-[8px] md:text-[10px] font-bold uppercase tracking-widest mt-1 md:mt-2">{evaluation.speedCategory}</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 w-full">
@@ -472,17 +459,17 @@ export default function SpeedReading() {
                 {evaluation.feedback.length > 0 && (
                   <div className="w-full bg-[#fffbf0] border border-amber-100 rounded-xl md:rounded-2xl p-4 md:p-6">
                     <div className="flex items-center gap-2 mb-2 md:mb-3">
-                        <AlertTriangle size={16} className="text-amber-500 md:w-[18px] md:h-[18px]" />
-                        <h3 className="font-bold text-sm md:text-base text-[#8a6a24]">AI Feedback</h3>
+                      <AlertTriangle size={16} className="text-amber-500 md:w-[18px] md:h-[18px]" />
+                      <h3 className="font-bold text-sm md:text-base text-[#8a6a24]">AI Feedback</h3>
                     </div>
                     <div className="space-y-2 md:space-y-3 mb-3 md:mb-4">
-                        {evaluation.feedback.map((f, i) => (
+                      {evaluation.feedback.map((f, i) => (
                         <div key={i} className="text-xs md:text-sm text-[#8a6a24]/80">{f}</div>
-                        ))}
+                      ))}
                     </div>
                     <div className="text-[10px] md:text-xs font-semibold text-[#8a6a24] bg-amber-100/50 p-2 md:p-3 rounded-lg flex items-start gap-2">
-                        <span className="opacity-80 mt-0.5">💡</span>
-                        <span>Tip: Next target speed should be around {evaluation.idealWpmSuggestion} WPM.</span>
+                      <span className="opacity-80 mt-0.5">💡</span>
+                      <span>Tip: Next target speed should be around {evaluation.idealWpmSuggestion} WPM.</span>
                     </div>
                   </div>
                 )}

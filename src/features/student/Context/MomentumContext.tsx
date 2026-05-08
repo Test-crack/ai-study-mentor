@@ -7,8 +7,9 @@ interface MomentumContextType {
   streak: number;
   addPoints: (points: number, reason?: string) => void;
   deductPoints: (points: number, reason?: string) => void;
+  syncMomentum: (serverScore: number, force?: boolean) => void;
   updateStreak: (newStreak: number) => void;
-  applyMissPenalty: (missCount: 1 | 2, cycleKey: string) => boolean; // returns true if penalty was newly applied
+  applyMissPenalty: (missCount: 1 | 2, cycleKey: string) => boolean;
   hasPenaltyBeenApplied: (cycleKey: string) => boolean;
 }
 
@@ -22,22 +23,14 @@ export const MomentumProvider = ({ children }: { children: ReactNode }) => {
 
   // ── Core State ──────────────────────────────────────────────────────────────
 
+  // ✅ FIXED: Initialize from localStorage so your score survives a page refresh!
   const [totalMomentum, setTotalMomentum] = useState<number>(() => {
-    const stored = localStorage.getItem('testcrack_momentum');
-    return stored !== null ? parseInt(stored, 10) : 120;
+    const saved = localStorage.getItem('testcrack_momentum');
+    return saved ? parseInt(saved, 10) : 0;
   });
 
-  const [streak, setStreak] = useState<number>(() => {
-    const stored = localStorage.getItem('testcrack_streak');
-    return stored !== null ? parseInt(stored, 10) : 2;
-  });
+  const [streak, setStreak] = useState<number>(0);
 
-  /**
-   * Tracks which penalty cycles have already been applied.
-   * Key format: "miss_penalty_<cycleKey>" where cycleKey is a unique identifier
-   * per miss event (e.g. "2026-W25-miss1", "2026-W25-miss2").
-   * This prevents double-deduction on re-renders or page reloads.
-   */
   const [appliedPenalties, setAppliedPenalties] = useState<Set<string>>(() => {
     const stored = localStorage.getItem('testcrack_applied_penalties');
     return stored ? new Set(JSON.parse(stored)) : new Set();
@@ -45,6 +38,7 @@ export const MomentumProvider = ({ children }: { children: ReactNode }) => {
 
   // ── Persistence Side-Effects ─────────────────────────────────────────────────
 
+  // ✅ FIXED: Save to localStorage every time the score changes
   useEffect(() => {
     localStorage.setItem('testcrack_momentum', totalMomentum.toString());
   }, [totalMomentum]);
@@ -63,32 +57,30 @@ export const MomentumProvider = ({ children }: { children: ReactNode }) => {
     setTotalMomentum(prev => prev + Math.abs(points));
   }, []);
 
-  /**
-   * Safely deducts points. Floors at 0 — momentum can never go negative.
-   */
   const deductPoints = useCallback((points: number, reason?: string) => {
     if (reason) console.info(`[Momentum] -${Math.abs(points)} — ${reason}`);
     setTotalMomentum(prev => Math.max(0, prev - Math.abs(points)));
   }, []);
 
-  const updateStreak = useCallback((newStreak: number) => {
-    setStreak(newStreak);
-    localStorage.setItem('testcrack_streak', newStreak.toString());
+  // ✅ FIXED: Smart Sync. Ignores the database if your local score is higher.
+  const syncMomentum = useCallback((serverScore: number, force: boolean = false) => {
+    setTotalMomentum(prev => {
+      // If we force an update (like spending points), or if local is 0, trust the server.
+      if (force || prev === 0) {
+        return serverScore;
+      }
+      // Otherwise, keep whichever score is higher so you don't lose un-synced points!
+      return Math.max(prev, serverScore);
+    });
   }, []);
 
-  /**
-   * Applies a miss penalty ONCE per unique cycleKey.
-   * Miss 1 → −20 pts. Miss 2 → −40 pts (cumulative from miss 1 = −60 total).
-   *
-   * cycleKey should encode enough context to be unique per event:
-   *   e.g. `${studentId}_${isoWeek}_miss${missCount}`
-   *   For now a date-based key works fine: `${todayDate}_miss${missCount}`
-   *
-   * Returns true if the penalty was freshly applied, false if already recorded.
-   */
+  const updateStreak = useCallback((newStreak: number) => {
+    setStreak(newStreak);
+  }, []);
+
   const applyMissPenalty = useCallback(
     (missCount: 1 | 2, cycleKey: string): boolean => {
-      if (appliedPenalties.has(cycleKey)) return false; // guard — already applied
+      if (appliedPenalties.has(cycleKey)) return false; 
 
       const deduction = missCount === 1 ? 20 : 40;
       const reason = missCount === 1
@@ -122,6 +114,7 @@ export const MomentumProvider = ({ children }: { children: ReactNode }) => {
         streak,
         addPoints,
         deductPoints,
+        syncMomentum,
         updateStreak,
         applyMissPenalty,
         hasPenaltyBeenApplied,

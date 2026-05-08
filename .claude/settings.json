@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//e/FreeLance/edtech/backend-study-mentor/**)",
+      "Bash(npx tsc *)"
+    ],
+    "additionalDirectories": [
+      "e:\\FreeLance\\edtech\\backend-study-mentor\\src\\controllers",
+      "e:\\FreeLance\\edtech\\backend-study-mentor\\src\\routes",
+      "e:\\FreeLance\\edtech\\backend-study-mentor\\src\\lib"
+    ]
+  }
+}

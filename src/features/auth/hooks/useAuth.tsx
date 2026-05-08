@@ -156,6 +156,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const navigate = useNavigate();
 
+  // Global 401 handler — any callBackend() that receives a 401 dispatches this event.
+  // A ref prevents multiple simultaneous 401 responses from triggering multiple redirects.
+  const handlingUnauthorized = useRef(false);
+  useEffect(() => {
+    const handleUnauthorized = async () => {
+      if (handlingUnauthorized.current) return;
+      handlingUnauthorized.current = true;
+      try {
+        await supabase.auth.signOut();
+      } catch {
+        // ignore
+      }
+      setProfile(null);
+      setSession(null);
+      setUser(null);
+      localStorage.removeItem(PROFILE_CACHE_KEY);
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('sb-')) localStorage.removeItem(key);
+      });
+      navigate('/login', { replace: true });
+    };
+
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
+  }, [navigate]);
+
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
