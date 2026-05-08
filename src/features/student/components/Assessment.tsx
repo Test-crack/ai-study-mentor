@@ -71,6 +71,7 @@ interface IAStatusResponse {
   is_ia_day:             boolean;
   current_ia_number:     number | null;
   can_start_test:        boolean;
+  has_active_session:    boolean;
   suggested_subskills:   { skill: string; sub_skill: string }[] | null;
   next_ia:               IANextSlot | null;
   upcoming_ias:          IANextSlot[];
@@ -217,6 +218,14 @@ export default function Assessment() {
   const [isRecording, setIsRecording]         = useState(false);
   const [animBars] = useState(() => Array.from({ length: 12 }, () => Math.random()));
 
+  // Speech recognition (Web Speech API)
+  const recognitionRef       = useRef<any>(null);
+  const transcriptAccumRef   = useRef<string>('');
+  const [liveTranscript, setLiveTranscript] = useState('');
+
+  // Writing debounce — avoids per-keystroke backend calls
+  const writingDebounceRef   = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Timer: 20 min per section (2 sections = 40 min total). Resets on section advance.
   const [timeLeft, setTimeLeft]               = useState(20 * 60);
 
@@ -262,6 +271,63 @@ export default function Assessment() {
       method: 'POST',
       body: JSON.stringify({ session_id: iaSessionId, question_id: questionId, answer })
     }).catch(e => console.warn('[IA] answer save failed:', e));
+  };
+
+  /** Debounced writing save — waits 1.5s after the student stops typing. */
+  const persistWritingDebounced = (questionId: string, text: string) => {
+    if (writingDebounceRef.current) clearTimeout(writingDebounceRef.current);
+    writingDebounceRef.current = setTimeout(() => persistAnswer(questionId, text), 1500);
+  };
+
+  /** Start recording with the Web Speech API (Chrome/Edge). Falls back gracefully. */
+  const startSpeakingRecording = (questionId: string) => {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    // Seed accumulator from any previously saved transcript
+    transcriptAccumRef.current = (answers[questionId] || '').trim();
+    setLiveTranscript(transcriptAccumRef.current);
+    setIsRecording(true);
+    if (!SR) return; // UI shows recording; student cannot get transcript on unsupported browser
+
+    const rec = new SR();
+    rec.continuous      = true;
+    rec.interimResults  = true;
+    rec.lang            = 'en-US';
+
+    rec.onresult = (event: any) => {
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          transcriptAccumRef.current = (
+            transcriptAccumRef.current ? transcriptAccumRef.current + ' ' : ''
+          ) + event.results[i][0].transcript.trim();
+        }
+      }
+      const last    = event.results[event.results.length - 1];
+      const interim = last.isFinal ? '' : last[0].transcript;
+      setLiveTranscript((transcriptAccumRef.current + (interim ? ' ' + interim : '')).trim());
+    };
+
+    rec.onerror = (e: any) => {
+      if (e.error !== 'aborted' && e.error !== 'no-speech') console.warn('[Speech]', e.error);
+    };
+
+    recognitionRef.current = rec;
+    try { rec.start(); } catch { /* already started */ }
+  };
+
+  /** Stop recording, persist the final transcript, update UI state. */
+  const stopSpeakingRecording = (questionId: string) => {
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch { /**/ }
+      recognitionRef.current = null;
+    }
+    const finalTranscript = transcriptAccumRef.current.trim();
+    setIsRecording(false);
+    setLiveTranscript('');
+    if (finalTranscript) {
+      setAnswers(p => ({ ...p, [questionId]: finalTranscript }));
+      persistAnswer(questionId, finalTranscript);
+    }
+    setRecordedPrompts(p => ({ ...p, [questionId]: !!finalTranscript }));
   };
 
   const beginFullTest = async () => {
@@ -379,6 +445,17 @@ export default function Assessment() {
       void handleSectionComplete();
     }
   }, [timeLeft, phase, isLoadingQuestions, handleSectionComplete]);
+
+  // Stop any active recording and flush writing debounce when the question or section changes
+  useEffect(() => {
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch { /**/ }
+      recognitionRef.current = null;
+    }
+    setIsRecording(false);
+    setLiveTranscript('');
+    if (writingDebounceRef.current) clearTimeout(writingDebounceRef.current);
+  }, [currentIdx, currentSectionIdx]);
 
   // ── RENDERERS ──
 
@@ -614,7 +691,10 @@ export default function Assessment() {
             disabled={isLoadingQuestions}
             className="flex-1 bg-indigo-700 hover:bg-indigo-600 disabled:opacity-60 text-white font-black text-base uppercase tracking-wide rounded-xl border-2 border-gray-900 transition-all neo-btn shadow-[4px_4px_0_#0F0F0F] flex items-center justify-center gap-2"
           >
-            {isLoadingQuestions ? <><Loader2 className="w-4 h-4 animate-spin" /> Loading…</> : 'Start Assessment →'}
+            {isLoadingQuestions
+            ? <><Loader2 className="w-4 h-4 animate-spin" /> Loading…</>
+            : iaStatus?.has_active_session ? 'Continue Assessment →' : 'Start Assessment →'
+          }
           </button>
         </div>
       </div>
@@ -634,7 +714,7 @@ export default function Assessment() {
             Section {currentSectionIdx + 1} Complete
           </h2>
           <p className="text-gray-500 font-medium mb-10">
-            Great work on {SKILL_LABEL[doneSec?.sub_skill ?? ''] ?? doneSec?.sub_skill}. Take a breath — the timer is still running.
+            Great work on {SKILL_LABEL[doneSec?.sub_skill ?? ''] ?? doneSec?.sub_skill}. Take a breath — the next section has its own 20-minute timer.
           </p>
           {nextSec && (
             <div className="bg-indigo-50 border-2 border-gray-900 rounded-xl p-6 mb-8 text-left shadow-[4px_4px_0_#0F0F0F]">
@@ -662,8 +742,8 @@ export default function Assessment() {
         <div className="w-24 h-24 rounded-full border-[6px] border-gray-200 border-t-indigo-700 animate-spin" />
         <span className="absolute inset-0 flex items-center justify-center text-4xl">🧠</span>
       </div>
-      <h2 className="text-3xl font-black text-gray-900 uppercase tracking-wide mb-3">Gemini is Evaluating...</h2>
-      <p className="text-gray-500 font-medium text-lg">Analyzing all four sections to calculate your Overall Band.</p>
+      <h2 className="text-3xl font-black text-gray-900 uppercase tracking-wide mb-3">Scoring Your Assessment</h2>
+      <p className="text-gray-500 font-medium text-lg">Calculating your band scores and updating your competency matrix.</p>
     </div>
   );
 
@@ -844,9 +924,10 @@ export default function Assessment() {
     // Can-proceed check per question type
     let canProceed = false;
     if (currentQ.question_type === 'SPEAKING_PROMPT') {
-      canProceed = !!recordedPrompts[currentQ.id];
+      // Requires a saved transcript (from this session or a prior resume)
+      canProceed = !!(answers[currentQ.id]?.trim());
     } else if (currentQ.question_type === 'WRITING_PROMPT') {
-      canProceed = (answers[currentQ.id]?.trim().length ?? 0) >= 10;
+      canProceed = (answers[currentQ.id]?.trim().split(/\s+/).filter(Boolean).length ?? 0) >= 10;
     } else {
       // MCQ or TFNG
       canProceed = !!answers[currentQ.id];
@@ -998,41 +1079,87 @@ export default function Assessment() {
                     placeholder="Write your response here (minimum 10 words)…"
                     rows={8}
                     value={answers[currentQ.id] || ""}
-                    onChange={e => setAnswers(p => ({ ...p, [currentQ.id]: e.target.value }))}
+                    onChange={e => {
+                      const text = e.target.value;
+                      setAnswers(p => ({ ...p, [currentQ.id]: text }));
+                      persistWritingDebounced(currentQ.id, text);
+                    }}
                     className="w-full p-5 border-2 border-gray-900 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-indigo-200 bg-gray-50 resize-none"
                     style={{ boxShadow: 'inset 3px 3px 0 rgba(0,0,0,0.05)' }}
                   />
-                  <p className="text-xs text-gray-400 mt-2 font-bold">{(answers[currentQ.id] ?? '').trim().split(/\s+/).filter(Boolean).length} words</p>
+                  <div className="flex justify-between items-center mt-2">
+                    <p className="text-xs text-gray-400 font-bold">
+                      {(answers[currentQ.id] ?? '').trim().split(/\s+/).filter(Boolean).length} words
+                    </p>
+                    <p className="text-[10px] text-gray-300 font-medium">Auto-saved</p>
+                  </div>
                 </div>
               )}
 
               {/* ── SPEAKING_PROMPT ── */}
-              {currentQ.question_type === 'SPEAKING_PROMPT' && (
-                <div className="bg-gray-50 border-2 border-gray-300 rounded-2xl p-6 text-center">
-                  {isRecording ? (
-                    <div className="flex flex-col items-center">
-                      <div className="flex items-center gap-2 h-12 mb-5">
-                        {animBars.slice(0, 8).map((h, i) => <div key={i} className="w-2 bg-rose-500 rounded-full animate-pulse" style={{ height: `${12 + h * 30}px`, animationDelay: `${i * 0.1}s` }} />)}
+              {currentQ.question_type === 'SPEAKING_PROMPT' && (() => {
+                const hasTranscript = !!(answers[currentQ.id]?.trim());
+                return (
+                  <div className="bg-gray-50 border-2 border-gray-300 rounded-2xl p-6">
+                    {isRecording ? (
+                      /* ── Active recording ── */
+                      <div className="flex flex-col items-center gap-4">
+                        <div className="flex items-center gap-1.5 h-10">
+                          {animBars.slice(0, 10).map((h, i) => (
+                            <div key={i} className="w-1.5 bg-rose-500 rounded-full animate-pulse"
+                              style={{ height: `${10 + h * 28}px`, animationDelay: `${i * 0.09}s` }} />
+                          ))}
+                        </div>
+                        {liveTranscript ? (
+                          <div className="w-full bg-white border border-gray-200 rounded-xl p-3 text-sm text-gray-700 font-medium italic min-h-[56px] max-h-[120px] overflow-y-auto leading-relaxed">
+                            "{liveTranscript}"
+                          </div>
+                        ) : (
+                          <p className="text-xs text-gray-400 font-medium">Speak clearly — transcript appears here</p>
+                        )}
+                        <button onClick={() => stopSpeakingRecording(currentQ.id)}
+                          className="bg-rose-600 hover:bg-rose-700 text-white font-black text-sm px-8 py-3 rounded-xl border-2 border-gray-900 uppercase tracking-wide shadow-[3px_3px_0_#0F0F0F]">
+                          Stop &amp; Save
+                        </button>
                       </div>
-                      <button
-                        onClick={() => { setIsRecording(false); setRecordedPrompts(p => ({ ...p, [currentQ.id]: true })); }}
-                        className="bg-rose-100 hover:bg-rose-200 text-rose-700 font-black text-sm px-6 py-3 rounded-lg border-2 border-rose-700 uppercase shadow-[3px_3px_0_#BE123C]"
-                      >Stop Recording</button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center">
-                      <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 border-2 ${recordedPrompts[currentQ.id] ? 'bg-emerald-100 border-emerald-600' : 'bg-indigo-100 border-indigo-700'}`}>
-                        {recordedPrompts[currentQ.id] ? <CheckCircle2 className="w-8 h-8 text-emerald-600" /> : <Mic className="w-8 h-8 text-indigo-700" />}
+                    ) : hasTranscript ? (
+                      /* ── Has saved transcript ── */
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                          <span className="text-xs font-black uppercase tracking-widest text-emerald-700">Response Saved</span>
+                        </div>
+                        <div className="bg-white border-2 border-emerald-200 rounded-xl p-4 text-sm text-gray-700 font-medium italic max-h-[120px] overflow-y-auto leading-relaxed">
+                          "{answers[currentQ.id]}"
+                        </div>
+                        <button onClick={() => startSpeakingRecording(currentQ.id)}
+                          className="text-sm font-black uppercase tracking-wide px-6 py-3 rounded-xl border-2 border-gray-900 bg-white text-gray-900 hover:bg-gray-50 self-start"
+                          style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+                          Re-record Answer
+                        </button>
                       </div>
-                      <button onClick={() => setIsRecording(true)}
-                        className={`font-black text-sm uppercase tracking-wide px-8 py-4 rounded-xl border-2 border-gray-900 ${recordedPrompts[currentQ.id] ? 'bg-white text-gray-900' : 'bg-indigo-700 text-white'}`}
-                        style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>
-                        {recordedPrompts[currentQ.id] ? 'Re-record Answer' : 'Start Speaking'}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+                    ) : (
+                      /* ── Not yet recorded ── */
+                      <div className="flex flex-col items-center gap-4 text-center">
+                        <div className="w-16 h-16 rounded-full bg-indigo-100 border-2 border-indigo-700 flex items-center justify-center">
+                          <Mic className="w-8 h-8 text-indigo-700" />
+                        </div>
+                        <p className="text-sm text-gray-600 font-medium max-w-xs">
+                          Tap the button and speak your answer. Your response will be transcribed automatically.
+                        </p>
+                        <button onClick={() => startSpeakingRecording(currentQ.id)}
+                          className="bg-indigo-700 hover:bg-indigo-600 text-white font-black text-sm uppercase tracking-wide px-8 py-4 rounded-xl border-2 border-gray-900"
+                          style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>
+                          Start Speaking
+                        </button>
+                        {!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) && (
+                          <p className="text-xs text-amber-600 font-medium">Use Chrome or Edge for voice transcription.</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Navigation */}
               <div className="mt-8 flex gap-4">
