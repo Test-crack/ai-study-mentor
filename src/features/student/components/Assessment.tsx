@@ -748,49 +748,126 @@ export default function Assessment() {
   );
 
   const renderResults = () => {
-    // IA results from backend — if no backend results, show completion screen
-    const momentumEarned = sessionMomentumAward || iaResults?.momentum_awarded || 0;
-    const sectionScores: Array<{ sub_skill: string; skill: string; band: number; correct?: number; total?: number }> =
-      (iaResults?.section_scores ?? iaSections?.map(s => ({ sub_skill: s.sub_skill, skill: s.skill, band: 0 })) ?? []);
+    const momentumEarned   = sessionMomentumAward || iaResults?.momentum_awarded || 0;
+    const breakdown: Array<{ reason: string; points: number }> = iaResults?.momentum_breakdown ?? [];
+    const isFirstIA        = iaResults?.is_first_ia ?? false;
+    const comparisonLabel  = isFirstIA ? 'vs Diagnostic' : 'vs Last IA';
+
+    type ScoreRow = {
+      sub_skill: string; skill: string; band: number;
+      correct?: number; total?: number; ai_graded?: boolean;
+      previous_band?: number | null; delta?: number | null;
+    };
+    const sectionScores: ScoreRow[] =
+      iaResults?.section_scores ?? iaSections?.map(s => ({ sub_skill: s.sub_skill, skill: s.skill, band: 0 })) ?? [];
 
     return (
       <div className="max-w-3xl mx-auto animate-fade-in pt-8 pb-24 px-4">
+
+        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tight">IA Complete</h2>
-          <button onClick={() => { localStorage.removeItem(STORAGE_KEY); navigate('/student/dashboard', { state: { drillCompleted: true } }); }}
+          <button
+            onClick={() => { localStorage.removeItem(STORAGE_KEY); navigate('/student/dashboard', { state: { drillCompleted: true } }); }}
             className="px-6 py-3 bg-gray-900 text-white rounded-xl font-black text-sm uppercase tracking-wide hover:bg-gray-800 shadow-[4px_4px_0_#4338CA]">
             Dashboard
           </button>
         </div>
 
-        {/* Momentum award */}
-        <div className="bg-indigo-700 border-2 border-gray-900 rounded-2xl p-8 mb-6 text-center shadow-[8px_8px_0_#0F0F0F]">
-          <p className="text-indigo-200 font-black uppercase tracking-widest mb-2">Momentum Earned</p>
+        {/* Momentum banner */}
+        <div className="bg-indigo-700 border-2 border-gray-900 rounded-2xl p-8 mb-6 text-center shadow-[8px_8px_0_#0F0F0F] relative overflow-hidden">
+          <div className="absolute -top-8 -right-8 text-[140px] opacity-10 pointer-events-none select-none">⚡</div>
+          <p className="text-indigo-200 font-black uppercase tracking-widest mb-1">Momentum Earned</p>
           <div className="text-7xl font-black text-amber-400">+{momentumEarned}</div>
           <div className="mt-4 inline-flex items-center gap-2 bg-white text-indigo-900 px-5 py-2 rounded-lg font-black uppercase shadow-[3px_3px_0_#0F0F0F]">
-            <CheckCircle2 className="w-5 h-5 text-emerald-500" /> Internal Assessment Submitted
+            <CheckCircle2 className="w-5 h-5 text-emerald-500" /> Assessment Submitted
           </div>
+          {/* Breakdown pills */}
+          {breakdown.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-2 mt-5">
+              {breakdown.map((b, i) => (
+                <span key={i} className="bg-indigo-600 text-indigo-100 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-indigo-500">
+                  +{b.points} {b.reason}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Section scores */}
+        {/* Per sub-skill score cards */}
         {sectionScores.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
-            {sectionScores.map((s, i) => (
-              <div key={i} className="bg-white border-2 border-gray-900 rounded-xl p-6 shadow-[4px_4px_0_#0F0F0F] text-center">
-                <span className="text-3xl">{SKILL_ICON[s.skill] ?? '📝'}</span>
-                <p className="text-gray-500 font-black uppercase tracking-widest text-xs mt-3 mb-1">{SKILL_LABEL[s.sub_skill] ?? s.sub_skill}</p>
-                <p className="text-4xl font-black text-gray-900">{s.band > 0 ? s.band.toFixed(1) : '—'}</p>
-                {s.correct != null && <p className="text-xs text-gray-400 font-bold mt-1">{s.correct} / {s.total} correct</p>}
-              </div>
-            ))}
+            {sectionScores.map((s, i) => {
+              const hasDelta  = s.delta !== null && s.delta !== undefined;
+              const isUp      = hasDelta && s.delta! > 0;
+              const isDown    = hasDelta && s.delta! < 0;
+              const deltaText = hasDelta
+                ? (isUp ? `+${s.delta!.toFixed(1)}` : isDown ? s.delta!.toFixed(1) : '±0.0')
+                : null;
+
+              return (
+                <div key={i} className="bg-white border-2 border-gray-900 rounded-xl p-6 shadow-[4px_4px_0_#0F0F0F]">
+                  {/* Sub-skill header */}
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-2xl">{SKILL_ICON[s.skill] ?? '📝'}</span>
+                    <div>
+                      <p className="font-black text-gray-900 text-sm uppercase tracking-wide">{SKILL_LABEL[s.sub_skill] ?? s.sub_skill}</p>
+                      <p className="text-gray-400 text-[10px] font-bold uppercase">{s.skill}{s.ai_graded ? ' · AI Graded' : ''}</p>
+                    </div>
+                  </div>
+
+                  {/* Band score + delta */}
+                  <div className="flex items-end gap-4">
+                    <span className="text-5xl font-black text-gray-900 leading-none">
+                      {s.band > 0 ? s.band.toFixed(1) : '—'}
+                    </span>
+                    {hasDelta && (
+                      <div className="mb-1">
+                        <span className={`text-lg font-black ${isUp ? 'text-emerald-600' : isDown ? 'text-rose-600' : 'text-gray-500'}`}>
+                          {deltaText}
+                        </span>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase">{comparisonLabel}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Previous band */}
+                  {s.previous_band !== null && s.previous_band !== undefined && (
+                    <p className="text-xs text-gray-400 font-medium mt-2">
+                      Previous: <span className="font-black">{s.previous_band.toFixed(1)}</span>
+                      {isUp && <span className="text-emerald-600 ml-1 font-black">↑ Improved</span>}
+                      {isDown && <span className="text-rose-600 ml-1 font-black">↓ Dropped</span>}
+                    </p>
+                  )}
+
+                  {/* MCQ score (if present) */}
+                  {s.correct != null && s.total != null && s.total > 0 && (
+                    <p className="text-xs text-gray-400 font-bold mt-1">{s.correct} / {s.total} MCQ correct</p>
+                  )}
+
+                  {/* Delta badge */}
+                  {hasDelta && (
+                    <div className={`mt-3 inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide px-2.5 py-1 rounded border-2 ${
+                      isUp   ? 'bg-emerald-50 text-emerald-700 border-emerald-300' :
+                      isDown ? 'bg-rose-50 text-rose-700 border-rose-300' :
+                               'bg-gray-100 text-gray-600 border-gray-300'
+                    }`}>
+                      {isUp ? '↑ Improved' : isDown ? '↓ Dropped' : '● Maintained'}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 
-        <p className="text-center text-gray-500 font-medium">Your scores are now reflected in your competency matrix. Continue your drills to prepare for the next IA.</p>
+        <p className="text-center text-gray-500 font-medium text-sm">
+          Scores updated in your competency matrix. Continue drilling to build on this result.
+        </p>
       </div>
     );
 
-    // legacy shape fallback — unreachable but keeps compiler happy
+    // eslint-disable-next-line no-unreachable
     const overallBand = 0;
     const weakestResult = null;
 
