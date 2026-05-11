@@ -295,9 +295,9 @@ export default function Assessment() {
   /** Start recording with the Web Speech API (Chrome/Edge). Falls back gracefully. */
   const startSpeakingRecording = (questionId: string) => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    // Seed accumulator from any previously saved transcript
-    transcriptAccumRef.current = (answers[questionId] || '').trim();
-    setLiveTranscript(transcriptAccumRef.current);
+    // Always start fresh — re-recording replaces, never appends to previous transcript
+    transcriptAccumRef.current = '';
+    setLiveTranscript('');
     setIsRecording(true);
     if (!SR) return; // UI shows recording; student cannot get transcript on unsupported browser
 
@@ -339,8 +339,15 @@ export default function Assessment() {
     if (finalTranscript) {
       setAnswers(p => ({ ...p, [questionId]: finalTranscript }));
       persistAnswer(questionId, finalTranscript);
+      setRecordedPrompts(p => ({ ...p, [questionId]: true }));
+    } else {
+      // Recognition produced no text (mic blocked, no-speech, unsupported browser).
+      // Mark with a sentinel so canProceed unblocks and the student can still advance.
+      const sentinel = '[no transcript]';
+      setAnswers(p => ({ ...p, [questionId]: sentinel }));
+      persistAnswer(questionId, sentinel);
+      setRecordedPrompts(p => ({ ...p, [questionId]: true }));
     }
-    setRecordedPrompts(p => ({ ...p, [questionId]: !!finalTranscript }));
   };
 
   const beginFullTest = async () => {
@@ -413,6 +420,11 @@ export default function Assessment() {
 
   const advanceToNextSection = () => {
     const nextIdx = currentSectionIdx + 1;
+    // Stop any playing audio from the outgoing section
+    if (audioRef.current && !audioRef.current.paused) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
     // Stamp section start on backend so the per-section timer survives a mid-section exit
     if (iaSessionId) {
       const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
@@ -436,6 +448,11 @@ export default function Assessment() {
     const totalQ = currentSection.questions.length;
     const currentQ = currentSection.questions[currentIdx];
 
+    // Flush any pending writing debounce immediately before advancing
+    if (writingDebounceRef.current) {
+      clearTimeout(writingDebounceRef.current);
+      writingDebounceRef.current = null;
+    }
     // Persist current answer before advancing
     const currentAnswer = answers[currentQ?.id ?? ''];
     if (currentQ && currentAnswer) persistAnswer(currentQ.id, currentAnswer);
@@ -899,6 +916,7 @@ export default function Assessment() {
       sub_skill: string; skill: string; band: number;
       correct?: number; total?: number; ai_graded?: boolean;
       previous_band?: number | null; delta?: number | null;
+      new_matrix_band?: number;
     };
     const sectionScores: ScoreRow[] =
       iaResults?.section_scores ?? iaSections?.map(s => ({ sub_skill: s.sub_skill, skill: s.skill, band: 0 })) ?? [];
@@ -947,8 +965,19 @@ export default function Assessment() {
                 ? (isUp ? `+${s.delta!.toFixed(1)}` : isDown ? s.delta!.toFixed(1) : '±0.0')
                 : null;
 
+              // Competency band impact
+              const hasMatrix   = s.new_matrix_band !== undefined && s.new_matrix_band !== null;
+              const prevMatrix  = s.previous_band ?? null;
+              const matrixDelta = hasMatrix && prevMatrix !== null
+                ? Math.round((s.new_matrix_band! - prevMatrix) * 10) / 10
+                : null;
+              const matrixUp   = matrixDelta !== null && matrixDelta > 0;
+              const matrixDown = matrixDelta !== null && matrixDelta < 0;
+              const smoothingVisible = hasMatrix && Math.abs(s.new_matrix_band! - s.band) >= 0.5;
+
               return (
                 <div key={i} className="bg-white border-2 border-gray-900 rounded-xl p-6 shadow-[4px_4px_0_#0F0F0F]">
+
                   {/* Sub-skill header */}
                   <div className="flex items-center gap-3 mb-4">
                     <span className="text-2xl">{SKILL_ICON[s.skill] ?? '📝'}</span>
@@ -958,8 +987,9 @@ export default function Assessment() {
                     </div>
                   </div>
 
-                  {/* Band score + delta */}
-                  <div className="flex items-end gap-4">
+                  {/* ── IA Score (this session) ── */}
+                  <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-0.5">IA Score</p>
+                  <div className="flex items-end gap-4 mb-3">
                     <span className="text-5xl font-black text-gray-900 leading-none">
                       {s.band > 0 ? s.band.toFixed(1) : '—'}
                     </span>
@@ -973,18 +1003,35 @@ export default function Assessment() {
                     )}
                   </div>
 
-                  {/* Previous band */}
-                  {s.previous_band !== null && s.previous_band !== undefined && (
-                    <p className="text-xs text-gray-400 font-medium mt-2">
-                      Previous: <span className="font-black">{s.previous_band.toFixed(1)}</span>
-                      {isUp && <span className="text-emerald-600 ml-1 font-black">↑ Improved</span>}
-                      {isDown && <span className="text-rose-600 ml-1 font-black">↓ Dropped</span>}
-                    </p>
+                  {/* MCQ correct count */}
+                  {s.correct != null && s.total != null && s.total > 0 && (
+                    <p className="text-xs text-gray-400 font-bold mb-3">{s.correct} / {s.total} MCQ correct</p>
                   )}
 
-                  {/* MCQ score (if present) */}
-                  {s.correct != null && s.total != null && s.total > 0 && (
-                    <p className="text-xs text-gray-400 font-bold mt-1">{s.correct} / {s.total} MCQ correct</p>
+                  {/* ── Competency Band Impact ── */}
+                  {hasMatrix && (
+                    <div className="border-t border-gray-100 pt-3">
+                      <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5">Competency Band</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-black text-gray-400">
+                          {prevMatrix !== null ? prevMatrix.toFixed(1) : '—'}
+                        </span>
+                        <span className="text-gray-300 text-xs">→</span>
+                        <span className={`text-xl font-black ${matrixUp ? 'text-emerald-600' : matrixDown ? 'text-rose-600' : 'text-gray-700'}`}>
+                          {s.new_matrix_band!.toFixed(1)}
+                        </span>
+                        {matrixDelta !== null && (
+                          <span className={`text-xs font-black ml-0.5 ${matrixUp ? 'text-emerald-600' : matrixDown ? 'text-rose-600' : 'text-gray-400'}`}>
+                            {matrixUp ? `+${matrixDelta.toFixed(1)}` : matrixDelta.toFixed(1)}
+                          </span>
+                        )}
+                      </div>
+                      {smoothingVisible && (
+                        <p className="text-[10px] text-gray-400 font-medium mt-1">
+                          Builds gradually — averaged over sessions
+                        </p>
+                      )}
+                    </div>
                   )}
 
                   {/* Delta badge */}

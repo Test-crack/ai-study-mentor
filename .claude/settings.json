@@ -8,7 +8,9 @@
       "Bash(xargs grep -l \"ia\\\\|IA\")",
       "Bash(Get-ChildItem -Path \"e:\\\\FreeLance\\\\edtech\\\\backend-study-mentor\\\\src\" -Recurse -Include \"*.ts\")",
       "Bash(Select-Object FullName)",
-      "Bash(Sort-Object)"
+      "Bash(Sort-Object)",
+      "PowerShell(& npx tsc --noEmit --project \"e:\\\\FreeLance\\\\edtech\\\\backend-study-mentor\\\\tsconfig.json\" 2>&1)",
+      "PowerShell(& npx tsc --noEmit --project \"e:\\\\FreeLance\\\\edtech\\\\ai-study-mentor\\\\tsconfig.json\" 2>&1)"
     ],
     "additionalDirectories": [
       "e:\\FreeLance\\edtech\\backend-study-mentor\\src\\controllers",
