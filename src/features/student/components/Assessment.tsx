@@ -343,8 +343,15 @@ export default function Assessment() {
     if (finalTranscript) {
       setAnswers(p => ({ ...p, [questionId]: finalTranscript }));
       persistAnswer(questionId, finalTranscript);
+      setRecordedPrompts(p => ({ ...p, [questionId]: true }));
+    } else {
+      // Recognition produced no text (mic blocked, no-speech, unsupported browser).
+      // Mark with a sentinel so canProceed unblocks and the student can still advance.
+      const sentinel = '[no transcript]';
+      setAnswers(p => ({ ...p, [questionId]: sentinel }));
+      persistAnswer(questionId, sentinel);
+      setRecordedPrompts(p => ({ ...p, [questionId]: true }));
     }
-    setRecordedPrompts(p => ({ ...p, [questionId]: !!finalTranscript }));
   };
 
   const beginFullTest = async () => {
@@ -417,6 +424,11 @@ export default function Assessment() {
 
   const advanceToNextSection = () => {
     const nextIdx = currentSectionIdx + 1;
+    // Stop any playing audio from the outgoing section
+    if (audioRef.current && !audioRef.current.paused) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
     // Stamp section start on backend so the per-section timer survives a mid-section exit
     if (iaSessionId) {
       const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
@@ -440,6 +452,11 @@ export default function Assessment() {
     const totalQ = currentSection.questions.length;
     const currentQ = currentSection.questions[currentIdx];
 
+    // Flush any pending writing debounce immediately before advancing
+    if (writingDebounceRef.current) {
+      clearTimeout(writingDebounceRef.current);
+      writingDebounceRef.current = null;
+    }
     // Persist current answer before advancing
     const currentAnswer = answers[currentQ?.id ?? ''];
     if (currentQ && currentAnswer) persistAnswer(currentQ.id, currentAnswer);
