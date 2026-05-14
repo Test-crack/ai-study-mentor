@@ -5,7 +5,8 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { PremiumModal } from "@/features/payment/components/PremiumModal";
 import { useNavigate, useLocation } from "react-router-dom";
 import { callBackend } from "@/features/auth/services/authClient";
-import IAScheduleWidget from "./dashboard/IAScheduleWidget";
+import IAScheduleWidget  from "./dashboard/IAScheduleWidget";
+import MockStatusWidget  from "./dashboard/MockStatusWidget";
 import { useMomentum } from "@/features/student/Context/MomentumContext";
 import { cn } from "@/shared/utils";
 import {
@@ -614,11 +615,13 @@ const StudentDashboardPage = () => {
                           <p className="text-sm text-indigo-100/70 font-medium mb-4">
                             {isLexiGate
                               ? <>Solve <strong className="text-teal-300">5 words</strong> to unlock Drill 2 — your gate is open now.</>
-                              : <>Crack today's vocabulary puzzle to earn <strong className="text-amber-400">+10 Momentum</strong>.</>
+                              : lexiDone
+                                ? <>Daily momentum earned. Play as many <strong className="text-indigo-300">practice rounds</strong> as you like — no cap.</>
+                                : <>Crack today&apos;s vocabulary puzzle to earn your daily <strong className="text-amber-400">Momentum</strong>.</>
                             }
                           </p>
                           <button className="bg-white/10 hover:bg-white/20 text-white font-semibold text-sm py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
-                            {lexiDone ? "Play Again" : "Play Now"} <ArrowRight className="w-4 h-4" />
+                            {lexiDone ? "Practice Mode →" : "Play Now"} <ArrowRight className="w-4 h-4" />
                           </button>
                         </div>
                       </div>
@@ -654,13 +657,13 @@ const StudentDashboardPage = () => {
                 </div>
               </section>
 
-              {/* Weekly Rhythm / Readiness / Streak / IA Schedule */}
+              {/* Weekly Rhythm / Readiness / Streak */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div className="lg:col-span-4"><WeeklyRhythmIndicator /></div>
-                <div className="lg:col-span-3">
+                <div className="lg:col-span-4">
                   <PredictedReadinessCard readiness={dynamicReadiness} />
                 </div>
-                <div className="lg:col-span-2">
+                <div className="lg:col-span-4">
                   <DashboardCard
                     title="Streak"
                     icon={<Flame className="h-5 w-5 text-orange-500" />}
@@ -668,9 +671,12 @@ const StudentDashboardPage = () => {
                     <AttendanceStreakTracker currentStreak={dailyDrillState?.daily_streak ?? 0} goal={7} />
                   </DashboardCard>
                 </div>
-                <div className="lg:col-span-3">
-                  <IAScheduleWidget />
-                </div>
+              </div>
+
+              {/* Assessment Schedule widgets — IA + Mock side by side */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <IAScheduleWidget />
+                <MockStatusWidget />
               </div>
 
               {/* Skill Modules + Recent Activity */}

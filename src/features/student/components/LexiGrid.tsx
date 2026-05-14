@@ -73,6 +73,8 @@ export default function LexiGrid() {
   const [gameStatus, setGameStatus]     = useState<'playing' | 'won' | 'lost' | 'completed_day'>('playing');
   const [isInitializing, setIsInitializing] = useState(true);
   const [fetchError, setFetchError]     = useState(false);
+  // Practice mode: daily round already done, student is playing for fun — no momentum
+  const [isPracticeMode, setIsPracticeMode] = useState(false);
 
   // UI States
   const [introStage, setIntroStage]     = useState<'playing' | 'fading' | 'done'>('playing');
@@ -121,13 +123,12 @@ export default function LexiGrid() {
         if (stateRes.success) {
           backendReachable = true;
           if (stateRes.lexigrid_completed_today) {
-            setWordsWon(stateRes.lexigrid_words_solved ?? 0);
-            setGameStatus('completed_day');
-            setIsInitializing(false);
-            return;
+            // Daily momentum already earned — switch to practice mode and load fresh
+            // words so the student can keep playing without restriction.
+            setIsPracticeMode(true);
+            // Fall through to step 3 (fetch fresh words) — do NOT return.
           }
-          // Backend confirmed NOT done today — any localStorage "completed" entry is stale.
-          // Clear it so the date-match check below cannot resurrect it.
+          // Backend confirmed status — clear any stale localStorage "completed" entry.
           const savedData = localStorage.getItem('lexigrid_state');
           if (savedData) {
             try {
@@ -292,6 +293,39 @@ export default function LexiGrid() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyPress]);
 
+  // --- Load fresh words (used by both init and "Play Another Round") ---
+  const loadFreshWords = useCallback(async () => {
+    setIsInitializing(true);
+    setCurrentIndex(0);
+    setWordsWon(0);
+    setTriesLeft(MAX_TRIES);
+    setCurrentGuess('');
+    setGameStatus('playing');
+    totalAttemptsRef.current = 0;
+    allBonusEligibleRef.current = true;
+    try {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+      const res = await callBackend(
+        `${backendUrl}/api/student/lexigrid-words?difficulty=${encodeURIComponent(difficulty)}`
+      );
+      let words: WordItem[];
+      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        words = (res.data as any[]).map((w: any) => ({
+          base:   w.base_word.toUpperCase(),
+          target: w.target_word.toUpperCase(),
+          hint:   w.hint,
+        }));
+      } else {
+        words = [...FALLBACK_WORD_BANK].sort(() => 0.5 - Math.random()).slice(0, DAILY_LIMIT);
+      }
+      setDailyWords(words);
+    } catch {
+      setDailyWords([...FALLBACK_WORD_BANK].sort(() => 0.5 - Math.random()).slice(0, DAILY_LIMIT));
+    } finally {
+      setIsInitializing(false);
+    }
+  }, [difficulty]);
+
   // --- Backend sync on session complete ---
   const submitLexiGridSession = useCallback(async (finalWordsWon: number) => {
     try {
@@ -317,9 +351,10 @@ export default function LexiGrid() {
 
   // --- Animations & Progression ---
   const triggerWinAnimation = (attemptsForThisWord: number) => {
-    // Track if this word used ≤ MAX_TRIES - triesLeft attempts (i.e. ≤ 3 total → bonus eligible)
     if (attemptsForThisWord > MAX_TRIES) allBonusEligibleRef.current = false;
     totalAttemptsRef.current += attemptsForThisWord;
+
+    if (isPracticeMode) return; // No momentum gained in practice — skip all reward UI
 
     setFlyingScore(true);
     setTimeout(() => {
@@ -427,32 +462,75 @@ export default function LexiGrid() {
         <div className="flex-1 flex flex-col items-center w-full max-w-3xl relative z-10">
           
           {gameStatus === 'completed_day' ? (
-            /* ── End of Day Scoreboard ── */
             <div className="w-full max-w-lg bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-[32px] p-8 sm:p-10 flex flex-col items-center text-center shadow-2xl animate-in zoom-in-95 duration-500 mt-10">
-              <div className="w-20 h-20 bg-amber-500/20 rounded-full flex items-center justify-center mb-6 ring-8 ring-amber-500/10">
-                <Award className="w-10 h-10 text-amber-400" />
-              </div>
-              <h2 className="text-3xl font-black mb-2 text-white">Daily Challenge Complete</h2>
-              <p className="text-slate-400 mb-10 font-medium">Here is your vocabulary wrap-up for today.</p>
-              
-              <div className="w-full bg-slate-950/50 rounded-2xl p-6 border border-white/5 mb-10 flex justify-around">
-                <div>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Score</p>
-                  <p className="text-4xl font-black text-white">{wordsWon} <span className="text-xl text-slate-600">/ {DAILY_LIMIT}</span></p>
-                </div>
-                <div className="w-px bg-white/10" />
-                <div>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Momentum</p>
-                  <p className="text-4xl font-black text-amber-400">+{wordsWon * POINTS_PER_WORD}</p>
-                </div>
-              </div>
 
-              <button
-                onClick={() => navigate('/student/dashboard', { state: { lexigridCompleted: true } })}
-                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-lg py-4 rounded-2xl transition-all shadow-lg hover:shadow-indigo-500/25 active:scale-[0.98]"
-              >
-                Return to Dashboard
-              </button>
+              {isPracticeMode ? (
+                /* ── Practice Round Complete ── */
+                <>
+                  <div className="w-20 h-20 bg-indigo-500/20 rounded-full flex items-center justify-center mb-6 ring-8 ring-indigo-500/10">
+                    <Award className="w-10 h-10 text-indigo-400" />
+                  </div>
+                  <h2 className="text-3xl font-black mb-2 text-white">Practice Round Complete</h2>
+                  <p className="text-slate-400 mb-8 font-medium">
+                    Your daily momentum was already earned — this was a practice session.
+                  </p>
+                  <div className="w-full bg-slate-950/50 rounded-2xl p-6 border border-white/5 mb-8 flex justify-around">
+                    <div>
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Score</p>
+                      <p className="text-4xl font-black text-white">{wordsWon} <span className="text-xl text-slate-600">/ {DAILY_LIMIT}</span></p>
+                    </div>
+                    <div className="w-px bg-white/10" />
+                    <div>
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Mode</p>
+                      <p className="text-lg font-black text-indigo-400 mt-2">Practice</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={loadFreshWords}
+                    className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-lg py-4 rounded-2xl transition-all shadow-lg hover:shadow-indigo-500/25 active:scale-[0.98] mb-3"
+                  >
+                    Play Another Round
+                  </button>
+                  <button
+                    onClick={() => navigate('/student/dashboard')}
+                    className="w-full bg-white/5 hover:bg-white/10 text-slate-400 font-bold text-base py-3 rounded-2xl transition-all"
+                  >
+                    Return to Dashboard
+                  </button>
+                </>
+              ) : (
+                /* ── Daily Challenge Complete (first round — momentum earned) ── */
+                <>
+                  <div className="w-20 h-20 bg-amber-500/20 rounded-full flex items-center justify-center mb-6 ring-8 ring-amber-500/10">
+                    <Award className="w-10 h-10 text-amber-400" />
+                  </div>
+                  <h2 className="text-3xl font-black mb-2 text-white">Daily Challenge Complete</h2>
+                  <p className="text-slate-400 mb-10 font-medium">Here is your vocabulary wrap-up for today.</p>
+                  <div className="w-full bg-slate-950/50 rounded-2xl p-6 border border-white/5 mb-8 flex justify-around">
+                    <div>
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Score</p>
+                      <p className="text-4xl font-black text-white">{wordsWon} <span className="text-xl text-slate-600">/ {DAILY_LIMIT}</span></p>
+                    </div>
+                    <div className="w-px bg-white/10" />
+                    <div>
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Momentum</p>
+                      <p className="text-4xl font-black text-amber-400">+{wordsWon * POINTS_PER_WORD}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => navigate('/student/dashboard', { state: { lexigridCompleted: true } })}
+                    className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-lg py-4 rounded-2xl transition-all shadow-lg hover:shadow-indigo-500/25 active:scale-[0.98] mb-3"
+                  >
+                    Return to Dashboard
+                  </button>
+                  <button
+                    onClick={() => { setIsPracticeMode(true); loadFreshWords(); }}
+                    className="w-full bg-white/5 hover:bg-white/10 text-slate-400 font-bold text-base py-3 rounded-2xl transition-all"
+                  >
+                    Keep Practising →
+                  </button>
+                </>
+              )}
             </div>
           ) : (
             <>
