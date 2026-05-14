@@ -211,6 +211,9 @@ export default function Assessment() {
   // Phase
   const [phase, setPhase] = useState<Phase>("gate");
 
+  // Gate-level error (e.g. window closing too soon)
+  const [gateError, setGateError]             = useState<string | null>(null);
+
   // IA session state
   const [iaSessionId, setIaSessionId]         = useState<string | null>(null);
   const [iaSections, setIaSections]           = useState<IASection[] | null>(null);
@@ -218,6 +221,8 @@ export default function Assessment() {
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
   const [sessionMomentumAward, setSessionMomentumAward] = useState(0);
   const [iaResults, setIaResults]             = useState<any>(null);
+  // Which result card's Key Observations panel is open (null = all closed)
+  const [expandedFeedbackIdx, setExpandedFeedbackIdx] = useState<number | null>(null);
 
   // Per-question state
   const [currentIdx, setCurrentIdx]           = useState(0);
@@ -358,7 +363,10 @@ export default function Assessment() {
       const res: IASessionResponse = await callBackend(`${backendUrl}/api/ia/questions`);
 
       if (!res.success) {
-        console.error('[IA] failed to load questions:', res);
+        // Surface window-closing-soon as a friendly gate message
+        if ((res as any).error === 'window_closing_soon') {
+          setGateError((res as any).message ?? 'Too little time remains in today\'s window. Try your next scheduled IA.');
+        }
         setIsLoadingQuestions(false);
         return;
       }
@@ -841,12 +849,23 @@ export default function Assessment() {
           ))}
         </div>
 
+        {/* Window-closing-soon error banner */}
+        {gateError && (
+          <div className="mb-4 flex items-start gap-3 bg-amber-50 border-2 border-amber-300 rounded-xl px-4 py-3">
+            <span className="text-amber-500 text-lg flex-shrink-0">⚠️</span>
+            <div>
+              <p className="font-black text-amber-800 text-sm uppercase tracking-wide mb-0.5">Window Closing Soon</p>
+              <p className="text-amber-700 text-xs font-medium leading-relaxed">{gateError}</p>
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row gap-4">
           <button onClick={() => navigate(-1)} className="px-6 py-4 rounded-xl border-2 border-gray-300 font-black text-gray-500 hover:bg-gray-50 hover:border-gray-400 transition-colors uppercase tracking-wide">
             Cancel
           </button>
           <button
-            onClick={() => void beginFullTest()}
+            onClick={() => { setGateError(null); void beginFullTest(); }}
             disabled={isLoadingQuestions}
             className="flex-1 bg-indigo-700 hover:bg-indigo-600 disabled:opacity-60 text-white font-black text-base uppercase tracking-wide rounded-xl border-2 border-gray-900 transition-all neo-btn shadow-[4px_4px_0_#0F0F0F] flex items-center justify-center gap-2"
           >
@@ -917,6 +936,7 @@ export default function Assessment() {
       correct?: number; total?: number; ai_graded?: boolean;
       previous_band?: number | null; delta?: number | null;
       new_matrix_band?: number;
+      ai_feedback?: { rationale: string; key_observations: string[] };
     };
     const sectionScores: ScoreRow[] =
       iaResults?.section_scores ?? iaSections?.map(s => ({ sub_skill: s.sub_skill, skill: s.skill, band: 0 })) ?? [];
@@ -1006,6 +1026,68 @@ export default function Assessment() {
                   {/* MCQ correct count */}
                   {s.correct != null && s.total != null && s.total > 0 && (
                     <p className="text-xs text-gray-400 font-bold mb-3">{s.correct} / {s.total} MCQ correct</p>
+                  )}
+
+                  {/* ── AI Feedback (Writing/Speaking prompts only) ── */}
+                  {s.ai_graded && s.ai_feedback?.rationale && (
+                    <div className="border-t border-gray-100 pt-3 mb-3">
+                      <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5">AI Feedback</p>
+                      <p className="text-xs text-gray-600 font-medium leading-relaxed">
+                        &ldquo;{s.ai_feedback.rationale}&rdquo;
+                      </p>
+
+                      {/* Key Observations toggle button */}
+                      {(s.ai_feedback.key_observations?.length ?? 0) > 0 && (
+                        <div className="mt-2 relative">
+                          <button
+                            onClick={() => setExpandedFeedbackIdx(prev => prev === i ? null : i)}
+                            className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border transition-all ${
+                              expandedFeedbackIdx === i
+                                ? 'bg-indigo-700 text-white border-indigo-700'
+                                : 'bg-white text-indigo-700 border-indigo-300 hover:bg-indigo-50'
+                            }`}
+                          >
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            {expandedFeedbackIdx === i ? 'Hide Observations' : 'Key Observations'}
+                            <span className={`transition-transform duration-200 ${expandedFeedbackIdx === i ? 'rotate-180' : ''}`}>
+                              ▾
+                            </span>
+                          </button>
+
+                          {/* Popover panel — appears inline below the button */}
+                          {expandedFeedbackIdx === i && (
+                            <div className="mt-2 bg-white border-2 border-indigo-200 rounded-xl shadow-[0_4px_20px_rgba(99,102,241,0.15)] overflow-hidden">
+                              {/* Panel header */}
+                              <div className="flex items-center justify-between px-4 py-2.5 bg-indigo-50 border-b border-indigo-100">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-1.5 h-4 bg-indigo-600 rounded-full" />
+                                  <p className="text-[10px] font-black uppercase tracking-widest text-indigo-700">
+                                    Key Observations
+                                  </p>
+                                </div>
+                                <button
+                                  onClick={() => setExpandedFeedbackIdx(null)}
+                                  className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-indigo-200 text-indigo-500 transition-colors text-xs font-black"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                              {/* Observations list */}
+                              <ul className="px-4 py-3 flex flex-col gap-2.5">
+                                {s.ai_feedback.key_observations.map((obs, j) => (
+                                  <li key={j} className="flex items-start gap-2.5">
+                                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-indigo-500 flex-shrink-0" />
+                                    <span className="text-xs text-gray-700 font-medium leading-relaxed">{obs}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   )}
 
                   {/* ── Competency Band Impact ── */}
@@ -1250,7 +1332,7 @@ export default function Assessment() {
                       setAnswers(p => ({ ...p, [currentQ.id]: text }));
                       persistWritingDebounced(currentQ.id, text);
                     }}
-                    className="w-full p-5 border-2 border-gray-900 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-indigo-200 bg-gray-50 resize-none"
+                    className="w-full p-5 border-2 border-gray-900 rounded-xl text-base text-gray-900 font-medium outline-none focus:ring-2 focus:ring-indigo-200 bg-gray-50 resize-none"
                     style={{ boxShadow: 'inset 3px 3px 0 rgba(0,0,0,0.05)' }}
                   />
                   <div className="flex justify-between items-center mt-2">

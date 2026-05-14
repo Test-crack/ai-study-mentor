@@ -70,11 +70,12 @@ interface MockSessionResponse {
 }
 
 interface MockSubSkillScore {
-  sub_skill:  string;
-  band:       number;
-  correct:    number;
-  total_mcq:  number;
-  ai_band:    number | null;
+  sub_skill:   string;
+  band:        number;
+  correct:     number;
+  total_mcq:   number;
+  ai_band:     number | null;
+  ai_feedback?: { rationale: string; key_observations: string[] };
 }
 
 interface MockSkillScore {
@@ -188,6 +189,8 @@ export default function FullMockAssessment() {
   const [answers, setAnswers]                   = useState<Record<string, string>>({});
   const [mockResults, setMockResults]           = useState<any>(null);
   const [sessionMomentum, setSessionMomentum]   = useState(0);
+  // Which sub-skill feedback panel is open: "skillIdx-subSkillName" | null
+  const [expandedMockFeedback, setExpandedMockFeedback] = useState<string | null>(null);
 
   // Global 3-hour timer — never resets between sections
   const [timeLeft, setTimeLeft]                 = useState(MOCK_TOTAL_SECS);
@@ -773,7 +776,7 @@ export default function FullMockAssessment() {
                   <textarea rows={8} placeholder="Write your response here (minimum 10 words)…"
                     value={answers[currentQ.id] || ""}
                     onChange={e => { const text = e.target.value; setAnswers(p => ({ ...p, [currentQ.id]: text })); persistWritingDebounced(currentQ.id, text); }}
-                    className="w-full p-5 border-2 border-gray-900 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-purple-200 bg-gray-50 resize-none"
+                    className="w-full p-5 border-2 border-gray-900 rounded-xl text-base text-gray-900 font-medium outline-none focus:ring-2 focus:ring-purple-200 bg-gray-50 resize-none"
                     style={{ boxShadow: "inset 3px 3px 0 rgba(0,0,0,0.05)" }} />
                   <div className="flex justify-between mt-2">
                     <p className="text-xs text-gray-400 font-bold">{(answers[currentQ.id] ?? "").trim().split(/\s+/).filter(Boolean).length} words</p>
@@ -983,19 +986,77 @@ export default function FullMockAssessment() {
                     <div className="mb-3">
                       <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-2">Sub-skill Breakdown</p>
                       <div className="grid grid-cols-2 gap-1.5">
-                        {s.sub_skill_scores!.map((ss, j) => (
-                          <div key={j} className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
-                            <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">{SUBSKILL_LABEL[ss.sub_skill] ?? ss.sub_skill}</p>
-                            <div className="flex items-baseline gap-1.5 mt-0.5">
-                              <span className="text-lg font-black text-gray-900">{ss.band.toFixed(1)}</span>
-                              {ss.ai_band !== null && (
-                                <span className="text-[9px] text-gray-400 font-medium">AI: {ss.ai_band.toFixed(1)}</span>
+                        {s.sub_skill_scores!.map((ss, j) => {
+                          const feedbackKey = `${i}-${ss.sub_skill}`;
+                          const isOpen      = expandedMockFeedback === feedbackKey;
+                          const hasFeedback = !!(ss.ai_feedback?.rationale);
+                          return (
+                            <div key={j} className={`bg-gray-50 border rounded-lg px-3 py-2 transition-colors ${isOpen ? 'border-indigo-300 bg-indigo-50/60' : 'border-gray-200'}`}>
+                              <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">{SUBSKILL_LABEL[ss.sub_skill] ?? ss.sub_skill}</p>
+                              <div className="flex items-baseline gap-1.5 mt-0.5">
+                                <span className="text-lg font-black text-gray-900">{ss.band.toFixed(1)}</span>
+                                {ss.ai_band !== null && (
+                                  <span className="text-[9px] text-gray-400 font-medium">AI: {ss.ai_band.toFixed(1)}</span>
+                                )}
+                              </div>
+                              <p className="text-[9px] text-gray-400 font-medium mb-1.5">{ss.correct}/{ss.total_mcq} MCQ</p>
+                              {hasFeedback && (
+                                <button
+                                  onClick={() => setExpandedMockFeedback(prev => prev === feedbackKey ? null : feedbackKey)}
+                                  className={`inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border transition-all ${
+                                    isOpen ? 'bg-indigo-700 text-white border-indigo-700' : 'bg-white text-indigo-600 border-indigo-300 hover:bg-indigo-50'
+                                  }`}
+                                >
+                                  <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                  </svg>
+                                  {isOpen ? 'Hide' : 'Feedback'}
+                                </button>
                               )}
                             </div>
-                            <p className="text-[9px] text-gray-400 font-medium">{ss.correct}/{ss.total_mcq} MCQ</p>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
+
+                      {/* AI feedback panel — appears below the 2×2 grid for the selected sub-skill */}
+                      {s.sub_skill_scores!.map((ss, j) => {
+                        const feedbackKey = `${i}-${ss.sub_skill}`;
+                        if (expandedMockFeedback !== feedbackKey || !ss.ai_feedback?.rationale) return null;
+                        return (
+                          <div key={`fb-${j}`} className="mt-2 bg-white border-2 border-indigo-200 rounded-xl shadow-[0_4px_20px_rgba(99,102,241,0.12)] overflow-hidden">
+                            {/* Panel header */}
+                            <div className="flex items-center justify-between px-4 py-2.5 bg-indigo-50 border-b border-indigo-100">
+                              <div className="flex items-center gap-2">
+                                <div className="w-1.5 h-4 bg-indigo-600 rounded-full" />
+                                <p className="text-[10px] font-black uppercase tracking-widest text-indigo-700">
+                                  {SUBSKILL_LABEL[ss.sub_skill] ?? ss.sub_skill} — AI Feedback
+                                </p>
+                              </div>
+                              <button
+                                onClick={() => setExpandedMockFeedback(null)}
+                                className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-indigo-200 text-indigo-500 transition-colors text-xs font-black"
+                              >✕</button>
+                            </div>
+                            {/* Rationale */}
+                            <div className="px-4 pt-3 pb-2">
+                              <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1">Summary</p>
+                              <p className="text-xs text-gray-600 font-medium leading-relaxed italic">&ldquo;{ss.ai_feedback.rationale}&rdquo;</p>
+                            </div>
+                            {/* Key observations */}
+                            {(ss.ai_feedback.key_observations?.length ?? 0) > 0 && (
+                              <ul className="px-4 pb-3 flex flex-col gap-2">
+                                <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mt-1 mb-0.5">Key Observations</p>
+                                {ss.ai_feedback.key_observations.map((obs, k) => (
+                                  <li key={k} className="flex items-start gap-2">
+                                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-indigo-500 flex-shrink-0" />
+                                    <span className="text-xs text-gray-700 font-medium leading-relaxed">{obs}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
 
