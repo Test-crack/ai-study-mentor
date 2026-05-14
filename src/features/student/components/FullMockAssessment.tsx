@@ -65,20 +65,29 @@ interface MockSessionResponse {
   saved_answers:       Record<string, string>;
   window_closes_at:    string;
   time_remaining_ms:   number;
-  section_timers:      Record<string, number>;
+  total_time_ms:       number;
   already_done?:       boolean;
 }
 
+interface MockSubSkillScore {
+  sub_skill:  string;
+  band:       number;
+  correct:    number;
+  total_mcq:  number;
+  ai_band:    number | null;
+}
+
 interface MockSkillScore {
-  skill:             string;
-  band:              number;
-  new_matrix_band:   number;
-  diagnostic_band:   number | null;
-  delta_from_diag:   number | null;
-  prev_matrix_band:  number | null;
-  correct:           number;
-  total:             number;
-  ai_graded:         boolean;
+  skill:              string;
+  band:               number;
+  new_matrix_band:    number;
+  diagnostic_band:    number | null;
+  delta_from_diag:    number | null;
+  prev_matrix_band:   number | null;
+  correct:            number;
+  total:              number;
+  ai_graded:          boolean;
+  sub_skill_scores?:  MockSubSkillScore[];  // W/S only
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -89,10 +98,11 @@ const SKILL_ICON: Record<string, string> = {
 const SKILL_LABEL: Record<string, string> = {
   LISTENING: "Listening", READING: "Reading", WRITING: "Writing", SPEAKING: "Speaking",
 };
-// Fallback timers if API doesn't return them
-const FALLBACK_TIMERS: Record<string, number> = {
-  LISTENING: 30 * 60 * 1000, READING: 30 * 60 * 1000, WRITING: 40 * 60 * 1000, SPEAKING: 20 * 60 * 1000,
+const SUBSKILL_LABEL: Record<string, string> = {
+  GRAMMAR: "Grammar", VOCABULARY: "Vocabulary", COHERENCE: "Coherence",
+  TASK_RESPONSE: "Task Response", FLUENCY: "Fluency", PRONUNCIATION: "Pronunciation",
 };
+const MOCK_TOTAL_SECS = 3 * 60 * 60;   // 3-hour global timer — no per-section resets
 const STORAGE_KEY = "tc_full_mock_assessment_state";
 
 function formatTime(seconds: number): string {
@@ -172,7 +182,6 @@ export default function FullMockAssessment() {
   // Session
   const [sessionId, setSessionId]               = useState<string | null>(null);
   const [sections, setSections]                 = useState<MockSection[] | null>(null);
-  const [sectionTimers, setSectionTimers]       = useState<Record<string, number>>(FALLBACK_TIMERS);
   const [currentSectionIdx, setCurrentSectionIdx] = useState(0);
   const [currentIdx, setCurrentIdx]             = useState(0);
   const [isLoading, setIsLoading]               = useState(false);
@@ -180,8 +189,8 @@ export default function FullMockAssessment() {
   const [mockResults, setMockResults]           = useState<any>(null);
   const [sessionMomentum, setSessionMomentum]   = useState(0);
 
-  // Timer
-  const [timeLeft, setTimeLeft]                 = useState(30 * 60);
+  // Global 3-hour timer — never resets between sections
+  const [timeLeft, setTimeLeft]                 = useState(MOCK_TOTAL_SECS);
 
   // Audio / Passage
   const audioRef                                = useRef<HTMLAudioElement>(null);
@@ -200,7 +209,8 @@ export default function FullMockAssessment() {
   const writingDebounceRef                      = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const currentSection = sections?.[currentSectionIdx] ?? null;
-  const currentSectionTotalSec = Math.floor((sectionTimers[currentSection?.skill?.toUpperCase() ?? "LISTENING"] ?? 30 * 60 * 1000) / 1000);
+  // For CircleTimer the max is always the full 3-hour test duration
+  const currentSectionTotalSec = MOCK_TOTAL_SECS;
 
   // ── Status check ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -306,9 +316,6 @@ export default function FullMockAssessment() {
         if (s.success) setMockStatus(s);
         setIsLoading(false); return;
       }
-      const timers = res.section_timers ?? FALLBACK_TIMERS;
-      const firstSkill = res.sections[res.current_section_idx ?? 0]?.skill?.toUpperCase() ?? "LISTENING";
-      setSectionTimers(timers);
       setSessionId(res.session_id);
       setSections(transformSectionAudioUrls(res.sections));
       setCurrentSectionIdx(res.current_section_idx ?? 0);
@@ -317,7 +324,8 @@ export default function FullMockAssessment() {
       setAudioState("idle");
       setShowPassage(false);
       setIsRecording(false);
-      setTimeLeft(Math.floor((res.time_remaining_ms ?? timers[firstSkill] ?? 30 * 60 * 1000) / 1000));
+      // Global timer — restore remaining time from backend (accounts for time away)
+      setTimeLeft(Math.floor((res.time_remaining_ms ?? MOCK_TOTAL_SECS * 1000) / 1000));
       setPhase("session");
     } catch (err) {
       console.error("[Mock] begin error:", err);
@@ -351,10 +359,9 @@ export default function FullMockAssessment() {
   }, [sections, currentSectionIdx, sessionId]);
 
   const advanceToNextSection = () => {
-    const nextIdx   = currentSectionIdx + 1;
-    const nextSkill = sections?.[nextIdx]?.skill?.toUpperCase() ?? "READING";
-    const nextMs    = sectionTimers[nextSkill] ?? 30 * 60 * 1000;
+    const nextIdx = currentSectionIdx + 1;
     if (audioRef.current && !audioRef.current.paused) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
+    // Stamp navigation position on backend — timer is global so no section_started_at needed
     if (sessionId) {
       callBackend(`${backendUrl()}/api/mock/answer`, {
         method: "POST", body: JSON.stringify({ session_id: sessionId, section_advance: nextIdx })
@@ -363,7 +370,7 @@ export default function FullMockAssessment() {
     setCurrentSectionIdx(nextIdx);
     setCurrentIdx(0);
     setAnswers({});
-    setTimeLeft(Math.floor(nextMs / 1000));
+    // DO NOT reset timeLeft — global timer keeps counting down across all sections
     setAudioState("idle"); setShowPassage(false); setIsRecording(false);
     setPhase("session");
   };
@@ -840,7 +847,6 @@ export default function FullMockAssessment() {
 
   const renderInterim = () => {
     const nextSec = sections?.[currentSectionIdx + 1];
-    const nextMs  = sectionTimers[nextSec?.skill?.toUpperCase() ?? "READING"] ?? 30 * 60 * 1000;
     return (
       <div className="min-h-[70vh] flex items-center justify-center animate-fade-in px-4 pt-12">
         <div className="max-w-lg w-full bg-white border-2 border-gray-900 rounded-2xl p-10 text-center shadow-[8px_8px_0_#0F0F0F]">
@@ -862,7 +868,7 @@ export default function FullMockAssessment() {
                     <p className="text-sm text-gray-500">{nextSec.questions.length} questions</p>
                   </div>
                 </div>
-                <span className="bg-gray-100 border-2 border-gray-200 rounded-lg px-3 py-1 text-xs font-black text-gray-500 uppercase">{Math.floor(nextMs / 60000)} min</span>
+                <span className="bg-gray-100 border-2 border-gray-200 rounded-lg px-3 py-1 text-xs font-black text-gray-500 uppercase">{nextSec.questions.length} Q</span>
               </div>
             </div>
           )}
@@ -952,6 +958,8 @@ export default function FullMockAssessment() {
               const diagDelta  = s.delta_from_diag;
               const diagUp     = diagDelta !== null && diagDelta > 0;
 
+              const hasSubSkills = (s.sub_skill_scores?.length ?? 0) > 0;
+
               return (
                 <div key={i} className="bg-white border-2 border-gray-900 rounded-xl p-6 shadow-[4px_4px_0_#0F0F0F]">
                   {/* Skill header */}
@@ -959,15 +967,36 @@ export default function FullMockAssessment() {
                     <span className="text-2xl">{SKILL_ICON[s.skill] ?? "📝"}</span>
                     <div>
                       <p className="font-black text-gray-900 text-sm uppercase tracking-wide">{SKILL_LABEL[s.skill] ?? s.skill}</p>
-                      <p className="text-gray-400 text-[10px] font-bold uppercase">{s.ai_graded ? "MCQ + AI Graded" : "MCQ"}</p>
+                      <p className="text-gray-400 text-[10px] font-bold uppercase">{s.ai_graded ? "MCQ + AI Graded" : "Pure MCQ"}</p>
                     </div>
                   </div>
 
-                  {/* Mock score */}
+                  {/* Mock score (overall for this skill) */}
                   <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Mock Score</p>
-                  <p className="text-5xl font-black text-gray-900 leading-none mb-3">{s.band > 0 ? s.band.toFixed(1) : "—"}</p>
+                  <p className="text-5xl font-black text-gray-900 leading-none mb-1">{s.band > 0 ? s.band.toFixed(1) : "—"}</p>
                   {s.correct != null && s.total > 0 && (
                     <p className="text-xs text-gray-400 font-bold mb-3">{s.correct} / {s.total} MCQ correct</p>
+                  )}
+
+                  {/* Sub-skill breakdown (W/S only) */}
+                  {hasSubSkills && (
+                    <div className="mb-3">
+                      <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-2">Sub-skill Breakdown</p>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        {s.sub_skill_scores!.map((ss, j) => (
+                          <div key={j} className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+                            <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">{SUBSKILL_LABEL[ss.sub_skill] ?? ss.sub_skill}</p>
+                            <div className="flex items-baseline gap-1.5 mt-0.5">
+                              <span className="text-lg font-black text-gray-900">{ss.band.toFixed(1)}</span>
+                              {ss.ai_band !== null && (
+                                <span className="text-[9px] text-gray-400 font-medium">AI: {ss.ai_band.toFixed(1)}</span>
+                              )}
+                            </div>
+                            <p className="text-[9px] text-gray-400 font-medium">{ss.correct}/{ss.total_mcq} MCQ</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   )}
 
                   {/* Real Band impact */}
@@ -983,8 +1012,6 @@ export default function FullMockAssessment() {
                         </span>
                       )}
                     </div>
-
-                    {/* Diagnostic comparison */}
                     {s.diagnostic_band !== null && (
                       <div className={`flex items-center gap-2 text-xs font-bold ${diagUp ? "text-emerald-600" : "text-gray-500"}`}>
                         <BookOpen className="w-3 h-3" />
