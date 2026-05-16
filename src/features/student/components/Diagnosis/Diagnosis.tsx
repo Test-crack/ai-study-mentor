@@ -207,14 +207,16 @@ async function submitSection(
 
 async function submitWriting(
   studentId: string,
-  text: string
+  text: string,
+  questionId?: string
 ): Promise<SkillResult> {
   const data = await callBackend(`/api/diagnostic/submit/writing`, {
     method: "POST",
-    body: JSON.stringify({ 
+    body: JSON.stringify({
       student_id: studentId,
       skill: "writing",
-      answers: { text } 
+      question_id: questionId,
+      answers: { text, question_id: questionId }
     }),
   });
   if (data?.bandScore === undefined) throw new Error("Writing submission failed");
@@ -228,12 +230,14 @@ async function submitWriting(
 
 async function submitSpeaking(
   studentId: string,
-  audioBlob: Blob
+  audioBlob: Blob,
+  questionId?: string
 ): Promise<SkillResult> {
   const formData = new FormData();
   formData.append("audio", audioBlob, "recording.webm");
   formData.append("student_id", studentId);
   formData.append("skill", "speaking");
+  if (questionId) formData.append("question_id", questionId);
 
   const data = await uploadFileToBackend(
     `/api/diagnostic/submit/speaking`,
@@ -1130,7 +1134,7 @@ function WritingPhase({
     setError(false);
     try {
       setSectionState("scoring");
-      const result = await submitWriting(studentId, text);
+      const result = await submitWriting(studentId, text, data?.id);
       storageClear(SK.writingText);
       setSectionState("scored");
       onComplete(result);
@@ -1378,7 +1382,7 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
     setRecordState("uploading");
     try {
       setRecordState("processing");
-      const result = await submitSpeaking(studentId, audioBlob);
+      const result = await submitSpeaking(studentId, audioBlob, data?.id);
       storageSave(SK.speakingResult, result);
       setRecordState("done");
       onComplete(result);
