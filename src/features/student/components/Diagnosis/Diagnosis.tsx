@@ -117,6 +117,22 @@ function getAverageScore(results: AllResults): number {
   return scores.reduce((a, b) => a + b, 0) / scores.length;
 }
 
+/**
+ * Normalise MCQ options from either DB format (object) or legacy format (array).
+ * DB format:     { "A": "Option text", "B": "Option text" }
+ * Legacy format: ["A. Option text", "B. Option text"]
+ */
+function normaliseOptions(raw: any): { letter: string; text: string }[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) {
+    return raw.map((opt: string) => ({
+      letter: opt.split('.')[0].trim(),
+      text:   opt.substring(opt.indexOf('.') + 1).trim(),
+    }));
+  }
+  return Object.entries(raw as Record<string, string>).map(([letter, text]) => ({ letter, text }));
+}
+
 function countWords(text: string): number {
   return text.trim().split(/\s+/).filter(Boolean).length;
 }
@@ -239,11 +255,19 @@ async function submitSpeaking(
   formData.append("skill", "speaking");
   if (questionId) formData.append("question_id", questionId);
 
-  const data = await uploadFileToBackend(
-    `/api/diagnostic/submit/speaking`,
-    formData,
-    "POST"
-  );
+  let data: any;
+  try {
+    data = await uploadFileToBackend(`/api/diagnostic/submit/speaking`, formData, "POST");
+  } catch (httpErr: any) {
+    // 422 → server detected no usable speech; responseData is attached by uploadFileToBackend
+    if (httpErr?.responseData?.can_retry) {
+      const retryErr = new Error(httpErr.responseData.message ?? 'No speech detected. Please re-record.');
+      (retryErr as any).canRetry = true;
+      throw retryErr;
+    }
+    throw httpErr;
+  }
+
   if (data?.bandScore === undefined) throw new Error("Speaking submission failed");
   return {
     band_score: data.bandScore,
@@ -569,8 +593,8 @@ function DiagnosticGate({
   onStart: () => void;
 }) {
   const steps = [
-    { icon: "🎧", label: "Listening", desc: "6 MCQs with audio", num: "01" },
-    { icon: "📖", label: "Reading", desc: "Passage + 4 questions", num: "02" },
+    { icon: "🎧", label: "Listening", desc: "Audio passage with MCQs", num: "01" },
+    { icon: "📖", label: "Reading", desc: "Passage + comprehension questions", num: "02" },
     { icon: "✍️", label: "Writing", desc: "Graph response task", num: "03" },
     { icon: "🎤", label: "Speaking", desc: "90-second verbal prompt", num: "04" },
   ];
@@ -660,6 +684,10 @@ function ListeningPhase({
     fetchDiagnosticQuestionsData("listening")
       .then(res => {
         setData(res);
+        // Discard any stale answers from a previous session whose question IDs
+        // no longer match the newly-fetched set. Prevents 5+5 = 10-question grading.
+        const validIds = new Set<string>((res.questions ?? []).map((q: any) => q.id));
+        setAnswers(prev => Object.fromEntries(Object.entries(prev).filter(([id]) => validIds.has(id))));
         setSectionState("ready");
       })
       .catch((e) => {
@@ -677,7 +705,9 @@ function ListeningPhase({
     storageSave(SK.listeningAudioPlayed, audioPlayed);
   }, [audioPlayed]);
 
-  const allAnswered = data?.questions ? data.questions.every((q: any) => answers[q.id]) : false;
+  const allAnswered   = data?.questions ? data.questions.every((q: any) => answers[q.id]) : false;
+  const answeredCount = data?.questions?.filter((q: any) => answers[q.id]).length ?? 0;
+  const totalCount    = data?.questions?.length ?? 0;
 
   const handleSubmit = async () => {
     setSectionState("submitting");
@@ -757,11 +787,11 @@ function ListeningPhase({
           <div className="w-10 h-10 bg-indigo-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>🎧</div>
           <div>
             <p className="text-gray-900 font-black uppercase tracking-wide">Listening Section</p>
-            <p className="text-gray-500 text-sm">6 questions · Answer all to submit</p>
+            <p className="text-gray-500 text-sm">{data?.questions?.length ?? 0} questions · Answer all to submit</p>
           </div>
         </div>
         <div className="bg-white border-2 border-gray-900 rounded-lg px-3 py-1.5 text-gray-900 text-sm font-black tabular-nums" style={{ boxShadow: '2px 2px 0 #0F0F0F' }}>
-          {Object.keys(answers).length}/6
+          {Object.keys(answers).length}/{data?.questions?.length ?? 0}
         </div>
       </div>
 
@@ -817,43 +847,66 @@ function ListeningPhase({
               <span className="text-indigo-700 font-black mr-2 uppercase">Q{qi + 1}.</span>
               {q.text}
             </p>
-            <div className="grid grid-cols-1 gap-2">
-              {q.options.map((opt: string) => {
-                const optLetter = opt.split('.')[0];
-                return (
-                <label
-                  key={optLetter}
-                  className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
-                    answers[q.id] === optLetter
-                      ? "border-gray-900 bg-gray-900 text-white"
-                      : "border-gray-200 text-gray-600 hover:border-gray-400 hover:text-gray-900"
-                  }`}
-                >
-                  <div
-                    className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-all ${
-                      answers[q.id] === optLetter
-                        ? "border-indigo-400 bg-indigo-500"
-                        : "border-gray-400"
+            <div className={`${q.type === 'tfng' ? 'flex gap-2 flex-wrap mt-2' : 'grid grid-cols-1 gap-2'}`}>
+              {q.type === 'tfng' ? (
+                /* TRUE / FALSE / NOT GIVEN buttons for TFNG questions */
+                (['T', 'F', 'NG'] as const).map(val => {
+                  const label = val === 'T' ? 'True' : val === 'F' ? 'False' : 'Not Given';
+                  const selected = answers[q.id] === val;
+                  return (
+                    <label
+                      key={val}
+                      className={`px-4 py-2 rounded-lg border-2 cursor-pointer text-xs font-black uppercase tracking-wide transition-all ${
+                        selected
+                          ? 'border-gray-900 bg-gray-900 text-white shadow-[2px_2px_0_#0F0F0F]'
+                          : 'border-gray-300 text-gray-600 hover:border-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      {label}
+                      <input
+                        type="radio"
+                        name={q.id}
+                        value={val}
+                        checked={selected}
+                        onChange={() => setAnswers(prev => ({ ...prev, [q.id]: val }))}
+                        className="sr-only"
+                      />
+                    </label>
+                  );
+                })
+              ) : (
+                /* MCQ options */
+                normaliseOptions(q.options).map(({ letter, text }) => (
+                  <label
+                    key={letter}
+                    className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                      answers[q.id] === letter
+                        ? 'border-gray-900 bg-gray-900 text-white'
+                        : 'border-gray-200 text-gray-600 hover:border-gray-400 hover:text-gray-900'
                     }`}
                   >
-                    {answers[q.id] === optLetter && (
-                      <div className="w-1.5 h-1.5 rounded-sm bg-white" />
-                    )}
-                  </div>
-                  <span className={`font-black text-sm w-5 shrink-0 ${answers[q.id] === optLetter ? 'text-indigo-300' : 'text-indigo-700'}`}>
-                    {optLetter}
-                  </span>
-                  <span className="text-sm">{opt.substring(optLetter.length + 1).trim()}</span>
-                  <input
-                    type="radio"
-                    name={q.id}
-                    value={optLetter}
-                    checked={answers[q.id] === optLetter}
-                    onChange={() => setAnswers((prev) => ({ ...prev, [q.id]: optLetter }))}
-                    className="sr-only"
-                  />
-                </label>
-              )})}
+                    <div
+                      className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-all ${
+                        answers[q.id] === letter ? 'border-indigo-400 bg-indigo-500' : 'border-gray-400'
+                      }`}
+                    >
+                      {answers[q.id] === letter && <div className="w-1.5 h-1.5 rounded-sm bg-white" />}
+                    </div>
+                    <span className={`font-black text-sm w-5 shrink-0 ${answers[q.id] === letter ? 'text-indigo-300' : 'text-indigo-700'}`}>
+                      {letter}
+                    </span>
+                    <span className="text-sm">{text}</span>
+                    <input
+                      type="radio"
+                      name={q.id}
+                      value={letter}
+                      checked={answers[q.id] === letter}
+                      onChange={() => setAnswers(prev => ({ ...prev, [q.id]: letter }))}
+                      className="sr-only"
+                    />
+                  </label>
+                ))
+              )}
             </div>
           </div>
         ))}
@@ -877,7 +930,7 @@ function ListeningPhase({
             Submitting…
           </span>
         ) : (
-          `Submit Listening ${allAnswered ? "✓" : `(${Object.keys(answers).length}/6)`}`
+          `Submit Listening ${allAnswered ? "✓" : `(${answeredCount}/${totalCount})`}`
         )}
       </button>
     </div>
@@ -910,6 +963,9 @@ function ReadingPhase({
     fetchDiagnosticQuestionsData("reading")
       .then(res => {
         setData(res);
+        // Discard stale answers from previous sessions with different question IDs
+        const validIds = new Set<string>((res.questions ?? []).map((q: any) => q.id));
+        setAnswers(prev => Object.fromEntries(Object.entries(prev).filter(([id]) => validIds.has(id))));
         setSectionState("ready");
       })
       .catch((e) => {
@@ -936,8 +992,10 @@ function ReadingPhase({
     storageSave(SK.readingAnswers, answers);
   }, [answers]);
 
-  const allAnswered = data?.questions ? data.questions.every((q: any) => answers[q.id]) : false;
-  const timerWarning = timeLeft <= 60 && timeLeft > 0;
+  const allAnswered   = data?.questions ? data.questions.every((q: any) => answers[q.id]) : false;
+  const answeredCount = data?.questions?.filter((q: any) => answers[q.id]).length ?? 0;
+  const totalCount    = data?.questions?.length ?? 0;
+  const timerWarning  = timeLeft <= 60 && timeLeft > 0;
 
   const handleSubmit = async () => {
     setSectionState("submitting");
@@ -993,7 +1051,7 @@ function ReadingPhase({
           <div className="w-10 h-10 bg-indigo-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>📖</div>
           <div>
             <p className="text-gray-900 font-black uppercase tracking-wide">Reading Section</p>
-            <p className="text-gray-500 text-sm">Read the passage, then answer 4 questions</p>
+            <p className="text-gray-500 text-sm">Read the passage, then answer {data?.questions?.length ?? 0} questions</p>
           </div>
         </div>
         <div
@@ -1036,30 +1094,60 @@ function ReadingPhase({
               {q.text}
             </p>
             <div className="flex gap-2 flex-wrap">
-              {q.options.map((opt: string) => {
-                const optLetter = opt.split('.')[0];
-                const isSelected = answers[q.id] === optLetter;
-                return (
-                <label
-                  key={optLetter}
-                  className={`px-4 py-2 rounded-lg border-2 cursor-pointer text-sm font-black uppercase tracking-wide transition-all ${
-                    isSelected
-                      ? "border-gray-900 bg-gray-900 text-white"
-                      : "border-gray-300 text-gray-500 hover:border-gray-600 hover:text-gray-800"
-                  }`}
-                  style={isSelected ? { boxShadow: '2px 2px 0 #0F0F0F' } : {}}
-                >
-                  {opt.substring(optLetter.length + 1).trim()}
-                  <input
-                    type="radio"
-                    name={q.id}
-                    value={optLetter}
-                    checked={isSelected}
-                    onChange={() => setAnswers((prev) => ({ ...prev, [q.id]: optLetter }))}
-                    className="sr-only"
-                  />
-                </label>
-              )})}
+              {q.type === 'tfng' ? (
+                /* TRUE / FALSE / NOT GIVEN buttons */
+                (['T', 'F', 'NG'] as const).map(val => {
+                  const label = val === 'T' ? 'True' : val === 'F' ? 'False' : 'Not Given';
+                  const isSelected = answers[q.id] === val;
+                  return (
+                    <label
+                      key={val}
+                      className={`px-4 py-2 rounded-lg border-2 cursor-pointer text-sm font-black uppercase tracking-wide transition-all ${
+                        isSelected
+                          ? 'border-gray-900 bg-gray-900 text-white'
+                          : 'border-gray-300 text-gray-500 hover:border-gray-600 hover:text-gray-800'
+                      }`}
+                      style={isSelected ? { boxShadow: '2px 2px 0 #0F0F0F' } : {}}
+                    >
+                      {label}
+                      <input
+                        type="radio"
+                        name={q.id}
+                        value={val}
+                        checked={isSelected}
+                        onChange={() => setAnswers(prev => ({ ...prev, [q.id]: val }))}
+                        className="sr-only"
+                      />
+                    </label>
+                  );
+                })
+              ) : (
+                /* MCQ options */
+                normaliseOptions(q.options).map(({ letter, text }) => {
+                  const isSelected = answers[q.id] === letter;
+                  return (
+                    <label
+                      key={letter}
+                      className={`px-4 py-2 rounded-lg border-2 cursor-pointer text-sm font-black uppercase tracking-wide transition-all ${
+                        isSelected
+                          ? 'border-gray-900 bg-gray-900 text-white'
+                          : 'border-gray-300 text-gray-500 hover:border-gray-600 hover:text-gray-800'
+                      }`}
+                      style={isSelected ? { boxShadow: '2px 2px 0 #0F0F0F' } : {}}
+                    >
+                      {text}
+                      <input
+                        type="radio"
+                        name={q.id}
+                        value={letter}
+                        checked={isSelected}
+                        onChange={() => setAnswers(prev => ({ ...prev, [q.id]: letter }))}
+                        className="sr-only"
+                      />
+                    </label>
+                  );
+                })
+              )}
             </div>
           </div>
         ))}
@@ -1083,7 +1171,7 @@ function ReadingPhase({
             Submitting…
           </span>
         ) : (
-          `Submit Reading ${allAnswered ? "✓" : `(${Object.keys(answers).length}/4)`}`
+          `Submit Reading ${allAnswered ? "✓" : `(${answeredCount}/${totalCount})`}`
         )}
       </button>
     </div>
@@ -1144,10 +1232,12 @@ function WritingPhase({
     }
   };
 
-  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => { e.preventDefault(); };
-  const handleCopy = (e: React.ClipboardEvent<HTMLTextAreaElement>) => { e.preventDefault(); };
-  const handleCut = (e: React.ClipboardEvent<HTMLTextAreaElement>) => { e.preventDefault(); };
-  const handleDrop = (e: React.DragEvent<HTMLTextAreaElement>) => { e.preventDefault(); };
+  // Copy/paste/drag blocked in production only — leave open in dev for easier testing
+  const IS_PROD = !import.meta.env.DEV;
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => { if (IS_PROD) e.preventDefault(); };
+  const handleCopy  = (e: React.ClipboardEvent<HTMLTextAreaElement>) => { if (IS_PROD) e.preventDefault(); };
+  const handleCut   = (e: React.ClipboardEvent<HTMLTextAreaElement>) => { if (IS_PROD) e.preventDefault(); };
+  const handleDrop  = (e: React.DragEvent<HTMLTextAreaElement>)      => { if (IS_PROD) e.preventDefault(); };
 
   if (sectionState === "loading") {
     return (
@@ -1386,9 +1476,17 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
       storageSave(SK.speakingResult, result);
       setRecordState("done");
       onComplete(result);
-    } catch {
-      setError("Upload failed. Your recording is still available — please try again.");
-      setRecordState("recorded");
+    } catch (err: any) {
+      if (err?.canRetry) {
+        // Empty / silent audio — clear the bad recording and let them try again
+        setAudioBlob(null);
+        setElapsed(0);
+        setRecordState("idle");
+        setError(err.message ?? 'No speech was detected in your recording. Please check your microphone and record again.');
+      } else {
+        setError("Upload failed. Your recording is still available — please try again.");
+        setRecordState("recorded");
+      }
     }
   };
 
@@ -1625,49 +1723,10 @@ function SpeakingResultCard({
         </div>
       )}
 
-      {result.sub_scores?.feedback && (
+      {(result.feedback ?? result.sub_scores?.feedback) && (
         <div className="bg-white border-2 border-gray-900 rounded-lg p-6" style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>
           <p className="text-gray-900 font-black uppercase tracking-wide mb-4 text-center">AI Detailed Feedback</p>
-          <div className="space-y-4">
-            {result.sub_scores.feedback.fluency && Array.isArray(result.sub_scores.feedback.fluency) && (
-              <div>
-                <p className="text-xs uppercase font-black text-gray-500 mb-1 tracking-wider">Fluency</p>
-                <ul className="list-disc pl-4 text-sm text-gray-700 space-y-1">
-                  {result.sub_scores.feedback.fluency.map((item: string, i: number) => <li key={i}>{item}</li>)}
-                </ul>
-              </div>
-            )}
-            {result.sub_scores.feedback.delivery_and_confidence && Array.isArray(result.sub_scores.feedback.delivery_and_confidence) && (
-              <div>
-                <p className="text-xs uppercase font-black text-gray-500 mb-1 tracking-wider">Delivery & Confidence</p>
-                <ul className="list-disc pl-4 text-sm text-gray-700 space-y-1">
-                  {result.sub_scores.feedback.delivery_and_confidence.map((item: string, i: number) => <li key={i}>{item}</li>)}
-                </ul>
-              </div>
-            )}
-            {result.sub_scores.feedback.filler_words_used && Array.isArray(result.sub_scores.feedback.filler_words_used) && (
-              <div>
-                <p className="text-xs uppercase font-black text-gray-500 mb-1 tracking-wider">Filler Words</p>
-                <ul className="list-disc pl-4 text-sm text-gray-700 space-y-1">
-                  {result.sub_scores.feedback.filler_words_used.map((item: string, i: number) => <li key={i}>{item}</li>)}
-                </ul>
-              </div>
-            )}
-            {result.sub_scores.feedback.pronunciation && Array.isArray(result.sub_scores.feedback.pronunciation) && (
-              <div>
-                <p className="text-xs uppercase font-black text-gray-500 mb-1 tracking-wider">Pronunciation</p>
-                <ul className="list-disc pl-4 text-sm text-gray-700 space-y-1">
-                  {result.sub_scores.feedback.pronunciation.map((item: string, i: number) => <li key={i}>{item}</li>)}
-                </ul>
-              </div>
-            )}
-            {result.sub_scores.feedback.improvements && (
-              <div>
-                <p className="text-xs uppercase font-black text-gray-500 mb-1 tracking-wider">Overall Improvements</p>
-                <p className="text-sm text-gray-700 bg-indigo-50 p-3 rounded-lg border-2 border-gray-900">{result.sub_scores.feedback.improvements}</p>
-              </div>
-            )}
-          </div>
+          <DetailedFeedbackDisplay feedback={result.feedback ?? result.sub_scores?.feedback} />
         </div>
       )}
 

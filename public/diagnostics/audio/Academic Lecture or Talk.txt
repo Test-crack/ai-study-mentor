@@ -1,0 +1,159 @@
+You will hear a university
+lecture on the psychology of
+decision making. First, you have
+some time to look at questions
+31 to 40. Now listen carefully
+and answer questions 31 to 40.
+Good morning, everyone. Today
+we're moving into one of the
+most fascinating areas of
+behavioral psychology, the way
+human beings make decisions,
+particularly when the outcome is
+uncertain. By the end of this
+lecture, I'd like you to have a
+solid grasp of three key
+prospect theory, the concept of
+cognitive bias, and what's known
+as bounded rationality. Let's
+start with the classical
+economic assumption. For a long
+time, economists believed that
+people are what they called
+rational agents. The idea was
+that when faced with a decision,
+a person would weigh up all the
+available information, calculate
+the expected utility of each
+option, and choose the one most
+likely to maximize their
+benefit. Simple enough in
+theory. But in the 1970s, two
+psychologists, Daniel Kahneman
+and Amos Tversky, began
+conducting experiments that
+systematically dismantled this
+assumption. Their research
+showed that people do not behave
+like rational calculators.
+Instead, we are deeply
+influenced by the way
+information is presented to us,
+something they called the
+framing effect. Here's a classic
+example. Imagine you're told
+that a new medical treatment has
+a 90% support survival rate.
+Most people would support it.
+But if you're told the same
+treatment has a 10% mortality
+rate, people are far less
+enthusiastic. Even though
+mathematically these two
+statements are identical, the
+framing survival versus
+mortality profoundly affects our
+perception of risk. This led
+Kahneman and Tversky to develop
+what became known as prospect
+theory, published in 1979. The
+central insight is people do not
+evaluate outcomes in absolute
+terms. Instead, we assess them
+relative to a reference point,
+usually our current situation or
+what we expected to happen.
+Gains and losses are treated
+asymmetrically. Losing $100
+feels roughly twice as painful
+as gaining $100 feels
+pleasurable. This phenomenon is
+called loss aversion, and it has
+enormous implications for
+everything from consumer
+behavior to financial markets.
+Now, prospect theory is closely
+related to a broader concept
+called cognitive bias. A
+cognitive bias is is a
+systematic error in thinking, a
+mental shortcut or heuristic
+that leads us to make
+consistently irrational
+judgments. Kahneman later
+organized these ideas into what
+he called System 1 and System 2.
+Thinking, described in his 2011
+book Fast and Slow, System 1 is
+fast, intuitive and emotional.
+System 2 is slow, deliberate and
+logical. Most of our everyday
+decisions are made by System 1,
+which is efficient but prone to
+error. Some of the most well
+documented cognitive biases
+include the availability
+heuristic, where we judge the
+likelihood of an event based on
+how easily an example comes to
+mind. After seeing news coverage
+of plane crashes, for instance,
+people dramatically overestimate
+the danger of flying, even
+though statistically it is far
+safer than driving. Another is
+confirmation bias, our tendency
+to seek out and interpret
+information in ways that confirm
+what we already believe while
+ignoring contradictory evidence.
+The third framework I want to
+introduce today is is bounded
+rationality, a concept developed
+by the economist and cognitive
+scientist Herbert Simon in the
+1950s. Simon argued that while
+people do try to make rational
+decisions, we are constrained by
+three the limited information
+available to us, the cognitive
+limitations of our minds, and
+the finite amount of time we
+have to make a decision. Given
+these constraints, we don't
+optimize, we satisfice. That's a
+word Simon coined, combining,
+satisfy and suffice. We choose
+the first option that meets an
+acceptable threshold rather than
+exhaustively comparing all
+alternatives. Understanding
+these frameworks has significant
+real world applications in
+public health. Nudge theory,
+developed by Thaler and Sunstein
+uses knowledge of cognitive bias
+to design environments that
+guide people toward healthier
+choices without restricting
+their freedom. For example,
+placing fruit at eye level in a
+cafeteria increases consumption
+not through rules but through
+the architecture of choice. In
+finance, behavioral economists
+have used prospect theory to
+explain market bubbles and
+crashes, events that classical
+economics struggled to account
+for. And in legal systems,
+awareness of cognitive bias is
+reshaping how eyewitness
+testimony is evaluated in court.
+For your seminar next week, I'd
+like you to read the first three
+chapters of of Kahneman's book
+and come prepared to discuss one
+real world example of cognitive
+bias in your own field of study.
+Thank you.

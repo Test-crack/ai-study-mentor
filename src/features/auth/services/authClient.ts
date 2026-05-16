@@ -80,7 +80,11 @@ export async function uploadFileToBackend(path: string, formData: FormData, meth
       window.dispatchEvent(new CustomEvent('auth:unauthorized'));
     }
     const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.error || `API error: ${res.status}`);
+    const err = new Error(errorData.error || `API error: ${res.status}`);
+    // Attach full body so callers can inspect fields like can_retry, message etc.
+    (err as any).statusCode   = res.status;
+    (err as any).responseData = errorData;
+    throw err;
   }
 
   return res.json();
