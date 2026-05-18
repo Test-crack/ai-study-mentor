@@ -480,7 +480,7 @@ const StudentDashboardPage = () => {
                                     || nextAction === 'DAILY_LIMIT_REACHED';
                 const canBuyExtra    = dailyDrillState?.can_buy_extra ?? false;
                 const dailyDCS       = dailyDrillState?.daily_dcs ?? 0;
-                const dcsThreshold   = dailyDrillState?.dcs_threshold ?? 75;
+                const dcsThreshold   = dailyDrillState?.dcs_threshold ?? 40;
                 // Drills left until platform unlock (threshold = 2)
                 const drillsToUnlock = Math.max(0, 2 - drillsToday);
 
@@ -556,7 +556,7 @@ const StudentDashboardPage = () => {
                 console.log('dashboard_unlocked    :', dailyDrillState?.dashboard_unlocked     ?? false);
                 console.log('daily_streak          :', dailyDrillState?.daily_streak           ?? 0);
                 console.log('momentum_score        :', dailyDrillState?.momentum_score         ?? 0);
-                console.log('daily_dcs             :', dailyDrillState?.daily_dcs              ?? 0, '%  ← need', (dailyDrillState?.dcs_threshold ?? 75), '% for extra drill');
+                console.log('daily_dcs             :', dailyDrillState?.daily_dcs              ?? 0, '%  ← need', (dailyDrillState?.dcs_threshold ?? 40), '% for extra drill');
                 console.log('--- computed ---');
                 console.log('isLocked (platform)   :', isLocked,    '← !dailyDrillState || !dashboard_unlocked || misses≥2');
                 console.log('isLexiGate            :', isLexiGate,  '← next_action === LEXIGRID');
