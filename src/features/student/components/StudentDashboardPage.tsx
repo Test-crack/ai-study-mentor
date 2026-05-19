@@ -7,11 +7,15 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { callBackend } from "@/features/auth/services/authClient";
 import IAScheduleWidget from "./dashboard/IAScheduleWidget";
 import { useMomentum } from "@/features/student/Context/MomentumContext";
+import OpenPracticeSection from "./dashboard/OpenPracticeSection";
+import TodaysPracticeGate from "./TodaysPracticeGate";
+import { useTodaySkill } from "../utils/useTodaySkill";
+import { formatSkillLabel } from "@/shared/utils/formatSkillLabel";
 import { cn } from "@/shared/utils";
 import {
   Clock, Flame, Trophy, Target, Zap, BookOpen, Mic, PenLine,
   Headphones, CalendarClock, CheckCircle2, ArrowRight, Sparkles,
-  Lock, ShieldAlert, CalendarX2, AlertTriangle,
+  Lock, ShieldAlert, CalendarX2, AlertTriangle, TrendingUp,
 } from "lucide-react";
 
 // ─── TYPES & CONSTANTS ────────────────────────────────────────────────────────
@@ -31,9 +35,9 @@ interface SkillBand {
 
 const SKILL_BANDS: SkillBand[] = [
   { skill: "Listening", score: 0.0, target: 0.0, delta: 0.0, route: "/student/listening", icon: <Headphones className="h-5 w-5" />, color: "text-sky-600", bg: "bg-sky-50 dark:bg-sky-500/10", border: "border-sky-200 dark:border-sky-500/30" },
-  { skill: "Reading", score: 0.0, target: 0.0, delta: 0.0, route: "/student/reading", icon: <BookOpen className="h-5 w-5" />, color: "text-violet-600", bg: "bg-violet-50 dark:bg-violet-500/10", border: "border-violet-200 dark:border-violet-500/30" },
-  { skill: "Writing", score: 0.0, target: 0.0, delta: 0.0, route: "/student/writing", icon: <PenLine className="h-5 w-5" />, color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-500/10", border: "border-amber-200 dark:border-amber-500/30" },
-  { skill: "Speaking", score: 0.0, target: 0.0, delta: 0.0, route: "/student/speaking-assessment", icon: <Mic className="h-5 w-5" />, color: "text-rose-600", bg: "bg-rose-50 dark:bg-rose-500/10", border: "border-rose-200 dark:border-rose-500/30" },
+  { skill: "Reading",   score: 0.0, target: 0.0, delta: 0.0, route: "/student/reading",   icon: <BookOpen   className="h-5 w-5" />, color: "text-violet-600", bg: "bg-violet-50 dark:bg-violet-500/10", border: "border-violet-200 dark:border-violet-500/30" },
+  { skill: "Writing",   score: 0.0, target: 0.0, delta: 0.0, route: "/student/writing",   icon: <PenLine    className="h-5 w-5" />, color: "text-amber-600",  bg: "bg-amber-50 dark:bg-amber-500/10",  border: "border-amber-200 dark:border-amber-500/30"  },
+  { skill: "Speaking",  score: 0.0, target: 0.0, delta: 0.0, route: "/student/speaking-assessment", icon: <Mic className="h-5 w-5" />, color: "text-rose-600", bg: "bg-rose-50 dark:bg-rose-500/10", border: "border-rose-200 dark:border-rose-500/30" },
 ];
 
 const READINESS = {
@@ -55,19 +59,12 @@ const LEVEL = {
 const overallBand = (bands: SkillBand[]) =>
   Math.round((bands.reduce((s, b) => s + b.score, 0) / bands.length) * 2) / 2;
 
-// Maps a sub-skill band score to a drill level for the backend question picker
 const getLevelFromScore = (score: number): string => {
   if (score < 5.0) return 'BEGINNER';
   if (score < 7.0) return 'INTERMEDIATE';
   return 'ADVANCED';
 };
 
-/**
- * Builds a stable, unique key for a specific miss-penalty event.
- * Format: "<YYYY-WW>_miss<count>"  — one per ISO week per miss level.
- * When you wire in real backend missedData, pass the actual assessment date
- * or a server-generated event ID here instead for full correctness.
- */
 const buildMissCycleKey = (missCount: number): string => {
   const now = new Date();
   const startOfYear = new Date(now.getFullYear(), 0, 1);
@@ -75,6 +72,146 @@ const buildMissCycleKey = (missCount: number): string => {
     ((now.getTime() - startOfYear.getTime()) / 86400000 + startOfYear.getDay() + 1) / 7
   );
   return `${now.getFullYear()}-W${String(week).padStart(2, "0")}_miss${missCount}`;
+};
+
+// ─── BAND CELEBRATION OVERLAY ────────────────────────────────────────────────
+// Shows when overallBand increases by any amount after data refresh.
+// Auto-dismisses after 4 seconds. Triggered from StudentDashboardPage.
+
+interface BandCelebrationProps {
+  previousBand: number;
+  newBand: number;
+  onDismiss: () => void;
+}
+
+// ─── REPLACE the entire BandCelebration component with this ─────────────────
+// Paste from "const BandCelebration" down to the closing "};" before "// ─── MAIN COMPONENT"
+
+const BandCelebration = ({ previousBand, newBand, onDismiss }: BandCelebrationProps) => {
+  const delta = (newBand - previousBand).toFixed(1);
+
+  // Auto-dismiss after 5 seconds
+  useEffect(() => {
+    const t = setTimeout(onDismiss, 5000);
+    return () => clearTimeout(t);
+  }, [onDismiss]);
+
+  // 40 particles with randomised properties
+  const particles = Array.from({ length: 40 }, (_, i) => ({
+    id: i,
+    color: ['#7B61FF','#34d399','#fbbf24','#f87171','#60a5fa','#e879f9','#fb923c','#a3e635'][i % 8],
+    left: `${5 + Math.random() * 90}%`,
+    size: `${6 + Math.random() * 10}px`,
+    delay: `${Math.random() * 0.8}s`,
+    duration: `${1.0 + Math.random() * 1.5}s`,
+    shape: i % 4 === 0 ? 'rounded-none rotate-45' : i % 3 === 0 ? 'rounded-full' : 'rounded-sm',
+  }));
+
+  return (
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center"
+      onClick={onDismiss}
+    >
+      {/* Dark backdrop with blur */}
+      <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" />
+
+      {/* Particle burst */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {particles.map((p) => (
+          <div
+            key={p.id}
+            className={`absolute animate-confetti ${p.shape}`}
+            style={{
+              left: p.left,
+              top: '-12px',
+              width: p.size,
+              height: p.size,
+              background: p.color,
+              animationDelay: p.delay,
+              animationDuration: p.duration,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Main card */}
+      <div className="relative z-10 flex flex-col items-center text-center px-8 py-10 mx-4 max-w-sm w-full animate-in zoom-in-95 duration-500">
+
+        {/* Outer glow ring — pulses */}
+        <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 opacity-30 blur-2xl animate-pulse pointer-events-none" />
+
+        {/* Card body */}
+        <div className="relative w-full bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-indigo-100 dark:border-indigo-500/20 overflow-hidden">
+
+          {/* Top colour band */}
+          <div className="h-2 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
+
+          <div className="px-8 py-8 flex flex-col items-center gap-5">
+
+            {/* Big emoji burst */}
+            <div className="text-6xl animate-in zoom-in duration-300 select-none">🎉</div>
+
+            {/* Headline */}
+            <div>
+              <p className="text-xs font-black text-indigo-500 uppercase tracking-widest mb-1">
+                Band Score Updated
+              </p>
+              <h2 className="text-2xl font-black text-slate-800 dark:text-white leading-tight">
+                You're improving!
+              </h2>
+            </div>
+
+            {/* Before → After bands */}
+            <div className="flex items-center justify-center gap-4 w-full">
+              {/* Old band */}
+              <div className="flex flex-col items-center bg-slate-100 dark:bg-slate-800 rounded-2xl px-5 py-3 flex-1">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Was</span>
+                <span className="text-4xl font-black text-slate-400 line-through decoration-rose-400 decoration-2">
+                  {previousBand.toFixed(1)}
+                </span>
+              </div>
+
+              {/* Arrow with glow */}
+              <div className="flex flex-col items-center gap-1">
+                <div className="text-2xl animate-bounce">→</div>
+              </div>
+
+              {/* New band */}
+              <div className="flex flex-col items-center bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl px-5 py-3 flex-1 shadow-lg shadow-indigo-500/30">
+                <span className="text-xs font-black text-indigo-200 uppercase tracking-wider mb-1">Now</span>
+                <span className="text-4xl font-black text-white">
+                  {newBand.toFixed(1)}
+                </span>
+              </div>
+            </div>
+
+            {/* Delta badge */}
+            <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-full px-4 py-1.5">
+              <TrendingUp className="w-4 h-4 text-emerald-500" />
+              <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
+                +{delta} overall band 🚀
+              </span>
+            </div>
+
+            {/* Motivational line */}
+            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+              Keep going — every drill counts. You're on track!
+            </p>
+
+            {/* Dismiss button */}
+            <button
+              onClick={onDismiss}
+              className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-black py-3 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98] text-sm"
+            >
+              Let's keep going! 💪
+            </button>
+          </div>
+        </div>
+
+        <p className="text-xs text-white/50 mt-3">Tap anywhere to dismiss</p>
+      </div>
+    </div>
+  );
 };
 
 // ─── MAIN COMPONENT ──────────────────────────────────────────────────────────
@@ -86,10 +223,16 @@ const StudentDashboardPage = () => {
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
   const [skillBands, setSkillBands] = useState<SkillBand[]>(SKILL_BANDS);
   const [nextActionDrill, setNextActionDrill] = useState<any>(null);
-  // Real target band from student profile (overrides the static constant)
   const [targetBand, setTargetBand] = useState(READINESS.targetBand);
 
-  // Daily drill state (from backend) — single source of truth
+  // ── Band celebration state ──
+  const [bandCelebration, setBandCelebration] = useState<{
+    show: boolean;
+    previousBand: number;
+    newBand: number;
+  }>({ show: false, previousBand: 0, newBand: 0 });
+  const previousOverallRef = useRef<number | null>(null);
+
   const [dailyDrillState, setDailyDrillState] = useState<{
     drills_completed_today: number;
     lexigrid_completed_today: boolean;
@@ -102,40 +245,26 @@ const StudentDashboardPage = () => {
     daily_dcs: number;
     extra_session_cost: number;
     dcs_threshold: number;
+    skill_module_completed_today?: boolean;
+    skill_module_skill_today?: string;
   } | null>(null);
-  const [buyingExtra, setBuyingExtra]   = useState(false);
+  const [buyingExtra, setBuyingExtra] = useState(false);
   const [confirmExtra, setConfirmExtra] = useState(false);
 
   const { user, profile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { applyMissPenalty, syncMomentum, updateStreak, totalMomentum } = useMomentum();
+  const { applyMissPenalty, syncMomentum, updateStreak, totalMomentum, deductPoints } = useMomentum();
 
-  // ─── Guards ──────────────────────────────────────────────────────────────────
-  // Prevent firing the tutor alert more than once per session even if the
-  // component re-renders multiple times.
   const tutorAlertFiredRef = useRef(false);
 
-  // ─── Missed Assessment Data ───────────────────────────────────────────────
-  /**
-   * 🔧 TODO (Backend wiring):
-   * Replace MOCK_MISSED_STATE and the static missedData object with a real
-   * fetch from your backend, e.g.:
-   *   const resData = await callBackend(`${backendUrl}/api/student/missed-assessments`);
-   *   setMissedData({ misses: resData.consecutive_misses, subSkills: resData.missed_sub_skills });
-   *
-   * The cycleKey should come from the server (e.g. assessment event ID) rather
-   * than the ISO-week heuristic below, so penalties survive week boundaries.
-   */
-  const MOCK_MISSED_STATE = 1; // Change to 0, 1, or 2 to test UI states
+  const MOCK_MISSED_STATE = 1;
   const missedData = {
     misses: MOCK_MISSED_STATE,
     subSkills: MOCK_MISSED_STATE === 1 ? ["Grammar"] : ["Grammar", "Coherence"],
   };
 
-  // ─── Dynamic Readiness ───────────────────────────────────────────────────────
-  // targetBand is loaded from the backend; override the static READINESS constant.
   const dynamicReadiness = { ...READINESS, targetBand };
   if (missedData.misses === 1) {
     dynamicReadiness.targetDate = "2026-06-19";
@@ -151,10 +280,40 @@ const StudentDashboardPage = () => {
 
   const displayName = profile?.name || user?.email?.split("@")[0] || "Student";
   const overall = overallBand(skillBands);
-  // Backend daily-drill-state is the single source of truth; locked until state loads or dashboard unlocked
   const isLocked = !dailyDrillState || !dailyDrillState.dashboard_unlocked || missedData.misses >= 2;
 
-  // ─── Extracted fetch helpers (stable refs so they're safe as effect deps) ────
+  // ─── GATE & SKILL LOGIC ───────────────────────────────────────────────────
+
+  const { todaySkillLabel, todaySkillRoute, moduleCompleted, markModuleComplete } = useTodaySkill({
+    dailyDrillState,
+    skillBands,
+    moduleCompletedFromAPI: dailyDrillState?.skill_module_completed_today,
+  });
+
+  const isDrillGated = !moduleCompleted;
+
+  const handleSkipGate = useCallback(() => {
+    deductPoints(20, 'Skipped gate');
+    markModuleComplete();
+  }, [deductPoints, markModuleComplete]);
+
+  // ─── BAND CHANGE DETECTION ───────────────────────────────────────────────
+  // After competency scores load/refresh, compare new overall to previous.
+  // If it increased (even by 0.5), show the celebration overlay.
+
+  const checkAndTriggerBandCelebration = useCallback((newBands: SkillBand[]) => {
+    const newOverall = overallBand(newBands);
+    if (previousOverallRef.current !== null && newOverall > previousOverallRef.current) {
+      setBandCelebration({
+        show: true,
+        previousBand: previousOverallRef.current,
+        newBand: newOverall,
+      });
+    }
+    previousOverallRef.current = newOverall;
+  }, []);
+
+  // ─── DATA FETCHING ───────────────────────────────────────────────────────
 
   const fetchDailyDrillState = useCallback(async () => {
     try {
@@ -163,9 +322,8 @@ const StudentDashboardPage = () => {
       if (resData.success) {
         setDailyDrillState(resData);
         syncMomentum(resData.momentum_score);
-        // Authoritative streak from backend overwrites any stale localStorage value
         if (resData.daily_streak !== undefined) updateStreak(resData.daily_streak);
-        if (resData.target_band !== undefined) setTargetBand(Number(resData.target_band));
+        if (resData.target_band  !== undefined) setTargetBand(Number(resData.target_band));
       }
     } catch (err) {
       console.error("[DailyDrillState] Fetch failed:", err);
@@ -191,38 +349,18 @@ const StudentDashboardPage = () => {
     }
   }, []);
 
-  // ─── Effect: Apply Momentum Penalties ────────────────────────────────────────
-  /**
-   * Fires once per unique miss-cycle key. The `applyMissPenalty` guard inside
-   * MomentumContext ensures no double-deduction even if this effect re-runs.
-   *
-   * Miss 1 → −20 pts (gentle warning)
-   * Miss 2 → −40 pts (escalation, on top of the previous −20)
-   */
   useEffect(() => {
     if (missedData.misses === 1) {
-      const key = buildMissCycleKey(1);
-      applyMissPenalty(1, key);
-    } else if (missedData.misses >= 2) {
-      // Apply miss-1 penalty first if it somehow wasn't applied yet
       applyMissPenalty(1, buildMissCycleKey(1));
-      // Then apply the escalation penalty
+    } else if (missedData.misses >= 2) {
+      applyMissPenalty(1, buildMissCycleKey(1));
       applyMissPenalty(2, buildMissCycleKey(2));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [missedData.misses]); // only re-run when miss count changes
+  }, [missedData.misses]);
 
-  // ─── Effect: Fire Tutor Alert ─────────────────────────────────────────────
-  /**
-   * Fires a backend tutor-alert notification when the student has 2+
-   * consecutive misses. A ref guard prevents duplicate calls on re-render.
-   *
-   * 🔧 TODO: Replace `/api/student/tutor-alert` with your real endpoint.
-   * The backend should be idempotent (e.g. deduplicate by student + week).
-   */
   useEffect(() => {
     if (missedData.misses < 2 || tutorAlertFiredRef.current) return;
-
     const fireTutorAlert = async () => {
       tutorAlertFiredRef.current = true;
       try {
@@ -230,28 +368,23 @@ const StudentDashboardPage = () => {
         await callBackend(`${backendUrl}/api/student/tutor-alert`, {
           method: "POST",
           body: JSON.stringify({
-            student_name: displayName,
-            student_email: user?.email,
-            missed_sub_skills: missedData.subSkills,
+            student_name:       displayName,
+            student_email:      user?.email,
+            missed_sub_skills:  missedData.subSkills,
             consecutive_misses: missedData.misses,
-            last_login: new Date().toISOString(),
+            last_login:         new Date().toISOString(),
             exam_days_remaining: dynamicReadiness.daysLeft,
           }),
         });
-        console.info("[TutorAlert] Alert fired successfully for", displayName);
       } catch (err) {
-        // Non-blocking — log and move on. Alert system should have its own
-        // retry logic on the backend.
-        console.error("[TutorAlert] Failed to fire tutor alert:", err);
-        tutorAlertFiredRef.current = false; // allow retry on next render
+        console.error("[TutorAlert] Failed:", err);
+        tutorAlertFiredRef.current = false;
       }
     };
-
     fireTutorAlert();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [missedData.misses]);
 
-  // ─── Effect: Initial data load ───────────────────────────────────────────────
   useEffect(() => {
     const fetchCompetencyScores = async () => {
       try {
@@ -260,51 +393,81 @@ const StudentDashboardPage = () => {
         if (resData.success && resData.data) {
           const fetchedTarget = Number(resData.target_band) || 7.0;
           setTargetBand(fetchedTarget);
-          setSkillBands((prevBands) =>
-            prevBands.map((band) => {
+          setSkillBands((prevBands) => {
+            const newBands = prevBands.map((band) => {
               const dbRecord = resData.data.find(
                 (m: any) => m.skill.toUpperCase() === band.skill.toUpperCase()
               );
               if (dbRecord) {
                 return {
                   ...band,
-                  score: Number(dbRecord.band_score) || 0.0,
-                  target: fetchedTarget,
-                  delta: 0,
+                  score:     Number(dbRecord.band_score) || 0.0,
+                  target:    fetchedTarget,
+                  delta:     0,
                   subScores: dbRecord.sub_scores || {},
                 };
               }
               return { ...band, target: fetchedTarget };
-            })
-          );
+            });
+            // Check if overall band improved and trigger celebration
+            checkAndTriggerBandCelebration(newBands);
+            return newBands;
+          });
         }
       } catch (err) {
         console.error("[CompetencyScores] Fetch failed:", err);
       }
     };
-
     fetchCompetencyScores();
     fetchNextActionDrill();
     fetchDailyDrillState();
-  }, [fetchDailyDrillState, fetchNextActionDrill]);
+  }, [fetchDailyDrillState, fetchNextActionDrill, checkAndTriggerBandCelebration]);
 
-  // ─── Effect: Refresh drill state when returning from drill/apply/lexigrid ────
+  // ── Dashboard Return Detection ──
   useEffect(() => {
-    if (location.state?.drillCompleted || location.state?.lexigridCompleted) {
+    const isReturningFromGame   = location.state?.drillCompleted || location.state?.lexigridCompleted;
+    const isReturningFromModule = location.state?.skillModuleCompleted;
+
+    if (isReturningFromModule) markModuleComplete();
+
+    if (isReturningFromGame || isReturningFromModule) {
       fetchDailyDrillState();
       fetchNextActionDrill();
+      window.history.replaceState({}, document.title);
     }
-  }, [location.state?.drillCompleted, location.state?.lexigridCompleted, fetchDailyDrillState, fetchNextActionDrill]);
+  }, [location.state, fetchDailyDrillState, fetchNextActionDrill, markModuleComplete]);
 
-  // focusData is driven purely by the backend's prioritized drill recommendation
+  // FIX: raw values kept for URL params, formatted only for display
   const focusData = nextActionDrill
-    ? { sub_skill: nextActionDrill.sub_skill, band: nextActionDrill.sub_skill_score ?? 5.0, skill: nextActionDrill.skill }
-    : { sub_skill: "Loading...", band: 5.0, skill: "Overall" };
+    ? {
+        sub_skill:     nextActionDrill.sub_skill,                 // raw → URL param
+        sub_skill_display: formatSkillLabel(nextActionDrill.sub_skill), // formatted → display
+        band:          nextActionDrill.sub_skill_score ?? 5.0,
+        skill:         nextActionDrill.skill,                     // raw → URL param
+        skill_display: formatSkillLabel(nextActionDrill.skill),   // formatted → display
+      }
+    : {
+        sub_skill: "loading",
+        sub_skill_display: "Loading...",
+        band: 5.0,
+        skill: "Overall",
+        skill_display: "Overall",
+      };
 
-  // ─── Render ───────────────────────────────────────────────────────────────────
+  // ─── Render ──────────────────────────────────────────────────────────────
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#020617] transition-colors duration-300">
+
+      {/* ── Band Celebration Overlay ── */}
+      {bandCelebration.show && (
+        <BandCelebration
+          previousBand={bandCelebration.previousBand}
+          newBand={bandCelebration.newBand}
+          onDismiss={() => setBandCelebration(prev => ({ ...prev, show: false }))}
+        />
+      )}
+
       <StudentSidebar
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -325,13 +488,14 @@ const StudentDashboardPage = () => {
         <StudentTopbar onUpgradeClick={() => setShowPremiumModal(true)} />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 relative">
+          {/* ── DEV ONLY: remove before production ── */}
 
-          {/* Background blur overlay when locked */}
+
           {isLocked && (
             <div className="absolute inset-0 z-40 bg-slate-50/60 dark:bg-slate-950/60 backdrop-blur-md rounded-3xl" />
           )}
 
-          {/* ── Hero Banner ───────────────────────────────────────────────────── */}
+          {/* ── Hero Banner ──────────────────────────────────────────────── */}
           <section
             className={cn(
               "relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 p-8 text-white shadow-lg",
@@ -380,51 +544,38 @@ const StudentDashboardPage = () => {
             </div>
           </section>
 
-          {/* ── Missed Assessment Alerts ─────────────────────────────────────── */}
+          {/* ── Missed Assessment Alerts ──────────────────────────────────── */}
           <div className={cn("transition-all duration-500", isLocked && "relative z-50")}>
-
-            {/* Miss Cycle 1 — Warning */}
             {missedData.misses === 1 && (
               <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-3xl p-6 shadow-sm flex items-start gap-4 mb-6">
                 <div className="bg-amber-100 dark:bg-amber-500/20 p-3 rounded-2xl shrink-0">
                   <CalendarX2 className="w-6 h-6 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div>
-                  <h3 className="text-amber-900 dark:text-amber-300 font-bold text-lg">
-                    Assessment Missed
-                  </h3>
+                  <h3 className="text-amber-900 dark:text-amber-300 font-bold text-lg">Assessment Missed</h3>
                   <p className="text-amber-700/80 dark:text-amber-400/80 text-sm mt-1">
                     You missed your recent{" "}
                     <strong className="font-semibold text-amber-900 dark:text-amber-300">
                       {missedData.subSkills.join(", ")}
                     </strong>{" "}
                     assessment. No band penalty has been applied, but{" "}
-                    <strong className="font-bold text-amber-600 dark:text-amber-400">
-                      −20 Momentum
-                    </strong>{" "}
-                    points were deducted. This module has been automatically added
-                    to your upcoming Saturday session. Try not to miss it!
+                    <strong className="font-bold text-amber-600 dark:text-amber-400">−20 Momentum</strong>{" "}
+                    points were deducted. This module has been automatically added to your upcoming Saturday session.
                   </p>
                 </div>
               </div>
             )}
 
-            {/* Miss Cycle 2 — Intervention */}
             {missedData.misses >= 2 && (
               <div className="bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 rounded-3xl p-6 shadow-[0_8px_30px_rgba(244,63,94,0.15)] flex flex-col md:flex-row items-center gap-6 mb-6">
                 <div className="bg-rose-100 dark:bg-rose-500/20 p-4 rounded-2xl shrink-0">
                   <ShieldAlert className="w-8 h-8 text-rose-600 dark:text-rose-400" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-rose-900 dark:text-rose-300 font-black text-xl uppercase tracking-tight">
-                    Intervention Required
-                  </h3>
+                  <h3 className="text-rose-900 dark:text-rose-300 font-black text-xl uppercase tracking-tight">Intervention Required</h3>
                   <p className="text-rose-700/90 dark:text-rose-400/90 text-sm mt-1">
-                    You have missed 2 consecutive assessments (
-                    {missedData.subSkills.join(" & ")}). Your predicted readiness
-                    has been pushed back,{" "}
-                    <strong className="font-bold">−40 Momentum</strong> points were
-                    deducted, and your tutor has been notified.
+                    You have missed 2 consecutive assessments ({missedData.subSkills.join(" & ")}). Your predicted readiness
+                    has been pushed back, <strong className="font-bold">−40 Momentum</strong> points were deducted, and your tutor has been notified.
                   </p>
                 </div>
                 <button
@@ -437,7 +588,7 @@ const StudentDashboardPage = () => {
             )}
           </div>
 
-          {/* ── Platform Lock Banner ─────────────────────────────────────────── */}
+          {/* ── Platform Lock Banner ──────────────────────────────────────── */}
           {isLocked && missedData.misses < 2 && dailyDrillState && (
             <div className="relative z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-xl flex items-center justify-between animate-in slide-in-from-top-4">
               <div className="flex items-center gap-4">
@@ -445,12 +596,10 @@ const StudentDashboardPage = () => {
                   <Lock className="w-6 h-6 text-indigo-500" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase">
-                    Platform Locked
-                  </h3>
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase">Platform Locked</h3>
                   <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
                     {dailyDrillState.next_action === 'DRILL_1'
-                      ? <>Finish <strong className="text-indigo-500">2 drills</strong> today to unlock the full platform.</>
+                      ? <><strong className="text-indigo-500">Finish 2 drills</strong> today to unlock the full platform.</>
                       : dailyDrillState.next_action === 'LEXIGRID'
                         ? <>Complete <strong className="text-teal-500">LexiGrid</strong> (5 words) to unlock your second drill.</>
                         : <>LexiGrid done — complete <strong className="text-indigo-500">1 more drill</strong> to unlock full access.</>
@@ -461,26 +610,29 @@ const StudentDashboardPage = () => {
             </div>
           )}
 
-          {/* ── Focus Area + Daily Challenge ─────────────────────────────────── */}
-          <section
-            className={cn(
-              "transition-all duration-500",
-              isLocked && "relative z-50 animate-in slide-in-from-bottom-4"
+          {/* ── Focus Area + Daily Challenge ──────────────────────────────── */}
+          <section className={cn("transition-all duration-500", isLocked && "relative z-50 animate-in slide-in-from-bottom-4")}>
+            <div className="mb-5 flex flex-col gap-1">
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Today's Session</h2>
+              <p className="text-sm font-medium text-slate-500">Your required daily structured loop. Complete this to unlock full platform access.</p>
+            </div>
+
+            {missedData.misses < 2 && (
+              <TodaysPracticeGate
+                skillLabel={todaySkillLabel}
+                skillRoute={todaySkillRoute}
+                isCompleted={moduleCompleted}
+                onSkip={handleSkipGate}
+              />
             )}
-          >
+
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
               {missedData.misses < 2 && (() => {
                 const drillsToday    = dailyDrillState?.drills_completed_today ?? 0;
                 const nextAction     = dailyDrillState?.next_action ?? 'DRILL_1';
-                const lexiGridIsGate = nextAction === 'LEXIGRID';
-                const drillLocked    = nextAction === 'DRILL_LOCKED_INSUFFICIENT_PTS'
-                                    || nextAction === 'DRILL_LOCKED_LOW_DCS'
-                                    || nextAction === 'DAILY_LIMIT_REACHED';
-                const canBuyExtra    = dailyDrillState?.can_buy_extra ?? false;
                 const dailyDCS       = dailyDrillState?.daily_dcs ?? 0;
                 const dcsThreshold   = dailyDrillState?.dcs_threshold ?? 75;
-                // Drills left until platform unlock (threshold = 2)
                 const drillsToUnlock = Math.max(0, 2 - drillsToday);
 
                 const handleBuyExtra = async () => {
@@ -491,15 +643,14 @@ const StudentDashboardPage = () => {
                     const res = await callBackend(`${backendUrl}/api/drills/authorize-extra`, { method: 'POST' });
                     if (res.success) {
                       syncMomentum(res.momentum_score);
-                      // Navigate immediately — no state refresh, we're leaving the page
                       const params = new URLSearchParams({
-                        skill:     focusData.skill,
-                        sub_skill: focusData.sub_skill,
+                        skill:     focusData.skill,      // raw
+                        sub_skill: focusData.sub_skill,  // raw
                         level:     getLevelFromScore(focusData.band),
-                        extra:     'true'
+                        extra:     'true',
                       });
                       navigate(`/student/drill?${params.toString()}`);
-                      return; // skip finally reset — component unmounts on navigate
+                      return;
                     }
                     setBuyingExtra(false);
                   } catch (err) {
@@ -510,10 +661,10 @@ const StudentDashboardPage = () => {
 
                 const handleStartDrill = () => {
                   const params = new URLSearchParams({
-                    skill:     focusData.skill,
-                    sub_skill: focusData.sub_skill,
+                    skill:     focusData.skill,      // raw — backend expects uppercase
+                    sub_skill: focusData.sub_skill,  // raw — backend expects uppercase
                     level:     getLevelFromScore(focusData.band),
-                    ...(nextAction === 'EXTRA_DRILL_AVAILABLE' || nextAction === 'EXTRA_DRILL_READY' ? { extra: 'true' } : {})
+                    ...(nextAction === 'EXTRA_DRILL_AVAILABLE' || nextAction === 'EXTRA_DRILL_READY' ? { extra: 'true' } : {}),
                   });
                   navigate(`/student/drill?${params.toString()}`);
                 };
@@ -521,10 +672,11 @@ const StudentDashboardPage = () => {
                 return (
                   <div className="lg:col-span-6 h-full">
                     <FocusAreaCard
-                      sub_skill={focusData.sub_skill}
+                      sub_skill={focusData.sub_skill_display}   // FIX: formatted display
                       band={focusData.band}
-                      skill={focusData.skill}
+                      skill={focusData.skill_display}           // FIX: formatted display
                       isLocked={isLocked}
+                      isDrillGated={isDrillGated}
                       drillsLeft={drillsToUnlock}
                       nextAction={nextAction}
                       dailyDCS={dailyDCS}
@@ -543,27 +695,10 @@ const StudentDashboardPage = () => {
               })()}
 
               {(() => {
-                const isLexiGate   = dailyDrillState?.next_action === 'LEXIGRID';
-                const lexiDone     = dailyDrillState?.lexigrid_completed_today ?? false;
-                const lexiBlocked  = !isLexiGate && isLocked && !lexiDone;
+                const isLexiGate  = dailyDrillState?.next_action === 'LEXIGRID';
+                const lexiDone    = dailyDrillState?.lexigrid_completed_today ?? false;
+                const lexiBlocked = (!isLexiGate && isLocked && !lexiDone) || isDrillGated;
 
-                // ── DEBUG: remove before production ──────────────────────────
-                console.group('%c[Dashboard State]', 'color:#818cf8;font-weight:bold');
-                console.log('next_action           :', dailyDrillState?.next_action            ?? '(loading)');
-                console.log('drills_completed_today:', dailyDrillState?.drills_completed_today ?? 0);
-                console.log('lexigrid_completed    :', lexiDone);
-                console.log('dashboard_unlocked    :', dailyDrillState?.dashboard_unlocked     ?? false);
-                console.log('daily_streak          :', dailyDrillState?.daily_streak           ?? 0);
-                console.log('momentum_score        :', dailyDrillState?.momentum_score         ?? 0);
-                console.log('daily_dcs             :', dailyDrillState?.daily_dcs              ?? 0, '%  ← need', (dailyDrillState?.dcs_threshold ?? 75), '% for extra drill');
-                console.log('--- computed ---');
-                console.log('isLocked (platform)   :', isLocked,    '← !dailyDrillState || !dashboard_unlocked || misses≥2');
-                console.log('isLexiGate            :', isLexiGate,  '← next_action === LEXIGRID');
-                console.log('lexiDone              :', lexiDone,    '← lexigrid_completed_today from backend');
-                console.log('lexiBlocked           :', lexiBlocked, '← !isLexiGate && isLocked && !lexiDone');
-                console.log('lexiGridIsGate(drill) :', isLexiGate, '← controls drill isGated prop');
-                console.groupEnd();
-                // ─────────────────────────────────────────────────────────────
                 return (
                   <div
                     className={cn(
@@ -575,12 +710,12 @@ const StudentDashboardPage = () => {
                     <div
                       onClick={() => {
                         if (!lexiBlocked) {
-                          navigate(`/student/lexigrid?difficulty=${getLevelFromScore(overall)}`);
+                          navigate(`/student/lexigrid?difficulty=${getLevelFromScore(overall)}&mode=${isLocked ? 'gate' : 'standalone'}`);
                         }
                       }}
                       className={cn(
                         "h-full relative overflow-hidden rounded-3xl bg-slate-900 dark:bg-[#0f172a] p-6 flex flex-col justify-center group shadow-lg transition-all duration-300",
-                        isLexiGate
+                        isLexiGate && !isDrillGated
                           ? "border-2 border-teal-500/60 cursor-pointer hover:shadow-teal-500/20"
                           : "border border-indigo-500/30 cursor-pointer hover:shadow-indigo-500/20"
                       )}
@@ -592,28 +727,20 @@ const StudentDashboardPage = () => {
                         </div>
                         <div>
                           <div className="flex items-center gap-2 mb-2">
-                            <h2 className="text-xl font-bold text-white tracking-tight">
-                              LexiGrid
-                            </h2>
-                            {isLexiGate && (
-                              <span className="bg-teal-500/20 text-teal-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase animate-pulse">
-                                Active Gate
-                              </span>
+                            <h2 className="text-xl font-bold text-white tracking-tight">LexiGrid</h2>
+                            {isLexiGate && !isDrillGated && (
+                              <span className="bg-teal-500/20 text-teal-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase animate-pulse">Active Gate</span>
                             )}
                             {lexiDone && (
-                              <span className="bg-green-500/20 text-green-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
-                                ✓ Done
-                              </span>
+                              <span className="bg-green-500/20 text-green-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">✓ Done</span>
                             )}
                             {!isLexiGate && !lexiDone && (
-                              <span className="bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
-                                Ready
-                              </span>
+                              <span className="bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Ready</span>
                             )}
                           </div>
                           <p className="text-sm text-indigo-100/70 font-medium mb-4">
-                            {isLexiGate
-                              ? <>Solve <strong className="text-teal-300">5 words</strong> to unlock Drill 2 — your gate is open now.</>
+                            {isLexiGate && !isDrillGated
+                              ? <><strong className="text-teal-300">Solve 5 words</strong> to unlock Drill 2 — your gate is open now.</>
                               : <>Crack today's vocabulary puzzle to earn <strong className="text-amber-400">+10 Momentum</strong>.</>
                             }
                           </p>
@@ -629,48 +756,33 @@ const StudentDashboardPage = () => {
             </div>
           </section>
 
-          {/* ── Main Dashboard Content (blurred when locked) ──────────────────── */}
+          {/* ── Main Dashboard Content (blurred when locked) ──────────────── */}
           <div className="relative mt-6">
             {isLocked && (
               <div className="absolute inset-0 z-40 bg-slate-50/60 dark:bg-[#020617]/70 backdrop-blur-md rounded-3xl border border-white/10 flex flex-col items-center pt-24" />
             )}
 
-            <div
-              className={cn(
-                "space-y-6 transition-all duration-500",
-                isLocked && "opacity-40 grayscale-[50%] pointer-events-none select-none blur-[3px]"
-              )}
-            >
+            <div className={cn("space-y-6 transition-all duration-500", isLocked && "opacity-40 grayscale-[50%] pointer-events-none select-none blur-[3px]")}>
+
               {/* Skill Band Cards */}
               <section>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   {skillBands.map((band) => (
-                    <SkillBandCard
-                      key={band.skill}
-                      band={band}
-                      onNavigate={() => navigate(band.route)}
-                    />
+                    <SkillBandCard key={band.skill} band={band} onNavigate={() => navigate(band.route)} />
                   ))}
                 </div>
               </section>
 
-              {/* Weekly Rhythm / Readiness / Streak / IA Schedule */}
+              {/* Weekly Rhythm / Readiness / Streak / IA */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div className="lg:col-span-4"><WeeklyRhythmIndicator /></div>
-                <div className="lg:col-span-3">
-                  <PredictedReadinessCard readiness={dynamicReadiness} />
-                </div>
+                <div className="lg:col-span-3"><PredictedReadinessCard readiness={dynamicReadiness} /></div>
                 <div className="lg:col-span-2">
-                  <DashboardCard
-                    title="Streak"
-                    icon={<Flame className="h-5 w-5 text-orange-500" />}
-                  >
+                  <DashboardCard title="Streak" icon={<Flame className="h-5 w-5 text-orange-500" />}>
                     <AttendanceStreakTracker currentStreak={dailyDrillState?.daily_streak ?? 0} goal={7} />
                   </DashboardCard>
                 </div>
-                <div className="lg:col-span-3">
-                  <IAScheduleWidget />
-                </div>
+                <div className="lg:col-span-3"><IAScheduleWidget /></div>
               </div>
 
               {/* Skill Modules + Recent Activity */}
@@ -679,11 +791,7 @@ const StudentDashboardPage = () => {
                   <DashboardCard title="Skill Modules" subtitle="Tap any module to continue">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {skillBands.map((band) => (
-                        <ModuleNavCard
-                          key={band.skill}
-                          band={band}
-                          onNavigate={() => navigate(band.route)}
-                        />
+                        <ModuleNavCard key={band.skill} band={band} onNavigate={() => navigate(band.route)} />
                       ))}
                     </div>
                   </DashboardCard>
@@ -691,20 +799,14 @@ const StudentDashboardPage = () => {
                 <div className="lg:col-span-4 space-y-4">
                   <DashboardCard title="Recent Activity" subtitle="Your last 3 actions">
                     <div className="space-y-5 pt-1">
-                      <ActivityItem
-                        label="Completed Reading Comprehension Set 3"
-                        time="2 hours ago"
-                        color="bg-emerald-500"
-                      />
-                      <ActivityItem
-                        label="Scored 78% in Speaking Mock Test"
-                        time="Yesterday"
-                        color="bg-indigo-500"
-                      />
+                      <ActivityItem label="Completed Reading Comprehension Set 3" time="2 hours ago" color="bg-emerald-500" />
+                      <ActivityItem label="Scored 78% in Speaking Mock Test" time="Yesterday" color="bg-indigo-500" />
                     </div>
                   </DashboardCard>
                 </div>
               </div>
+
+              {!isLocked && <OpenPracticeSection />}
             </div>
           </div>
         </main>
@@ -718,9 +820,9 @@ const StudentDashboardPage = () => {
 // ─── SUB-COMPONENTS ───────────────────────────────────────────────────────────
 
 const FocusAreaCard = ({
-  sub_skill, band, skill, isLocked, drillsLeft,
+  sub_skill, band, skill, isLocked, isDrillGated, drillsLeft,
   nextAction, dailyDCS, dcsThreshold, extraCost, totalMomentum,
-  buyingExtra, confirmExtra, onStartDrill, onRequestConfirm, onCancelConfirm, onConfirmBuy
+  buyingExtra, confirmExtra, onStartDrill, onRequestConfirm, onCancelConfirm, onConfirmBuy,
 }: any) => {
   if (band === 9.0 && sub_skill === "All Caught Up!") {
     return (
@@ -729,25 +831,21 @@ const FocusAreaCard = ({
           <CheckCircle2 className="h-8 w-8 text-emerald-500" />
         </div>
         <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-2 tracking-tight">Daily Priorities Knocked Out!</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          You have completed the required drills for your weakest sub-skills today.
-        </p>
+        <p className="text-sm text-slate-500 dark:text-slate-400">You have completed the required drills for your weakest sub-skills today.</p>
       </div>
     );
   }
 
-  // ── derived flags ────────────────────────────────────────────────────────
-  const isFreeDrill      = ['DRILL_1', 'DRILL_2', 'DRILL_3'].includes(nextAction);
-  const isLexiGate       = nextAction === 'LEXIGRID';
-  const isExtraReady     = nextAction === 'EXTRA_DRILL_AVAILABLE';
-  const isExtraPrepaid   = nextAction === 'EXTRA_DRILL_READY';  // already paid, just start
-  const isLowDCS         = nextAction === 'DRILL_LOCKED_LOW_DCS';
-  const isLowPts         = nextAction === 'DRILL_LOCKED_INSUFFICIENT_PTS';
-  const isExtraLocked    = isLowDCS || isLowPts || isExtraReady || isExtraPrepaid;
-  const showDCSMeter     = isLowDCS || isLowPts || isExtraReady; // not shown for prepaid (already cleared)
+  const isFreeDrill    = ['DRILL_1', 'DRILL_2', 'DRILL_3'].includes(nextAction);
+  const isLexiGate     = nextAction === 'LEXIGRID';
+  const isExtraReady   = nextAction === 'EXTRA_DRILL_AVAILABLE';
+  const isExtraPrepaid = nextAction === 'EXTRA_DRILL_READY';
+  const isLowDCS       = nextAction === 'DRILL_LOCKED_LOW_DCS';
+  const isLowPts       = nextAction === 'DRILL_LOCKED_INSUFFICIENT_PTS';
+  const isExtraLocked  = isLowDCS || isLowPts || isExtraReady || isExtraPrepaid;
+  const showDCSMeter   = isLowDCS || isLowPts || isExtraReady;
 
-  // card accent: blue when actively drillable, muted when waiting/locked
-  const cardBg = isLocked
+  const cardBg = isLocked || isDrillGated
     ? "bg-white dark:bg-slate-900 border-indigo-200 dark:border-indigo-500/30 ring-1 ring-indigo-500/20"
     : isExtraLocked
       ? "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
@@ -755,33 +853,29 @@ const FocusAreaCard = ({
 
   return (
     <div className={cn("h-full rounded-3xl border p-6 flex flex-col transition-all duration-500 shadow-sm", cardBg)}>
-
-      {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <Zap className="h-5 w-5 text-indigo-500" />
-          <h2 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">
-            Next Best Action
-          </h2>
+          <h2 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">Next Best Action</h2>
         </div>
         {isLocked && drillsLeft > 0 && (
           <span className="text-[10px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 px-3 py-1 rounded-full animate-pulse">
             Required: {drillsLeft} Left
           </span>
         )}
-        {isExtraLocked && (
+        {isExtraLocked && !isLocked && !isDrillGated && (
           <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 px-3 py-1 rounded-full">
             3 / 3 Done
           </span>
         )}
       </div>
 
-      {/* Drill info */}
       <div className="flex items-center gap-5 mb-6">
         <div className="flex-shrink-0 h-16 w-16 rounded-2xl bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center border border-indigo-200 dark:border-indigo-500/30">
           <Target className="h-8 w-8 text-indigo-500" />
         </div>
         <div>
+          {/* FIX: sub_skill and skill are already formatted by the caller */}
           <p className="text-xl font-bold text-slate-800 dark:text-white leading-snug tracking-tight mb-1">
             {sub_skill} Drill
           </p>
@@ -793,10 +887,7 @@ const FocusAreaCard = ({
         </div>
       </div>
 
-      {/* ── CTA area — driven entirely by nextAction ── */}
       <div className="mt-auto space-y-3">
-
-        {/* DCS meter — shown for all post-free states */}
         {showDCSMeter && (
           <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
             <div className="flex items-center justify-between">
@@ -807,8 +898,7 @@ const FocusAreaCard = ({
                   <span className="text-xs font-normal text-slate-400 ml-1">/ need {dcsThreshold}%</span>
                 </p>
               </div>
-              <span className={cn(
-                "text-[10px] font-bold px-2.5 py-1 rounded-full",
+              <span className={cn("text-[10px] font-bold px-2.5 py-1 rounded-full",
                 dailyDCS >= dcsThreshold
                   ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400"
                   : "bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400"
@@ -818,78 +908,61 @@ const FocusAreaCard = ({
             </div>
             <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
               <div
-                className={cn("h-full rounded-full transition-all duration-500",
-                  dailyDCS >= dcsThreshold ? "bg-emerald-500" : "bg-rose-400")}
+                className={cn("h-full rounded-full transition-all duration-500", dailyDCS >= dcsThreshold ? "bg-emerald-500" : "bg-rose-400")}
                 style={{ width: `${Math.min(100, dailyDCS)}%` }}
               />
             </div>
           </div>
         )}
 
-        {/* Buttons */}
-        {isLexiGate && (
+        {isDrillGated && (
+          <div className="w-full flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 font-semibold text-sm py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 cursor-not-allowed select-none">
+            <Lock className="h-4 w-4 text-indigo-400" /> Complete practice to unlock
+          </div>
+        )}
+        {!isDrillGated && isLexiGate && (
           <div className="w-full flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 font-semibold text-sm py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 cursor-not-allowed select-none">
             <Lock className="h-4 w-4" /> Complete LexiGrid to unlock
           </div>
         )}
-
-        {isLowDCS && (
+        {!isDrillGated && isLowDCS && (
           <div className="w-full flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 font-semibold text-sm py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 cursor-not-allowed select-none">
             <Lock className="h-4 w-4" /> Improve accuracy to unlock extra
           </div>
         )}
-
-        {isLowPts && (
+        {!isDrillGated && isLowPts && (
           <div className="w-full flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 font-semibold text-sm py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 cursor-not-allowed select-none">
             <Lock className="h-4 w-4" /> Need {extraCost} pts to unlock
           </div>
         )}
-
-        {/* Already paid — credit is waiting, just start the drill */}
-        {isExtraPrepaid && (
-          <button
-            onClick={onStartDrill}
-            className="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm py-3.5 rounded-xl transition-all shadow-md active:scale-[0.98]"
-          >
+        {!isDrillGated && isExtraPrepaid && (
+          <button onClick={onStartDrill} className="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm py-3.5 rounded-xl transition-all shadow-md active:scale-[0.98]">
             <CheckCircle2 className="h-4 w-4" /> Start Extra Drill — Session Ready
           </button>
         )}
-
-        {isExtraReady && !confirmExtra && (
-          <button
-            onClick={onRequestConfirm}
-            disabled={buyingExtra}
-            className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm py-3.5 rounded-xl transition-all shadow-md active:scale-[0.98] disabled:opacity-40"
-          >
+        {!isDrillGated && isExtraReady && !confirmExtra && (
+          <button onClick={onRequestConfirm} disabled={buyingExtra} className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm py-3.5 rounded-xl transition-all shadow-md active:scale-[0.98] disabled:opacity-40">
             <Zap className="h-4 w-4" /> Unlock Extra Drill — {extraCost} pts
           </button>
         )}
-
-        {isExtraReady && confirmExtra && (
+        {!isDrillGated && isExtraReady && confirmExtra && (
           <div className="space-y-2">
             <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
               Spend <strong className="text-amber-500">{extraCost} pts</strong> from your {totalMomentum} pts balance?
             </p>
             <div className="flex gap-2">
-              <button onClick={onCancelConfirm} className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                Cancel
-              </button>
+              <button onClick={onCancelConfirm} className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Cancel</button>
               <button onClick={onConfirmBuy} disabled={buyingExtra} className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm transition-colors disabled:opacity-40">
-                {buyingExtra ? "Unlocking…" : "Confirm — Spend " + extraCost + " pts"}
+                {buyingExtra ? "Unlocking…" : `Confirm — Spend ${extraCost} pts`}
               </button>
             </div>
           </div>
         )}
-
-        {isFreeDrill && (
-          <button
-            onClick={onStartDrill}
-            className="w-full flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold text-sm py-3.5 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
-          >
+        {!isDrillGated && isFreeDrill && (
+          <button onClick={onStartDrill} className="w-full flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold text-sm py-3.5 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98]">
             Start Priority Drill <ArrowRight className="h-4 w-4" />
           </button>
         )}
-
       </div>
     </div>
   );
@@ -898,26 +971,14 @@ const FocusAreaCard = ({
 const SkillBandCard = ({ band, onNavigate }: { band: SkillBand; onNavigate: () => void }) => {
   const pct = Math.round((band.score / 9) * 100);
   return (
-    <button
-      onClick={onNavigate}
-      className={`text-left w-full rounded-3xl border p-5 flex flex-col transition-all duration-200 hover:scale-[1.02] hover:shadow-md bg-white dark:bg-slate-900 ${band.border} shadow-sm`}
-    >
+    <button onClick={onNavigate} className={`text-left w-full rounded-3xl border p-5 flex flex-col transition-all duration-200 hover:scale-[1.02] hover:shadow-md bg-white dark:bg-slate-900 ${band.border} shadow-sm`}>
       <div className="flex items-center justify-between mb-4 w-full">
-        <div className={`flex items-center justify-center h-10 w-10 rounded-xl ${band.bg} ${band.color}`}>
-          {band.icon}
-        </div>
+        <div className={`flex items-center justify-center h-10 w-10 rounded-xl ${band.bg} ${band.color}`}>{band.icon}</div>
       </div>
-      <p className="text-3xl font-bold text-slate-800 dark:text-white tracking-tight">
-        {band.score.toFixed(1)}
-      </p>
-      <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1 mb-4">
-        {band.skill}
-      </p>
+      <p className="text-3xl font-bold text-slate-800 dark:text-white tracking-tight">{band.score.toFixed(1)}</p>
+      <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1 mb-4">{band.skill}</p>
       <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden mb-4">
-        <div
-          className={`h-full rounded-full transition-all duration-700 ${band.color.replace("text-", "bg-")}`}
-          style={{ width: `${pct}%` }}
-        />
+        <div className={`h-full rounded-full transition-all duration-700 ${band.color.replace("text-", "bg-")}`} style={{ width: `${pct}%` }} />
       </div>
       {band.subScores && Object.keys(band.subScores).length > 0 && (
         <div className="grid grid-cols-2 gap-2 w-full mt-auto">
@@ -933,14 +994,9 @@ const SkillBandCard = ({ band, onNavigate }: { band: SkillBand; onNavigate: () =
               label = label.charAt(0).toUpperCase() + label.slice(1);
               const numVal = Number(val);
               return (
-                <div
-                  key={key}
-                  className="flex justify-between items-center text-[10px] bg-slate-50 dark:bg-slate-800/50 px-2 py-1.5 rounded-lg border border-slate-100 dark:border-slate-800"
-                >
+                <div key={key} className="flex justify-between items-center text-[10px] bg-slate-50 dark:bg-slate-800/50 px-2 py-1.5 rounded-lg border border-slate-100 dark:border-slate-800">
                   <span className="text-slate-500 truncate mr-1" title={label}>{label}</span>
-                  <span className="font-bold text-slate-700 dark:text-slate-300">
-                    {!Number.isInteger(numVal) ? numVal.toFixed(1) : numVal}
-                  </span>
+                  <span className="font-bold text-slate-700 dark:text-slate-300">{!Number.isInteger(numVal) ? numVal.toFixed(1) : numVal}</span>
                 </div>
               );
             })}
@@ -952,34 +1008,16 @@ const SkillBandCard = ({ band, onNavigate }: { band: SkillBand; onNavigate: () =
 
 const PredictedReadinessCard = ({ readiness }: any) => {
   const statusConfig = {
-    "on-track": {
-      icon: <CheckCircle2 className="h-5 w-5 text-emerald-500" />,
-      color: "text-emerald-600",
-      bg: "bg-emerald-50 dark:bg-emerald-500/5",
-      border: "border-emerald-200 dark:border-emerald-500/20",
-    },
-    warn: {
-      icon: <AlertTriangle className="h-5 w-5 text-amber-500" />,
-      color: "text-amber-600",
-      bg: "bg-amber-50 dark:bg-amber-500/5",
-      border: "border-amber-200 dark:border-amber-500/20",
-    },
-    danger: {
-      icon: <AlertTriangle className="h-5 w-5 text-red-500" />,
-      color: "text-red-600",
-      bg: "bg-red-50 dark:bg-red-500/5",
-      border: "border-red-200 dark:border-red-500/20",
-    },
+    "on-track": { icon: <CheckCircle2 className="h-5 w-5 text-emerald-500" />, color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-500/5", border: "border-emerald-200 dark:border-emerald-500/20" },
+    warn:       { icon: <AlertTriangle className="h-5 w-5 text-amber-500" />,  color: "text-amber-600",  bg: "bg-amber-50 dark:bg-amber-500/5",   border: "border-amber-200 dark:border-amber-500/20"  },
+    danger:     { icon: <AlertTriangle className="h-5 w-5 text-red-500" />,    color: "text-red-600",    bg: "bg-red-50 dark:bg-red-500/5",       border: "border-red-200 dark:border-red-500/20"      },
   };
   const cfg = statusConfig[readiness.status as keyof typeof statusConfig];
-
   return (
     <div className={`h-full rounded-3xl border ${cfg.bg} ${cfg.border} p-6 shadow-sm flex flex-col`}>
       <div className="flex items-center gap-2 mb-4">
         <CalendarClock className="h-5 w-5 text-slate-500" />
-        <h2 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">
-          Predicted Readiness
-        </h2>
+        <h2 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">Predicted Readiness</h2>
       </div>
       <div className="space-y-4 mt-2">
         <div className="flex justify-between items-center">
@@ -1004,13 +1042,8 @@ const PredictedReadinessCard = ({ readiness }: any) => {
 };
 
 const ModuleNavCard = ({ band, onNavigate }: any) => (
-  <button
-    onClick={onNavigate}
-    className={`text-left w-full flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200 hover:scale-[1.01] hover:shadow-sm bg-white dark:bg-slate-900 ${band.border} group`}
-  >
-    <div className={`flex-shrink-0 h-12 w-12 rounded-xl flex items-center justify-center ${band.bg} ${band.color}`}>
-      {band.icon}
-    </div>
+  <button onClick={onNavigate} className={`text-left w-full flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200 hover:scale-[1.01] hover:shadow-sm bg-white dark:bg-slate-900 ${band.border} group`}>
+    <div className={`flex-shrink-0 h-12 w-12 rounded-xl flex items-center justify-center ${band.bg} ${band.color}`}>{band.icon}</div>
     <div className="flex-1 min-w-0">
       <p className="text-sm font-bold text-slate-800 dark:text-white">{band.skill}</p>
       <p className="text-xs text-slate-500 mt-0.5">Band {band.score} → {band.target}</p>
@@ -1049,46 +1082,40 @@ const AttendanceStreakTracker = ({ currentStreak, goal = 7 }: any) => {
       <div className="relative flex items-center justify-center h-24 w-24 mb-4">
         <svg className="rotate-[-90deg]" width="96" height="96">
           <circle cx="48" cy="48" r="40" fill="none" stroke="#fed7aa" strokeWidth="8" className="dark:stroke-orange-500/20" />
-          <circle
-            cx="48" cy="48" r="40" fill="none" stroke="#f97316" strokeWidth="8"
+          <circle cx="48" cy="48" r="40" fill="none" stroke="#f97316" strokeWidth="8"
             strokeDasharray={`${2 * Math.PI * 40}`}
             strokeDashoffset={`${2 * Math.PI * 40 * (1 - progress / 100)}`}
-            strokeLinecap="round"
-            className="transition-all duration-700 ease-out"
+            strokeLinecap="round" className="transition-all duration-700 ease-out"
           />
         </svg>
         <div className="absolute flex flex-col items-center">
           <Flame className="h-6 w-6 text-orange-500" />
-          <span className="text-xl font-bold text-slate-800 dark:text-white leading-none mt-1">
-            {currentStreak}
-          </span>
+          <span className="text-xl font-bold text-slate-800 dark:text-white leading-none mt-1">{currentStreak}</span>
         </div>
       </div>
       <p className="text-sm font-medium text-slate-500 dark:text-slate-400 text-center">
-        {currentStreak >= goal
-          ? "Weekly goal hit! 🎉"
-          : `${goal - currentStreak} more to reach ${goal}-day goal`}
+        {currentStreak >= goal ? "Weekly goal hit! 🎉" : `${goal - currentStreak} more to reach ${goal}-day goal`}
       </p>
     </div>
   );
 };
 
 const WEEKLY_RHYTHM = [
-  { day: "Mon", type: "Drill", color: "blue", text: "Priority sub-skill drill (15 min)" },
-  { day: "Tue", type: "Drill", color: "blue", text: "Same sub-skill, new prompts (15 min)" },
+  { day: "Mon", type: "Drill",      color: "blue",   text: "Priority sub-skill drill (15 min)" },
+  { day: "Tue", type: "Drill",      color: "blue",   text: "Same sub-skill, new prompts (15 min)" },
   { day: "Wed", type: "Assessment", color: "purple", text: "Mid-Week Priority Assessment (20 min)" },
-  { day: "Thu", type: "Drill", color: "blue", text: "Secondary sub-skill drill (15 min)" },
-  { day: "Fri", type: "Content", color: "teal", text: "Apply Lesson & Mini-Drill (15 min)" },
-  { day: "Sat", type: "Eval", color: "amber", text: "Full Weekly Assessment (45 min)" },
-  { day: "Sun", type: "Rest", color: "slate", text: "Rest & Recovery" },
+  { day: "Thu", type: "Drill",      color: "blue",   text: "Secondary sub-skill drill (15 min)" },
+  { day: "Fri", type: "Content",    color: "teal",   text: "Apply Lesson & Mini-Drill (15 min)" },
+  { day: "Sat", type: "Eval",       color: "amber",  text: "Full Weekly Assessment (45 min)" },
+  { day: "Sun", type: "Rest",       color: "slate",  text: "Rest & Recovery" },
 ];
 
 const colorConfig: Record<string, any> = {
-  blue: { bg: "bg-blue-500", border: "border-blue-500", text: "text-blue-600 dark:text-blue-400", ring: "ring-blue-500/30" },
+  blue:   { bg: "bg-blue-500",   border: "border-blue-500",   text: "text-blue-600 dark:text-blue-400",     ring: "ring-blue-500/30"   },
   purple: { bg: "bg-purple-500", border: "border-purple-500", text: "text-purple-600 dark:text-purple-400", ring: "ring-purple-500/30" },
-  teal: { bg: "bg-teal-500", border: "border-teal-500", text: "text-teal-600 dark:text-teal-400", ring: "ring-teal-500/30" },
-  amber: { bg: "bg-amber-500", border: "border-amber-500", text: "text-amber-600 dark:text-amber-400", ring: "ring-amber-500/30" },
-  slate: { bg: "bg-slate-400", border: "border-slate-300 dark:border-slate-600", text: "text-slate-500 dark:text-slate-400", ring: "ring-slate-400/30" },
+  teal:   { bg: "bg-teal-500",   border: "border-teal-500",   text: "text-teal-600 dark:text-teal-400",     ring: "ring-teal-500/30"   },
+  amber:  { bg: "bg-amber-500",  border: "border-amber-500",  text: "text-amber-600 dark:text-amber-400",   ring: "ring-amber-500/30"  },
+  slate:  { bg: "bg-slate-400",  border: "border-slate-300 dark:border-slate-600", text: "text-slate-500 dark:text-slate-400", ring: "ring-slate-400/30" },
 };
 
 const WeeklyRhythmIndicator = () => {
@@ -1100,30 +1127,20 @@ const WeeklyRhythmIndicator = () => {
       <div className="flex items-center justify-between gap-1 mb-6 relative px-2 mt-2">
         <div className="absolute left-4 right-4 top-2 h-0.5 bg-slate-100 dark:bg-slate-800 z-0" />
         {WEEKLY_RHYTHM.map((day, idx) => {
-          const isToday = idx === currentDayIndex;
+          const isToday  = idx === currentDayIndex;
           const isFuture = idx > currentDayIndex;
-          const colors = colorConfig[day.color];
+          const colors   = colorConfig[day.color];
           return (
             <div key={day.day} className="relative z-10 flex flex-col items-center gap-3">
-              <div
-                className={`w-4 h-4 rounded-full transition-all duration-300
-                  ${isFuture ? `bg-white dark:bg-slate-900 border-2 ${colors.border}` : colors.bg}
-                  ${isToday ? `ring-4 ring-offset-2 dark:ring-offset-slate-900 ${colors.ring} scale-125` : ""}
-                `}
-              />
-              <span className={`text-[10px] font-bold uppercase tracking-widest ${isToday ? "text-slate-800 dark:text-white" : "text-slate-400 dark:text-slate-500"}`}>
-                {day.day}
-              </span>
+              <div className={`w-4 h-4 rounded-full transition-all duration-300 ${isFuture ? `bg-white dark:bg-slate-900 border-2 ${colors.border}` : colors.bg} ${isToday ? `ring-4 ring-offset-2 dark:ring-offset-slate-900 ${colors.ring} scale-125` : ""}`} />
+              <span className={`text-[10px] font-bold uppercase tracking-widest ${isToday ? "text-slate-800 dark:text-white" : "text-slate-400 dark:text-slate-500"}`}>{day.day}</span>
             </div>
           );
         })}
       </div>
       <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-2xl p-4 text-center">
         <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
-          Today:{" "}
-          <span className={`ml-1 font-semibold ${colorConfig[todayConfig.color].text}`}>
-            {todayConfig.text}
-          </span>
+          Today: <span className={`ml-1 font-semibold ${colorConfig[todayConfig.color].text}`}>{todayConfig.text}</span>
         </p>
       </div>
     </div>

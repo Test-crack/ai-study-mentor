@@ -5,9 +5,9 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 interface MomentumContextType {
   totalMomentum: number;
   streak: number;
-  addPoints: (points: number, reason?: string) => void;
+  addPoints: (points: number, reason?: string, multiplier?: number) => void;
   deductPoints: (points: number, reason?: string) => void;
-  syncMomentum: (serverScore: number, force?: boolean) => void;
+  syncMomentum: (serverScore: number) => void;
   updateStreak: (newStreak: number) => void;
   applyMissPenalty: (missCount: 1 | 2, cycleKey: string) => boolean;
   hasPenaltyBeenApplied: (cycleKey: string) => boolean;
@@ -23,12 +23,7 @@ export const MomentumProvider = ({ children }: { children: ReactNode }) => {
 
   // ── Core State ──────────────────────────────────────────────────────────────
 
-  // ✅ FIXED: Initialize from localStorage so your score survives a page refresh!
-  const [totalMomentum, setTotalMomentum] = useState<number>(() => {
-    const saved = localStorage.getItem('testcrack_momentum');
-    return saved ? parseInt(saved, 10) : 0;
-  });
-
+  const [totalMomentum, setTotalMomentum] = useState<number>(0);
   const [streak, setStreak] = useState<number>(0);
 
   const [appliedPenalties, setAppliedPenalties] = useState<Set<string>>(() => {
@@ -37,11 +32,6 @@ export const MomentumProvider = ({ children }: { children: ReactNode }) => {
   });
 
   // ── Persistence Side-Effects ─────────────────────────────────────────────────
-
-  // ✅ FIXED: Save to localStorage every time the score changes
-  useEffect(() => {
-    localStorage.setItem('testcrack_momentum', totalMomentum.toString());
-  }, [totalMomentum]);
 
   useEffect(() => {
     localStorage.setItem(
@@ -52,26 +42,25 @@ export const MomentumProvider = ({ children }: { children: ReactNode }) => {
 
   // ── Actions ──────────────────────────────────────────────────────────────────
 
-  const addPoints = useCallback((points: number, reason?: string) => {
-    if (reason) console.info(`[Momentum] +${points} — ${reason}`);
-    setTotalMomentum(prev => prev + Math.abs(points));
+  // Handles standard additions + the ?mode=replay multiplier (0.5x)
+  const addPoints = useCallback((points: number, reason?: string, multiplier: number = 1.0) => {
+    const finalPoints = Math.round(points * multiplier);
+    if (reason) console.info(`[Momentum] +${finalPoints} (Base: ${points}, Mult: ${multiplier}x) — ${reason}`);
+    
+    setTotalMomentum(prev => prev + Math.abs(finalPoints));
   }, []);
 
+  // Handles skips (-20 pts) and missed assessment penalties (-20/-40 pts)
   const deductPoints = useCallback((points: number, reason?: string) => {
-    if (reason) console.info(`[Momentum] -${Math.abs(points)} — ${reason}`);
-    setTotalMomentum(prev => Math.max(0, prev - Math.abs(points)));
+    const deduction = Math.abs(points);
+    if (reason) console.info(`[Momentum] -${deduction} — ${reason}`);
+    
+    setTotalMomentum(prev => Math.max(0, prev - deduction));
   }, []);
 
-  // ✅ FIXED: Smart Sync. Ignores the database if your local score is higher.
-  const syncMomentum = useCallback((serverScore: number, force: boolean = false) => {
-    setTotalMomentum(prev => {
-      // If we force an update (like spending points), or if local is 0, trust the server.
-      if (force || prev === 0) {
-        return serverScore;
-      }
-      // Otherwise, keep whichever score is higher so you don't lose un-synced points!
-      return Math.max(prev, serverScore);
-    });
+  // Authoritative sync from Sarthak's backend
+  const syncMomentum = useCallback((serverScore: number) => {
+    setTotalMomentum(serverScore);
   }, []);
 
   const updateStreak = useCallback((newStreak: number) => {

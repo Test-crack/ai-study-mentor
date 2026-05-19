@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { StudentSidebar } from './dashboard/StudentSidebar';
 import { StudentTopbar } from './dashboard/StudentTopbar';
 import { Button } from '@/shared/components/ui/button';
 import { useToast } from '@/shared/hooks/use-toast';
-import { ArrowLeft, Send, PenTool, BookOpen, Sparkles, History, CheckCircle, BarChart2 } from 'lucide-react';
+import { ArrowLeft, Send, PenTool, BookOpen, Sparkles, History, CheckCircle, BarChart2, CheckCircle2, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
 import { fetchWritingTasks, submitWritingSession, fetchWritingHistory, WritingAssessmentHistoryItem, WritingTask } from '../services/ieltsWritingService';
@@ -18,8 +18,14 @@ const MOCK_ASSIGNMENTS: WritingTask[] = [];
 
 export default function IeltsWriting() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { addPoints } = useMomentum();
+
+  // Mode Logic
+  const practiceMode = (searchParams.get('mode') ?? 'standalone') as 'gate' | 'standalone' | 'replay';
+  const isGateMode   = practiceMode === 'gate';
+  const isReplayMode = practiceMode === 'replay';
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isSidebarHovered,   setIsSidebarHovered]   = useState(false);
@@ -79,6 +85,15 @@ export default function IeltsWriting() {
     setView('library');
   };
 
+  const handleGateContinue = () => {
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      localStorage.setItem('skill_module_completed_today',
+        JSON.stringify({ completed: true, date: today, skill: 'writing' }));
+    } catch { }
+    navigate('/student/dashboard', { state: { skillModuleCompleted: true } });
+  };
+
   const handleSubmit = async () => {
     if (wordCount < targetWordCount) {
       toast({
@@ -92,8 +107,11 @@ export default function IeltsWriting() {
     try {
       const result = await submitWritingSession(selectedAssignment.id, essayText, wordCount);
       setEvaluationResult(result);
-      addPoints(50, 'Completed Writing Module');
+      
+      // Add Momentum Points & Passport Stamp
+      addPoints(50, 'Completed Writing Module', isReplayMode ? 0.5 : 1.0);
       stampPassportSlot('writing');
+      
       setView('results');
       toast({ title: 'Success!', description: 'Writing submitted successfully for analysis.' });
     } catch (error: any) {
@@ -324,6 +342,20 @@ export default function IeltsWriting() {
                   </div>
                 </div>
               </div>
+
+              {/* Gate completion CTA block */}
+              {isGateMode && (
+                <div className='bg-indigo-50 border border-indigo-200 rounded-2xl p-5 flex flex-col items-center justify-center text-center mt-6'>
+                  <CheckCircle2 className='w-8 h-8 text-indigo-500 mb-2' />
+                  <p className="text-indigo-900 font-bold mb-4">Practice complete — your drills are now unlocked</p>
+                  <button
+                    onClick={handleGateContinue}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-2"
+                  >
+                    Continue to Drills <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Card className="text-center p-4"><p className="text-xs font-bold text-slate-400 uppercase">Grammar</p><p className="text-2xl font-black text-[#7B61FF]">{evaluationResult.aiGrammarScore}</p></Card>

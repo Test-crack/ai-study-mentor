@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { StudentSidebar } from './dashboard/StudentSidebar';
 import { StudentTopbar } from './dashboard/StudentTopbar';
 import { useToast } from '@/shared/hooks/use-toast';
@@ -9,7 +9,7 @@ import {
   RotateCcw, ChevronRight, History, Brain,
   ChevronLeft, TrendingUp, TrendingDown, Eye,
   AlertTriangle, Play, Gauge, Info, Timer, Layers,
-  BookMarked, Flame,
+  BookMarked, Flame, ArrowRight
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
@@ -331,9 +331,9 @@ const QuestionHighlighter: React.FC<QuestionHighlighterProps> = ({ text, activeI
 // ─────────────────────────────────────────────────────────────────────────────
 
 const TimerRing = ({ value, max, size = 64, urgent }: { value: number; max: number; size?: number; urgent?: boolean }) => {
-  const r     = (size - 8) / 2;
-  const pct   = Math.max(0, value / max);
-  const circ  = 2 * Math.PI * r;
+  const r    = (size - 8) / 2;
+  const pct  = Math.max(0, value / max);
+  const circ = 2 * Math.PI * r;
   const color = urgent ? '#ef4444' : pct > 0.5 ? '#7B61FF' : '#f59e0b';
 
   return (
@@ -485,12 +485,18 @@ export default function ReadingPractice() {
   const { toast } = useToast();
   const { addPoints } = useMomentum();
 
+  // Mode Logic from Master Handoff Doc
+  const [searchParams] = useSearchParams();
+  const practiceMode = (searchParams.get('mode') ?? 'standalone') as 'gate' | 'standalone' | 'replay';
+  const isGateMode   = practiceMode === 'gate';
+  const isReplayMode = practiceMode === 'replay';
+
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isSidebarHovered,   setIsSidebarHovered]   = useState(false);
   const [view, setView] = useState<ViewState>('library');
 
   // ── Library ────────────────────────────────────────────────────────────────
-  const [passages,        setPassages]        = useState<SpeedReadingReportSummary[]>([]);
+  const [passages,         setPassages]         = useState<SpeedReadingReportSummary[]>([]);
   const [loadingPassages, setLoadingPassages] = useState(true);
   const [activeCategory,  setActiveCategory]  = useState<string>('All');
 
@@ -740,7 +746,9 @@ export default function ReadingPractice() {
         answers: qs.map(q => ({ questionId: q.id, selectedOption: finalAnswers[q.id] ?? '' })),
       });
       setResults(evaluation);
-      addPoints(50, 'Completed Reading Module');
+      
+      // Multiplier logic
+      addPoints(50, 'Completed Reading Module', isReplayMode ? 0.5 : 1.0);
       stampPassportSlot('reading');
     } catch {
       const correct   = qs.filter(q => finalAnswers[q.id] === q.answer).length;
@@ -768,12 +776,14 @@ export default function ReadingPractice() {
           explanation:   q.explanation ?? null,
         })),
       } as any);
-      addPoints(50, 'Completed Reading Module (Offline)');
+
+      // Multiplier logic
+      addPoints(50, 'Completed Reading Module (Offline)', isReplayMode ? 0.5 : 1.0);
       stampPassportSlot('reading');
     } finally {
       setSubmitting(false);
     }
-  }, [answers, selectedPassage, speed, words.length, clearAll, addPoints]);
+  }, [answers, selectedPassage, speed, words.length, clearAll, addPoints, isReplayMode]);
 
   const advanceRef = useRef(advanceQuestion);
   useEffect(() => { advanceRef.current = advanceQuestion; }, [advanceQuestion]);
@@ -793,6 +803,16 @@ export default function ReadingPractice() {
     setReadingStarted(false);
     setKeywords(new Set());
     setView('library');
+  };
+
+  // Gate handler
+  const handleGateContinue = () => {
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      localStorage.setItem('skill_module_completed_today',
+        JSON.stringify({ completed: true, date: today, skill: 'reading' }));
+    } catch { }
+    navigate('/student/dashboard', { state: { skillModuleCompleted: true } });
   };
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -1239,10 +1259,24 @@ export default function ReadingPractice() {
                       </p>
                       <div className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-full bg-amber-400/20 border border-amber-400/30">
                         <Zap className="w-4 h-4 text-amber-400 fill-amber-400" />
-                        <span className="text-amber-300 font-black text-sm">+50 Momentum Earned</span>
+                        <span className="text-amber-300 font-black text-sm">+{isReplayMode ? 25 : 50} Momentum Earned</span>
                       </div>
                     </div>
                   </div>
+
+                  {/* Gate completion CTA block */}
+                  {isGateMode && (
+                    <div className='bg-indigo-50 border border-indigo-200 rounded-2xl p-5 flex flex-col items-center justify-center text-center'>
+                      <CheckCircle2 className='w-8 h-8 text-indigo-500 mb-2' />
+                      <p className="text-indigo-900 font-bold mb-4">Practice complete — your drills are now unlocked</p>
+                      <button 
+                        onClick={handleGateContinue}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-2"
+                      >
+                        Continue to Drills <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {[

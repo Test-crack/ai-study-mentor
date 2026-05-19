@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   BookOpen, Mic, Target, Zap, Clock, CheckCircle, 
   Sparkles, ChevronRight, Info, AlertTriangle, 
   XCircle, Check, PlaySquare, Square, Loader2,
-  ChevronLeft, RotateCcw, Activity, StopCircle, TrendingUp
+  ChevronLeft, RotateCcw, Activity, StopCircle, TrendingUp,
+  CheckCircle2, ArrowRight
 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent } from '@/shared/components/ui/card';
@@ -21,6 +22,8 @@ import {
 import { toast } from "sonner";
 import { useSpeechToText } from '../hooks/useSpeechToText';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useMomentum } from "@/features/student/Context/MomentumContext";
+import { stampPassportSlot } from '@/features/student/utils/passportUtils';
 
 type Step = 1 | 2 | 3 | 4;
 type BandLevel = 'All' | 'Band 5' | 'Band 6' | 'Band 7' | 'Band 8';
@@ -39,9 +42,17 @@ const FILLER_WORDS_LIST = [
 
 export default function StudentReadingAssessmentPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { profile } = useAuth();
+  const { addPoints } = useMomentum();
+
+  // Mode Logic
+  const practiceMode = (searchParams.get('mode') ?? 'standalone') as 'gate' | 'standalone' | 'replay';
+  const isGateMode   = practiceMode === 'gate';
+  const isReplayMode = practiceMode === 'replay';
+
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isSidebarHovered, setIsSidebarHovered] = useState(false); // ADDED HOVER STATE
+  const [isSidebarHovered, setIsSidebarHovered] = useState(false);
   const [activeBand, setActiveBand] = useState<BandLevel>('All');
   const [selectedTopic, setSelectedTopic] = useState<IeltsReadingPractice | null>(null);
   const [topics, setTopics] = useState<IeltsReadingPracticeList[]>([]);
@@ -228,6 +239,16 @@ export default function StudentReadingAssessmentPage() {
     setSelectedTopic(null);
     setCurrentStep(1);
     stopListening();
+  };
+
+  // Gate handler
+  const handleGateContinue = () => {
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      localStorage.setItem('skill_module_completed_today',
+        JSON.stringify({ completed: true, date: today, skill: 'speaking' }));
+    } catch { }
+    navigate('/student/dashboard', { state: { skillModuleCompleted: true } });
   };
 
   const renderLiveTranscript = () => {
@@ -562,7 +583,13 @@ export default function StudentReadingAssessmentPage() {
                         const pass2 = { coverage: keywordCoverage, totalKeywords: selectedTopic.keywords.length, words: wordsArray.length, fillers: currentFillers.total, fillerCounts: currentFillers.fillerCounts, pauses: pauseCount, time: recordingTime, wpm: currentWPM };
                         try {
                           const res = await saveIeltsReadingAssessment({ topicId: selectedTopic.id, userId: profile?.id || '', band: selectedTopic.band, pass1: sessionResults.pass1, pass2: pass2 });
-                          if (res.success) { setBackendResults(res.data); setCurrentStep(4); }
+                          if (res.success) { 
+                            setBackendResults(res.data); 
+                            setCurrentStep(4); 
+                            // Add Momentum Points & Passport Stamp
+                            addPoints(50, 'Completed Speaking Module', isReplayMode ? 0.5 : 1.0);
+                            stampPassportSlot('speaking');
+                          }
                           else { toast.error(res.error || "Failed to save results"); }
                         } catch (err) { toast.error("Error connecting to server"); }
                         finally { setIsSaving(false); }
@@ -581,6 +608,20 @@ export default function StudentReadingAssessmentPage() {
                       Band {selectedTopic.band.split(' ')[1]} Assessment Saved
                     </span>
                   </div>
+
+                  {/* Gate completion CTA block */}
+                  {isGateMode && (
+                    <div className='bg-indigo-50 border border-indigo-200 rounded-2xl p-5 flex flex-col items-center justify-center text-center w-full max-w-4xl'>
+                      <CheckCircle2 className='w-8 h-8 text-indigo-500 mb-2' />
+                      <p className="text-indigo-900 font-bold mb-4">Practice complete — your drills are now unlocked</p>
+                      <button 
+                        onClick={handleGateContinue}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-2"
+                      >
+                        Continue to Drills <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full max-w-4xl">
                     <ScoreCard 

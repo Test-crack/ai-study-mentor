@@ -1,10 +1,14 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useMomentum } from "@/features/student/Context/MomentumContext";
 import { callBackend } from '@/features/auth/services/authClient';
-import { ArrowLeft, Sparkles, Lightbulb, CheckCircle2, Zap, Info, ShieldAlert, Award, Loader2 } from 'lucide-react';
+import { ArrowLeft, Lightbulb, CheckCircle2, Zap, Info, ShieldAlert, Award, Loader2, RotateCcw } from 'lucide-react';
+import {
+  stampPassportSlot,
+  PASSPORT_BONUS_PTS,
+  PASSPORT_STREAK_BONUS_PTS,
+} from '@/features/student/utils/passportUtils';
 
-// --- Emergency offline fallback (used only when the API is unreachable) ---
 const FALLBACK_WORD_BANK = [
   { base: "IMPORTANT",  target: "CRUCIAL",     hint: "Decisive or critical, especially in the success or failure of something." },
   { base: "VERY HAPPY", target: "ECSTATIC",    hint: "Feeling or expressing overwhelming happiness or joyful excitement." },
@@ -23,22 +27,9 @@ const INTRO_WORDS = [
   "EVALUATE", "COMPREHENSIVE", "SYNONYM", "MOMENTUM", "EXCELLENCE"
 ];
 
-const DAILY_LIMIT = 5;
-const MAX_TRIES = 3;
-const POINTS_PER_WORD = 15;
-
-// IST date string (YYYY-MM-DD) — must match the backend's currentISTDate() boundary.
-// Using toISOString() gives a UTC date which is wrong for the 5.5-hour window after
-// midnight IST but before midnight UTC (00:00–05:30 IST = still previous UTC day).
-function todayIST(): string {
-  const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
-  const ist = new Date(Date.now() + IST_OFFSET_MS);
-  return [
-    ist.getUTCFullYear(),
-    String(ist.getUTCMonth() + 1).padStart(2, '0'),
-    String(ist.getUTCDate()).padStart(2, '0')
-  ].join('-');
-}
+const DAILY_LIMIT     = 5;
+const MAX_TRIES       = 3;
+const POINTS_PER_WORD = 2; // Exactly 10 points total for a perfect 5-word game
 
 const KEYBOARD_ROWS = [
   ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
@@ -53,190 +44,186 @@ interface WordItem {
 }
 
 export default function LexiGrid() {
-  const navigate = useNavigate();
+  const navigate       = useNavigate();
   const [searchParams] = useSearchParams();
+
   const difficulty = (searchParams.get('difficulty') || 'INTERMEDIATE').toUpperCase();
+
+  /**
+   * GATE MODE    → ?mode=gate  (Drill1 → Drill2 gate from dashboard)
+   * Enforces daily lock. syncMomentum from server after session.
+   *
+   * STANDALONE   → no mode param (sidebar / dashboard card / passport)
+   * No daily lock. addPoints client-side only — never sync from
+   * server on session end, so earned points are NOT overwritten.
+   */
+  const isGateMode = searchParams.get('mode') === 'gate';
 
   const { totalMomentum, addPoints, syncMomentum } = useMomentum();
 
-  // Tracks total attempts across all words this session (for bonus eligibility)
-  const totalAttemptsRef = useRef(0);
-  // Tracks whether every solved word used ≤3 attempts (bonus check)
+  const totalAttemptsRef    = useRef(0);
   const allBonusEligibleRef = useRef(true);
 
-  // --- State Management ---
-  const [dailyWords, setDailyWords]     = useState<WordItem[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [currentGuess, setCurrentGuess] = useState("");
-  const [triesLeft, setTriesLeft]       = useState(MAX_TRIES);
-  const [wordsWon, setWordsWon]         = useState(0);
-  const [gameStatus, setGameStatus]     = useState<'playing' | 'won' | 'lost' | 'completed_day'>('playing');
-  const [isInitializing, setIsInitializing] = useState(true);
-  const [fetchError, setFetchError]     = useState(false);
+  const [dailyWords, setDailyWords]           = useState<WordItem[]>([]);
+  const [currentIndex, setCurrentIndex]       = useState(0);
+  const [currentGuess, setCurrentGuess]       = useState('');
+  const [triesLeft, setTriesLeft]             = useState(MAX_TRIES);
+  const [wordsWon, setWordsWon]               = useState(0);
+  const [gameStatus, setGameStatus]           = useState<'playing' | 'won' | 'lost' | 'completed_day'>('playing');
+  const [isInitializing, setIsInitializing]   = useState(true);
+  const [fetchError, setFetchError]           = useState(false);
+  const [passportStamped, setPassportStamped] = useState(false);
 
-  // UI States
-  const [introStage, setIntroStage]     = useState<'playing' | 'fading' | 'done'>('playing');
-  const [isErrorShake, setIsErrorShake] = useState(false);
-  const [showHint, setShowHint]         = useState(false);
-  const [flyingScore, setFlyingScore]   = useState(false);
+  const [introStage, setIntroStage]       = useState<'playing' | 'fading' | 'done'>('playing');
+  const [isErrorShake, setIsErrorShake]   = useState(false);
+  const [showHint, setShowHint]           = useState(false);
+  const [flyingScore, setFlyingScore]     = useState(false);
+
+  // ── localMomentum mirrors global momentum for display in topbar.
+  //    We update it via addPoints (which updates the global context), and
+  //    we only call syncMomentum (which OVERWRITES local state from server)
+  //    in gate mode — never in standalone mode.
   const [localMomentum, setLocalMomentum] = useState(totalMomentum);
 
-  // Sync local momentum with global on load
   useEffect(() => {
+    // Keep localMomentum in sync with global context.
+    // This fires when totalMomentum changes — including when addPoints is called.
     setLocalMomentum(totalMomentum);
   }, [totalMomentum]);
 
-  // --- Intro Animation Timers ---
+  // ── Intro animation ──────────────────────────────────────────────────────────
   useEffect(() => {
-    // Start fading out the intro at 2.8 seconds, fully unmount at 3.3 seconds
     const t1 = setTimeout(() => setIntroStage('fading'), 2800);
-    const t2 = setTimeout(() => setIntroStage('done'), 3300);
+    const t2 = setTimeout(() => setIntroStage('done'),   3300);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
 
-  // Memoize random intro word positions so they don't jump on re-renders
   const introWordConfigs = useMemo(() => {
     return INTRO_WORDS.map((word, i) => {
-      const angle = (i / INTRO_WORDS.length) * Math.PI * 2;
-      const dist = 400 + Math.random() * 500; // Start far off screen
+      const angle  = (i / INTRO_WORDS.length) * Math.PI * 2;
+      const dist   = 400 + Math.random() * 500;
       const startX = Math.cos(angle) * dist;
       const startY = Math.sin(angle) * dist;
-      const delay = Math.random() * 0.8; // Staggered start times
+      const delay  = Math.random() * 0.8;
       return { word, startX, startY, delay };
     });
   }, []);
 
-  // --- Persistence & Initialization ---
+  // ── Fetch words ──────────────────────────────────────────────────────────────
+  const fetchWords = useCallback(async (): Promise<WordItem[]> => {
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+    try {
+      const res = await callBackend(
+        `${backendUrl}/api/student/lexigrid-words?difficulty=${encodeURIComponent(difficulty)}`
+      );
+      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        return (res.data as any[]).map(w => ({
+          base:   w.base_word.toUpperCase(),
+          target: w.target_word.toUpperCase(),
+          hint:   w.hint,
+        }));
+      }
+    } catch { /* fall through */ }
+    setFetchError(true);
+    return [...FALLBACK_WORD_BANK].sort(() => 0.5 - Math.random()).slice(0, DAILY_LIMIT);
+  }, [difficulty]);
+
+  // ── Init ─────────────────────────────────────────────────────────────────────
   useEffect(() => {
-    const today = todayIST(); // IST date — matches backend's session_date boundary
+    const today      = new Date().toISOString().split('T')[0];
     const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
 
     const init = async () => {
-      // 1. Backend is the single source of truth for whether today's session is done.
-      //    Using IST on both sides prevents stale-localStorage false-positives in the
-      //    00:00–05:30 IST window (new IST day, same UTC day).
-      let backendReachable = false;
-      try {
-        const stateRes = await callBackend(`${backendUrl}/api/student/daily-drill-state`);
-        if (stateRes.success) {
-          backendReachable = true;
-          if (stateRes.lexigrid_completed_today) {
-            setWordsWon(stateRes.lexigrid_words_solved ?? 0);
-            setGameStatus('completed_day');
-            setIsInitializing(false);
-            return;
-          }
-          // Backend confirmed NOT done today — any localStorage "completed" entry is stale.
-          // Clear it so the date-match check below cannot resurrect it.
-          const savedData = localStorage.getItem('lexigrid_state');
-          if (savedData) {
-            try {
-              const parsed = JSON.parse(savedData);
-              if (parsed.currentIndex >= DAILY_LIMIT) {
-                localStorage.removeItem('lexigrid_state');
-              }
-            } catch { localStorage.removeItem('lexigrid_state'); }
-          }
-        }
-      } catch {
-        // Backend unreachable — fall through to localStorage/fallback
-      }
 
-      // 2. Resume an in-progress session from localStorage (same browser, mid-game).
-      //    Only trusted when: date matches today (IST), AND session is not yet complete.
-      //    If backend was reachable we already cleared stale completed entries above.
-      const savedData = localStorage.getItem('lexigrid_state');
-      if (savedData) {
+      if (isGateMode) {
+        // Gate mode: enforce daily lock
         try {
-          const parsed = JSON.parse(savedData);
-          const sameDay    = parsed.date === today;
-          const inProgress = Array.isArray(parsed.words) && parsed.words.length > 0
-                             && parsed.currentIndex < DAILY_LIMIT;
-          if (sameDay && inProgress) {
-            setDailyWords(parsed.words);
-            setCurrentIndex(parsed.currentIndex || 0);
-            setTriesLeft(parsed.triesLeft ?? MAX_TRIES);
-            setCurrentGuess(parsed.currentGuess || "");
-            setWordsWon(parsed.wordsWon || 0);
-            setIsInitializing(false);
-            return;
-          }
-          // Stale or completed entry (different date, or completed when backend was offline)
-          if (!backendReachable && parsed.currentIndex >= DAILY_LIMIT && sameDay) {
-            // Backend was unreachable and localStorage shows completed — honour it
-            setWordsWon(parsed.wordsWon || 0);
+          const state = await callBackend(`${backendUrl}/api/student/daily-drill-state`);
+          if (state.success && state.lexigrid_completed_today) {
+            setWordsWon(state.lexigrid_words_solved ?? 0);
             setGameStatus('completed_day');
             setIsInitializing(false);
             return;
           }
-          localStorage.removeItem('lexigrid_state');
-        } catch {
-          console.warn('[LexiGrid] Corrupted save data. Clearing...');
-          localStorage.removeItem('lexigrid_state');
-        }
-      }
+        } catch { /* backend unreachable — allow play */ }
 
-      // 3. Fresh session — fetch today's words from backend
-      try {
-        const res = await callBackend(
-          `${backendUrl}/api/student/lexigrid-words?difficulty=${encodeURIComponent(difficulty)}`
-        );
-
-        let words: WordItem[];
-        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-          words = (res.data as any[]).map((w) => ({
-            base:   w.base_word.toUpperCase(),
-            target: w.target_word.toUpperCase(),
-            hint:   w.hint,
-          }));
-        } else {
-          console.warn('[LexiGrid] No words from API, using fallback bank.');
-          words = [...FALLBACK_WORD_BANK].sort(() => 0.5 - Math.random()).slice(0, DAILY_LIMIT);
+        // Resume in-progress gate session
+        const saved = localStorage.getItem('lexigrid_state');
+        if (saved) {
+          try {
+            const p = JSON.parse(saved);
+            if (p.date === today && Array.isArray(p.words) && p.words.length > 0) {
+              setDailyWords(p.words);
+              setCurrentIndex(p.currentIndex || 0);
+              setTriesLeft(p.triesLeft ?? MAX_TRIES);
+              setCurrentGuess(p.currentGuess || '');
+              setWordsWon(p.wordsWon || 0);
+              if (p.currentIndex >= DAILY_LIMIT) setGameStatus('completed_day');
+              setIsInitializing(false);
+              return;
+            }
+          } catch { localStorage.removeItem('lexigrid_state'); }
         }
 
+        // Fresh gate session
+        const words = await fetchWords();
         setDailyWords(words);
-        setCurrentIndex(0);
-        setTriesLeft(MAX_TRIES);
-        setCurrentGuess('');
-        setWordsWon(0);
-
+        setCurrentIndex(0); setTriesLeft(MAX_TRIES); setCurrentGuess(''); setWordsWon(0);
+        totalAttemptsRef.current = 0; allBonusEligibleRef.current = true;
         localStorage.setItem('lexigrid_state', JSON.stringify({
-          date: todayIST(), words, currentIndex: 0, triesLeft: MAX_TRIES, currentGuess: '', wordsWon: 0,
+          date: today, words, currentIndex: 0, triesLeft: MAX_TRIES, currentGuess: '', wordsWon: 0,
         }));
-      } catch (err) {
-        console.error('[LexiGrid] Failed to fetch words from API:', err);
-        setFetchError(true);
-        const words = [...FALLBACK_WORD_BANK].sort(() => 0.5 - Math.random()).slice(0, DAILY_LIMIT);
-        setDailyWords(words);
-        setCurrentIndex(0);
-        setTriesLeft(MAX_TRIES);
-        setCurrentGuess('');
-        setWordsWon(0);
-      } finally {
         setIsInitializing(false);
+        return;
       }
+
+      // ── STANDALONE MODE ───────────────────────────────────────────────────────
+      // Never lock. Try to resume a mid-game standalone session.
+      const saved = localStorage.getItem('lexigrid_standalone_state');
+      if (saved) {
+        try {
+          const p = JSON.parse(saved);
+          if (p.date === today && Array.isArray(p.words) && p.words.length > 0
+              && p.currentIndex < DAILY_LIMIT) {
+            setDailyWords(p.words);
+            setCurrentIndex(p.currentIndex || 0);
+            setTriesLeft(p.triesLeft ?? MAX_TRIES);
+            setCurrentGuess(p.currentGuess || '');
+            setWordsWon(p.wordsWon || 0);
+            setIsInitializing(false);
+            return;
+          }
+        } catch { localStorage.removeItem('lexigrid_standalone_state'); }
+      }
+
+      // Fresh standalone session
+      const words = await fetchWords();
+      setDailyWords(words);
+      setCurrentIndex(0); setTriesLeft(MAX_TRIES); setCurrentGuess(''); setWordsWon(0);
+      totalAttemptsRef.current = 0; allBonusEligibleRef.current = true;
+      setIsInitializing(false);
     };
 
     init();
-  }, [difficulty]);
+  }, [isGateMode, fetchWords]);
 
-  const saveState = (index: number, tries: number, guess: string, score: number) => {
-    localStorage.setItem('lexigrid_state', JSON.stringify({
-      date: todayIST(),
-      words: dailyWords,
-      currentIndex: index,
-      triesLeft: tries,
-      currentGuess: guess,
-      wordsWon: score
-    }));
-  };
+  // ── Save state ───────────────────────────────────────────────────────────────
+  const saveState = useCallback((index: number, tries: number, guess: string, score: number) => {
+    const today = new Date().toISOString().split('T')[0];
+    const key   = isGateMode ? 'lexigrid_state' : 'lexigrid_standalone_state';
+    try {
+      localStorage.setItem(key, JSON.stringify({
+        date: today, words: dailyWords, currentIndex: index,
+        triesLeft: tries, currentGuess: guess, wordsWon: score,
+      }));
+    } catch { /* ignore */ }
+  }, [isGateMode, dailyWords]);
 
-  // --- Keyboard Logic ---
+  // ── Keyboard ─────────────────────────────────────────────────────────────────
   const handleKeyPress = useCallback((key: string) => {
-    // BUG FIX: Block input if intro is playing to prevent phantom typing
     if (gameStatus !== 'playing' || isInitializing || isErrorShake || introStage !== 'done') return;
-    
-    const targetWord = dailyWords[currentIndex]?.target || "";
+
+    const targetWord = dailyWords[currentIndex]?.target || '';
     const wordLength = targetWord.length;
 
     if (key === 'ENTER') {
@@ -245,85 +232,81 @@ export default function LexiGrid() {
         setTimeout(() => setIsErrorShake(false), 400);
         return;
       }
-      
       if (currentGuess === targetWord) {
         setGameStatus('won');
         const newScore = wordsWon + 1;
         setWordsWon(newScore);
         saveState(currentIndex, triesLeft, currentGuess, newScore);
-        const attemptsUsedForWord = MAX_TRIES - triesLeft + 1; // e.g. first try → 1
-        triggerWinAnimation(attemptsUsedForWord);
+        triggerWinAnimation(MAX_TRIES - triesLeft + 1);
       } else {
         const newTries = triesLeft - 1;
         setTriesLeft(newTries);
         setIsErrorShake(true);
         saveState(currentIndex, newTries, currentGuess, wordsWon);
-        
         setTimeout(() => {
           setIsErrorShake(false);
-          if (newTries <= 0) {
-            setGameStatus('lost');
-          } else {
-            setCurrentGuess("");
-          }
+          if (newTries <= 0) setGameStatus('lost');
+          else setCurrentGuess('');
         }, 600);
       }
     } else if (key === '⌫' || key === 'BACKSPACE') {
-      const newGuess = currentGuess.slice(0, -1);
-      setCurrentGuess(newGuess);
-      saveState(currentIndex, triesLeft, newGuess, wordsWon);
+      const g = currentGuess.slice(0, -1);
+      setCurrentGuess(g);
+      saveState(currentIndex, triesLeft, g, wordsWon);
     } else if (currentGuess.length < wordLength && /^[A-Z]$/.test(key)) {
-      const newGuess = currentGuess + key;
-      setCurrentGuess(newGuess);
-      saveState(currentIndex, triesLeft, newGuess, wordsWon);
+      const g = currentGuess + key;
+      setCurrentGuess(g);
+      saveState(currentIndex, triesLeft, g, wordsWon);
     }
-  }, [currentGuess, gameStatus, triesLeft, currentIndex, dailyWords, wordsWon, isInitializing, isErrorShake, introStage]);
+  }, [currentGuess, gameStatus, triesLeft, currentIndex, dailyWords, wordsWon, isInitializing, isErrorShake, introStage, saveState]);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const down = (e: KeyboardEvent) => {
       if (e.key === 'Enter') handleKeyPress('ENTER');
       else if (e.key === 'Backspace') handleKeyPress('⌫');
-      else {
-        const key = e.key.toUpperCase();
-        if (/^[A-Z]$/.test(key)) handleKeyPress(key);
-      }
+      else { const k = e.key.toUpperCase(); if (/^[A-Z]$/.test(k)) handleKeyPress(k); }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', down);
+    return () => window.removeEventListener('keydown', down);
   }, [handleKeyPress]);
 
-  // --- Backend sync on session complete ---
+  // ── Submit session ────────────────────────────────────────────────────────────
   const submitLexiGridSession = useCallback(async (finalWordsWon: number) => {
     try {
-      const attemptsUsed = totalAttemptsRef.current;
-      const bonusEligible = allBonusEligibleRef.current && finalWordsWon >= DAILY_LIMIT;
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
       const res = await callBackend(`${backendUrl}/api/student/game-score`, {
         method: 'POST',
         body: JSON.stringify({
           game_type:      'LEXIGRID',
           words_solved:   finalWordsWon,
-          total_attempts: attemptsUsed,
-          bonus_eligible: bonusEligible
-        })
+          total_attempts: totalAttemptsRef.current,
+          bonus_eligible: allBonusEligibleRef.current && finalWordsWon >= DAILY_LIMIT,
+        }),
       });
-      if (res.momentum_score !== undefined) {
+
+      // Only sync momentum from server in GATE MODE.
+      if (isGateMode && res.momentum_score !== undefined) {
         syncMomentum(res.momentum_score);
       }
     } catch (err) {
       console.error('[LexiGrid] Failed to submit session:', err);
     }
-  }, [syncMomentum]);
 
-  // --- Animations & Progression ---
+    const { bonusJustUnlocked, streakBonusJustUnlocked } = stampPassportSlot('vocabulary');
+    setPassportStamped(true);
+    if (bonusJustUnlocked)       addPoints(PASSPORT_BONUS_PTS,        'Skill Passport complete');
+    if (streakBonusJustUnlocked) addPoints(PASSPORT_STREAK_BONUS_PTS, 'Skill Passport streak bonus');
+    
+  }, [isGateMode, syncMomentum, addPoints]);
+
+  // ── Win animation ────────────────────────────────────────────────────────────
   const triggerWinAnimation = (attemptsForThisWord: number) => {
-    // Track if this word used ≤ MAX_TRIES - triesLeft attempts (i.e. ≤ 3 total → bonus eligible)
     if (attemptsForThisWord > MAX_TRIES) allBonusEligibleRef.current = false;
     totalAttemptsRef.current += attemptsForThisWord;
-
     setFlyingScore(true);
     setTimeout(() => {
-      setLocalMomentum(prev => prev + POINTS_PER_WORD);
+      // addPoints updates the MomentumContext → totalMomentum changes →
+      // useEffect above updates localMomentum → topbar shows new value.
       addPoints(POINTS_PER_WORD);
     }, 800);
     setTimeout(() => setFlyingScore(false), 1500);
@@ -337,105 +320,121 @@ export default function LexiGrid() {
     } else {
       setCurrentIndex(nextIndex);
       setTriesLeft(MAX_TRIES);
-      setCurrentGuess("");
+      setCurrentGuess('');
       setGameStatus('playing');
       setShowHint(false);
     }
-    saveState(nextIndex, MAX_TRIES, "", wordsWon);
+    saveState(nextIndex, MAX_TRIES, '', wordsWon);
   };
+
+  // ── Play Again (standalone only) ─────────────────────────────────────────────
+  const handlePlayAgain = async () => {
+    setIsInitializing(true);
+    setPassportStamped(false);
+    totalAttemptsRef.current    = 0;
+    allBonusEligibleRef.current = true;
+    localStorage.removeItem('lexigrid_standalone_state');
+    const words = await fetchWords();
+    setDailyWords(words);
+    setCurrentIndex(0); setTriesLeft(MAX_TRIES); setCurrentGuess(''); setWordsWon(0);
+    setGameStatus('playing'); setShowHint(false);
+    setIsInitializing(false);
+  };
+
+  // ─────────────────────────────────────────────────────────────────────────────
 
   if (isInitializing) {
     return (
       <div className="min-h-screen bg-[#07070a] flex items-center justify-center font-sans text-white">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
-          <p className="text-slate-400 font-bold tracking-widest uppercase text-sm">
-            Loading Today's Challenge...
-          </p>
+          <p className="text-slate-400 font-bold tracking-widest uppercase text-sm">Loading Today's Challenge...</p>
         </div>
       </div>
     );
   }
 
   const currentWordObj = dailyWords[currentIndex];
-  const targetWord = currentWordObj?.target || "";
-  const wordLength = targetWord.length;
+  const targetWord     = currentWordObj?.target || '';
+  const wordLength     = targetWord.length;
 
   return (
     <div className="min-h-screen bg-[#07070a] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-950/20 via-[#07070a] to-[#07070a] font-sans text-white flex flex-col selection:bg-indigo-500/30 overflow-x-hidden relative">
-      
-      {/* ── CINEMATIC INTRO OVERLAY ── */}
+
+      {/* ── INTRO OVERLAY ── */}
       {introStage !== 'done' && (
         <div className={`fixed inset-0 z-[100] bg-[#07070a] flex items-center justify-center overflow-hidden transition-opacity duration-500 ${introStage === 'fading' ? 'opacity-0' : 'opacity-100'}`}>
-          {/* Flying Words Background */}
           <div className="absolute inset-0 pointer-events-none">
             {introWordConfigs.map((config, i) => (
-              <div
-                key={i}
+              <div key={i}
                 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-indigo-400/20 font-black text-xl md:text-3xl uppercase whitespace-nowrap mix-blend-screen"
                 style={{
-                  animation: `flyToCenter 1.4s cubic-bezier(0.2, 0, 0.8, 1) ${config.delay}s forwards`,
+                  animation: `flyToCenter 1.4s cubic-bezier(0.2,0,0.8,1) ${config.delay}s forwards`,
                   '--startX': `${config.startX}px`,
                   '--startY': `${config.startY}px`,
-                  transform: `translate(${config.startX}px, ${config.startY}px) scale(0)`,
+                  transform: `translate(${config.startX}px,${config.startY}px) scale(0)`,
                   opacity: 0
-                } as React.CSSProperties}
-              >
+                } as React.CSSProperties}>
                 {config.word}
               </div>
             ))}
           </div>
-
-          {/* Central Logo Pop */}
           <h1 className="relative z-10 text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 tracking-[0.2em] uppercase drop-shadow-[0_0_40px_rgba(129,140,248,0.6)] animate-[logoPop_1s_ease-out_1s_both]">
             LexiGrid
           </h1>
         </div>
       )}
 
-      {/* ── Offline warning banner ── */}
       {fetchError && (
         <div className="relative z-20 mx-auto mt-2 max-w-lg bg-amber-500/10 border border-amber-500/30 rounded-2xl px-4 py-2 text-center text-amber-400 text-xs font-bold tracking-wide">
           Using offline word bank — check your connection for fresh challenges.
         </div>
       )}
 
-      {/* ── Topbar (Target for Flying Score) ── */}
+      {/* ── Topbar ── */}
       <header className="flex items-center justify-between p-4 sm:p-6 max-w-7xl mx-auto w-full relative z-20">
         <button onClick={() => navigate('/student/dashboard')} className="p-2.5 -ml-2 rounded-full hover:bg-white/10 transition-colors">
           <ArrowLeft className="w-5 h-5 text-slate-300" />
         </button>
-        
-        <div className="flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 px-4 py-2 rounded-full shadow-lg shadow-indigo-500/5">
-          <Zap className="w-4 h-4 text-amber-400 fill-amber-400" />
-          <span className="font-black text-indigo-50 text-lg">{localMomentum}</span>
+        <div className="flex items-center gap-3">
+          <span className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border ${
+            isGateMode
+              ? 'bg-teal-500/20 text-teal-300 border-teal-500/30'
+              : 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
+          }`}>
+            {isGateMode ? 'Gate Mode' : 'Practice Mode'}
+          </span>
+          <div className="flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 px-4 py-2 rounded-full shadow-lg shadow-indigo-500/5">
+            <Zap className="w-4 h-4 text-amber-400 fill-amber-400" />
+            <span className="font-black text-indigo-50 text-lg">{localMomentum}</span>
+          </div>
         </div>
       </header>
 
-      {/* ── Flying Score Animation Element ── */}
+      {/* ── Flying Score ── */}
       {flyingScore && (
         <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 animate-[flyToTopRight_0.8s_ease-in-out_forwards]">
-          <div className="text-4xl font-black text-amber-400 drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">
-            +{POINTS_PER_WORD}
-          </div>
+          <div className="text-4xl font-black text-amber-400 drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">+{POINTS_PER_WORD}</div>
         </div>
       )}
 
       <main className="flex-1 flex flex-col xl:flex-row items-center xl:items-start justify-center max-w-7xl mx-auto w-full px-4 sm:px-6 gap-8 xl:gap-16 pb-12">
-        
-        {/* ── Left Column: Game Area ── */}
         <div className="flex-1 flex flex-col items-center w-full max-w-3xl relative z-10">
-          
-          {gameStatus === 'completed_day' ? (
-            /* ── End of Day Scoreboard ── */
+
+          {/* ── COMPLETED STATE ── */}
+          {gameStatus === 'completed_day' && (
             <div className="w-full max-w-lg bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-[32px] p-8 sm:p-10 flex flex-col items-center text-center shadow-2xl animate-in zoom-in-95 duration-500 mt-10">
               <div className="w-20 h-20 bg-amber-500/20 rounded-full flex items-center justify-center mb-6 ring-8 ring-amber-500/10">
                 <Award className="w-10 h-10 text-amber-400" />
               </div>
-              <h2 className="text-3xl font-black mb-2 text-white">Daily Challenge Complete</h2>
-              <p className="text-slate-400 mb-10 font-medium">Here is your vocabulary wrap-up for today.</p>
-              
-              <div className="w-full bg-slate-950/50 rounded-2xl p-6 border border-white/5 mb-10 flex justify-around">
+              <h2 className="text-3xl font-black mb-2 text-white">
+                {isGateMode ? 'Gate Cleared!' : 'Round Complete!'}
+              </h2>
+              <p className="text-slate-400 mb-8 font-medium">
+                {isGateMode ? 'Drill 2 is now unlocked.' : 'Great vocabulary work!'}
+              </p>
+
+              <div className="w-full bg-slate-950/50 rounded-2xl p-6 border border-white/5 mb-6 flex justify-around">
                 <div>
                   <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Score</p>
                   <p className="text-4xl font-black text-white">{wordsWon} <span className="text-xl text-slate-600">/ {DAILY_LIMIT}</span></p>
@@ -447,22 +446,42 @@ export default function LexiGrid() {
                 </div>
               </div>
 
-              <button
-                onClick={() => navigate('/student/dashboard', { state: { lexigridCompleted: true } })}
-                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-lg py-4 rounded-2xl transition-all shadow-lg hover:shadow-indigo-500/25 active:scale-[0.98]"
-              >
-                Return to Dashboard
-              </button>
+              {passportStamped && (
+                <div className="w-full mb-6 flex items-center gap-3 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-left">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                  <p className="text-sm font-bold text-emerald-400">Vocabulary passport slot stamped ✓</p>
+                </div>
+              )}
+
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
+                <button
+                  onClick={() => navigate('/student/dashboard', isGateMode ? { state: { lexigridCompleted: true } } : undefined)}
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-base py-4 rounded-2xl transition-all shadow-lg hover:shadow-indigo-500/25 active:scale-[0.98]"
+                >
+                  {isGateMode ? 'Continue to Drill 2 →' : 'Back to Dashboard'}
+                </button>
+
+                {/* Play Again — standalone only */}
+                {!isGateMode && (
+                  <button
+                    onClick={handlePlayAgain}
+                    className="flex-1 flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold text-base py-4 rounded-2xl transition-all border border-white/10 active:scale-[0.98]"
+                  >
+                    <RotateCcw className="w-4 h-4" /> Play Again
+                  </button>
+                )}
+              </div>
             </div>
-          ) : (
+          )}
+
+          {/* ── ACTIVE GAME ── */}
+          {gameStatus !== 'completed_day' && (
             <>
-              {/* Context / Status */}
               <div className="text-center w-full mt-2 xl:mt-6">
                 <div className="flex items-center justify-between mb-8 px-2 max-w-lg mx-auto">
                   <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 bg-slate-800/50 px-3 py-1.5 rounded-full border border-white/5">
                     Word {currentIndex + 1} of {DAILY_LIMIT}
                   </span>
-                  
                   <div className="flex items-center gap-2 bg-slate-800/50 px-3 py-1.5 rounded-full border border-white/5">
                     <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">{Math.max(0, triesLeft)} attempts left</span>
                     <div className="flex gap-1.5 ml-1">
@@ -475,39 +494,29 @@ export default function LexiGrid() {
 
                 <p className="text-slate-400 font-medium mb-2 text-sm sm:text-base">Find the Band 8.0 synonym for:</p>
                 <p className="text-3xl sm:text-5xl font-black text-white uppercase tracking-widest mb-6 drop-shadow-lg break-words">
-                  {currentWordObj.base}
+                  {currentWordObj?.base}
                 </p>
 
-                <button 
+                <button
                   onClick={() => setShowHint(true)}
                   className={`inline-flex items-center gap-2 text-sm font-bold transition-all ${showHint ? 'text-amber-400' : 'text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 px-4 py-2 rounded-full border border-indigo-500/20'}`}
                 >
                   <Lightbulb className="w-4 h-4 shrink-0" />
-                  <span>{showHint ? currentWordObj.hint : "Reveal Context Hint"}</span>
+                  <span>{showHint ? currentWordObj?.hint : 'Reveal Context Hint'}</span>
                 </button>
               </div>
 
-              {/* ── Dynamic Single Row Grid (The Vault Lock) ── */}
+              {/* Vault Lock Grid */}
               <div className="w-full flex justify-center mt-12 mb-14 px-2 sm:px-4">
                 <div className={`flex w-full max-w-3xl justify-center gap-1.5 sm:gap-2.5 ${isErrorShake ? 'animate-[shake_0.4s_ease-in-out]' : ''}`}>
                   {Array.from({ length: wordLength }).map((_, colIndex) => {
-                    const letter = currentGuess[colIndex] || "";
-                    let bgColor = "bg-slate-900/80 border-slate-700/50 shadow-inner";
-                    let textColor = "text-white";
-
-                    if (isErrorShake) {
-                      bgColor = "bg-rose-500/20 border-rose-500 text-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.3)]";
-                    } else if (gameStatus === 'won') {
-                      bgColor = "bg-emerald-500/20 border-emerald-400 text-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)]";
-                    } else if (letter) {
-                      bgColor = "bg-indigo-500/20 border-indigo-400 shadow-[0_0_15px_rgba(129,140,248,0.2)]";
-                    }
-
+                    const letter = currentGuess[colIndex] || '';
+                    let bgColor  = 'bg-slate-900/80 border-slate-700/50 shadow-inner';
+                    if (isErrorShake)             bgColor = 'bg-rose-500/20 border-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.3)]';
+                    else if (gameStatus === 'won') bgColor = 'bg-emerald-500/20 border-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)]';
+                    else if (letter)              bgColor = 'bg-indigo-500/20 border-indigo-400 shadow-[0_0_15px_rgba(129,140,248,0.2)]';
                     return (
-                      <div 
-                        key={colIndex} 
-                        className={`flex-1 max-w-[4rem] aspect-[4/5] flex items-center justify-center text-2xl sm:text-4xl font-black uppercase border-2 rounded-xl sm:rounded-2xl transition-all duration-200 ${bgColor} ${textColor}`}
-                      >
+                      <div key={colIndex} className={`flex-1 max-w-[4rem] aspect-[4/5] flex items-center justify-center text-2xl sm:text-4xl font-black uppercase border-2 rounded-xl sm:rounded-2xl transition-all duration-200 ${bgColor} text-white`}>
                         {letter}
                       </div>
                     );
@@ -515,7 +524,7 @@ export default function LexiGrid() {
                 </div>
               </div>
 
-              {/* ── End State Overlays ── */}
+              {/* Word result overlay */}
               {(gameStatus === 'won' || gameStatus === 'lost') ? (
                 <div className="w-full max-w-lg bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-[32px] p-6 sm:p-8 text-center animate-in slide-in-from-bottom-8 duration-500 shadow-2xl">
                   {gameStatus === 'won' ? (
@@ -530,21 +539,19 @@ export default function LexiGrid() {
                       <p className="text-slate-300 mb-6 text-base sm:text-lg">The correct word was <strong className="text-emerald-400 tracking-widest">{targetWord}</strong></p>
                     </div>
                   )}
-                  
                   <div className="bg-slate-950/50 rounded-2xl p-4 sm:p-5 mb-8 border border-white/5 text-left">
                     <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-2">Definition</p>
-                    <p className="text-sm text-slate-300 font-medium leading-relaxed">{currentWordObj.hint}</p>
+                    <p className="text-sm text-slate-300 font-medium leading-relaxed">{currentWordObj?.hint}</p>
                   </div>
-                  
-                  <button 
+                  <button
                     onClick={handleNextWord}
                     className="w-full bg-white text-slate-900 hover:bg-slate-200 font-black text-lg py-4 rounded-2xl transition-all active:scale-[0.98]"
                   >
-                    {currentIndex === DAILY_LIMIT - 1 ? "See Final Score" : "Next Word"}
+                    {currentIndex === DAILY_LIMIT - 1 ? 'See Final Score' : 'Next Word'}
                   </button>
                 </div>
               ) : (
-                /* ── Sleek Tactile Keyboard ── */
+                /* Keyboard */
                 <div className="w-full max-w-2xl flex flex-col gap-2 sm:gap-2.5 px-2">
                   {KEYBOARD_ROWS.map((row, i) => (
                     <div key={i} className="flex justify-center gap-1.5 sm:gap-2 w-full">
@@ -556,11 +563,8 @@ export default function LexiGrid() {
                             onClick={() => handleKeyPress(key)}
                             disabled={isErrorShake}
                             className={`h-12 sm:h-14 rounded-xl font-bold text-xs sm:text-base flex items-center justify-center transition-all active:scale-95 border border-white/5 shadow-sm
-                              ${isSpecial 
-                                ? 'px-3 sm:px-6 text-[10px] sm:text-xs tracking-wider bg-slate-800 hover:bg-slate-700 text-slate-300' 
-                                : 'flex-1 max-w-[40px] sm:max-w-[48px] bg-slate-800/80 hover:bg-slate-700 text-white'}
-                              ${isErrorShake ? 'opacity-50 cursor-not-allowed active:scale-100' : ''}
-                            `}
+                              ${isSpecial ? 'px-3 sm:px-6 text-[10px] sm:text-xs tracking-wider bg-slate-800 hover:bg-slate-700 text-slate-300' : 'flex-1 max-w-[40px] sm:max-w-[48px] bg-slate-800/80 hover:bg-slate-700 text-white'}
+                              ${isErrorShake ? 'opacity-50 cursor-not-allowed active:scale-100' : ''}`}
                           >
                             {key}
                           </button>
@@ -574,75 +578,49 @@ export default function LexiGrid() {
           )}
         </div>
 
-        {/* ── Right Column: How to Play Guide ── */}
+        {/* ── How to Play ── */}
         {gameStatus !== 'completed_day' && (
           <div className="w-full xl:w-[340px] shrink-0 bg-slate-900/40 border border-white/10 rounded-[32px] p-6 sm:p-8 xl:mt-6 backdrop-blur-md mb-10 xl:mb-0 shadow-xl">
             <div className="flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
               <div className="bg-indigo-500/20 p-2 rounded-xl text-indigo-400"><Info className="w-5 h-5" /></div>
               <h3 className="text-lg font-black text-white uppercase tracking-widest">How to Play</h3>
             </div>
-            
             <div className="space-y-6">
               <div className="flex gap-4 items-start">
                 <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-400 shrink-0 mt-0.5">1</div>
                 <p className="text-sm text-slate-300 leading-relaxed font-medium">Read the basic word and guess its <strong className="text-indigo-300">Band 8.0 Synonym</strong>.</p>
               </div>
-              
               <div className="flex gap-4 items-start">
                 <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-400 shrink-0 mt-0.5">2</div>
                 <p className="text-sm text-slate-300 leading-relaxed font-medium">Type the word into the lock. You have exactly <strong className="text-amber-400">3 attempts</strong> to crack it.</p>
               </div>
-
               <div className="flex gap-4 items-start">
                 <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-400 shrink-0 mt-0.5">3</div>
                 <div className="flex flex-col gap-3 w-full">
                   <p className="text-sm text-slate-300 leading-relaxed font-medium">If you guess incorrectly, the lock flashes red and clears your attempt.</p>
                   <div className="flex gap-1.5 opacity-80">
-                    <div className="flex-1 aspect-[4/5] bg-rose-500/20 text-rose-500 flex items-center justify-center font-black rounded-lg border border-rose-500">W</div>
-                    <div className="flex-1 aspect-[4/5] bg-rose-500/20 text-rose-500 flex items-center justify-center font-black rounded-lg border border-rose-500">R</div>
-                    <div className="flex-1 aspect-[4/5] bg-rose-500/20 text-rose-500 flex items-center justify-center font-black rounded-lg border border-rose-500">O</div>
-                    <div className="flex-1 aspect-[4/5] bg-rose-500/20 text-rose-500 flex items-center justify-center font-black rounded-lg border border-rose-500">N</div>
-                    <div className="flex-1 aspect-[4/5] bg-rose-500/20 text-rose-500 flex items-center justify-center font-black rounded-lg border border-rose-500">G</div>
+                    {['W','R','O','N','G'].map(l => (
+                      <div key={l} className="flex-1 aspect-[4/5] bg-rose-500/20 text-rose-500 flex items-center justify-center font-black rounded-lg border border-rose-500">{l}</div>
+                    ))}
                   </div>
                 </div>
               </div>
             </div>
-            
             <div className="mt-8 pt-6 border-t border-white/10">
-              <p className="text-xs text-slate-500 text-center font-bold uppercase tracking-widest">
-                Earn +15 points per word!
-              </p>
+              <p className="text-xs text-slate-500 text-center font-bold uppercase tracking-widest">Earn +{POINTS_PER_WORD} points per word!</p>
+              {!isGateMode && (
+                <p className="text-xs text-indigo-400/70 text-center font-medium mt-2">Solve all 5 to stamp your Vocabulary passport slot</p>
+              )}
             </div>
           </div>
         )}
-
       </main>
 
-      {/* Tailwind Custom Keyframes including New Intro Animations */}
       <style dangerouslySetInnerHTML={{__html: `
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          20% { transform: translateX(-6px); }
-          40% { transform: translateX(6px); }
-          60% { transform: translateX(-6px); }
-          80% { transform: translateX(6px); }
-        }
-        @keyframes flyToTopRight {
-          0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-          30% { transform: translate(-50%, -120px) scale(1.3); opacity: 1; }
-          100% { transform: translate(150px, -400px) scale(0.4); opacity: 0; }
-        }
-        @keyframes flyToCenter {
-          0% { opacity: 0; transform: translate(var(--startX), var(--startY)) scale(1.5); filter: blur(4px); }
-          30% { opacity: 1; filter: blur(2px); }
-          90% { opacity: 1; transform: translate(calc(var(--startX) * 0.1), calc(var(--startY) * 0.1)) scale(0.8); filter: blur(0px); }
-          100% { opacity: 0; transform: translate(0px, 0px) scale(0.2); filter: blur(0px); }
-        }
-        @keyframes logoPop {
-          0% { opacity: 0; transform: scale(0.5); filter: blur(10px); }
-          60% { opacity: 1; transform: scale(1.1); filter: blur(0px); }
-          100% { opacity: 1; transform: scale(1); }
-        }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }
+        @keyframes flyToTopRight { 0%{transform:translate(-50%,-50%) scale(1);opacity:1} 30%{transform:translate(-50%,-120px) scale(1.3);opacity:1} 100%{transform:translate(150px,-400px) scale(0.4);opacity:0} }
+        @keyframes flyToCenter { 0%{opacity:0;transform:translate(var(--startX),var(--startY)) scale(1.5);filter:blur(4px)} 30%{opacity:1;filter:blur(2px)} 90%{opacity:1;transform:translate(calc(var(--startX)*0.1),calc(var(--startY)*0.1)) scale(0.8);filter:blur(0px)} 100%{opacity:0;transform:translate(0px,0px) scale(0.2);filter:blur(0px)} }
+        @keyframes logoPop { 0%{opacity:0;transform:scale(0.5);filter:blur(10px)} 60%{opacity:1;transform:scale(1.1);filter:blur(0px)} 100%{opacity:1;transform:scale(1)} }
       `}} />
     </div>
   );
