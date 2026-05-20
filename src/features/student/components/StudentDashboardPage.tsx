@@ -180,8 +180,13 @@ const StudentDashboardPage = () => {
       if (resData.success) {
         if (resData.recommended_drills && resData.recommended_drills.length > 0) {
           setNextActionDrill(resData.recommended_drills[0]);
-        } else {
+        } else if ((resData.daily_sessions_completed ?? 0) > 0) {
+          // At least one drill done today and no more to recommend → genuinely all caught up
           setNextActionDrill({ sub_skill: "All Caught Up!", skill: "Overall", sub_skill_score: 9.0 });
+        } else {
+          // No drills done yet but nothing recommended — matrix may be empty (new student)
+          // Show a generic starting point so the card doesn't silently hide
+          setNextActionDrill({ sub_skill: "General Practice", skill: "Overall", sub_skill_score: 5.5 });
         }
       } else {
         setNextActionDrill({ sub_skill: "General Practice", skill: "Overall", sub_skill_score: 5.5 });
@@ -723,6 +728,9 @@ const StudentDashboardPage = () => {
 
 // ─── SUB-COMPONENTS ───────────────────────────────────────────────────────────
 
+const toTitleCase = (s: string) =>
+  s.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+
 const FocusAreaCard = ({
   sub_skill, band, skill, isLocked, drillsLeft,
   nextAction, dailyDCS, dcsThreshold, extraCost, totalMomentum,
@@ -789,10 +797,10 @@ const FocusAreaCard = ({
         </div>
         <div>
           <p className="text-xl font-bold text-slate-800 dark:text-white leading-snug tracking-tight mb-1">
-            {sub_skill} Drill
+            {toTitleCase(sub_skill)} Drill
           </p>
           <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-            <span>{skill}</span>
+            <span>{toTitleCase(skill)}</span>
             <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
             <span>Sub-score: <strong className="text-indigo-600 dark:text-indigo-400">{band.toFixed(1)}</strong></span>
           </div>

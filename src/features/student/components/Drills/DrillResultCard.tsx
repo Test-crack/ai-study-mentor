@@ -78,7 +78,7 @@ export default function DrillResultCard({
   };
 
   // ── Derived display values ────────────────────────────────────────────────
-  const recTitle   = rec?.title ?? `Mastering ${subSkill}`;
+  const recTitle   = rec?.title ?? `Mastering ${subSkill.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}`;
   const thumbSrc   = rec?.thumbnail_url ?? FALLBACK_THUMB;
 
   const targetTag = [rec?.skill_type ?? skill, rec?.sub_skill ?? subSkill]

@@ -138,7 +138,7 @@ export default function DrillScreen() {
                   <Target className="w-6 h-6" />
                 </div>
                 <h1 className="text-3xl font-black text-slate-800 dark:text-white capitalize">
-                  Today's Focus: {skill.toLowerCase()} {subSkill.toLowerCase()}
+                  Today's Focus: {skill.toLowerCase()} {subSkill.toLowerCase().replace(/_/g, ' ')}
                 </h1>
                 <p className="text-slate-500 font-medium tracking-wide uppercase text-sm">
                   Prompt {currentPromptIndex + 1} of {totalPrompts}
