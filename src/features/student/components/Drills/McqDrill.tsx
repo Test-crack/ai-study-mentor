@@ -10,9 +10,15 @@ export interface McqPrompt {
   explanation: string | null;
 }
 
+export interface McqDrillResult {
+  points: number;
+  questionId: string;
+  selectedAnswer: string;
+}
+
 interface McqDrillProps {
   prompt: McqPrompt;
-  onComplete: (pointsEarned: number) => void;
+  onComplete: (result: McqDrillResult) => void;
 }
 
 export default function McqDrill({ prompt, onComplete }: McqDrillProps) {
@@ -44,13 +50,12 @@ export default function McqDrill({ prompt, onComplete }: McqDrillProps) {
   };
 
   const handleNext = () => {
-    // Award 10 points for correct, 2 points for attempting
     const points = isCorrect ? 10 : 2;
-    // Reset state for next prompt
+    const answer = selectedOption ?? '';
     setSelectedOption(null);
     setHasChecked(false);
     setIsCorrect(false);
-    onComplete(points);
+    onComplete({ points, questionId: prompt.id, selectedAnswer: answer });
   };
 
   return (

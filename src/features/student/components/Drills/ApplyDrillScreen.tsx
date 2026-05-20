@@ -13,6 +13,7 @@ export default function ApplyDrillScreen() {
   const skill = searchParams.get('skill') || 'Speaking';
   const subSkill = searchParams.get('sub_skill') || 'Pronunciation';
   const initialScore = parseInt(searchParams.get('score') || '0', 10);
+  const sessionId = searchParams.get('session_id') || null;
   
   const { streak, syncMomentum } = useMomentum();
   
@@ -41,8 +42,12 @@ export default function ApplyDrillScreen() {
     setIsRecording(false);
     setIsProcessing(true);
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
-      const res = await callBackend(`${backendUrl}/api/drills/apply-complete`, { method: 'POST' });
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+      // Use stateful endpoint if we have a session_id; fall back to legacy endpoint
+      const url = sessionId
+        ? `${backendUrl}/api/drills/session/${sessionId}/apply-done`
+        : `${backendUrl}/api/drills/apply-complete`;
+      const res = await callBackend(url, { method: 'POST' });
       if (res.success && res.momentum_score !== undefined) {
         syncMomentum(res.momentum_score);
       }
