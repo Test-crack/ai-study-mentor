@@ -151,7 +151,7 @@ export default function ApplyDrillScreen() {
                 <div className="inline-flex flex-wrap justify-center gap-3 mb-8">
                    <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 px-4 py-2 rounded-xl border border-slate-100 dark:border-slate-700">
                       <Zap className="w-5 h-5 text-amber-500 fill-amber-500"/>
-                      <span className="font-bold text-slate-700 dark:text-slate-200">+{initialScore + 30} pts total</span>
+                      <span className="font-bold text-slate-700 dark:text-slate-200">+{initialScore + 25 + 30} pts total</span>
                    </div>
                    <div className="flex items-center gap-2 bg-orange-50 dark:bg-orange-500/10 px-4 py-2 rounded-xl border border-orange-100 dark:border-orange-500/20">
                       <Flame className="w-5 h-5 text-orange-500 fill-orange-500"/>

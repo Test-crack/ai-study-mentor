@@ -33,6 +33,7 @@ export default function DrillScreen() {
   const [momentumScore, setMomentumScore]             = useState(0);
   const [isComplete, setIsComplete]                   = useState(false);
   const [isSubmitting, setIsSubmitting]               = useState(false);
+  const [drillSessionId, setDrillSessionId]           = useState<string | null>(null);
 
   const totalPrompts = prompts.length || QUESTIONS_PER_SESSION;
 
@@ -78,8 +79,8 @@ export default function DrillScreen() {
         })
       });
       if (res.momentum_score !== undefined) syncMomentum(res.momentum_score);
-      // Streak is incremented server-side when drills_today hits 2; sync it here
       if (res.daily_streak   !== undefined) updateStreak(res.daily_streak);
+      if (res.data?.id)                     setDrillSessionId(res.data.id);
     } catch (err) {
       console.error("Failed to save drill session", err);
     } finally {
@@ -173,16 +174,20 @@ export default function DrillScreen() {
             </>
          ) : (
             /* Result & Reflection Gate */
-         <DrillResultCard 
-  skill={skill} 
-  subSkill={subSkill} 
-  momentumScore={momentumScore} 
-  feedback={[]}
-  onUnlockNext={() => {
-    // Navigate to Apply Drill, passing context via URL
-    navigate(`/student/apply-drill?skill=${skill}&sub_skill=${subSkill}&score=${momentumScore}`);
-  }} 
-/>
+            <DrillResultCard
+              skill={skill}
+              subSkill={subSkill}
+              momentumScore={momentumScore}
+              feedback={[]}
+              drillSessionId={drillSessionId}
+              onUnlockNext={() => {
+                const params = new URLSearchParams({
+                  skill, sub_skill: subSkill, score: String(momentumScore),
+                  ...(drillSessionId ? { session_id: drillSessionId } : {}),
+                });
+                navigate(`/student/apply-drill?${params.toString()}`);
+              }}
+            />
           )}
         </main>
       </div>

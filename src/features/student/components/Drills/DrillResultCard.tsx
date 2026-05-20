@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle2, PlayCircle, Lock, ExternalLink, MessageSquare, Flame, Zap, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { useMomentum } from "@/features/student/Context/MomentumContext";
 import { callBackend } from "@/features/auth/services/authClient";
 
 interface ResultCardProps {
-  skill:         string;
-  subSkill:      string;
-  momentumScore: number;
-  feedback:      string[];
-  onUnlockNext:  () => void;
+  skill:           string;
+  subSkill:        string;
+  momentumScore:   number;
+  feedback:        string[];
+  drillSessionId:  string | null;
+  onUnlockNext:    () => void;
 }
 
 interface RecommendationItem {
@@ -29,19 +31,20 @@ const FALLBACK_THUMB =
   'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1000&auto=format&fit=crop';
 
 export default function DrillResultCard({
-  skill, subSkill, momentumScore, feedback, onUnlockNext,
+  skill, subSkill, momentumScore, feedback, drillSessionId, onUnlockNext,
 }: ResultCardProps) {
-  const [videoWatched, setVideoWatched] = useState(false);
-  const [reflection,   setReflection]   = useState('');
-  const [error,        setError]        = useState('');
-  const [watchTimer,   setWatchTimer]   = useState(30);
-  const [hasClicked,   setHasClicked]   = useState(false);
+  const [videoWatched,        setVideoWatched]        = useState(false);
+  const [reflection,          setReflection]          = useState('');
+  const [error,               setError]               = useState('');
+  const [watchTimer,          setWatchTimer]          = useState(30);
+  const [hasClicked,          setHasClicked]          = useState(false);
+  const [savingReflection,    setSavingReflection]    = useState(false);
 
   // Recommendation state
   const [rec,     setRec]     = useState<RecommendationItem | null>(null);
   const [recLoad, setRecLoad] = useState(true);
 
-  const { totalMomentum, streak } = useMomentum();
+  const { totalMomentum, streak, syncMomentum } = useMomentum();
 
   // ── Fetch recommendation on mount ────────────────────────────────────────
   useEffect(() => {
@@ -67,14 +70,36 @@ export default function DrillResultCard({
     window.open(rec?.url ?? 'https://www.youtube.com', '_blank');
   };
 
-  const handleSubmitReflection = () => {
-    const words = reflection.trim().split(/\s+/).length;
+  const handleSubmitReflection = async () => {
+    const words = reflection.trim().split(/\s+/).filter(Boolean).length;
     if (words < 8) {
       setError('Try again — be specific and use at least 8 words.');
       return;
     }
     setError('');
-    onUnlockNext();
+    setSavingReflection(true);
+    try {
+      if (drillSessionId) {
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+        const res = await callBackend(`${backendUrl}/api/drills/save-reflection`, {
+          method: 'POST',
+          body: JSON.stringify({ session_id: drillSessionId, reflection_text: reflection.trim() }),
+        });
+        if (res.success && res.momentum_earned > 0) {
+          syncMomentum(res.momentum_score);
+          toast.success(`+${res.momentum_earned} momentum earned!`, {
+            description: 'Great reflection — keep the momentum going.',
+            duration: 3500,
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('[DrillResultCard] reflection save failed:', err);
+      // Non-blocking — still let the user proceed
+    } finally {
+      setSavingReflection(false);
+      onUnlockNext();
+    }
   };
 
   // ── Derived display values ────────────────────────────────────────────────
@@ -234,9 +259,14 @@ export default function DrillResultCard({
             {error && <p className="text-rose-500 text-sm font-bold">{error}</p>}
             <button
               onClick={handleSubmitReflection}
-              className="w-full py-4 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-700 transition-colors"
+              disabled={savingReflection}
+              className="w-full py-4 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
             >
-              Continue to Apply Drill
+              {savingReflection ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</>
+              ) : (
+                'Continue to Apply Drill  +25 pts'
+              )}
             </button>
           </div>
         )}
