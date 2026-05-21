@@ -86,8 +86,8 @@ function AddStudentModal({ onClose, onAdded }: { onClose: () => void; onAdded: (
       toast({
         title: 'Student Enrolled',
         description: res.data.inviteEmailSent
-          ? `Invite email sent to ${res.data.email}. They'll set a password and land on the dashboard.`
-          : `${res.data.email} already has an account — they can log in directly, no invite needed.`,
+          ? `Invite sent to ${res.data.email}. They'll set a password and land on the dashboard.`
+          : `${res.data.email} has been added to your institute. They already have an account and can log in directly.`,
       });
       onAdded();
       onClose();
@@ -103,7 +103,7 @@ function AddStudentModal({ onClose, onAdded }: { onClose: () => void; onAdded: (
       } else if (msg.includes('already enrolled at another institute')) {
         toast({
           title: 'Student unavailable',
-          description: 'This student is currently enrolled at another institute and cannot be added here.',
+          description: 'This student is currently enrolled at another institute and cannot be added here. Please contact TestCrack team for support.',
           variant: 'destructive',
         });
       } else if (msg.includes('non-student account')) {

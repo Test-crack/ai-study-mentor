@@ -356,65 +356,130 @@ model ielts_batch_students {
 
 ## 10. Identified Issues & Bugs
 
-Issues are tagged: ✅ Fixed | ⏭️ Skip for pilot (self-healing or low risk) | 🚀 Post-pilot
+### 🐛 Issue #1: Pending Supabase ID
+**Location:** `instituteAdminController.ts:127`
+```typescript
+supabaseuserid: supabaseUserId ?? `pending-${Date.now()}`
+```
+
+**Problem:**
+- If Supabase invite fails, a temporary ID is created
+- This ID will never be updated when student actually signs up
+- Student won't be able to log in
+
+**Recommendation:**
+- Don't create User record if Supabase invite fails
+- Return error to admin to retry
+- Or implement a webhook to update the ID when student accepts invite
 
 ---
 
-### ✅ Issue #1: Silent Institute Reassignment
-**Location:** `instituteAdminController.ts` — `addStudent`
+### 🐛 Issue #2: No Email Verification Status
+**Problem:**
+- System doesn't track if student has accepted the invite
+- Admin can't see if student has set their password
+- No way to resend invite if email was missed
 
-**Problem (was):**
-- `alreadyEnrolled` check only filtered by the *current* institute.
-- A student enrolled at **another** institute would pass the check and the subsequent `upsert` would overwrite their `institute_id`, silently moving them out of the other institute and destroying that enrollment.
-
-**Fix applied:**
-- Changed to `findUnique({ where: { user_id } })` — covers all institutes since `user_id` has a unique constraint in `institute_students`.
-- Returns 409 with distinct messages: "already enrolled in your institute" vs "already enrolled at another institute".
-- Replaced the `upsert` with a plain `create` — safe because we've already confirmed no record exists.
-
----
-
-### ✅ Issue #2: Pending Supabase ID not updating
-**Location:** `instituteAdminController.ts` — `addStudent`
-
-**Problem (was):**
-- When Supabase returned "already been registered", `inviteData` was null so `supabaseUserId` was undefined.
-- If a matching User record already existed with a `pending-*` ID, it was never corrected.
-
-**Fix applied:**
-- After the invite call, if we received a real `supabaseUserId` and the stored one starts with `pending-`, we now update the User row immediately.
-- Remaining `pending-*` cases (Supabase returned no ID at all) self-heal on the student's first login: `ensureUser` finds the user by email and overwrites the Supabase ID with the real one.
+**Recommendation:**
+- Add `email_verified` field to User table
+- Add `invite_status` field: `PENDING`, `ACCEPTED`, `EXPIRED`
+- Add endpoint to resend invite
 
 ---
 
-### ⏭️ Issue #3: Duplicate User on Google OAuth before invite accept
-**Location:** `ensureUser.ts`
+### 🐛 Issue #3: Duplicate User Creation Risk
+**Location:** `ensureUser.ts:67-75`
 
-**Status:** Skip for pilot.
-`ensureUser` already performs email-based account linking (step 2 in the middleware). If a student registered via Google before the admin enrolled them, the middleware links the records on first login. No production failure occurs — the student lands with the correct `institute_students` row already in place from enrollment.
+**Problem:**
+- If student signs up via Google OAuth before accepting institute invite
+- Two User records could be created (one by admin, one by OAuth)
+- Email linking logic exists but could fail in race conditions
 
----
-
-### ⏭️ Issue #4: Supabase invite succeeds but DB insert fails
-**Status:** Skip for pilot.
-If the DB `user.create` or `institute_students.create` fails after the invite email has already been sent:
-- Student has a valid Supabase auth account.
-- Admin receives a 500 error and can simply re-enroll the student.
-- On re-enroll, the `dbUser` lookup finds the existing User (by email), the enrollment check finds no `institute_students` row, and the flow completes normally.
-- No phantom or orphaned state results.
-
-Adding a Supabase-aware rollback would require a compensating call to `supabaseAdmin.auth.admin.deleteUser()` on DB failure — not worth the complexity for a pilot.
+**Recommendation:**
+- Make email the primary unique identifier
+- Always check by email first, then link Supabase ID
+- Add transaction wrapper for user creation
 
 ---
 
-### 🚀 Issue #5: No invite status tracking (PENDING / ACCEPTED)
-**Status:** Post-pilot.
-Admin currently cannot tell if a student has accepted their invite. Tracking this requires either a Supabase webhook or polling. Defer until the admin panel needs an "invite status" column.
+### 🐛 Issue #4: No Onboarding Status Tracking
+**Problem:**
+- System doesn't track onboarding completion steps
+- Can't tell if student has:
+  - Completed profile
+  - Taken diagnostic test
+  - Viewed tutorial
+  - Started first drill
+
+**Recommendation:**
+- Add `onboarding_status` JSONB field to `institute_students`
+```json
+{
+  "profile_completed": false,
+  "diagnostic_taken": false,
+  "tutorial_viewed": false,
+  "first_drill_completed": false
+}
+```
 
 ---
 
-### 🚀 Issue #6: Rate limiting on student addition
-**Status:** Post-pilot. Low risk for a controlled pilot with a known set of admins.
+### 🐛 Issue #5: Missing Student Activation Notification
+**Problem:**
+- Admin doesn't get notified when student accepts invite
+- No webhook from Supabase to track student activation
+
+**Recommendation:**
+- Implement Supabase webhook for `user.created` event
+- Update `institute_students.is_active` when student logs in first time
+- Send notification to admin
+
+---
+
+### 🐛 Issue #6: No Rollback on Partial Failure
+**Problem:**
+- If Supabase invite succeeds but DB insert fails
+- Student receives email but has no account in system
+- If DB insert succeeds but Supabase fails
+- Student exists in DB but can't log in
+
+**Recommendation:**
+- Wrap entire process in try-catch with rollback
+- Use database transactions
+- Implement idempotency for retry safety
+
+---
+
+### ⚠️ Issue #7: Hardcoded Redirect URL
+**Location:** `instituteAdminController.ts:113`
+```typescript
+redirectTo: `${process.env.FRONTEND_URL ?? 'http://localhost:8080'}/login`
+```
+
+**Problem:**
+- All students redirected to generic login page
+- No context about which institute they're joining
+- No pre-filled information
+
+**Recommendation:**
+- Include institute ID in redirect URL
+- Create dedicated onboarding page
+```typescript
+redirectTo: `${process.env.FRONTEND_URL}/onboarding?institute=${instituteId}&email=${studentEmail}`
+```
+
+---
+
+### 🐛 Issue #8: No Rate Limiting on Student Addition
+**Problem:**
+- Admin can spam student invites
+- No protection against accidental bulk invites
+- Could hit Supabase rate limits
+
+**Recommendation:**
+- Add rate limiting middleware
+- Implement bulk invite endpoint with confirmation
+- Add daily invite quota per institute
 
 ---
 

@@ -6,14 +6,14 @@ import { ArrowLeft, Sparkles, Lightbulb, CheckCircle2, Zap, Info, ShieldAlert, A
 
 // --- Emergency offline fallback (used only when the API is unreachable) ---
 const FALLBACK_WORD_BANK = [
-  { base: "IMPORTANT",  target: "CRUCIAL",     hint: "Decisive or critical, especially in the success or failure of something." },
-  { base: "VERY HAPPY", target: "ECSTATIC",    hint: "Feeling or expressing overwhelming happiness or joyful excitement." },
-  { base: "POOR",       target: "DESTITUTE",   hint: "Without the basic necessities of life." },
-  { base: "LAZY",       target: "LETHARGIC",   hint: "Affected by lethargy; sluggish and apathetic." },
-  { base: "BRAVE",      target: "INTREPID",    hint: "Fearless; adventurous, often used in formal contexts." },
-  { base: "CAREFUL",    target: "METICULOUS",  hint: "Showing great attention to detail; very careful and precise." },
-  { base: "BAD",        target: "DETRIMENTAL", hint: "Tending to cause harm." },
-  { base: "MANY",       target: "MYRIAD",      hint: "A countless or extremely great number." },
+  { base: "IMPORTANT",  target: "CRUCIAL",     hint: "Decisive or critical, especially in the success or failure of something.", target_band: null },
+  { base: "VERY HAPPY", target: "ECSTATIC",    hint: "Feeling or expressing overwhelming happiness or joyful excitement.", target_band: null },
+  { base: "POOR",       target: "DESTITUTE",   hint: "Without the basic necessities of life.", target_band: null },
+  { base: "LAZY",       target: "LETHARGIC",   hint: "Affected by lethargy; sluggish and apathetic.", target_band: null },
+  { base: "BRAVE",      target: "INTREPID",    hint: "Fearless; adventurous, often used in formal contexts.", target_band: null },
+  { base: "CAREFUL",    target: "METICULOUS",  hint: "Showing great attention to detail; very careful and precise.", target_band: null },
+  { base: "BAD",        target: "DETRIMENTAL", hint: "Tending to cause harm.", target_band: null },
+  { base: "MANY",       target: "MYRIAD",      hint: "A countless or extremely great number.", target_band: null },
 ];
 
 const INTRO_WORDS = [
@@ -47,9 +47,10 @@ const KEYBOARD_ROWS = [
 ];
 
 interface WordItem {
-  base:   string;
-  target: string;
-  hint:   string;
+  base:        string;
+  target:      string;
+  hint:        string;
+  target_band: number | null;
 }
 
 export default function LexiGrid() {
@@ -153,7 +154,8 @@ export default function LexiGrid() {
           const sameDay    = parsed.date === today;
           const inProgress = Array.isArray(parsed.words) && parsed.words.length > 0
                              && parsed.currentIndex < DAILY_LIMIT;
-          if (sameDay && inProgress) {
+          const hasTargetBand = Array.isArray(parsed.words) && parsed.words.every((w: any) => 'target_band' in w);
+          if (sameDay && inProgress && hasTargetBand) {
             setDailyWords(parsed.words);
             setCurrentIndex(parsed.currentIndex || 0);
             setTriesLeft(parsed.triesLeft ?? MAX_TRIES);
@@ -185,11 +187,15 @@ export default function LexiGrid() {
 
         let words: WordItem[];
         if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-          words = (res.data as any[]).map((w) => ({
-            base:   w.base_word.toUpperCase(),
-            target: w.target_word.toUpperCase(),
-            hint:   w.hint,
-          }));
+          words = (res.data as any[]).map((w) => {
+            console.log('[LexiGrid] raw word from API:', w);
+            return {
+              base:        w.base_word.toUpperCase(),
+              target:      w.target_word.toUpperCase(),
+              hint:        w.hint,
+              target_band: w.target_band != null ? parseFloat(String(w.target_band)) : null,
+            };
+          });
         } else {
           console.warn('[LexiGrid] No words from API, using fallback bank.');
           words = [...FALLBACK_WORD_BANK].sort(() => 0.5 - Math.random()).slice(0, DAILY_LIMIT);
@@ -551,7 +557,7 @@ export default function LexiGrid() {
                   </div>
                 </div>
 
-                <p className="text-slate-400 font-medium mb-2 text-sm sm:text-base">Find the Band 8.0 synonym for:</p>
+                <p className="text-slate-400 font-medium mb-2 text-sm sm:text-base">Find the Band {currentWordObj.target_band ?? 8.0} synonym for:</p>
                 <p className="text-3xl sm:text-5xl font-black text-white uppercase tracking-widest mb-6 drop-shadow-lg break-words">
                   {currentWordObj.base}
                 </p>
@@ -663,7 +669,7 @@ export default function LexiGrid() {
             <div className="space-y-6">
               <div className="flex gap-4 items-start">
                 <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-400 shrink-0 mt-0.5">1</div>
-                <p className="text-sm text-slate-300 leading-relaxed font-medium">Read the basic word and guess its <strong className="text-indigo-300">Band 8.0 Synonym</strong>.</p>
+                <p className="text-sm text-slate-300 leading-relaxed font-medium">Read the basic word and guess its <strong className="text-indigo-300">Synonym</strong>.</p>
               </div>
               
               <div className="flex gap-4 items-start">

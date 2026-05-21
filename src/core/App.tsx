@@ -92,6 +92,7 @@ import ApplyDrillScreen from "@/features/student/components/Drills/ApplyDrillScr
 import LexiGrid from "@/features/student/components/LexiGrid";
 import Assessment from "@/features/student/components/Assessment";
 import FullMockAssessment from "@/features/student/components/FullMockAssessment";
+import StudentNotEnrolledPage from "@/features/student/components/StudentNotEnrolledPage";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -115,6 +116,9 @@ const LoginRedirect = () => {
 
   // Default: STUDENT
   if (profile?.role === 'STUDENT') {
+    if (profile.isEnrolled === false) {
+      return <Navigate to="/student/not-enrolled" replace />;
+    }
     if (!profile.isDiagnosed) {
       return <Navigate to="/student/diagnosis" replace />;
     }
@@ -140,8 +144,9 @@ const ManualDashboardAccess = () => {
   if (profile.role === 'INSTITUTE_ADMIN') return <Navigate to="/institute-admin/dashboard" replace />;
 
   // Students
-  if (profile.role === 'STUDENT' && !profile.isDiagnosed) {
-    return <Navigate to="/student/diagnosis" replace />;
+  if (profile.role === 'STUDENT') {
+    if (profile.isEnrolled === false) return <Navigate to="/student/not-enrolled" replace />;
+    if (!profile.isDiagnosed)        return <Navigate to="/student/diagnosis" replace />;
   }
   return <Navigate to="/student/dashboard" replace />;
 };
@@ -158,8 +163,9 @@ const StudentDiagnosisGuard = ({ children }: { children: React.ReactNode }) => {
 
   if (!profile) return <Navigate to="/login" replace />;
 
-  if (profile.role === 'STUDENT' && !profile.isDiagnosed) {
-    return <Navigate to="/student/diagnosis" replace />;
+  if (profile.role === 'STUDENT') {
+    if (profile.isEnrolled === false) return <Navigate to="/student/not-enrolled" replace />;
+    if (!profile.isDiagnosed)        return <Navigate to="/student/diagnosis" replace />;
   }
 
   return <>{children}</>;
@@ -219,6 +225,9 @@ const AppRoutes = () => {
       <Route path="/courses/:slug" element={<CourseDetailPage />} />
       <Route path="/dashboard" element={<ManualDashboardAccess />} />
       <Route path="/dashboard/:tab" element={<ManualDashboardAccess />} />
+
+      {/* Not-enrolled screen — role-protected but no enrollment guard (would loop) */}
+      <Route path="/student/not-enrolled" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentNotEnrolledPage /></RoleProtectedRoute>} />
 
       {/* Student Dashboard & Routes */}
       <Route

@@ -1211,7 +1211,8 @@ function WritingPhase({
   }, []);
 
   const wordCount = countWords(text);
-  const MIN_WORDS = data?.minWords || 150;
+  const raw = data?.minWords;
+  const MIN_WORDS = (typeof raw === 'number' && Number.isFinite(raw) && raw > 0) ? raw : 250;
 
   useEffect(() => {
     storageSave(SK.writingText, text);
@@ -1291,7 +1292,7 @@ function WritingPhase({
           <div className="w-10 h-10 bg-indigo-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>✍️</div>
           <div>
             <p className="text-gray-900 font-black uppercase tracking-wide">Writing Section</p>
-            <p className="text-gray-500 text-sm">Describe the graph in at least {MIN_WORDS} words</p>
+            <p className="text-gray-500 text-sm">Write your response in at least {MIN_WORDS} words</p>
           </div>
         </div>
         {/* Word count badge moved here from inside the textarea div */}
