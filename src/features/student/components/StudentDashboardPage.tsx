@@ -7,12 +7,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { callBackend } from "@/features/auth/services/authClient";
 import IAScheduleWidget  from "./dashboard/IAScheduleWidget";
 import MockStatusWidget  from "./dashboard/MockStatusWidget";
+import { DailyNotices }  from "./dashboard/DailyNotices";
 import { useMomentum } from "@/features/student/Context/MomentumContext";
 import { cn } from "@/shared/utils";
 import {
-  Clock, Flame, Trophy, Target, Zap, BookOpen, Mic, PenLine,
+  Flame, Trophy, Target, Zap, BookOpen, Mic, PenLine,
   Headphones, CalendarClock, CheckCircle2, ArrowRight, Sparkles,
-  Lock, ShieldAlert, CalendarX2, AlertTriangle,
+  Lock, AlertTriangle,
 } from "lucide-react";
 
 // ─── TYPES & CONSTANTS ────────────────────────────────────────────────────────
@@ -386,61 +387,9 @@ const StudentDashboardPage = () => {
             </div>
           </section>
 
-          {/* ── Missed Assessment Alerts ─────────────────────────────────────── */}
+          {/* ── Daily Notices ────────────────────────────────────────────────── */}
           <div className={cn("transition-all duration-500", isLocked && "relative z-50")}>
-
-            {/* Miss Cycle 1 — Warning */}
-            {missedData.misses === 1 && (
-              <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-3xl p-6 shadow-sm flex items-start gap-4 mb-6">
-                <div className="bg-amber-100 dark:bg-amber-500/20 p-3 rounded-2xl shrink-0">
-                  <CalendarX2 className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-                </div>
-                <div>
-                  <h3 className="text-amber-900 dark:text-amber-300 font-bold text-lg">
-                    Assessment Missed
-                  </h3>
-                  <p className="text-amber-700/80 dark:text-amber-400/80 text-sm mt-1">
-                    You missed your recent{" "}
-                    <strong className="font-semibold text-amber-900 dark:text-amber-300">
-                      {missedData.subSkills.join(", ")}
-                    </strong>{" "}
-                    assessment. No band penalty has been applied, but{" "}
-                    <strong className="font-bold text-amber-600 dark:text-amber-400">
-                      −20 Momentum
-                    </strong>{" "}
-                    points were deducted. This module has been automatically added
-                    to your upcoming Saturday session. Try not to miss it!
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Miss Cycle 2 — Intervention */}
-            {missedData.misses >= 2 && (
-              <div className="bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 rounded-3xl p-6 shadow-[0_8px_30px_rgba(244,63,94,0.15)] flex flex-col md:flex-row items-center gap-6 mb-6">
-                <div className="bg-rose-100 dark:bg-rose-500/20 p-4 rounded-2xl shrink-0">
-                  <ShieldAlert className="w-8 h-8 text-rose-600 dark:text-rose-400" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-rose-900 dark:text-rose-300 font-black text-xl uppercase tracking-tight">
-                    Intervention Required
-                  </h3>
-                  <p className="text-rose-700/90 dark:text-rose-400/90 text-sm mt-1">
-                    You have missed 2 consecutive assessments (
-                    {missedData.subSkills.join(" & ")}). Your predicted readiness
-                    has been pushed back,{" "}
-                    <strong className="font-bold">−40 Momentum</strong> points were
-                    deducted, and your tutor has been notified.
-                  </p>
-                </div>
-                <button
-                  onClick={() => navigate("/student/internal")}
-                  className="w-full md:w-auto bg-rose-600 hover:bg-rose-700 text-white font-bold py-3.5 px-6 rounded-xl shrink-0 transition-colors shadow-md"
-                >
-                  Start Catch-Up Session
-                </button>
-              </div>
-            )}
+            <DailyNotices />
           </div>
 
           {/* ── Platform Lock Banner ─────────────────────────────────────────── */}
@@ -684,38 +633,18 @@ const StudentDashboardPage = () => {
                 <MockStatusWidget />
               </div>
 
-              {/* Skill Modules + Recent Activity */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div className="lg:col-span-8">
-                  <DashboardCard title="Skill Modules" subtitle="Tap any module to continue">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {skillBands.map((band) => (
-                        <ModuleNavCard
-                          key={band.skill}
-                          band={band}
-                          onNavigate={() => navigate(band.route)}
-                        />
-                      ))}
-                    </div>
-                  </DashboardCard>
+              {/* Skill Modules */}
+              <DashboardCard title="Skill Modules" subtitle="Tap any module to continue">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {skillBands.map((band) => (
+                    <ModuleNavCard
+                      key={band.skill}
+                      band={band}
+                      onNavigate={() => navigate(band.route)}
+                    />
+                  ))}
                 </div>
-                <div className="lg:col-span-4 space-y-4">
-                  <DashboardCard title="Recent Activity" subtitle="Your last 3 actions">
-                    <div className="space-y-5 pt-1">
-                      <ActivityItem
-                        label="Completed Reading Comprehension Set 3"
-                        time="2 hours ago"
-                        color="bg-emerald-500"
-                      />
-                      <ActivityItem
-                        label="Scored 78% in Speaking Mock Test"
-                        time="Yesterday"
-                        color="bg-indigo-500"
-                      />
-                    </div>
-                  </DashboardCard>
-                </div>
-              </div>
+              </DashboardCard>
             </div>
           </div>
         </main>
@@ -1044,17 +973,6 @@ const DashboardCard = ({ title, subtitle, children, icon }: any) => (
   </div>
 );
 
-const ActivityItem = ({ label, time, color }: any) => (
-  <div className="flex gap-4 relative">
-    <div className={`mt-1.5 h-2.5 w-2.5 rounded-full shrink-0 ${color} ring-4 ring-white dark:ring-slate-900 z-10`} />
-    <div className="text-sm border-l-2 border-slate-100 dark:border-slate-800 pl-4 pb-4 -ml-[19px]">
-      <p className="text-slate-700 dark:text-slate-300 font-medium leading-tight">{label}</p>
-      <div className="flex items-center gap-1.5 text-slate-400 text-xs mt-1.5">
-        <Clock className="h-3 w-3" /> {time}
-      </div>
-    </div>
-  </div>
-);
 
 const AttendanceStreakTracker = ({ currentStreak, goal = 7 }: any) => {
   const progress = Math.min((currentStreak / goal) * 100, 100);
