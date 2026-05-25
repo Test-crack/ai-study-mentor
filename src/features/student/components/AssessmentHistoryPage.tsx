@@ -42,9 +42,11 @@ interface IAEntry {
   id: string;
   ia_number: number;
   ia_date: string;           // "YYYY-MM-DD"
+  status: "COMPLETED" | "MISSED";
   time_submitted_at: string | null;
   scores: SectionScore[];
   momentum_awarded: number | null;
+  carry_forward_subskills: { skill: string; sub_skill: string }[];
 }
 
 interface MockSubSkillScore {
@@ -424,42 +426,54 @@ const IASubSkillRow = ({ score }: { score: SectionScore }) => {
 
 const IASessionCard = ({ entry }: { entry: IAEntry }) => {
   const [expanded, setExpanded] = useState(false);
-  const scores = entry.scores ?? [];
+  const isMissed = entry.status === "MISSED";
+  const scores   = entry.scores ?? [];
 
-  // Unique parent skills covered in this session
-  const skillsCovered = [...new Set(scores.map((s) => s.skill))] as SkillType[];
+  // Unique parent skills covered (from scores for COMPLETED; from carry_forward for MISSED)
+  const skillsCovered = isMissed
+    ? ([...new Set((entry.carry_forward_subskills ?? []).map((s) => s.skill))] as SkillType[])
+    : ([...new Set(scores.map((s) => s.skill))] as SkillType[]);
 
-  // Average band across all sub-skills (rounded to nearest 0.5)
+  // Average band (COMPLETED only)
   const avgBand = scores.length > 0
     ? Math.round((scores.reduce((sum, s) => sum + s.band, 0) / scores.length) * 2) / 2
-    : 0;
+    : null;
 
   const hasAnyAI = scores.some((s) => s.ai_graded && s.ai_feedback);
+  const carryForward = entry.carry_forward_subskills ?? [];
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+    <div className={`bg-white dark:bg-slate-900 rounded-2xl border shadow-sm overflow-hidden ${isMissed ? "border-rose-200 dark:border-rose-500/30" : "border-slate-200 dark:border-slate-800"}`}>
 
       {/* ── Collapsed header ── */}
       <button
-        onClick={() => setExpanded((p) => !p)}
-        className="w-full flex items-center gap-4 p-4 sm:p-5 text-left hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
+        onClick={() => !isMissed && setExpanded((p) => !p)}
+        className={`w-full flex items-center gap-4 p-4 sm:p-5 text-left transition-colors ${isMissed ? "cursor-default" : "hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer"}`}
       >
         {/* IA badge */}
-        <div className="flex-shrink-0 w-11 h-11 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 flex flex-col items-center justify-center">
-          <span className="text-[9px] font-black text-indigo-400 dark:text-indigo-500 uppercase leading-none">IA</span>
-          <span className="text-base font-black text-indigo-600 dark:text-indigo-400 leading-tight">#{entry.ia_number}</span>
+        <div className={`flex-shrink-0 w-11 h-11 rounded-xl flex flex-col items-center justify-center ${isMissed ? "bg-rose-100 dark:bg-rose-500/20" : "bg-indigo-100 dark:bg-indigo-500/20"}`}>
+          <span className={`text-[9px] font-black uppercase leading-none ${isMissed ? "text-rose-400 dark:text-rose-500" : "text-indigo-400 dark:text-indigo-500"}`}>IA</span>
+          <span className={`text-base font-black leading-tight ${isMissed ? "text-rose-600 dark:text-rose-400" : "text-indigo-600 dark:text-indigo-400"}`}>#{entry.ia_number}</span>
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-1">
             <span className="font-bold text-slate-800 dark:text-white text-sm">Internal Assessment #{entry.ia_number}</span>
-            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400">
-              {scores.length} sub-skill{scores.length !== 1 ? "s" : ""}
-            </span>
-            {hasAnyAI && (
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-400">
-                AI Graded
+            {isMissed ? (
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400">
+                Missed
               </span>
+            ) : (
+              <>
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400">
+                  {scores.length} sub-skill{scores.length !== 1 ? "s" : ""}
+                </span>
+                {hasAnyAI && (
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-400">
+                    AI Graded
+                  </span>
+                )}
+              </>
             )}
           </div>
 
@@ -468,17 +482,11 @@ const IASessionCard = ({ entry }: { entry: IAEntry }) => {
             <div className="flex items-center gap-1 text-xs text-slate-400">
               <Clock className="h-3 w-3" />
               {formatIADate(entry.ia_date)}
-              {entry.time_submitted_at && (
-                <span className="text-slate-300 dark:text-slate-600 mx-0.5">·</span>
-              )}
-              {entry.time_submitted_at && (
-                <span>{new Date(entry.time_submitted_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</span>
-              )}
             </div>
             {entry.momentum_awarded != null && (
-              <div className="flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400">
-                <Zap className="h-3 w-3 fill-amber-400 text-amber-400" />
-                +{entry.momentum_awarded} Momentum
+              <div className={`flex items-center gap-1 text-xs font-bold ${isMissed ? "text-rose-500 dark:text-rose-400" : "text-amber-600 dark:text-amber-400"}`}>
+                <Zap className={`h-3 w-3 ${isMissed ? "text-rose-400" : "fill-amber-400 text-amber-400"}`} />
+                {entry.momentum_awarded > 0 ? "+" : ""}{entry.momentum_awarded} Momentum
               </div>
             )}
           </div>
@@ -487,6 +495,7 @@ const IASessionCard = ({ entry }: { entry: IAEntry }) => {
           <div className="flex flex-wrap gap-1.5 mt-2">
             {skillsCovered.map((skill) => {
               const cfg = SKILL_CONFIG[skill];
+              if (!cfg) return null;
               return (
                 <span key={skill} className={`flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.color}`}>
                   {cfg.icon} {cfg.label}
@@ -494,11 +503,28 @@ const IASessionCard = ({ entry }: { entry: IAEntry }) => {
               );
             })}
           </div>
+
+          {/* Carry-forward chips (MISSED only) */}
+          {isMissed && carryForward.length > 0 && (
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <span className="text-[10px] text-rose-500 dark:text-rose-400 font-semibold">Will be retried:</span>
+              {carryForward.map((s, i) => (
+                <span key={i} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30">
+                  {SUB_SKILL_LABELS[s.sub_skill] ?? s.sub_skill}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Average band */}
+        {/* Average band / missed indicator */}
         <div className="flex-shrink-0 text-right mr-2">
-          {scores.length > 0 ? (
+          {isMissed ? (
+            <>
+              <p className="text-2xl font-black text-rose-400 dark:text-rose-500">—</p>
+              <p className="text-[10px] text-rose-400 dark:text-rose-500 font-semibold uppercase tracking-wide">No submission</p>
+            </>
+          ) : avgBand !== null ? (
             <>
               <p className={`text-3xl font-black ${bandColor(avgBand)}`}>{avgBand.toFixed(1)}</p>
               <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wide">Avg Band</p>
@@ -508,13 +534,15 @@ const IASessionCard = ({ entry }: { entry: IAEntry }) => {
           )}
         </div>
 
-        <div className="flex-shrink-0 text-slate-400">
-          {expanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-        </div>
+        {!isMissed && (
+          <div className="flex-shrink-0 text-slate-400">
+            {expanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+          </div>
+        )}
       </button>
 
-      {/* ── Expanded sub-skills ── */}
-      {expanded && (
+      {/* ── Expanded sub-skills (COMPLETED only) ── */}
+      {!isMissed && expanded && (
         <div className="border-t border-slate-100 dark:border-slate-800 p-4 sm:p-5 bg-slate-50/50 dark:bg-slate-800/20">
           {scores.length === 0 ? (
             <p className="text-sm text-slate-400 italic">No detailed breakdown available.</p>

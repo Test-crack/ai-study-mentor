@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CalendarClock, PlayCircle, Trophy, BookOpen } from "lucide-react";
+import { CalendarClock, PlayCircle, Trophy, BookOpen, AlertTriangle } from "lucide-react";
 import { callBackend } from "@/features/auth/services/authClient";
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
 
-type NotificationType = 'IA_PENDING' | 'IA_IN_PROGRESS' | 'MOCK_PENDING' | 'MOCK_IN_PROGRESS';
+type NotificationType = 'IA_PENDING' | 'IA_IN_PROGRESS' | 'MOCK_PENDING' | 'MOCK_IN_PROGRESS' | 'IA_MISSED';
 
 interface Notification {
   type: NotificationType;
@@ -16,6 +16,7 @@ interface Notification {
   window_closes_at?: string | null;
   month_year?: string;
   attempt_type?: string;
+  momentum_deducted?: number;
 }
 
 interface BannerConfig {
@@ -27,9 +28,9 @@ interface BannerConfig {
   bodyColor: string;
   title: (n: Notification) => string;
   body: (n: Notification) => string;
-  ctaLabel: string;
-  ctaClass: string;
-  route: string;
+  ctaLabel?: string;
+  ctaClass?: string;
+  route?: string;
 }
 
 const CONFIG: Record<NotificationType, BannerConfig> = {
@@ -87,6 +88,24 @@ const CONFIG: Record<NotificationType, BannerConfig> = {
     ctaClass: "bg-amber-600 hover:bg-amber-700 text-white",
     route: "/student/mock",
   },
+  IA_MISSED: {
+    bgColor:     "bg-rose-50 dark:bg-rose-500/10",
+    borderColor: "border-rose-200 dark:border-rose-500/30",
+    iconBg:      "bg-rose-100 dark:bg-rose-500/20",
+    icon:        <AlertTriangle className="w-6 h-6 text-rose-600 dark:text-rose-400" />,
+    titleColor:  "text-rose-900 dark:text-rose-300",
+    bodyColor:   "text-rose-700/80 dark:text-rose-400/80",
+    title:  (n) => `Internal Assessment #${n.ia_number ?? ""} Missed`,
+    body:   (n) => {
+      const date = n.ia_date
+        ? new Date(n.ia_date + "T12:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
+        : "a recent date";
+      return `You did not submit your IA on ${date}. −${n.momentum_deducted ?? 20} Momentum was deducted from your score.`;
+    },
+    ctaLabel: "View History",
+    ctaClass: "bg-rose-100 hover:bg-rose-200 dark:bg-rose-500/20 dark:hover:bg-rose-500/30 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/40",
+    route: "/student/assessment-history",
+  },
 };
 
 function NotificationBanner({ notification }: { notification: Notification }) {
@@ -108,12 +127,14 @@ function NotificationBanner({ notification }: { notification: Notification }) {
           {cfg.body(notification)}
         </p>
       </div>
-      <button
-        onClick={() => navigate(cfg.route)}
-        className={`shrink-0 self-start sm:self-auto ${cfg.ctaClass} font-bold text-sm py-2.5 px-5 rounded-xl transition-colors shadow-sm whitespace-nowrap`}
-      >
-        {cfg.ctaLabel} →
-      </button>
+      {cfg.ctaLabel && cfg.route && (
+        <button
+          onClick={() => navigate(cfg.route!)}
+          className={`shrink-0 self-start sm:self-auto ${cfg.ctaClass} font-bold text-sm py-2.5 px-5 rounded-xl transition-colors shadow-sm whitespace-nowrap`}
+        >
+          {cfg.ctaLabel} →
+        </button>
+      )}
     </div>
   );
 }
