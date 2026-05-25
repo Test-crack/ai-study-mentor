@@ -187,15 +187,12 @@ export default function LexiGrid() {
 
         let words: WordItem[];
         if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-          words = (res.data as any[]).map((w) => {
-            console.log('[LexiGrid] raw word from API:', w);
-            return {
-              base:        w.base_word.toUpperCase(),
-              target:      w.target_word.toUpperCase(),
-              hint:        w.hint,
-              target_band: w.target_band != null ? parseFloat(String(w.target_band)) : null,
-            };
-          });
+          words = (res.data as any[]).map((w) => ({
+            base:        w.base_word.toUpperCase(),
+            target:      w.target_word.toUpperCase(),
+            hint:        w.hint,
+            target_band: w.target_band != null ? parseFloat(String(w.target_band)) : null,
+          }));
         } else {
           console.warn('[LexiGrid] No words from API, using fallback bank.');
           words = [...FALLBACK_WORD_BANK].sort(() => 0.5 - Math.random()).slice(0, DAILY_LIMIT);
@@ -317,9 +314,10 @@ export default function LexiGrid() {
       let words: WordItem[];
       if (res.success && Array.isArray(res.data) && res.data.length > 0) {
         words = (res.data as any[]).map((w: any) => ({
-          base:   w.base_word.toUpperCase(),
-          target: w.target_word.toUpperCase(),
-          hint:   w.hint,
+          base:        w.base_word.toUpperCase(),
+          target:      w.target_word.toUpperCase(),
+          hint:        w.hint,
+          target_band: w.target_band != null ? parseFloat(String(w.target_band)) : null,
         }));
       } else {
         words = [...FALLBACK_WORD_BANK].sort(() => 0.5 - Math.random()).slice(0, DAILY_LIMIT);
