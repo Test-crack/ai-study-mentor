@@ -91,9 +91,19 @@ import { MomentumProvider } from "@/features/student/Context/MomentumContext";
 import ApplyDrillScreen from "@/features/student/components/Drills/ApplyDrillScreen";
 import LexiGrid from "@/features/student/components/LexiGrid";
 import InternalAssessmentPage from "@/features/student/components/Internalassessmentpage";
-
 import FullMockAssessment from "@/features/student/components/FullMockAssessment";
 import QuestionBankManager from "@/features/TestCrackSuperAdmin/dashboard/Questionbankmanager";
+
+// ── B2C imports ───────────────────────────────────────────────────────────────
+import B2CLoginPage        from "@/features/B-C/pages/B2cloginpage";
+import B2CStudentDashboard from "@/features/B-C/pages/B2cstudentdashboard";
+import LexiGridGame        from "@/features/B-C/games/Lexigridgame";
+import TrapSpotterGame     from "@/features/B-C/games/Trapspottergame";
+import BandLadderGame      from "@/features/B-C/games/Bandladdergame";
+import SentenceSurgeryGame from "@/features/B-C/games/Sentencesurgerygame";
+import InferenceSprintGame from "@/features/B-C/games/Inferencesprintgame";
+import ConnectorChainGame  from "@/features/B-C/games/Connectorchaingame";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -101,6 +111,14 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+// ─── B2C auth guard ───────────────────────────────────────────────────────────
+// Checks sessionStorage for b2c_email.
+// Replace with real B2C auth check once backend is wired.
+const B2CProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const email = sessionStorage.getItem('b2c_email');
+  return email ? <>{children}</> : <Navigate to="/b2c/login" replace />;
+};
 
 /**
  * 1. Initial Login Redirector
@@ -155,7 +173,7 @@ const StudentDiagnosisGuard = ({ children }: { children: React.ReactNode }) => {
   const { profile, loading, profileLoading } = useAuth();
 
   if ((loading || profileLoading) && !profile) {
-    return null; 
+    return null;
   }
 
   if (!profile) return <Navigate to="/login" replace />;
@@ -172,13 +190,33 @@ const AppRoutes = () => {
 
   return (
     <Routes>
-      {/* Public routes */}
+      {/* ── Public routes ────────────────────────────────────────────────── */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/student/diagnosis" element={<Diagnosis />} />
       <Route path="/dashdemo" element={<Dashdemo />} />
       <Route path="/Contact" element={<Contactpage />} />
 
-      {/* Routes that require the institute to be active */}
+      {/* ── B2C routes (no B2B auth required) ────────────────────────────── */}
+      <Route path="/b2c/login" element={<B2CLoginPage />} />
+      <Route
+        path="/b2c/dashboard"
+        element={
+          <B2CProtectedRoute>
+            <B2CStudentDashboard />
+          </B2CProtectedRoute>
+        }
+      />
+      <Route path="/b2c/leaderboard" element={<B2CProtectedRoute><B2CStudentDashboard /></B2CProtectedRoute>} />
+
+      {/* ── B2C game routes — all fully functional ───────────────────────── */}
+      <Route path="/b2c/game/lexigrid"         element={<B2CProtectedRoute><LexiGridGame        /></B2CProtectedRoute>} />
+      <Route path="/b2c/game/trap-spotter"     element={<B2CProtectedRoute><TrapSpotterGame     /></B2CProtectedRoute>} />
+      <Route path="/b2c/game/band-ladder"      element={<B2CProtectedRoute><BandLadderGame      /></B2CProtectedRoute>} />
+      <Route path="/b2c/game/sentence-surgery" element={<B2CProtectedRoute><SentenceSurgeryGame /></B2CProtectedRoute>} />
+      <Route path="/b2c/game/inference-sprint" element={<B2CProtectedRoute><InferenceSprintGame /></B2CProtectedRoute>} />
+      <Route path="/b2c/game/connector-chain"  element={<B2CProtectedRoute><ConnectorChainGame  /></B2CProtectedRoute>} />
+
+      {/* ── Routes that require the institute to be active ─────────────── */}
       <Route element={<RequireActiveInstitute />}>
         {/* Institute Owner Routes */}
         <Route path="/institute-owner/dashboard" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteOwnerDashboard /></RoleProtectedRoute>} />
@@ -204,16 +242,17 @@ const AppRoutes = () => {
         <Route path="/institute-admin/Setting" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteSettings /></RoleProtectedRoute>} />
       </Route>
 
-      {/* Testcrack SuperAdmin */}
+      {/* ── TestCrack SuperAdmin ──────────────────────────────────────────── */}
       <Route path="/superadmin/dashboard" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SuperAdminDashboard /></RoleProtectedRoute>} />
       <Route path="/superadmin/institutes" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SuperAdminInstitutes /></RoleProtectedRoute>} />
       <Route path="/superadmin/subscription" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><Subscription /></RoleProtectedRoute>} />
       <Route path="/superadmin/priceconfig" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><PricingConfig /></RoleProtectedRoute>} />
       <Route path="/superadmin/supportickets" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SupportTicket /></RoleProtectedRoute>} />
       <Route path="/superadmin/platform" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><PlatformAnalytics /></RoleProtectedRoute>} />
-      <Route path="/superadmin/question" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><QuestionBankManager/></RoleProtectedRoute>} />
+      <Route path="/superadmin/question" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><QuestionBankManager /></RoleProtectedRoute>} />
       <Route path="/superadmin/allusers" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><AllUsers /></RoleProtectedRoute>} />
 
+      {/* ── Auth & misc ───────────────────────────────────────────────────── */}
       <Route path="/login" element={user ? <LoginRedirect /> : <LoginPage />} />
       <Route path="/auth" element={<Navigate to="/login" replace />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
@@ -223,7 +262,7 @@ const AppRoutes = () => {
       <Route path="/dashboard" element={<ManualDashboardAccess />} />
       <Route path="/dashboard/:tab" element={<ManualDashboardAccess />} />
 
-      {/* Student Dashboard & Routes */}
+      {/* ── Student Dashboard & Routes ────────────────────────────────────── */}
       <Route
         path="/student/dashboard"
         element={
@@ -258,10 +297,10 @@ const AppRoutes = () => {
       <Route path="/student/drill" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><DrillScreen /></RoleProtectedRoute>} />
       <Route path="/student/apply-drill" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><ApplyDrillScreen /></RoleProtectedRoute>} />
       <Route path="/student/lexigrid" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><LexiGrid /></RoleProtectedRoute>} />
-<Route path="/student/internal" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><InternalAssessmentPage/></RoleProtectedRoute>} />      <Route path="/student/mock" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><FullMockAssessment/></RoleProtectedRoute>} />
-      
-  
-      {/* Instructor Dashboard & Routes */}
+      <Route path="/student/internal" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><InternalAssessmentPage /></RoleProtectedRoute>} />
+      <Route path="/student/mock" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><FullMockAssessment /></RoleProtectedRoute>} />
+
+      {/* ── Instructor Dashboard & Routes ─────────────────────────────────── */}
       <Route
         path="/instructor/dashboard"
         element={
@@ -279,13 +318,13 @@ const AppRoutes = () => {
       <Route path="/instructor/reports" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorReport /></RoleProtectedRoute>} />
       <Route path="/instructor/workflow" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><Workflow /></RoleProtectedRoute>} />
 
+      {/* ── Shared protected routes ───────────────────────────────────────── */}
       <Route path="/learn/:slug" element={<RoleProtectedRoute><LearningPage /></RoleProtectedRoute>} />
       <Route path="/notes" element={<RoleProtectedRoute><NotesPage /></RoleProtectedRoute>} />
       <Route path="/profile" element={<RoleProtectedRoute><ProfilePage /></RoleProtectedRoute>} />
       <Route path="/assessment" element={<RoleProtectedRoute><ReadingAssessmentPage /></RoleProtectedRoute>} />
       <Route path="/assessment/legacy" element={<RoleProtectedRoute><SpeedAssessmentPage /></RoleProtectedRoute>} />
       <Route path="/payment/success" element={<RoleProtectedRoute><PaymentSuccess /></RoleProtectedRoute>} />
-
       <Route path="/courses/admin/dashboard" element={<RoleProtectedRoute allowedRoles={["INSTRUCTOR"]}><AdminDashboardPage /></RoleProtectedRoute>} />
       <Route path="/courses/admin/manage/:id" element={<RoleProtectedRoute allowedRoles={["INSTRUCTOR"]}><CourseManagementPage /></RoleProtectedRoute>} />
 
@@ -302,7 +341,6 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
-         
             <MomentumProvider>
               <WebSocketProvider>
                 <AppRoutes />
