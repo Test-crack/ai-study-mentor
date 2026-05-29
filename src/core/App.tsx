@@ -93,6 +93,15 @@ import LexiGrid from "@/features/student/components/LexiGrid";
 import InternalAssessmentPage from "@/features/student/components/Internalassessmentpage";
 import FullMockAssessment from "@/features/student/components/FullMockAssessment";
 import StudentNotEnrolledPage from "@/features/student/components/StudentNotEnrolledPage";
+import B2CLoginPage from "@/features/B-C/pages/B2cloginpage";
+import B2CStudentDashboard from "@/features/B-C/pages/B2cstudentdashboard";
+import BandLadderGame from "@/features/B-C/games/Bandladdergame";
+import ConnectorChainGame from "@/features/B-C/games/Connectorchaingame";
+import InferenceSprintGame from "@/features/B-C/games/Inferencesprintgame";
+import LexiGridGame from "@/features/B-C/games/Lexigridgame";
+import SentenceSurgeryGame from "@/features/B-C/games/Sentencesurgerygame";
+import TrapSpotterGame from "@/features/B-C/games/Trapspottergame";
+import QuestionBankManager from "@/features/TestCrackSuperAdmin/dashboard/Questionbankmanager";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

@@ -407,135 +407,8 @@ export default function FullMockAssessment() {
         <p className={`text-sm font-black uppercase tracking-wide ${met ? "text-emerald-800" : "text-gray-600"}`}>{label}</p>
         {detail && <p className={`text-xs font-medium mt-0.5 ${met ? "text-emerald-600" : "text-gray-400"}`}>{detail}</p>}
       </div>
-    );
-  };
-
-  const renderGate = () => {
-    if (!eligibility) return null;
-    const monthUsed = readMockUsageThisMonth();
-
-    return (
-      <div className="tc-fade-in" style={{ maxWidth: '860px', margin: '0 auto', padding: '48px 16px' }}>
-        <GlassCard glow="cyan" style={{ padding: '48px', textAlign: 'center' }}>
-
-          {/* Badge */}
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: '8px',
-            padding: '6px 14px', borderRadius: '100px',
-            background: 'rgba(244,63,94,0.1)', border: '1px solid rgba(244,63,94,0.3)',
-            marginBottom: '32px',
-          }}>
-            <AlertCircle style={{ width: '14px', height: '14px', color: '#f43f5e' }} />
-            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.62rem', letterSpacing: '0.15em', color: '#f43f5e', fontWeight: 700 }}>
-              FULL OFFICIAL MOCK EXAM
-            </span>
-          </div>
-
-          <h1 style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontWeight: 900, fontSize: 'clamp(1.8rem, 4vw, 3rem)',
-            letterSpacing: '0.05em', marginBottom: '20px',
-            lineHeight: 1.1,
-          }}>
-            <span style={{ color: '#e2e8f0' }}>READY FOR THE </span>
-            <span style={{
-              background: 'linear-gradient(135deg, #00f0ff, #a855f7)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-            }}>REAL DEAL?</span>
-          </h1>
-
-          <p style={{
-            fontFamily: "'JetBrains Mono', monospace", fontSize: '0.78rem',
-            color: 'rgba(255,255,255,0.45)', lineHeight: 1.8,
-            maxWidth: '520px', margin: '0 auto 40px',
-          }}>
-            Full-length, strict-timed IELTS simulation. Set aside{' '}
-            <span style={{ color: '#00f0ff' }}>2 hours and 45 minutes</span>{' '}
-            in a quiet environment. Timers cannot be paused once started.
-          </p>
-
-          {/* Skill cards */}
-          <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '40px',
-          }}>
-            {SKILL_ORDER.map((s, i) => (
-              <div key={s} style={{
-                background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(0,240,255,0.12)',
-                borderRadius: '14px', padding: '20px 12px',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-                transition: 'all 0.3s',
-              }}>
-                <span style={{ fontSize: '1.8rem' }}>{SKILL_ICONS[s]}</span>
-                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: '0.6rem', letterSpacing: '0.15em', color: '#00f0ff' }}>
-                  {SKILL_LABELS[s].toUpperCase()}
-                </span>
-                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)' }}>
-                  {s === 'listening' ? '40 Qs / 30m' : s === 'reading' ? '40 Qs / 60m' : s === 'writing' ? '2 Tasks / 60m' : '3 Parts / 14m'}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {monthUsed.standard >= 1 && eligibility.canTakeExchange && (
-            <div style={{
-              background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)',
-              borderRadius: '12px', padding: '14px 18px', marginBottom: '24px', textAlign: 'left',
-              display: 'flex', gap: '10px',
-            }}>
-              <Calendar style={{ width: '16px', height: '16px', color: '#f59e0b', flexShrink: 0, marginTop: '2px' }} />
-              <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.68rem', color: '#fde68a', lineHeight: 1.6 }}>
-                Standard mock used this month. You're taking an exchange mock (−1500 pts from Momentum).
-              </p>
-            </div>
-          )}
-
-          {/* Action buttons */}
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button onClick={() => navigate(-1)} style={{
-              padding: '14px 28px', borderRadius: '12px', cursor: 'pointer',
-              background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)',
-              fontFamily: "'JetBrains Mono', monospace", fontWeight: 700,
-              fontSize: '0.72rem', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.4)',
-              transition: 'all 0.2s',
-            }}
-            onMouseOver={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)')}
-            onMouseOut={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)')}>
-              EXIT
-            </button>
-
-            {eligibility.canTakeStandard && (
-              <button onClick={() => beginMock("standard")} className="tc-glow-btn" style={{
-                padding: '14px 36px', borderRadius: '12px', cursor: 'pointer',
-                background: 'linear-gradient(135deg, rgba(0,240,255,0.15), rgba(139,92,246,0.15))',
-                border: '1px solid rgba(0,240,255,0.4)',
-                fontFamily: "'JetBrains Mono', monospace", fontWeight: 800,
-                fontSize: '0.78rem', letterSpacing: '0.12em', color: '#00f0ff',
-                boxShadow: '0 0 30px rgba(0,240,255,0.15)',
-                transition: 'all 0.2s', minWidth: '180px',
-              }}>
-                INITIATE EXAM →
-              </button>
-            )}
-
-            {!eligibility.canTakeStandard && eligibility.canTakeExchange && (
-              <button onClick={() => beginMock("exchange")} className="tc-glow-btn-amber" style={{
-                padding: '14px 36px', borderRadius: '12px', cursor: 'pointer',
-                background: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(239,68,68,0.1))',
-                border: '1px solid rgba(245,158,11,0.4)',
-                fontFamily: "'JetBrains Mono', monospace", fontWeight: 800,
-                fontSize: '0.78rem', letterSpacing: '0.1em', color: '#fbbf24',
-                boxShadow: '0 0 30px rgba(245,158,11,0.1)',
-                transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px',
-              }}>
-                <Zap style={{ width: '16px', height: '16px', fill: '#fbbf24' }} />
-                EXCHANGE MOCK (−1500 PTS)
-              </button>
-            )}
-          </div>
-        </GlassCard>
-      </div>
-    );
-  };
+    </div>
+  );
 
   const renderNotEligible = () => {
     const p = mockStatus!.progress;
@@ -750,7 +623,7 @@ export default function FullMockAssessment() {
       );
     }
     if (mockStatus.has_active_session) return renderActiveSession();
-    if (!mockStatus.is_eligible)        return renderNotEligible();
+    if (!mockStatus.is_eligible)       return renderNotEligible();
     if (mockStatus.standard_used_this_month && !mockStatus.can_start_earned) return renderMonthUsed();
     if (mockStatus.standard_used_this_month && mockStatus.can_start_earned)  return renderMonthUsed();
     return renderMockAvailable();
@@ -1010,7 +883,7 @@ export default function FullMockAssessment() {
           <button onClick={advanceToNextSection} className="w-full bg-gray-900 hover:bg-gray-800 text-white font-black text-lg py-4 rounded-xl border-2 border-gray-900 shadow-[5px_5px_0_#6D28D9]">
             Continue to Section {currentSectionIdx + 2} <ArrowRight className="w-5 h-5 inline ml-1" />
           </button>
-        </GlassCard>
+        </div>
       </div>
     );
   };

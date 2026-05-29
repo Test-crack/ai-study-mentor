@@ -81,6 +81,7 @@ export default function LexiGrid() {
   const [isErrorShake, setIsErrorShake]   = useState(false);
   const [showHint, setShowHint]           = useState(false);
   const [flyingScore, setFlyingScore]     = useState(false);
+  const [passportStamped, setPassportStamped] = useState(false);
 
   // ── localMomentum mirrors global momentum for display in topbar.
   //    We update it via addPoints (which updates the global context), and
@@ -121,9 +122,10 @@ export default function LexiGrid() {
       );
       if (res.success && Array.isArray(res.data) && res.data.length > 0) {
         return (res.data as any[]).map(w => ({
-          base:   w.base_word.toUpperCase(),
-          target: w.target_word.toUpperCase(),
-          hint:   w.hint,
+          base:        w.base_word.toUpperCase(),
+          target:      w.target_word.toUpperCase(),
+          hint:        w.hint,
+          target_band: w.target_band || null,
         }));
       }
     } catch { /* fall through */ }
@@ -141,6 +143,8 @@ export default function LexiGrid() {
       //    Using IST on both sides prevents stale-localStorage false-positives in the
       //    00:00–05:30 IST window (new IST day, same UTC day).
       let backendReachable = false;
+      let savedDataStr: string | null = null;
+      
       try {
         const stateRes = await callBackend(`${backendUrl}/api/student/daily-drill-state`);
         if (stateRes.success) {
@@ -152,77 +156,92 @@ export default function LexiGrid() {
             // Fall through to step 3 (fetch fresh words) — do NOT return.
           }
           // Backend confirmed status — clear any stale localStorage "completed" entry.
-          const savedData = localStorage.getItem('lexigrid_state');
-          if (savedData) {
+          savedDataStr = localStorage.getItem('lexigrid_state');
+          if (savedDataStr) {
             try {
-              const parsed = JSON.parse(savedData);
+              const parsed = JSON.parse(savedDataStr);
               if (parsed.currentIndex >= DAILY_LIMIT) {
                 localStorage.removeItem('lexigrid_state');
+                savedDataStr = null;
               }
-            } catch { localStorage.removeItem('lexigrid_state'); }
+            } catch { 
+              localStorage.removeItem('lexigrid_state'); 
+              savedDataStr = null;
+            }
           }
         }
       } catch {
         // Backend unreachable — fall through to localStorage/fallback
+        savedDataStr = localStorage.getItem('lexigrid_state');
       }
 
       if (isGateMode) {
         // Gate mode: enforce daily lock
         try {
-          const parsed = JSON.parse(savedData);
-          const sameDay    = parsed.date === today;
-          const inProgress = Array.isArray(parsed.words) && parsed.words.length > 0
-                             && parsed.currentIndex < DAILY_LIMIT;
-          const hasTargetBand = Array.isArray(parsed.words) && parsed.words.every((w: any) => 'target_band' in w);
-          if (sameDay && inProgress && hasTargetBand) {
-            setDailyWords(parsed.words);
-            setCurrentIndex(parsed.currentIndex || 0);
-            setTriesLeft(parsed.triesLeft ?? MAX_TRIES);
-            setCurrentGuess(parsed.currentGuess || "");
-            setWordsWon(parsed.wordsWon || 0);
-            setIsInitializing(false);
-            return;
-          }
-          // Stale or completed entry (different date, or completed when backend was offline)
-          if (!backendReachable && parsed.currentIndex >= DAILY_LIMIT && sameDay) {
-            // Backend was unreachable and localStorage shows completed — honour it
-            setWordsWon(parsed.wordsWon || 0);
-            setGameStatus('completed_day');
-            setIsInitializing(false);
-            return;
+          if (savedDataStr) {
+            const parsed = JSON.parse(savedDataStr);
+            const sameDay    = parsed.date === today;
+            const inProgress = Array.isArray(parsed.words) && parsed.words.length > 0
+                               && parsed.currentIndex < DAILY_LIMIT;
+            const hasTargetBand = Array.isArray(parsed.words) && parsed.words.every((w: any) => 'target_band' in w);
+            if (sameDay && inProgress && hasTargetBand) {
+              setDailyWords(parsed.words);
+              setCurrentIndex(parsed.currentIndex || 0);
+              setTriesLeft(parsed.triesLeft ?? MAX_TRIES);
+              setCurrentGuess(parsed.currentGuess || "");
+              setWordsWon(parsed.wordsWon || 0);
+              setIsInitializing(false);
+              return;
+            }
+            // Stale or completed entry (different date, or completed when backend was offline)
+            if (!backendReachable && parsed.currentIndex >= DAILY_LIMIT && sameDay) {
+              // Backend was unreachable and localStorage shows completed — honour it
+              setWordsWon(parsed.wordsWon || 0);
+              setGameStatus('completed_day');
+              setIsInitializing(false);
+              return;
+            }
           }
         } catch { /* backend unreachable — allow play */ }
 
-      // 3. Fresh session — fetch today's words from backend
-      try {
-        const res = await callBackend(
-          `${backendUrl}/api/student/lexigrid-words?difficulty=${encodeURIComponent(difficulty)}`
-        );
+        // 3. Fresh session — fetch today's words from backend
+        try {
+          const res = await callBackend(
+            `${backendUrl}/api/student/lexigrid-words?difficulty=${encodeURIComponent(difficulty)}`
+          );
 
-        let words: WordItem[];
-        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-          words = (res.data as any[]).map((w) => ({
-            base:        w.base_word.toUpperCase(),
-            target:      w.target_word.toUpperCase(),
-            hint:        w.hint,
-            target_band: w.target_band != null ? parseFloat(String(w.target_band)) : null,
+          let words: WordItem[];
+          if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+            words = (res.data as any[]).map((w) => ({
+              base:        w.base_word.toUpperCase(),
+              target:      w.target_word.toUpperCase(),
+              hint:        w.hint,
+              target_band: w.target_band != null ? parseFloat(String(w.target_band)) : null,
+            }));
+          } else {
+            console.warn('[LexiGrid] No words from API, using fallback bank.');
+            words = [...FALLBACK_WORD_BANK].sort(() => 0.5 - Math.random()).slice(0, DAILY_LIMIT);
+          }
+
+          // Fresh gate session
+          setDailyWords(words);
+          setCurrentIndex(0); setTriesLeft(MAX_TRIES); setCurrentGuess(''); setWordsWon(0);
+          totalAttemptsRef.current = 0; allBonusEligibleRef.current = true;
+          localStorage.setItem('lexigrid_state', JSON.stringify({
+            date: today, words, currentIndex: 0, triesLeft: MAX_TRIES, currentGuess: '', wordsWon: 0,
           }));
-        } else {
-          console.warn('[LexiGrid] No words from API, using fallback bank.');
-          words = [...FALLBACK_WORD_BANK].sort(() => 0.5 - Math.random()).slice(0, DAILY_LIMIT);
+          setIsInitializing(false);
+          return;
+        } catch (err) {
+          console.error('[LexiGrid] Fresh session fallback fetch error', err);
+          const words = [...FALLBACK_WORD_BANK].sort(() => 0.5 - Math.random()).slice(0, DAILY_LIMIT);
+          setDailyWords(words);
+          setCurrentIndex(0); setTriesLeft(MAX_TRIES); setCurrentGuess(''); setWordsWon(0);
+          totalAttemptsRef.current = 0; allBonusEligibleRef.current = true;
+          setIsInitializing(false);
+          return;
         }
-
-        // Fresh gate session
-        const words = await fetchWords();
-        setDailyWords(words);
-        setCurrentIndex(0); setTriesLeft(MAX_TRIES); setCurrentGuess(''); setWordsWon(0);
-        totalAttemptsRef.current = 0; allBonusEligibleRef.current = true;
-        localStorage.setItem('lexigrid_state', JSON.stringify({
-          date: today, words, currentIndex: 0, triesLeft: MAX_TRIES, currentGuess: '', wordsWon: 0,
-        }));
-        setIsInitializing(false);
-        return;
-      }
+      } // Close isGateMode
 
       // ── STANDALONE MODE ───────────────────────────────────────────────────────
       // Never lock. Try to resume a mid-game standalone session.
@@ -252,7 +271,7 @@ export default function LexiGrid() {
     };
 
     init();
-  }, [isGateMode, fetchWords]);
+  }, [isGateMode, fetchWords, difficulty]);
 
   // ── Save state ───────────────────────────────────────────────────────────────
   const saveState = useCallback((index: number, tries: number, guess: string, score: number) => {
@@ -505,7 +524,7 @@ export default function LexiGrid() {
       <main className="flex-1 flex flex-col xl:flex-row items-center xl:items-start justify-center max-w-7xl mx-auto w-full px-4 sm:px-6 gap-8 xl:gap-16 pb-12">
         <div className="flex-1 flex flex-col items-center w-full max-w-3xl relative z-10">
           
-          {gameStatus === 'completed_day' ? (
+        {gameStatus === 'completed_day' && (
             <div className="w-full max-w-lg bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-[32px] p-8 sm:p-10 flex flex-col items-center text-center shadow-2xl animate-in zoom-in-95 duration-500 mt-10">
 
               {isPracticeMode ? (
@@ -577,7 +596,6 @@ export default function LexiGrid() {
               )}
             </div>
           )}
-
           {/* ── ACTIVE GAME ── */}
           {gameStatus !== 'completed_day' && (
             <>

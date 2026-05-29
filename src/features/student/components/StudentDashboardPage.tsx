@@ -18,6 +18,7 @@ import {
   Flame, Trophy, Target, Zap, BookOpen, Mic, PenLine,
   Headphones, CalendarClock, CheckCircle2, ArrowRight, Sparkles,
   Lock, AlertTriangle,
+  TrendingUp,
 } from "lucide-react";
 
 // ─── TYPES & CONSTANTS ────────────────────────────────────────────────────────
