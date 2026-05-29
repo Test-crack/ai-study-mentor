@@ -1,34 +1,178 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
-import { Bell } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { CalendarClock, PlayCircle, Trophy, BookOpen, AlertTriangle } from "lucide-react";
+import { callBackend } from "@/features/auth/services/authClient";
+
+const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+
+type NotificationType = 'IA_PENDING' | 'IA_IN_PROGRESS' | 'MOCK_PENDING' | 'MOCK_IN_PROGRESS' | 'IA_MISSED';
+
+interface Notification {
+  type: NotificationType;
+  ia_number?: number;
+  ia_date?: string;
+  session_id?: string;
+  answers_saved?: number;
+  window_closes_at?: string | null;
+  month_year?: string;
+  attempt_type?: string;
+  momentum_deducted?: number;
+}
+
+interface BannerConfig {
+  bgColor: string;
+  borderColor: string;
+  iconBg: string;
+  icon: JSX.Element;
+  titleColor: string;
+  bodyColor: string;
+  title: (n: Notification) => string;
+  body: (n: Notification) => string;
+  ctaLabel?: string;
+  ctaClass?: string;
+  route?: string;
+}
+
+const CONFIG: Record<NotificationType, BannerConfig> = {
+  IA_PENDING: {
+    bgColor:     "bg-amber-50 dark:bg-amber-500/10",
+    borderColor: "border-amber-200 dark:border-amber-500/30",
+    iconBg:      "bg-amber-100 dark:bg-amber-500/20",
+    icon:        <CalendarClock className="w-6 h-6 text-amber-600 dark:text-amber-400" />,
+    titleColor:  "text-amber-900 dark:text-amber-300",
+    bodyColor:   "text-amber-700/80 dark:text-amber-400/80",
+    title:  (n) => `Internal Assessment #${n.ia_number ?? ""} — Due Today`,
+    body:   ()  => "Your Internal Assessment is scheduled for today. Complete it before the window closes.",
+    ctaLabel: "Start Assessment",
+    ctaClass: "bg-amber-600 hover:bg-amber-700 text-white",
+    route: "/student/internal",
+  },
+  IA_IN_PROGRESS: {
+    bgColor:     "bg-amber-50 dark:bg-amber-500/10",
+    borderColor: "border-amber-200 dark:border-amber-500/30",
+    iconBg:      "bg-amber-100 dark:bg-amber-500/20",
+    icon:        <PlayCircle className="w-6 h-6 text-amber-600 dark:text-amber-400" />,
+    titleColor:  "text-amber-900 dark:text-amber-300",
+    bodyColor:   "text-amber-700/80 dark:text-amber-400/80",
+    title:  (n) => `Internal Assessment #${n.ia_number ?? ""} — In Progress`,
+    body:   (n) =>
+      `You left mid-test with ${n.answers_saved ?? 0} answer${(n.answers_saved ?? 0) !== 1 ? "s" : ""} saved. Pick up where you left off.`,
+    ctaLabel: "Continue Assessment",
+    ctaClass: "bg-amber-600 hover:bg-amber-700 text-white",
+    route: "/student/internal",
+  },
+  MOCK_PENDING: {
+    bgColor:     "bg-emerald-50 dark:bg-emerald-500/10",
+    borderColor: "border-emerald-200 dark:border-emerald-500/30",
+    iconBg:      "bg-emerald-100 dark:bg-emerald-500/20",
+    icon:        <Trophy className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />,
+    titleColor:  "text-emerald-900 dark:text-emerald-300",
+    bodyColor:   "text-emerald-700/80 dark:text-emerald-400/80",
+    title:  (n) => `Monthly Mock Test${n.attempt_type ? ` — ${n.attempt_type}` : ""} Available`,
+    body:   (n) => `Your mock test for ${n.month_year ?? "this month"} is ready. Take it to measure your full IELTS readiness.`,
+    ctaLabel: "Start Mock Test",
+    ctaClass: "bg-emerald-600 hover:bg-emerald-700 text-white",
+    route: "/student/mock",
+  },
+  MOCK_IN_PROGRESS: {
+    bgColor:     "bg-amber-50 dark:bg-amber-500/10",
+    borderColor: "border-amber-200 dark:border-amber-500/30",
+    iconBg:      "bg-amber-100 dark:bg-amber-500/20",
+    icon:        <BookOpen className="w-6 h-6 text-amber-600 dark:text-amber-400" />,
+    titleColor:  "text-amber-900 dark:text-amber-300",
+    bodyColor:   "text-amber-700/80 dark:text-amber-400/80",
+    title:  (n) => `Monthly Mock Test${n.attempt_type ? ` — ${n.attempt_type}` : ""} — Paused`,
+    body:   (n) =>
+      `You left your mock test incomplete with ${n.answers_saved ?? 0} answer${(n.answers_saved ?? 0) !== 1 ? "s" : ""} saved. Continue before the window closes.`,
+    ctaLabel: "Continue Mock Test",
+    ctaClass: "bg-amber-600 hover:bg-amber-700 text-white",
+    route: "/student/mock",
+  },
+  IA_MISSED: {
+    bgColor:     "bg-rose-50 dark:bg-rose-500/10",
+    borderColor: "border-rose-200 dark:border-rose-500/30",
+    iconBg:      "bg-rose-100 dark:bg-rose-500/20",
+    icon:        <AlertTriangle className="w-6 h-6 text-rose-600 dark:text-rose-400" />,
+    titleColor:  "text-rose-900 dark:text-rose-300",
+    bodyColor:   "text-rose-700/80 dark:text-rose-400/80",
+    title:  (n) => `Internal Assessment #${n.ia_number ?? ""} Missed`,
+    body:   (n) => {
+      const date = n.ia_date
+        ? new Date(n.ia_date + "T12:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
+        : "a recent date";
+      return `You did not submit your IA on ${date}. −${n.momentum_deducted ?? 20} Momentum was deducted from your score.`;
+    },
+    ctaLabel: "View History",
+    ctaClass: "bg-rose-100 hover:bg-rose-200 dark:bg-rose-500/20 dark:hover:bg-rose-500/30 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/40",
+    route: "/student/assessment-history",
+  },
+};
+
+function NotificationBanner({ notification }: { notification: Notification }) {
+  const navigate = useNavigate();
+  const cfg = CONFIG[notification.type];
+
+  return (
+    <div
+      className={`${cfg.bgColor} border ${cfg.borderColor} rounded-3xl p-6 shadow-sm flex flex-col sm:flex-row sm:items-center gap-4`}
+    >
+      <div className={`${cfg.iconBg} p-3 rounded-2xl shrink-0 self-start sm:self-auto`}>
+        {cfg.icon}
+      </div>
+      <div className="flex-1 min-w-0">
+        <h3 className={`${cfg.titleColor} font-bold text-base leading-tight`}>
+          {cfg.title(notification)}
+        </h3>
+        <p className={`${cfg.bodyColor} text-sm mt-1 leading-relaxed`}>
+          {cfg.body(notification)}
+        </p>
+      </div>
+      {cfg.ctaLabel && cfg.route && (
+        <button
+          onClick={() => navigate(cfg.route!)}
+          className={`shrink-0 self-start sm:self-auto ${cfg.ctaClass} font-bold text-sm py-2.5 px-5 rounded-xl transition-colors shadow-sm whitespace-nowrap`}
+        >
+          {cfg.ctaLabel} →
+        </button>
+      )}
+    </div>
+  );
+}
 
 export const DailyNotices = () => {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await callBackend(`${BACKEND}/api/student/pending-notifications`);
+        if (!cancelled && res?.success) {
+          setNotifications(res.notifications ?? []);
+        }
+      } catch {
+        // non-critical widget — silently hide on error
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-3xl p-6 shadow-sm animate-pulse h-24" />
+    );
+  }
+
+  if (notifications.length === 0) return null;
+
   return (
-    <Card className="border-none shadow-sm bg-indigo-50/50 dark:bg-indigo-950/20 rounded-2xl transition-colors">
-      <CardHeader className="pb-3">
-        <div className="flex items-center gap-2">
-          <Bell className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-          <CardTitle className="text-lg font-bold text-slate-800 dark:text-slate-100">Daily Notice</CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="p-4 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-indigo-100/50 dark:border-indigo-900/30 transition-colors">
-            <h4 className="font-semibold text-sm text-indigo-900 dark:text-indigo-300 mb-1">Prelim Payment Due</h4>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-            </p>
-            <button className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 mt-2 hover:underline">See more</button>
-          </div>
-          
-          <div className="p-4 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-indigo-100/50 dark:border-indigo-900/30 transition-colors">
-            <h4 className="font-semibold text-sm text-indigo-900 dark:text-indigo-300 mb-1">Exam Schedule Released</h4>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-               Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-            </p>
-            <button className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 mt-2 hover:underline">See more</button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      {notifications.map((n, idx) => (
+        <NotificationBanner key={`${n.type}-${idx}`} notification={n} />
+      ))}
+    </div>
   );
 };

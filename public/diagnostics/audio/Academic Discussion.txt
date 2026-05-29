@@ -1,0 +1,122 @@
+Transcript
+You will hear two university
+students, Maya and Rajan,
+discussing their research
+project with their tutor, Dr.
+Ferguson. First, you have some
+time to look at questions 21 to
+25. Pause 30 seconds. Now listen
+carefully and answer questions
+21 to 25. Come in, Maya. Rajan.
+Sit down. So how's the research
+project coming along? You're at
+the data collection stage, I
+believe. Yes, that's right.
+We've actually collected a lot
+more data than we expected. We
+surveyed over 200 residents in
+three different neighborhoods,
+each one with a different level
+of access to parks and green
+spaces. The response rate was
+much better than we anticipated,
+especially in the Elmbridge
+neighborhood where we did face
+to face interviews rather than
+online surveys. People were
+really willing to talk. That's
+encouraging. And what patterns
+are you seeing in the data so
+far? Well, the most striking
+finding is the correlation
+between proximity to green space
+and reported mental well being
+scores. Residents within five
+minutes walk of a park scored on
+average 23% higher on our well
+being index than those who had
+to travel more than 15 minutes.
+That's a significant difference.
+Were there any confounding
+variables you had to account
+for? Yes, quite a few. Income
+level, age, housing type. We
+used a regression model to
+control for those which took a
+while, but the correlation held
+up even after controlling for
+socio economic factors. Good
+methodological thinking. What
+about the quality of the green
+spaces themselves? Did you
+collect any data on that? We
+did. We used a standardized
+assessment tool called the
+Greenspace Quality Index.
+Interestingly, quality turned
+out to matter more than size. A
+small but well maintained park
+with seeding and planting was
+rated significantly higher than
+a large open field with little
+infrastructure. Interesting.
+That raises questions about
+urban planning priorities,
+doesn't it? What's your argument
+going to be in the final report?
+We're planning to argue that
+city councils should prioritize
+improving the quality of
+existing green spaces rather
+than simply expanding the total
+area. It's a more cost effective
+approach and our data supports
+it. Good. Make sure you
+acknowledge counter arguments
+though, particularly the access
+issue. A high quality park is no
+good if people can't get to it
+safely. That's actually
+something we want to address in
+our recommendations section.
+We're going to suggest that the
+location of any new or upgraded
+green spaces should be
+determined by mapping
+underserved communities. Those
+with the longest travel times
+and fewest alternatives.
+Excellent. Have you thought
+about your literature review?
+You'll need to situate your
+findings within existing
+research. We've been reading
+studies from the Netherlands and
+Denmark. They've done a lot of
+work on this there's also a very
+relevant longitudinal study from
+Canada published last year in
+Environmental Health
+Perspectives. I know the one.
+Thompson and Okeke 2024. It's
+very relevant. Make sure you
+engage critically with it rather
+than just summarizing it. There
+are some limitations in their
+sampling methodology worth
+discussing. We noticed that too.
+Their sample was quite
+homogenous, mostly middle income
+suburban households. Our data
+from lower income urban areas
+actually challenges one of their
+main conclusions. Perfect.
+That's exactly the kind of
+critical engagement I'm looking
+for. When do you expect to have
+a draft ready? We're aiming for
+the 12th of November, which
+gives you two weeks to review
+before the submission deadline.
+That works for me. Keep up the
+good work.

@@ -57,9 +57,15 @@ export interface McqPrompt {
   option_explanations?: Record<string, string>;
 }
 
+export interface McqDrillResult {
+  points: number;
+  questionId: string;
+  selectedAnswer: string;
+}
+
 interface McqDrillProps {
   prompt: McqPrompt;
-  onComplete: (pointsEarned: number, usedTrapPhase: boolean) => void;
+  onComplete: (result: McqDrillResult) => void;
 }
 
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
@@ -108,12 +114,12 @@ export default function McqDrill({ prompt, onComplete }: McqDrillProps) {
   };
 
   const handleNext = () => {
-    onComplete(isCorrect ? 10 : 2, true);
+    const points = isCorrect ? 10 : 2;
+    const answer = selectedOption ?? '';
     setSelectedOption(null);
     setHasChecked(false);
     setIsCorrect(false);
-    setPhase('question');
-    setStudentConfirmed(false);
+    onComplete({ points, questionId: prompt.id, selectedAnswer: answer });
   };
 
   // ─── Explanation helpers ───────────────────────────────────────────────────

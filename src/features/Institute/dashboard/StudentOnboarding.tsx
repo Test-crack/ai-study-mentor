@@ -84,15 +84,41 @@ function AddStudentModal({ onClose, onAdded }: { onClose: () => void; onAdded: (
     try {
       const res = await addStudent(form);
       toast({
-        title: '✅ Student Enrolled',
+        title: 'Student Enrolled',
         description: res.data.inviteEmailSent
-          ? `Invite email sent to ${res.data.email}`
-          : `Student added. Invite email could not be sent — check Supabase logs.`,
+          ? `Invite sent to ${res.data.email}. They'll set a password and land on the dashboard.`
+          : `${res.data.email} has been added to your institute. They already have an account and can log in directly.`,
       });
       onAdded();
       onClose();
     } catch (err: any) {
-      toast({ title: 'Failed to add student', description: err.message, variant: 'destructive' });
+      const msg: string = err.message ?? '';
+
+      if (msg.includes('already enrolled in your institute')) {
+        toast({
+          title: 'Already enrolled',
+          description: 'This student is already part of your institute.',
+          variant: 'destructive',
+        });
+      } else if (msg.includes('already enrolled at another institute')) {
+        toast({
+          title: 'Student unavailable',
+          description: 'This student is currently enrolled at another institute and cannot be added here. Please contact TestCrack team for support.',
+          variant: 'destructive',
+        });
+      } else if (msg.includes('non-student account')) {
+        toast({
+          title: 'Role conflict',
+          description: 'This email belongs to a non-student account. Contact blinkgrid@gmail.com if this is a mistake.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Enrollment failed',
+          description: msg || 'Something went wrong. Please try again.',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setLoading(false);
     }

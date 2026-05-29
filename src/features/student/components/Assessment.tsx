@@ -4,6 +4,7 @@ import { GraduationCap, ArrowRight, CheckCircle2, AlertCircle, Target, BookOpen,
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useMomentum } from "@/features/student/Context/MomentumContext";
 import { callBackend } from "@/features/auth/services/authClient";
+import { transformSectionAudioUrls } from "@/features/student/utils/iaAudioUtils";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // API INTEGRATION LAYER (Ready for Sarthak's Endpoints)
@@ -71,11 +72,24 @@ interface IAStatusResponse {
   is_ia_day:             boolean;
   current_ia_number:     number | null;
   can_start_test:        boolean;
+  has_active_session:    boolean;
   suggested_subskills:   { skill: string; sub_skill: string }[] | null;
   next_ia:               IANextSlot | null;
   upcoming_ias:          IANextSlot[];
   reasons:               { key: string; message: string }[];
   progress:              IAProgress;
+  has_completed_session?: boolean;
+  completed_session_scores?: Array<{
+    skill: string;
+    sub_skill: string;
+    band: number;
+    correct?: number;
+    total?: number;
+    ai_graded?: boolean;
+    previous_band?: number | null;
+    delta?: number | null;
+  }> | null;
+  completed_session_momentum?: number | null;
 }
 
 interface IAQuestion {
@@ -197,6 +211,9 @@ export default function Assessment() {
   // Phase
   const [phase, setPhase] = useState<Phase>("gate");
 
+  // Gate-level error (e.g. window closing too soon)
+  const [gateError, setGateError]             = useState<string | null>(null);
+
   // IA session state
   const [iaSessionId, setIaSessionId]         = useState<string | null>(null);
   const [iaSections, setIaSections]           = useState<IASection[] | null>(null);
@@ -204,6 +221,8 @@ export default function Assessment() {
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
   const [sessionMomentumAward, setSessionMomentumAward] = useState(0);
   const [iaResults, setIaResults]             = useState<any>(null);
+  // Which result card's Key Observations panel is open (null = all closed)
+  const [expandedFeedbackIdx, setExpandedFeedbackIdx] = useState<number | null>(null);
 
   // Per-question state
   const [currentIdx, setCurrentIdx]           = useState(0);
@@ -216,6 +235,14 @@ export default function Assessment() {
   const [showPassage, setShowPassage]         = useState(false);
   const [isRecording, setIsRecording]         = useState(false);
   const [animBars] = useState(() => Array.from({ length: 12 }, () => Math.random()));
+
+  // Speech recognition (Web Speech API)
+  const recognitionRef       = useRef<any>(null);
+  const transcriptAccumRef   = useRef<string>('');
+  const [liveTranscript, setLiveTranscript] = useState('');
+
+  // Writing debounce — avoids per-keystroke backend calls
+  const writingDebounceRef   = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Timer: 20 min per section (2 sections = 40 min total). Resets on section advance.
   const [timeLeft, setTimeLeft]               = useState(20 * 60);
@@ -264,6 +291,70 @@ export default function Assessment() {
     }).catch(e => console.warn('[IA] answer save failed:', e));
   };
 
+  /** Debounced writing save — waits 1.5s after the student stops typing. */
+  const persistWritingDebounced = (questionId: string, text: string) => {
+    if (writingDebounceRef.current) clearTimeout(writingDebounceRef.current);
+    writingDebounceRef.current = setTimeout(() => persistAnswer(questionId, text), 1500);
+  };
+
+  /** Start recording with the Web Speech API (Chrome/Edge). Falls back gracefully. */
+  const startSpeakingRecording = (questionId: string) => {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    // Always start fresh — re-recording replaces, never appends to previous transcript
+    transcriptAccumRef.current = '';
+    setLiveTranscript('');
+    setIsRecording(true);
+    if (!SR) return; // UI shows recording; student cannot get transcript on unsupported browser
+
+    const rec = new SR();
+    rec.continuous      = true;
+    rec.interimResults  = true;
+    rec.lang            = 'en-US';
+
+    rec.onresult = (event: any) => {
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          transcriptAccumRef.current = (
+            transcriptAccumRef.current ? transcriptAccumRef.current + ' ' : ''
+          ) + event.results[i][0].transcript.trim();
+        }
+      }
+      const last    = event.results[event.results.length - 1];
+      const interim = last.isFinal ? '' : last[0].transcript;
+      setLiveTranscript((transcriptAccumRef.current + (interim ? ' ' + interim : '')).trim());
+    };
+
+    rec.onerror = (e: any) => {
+      if (e.error !== 'aborted' && e.error !== 'no-speech') console.warn('[Speech]', e.error);
+    };
+
+    recognitionRef.current = rec;
+    try { rec.start(); } catch { /* already started */ }
+  };
+
+  /** Stop recording, persist the final transcript, update UI state. */
+  const stopSpeakingRecording = (questionId: string) => {
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch { /**/ }
+      recognitionRef.current = null;
+    }
+    const finalTranscript = transcriptAccumRef.current.trim();
+    setIsRecording(false);
+    setLiveTranscript('');
+    if (finalTranscript) {
+      setAnswers(p => ({ ...p, [questionId]: finalTranscript }));
+      persistAnswer(questionId, finalTranscript);
+      setRecordedPrompts(p => ({ ...p, [questionId]: true }));
+    } else {
+      // Recognition produced no text (mic blocked, no-speech, unsupported browser).
+      // Mark with a sentinel so canProceed unblocks and the student can still advance.
+      const sentinel = '[no transcript]';
+      setAnswers(p => ({ ...p, [questionId]: sentinel }));
+      persistAnswer(questionId, sentinel);
+      setRecordedPrompts(p => ({ ...p, [questionId]: true }));
+    }
+  };
+
   const beginFullTest = async () => {
     localStorage.removeItem(STORAGE_KEY);
     setIsLoadingQuestions(true);
@@ -272,7 +363,10 @@ export default function Assessment() {
       const res: IASessionResponse = await callBackend(`${backendUrl}/api/ia/questions`);
 
       if (!res.success) {
-        console.error('[IA] failed to load questions:', res);
+        // Surface window-closing-soon as a friendly gate message
+        if ((res as any).error === 'window_closing_soon') {
+          setGateError((res as any).message ?? 'Too little time remains in today\'s window. Try your next scheduled IA.');
+        }
         setIsLoadingQuestions(false);
         return;
       }
@@ -285,8 +379,12 @@ export default function Assessment() {
       }
 
       const resumeSection = res.current_section_idx ?? 0;
+      
+      // Transform audio URLs to use public folder paths
+      const sectionsWithPublicAudioUrls = transformSectionAudioUrls(res.sections);
+
       setIaSessionId(res.session_id);
-      setIaSections(res.sections);
+      setIaSections(sectionsWithPublicAudioUrls);
       setCurrentSectionIdx(resumeSection);
       setCurrentIdx(0);
       setAnswers(res.saved_answers ?? {});
@@ -330,6 +428,11 @@ export default function Assessment() {
 
   const advanceToNextSection = () => {
     const nextIdx = currentSectionIdx + 1;
+    // Stop any playing audio from the outgoing section
+    if (audioRef.current && !audioRef.current.paused) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
     // Stamp section start on backend so the per-section timer survives a mid-section exit
     if (iaSessionId) {
       const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
@@ -353,6 +456,11 @@ export default function Assessment() {
     const totalQ = currentSection.questions.length;
     const currentQ = currentSection.questions[currentIdx];
 
+    // Flush any pending writing debounce immediately before advancing
+    if (writingDebounceRef.current) {
+      clearTimeout(writingDebounceRef.current);
+      writingDebounceRef.current = null;
+    }
     // Persist current answer before advancing
     const currentAnswer = answers[currentQ?.id ?? ''];
     if (currentQ && currentAnswer) persistAnswer(currentQ.id, currentAnswer);
@@ -379,6 +487,17 @@ export default function Assessment() {
       void handleSectionComplete();
     }
   }, [timeLeft, phase, isLoadingQuestions, handleSectionComplete]);
+
+  // Stop any active recording and flush writing debounce when the question or section changes
+  useEffect(() => {
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch { /**/ }
+      recognitionRef.current = null;
+    }
+    setIsRecording(false);
+    setLiveTranscript('');
+    if (writingDebounceRef.current) clearTimeout(writingDebounceRef.current);
+  }, [currentIdx, currentSectionIdx]);
 
   // ── RENDERERS ──
 
@@ -555,6 +674,131 @@ export default function Assessment() {
     );
   };
 
+  // ── STATE 3.5: IA completed today — Show results ──────────────────────────
+  const renderCompletedToday = () => {
+    if (!iaStatus?.completed_session_scores) return null;
+    
+    const scores = iaStatus.completed_session_scores;
+    const momentumAwarded = iaStatus.completed_session_momentum ?? 0;
+    const iaNumber = iaStatus.current_ia_number ?? 1;
+    const isFirstIA = iaNumber === 1;
+    const comparisonLabel = isFirstIA ? 'vs Diagnostic' : 'vs Last IA';
+
+    return (
+      <div className="max-w-3xl mx-auto animate-fade-in pt-8 pb-24 px-4">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tight">IA #{iaNumber} Complete</h2>
+          <button
+            onClick={() => navigate('/student/dashboard')}
+            className="px-6 py-3 bg-gray-900 text-white rounded-xl font-black text-sm uppercase tracking-wide hover:bg-gray-800 shadow-[4px_4px_0_#4338CA]">
+            Dashboard
+          </button>
+        </div>
+
+        {/* Completion banner */}
+        <div className="bg-emerald-600 border-2 border-gray-900 rounded-2xl p-8 mb-6 text-center shadow-[8px_8px_0_#0F0F0F] relative overflow-hidden">
+          <div className="absolute -top-8 -right-8 text-[140px] opacity-10 pointer-events-none select-none">✓</div>
+          <div className="inline-flex items-center gap-2 bg-white text-emerald-900 px-5 py-2 rounded-lg font-black uppercase shadow-[3px_3px_0_#0F0F0F] mb-4">
+            <CheckCircle2 className="w-5 h-5 text-emerald-500" /> Assessment Completed Today
+          </div>
+          <p className="text-emerald-100 font-bold text-lg mb-2">
+            Submitted earlier today
+          </p>
+          <p className="text-emerald-200 font-medium">
+            Your competency matrix has been updated with today's results
+          </p>
+        </div>
+
+        {/* Momentum earned */}
+        {momentumAwarded > 0 && (
+          <div className="bg-indigo-700 border-2 border-gray-900 rounded-2xl p-6 mb-6 text-center shadow-[6px_6px_0_#0F0F0F]">
+            <p className="text-indigo-200 font-black uppercase tracking-widest mb-1 text-sm">Momentum Earned</p>
+            <div className="text-5xl font-black text-amber-400">+{momentumAwarded}</div>
+          </div>
+        )}
+
+        {/* Per sub-skill score cards */}
+        {scores.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
+            {scores.map((s, i) => {
+              const hasDelta  = s.delta !== null && s.delta !== undefined;
+              const isUp      = hasDelta && s.delta! > 0;
+              const isDown    = hasDelta && s.delta! < 0;
+              const deltaText = hasDelta
+                ? (isUp ? `+${s.delta!.toFixed(1)}` : isDown ? s.delta!.toFixed(1) : '±0.0')
+                : null;
+
+              return (
+                <div key={i} className="bg-white border-2 border-gray-900 rounded-xl p-6 shadow-[4px_4px_0_#0F0F0F]">
+                  {/* Sub-skill header */}
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-2xl">{SKILL_ICON[s.skill] ?? '📝'}</span>
+                    <div>
+                      <p className="font-black text-gray-900 text-sm uppercase tracking-wide">{SKILL_LABEL[s.sub_skill] ?? s.sub_skill}</p>
+                      <p className="text-gray-400 text-[10px] font-bold uppercase">{s.skill}{s.ai_graded ? ' · AI Graded' : ''}</p>
+                    </div>
+                  </div>
+
+                  {/* Band score + delta */}
+                  <div className="flex items-end gap-4">
+                    <span className="text-5xl font-black text-gray-900 leading-none">
+                      {s.band > 0 ? s.band.toFixed(1) : '—'}
+                    </span>
+                    {hasDelta && (
+                      <div className="mb-1">
+                        <span className={`text-lg font-black ${isUp ? 'text-emerald-600' : isDown ? 'text-rose-600' : 'text-gray-500'}`}>
+                          {deltaText}
+                        </span>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase">{comparisonLabel}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Previous band */}
+                  {s.previous_band !== null && s.previous_band !== undefined && (
+                    <p className="text-xs text-gray-400 font-medium mt-2">
+                      Previous: <span className="font-black">{s.previous_band.toFixed(1)}</span>
+                      {isUp && <span className="text-emerald-600 ml-1 font-black">↑ Improved</span>}
+                      {isDown && <span className="text-rose-600 ml-1 font-black">↓ Dropped</span>}
+                    </p>
+                  )}
+
+                  {/* MCQ score (if present) */}
+                  {s.correct != null && s.total != null && s.total > 0 && (
+                    <p className="text-xs text-gray-400 font-bold mt-1">{s.correct} / {s.total} MCQ correct</p>
+                  )}
+
+                  {/* Delta badge */}
+                  {hasDelta && (
+                    <div className={`mt-3 inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide px-2.5 py-1 rounded border-2 ${
+                      isUp   ? 'bg-emerald-50 text-emerald-700 border-emerald-300' :
+                      isDown ? 'bg-rose-50 text-rose-700 border-rose-300' :
+                               'bg-gray-100 text-gray-600 border-gray-300'
+                    }`}>
+                      {isUp ? '↑ Improved' : isDown ? '↓ Dropped' : '● Maintained'}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Next IA info */}
+        {iaStatus!.next_ia && (
+          <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-6 text-center">
+            <p className="text-gray-500 font-medium mb-2">Next Internal Assessment</p>
+            <p className="text-2xl font-black text-gray-900">{iaStatus!.next_ia.date_formatted}</p>
+            <p className="text-sm text-gray-400 font-bold mt-1">
+              {iaStatus!.next_ia.days_away === 1 ? 'Tomorrow' : `In ${iaStatus!.next_ia.days_away} days`}
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // ── STATE 4: IA day + all conditions met → Start Test ─────────────────────
   const renderGate = () => (
     <div className="max-w-2xl mx-auto animate-fade-in pt-12 px-4">
@@ -605,16 +849,30 @@ export default function Assessment() {
           ))}
         </div>
 
+        {/* Window-closing-soon error banner */}
+        {gateError && (
+          <div className="mb-4 flex items-start gap-3 bg-amber-50 border-2 border-amber-300 rounded-xl px-4 py-3">
+            <span className="text-amber-500 text-lg flex-shrink-0">⚠️</span>
+            <div>
+              <p className="font-black text-amber-800 text-sm uppercase tracking-wide mb-0.5">Window Closing Soon</p>
+              <p className="text-amber-700 text-xs font-medium leading-relaxed">{gateError}</p>
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row gap-4">
           <button onClick={() => navigate(-1)} className="px-6 py-4 rounded-xl border-2 border-gray-300 font-black text-gray-500 hover:bg-gray-50 hover:border-gray-400 transition-colors uppercase tracking-wide">
             Cancel
           </button>
           <button
-            onClick={() => void beginFullTest()}
+            onClick={() => { setGateError(null); void beginFullTest(); }}
             disabled={isLoadingQuestions}
             className="flex-1 bg-indigo-700 hover:bg-indigo-600 disabled:opacity-60 text-white font-black text-base uppercase tracking-wide rounded-xl border-2 border-gray-900 transition-all neo-btn shadow-[4px_4px_0_#0F0F0F] flex items-center justify-center gap-2"
           >
-            {isLoadingQuestions ? <><Loader2 className="w-4 h-4 animate-spin" /> Loading…</> : 'Start Assessment →'}
+            {isLoadingQuestions
+            ? <><Loader2 className="w-4 h-4 animate-spin" /> Loading…</>
+            : iaStatus?.has_active_session ? 'Continue Assessment →' : 'Start Assessment →'
+          }
           </button>
         </div>
       </div>
@@ -634,7 +892,7 @@ export default function Assessment() {
             Section {currentSectionIdx + 1} Complete
           </h2>
           <p className="text-gray-500 font-medium mb-10">
-            Great work on {SKILL_LABEL[doneSec?.sub_skill ?? ''] ?? doneSec?.sub_skill}. Take a breath — the timer is still running.
+            Great work on {SKILL_LABEL[doneSec?.sub_skill ?? ''] ?? doneSec?.sub_skill}. Take a breath — the next section has its own 20-minute timer.
           </p>
           {nextSec && (
             <div className="bg-indigo-50 border-2 border-gray-900 rounded-xl p-6 mb-8 text-left shadow-[4px_4px_0_#0F0F0F]">
@@ -662,161 +920,221 @@ export default function Assessment() {
         <div className="w-24 h-24 rounded-full border-[6px] border-gray-200 border-t-indigo-700 animate-spin" />
         <span className="absolute inset-0 flex items-center justify-center text-4xl">🧠</span>
       </div>
-      <h2 className="text-3xl font-black text-gray-900 uppercase tracking-wide mb-3">Gemini is Evaluating...</h2>
-      <p className="text-gray-500 font-medium text-lg">Analyzing all four sections to calculate your Overall Band.</p>
+      <h2 className="text-3xl font-black text-gray-900 uppercase tracking-wide mb-3">Scoring Your Assessment</h2>
+      <p className="text-gray-500 font-medium text-lg">Calculating your band scores and updating your competency matrix.</p>
     </div>
   );
 
   const renderResults = () => {
-    // IA results from backend — if no backend results, show completion screen
-    const momentumEarned = sessionMomentumAward || iaResults?.momentum_awarded || 0;
-    const sectionScores: Array<{ sub_skill: string; skill: string; band: number; correct?: number; total?: number }> =
-      (iaResults?.section_scores ?? iaSections?.map(s => ({ sub_skill: s.sub_skill, skill: s.skill, band: 0 })) ?? []);
+    const momentumEarned   = sessionMomentumAward || iaResults?.momentum_awarded || 0;
+    const breakdown: Array<{ reason: string; points: number }> = iaResults?.momentum_breakdown ?? [];
+    const isFirstIA        = iaResults?.is_first_ia ?? false;
+    const comparisonLabel  = isFirstIA ? 'vs Diagnostic' : 'vs Last IA';
+
+    type ScoreRow = {
+      sub_skill: string; skill: string; band: number;
+      correct?: number; total?: number; ai_graded?: boolean;
+      previous_band?: number | null; delta?: number | null;
+      new_matrix_band?: number;
+      ai_feedback?: { rationale: string; key_observations: string[] };
+    };
+    const sectionScores: ScoreRow[] =
+      iaResults?.section_scores ?? iaSections?.map(s => ({ sub_skill: s.sub_skill, skill: s.skill, band: 0 })) ?? [];
 
     return (
       <div className="max-w-3xl mx-auto animate-fade-in pt-8 pb-24 px-4">
+
+        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tight">IA Complete</h2>
-          <button onClick={() => { localStorage.removeItem(STORAGE_KEY); navigate('/student/dashboard', { state: { drillCompleted: true } }); }}
+          <button
+            onClick={() => { localStorage.removeItem(STORAGE_KEY); navigate('/student/dashboard', { state: { drillCompleted: true } }); }}
             className="px-6 py-3 bg-gray-900 text-white rounded-xl font-black text-sm uppercase tracking-wide hover:bg-gray-800 shadow-[4px_4px_0_#4338CA]">
             Dashboard
           </button>
         </div>
 
-        {/* Momentum award */}
-        <div className="bg-indigo-700 border-2 border-gray-900 rounded-2xl p-8 mb-6 text-center shadow-[8px_8px_0_#0F0F0F]">
-          <p className="text-indigo-200 font-black uppercase tracking-widest mb-2">Momentum Earned</p>
+        {/* Momentum banner */}
+        <div className="bg-indigo-700 border-2 border-gray-900 rounded-2xl p-8 mb-6 text-center shadow-[8px_8px_0_#0F0F0F] relative overflow-hidden">
+          <div className="absolute -top-8 -right-8 text-[140px] opacity-10 pointer-events-none select-none">⚡</div>
+          <p className="text-indigo-200 font-black uppercase tracking-widest mb-1">Momentum Earned</p>
           <div className="text-7xl font-black text-amber-400">+{momentumEarned}</div>
           <div className="mt-4 inline-flex items-center gap-2 bg-white text-indigo-900 px-5 py-2 rounded-lg font-black uppercase shadow-[3px_3px_0_#0F0F0F]">
-            <CheckCircle2 className="w-5 h-5 text-emerald-500" /> Internal Assessment Submitted
+            <CheckCircle2 className="w-5 h-5 text-emerald-500" /> Assessment Submitted
           </div>
+          {/* Breakdown pills */}
+          {breakdown.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-2 mt-5">
+              {breakdown.map((b, i) => (
+                <span key={i} className="bg-indigo-600 text-indigo-100 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-indigo-500">
+                  +{b.points} {b.reason}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Section scores */}
+        {/* Per sub-skill score cards */}
         {sectionScores.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
-            {sectionScores.map((s, i) => (
-              <div key={i} className="bg-white border-2 border-gray-900 rounded-xl p-6 shadow-[4px_4px_0_#0F0F0F] text-center">
-                <span className="text-3xl">{SKILL_ICON[s.skill] ?? '📝'}</span>
-                <p className="text-gray-500 font-black uppercase tracking-widest text-xs mt-3 mb-1">{SKILL_LABEL[s.sub_skill] ?? s.sub_skill}</p>
-                <p className="text-4xl font-black text-gray-900">{s.band > 0 ? s.band.toFixed(1) : '—'}</p>
-                {s.correct != null && <p className="text-xs text-gray-400 font-bold mt-1">{s.correct} / {s.total} correct</p>}
-              </div>
-            ))}
+            {sectionScores.map((s, i) => {
+              const hasDelta  = s.delta !== null && s.delta !== undefined;
+              const isUp      = hasDelta && s.delta! > 0;
+              const isDown    = hasDelta && s.delta! < 0;
+              const deltaText = hasDelta
+                ? (isUp ? `+${s.delta!.toFixed(1)}` : isDown ? s.delta!.toFixed(1) : '±0.0')
+                : null;
+
+              // Competency band impact
+              const hasMatrix   = s.new_matrix_band !== undefined && s.new_matrix_band !== null;
+              const prevMatrix  = s.previous_band ?? null;
+              const matrixDelta = hasMatrix && prevMatrix !== null
+                ? Math.round((s.new_matrix_band! - prevMatrix) * 10) / 10
+                : null;
+              const matrixUp   = matrixDelta !== null && matrixDelta > 0;
+              const matrixDown = matrixDelta !== null && matrixDelta < 0;
+              const smoothingVisible = hasMatrix && Math.abs(s.new_matrix_band! - s.band) >= 0.5;
+
+              return (
+                <div key={i} className="bg-white border-2 border-gray-900 rounded-xl p-6 shadow-[4px_4px_0_#0F0F0F]">
+
+                  {/* Sub-skill header */}
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-2xl">{SKILL_ICON[s.skill] ?? '📝'}</span>
+                    <div>
+                      <p className="font-black text-gray-900 text-sm uppercase tracking-wide">{SKILL_LABEL[s.sub_skill] ?? s.sub_skill}</p>
+                      <p className="text-gray-400 text-[10px] font-bold uppercase">{s.skill}{s.ai_graded ? ' · AI Graded' : ''}</p>
+                    </div>
+                  </div>
+
+                  {/* ── IA Score (this session) ── */}
+                  <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-0.5">IA Score</p>
+                  <div className="flex items-end gap-4 mb-3">
+                    <span className="text-5xl font-black text-gray-900 leading-none">
+                      {s.band > 0 ? s.band.toFixed(1) : '—'}
+                    </span>
+                    {hasDelta && (
+                      <div className="mb-1">
+                        <span className={`text-lg font-black ${isUp ? 'text-emerald-600' : isDown ? 'text-rose-600' : 'text-gray-500'}`}>
+                          {deltaText}
+                        </span>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase">{comparisonLabel}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* MCQ correct count */}
+                  {s.correct != null && s.total != null && s.total > 0 && (
+                    <p className="text-xs text-gray-400 font-bold mb-3">{s.correct} / {s.total} MCQ correct</p>
+                  )}
+
+                  {/* ── AI Feedback (Writing/Speaking prompts only) ── */}
+                  {s.ai_graded && s.ai_feedback?.rationale && (
+                    <div className="border-t border-gray-100 pt-3 mb-3">
+                      <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5">AI Feedback</p>
+                      <p className="text-xs text-gray-600 font-medium leading-relaxed">
+                        &ldquo;{s.ai_feedback.rationale}&rdquo;
+                      </p>
+
+                      {/* Key Observations toggle button */}
+                      {(s.ai_feedback.key_observations?.length ?? 0) > 0 && (
+                        <div className="mt-2 relative">
+                          <button
+                            onClick={() => setExpandedFeedbackIdx(prev => prev === i ? null : i)}
+                            className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border transition-all ${
+                              expandedFeedbackIdx === i
+                                ? 'bg-indigo-700 text-white border-indigo-700'
+                                : 'bg-white text-indigo-700 border-indigo-300 hover:bg-indigo-50'
+                            }`}
+                          >
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            {expandedFeedbackIdx === i ? 'Hide Observations' : 'Key Observations'}
+                            <span className={`transition-transform duration-200 ${expandedFeedbackIdx === i ? 'rotate-180' : ''}`}>
+                              ▾
+                            </span>
+                          </button>
+
+                          {/* Popover panel — appears inline below the button */}
+                          {expandedFeedbackIdx === i && (
+                            <div className="mt-2 bg-white border-2 border-indigo-200 rounded-xl shadow-[0_4px_20px_rgba(99,102,241,0.15)] overflow-hidden">
+                              {/* Panel header */}
+                              <div className="flex items-center justify-between px-4 py-2.5 bg-indigo-50 border-b border-indigo-100">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-1.5 h-4 bg-indigo-600 rounded-full" />
+                                  <p className="text-[10px] font-black uppercase tracking-widest text-indigo-700">
+                                    Key Observations
+                                  </p>
+                                </div>
+                                <button
+                                  onClick={() => setExpandedFeedbackIdx(null)}
+                                  className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-indigo-200 text-indigo-500 transition-colors text-xs font-black"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                              {/* Observations list */}
+                              <ul className="px-4 py-3 flex flex-col gap-2.5">
+                                {s.ai_feedback.key_observations.map((obs, j) => (
+                                  <li key={j} className="flex items-start gap-2.5">
+                                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-indigo-500 flex-shrink-0" />
+                                    <span className="text-xs text-gray-700 font-medium leading-relaxed">{obs}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* ── Competency Band Impact ── */}
+                  {hasMatrix && (
+                    <div className="border-t border-gray-100 pt-3">
+                      <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5">Competency Band</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-black text-gray-400">
+                          {prevMatrix !== null ? prevMatrix.toFixed(1) : '—'}
+                        </span>
+                        <span className="text-gray-300 text-xs">→</span>
+                        <span className={`text-xl font-black ${matrixUp ? 'text-emerald-600' : matrixDown ? 'text-rose-600' : 'text-gray-700'}`}>
+                          {s.new_matrix_band!.toFixed(1)}
+                        </span>
+                        {matrixDelta !== null && (
+                          <span className={`text-xs font-black ml-0.5 ${matrixUp ? 'text-emerald-600' : matrixDown ? 'text-rose-600' : 'text-gray-400'}`}>
+                            {matrixUp ? `+${matrixDelta.toFixed(1)}` : matrixDelta.toFixed(1)}
+                          </span>
+                        )}
+                      </div>
+                      {smoothingVisible && (
+                        <p className="text-[10px] text-gray-400 font-medium mt-1">
+                          Builds gradually — averaged over sessions
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Delta badge */}
+                  {hasDelta && (
+                    <div className={`mt-3 inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide px-2.5 py-1 rounded border-2 ${
+                      isUp   ? 'bg-emerald-50 text-emerald-700 border-emerald-300' :
+                      isDown ? 'bg-rose-50 text-rose-700 border-rose-300' :
+                               'bg-gray-100 text-gray-600 border-gray-300'
+                    }`}>
+                      {isUp ? '↑ Improved' : isDown ? '↓ Dropped' : '● Maintained'}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 
-        <p className="text-center text-gray-500 font-medium">Your scores are now reflected in your competency matrix. Continue your drills to prepare for the next IA.</p>
-      </div>
-    );
-
-    // legacy shape fallback — unreachable but keeps compiler happy
-    const overallBand = 0;
-    const weakestResult = null;
-
-    return (
-      <div className="max-w-5xl mx-auto animate-fade-in pt-8 pb-24 px-4">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl sm:text-4xl font-black text-gray-900 uppercase tracking-tight">Final Results</h2>
-          <button 
-            onClick={() => {
-              localStorage.removeItem(STORAGE_KEY);
-              navigate('/student/dashboard');
-            }} 
-            className="px-6 py-3 bg-gray-900 text-white rounded-xl font-black text-sm uppercase tracking-wide hover:bg-gray-800 transition-colors shadow-[4px_4px_0_#4338CA]"
-          >
-            Dashboard
-          </button>
-        </div>
-
-        {/* OVERALL SCORE BANNER */}
-        <div className="bg-indigo-700 border-2 border-gray-900 rounded-2xl p-8 sm:p-12 mb-8 text-center relative overflow-hidden shadow-[8px_8px_0_#0F0F0F]">
-          <div className="absolute -top-10 -right-10 text-[200px] opacity-10 pointer-events-none">🎯</div>
-          <p className="text-indigo-200 font-black uppercase tracking-widest mb-4">Overall Real Band Score</p>
-          <div className="text-8xl sm:text-[120px] font-black text-white tabular-nums leading-none drop-shadow-md">
-            {overallBand.toFixed(1)}
-          </div>
-          <div className="mt-8 inline-flex items-center gap-2 bg-white text-indigo-900 px-6 py-2 rounded-lg font-black uppercase tracking-wide shadow-[4px_4px_0_#0F0F0F]">
-            <CheckCircle2 className="w-5 h-5 text-emerald-500" /> Full Assessment Complete
-          </div>
-        </div>
-
-        {/* 4 SKILL GRID with DELTAS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {SKILL_ORDER.map(s => {
-            const r = allResults[s]!;
-            const isUp = r.delta > 0;
-            const isSame = r.delta === 0;
-            
-            return (
-              <div key={s} className="bg-white border-2 border-gray-900 rounded-xl p-6 shadow-[4px_4px_0_#0F0F0F] flex flex-col items-center text-center">
-                <span className="text-4xl mb-4">{SKILL_ICONS[s]}</span>
-                
-                <p className="text-gray-500 font-black uppercase tracking-widest text-xs mb-1">{SKILL_LABELS[s]}</p>
-                <div className="flex items-center justify-center gap-3 w-full mb-4">
-                   <span className="text-xl font-black text-gray-400 line-through decoration-2 decoration-gray-400">{r.previousBand.toFixed(1)}</span>
-                   <ArrowRight className="w-5 h-5 text-gray-300" />
-                   <span className={`text-4xl font-black ${isUp ? 'text-emerald-600' : isSame ? 'text-gray-900' : 'text-rose-600'}`}>{r.newBand.toFixed(1)}</span>
-                </div>
-                
-                <div className={`text-[10px] font-black uppercase tracking-wide px-2.5 py-1 rounded border-2 ${isUp ? 'bg-emerald-100 text-emerald-700 border-emerald-300' : isSame ? 'bg-gray-100 text-gray-600 border-gray-300' : 'bg-rose-100 text-rose-700 border-rose-300'}`}>
-                  {isUp ? `+${r.delta.toFixed(1)} Improved` : isSame ? 'Maintained' : `${Math.abs(r.delta).toFixed(1)} Dropped`}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-
-        {/* DETAILED CRITERION SCORES (Reading Example) */}
-        <div className="bg-white border-2 border-gray-900 rounded-xl p-8 mb-8 shadow-[6px_6px_0_#0F0F0F]">
-           <h3 className="text-xl font-black text-gray-900 uppercase tracking-wide mb-6 flex items-center gap-2">
-             <BrainCircuit className="w-6 h-6 text-indigo-700" /> Full Criterion Breakdown
-           </h3>
-           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {allResults['reading']!.criteria.map((crit, i) => (
-                <div key={i} className="bg-gray-50 border-2 border-gray-200 p-5 rounded-lg">
-                  <div className="flex justify-between items-center mb-3 border-b-2 border-gray-200 pb-2">
-                    <span className="font-black text-sm text-gray-900 uppercase tracking-wide">{crit.name}</span>
-                    <span className="font-black text-xl text-indigo-700">{crit.score.toFixed(1)}</span>
-                  </div>
-                  <p className="text-sm text-gray-600 font-medium leading-relaxed">{crit.feedback}</p>
-                </div>
-              ))}
-            </div>
-        </div>
-
-        {/* PRIORITY ACTION */}
-        <div className="bg-red-50 border-2 border-gray-900 rounded-2xl p-8 shadow-[6px_6px_0_#0F0F0F] mb-8">
-          <div className="flex flex-col sm:flex-row gap-6 items-start">
-            <div className="bg-red-500 border-2 border-gray-900 rounded-xl p-4 shrink-0 shadow-[4px_4px_0_#0F0F0F]">
-              <AlertCircle className="w-10 h-10 text-white" />
-            </div>
-            <div>
-              <h4 className="font-black text-gray-900 text-xl mb-2 uppercase tracking-wide">Priority Action Plan</h4>
-              <p className="text-gray-700 font-medium leading-relaxed mb-6">
-                Your weakest overall area in this mock test was <strong className="text-gray-900 uppercase">{SKILL_LABELS[weakestResult!.skill]}</strong>. {weakestResult!.priorityAction}
-              </p>
-              <button 
-                onClick={() => {
-                  localStorage.removeItem(STORAGE_KEY);
-                  navigate('/student/dashboard');
-                }} 
-                className="bg-white text-gray-900 font-black text-sm uppercase tracking-wide px-8 py-4 rounded-xl border-2 border-gray-900 hover:bg-gray-50 transition-colors neo-btn shadow-[4px_4px_0_#0F0F0F]"
-              >
-                Update My Dashboard Rhythm →
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* MOMENTUM POINTS AWARD (Separate at Bottom) */}
-        <div className="flex items-center justify-center gap-4 bg-indigo-50 border-2 border-indigo-700 rounded-2xl p-6 shadow-[4px_4px_0_#4338CA]">
-           <div className="bg-amber-400 p-2 rounded-full border-2 border-gray-900"><Zap className="w-6 h-6 text-gray-900 fill-gray-900" /></div>
-           <p className="text-lg font-black text-indigo-900 uppercase tracking-wide">
-             Session Complete! You earned <strong className="text-indigo-700 text-2xl mx-1">+{sessionMomentumAward}</strong> Momentum Points.
-           </p>
-        </div>
-
+        <p className="text-center text-gray-500 font-medium text-sm">
+          Scores updated in your competency matrix. Continue drilling to build on this result.
+        </p>
       </div>
     );
   };
@@ -844,9 +1162,10 @@ export default function Assessment() {
     // Can-proceed check per question type
     let canProceed = false;
     if (currentQ.question_type === 'SPEAKING_PROMPT') {
-      canProceed = !!recordedPrompts[currentQ.id];
+      // Requires a saved transcript (from this session or a prior resume)
+      canProceed = !!(answers[currentQ.id]?.trim());
     } else if (currentQ.question_type === 'WRITING_PROMPT') {
-      canProceed = (answers[currentQ.id]?.trim().length ?? 0) >= 10;
+      canProceed = (answers[currentQ.id]?.trim().split(/\s+/).filter(Boolean).length ?? 0) >= 10;
     } else {
       // MCQ or TFNG
       canProceed = !!answers[currentQ.id];
@@ -900,7 +1219,12 @@ export default function Assessment() {
             {currentSection.section_type === 'AUDIO' && currentSection.audio_url ? (
               <div className="bg-indigo-50 border-2 border-gray-900 rounded-xl p-8 text-center flex flex-col items-center" style={{ boxShadow: '6px 6px 0 #0F0F0F' }}>
                 <button
-                  onClick={() => { if (audioState === 'idle' && audioRef.current) { audioRef.current.play(); setAudioState('playing'); } }}
+                  onClick={() => { 
+                    if (audioState === 'idle' && audioRef.current) { 
+                      audioRef.current.play(); 
+                      setAudioState('playing'); 
+                    } 
+                  }}
                   disabled={audioState !== 'idle'}
                   className={`w-24 h-24 border-2 border-gray-900 rounded-full flex items-center justify-center text-white mb-6 transition-all shadow-[4px_4px_0_#0F0F0F] ${
                     audioState === 'idle' ? 'bg-indigo-700 hover:bg-indigo-600' : audioState === 'playing' ? 'bg-amber-500' : 'bg-emerald-500'
@@ -912,7 +1236,12 @@ export default function Assessment() {
                 </button>
                 <p className="text-gray-900 font-black text-lg uppercase tracking-wide mb-2">Listening Audio</p>
                 <p className="text-gray-600 font-medium text-sm">{audioState === 'played' ? 'Playback complete — answer the questions.' : 'Listen carefully. The audio plays once.'}</p>
-                <audio ref={audioRef} src={currentSection.audio_url} preload="auto" onEnded={() => setAudioState('played')} />
+                <audio 
+                  ref={audioRef} 
+                  src={currentSection.audio_url} 
+                  preload="auto" 
+                  onEnded={() => setAudioState('played')}
+                />
               </div>
             ) : currentSection.section_type === 'PASSAGE' && currentSection.passage_text ? (
               <div className="bg-white border-2 border-gray-900 rounded-xl flex flex-col max-h-[700px]" style={{ boxShadow: '6px 6px 0 #0F0F0F' }}>
@@ -998,41 +1327,87 @@ export default function Assessment() {
                     placeholder="Write your response here (minimum 10 words)…"
                     rows={8}
                     value={answers[currentQ.id] || ""}
-                    onChange={e => setAnswers(p => ({ ...p, [currentQ.id]: e.target.value }))}
-                    className="w-full p-5 border-2 border-gray-900 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-indigo-200 bg-gray-50 resize-none"
+                    onChange={e => {
+                      const text = e.target.value;
+                      setAnswers(p => ({ ...p, [currentQ.id]: text }));
+                      persistWritingDebounced(currentQ.id, text);
+                    }}
+                    className="w-full p-5 border-2 border-gray-900 rounded-xl text-base text-gray-900 font-medium outline-none focus:ring-2 focus:ring-indigo-200 bg-gray-50 resize-none"
                     style={{ boxShadow: 'inset 3px 3px 0 rgba(0,0,0,0.05)' }}
                   />
-                  <p className="text-xs text-gray-400 mt-2 font-bold">{(answers[currentQ.id] ?? '').trim().split(/\s+/).filter(Boolean).length} words</p>
+                  <div className="flex justify-between items-center mt-2">
+                    <p className="text-xs text-gray-400 font-bold">
+                      {(answers[currentQ.id] ?? '').trim().split(/\s+/).filter(Boolean).length} words
+                    </p>
+                    <p className="text-[10px] text-gray-300 font-medium">Auto-saved</p>
+                  </div>
                 </div>
               )}
 
               {/* ── SPEAKING_PROMPT ── */}
-              {currentQ.question_type === 'SPEAKING_PROMPT' && (
-                <div className="bg-gray-50 border-2 border-gray-300 rounded-2xl p-6 text-center">
-                  {isRecording ? (
-                    <div className="flex flex-col items-center">
-                      <div className="flex items-center gap-2 h-12 mb-5">
-                        {animBars.slice(0, 8).map((h, i) => <div key={i} className="w-2 bg-rose-500 rounded-full animate-pulse" style={{ height: `${12 + h * 30}px`, animationDelay: `${i * 0.1}s` }} />)}
+              {currentQ.question_type === 'SPEAKING_PROMPT' && (() => {
+                const hasTranscript = !!(answers[currentQ.id]?.trim());
+                return (
+                  <div className="bg-gray-50 border-2 border-gray-300 rounded-2xl p-6">
+                    {isRecording ? (
+                      /* ── Active recording ── */
+                      <div className="flex flex-col items-center gap-4">
+                        <div className="flex items-center gap-1.5 h-10">
+                          {animBars.slice(0, 10).map((h, i) => (
+                            <div key={i} className="w-1.5 bg-rose-500 rounded-full animate-pulse"
+                              style={{ height: `${10 + h * 28}px`, animationDelay: `${i * 0.09}s` }} />
+                          ))}
+                        </div>
+                        {liveTranscript ? (
+                          <div className="w-full bg-white border border-gray-200 rounded-xl p-3 text-sm text-gray-700 font-medium italic min-h-[56px] max-h-[120px] overflow-y-auto leading-relaxed">
+                            "{liveTranscript}"
+                          </div>
+                        ) : (
+                          <p className="text-xs text-gray-400 font-medium">Speak clearly — transcript appears here</p>
+                        )}
+                        <button onClick={() => stopSpeakingRecording(currentQ.id)}
+                          className="bg-rose-600 hover:bg-rose-700 text-white font-black text-sm px-8 py-3 rounded-xl border-2 border-gray-900 uppercase tracking-wide shadow-[3px_3px_0_#0F0F0F]">
+                          Stop &amp; Save
+                        </button>
                       </div>
-                      <button
-                        onClick={() => { setIsRecording(false); setRecordedPrompts(p => ({ ...p, [currentQ.id]: true })); }}
-                        className="bg-rose-100 hover:bg-rose-200 text-rose-700 font-black text-sm px-6 py-3 rounded-lg border-2 border-rose-700 uppercase shadow-[3px_3px_0_#BE123C]"
-                      >Stop Recording</button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center">
-                      <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 border-2 ${recordedPrompts[currentQ.id] ? 'bg-emerald-100 border-emerald-600' : 'bg-indigo-100 border-indigo-700'}`}>
-                        {recordedPrompts[currentQ.id] ? <CheckCircle2 className="w-8 h-8 text-emerald-600" /> : <Mic className="w-8 h-8 text-indigo-700" />}
+                    ) : hasTranscript ? (
+                      /* ── Has saved transcript ── */
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                          <span className="text-xs font-black uppercase tracking-widest text-emerald-700">Response Saved</span>
+                        </div>
+                        <div className="bg-white border-2 border-emerald-200 rounded-xl p-4 text-sm text-gray-700 font-medium italic max-h-[120px] overflow-y-auto leading-relaxed">
+                          "{answers[currentQ.id]}"
+                        </div>
+                        <button onClick={() => startSpeakingRecording(currentQ.id)}
+                          className="text-sm font-black uppercase tracking-wide px-6 py-3 rounded-xl border-2 border-gray-900 bg-white text-gray-900 hover:bg-gray-50 self-start"
+                          style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+                          Re-record Answer
+                        </button>
                       </div>
-                      <button onClick={() => setIsRecording(true)}
-                        className={`font-black text-sm uppercase tracking-wide px-8 py-4 rounded-xl border-2 border-gray-900 ${recordedPrompts[currentQ.id] ? 'bg-white text-gray-900' : 'bg-indigo-700 text-white'}`}
-                        style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>
-                        {recordedPrompts[currentQ.id] ? 'Re-record Answer' : 'Start Speaking'}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+                    ) : (
+                      /* ── Not yet recorded ── */
+                      <div className="flex flex-col items-center gap-4 text-center">
+                        <div className="w-16 h-16 rounded-full bg-indigo-100 border-2 border-indigo-700 flex items-center justify-center">
+                          <Mic className="w-8 h-8 text-indigo-700" />
+                        </div>
+                        <p className="text-sm text-gray-600 font-medium max-w-xs">
+                          Tap the button and speak your answer. Your response will be transcribed automatically.
+                        </p>
+                        <button onClick={() => startSpeakingRecording(currentQ.id)}
+                          className="bg-indigo-700 hover:bg-indigo-600 text-white font-black text-sm uppercase tracking-wide px-8 py-4 rounded-xl border-2 border-gray-900"
+                          style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>
+                          Start Speaking
+                        </button>
+                        {!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) && (
+                          <p className="text-xs text-amber-600 font-medium">Use Chrome or Edge for voice transcription.</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Navigation */}
               <div className="mt-8 flex gap-4">
@@ -1067,6 +1442,7 @@ export default function Assessment() {
         {phase === "gate" && (() => {
           if (!iaStatus?.has_schedule || !iaStatus?.prerequisites_met) return renderNotEligible();
           if (!iaStatus.is_ia_day)                                       return renderScheduled();
+          if (iaStatus.has_completed_session && iaStatus.completed_session_scores) return renderCompletedToday();
           if (!iaStatus.dcs_eligible)                                    return renderIaDayLowDCS();
           return renderGate();
         })()}

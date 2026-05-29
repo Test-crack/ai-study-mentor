@@ -92,18 +92,7 @@ import ApplyDrillScreen from "@/features/student/components/Drills/ApplyDrillScr
 import LexiGrid from "@/features/student/components/LexiGrid";
 import InternalAssessmentPage from "@/features/student/components/Internalassessmentpage";
 import FullMockAssessment from "@/features/student/components/FullMockAssessment";
-import QuestionBankManager from "@/features/TestCrackSuperAdmin/dashboard/Questionbankmanager";
-
-// ── B2C imports ───────────────────────────────────────────────────────────────
-import B2CLoginPage        from "@/features/B-C/pages/B2cloginpage";
-import B2CStudentDashboard from "@/features/B-C/pages/B2cstudentdashboard";
-import LexiGridGame        from "@/features/B-C/games/Lexigridgame";
-import TrapSpotterGame     from "@/features/B-C/games/Trapspottergame";
-import BandLadderGame      from "@/features/B-C/games/Bandladdergame";
-import SentenceSurgeryGame from "@/features/B-C/games/Sentencesurgerygame";
-import InferenceSprintGame from "@/features/B-C/games/Inferencesprintgame";
-import ConnectorChainGame  from "@/features/B-C/games/Connectorchaingame";
-
+import StudentNotEnrolledPage from "@/features/student/components/StudentNotEnrolledPage";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -135,6 +124,9 @@ const LoginRedirect = () => {
 
   // Default: STUDENT
   if (profile?.role === 'STUDENT') {
+    if (profile.isEnrolled === false) {
+      return <Navigate to="/student/not-enrolled" replace />;
+    }
     if (!profile.isDiagnosed) {
       return <Navigate to="/student/diagnosis" replace />;
     }
@@ -160,8 +152,9 @@ const ManualDashboardAccess = () => {
   if (profile.role === 'INSTITUTE_ADMIN') return <Navigate to="/institute-admin/dashboard" replace />;
 
   // Students
-  if (profile.role === 'STUDENT' && !profile.isDiagnosed) {
-    return <Navigate to="/student/diagnosis" replace />;
+  if (profile.role === 'STUDENT') {
+    if (profile.isEnrolled === false) return <Navigate to="/student/not-enrolled" replace />;
+    if (!profile.isDiagnosed)        return <Navigate to="/student/diagnosis" replace />;
   }
   return <Navigate to="/student/dashboard" replace />;
 };
@@ -178,8 +171,9 @@ const StudentDiagnosisGuard = ({ children }: { children: React.ReactNode }) => {
 
   if (!profile) return <Navigate to="/login" replace />;
 
-  if (profile.role === 'STUDENT' && !profile.isDiagnosed) {
-    return <Navigate to="/student/diagnosis" replace />;
+  if (profile.role === 'STUDENT') {
+    if (profile.isEnrolled === false) return <Navigate to="/student/not-enrolled" replace />;
+    if (!profile.isDiagnosed)        return <Navigate to="/student/diagnosis" replace />;
   }
 
   return <>{children}</>;
@@ -262,7 +256,10 @@ const AppRoutes = () => {
       <Route path="/dashboard" element={<ManualDashboardAccess />} />
       <Route path="/dashboard/:tab" element={<ManualDashboardAccess />} />
 
-      {/* ── Student Dashboard & Routes ────────────────────────────────────── */}
+      {/* Not-enrolled screen — role-protected but no enrollment guard (would loop) */}
+      <Route path="/student/not-enrolled" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentNotEnrolledPage /></RoleProtectedRoute>} />
+
+      {/* Student Dashboard & Routes */}
       <Route
         path="/student/dashboard"
         element={

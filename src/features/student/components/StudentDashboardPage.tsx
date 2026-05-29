@@ -5,7 +5,9 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { PremiumModal } from "@/features/payment/components/PremiumModal";
 import { useNavigate, useLocation } from "react-router-dom";
 import { callBackend } from "@/features/auth/services/authClient";
-import IAScheduleWidget from "./dashboard/IAScheduleWidget";
+import IAScheduleWidget  from "./dashboard/IAScheduleWidget";
+import MockStatusWidget  from "./dashboard/MockStatusWidget";
+import { DailyNotices }  from "./dashboard/DailyNotices";
 import { useMomentum } from "@/features/student/Context/MomentumContext";
 import OpenPracticeSection from "./dashboard/OpenPracticeSection";
 import TodaysPracticeGate from "./TodaysPracticeGate";
@@ -13,9 +15,9 @@ import { useTodaySkill } from "../utils/useTodaySkill";
 import { formatSkillLabel } from "@/shared/utils/formatSkillLabel";
 import { cn } from "@/shared/utils";
 import {
-  Clock, Flame, Trophy, Target, Zap, BookOpen, Mic, PenLine,
+  Flame, Trophy, Target, Zap, BookOpen, Mic, PenLine,
   Headphones, CalendarClock, CheckCircle2, ArrowRight, Sparkles,
-  Lock, ShieldAlert, CalendarX2, AlertTriangle, TrendingUp,
+  Lock, AlertTriangle,
 } from "lucide-react";
 
 // ─── TYPES & CONSTANTS ────────────────────────────────────────────────────────
@@ -337,8 +339,13 @@ const StudentDashboardPage = () => {
       if (resData.success) {
         if (resData.recommended_drills && resData.recommended_drills.length > 0) {
           setNextActionDrill(resData.recommended_drills[0]);
-        } else {
+        } else if ((resData.daily_sessions_completed ?? 0) > 0) {
+          // At least one drill done today and no more to recommend → genuinely all caught up
           setNextActionDrill({ sub_skill: "All Caught Up!", skill: "Overall", sub_skill_score: 9.0 });
+        } else {
+          // No drills done yet but nothing recommended — matrix may be empty (new student)
+          // Show a generic starting point so the card doesn't silently hide
+          setNextActionDrill({ sub_skill: "General Practice", skill: "Overall", sub_skill_score: 5.5 });
         }
       } else {
         setNextActionDrill({ sub_skill: "General Practice", skill: "Overall", sub_skill_score: 5.5 });
@@ -544,48 +551,9 @@ const StudentDashboardPage = () => {
             </div>
           </section>
 
-          {/* ── Missed Assessment Alerts ──────────────────────────────────── */}
+          {/* ── Daily Notices ────────────────────────────────────────────────── */}
           <div className={cn("transition-all duration-500", isLocked && "relative z-50")}>
-            {missedData.misses === 1 && (
-              <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-3xl p-6 shadow-sm flex items-start gap-4 mb-6">
-                <div className="bg-amber-100 dark:bg-amber-500/20 p-3 rounded-2xl shrink-0">
-                  <CalendarX2 className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-                </div>
-                <div>
-                  <h3 className="text-amber-900 dark:text-amber-300 font-bold text-lg">Assessment Missed</h3>
-                  <p className="text-amber-700/80 dark:text-amber-400/80 text-sm mt-1">
-                    You missed your recent{" "}
-                    <strong className="font-semibold text-amber-900 dark:text-amber-300">
-                      {missedData.subSkills.join(", ")}
-                    </strong>{" "}
-                    assessment. No band penalty has been applied, but{" "}
-                    <strong className="font-bold text-amber-600 dark:text-amber-400">−20 Momentum</strong>{" "}
-                    points were deducted. This module has been automatically added to your upcoming Saturday session.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {missedData.misses >= 2 && (
-              <div className="bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 rounded-3xl p-6 shadow-[0_8px_30px_rgba(244,63,94,0.15)] flex flex-col md:flex-row items-center gap-6 mb-6">
-                <div className="bg-rose-100 dark:bg-rose-500/20 p-4 rounded-2xl shrink-0">
-                  <ShieldAlert className="w-8 h-8 text-rose-600 dark:text-rose-400" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-rose-900 dark:text-rose-300 font-black text-xl uppercase tracking-tight">Intervention Required</h3>
-                  <p className="text-rose-700/90 dark:text-rose-400/90 text-sm mt-1">
-                    You have missed 2 consecutive assessments ({missedData.subSkills.join(" & ")}). Your predicted readiness
-                    has been pushed back, <strong className="font-bold">−40 Momentum</strong> points were deducted, and your tutor has been notified.
-                  </p>
-                </div>
-                <button
-                  onClick={() => navigate("/student/internal")}
-                  className="w-full md:w-auto bg-rose-600 hover:bg-rose-700 text-white font-bold py-3.5 px-6 rounded-xl shrink-0 transition-colors shadow-md"
-                >
-                  Start Catch-Up Session
-                </button>
-              </div>
-            )}
+            <DailyNotices />
           </div>
 
           {/* ── Platform Lock Banner ──────────────────────────────────────── */}
@@ -632,7 +600,8 @@ const StudentDashboardPage = () => {
                 const drillsToday    = dailyDrillState?.drills_completed_today ?? 0;
                 const nextAction     = dailyDrillState?.next_action ?? 'DRILL_1';
                 const dailyDCS       = dailyDrillState?.daily_dcs ?? 0;
-                const dcsThreshold   = dailyDrillState?.dcs_threshold ?? 75;
+                const dcsThreshold   = dailyDrillState?.dcs_threshold ?? 40;
+                // Drills left until platform unlock (threshold = 2)
                 const drillsToUnlock = Math.max(0, 2 - drillsToday);
 
                 const handleBuyExtra = async () => {
@@ -699,6 +668,23 @@ const StudentDashboardPage = () => {
                 const lexiDone    = dailyDrillState?.lexigrid_completed_today ?? false;
                 const lexiBlocked = (!isLexiGate && isLocked && !lexiDone) || isDrillGated;
 
+                // ── DEBUG: remove before production ──────────────────────────
+                console.group('%c[Dashboard State]', 'color:#818cf8;font-weight:bold');
+                console.log('next_action           :', dailyDrillState?.next_action            ?? '(loading)');
+                console.log('drills_completed_today:', dailyDrillState?.drills_completed_today ?? 0);
+                console.log('lexigrid_completed    :', lexiDone);
+                console.log('dashboard_unlocked    :', dailyDrillState?.dashboard_unlocked     ?? false);
+                console.log('daily_streak          :', dailyDrillState?.daily_streak           ?? 0);
+                console.log('momentum_score        :', dailyDrillState?.momentum_score         ?? 0);
+                console.log('daily_dcs             :', dailyDrillState?.daily_dcs              ?? 0, '%  ← need', (dailyDrillState?.dcs_threshold ?? 40), '% for extra drill');
+                console.log('--- computed ---');
+                console.log('isLocked (platform)   :', isLocked,    '← !dailyDrillState || !dashboard_unlocked || misses≥2');
+                console.log('isLexiGate            :', isLexiGate,  '← next_action === LEXIGRID');
+                console.log('lexiDone              :', lexiDone,    '← lexigrid_completed_today from backend');
+                console.log('lexiBlocked           :', lexiBlocked, '← !isLexiGate && isLocked && !lexiDone');
+                console.log('lexiGridIsGate(drill) :', isLexiGate, '← controls drill isGated prop');
+                console.groupEnd();
+                // ─────────────────────────────────────────────────────────────
                 return (
                   <div
                     className={cn(
@@ -739,13 +725,15 @@ const StudentDashboardPage = () => {
                             )}
                           </div>
                           <p className="text-sm text-indigo-100/70 font-medium mb-4">
-                            {isLexiGate && !isDrillGated
-                              ? <><strong className="text-teal-300">Solve 5 words</strong> to unlock Drill 2 — your gate is open now.</>
-                              : <>Crack today's vocabulary puzzle to earn <strong className="text-amber-400">+10 Momentum</strong>.</>
+                            {isLexiGate
+                              ? <>Solve <strong className="text-teal-300">5 words</strong> to unlock Drill 2 — your gate is open now.</>
+                              : lexiDone
+                                ? <>Daily momentum earned. Play as many <strong className="text-indigo-300">practice rounds</strong> as you like — no cap.</>
+                                : <>Crack today&apos;s vocabulary puzzle to earn your daily <strong className="text-amber-400">Momentum</strong>.</>
                             }
                           </p>
                           <button className="bg-white/10 hover:bg-white/20 text-white font-semibold text-sm py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
-                            {lexiDone ? "Play Again" : "Play Now"} <ArrowRight className="w-4 h-4" />
+                            {lexiDone ? "Practice Mode →" : "Play Now"} <ArrowRight className="w-4 h-4" />
                           </button>
                         </div>
                       </div>
@@ -773,40 +761,40 @@ const StudentDashboardPage = () => {
                 </div>
               </section>
 
-              {/* Weekly Rhythm / Readiness / Streak / IA */}
+              {/* Weekly Rhythm / Readiness / Streak */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div className="lg:col-span-4"><WeeklyRhythmIndicator /></div>
-                <div className="lg:col-span-3"><PredictedReadinessCard readiness={dynamicReadiness} /></div>
-                <div className="lg:col-span-2">
-                  <DashboardCard title="Streak" icon={<Flame className="h-5 w-5 text-orange-500" />}>
+                <div className="lg:col-span-4">
+                  <PredictedReadinessCard readiness={dynamicReadiness} />
+                </div>
+                <div className="lg:col-span-4">
+                  <DashboardCard
+                    title="Streak"
+                    icon={<Flame className="h-5 w-5 text-orange-500" />}
+                  >
                     <AttendanceStreakTracker currentStreak={dailyDrillState?.daily_streak ?? 0} goal={7} />
                   </DashboardCard>
                 </div>
-                <div className="lg:col-span-3"><IAScheduleWidget /></div>
               </div>
 
-              {/* Skill Modules + Recent Activity */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div className="lg:col-span-8">
-                  <DashboardCard title="Skill Modules" subtitle="Tap any module to continue">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {skillBands.map((band) => (
-                        <ModuleNavCard key={band.skill} band={band} onNavigate={() => navigate(band.route)} />
-                      ))}
-                    </div>
-                  </DashboardCard>
-                </div>
-                <div className="lg:col-span-4 space-y-4">
-                  <DashboardCard title="Recent Activity" subtitle="Your last 3 actions">
-                    <div className="space-y-5 pt-1">
-                      <ActivityItem label="Completed Reading Comprehension Set 3" time="2 hours ago" color="bg-emerald-500" />
-                      <ActivityItem label="Scored 78% in Speaking Mock Test" time="Yesterday" color="bg-indigo-500" />
-                    </div>
-                  </DashboardCard>
-                </div>
+              {/* Assessment Schedule widgets — IA + Mock side by side */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <IAScheduleWidget />
+                <MockStatusWidget />
               </div>
 
-              {!isLocked && <OpenPracticeSection />}
+              {/* Skill Modules */}
+              <DashboardCard title="Skill Modules" subtitle="Tap any module to continue">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {skillBands.map((band) => (
+                    <ModuleNavCard
+                      key={band.skill}
+                      band={band}
+                      onNavigate={() => navigate(band.route)}
+                    />
+                  ))}
+                </div>
+              </DashboardCard>
             </div>
           </div>
         </main>
@@ -818,6 +806,9 @@ const StudentDashboardPage = () => {
 };
 
 // ─── SUB-COMPONENTS ───────────────────────────────────────────────────────────
+
+const toTitleCase = (s: string) =>
+  s.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
 
 const FocusAreaCard = ({
   sub_skill, band, skill, isLocked, isDrillGated, drillsLeft,
@@ -877,10 +868,10 @@ const FocusAreaCard = ({
         <div>
           {/* FIX: sub_skill and skill are already formatted by the caller */}
           <p className="text-xl font-bold text-slate-800 dark:text-white leading-snug tracking-tight mb-1">
-            {sub_skill} Drill
+            {toTitleCase(sub_skill)} Drill
           </p>
           <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-            <span>{skill}</span>
+            <span>{toTitleCase(skill)}</span>
             <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
             <span>Sub-score: <strong className="text-indigo-600 dark:text-indigo-400">{band.toFixed(1)}</strong></span>
           </div>
@@ -1063,17 +1054,6 @@ const DashboardCard = ({ title, subtitle, children, icon }: any) => (
   </div>
 );
 
-const ActivityItem = ({ label, time, color }: any) => (
-  <div className="flex gap-4 relative">
-    <div className={`mt-1.5 h-2.5 w-2.5 rounded-full shrink-0 ${color} ring-4 ring-white dark:ring-slate-900 z-10`} />
-    <div className="text-sm border-l-2 border-slate-100 dark:border-slate-800 pl-4 pb-4 -ml-[19px]">
-      <p className="text-slate-700 dark:text-slate-300 font-medium leading-tight">{label}</p>
-      <div className="flex items-center gap-1.5 text-slate-400 text-xs mt-1.5">
-        <Clock className="h-3 w-3" /> {time}
-      </div>
-    </div>
-  </div>
-);
 
 const AttendanceStreakTracker = ({ currentStreak, goal = 7 }: any) => {
   const progress = Math.min((currentStreak / goal) * 100, 100);

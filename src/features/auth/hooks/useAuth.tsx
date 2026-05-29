@@ -26,6 +26,7 @@ export interface UserProfile {
   isDiagnosed?: boolean;
   recommendationSeeded?: boolean;
   targetBand?: number | null;
+  isEnrolled?: boolean;
 }
 
 interface AuthContextType {
