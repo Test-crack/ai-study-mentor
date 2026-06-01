@@ -5,7 +5,7 @@ export default function TodaysPracticeGate({
   skillLabel,
   skillRoute,
   isCompleted,
-  onSkip
+  onSkip,
 }: {
   skillLabel: string;
   skillRoute: string;
@@ -51,12 +51,13 @@ export default function TodaysPracticeGate({
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
           <button
             onClick={onSkip}
-            className="text-xs font-semibold text-slate-500 hover:text-rose-500 transition-colors flex items-center gap-1 px-3 py-2"
+            className="text-xs font-semibold text-slate-50
+            
           >
             Skip Gate (−20 pts)
           </button>
           <button
-            onClick={() => navigate(`${skillRoute}?mode=gate`)}
+            onClick={() => navigate(skillRoute)}
             className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition-colors shadow-md flex items-center justify-center gap-2 active:scale-[0.98]"
           >
             Start Practice <ArrowRight className="w-4 h-4" />

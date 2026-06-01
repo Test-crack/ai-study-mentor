@@ -1,8 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // FILE: src/features/b2c/pages/B2CStudentDashboard.tsx
-// REPLACE existing file with this.
-// Only change: B2CVideoLibrary imported and added as a new section at the
-// bottom of main — everything else is exactly as your original.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useState, useEffect } from 'react';
@@ -122,6 +119,8 @@ const DIFFICULTY_COLOR: Record<string, string> = {
   Hard:   'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400',
 };
 
+const VIDEO_LIBRARY_UNLOCK_THRESHOLD = 1000;
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function B2CStudentDashboard() {
@@ -152,6 +151,7 @@ export default function B2CStudentDashboard() {
   }, [darkMode]);
 
   const sidebarWidth = isSidebarHovered ? 'md:pl-[240px]' : isSidebarCollapsed ? 'md:pl-[72px]' : 'md:pl-[240px]';
+  const videoLibraryUnlocked = momentum >= VIDEO_LIBRARY_UNLOCK_THRESHOLD;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
@@ -338,18 +338,69 @@ export default function B2CStudentDashboard() {
           )}
 
           {/* ── VIDEO LIBRARY ─────────────────────────────────────────────── */}
-          {/* Visual separator */}
           <div className="flex items-center gap-4 pt-2">
             <div className="flex-1 h-px bg-slate-200 dark:bg-slate-800" />
             <span className="text-xs font-black text-slate-400 uppercase tracking-widest px-2">Learn</span>
             <div className="flex-1 h-px bg-slate-200 dark:bg-slate-800" />
           </div>
 
-          {/* Video library component — fed by Jincy's Google Sheet via backend */}
-          <B2CVideoLibrary />
+          {videoLibraryUnlocked ? (
+            <B2CVideoLibrary />
+          ) : (
+            <div className="relative rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-sm">
+
+              {/* Blurred ghost preview */}
+              <div className="blur-sm pointer-events-none select-none opacity-40 p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center">
+                    <Play className="w-5 h-5 text-indigo-500" />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">Video Library</h2>
+                    <p className="text-xs text-slate-400">IELTS lessons by Jincy</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="rounded-2xl bg-slate-100 dark:bg-slate-800 h-36" />
+                  ))}
+                </div>
+              </div>
+
+              {/* Lock overlay */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/60 dark:bg-slate-900/70 backdrop-blur-[2px]">
+                <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center shadow-sm">
+                  <Lock className="w-7 h-7 text-slate-400 dark:text-slate-500" />
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-black text-slate-700 dark:text-slate-200">Video Library Locked</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                    Reach <span className="font-bold text-indigo-500">1,000 Momentum pts</span> to unlock
+                  </p>
+                </div>
+                {/* Progress bar */}
+                <div className="w-56">
+                  <div className="flex justify-between text-[10px] font-bold text-slate-400 mb-1">
+                    <span>{momentum} pts</span>
+                    <span>{VIDEO_LIBRARY_UNLOCK_THRESHOLD.toLocaleString()} pts</span>
+                  </div>
+                  <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-indigo-500 rounded-full transition-all duration-700"
+                      style={{ width: `${Math.min((momentum / VIDEO_LIBRARY_UNLOCK_THRESHOLD) * 100, 100)}%` }}
+                    />
+                  </div>
+                </div>
+                <p className="text-[10px] text-slate-400 font-medium">
+                  {Math.max(0, VIDEO_LIBRARY_UNLOCK_THRESHOLD - momentum)} pts to go — keep playing! 🎮
+                </p>
+              </div>
+
+            </div>
+          )}
 
         </main>
       </div>
     </div>
   );
-}5
+}

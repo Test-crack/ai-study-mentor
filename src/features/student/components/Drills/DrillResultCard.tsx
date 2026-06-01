@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, PlayCircle, Lock, ExternalLink, MessageSquare, Flame, Zap, Loader2 } from 'lucide-react';
+import { CheckCircle2, PlayCircle, Lock, ExternalLink, MessageSquare, Flame, Zap, Loader2, CalendarClock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useMomentum } from "@/features/student/Context/MomentumContext";
 import { callBackend } from "@/features/auth/services/authClient";
-
 interface ResultCardProps {
   skill:           string;
   subSkill:        string;

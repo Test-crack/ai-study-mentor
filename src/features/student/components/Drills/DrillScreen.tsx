@@ -31,26 +31,24 @@ export default function DrillScreen() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { syncMomentum, updateStreak, addPoints } = useMomentum();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  // ✅ FIX: start collapsed so sidebar is hidden on mobile by default
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
   const skill    = searchParams.get('skill')     || 'SPEAKING';
   const subSkill = searchParams.get('sub_skill') || 'PRONUNCIATION';
   const level    = searchParams.get('level')     || 'INTERMEDIATE';
   const isExtra  = searchParams.get('extra')     === 'true';
 
-  // ─── Detect if this is an un-gated replay from the Open Practice sandbox ───
   const isReplayMode = searchParams.get('mode') === 'replay';
 
   const QUESTIONS_PER_SESSION = 5;
 
-  // Session state
   const [sessionId, setSessionId]                   = useState<string | null>(null);
   const [prompts, setPrompts]                       = useState<any[]>([]);
   const [loading, setLoading]                       = useState(true);
   const [currentPromptIndex, setCurrentPromptIndex] = useState(0);
   const [answers, setAnswers]                       = useState<Record<string, string>>({});
 
-  // Scoring state
   const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
   const [momentumScore, setMomentumScore]             = useState(0);
   const [isComplete, setIsComplete]                   = useState(false);
@@ -67,7 +65,6 @@ export default function DrillScreen() {
         const skillUp    = skill.toUpperCase();
         const subSkillUp = subSkill.toUpperCase().replace(/\s+/g, '_');
 
-        // Check for today's active session first (resume support)
         const activeRes = await callBackend(
           `${backendUrl}/api/drills/active?skill=${encodeURIComponent(skillUp)}&sub_skill=${encodeURIComponent(subSkillUp)}`
         );
@@ -75,7 +72,6 @@ export default function DrillScreen() {
         if (activeRes.success && activeRes.session) {
           const sess = activeRes.session;
 
-          // Already fully completed — jump straight to result card
           if (sess.status === 'DRILL_DONE' || sess.status === 'APPLY_DONE') {
             setDrillSessionId(sess.id);
             setSessionId(sess.id);
@@ -85,7 +81,6 @@ export default function DrillScreen() {
             return;
           }
 
-          // STARTED — resume from where we left off
           const questions: any[] = activeRes.questions || [];
           setSessionId(sess.id);
           setPrompts(questions);
@@ -93,7 +88,6 @@ export default function DrillScreen() {
           const savedAnswers = (sess.saved_answers as Record<string, string>) ?? {};
           setAnswers(savedAnswers);
 
-          // Recompute correct count from saved answers + question data
           let resumeCorrect = 0;
           for (const q of questions) {
             if (savedAnswers[q.id]) {
@@ -105,7 +99,6 @@ export default function DrillScreen() {
           return;
         }
 
-        // No active session — start a new one
         const startRes = await callBackend(`${backendUrl}/api/drills/start`, {
           method: 'POST',
           body: JSON.stringify({
@@ -160,7 +153,6 @@ export default function DrillScreen() {
       });
       if (res.momentum_score !== undefined) syncMomentum(res.momentum_score);
       if (res.daily_streak   !== undefined) updateStreak(res.daily_streak);
-      // Prefer the session id returned from the server; fall back to the one we started with
       setDrillSessionId(res.data?.id ?? sessionId);
     } catch (err) {
       console.error('Failed to complete drill session', err);
@@ -184,7 +176,7 @@ export default function DrillScreen() {
     if (isCorrect) setCorrectAnswersCount(prev => prev + 1);
     if (questionId) {
       setAnswers(newAnswers);
-      saveProgress(newAnswers); // fire-and-forget: persists answers to DB after each MCQ
+      saveProgress(newAnswers);
     }
 
     if (currentPromptIndex < totalPrompts - 1) {
@@ -194,19 +186,26 @@ export default function DrillScreen() {
     }
   };
 
-  // ── Display labels (formatted) — raw values kept for API/URL params ──
   const skillDisplay    = formatSkillLabel(skill);
   const subSkillDisplay = formatSkillLabel(subSkill);
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
-      <StudentSidebar activeTab="dashboard" isCollapsed={isSidebarCollapsed} toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} />
+      <StudentSidebar
+        activeTab="dashboard"
+        isCollapsed={isSidebarCollapsed}
+        toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      />
 
-      <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'} flex flex-col min-h-screen`}>
+      {/* ✅ FIX: no left padding on mobile (sidebar is hidden); only apply on lg+ */}
+      <div className="transition-all duration-300 lg:pl-[84px] flex flex-col min-h-screen">
         <StudentTopbar onUpgradeClick={() => {}} />
 
         <main className="flex-1 p-6 max-w-4xl mx-auto w-full animate-in fade-in">
-          <button onClick={() => navigate('/student/dashboard', { state: isComplete ? { drillCompleted: true } : undefined })} className="flex items-center text-slate-500 hover:text-slate-800 dark:hover:text-white mb-6 transition-colors">
+          <button
+            onClick={() => navigate('/student/dashboard', { state: isComplete ? { drillCompleted: true } : undefined })}
+            className="flex items-center text-slate-500 hover:text-slate-800 dark:hover:text-white mb-6 transition-colors"
+          >
             <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
           </button>
 
@@ -223,7 +222,6 @@ export default function DrillScreen() {
             </div>
           ) : !isComplete ? (
             <>
-              {/* ── Header ── */}
               <div className="mb-8 text-center space-y-2">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-rose-100 text-rose-500 mb-2">
                   <Target className="w-6 h-6" />
@@ -245,7 +243,6 @@ export default function DrillScreen() {
                 </div>
               </div>
 
-              {/* Drill content */}
               <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-sm border border-slate-200 dark:border-slate-800">
                 {(() => {
                   const currentPrompt = prompts[currentPromptIndex];
