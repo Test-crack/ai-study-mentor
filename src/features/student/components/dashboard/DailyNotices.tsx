@@ -108,9 +108,17 @@ const CONFIG: Record<NotificationType, BannerConfig> = {
   },
 };
 
-function NotificationBanner({ notification }: { notification: Notification }) {
+// Notification types whose CTA navigates outside the assessment/drill flow.
+// These are suppressed when the platform is locked so students can't escape
+// the lock screen by clicking a notification button.
+const LOCKED_SUPPRESSED_TYPES: NotificationType[] = ['IA_MISSED', 'MOCK_PENDING', 'MOCK_IN_PROGRESS'];
+
+function NotificationBanner({ notification, isLocked }: { notification: Notification; isLocked: boolean }) {
   const navigate = useNavigate();
   const cfg = CONFIG[notification.type];
+
+  const showCta = cfg.ctaLabel && cfg.route &&
+    !(isLocked && LOCKED_SUPPRESSED_TYPES.includes(notification.type));
 
   return (
     <div
@@ -127,7 +135,7 @@ function NotificationBanner({ notification }: { notification: Notification }) {
           {cfg.body(notification)}
         </p>
       </div>
-      {cfg.ctaLabel && cfg.route && (
+      {showCta && (
         <button
           onClick={() => navigate(cfg.route!)}
           className={`shrink-0 self-start sm:self-auto ${cfg.ctaClass} font-bold text-sm py-2.5 px-5 rounded-xl transition-colors shadow-sm whitespace-nowrap`}
@@ -139,7 +147,7 @@ function NotificationBanner({ notification }: { notification: Notification }) {
   );
 }
 
-export const DailyNotices = () => {
+export const DailyNotices = ({ isLocked = false }: { isLocked?: boolean }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -171,7 +179,7 @@ export const DailyNotices = () => {
   return (
     <div className="space-y-4">
       {notifications.map((n, idx) => (
-        <NotificationBanner key={`${n.type}-${idx}`} notification={n} />
+        <NotificationBanner key={`${n.type}-${idx}`} notification={n} isLocked={isLocked} />
       ))}
     </div>
   );

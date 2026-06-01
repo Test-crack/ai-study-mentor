@@ -389,7 +389,7 @@ const StudentDashboardPage = () => {
 
           {/* ── Daily Notices ────────────────────────────────────────────────── */}
           <div className={cn("transition-all duration-500", isLocked && "relative z-50")}>
-            <DailyNotices />
+            <DailyNotices isLocked={isLocked} />
           </div>
 
           {/* ── Platform Lock Banner ─────────────────────────────────────────── */}
