@@ -51,8 +51,7 @@ export default function TodaysPracticeGate({
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
           <button
             onClick={onSkip}
-            className="text-xs font-semibold text-slate-50
-            
+            className="text-xs font-semibold text-slate-50"
           >
             Skip Gate (−20 pts)
           </button>
