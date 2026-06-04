@@ -30,6 +30,14 @@ export interface BandOverviewRow {
   gap: number | null;
   last_ia_date: string | null;   // "YYYY-MM-DD"
   band_trend: 'up' | 'flat' | 'down' | null;
+  // Today's activity fields (used by StudentActivityGrid)
+  drilled_today: boolean;
+  drills_count_today: number;
+  streak: number;
+  lexigrid_done_today: boolean;
+  lexigrid_words_today: number | null;
+  is_at_risk: boolean;
+  risk_primary_flag: string | null;
 }
 
 export interface PeriodSummary {

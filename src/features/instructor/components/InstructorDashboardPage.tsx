@@ -4,7 +4,7 @@ import { InstructorSidebar } from './dashboard/InstructorSidebar';
 import { InstructorTopbar } from './dashboard/InstructorTopbar';
 import { BatchSelector } from './dashboard/BatchSelector';
 import { EngagementPulseCards } from './dashboard/EngagementPulseCards';
-import { AtRiskStudentList } from './dashboard/AtRiskStudentList';
+import { StudentActivityGrid } from './dashboard/StudentActivityGrid';
 import { BandOverviewTable } from './dashboard/BandOverviewTable';
 import { PeriodSummaryRow } from './dashboard/PeriodSummaryRow';
 import { useAuth } from '@/features/auth/hooks/useAuth';
@@ -189,19 +189,19 @@ export default function InstructorDashboardPage() {
             totalStudents={totalStudents}
           />
 
-          {/* ── Sections 3 + 4: At-Risk + Band Overview side-by-side on wide screens ── */}
-          <div className="grid grid-cols-1 xl:grid-cols-[340px_1fr] gap-6">
-            <AtRiskStudentList
-              students={data?.at_risk ?? []}
-              batchId={selectedBatchId}
-              loading={loading}
-            />
-            <BandOverviewTable
-              rows={data?.band_overview ?? []}
-              batchId={selectedBatchId}
-              loading={loading}
-            />
-          </div>
+          {/* ── Section 3: Today's Batch Activity grid (full width) ── */}
+          <StudentActivityGrid
+            rows={data?.band_overview ?? []}
+            batchId={selectedBatchId}
+            loading={loading}
+          />
+
+          {/* ── Section 4: Band Score Overview table (full width) ── */}
+          <BandOverviewTable
+            rows={data?.band_overview ?? []}
+            batchId={selectedBatchId}
+            loading={loading}
+          />
 
           {/* ── Section 5: Period Summary ── */}
           <PeriodSummaryRow
