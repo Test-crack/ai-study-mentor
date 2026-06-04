@@ -5,6 +5,7 @@ import { InstructorTopbar } from './dashboard/InstructorTopbar';
 import { BatchSelector } from './dashboard/BatchSelector';
 import { EngagementPulseCards } from './dashboard/EngagementPulseCards';
 import { StudentActivityGrid } from './dashboard/StudentActivityGrid';
+import { AtRiskStudentList } from './dashboard/AtRiskStudentList';
 import { BandOverviewTable } from './dashboard/BandOverviewTable';
 import { PeriodSummaryRow } from './dashboard/PeriodSummaryRow';
 import { useAuth } from '@/features/auth/hooks/useAuth';
@@ -203,7 +204,14 @@ export default function InstructorDashboardPage() {
             loading={loading}
           />
 
-          {/* ── Section 5: Period Summary ── */}
+          {/* ── Section 5: Risk Monitor ── */}
+          <AtRiskStudentList
+            students={data?.at_risk ?? []}
+            batchId={selectedBatchId}
+            loading={loading}
+          />
+
+          {/* ── Section 6: Period Summary ── */}
           <PeriodSummaryRow
             data={data?.period_summary ?? null}
             loading={loading}

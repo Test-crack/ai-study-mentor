@@ -1,4 +1,5 @@
-import { TrendingUp, TrendingDown, Minus, ChevronRight, Target } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { TrendingUp, TrendingDown, Minus, ChevronRight, ChevronLeft, Target } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/shared/utils';
 import type { BandOverviewRow } from './types';
@@ -8,6 +9,8 @@ interface BandOverviewTableProps {
   batchId: string | null;
   loading: boolean;
 }
+
+const PAGE_SIZE = 8;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -36,90 +39,13 @@ function bandTextColor(band: number | null) {
   return 'text-rose-600 dark:text-rose-400';
 }
 
-function bandBarColor(band: number | null) {
-  if (band === null) return 'bg-slate-300 dark:bg-slate-600';
-  if (band >= 7.5)  return 'bg-emerald-500';
-  if (band >= 6.0)  return 'bg-sky-500';
-  if (band >= 5.0)  return 'bg-amber-500';
-  return 'bg-rose-500';
-}
-
 function gapPillColor(gap: number | null) {
-  if (gap === null || gap <= 0) return 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400';
-  if (gap > 2.0) return 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400';
-  if (gap > 1.0) return 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400';
+  if (gap === null)  return 'bg-slate-100 dark:bg-slate-800 text-slate-500';
+  if (gap <= 0)      return 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400';
+  if (gap > 2.0)     return 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400';
+  if (gap > 1.0)     return 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400';
   return 'bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400';
 }
-
-function relativeDate(dateStr: string): string {
-  const d    = new Date(dateStr + 'T12:00:00');
-  const now  = new Date();
-  const days = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
-  if (days === 0) return 'Today';
-  if (days === 1) return 'Yesterday';
-  if (days < 7)  return `${days}d ago`;
-  if (days < 30) return `${Math.floor(days / 7)}w ago`;
-  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-}
-
-// ── Progress column ────────────────────────────────────────────────────────────
-// Consolidates current band + target + gap into one visual column.
-
-function BandProgress({
-  current,
-  target,
-  gap,
-}: {
-  current: number | null;
-  target:  number | null;
-  gap:     number | null;
-}) {
-  // Bar fills proportionally against the target (capped at 100%)
-  const MAX_BAND = 9;
-  const pct = (current !== null && target !== null && target > 0)
-    ? Math.min(100, Math.round((current / target) * 100))
-    : current !== null
-      ? Math.round((current / MAX_BAND) * 100)
-      : 0;
-
-  return (
-    <div className="flex items-center gap-3 min-w-0">
-      {/* Current band number */}
-      <span className={cn('text-base font-black shrink-0 w-9 tabular-nums', bandTextColor(current))}>
-        {current !== null ? current.toFixed(1) : '—'}
-      </span>
-
-      {/* Mini bar */}
-      <div className="flex-1 min-w-0 max-w-[80px]">
-        <div className="flex items-center justify-between mb-0.5">
-          <span className="text-[10px] text-slate-400 font-medium">
-            {current !== null ? `${current.toFixed(1)}` : '—'}
-          </span>
-          {target !== null && (
-            <span className="text-[10px] text-slate-400 font-medium">
-              {target.toFixed(1)}
-            </span>
-          )}
-        </div>
-        <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-          <div
-            className={cn('h-full rounded-full transition-all duration-700', bandBarColor(current))}
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-      </div>
-
-      {/* Gap pill */}
-      {gap !== null && (
-        <span className={cn('shrink-0 text-[11px] font-bold px-2 py-0.5 rounded-full', gapPillColor(gap))}>
-          {gap <= 0 ? `+${Math.abs(gap).toFixed(1)}` : `−${gap.toFixed(1)}`}
-        </span>
-      )}
-    </div>
-  );
-}
-
-// ── Trend cell ────────────────────────────────────────────────────────────────
 
 function TrendCell({ trend }: { trend: BandOverviewRow['band_trend'] }) {
   if (trend === 'up')   return (
@@ -137,11 +63,10 @@ function TrendCell({ trend }: { trend: BandOverviewRow['band_trend'] }) {
       <Minus className="h-3 w-3" /> Flat
     </span>
   );
-  // null = < 2 IAs
-  return <span className="text-[11px] text-slate-300 dark:text-slate-600">No data</span>;
+  return <span className="text-[11px] text-slate-300 dark:text-slate-600">—</span>;
 }
 
-// ── Skeletons ─────────────────────────────────────────────────────────────────
+// ── Skeleton ──────────────────────────────────────────────────────────────────
 
 function RowSkeleton() {
   return (
@@ -152,24 +77,27 @@ function RowSkeleton() {
           <div className="h-3.5 w-24 bg-slate-200 dark:bg-slate-700 rounded" />
         </div>
       </td>
-      <td className="px-5 py-3.5">
-        <div className="flex items-center gap-2">
-          <div className="h-4 w-10 bg-slate-200 dark:bg-slate-700 rounded" />
-          <div className="h-1.5 flex-1 max-w-[80px] bg-slate-100 dark:bg-slate-800 rounded-full" />
-          <div className="h-5 w-10 bg-slate-100 dark:bg-slate-800 rounded-full" />
-        </div>
-      </td>
-      <td className="px-5 py-3.5"><div className="h-3.5 w-16 bg-slate-100 dark:bg-slate-800 rounded" /></td>
-      <td className="px-5 py-3.5"><div className="h-5 w-12 bg-slate-100 dark:bg-slate-800 rounded-full" /></td>
-      <td className="px-5 py-3.5"><div className="h-4 w-4 bg-slate-200 dark:bg-slate-700 rounded" /></td>
+      {[1, 2, 3, 4, 5].map(i => (
+        <td key={i} className="px-5 py-3.5">
+          <div className="h-3.5 w-12 bg-slate-100 dark:bg-slate-800 rounded" />
+        </td>
+      ))}
     </tr>
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
+// ── Main ─────────────────────────────────────────────────────────────────────
 
 export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableProps) {
   const navigate = useNavigate();
+  const [page, setPage] = useState(0);
+
+  useEffect(() => { setPage(0); }, [rows.length]);
+
+  const pageCount = Math.ceil(rows.length / PAGE_SIZE);
+  const pageRows  = rows.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  const hasPrev   = page > 0;
+  const hasNext   = page < pageCount - 1;
 
   const goToStudent = (studentId: string) => {
     if (!batchId) return;
@@ -200,36 +128,27 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
         <table className="w-full">
           <thead>
             <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
-              {[
-                { label: 'Student',  w: '' },
-                { label: 'Progress vs Target', w: 'min-w-[220px]' },
-                { label: 'Last IA',  w: '' },
-                { label: 'Trend',    w: '' },
-                { label: '',         w: 'w-8' },
-              ].map(h => (
+              {['Student', 'Current Band', 'Target', 'Gap', 'Last IA', 'Trend', ''].map(h => (
                 <th
-                  key={h.label}
-                  className={cn(
-                    'px-5 py-2.5 text-left text-[11px] font-black text-slate-400 uppercase tracking-wider whitespace-nowrap',
-                    h.w
-                  )}
+                  key={h}
+                  className="px-5 py-2.5 text-left text-[11px] font-black text-slate-400 uppercase tracking-wider whitespace-nowrap"
                 >
-                  {h.label}
+                  {h}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              [1, 2, 3, 4, 5].map(i => <RowSkeleton key={i} />)
+              Array.from({ length: PAGE_SIZE }, (_, i) => <RowSkeleton key={i} />)
             ) : rows.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-5 py-12 text-center text-sm text-slate-400">
+                <td colSpan={7} className="px-5 py-12 text-center text-sm text-slate-400">
                   No students enrolled in this batch yet.
                 </td>
               </tr>
             ) : (
-              rows.map(row => (
+              pageRows.map(row => (
                 <tr
                   key={row.student_id}
                   onClick={() => goToStudent(row.student_id)}
@@ -253,30 +172,48 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
                     </div>
                   </td>
 
-                  {/* Progress (current + bar + gap — replaces 3 old columns) */}
-                  <td className="px-5 py-3.5 min-w-[220px]">
-                    {row.current_band !== null || row.target_band !== null ? (
-                      <BandProgress
-                        current={row.current_band}
-                        target={row.target_band}
-                        gap={row.gap}
-                      />
+                  {/* Current Band */}
+                  <td className="px-5 py-3.5">
+                    <span className={cn('text-base font-black tabular-nums', bandTextColor(row.current_band))}>
+                      {row.current_band !== null ? row.current_band.toFixed(1) : '—'}
+                    </span>
+                  </td>
+
+                  {/* Target */}
+                  <td className="px-5 py-3.5">
+                    <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 tabular-nums">
+                      {row.target_band !== null ? row.target_band.toFixed(1) : '—'}
+                    </span>
+                  </td>
+
+                  {/* Gap */}
+                  <td className="px-5 py-3.5">
+                    {row.gap !== null ? (
+                      <span className={cn('text-xs font-bold px-2 py-0.5 rounded-full', gapPillColor(row.gap))}>
+                        {row.gap <= 0
+                          ? `+${Math.abs(row.gap).toFixed(1)}`
+                          : `−${row.gap.toFixed(1)}`
+                        }
+                      </span>
                     ) : (
-                      <span className="text-xs text-slate-300 dark:text-slate-600">No assessment yet</span>
+                      <span className="text-slate-300 dark:text-slate-600 text-xs">—</span>
                     )}
                   </td>
 
-                  {/* Last IA */}
+                  {/* Last IA — single line, relative date only */}
                   <td className="px-5 py-3.5 whitespace-nowrap">
                     {row.last_ia_date ? (
-                      <div>
-                        <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                          {relativeDate(row.last_ia_date)}
-                        </p>
-                        <p className="text-[11px] text-slate-400">
-                          {new Date(row.last_ia_date + 'T12:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                        </p>
-                      </div>
+                      <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                        {(() => {
+                          const d    = new Date(row.last_ia_date + 'T12:00:00');
+                          const days = Math.floor((Date.now() - d.getTime()) / 86_400_000);
+                          if (days === 0) return 'Today';
+                          if (days === 1) return 'Yesterday';
+                          if (days < 7)  return `${days}d ago`;
+                          if (days < 30) return `${Math.floor(days / 7)}w ago`;
+                          return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+                        })()}
+                      </span>
                     ) : (
                       <span className="text-xs text-slate-300 dark:text-slate-600">No IA yet</span>
                     )}
@@ -297,6 +234,62 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
           </tbody>
         </table>
       </div>
+
+      {/* Pagination bar */}
+      {!loading && pageCount > 1 && (
+        <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100 dark:border-slate-800">
+          <button
+            onClick={() => setPage(p => p - 1)}
+            disabled={!hasPrev}
+            className={cn(
+              'h-8 w-8 rounded-full flex items-center justify-center transition-all',
+              hasPrev
+                ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 hover:text-indigo-600 dark:hover:text-indigo-400'
+                : 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
+            )}
+            aria-label="Previous page"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+
+          {/* Dots ≤7 pages, text beyond */}
+          {pageCount <= 7 ? (
+            <div className="flex items-center gap-1.5">
+              {Array.from({ length: pageCount }, (_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setPage(i)}
+                  className={cn(
+                    'rounded-full transition-all',
+                    i === page
+                      ? 'h-2 w-5 bg-indigo-500'
+                      : 'h-2 w-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600'
+                  )}
+                  aria-label={`Page ${i + 1}`}
+                />
+              ))}
+            </div>
+          ) : (
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              {page + 1} / {pageCount}
+            </span>
+          )}
+
+          <button
+            onClick={() => setPage(p => p + 1)}
+            disabled={!hasNext}
+            className={cn(
+              'h-8 w-8 rounded-full flex items-center justify-center transition-all',
+              hasNext
+                ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 hover:text-indigo-600 dark:hover:text-indigo-400'
+                : 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
+            )}
+            aria-label="Next page"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
