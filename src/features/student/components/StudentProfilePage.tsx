@@ -124,12 +124,11 @@ export default function StudentProfilePage() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
-      <StudentSidebar 
-        activeTab="settings" 
+      <StudentSidebar
+        activeTab="settings"
         onTabChange={(tab) => {
             if (tab === 'dashboard') navigate('/student/dashboard');
-            // Handle other navs
-        }} 
+        }}
         isCollapsed={isSidebarCollapsed}
         toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />

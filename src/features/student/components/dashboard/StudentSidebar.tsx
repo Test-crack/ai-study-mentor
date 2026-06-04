@@ -1,42 +1,60 @@
-import React from 'react';
-import { 
-  GraduationCap, LayoutDashboard, Mic, PenTool, Headphones, 
+import React, { useState, useEffect } from 'react';
+import {
+  GraduationCap, LayoutDashboard, Mic, PenTool, Headphones,
   ClipboardCheck, History, Sparkles, Settings, LogOut,
   Timer, FileText, BookOpen, Target, Gamepad2, Lock
 } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { callBackend } from "@/features/auth/services/authClient";
 import { useNavigate, useLocation } from "react-router-dom";
+
+const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
 
 interface SidebarProps {
   activeTab?: string;
   onTabChange?: (tab: string) => void;
   isCollapsed: boolean;
   toggleCollapse: () => void;
-  isNewStudent?: boolean; 
+  isNewStudent?: boolean;
+  /** When provided by the parent (e.g. StudentDashboardPage), this value is used
+   *  directly and no extra API call is made. When omitted, the sidebar fetches
+   *  the lock state itself so any student page shows the correct locked sidebar. */
   isLocked?: boolean;
-  onMouseEnter?: () => void; 
-  onMouseLeave?: () => void; 
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
   className?: string;
 }
 
-export const StudentSidebar = ({ 
-  activeTab = 'dashboard', 
-  onTabChange, 
-  isCollapsed, 
+export const StudentSidebar = ({
+  activeTab = 'dashboard',
+  onTabChange,
+  isCollapsed,
   toggleCollapse,
   isNewStudent = false,
-  isLocked = false,
+  isLocked: isLockedProp,
   onMouseEnter,
   onMouseLeave,
-  className 
+  className
 }: SidebarProps) => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  
-  // Lock state comes from the dashboard (backend-driven via dailyDrillState.dashboard_unlocked).
-  // The old localStorage-based check is removed — it was always stale after Phase 1.
+
+  // Self-fetch lock state only when the parent hasn't supplied it.
+  // Default true (locked) prevents a flash of unlocked sidebar while loading.
+  const [selfLocked, setSelfLocked] = useState(true);
+  useEffect(() => {
+    if (isLockedProp !== undefined) return;   // parent owns the value — skip fetch
+    let cancelled = false;
+    callBackend(`${BACKEND}/api/student/daily-drill-state`)
+      .then((res) => { if (!cancelled) setSelfLocked(!res?.dashboard_unlocked); })
+      .catch(() => { /* stay locked on error */ });
+    return () => { cancelled = true; };
+  }, [isLockedProp]);
+
+  const isLocked = isLockedProp ?? selfLocked;
+
   const isActivelyDrilling = location.pathname.includes('/drill');
 
   const isItemDisabled = (itemId: string) => {
