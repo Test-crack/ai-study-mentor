@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { AlertCircle, RefreshCw, AlertTriangle, Users, CalendarDays } from 'lucide-react';
 import { InstructorSidebar } from './dashboard/InstructorSidebar';
 import { InstructorTopbar } from './dashboard/InstructorTopbar';
 import { BatchSelector } from './dashboard/BatchSelector';
@@ -19,6 +19,19 @@ export default function InstructorDashboardPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const firstName = (profile?.name || user?.email?.split('@')[0] || 'Instructor').split(' ')[0];
+
+  // Time-of-day greeting
+  const greeting = useMemo(() => {
+    const h = new Date().getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 17) return 'Good afternoon';
+    return 'Good evening';
+  }, []);
+
+  // Today's date label
+  const todayLabel = useMemo(() =>
+    new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }),
+  []);
 
   // ── Batches (for selector) ────────────────────────────────────────────────
   const [batches,         setBatches]         = useState<InstructorBatch[]>([]);
@@ -57,11 +70,6 @@ export default function InstructorDashboardPage() {
   const atRiskCount   = data?.at_risk.length ?? 0;
   const totalStudents = batches.find(b => b.id === selectedBatchId)?.studentCount ?? 0;
 
-  const subtitle = !data
-    ? 'Loading your batch data…'
-    : atRiskCount > 0
-      ? `${atRiskCount} student${atRiskCount !== 1 ? 's' : ''} need${atRiskCount === 1 ? 's' : ''} attention · ${activeToday} of ${totalStudents} active today`
-      : `All students on track · ${activeToday} of ${totalStudents} active today`;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#09090E] font-sans text-slate-900 dark:text-slate-200 transition-colors duration-300">
@@ -77,26 +85,75 @@ export default function InstructorDashboardPage() {
         <main className="px-4 sm:px-6 lg:px-8 py-6 space-y-6 max-w-7xl mx-auto">
 
           {/* ── Section 1: Welcome banner + batch selector ── */}
-          <div className="bg-gradient-to-br from-indigo-600 via-indigo-500 to-purple-600 rounded-2xl px-6 py-6 shadow-lg shadow-indigo-500/20 relative overflow-hidden">
-            <div className="pointer-events-none absolute -top-10 -right-10 w-48 h-48 rounded-full bg-white/10 blur-3xl" />
-            <div className="pointer-events-none absolute bottom-0 -left-6 w-32 h-32 rounded-full bg-purple-400/20 blur-2xl" />
+          <div className="bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-600 rounded-2xl px-6 py-5 shadow-lg shadow-indigo-500/25 relative overflow-hidden">
 
-            <div className="relative z-10 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-              <div>
-                <h1 className="text-2xl font-black text-white mb-1">
-                  Welcome back, {firstName}
+            {/* Decorative blobs */}
+            <div className="pointer-events-none absolute -top-12 -right-12 w-56 h-56 rounded-full bg-white/10 blur-3xl" />
+            <div className="pointer-events-none absolute bottom-0 -left-8 w-40 h-40 rounded-full bg-violet-400/20 blur-2xl" />
+            {/* Subtle dot grid */}
+            <div
+              className="pointer-events-none absolute inset-0 opacity-[0.07]"
+              style={{
+                backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+                backgroundSize: '24px 24px',
+              }}
+            />
+
+            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+
+              {/* Left: greeting + stat chips */}
+              <div className="min-w-0">
+                {/* Date */}
+                <div className="flex items-center gap-1.5 mb-2">
+                  <CalendarDays className="h-3.5 w-3.5 text-white/50" />
+                  <span className="text-[11px] font-semibold text-white/50 tracking-wide">{todayLabel}</span>
+                </div>
+
+                {/* Name */}
+                <h1 className="text-2xl font-black text-white tracking-tight leading-none mb-3">
+                  {greeting}, {firstName}
                 </h1>
-                <p className="text-indigo-200 text-sm leading-relaxed max-w-lg">
-                  {subtitle}
-                </p>
+
+                {/* Stat chips */}
+                <div className="flex flex-wrap gap-2">
+                  {loading ? (
+                    <>
+                      <div className="h-7 w-32 rounded-full bg-white/15 animate-pulse" />
+                      <div className="h-7 w-28 rounded-full bg-white/10 animate-pulse" />
+                    </>
+                  ) : (
+                    <>
+                      {/* At-risk chip */}
+                      <div className={`flex items-center gap-1.5 h-7 px-3 rounded-full text-xs font-bold border backdrop-blur-sm ${
+                        atRiskCount > 0
+                          ? 'bg-rose-500/30 border-rose-300/40 text-rose-100'
+                          : 'bg-white/10 border-white/20 text-white/70'
+                      }`}>
+                        <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                        {atRiskCount > 0
+                          ? `${atRiskCount} student${atRiskCount !== 1 ? 's' : ''} at risk`
+                          : 'All students on track'
+                        }
+                      </div>
+
+                      {/* Active today chip */}
+                      <div className="flex items-center gap-1.5 h-7 px-3 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-white/70 backdrop-blur-sm">
+                        <Users className="h-3.5 w-3.5 shrink-0" />
+                        {activeToday} / {totalStudents} active today
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
 
+              {/* Right: batch selector */}
               <div className="shrink-0">
                 <BatchSelector
                   batches={batches}
                   selectedBatchId={selectedBatchId}
                   onSelect={id => setSelectedBatchId(id)}
                   loading={batchesLoading}
+                  onGradient
                 />
               </div>
             </div>
@@ -129,6 +186,7 @@ export default function InstructorDashboardPage() {
           <EngagementPulseCards
             data={data?.engagement_today ?? null}
             loading={loading}
+            totalStudents={totalStudents}
           />
 
           {/* ── Sections 3 + 4: At-Risk + Band Overview side-by-side on wide screens ── */}

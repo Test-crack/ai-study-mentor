@@ -3,8 +3,9 @@ import { cn } from '@/shared/utils';
 import type { EngagementToday } from './types';
 
 interface EngagementPulseCardsProps {
-  data:    EngagementToday | null;
-  loading: boolean;
+  data:          EngagementToday | null;
+  loading:       boolean;
+  totalStudents: number;
 }
 
 interface CardConfig {
@@ -25,7 +26,7 @@ const CARDS: CardConfig[] = [
     iconBg:   'bg-indigo-100 dark:bg-indigo-500/20',
     iconColor: 'text-indigo-600 dark:text-indigo-400',
     getValue:    d => String(d.active_students),
-    getSubtitle: d => `of ${d.active_students + Math.max(0, 0)} students drilled`,
+    getSubtitle: _d => '',   // overridden at render — needs totalStudents
     getTrend:    d => d.active_yesterday > 0 ? d.active_students - d.active_yesterday : null,
     unit: 'students',
   },
@@ -92,7 +93,7 @@ function CardSkeleton() {
   );
 }
 
-export function EngagementPulseCards({ data, loading }: EngagementPulseCardsProps) {
+export function EngagementPulseCards({ data, loading, totalStudents }: EngagementPulseCardsProps) {
   if (loading || !data) {
     return (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -103,10 +104,13 @@ export function EngagementPulseCards({ data, loading }: EngagementPulseCardsProp
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {CARDS.map(cfg => {
-        const value    = cfg.getValue(data);
-        const subtitle = cfg.getSubtitle(data);
-        const trend    = cfg.getTrend(data);
+      {CARDS.map((cfg, idx) => {
+        const value = cfg.getValue(data);
+        const trend = cfg.getTrend(data);
+        // First card subtitle needs the batch total which isn't in EngagementToday
+        const subtitle = idx === 0
+          ? `of ${totalStudents} student${totalStudents !== 1 ? 's' : ''} in batch`
+          : cfg.getSubtitle(data);
 
         return (
           <div
