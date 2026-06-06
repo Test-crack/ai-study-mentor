@@ -99,9 +99,10 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
   const hasPrev   = page > 0;
   const hasNext   = page < pageCount - 1;
 
-  const goToStudent = (studentId: string) => {
+  const goToStudent = (row: BandOverviewRow) => {
     if (!batchId) return;
-    navigate(`/instructor/batches/${batchId}/students/${studentId}/progress`);
+    const slug = row.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'student';
+    navigate(`/instructor/students/${slug}/progress`, { state: { batchId, studentId: row.user_id } });
   };
 
   return (
@@ -151,7 +152,7 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
               pageRows.map(row => (
                 <tr
                   key={row.student_id}
-                  onClick={() => goToStudent(row.student_id)}
+                  onClick={() => goToStudent(row)}
                   className="border-b border-slate-50 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors group"
                 >
                   {/* Student */}

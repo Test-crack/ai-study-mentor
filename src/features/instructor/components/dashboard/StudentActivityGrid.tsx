@@ -114,7 +114,11 @@ function StudentCard({ row, batchId }: { row: BandOverviewRow; batchId: string |
 
   return (
     <button
-      onClick={() => batchId && navigate(`/instructor/batches/${batchId}/students/${row.student_id}/progress`)}
+      onClick={() => {
+        if (!batchId) return;
+        const slug = row.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'student';
+        navigate(`/instructor/students/${slug}/progress`, { state: { batchId, studentId: row.user_id } });
+      }}
       className={cn(
         'group w-full text-left bg-white dark:bg-slate-900 rounded-2xl border-2 shadow-sm',
         'hover:shadow-md hover:border-indigo-400 dark:hover:border-indigo-500/60 transition-all duration-200',

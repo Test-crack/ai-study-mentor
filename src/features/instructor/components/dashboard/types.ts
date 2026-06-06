@@ -12,6 +12,7 @@ export interface EngagementToday {
 
 export interface AtRiskStudent {
   student_id: string;
+  user_id: string;
   name: string;
   avatar: string | null;
   flags: string[];
@@ -23,6 +24,7 @@ export interface AtRiskStudent {
 
 export interface BandOverviewRow {
   student_id: string;
+  user_id: string;
   name: string;
   avatar: string | null;
   current_band: number | null;

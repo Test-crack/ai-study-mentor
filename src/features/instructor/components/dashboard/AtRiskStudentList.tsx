@@ -207,7 +207,11 @@ function RiskCard({
       {/* CTA */}
       <div className="px-4 pb-4 pt-1">
         <button
-          onClick={() => batchId && navigate(`/instructor/batches/${batchId}/students/${student.student_id}/progress`)}
+          onClick={() => {
+            if (!batchId) return;
+            const slug = student.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'student';
+            navigate(`/instructor/students/${slug}/progress`, { state: { batchId, studentId: student.user_id } });
+          }}
           className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-xs font-bold transition-colors group border border-slate-200 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-500/40"
         >
           View Student Profile
@@ -299,15 +303,19 @@ export function AtRiskStudentList({ students, batchId, loading }: AtRiskStudentL
     );
   }
 
+  // ── Sort by severity: Critical → Warning → Monitor ────────────────────────
+  const SEV_ORDER: Record<Severity, number> = { critical: 0, warning: 1, info: 2 };
+  const sorted = [...students].sort((a, b) => SEV_ORDER[getSeverity(a.flags)] - SEV_ORDER[getSeverity(b.flags)]);
+
   // ── Severity totals (always from full list, for header chips) ─────────────
   const groups: Record<Severity, number> = { critical: 0, warning: 0, info: 0 };
-  for (const s of students) groups[getSeverity(s.flags)]++;
+  for (const s of sorted) groups[getSeverity(s.flags)]++;
 
   // ── Pagination ────────────────────────────────────────────────────────────
-  const pageCount    = Math.ceil(students.length / PAGE_SIZE);
+  const pageCount    = Math.ceil(sorted.length / PAGE_SIZE);
   const hasPrev      = page > 0;
   const hasNext      = page < pageCount - 1;
-  const pageStudents = students.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  const pageStudents = sorted.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   // Build render list: inject a SectionDivider whenever severity changes,
   // even across page boundaries (compare each student against the previous
@@ -319,7 +327,7 @@ export function AtRiskStudentList({ students, batchId, loading }: AtRiskStudentL
   const items: RenderItem[] = [];
   pageStudents.forEach((student, localIdx) => {
     const globalIdx  = page * PAGE_SIZE + localIdx;
-    const prevGlobal = globalIdx > 0 ? students[globalIdx - 1] : null;
+    const prevGlobal = globalIdx > 0 ? sorted[globalIdx - 1] : null;
     const currSev    = getSeverity(student.flags);
     const prevSev    = prevGlobal ? getSeverity(prevGlobal.flags) : null;
 
