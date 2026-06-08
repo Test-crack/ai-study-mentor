@@ -2,11 +2,16 @@
 // GET /api/instructor/batches/:batchId/students/:studentId/full-progress
 
 export interface SectionScore {
-  section: string;
-  band:    number;
-  correct: number;
-  total:   number;
-  ai_feedback?: string;
+  skill:      string;
+  sub_skill:  string;
+  band:       number;
+  correct:    number;
+  total:      number;
+  ai_graded:  boolean;
+  ai_feedback?: {
+    rationale:        string;
+    key_observations: string[];
+  };
 }
 
 export interface IASession {
@@ -21,20 +26,35 @@ export interface IASession {
   time_submitted_at:      string | null;
 }
 
+export interface MockSubSkillScore {
+  sub_skill:  string;
+  band:       number;
+  ai_band?:   number;
+  correct:    number;
+  total_mcq:  number;
+  ai_feedback?: {
+    rationale:        string;
+    key_observations: string[];
+  };
+}
+
 export interface MockSkillScore {
-  skill:            string;
-  band_score:       number;
-  sub_skill_scores: Array<{ sub_skill: string; score: number }>;
+  skill:             string;
+  band:              number;
+  total:             number;
+  correct:           number;
+  ai_graded:         boolean;
+  sub_skill_scores?: MockSubSkillScore[];
 }
 
 export interface MockSession {
-  id:               string;
-  month_year:       string;   // "YYYY-MM"
-  attempt_type:     string;
-  status:           'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
-  scores:           MockSkillScore[] | null;
-  real_band_score:  number | null;
-  momentum_awarded: number | null;
+  id:                string;
+  month_year:        string;   // "YYYY-MM"
+  attempt_type:      string;
+  status:            'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+  scores:            MockSkillScore[] | null;
+  real_band_score:   number | null;
+  momentum_awarded:  number | null;
   time_submitted_at: string | null;
 }
 
@@ -61,6 +81,47 @@ export interface StreakDay {
   active: boolean;
 }
 
+// sub_scores shape varies by skill — typed loosely, components narrow as needed
+export interface DiagnosticSubScoresLR {
+  total_questions:    number;
+  correct_answers:    number;
+  accuracy_percentage: number;
+  by_question_type?:  Record<string, { correct: number; total: number }>;
+}
+
+export interface DiagnosticSubScoresWriting {
+  word_count?:        number;
+  grammarScore?:      number;
+  vocabularyScore?:   number;
+  coherenceScore?:    number;
+  taskResponseScore?: number;
+  feedback?:          string;
+}
+
+export interface DiagnosticSubScoresSpeaking {
+  fluencyScore?:       number;
+  vocabularyScore?:    number;
+  grammarScore?:       number;
+  pronunciationScore?: number;
+  content_assessment?: string;
+  feedback?:           string;
+}
+
+export interface DiagnosticFeedback {
+  band?:             number;
+  rationale?:        string;
+  key_observations?: string[];
+  feedback?:         string;
+}
+
+export interface DiagnosticSkillResult {
+  skill:        string;
+  band_score:   number;
+  sub_scores:   DiagnosticSubScoresLR | DiagnosticSubScoresWriting | DiagnosticSubScoresSpeaking | null;
+  feedback_json: DiagnosticFeedback | null;
+  created_at:   string;
+}
+
 export interface StudentFullProgress {
   student: {
     id:     string;
@@ -73,8 +134,10 @@ export interface StudentFullProgress {
   current_band:   number | null;
   momentum_score: number;
   daily_streak:   number;
-  ia_sessions:    IASession[];
-  mock_sessions:  MockSession[];
+  ia_sessions:         IASession[];
+  mock_sessions:       MockSession[];
+  diagnostic_baseline: { L: number | null; R: number | null; W: number | null; S: number | null };
+  diagnostic_results:  DiagnosticSkillResult[];
   drill_stats: {
     last_14_days:          DrillDay[];
     sub_skill_counts:      SubSkillCount[];

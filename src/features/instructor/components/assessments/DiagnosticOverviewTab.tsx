@@ -55,7 +55,9 @@ export function DiagnosticOverviewTab({ rows, batchId }: Props) {
 
   const goToStudent = (row: DiagnosticOverviewRow) => {
     const slug = row.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'student';
-    navigate(`/instructor/students/${slug}/progress`, { state: { batchId, studentId: row.user_id } });
+    navigate(`/instructor/students/${slug}/progress`, {
+      state: { batchId, studentId: row.user_id, initialTab: 'diagnostic' },
+    });
   };
 
   const notDiagnosed = rows.filter(r => !r.is_diagnosed).length;
@@ -151,10 +153,16 @@ export function DiagnosticOverviewTab({ rows, batchId }: Props) {
                     <td className="py-3 pr-5 text-right">
                       <button
                         onClick={() => goToStudent(row)}
-                        className="inline-flex items-center gap-1 text-xs font-bold text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                        disabled={!row.is_diagnosed}
+                        className={cn(
+                          'inline-flex items-center gap-1 text-xs font-bold transition-colors',
+                          row.is_diagnosed
+                            ? 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300'
+                            : 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
+                        )}
                       >
                         <ExternalLink className="h-3.5 w-3.5" />
-                        View
+                        View Report
                       </button>
                     </td>
                   </tr>

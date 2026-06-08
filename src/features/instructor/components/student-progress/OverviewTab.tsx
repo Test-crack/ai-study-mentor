@@ -25,8 +25,93 @@ function MiniCard({ icon, label, value, sub }: {
   );
 }
 
+const SKILL_ROWS: Array<{ abbr: 'L' | 'R' | 'W' | 'S'; label: string; skill: string }> = [
+  { abbr: 'L', label: 'Listening', skill: 'LISTENING' },
+  { abbr: 'R', label: 'Reading',   skill: 'READING'   },
+  { abbr: 'W', label: 'Writing',   skill: 'WRITING'   },
+  { abbr: 'S', label: 'Speaking',  skill: 'SPEAKING'  },
+];
+
+function BaselineComparison({ baseline, competency }: {
+  baseline: StudentFullProgress['diagnostic_baseline'];
+  competency: StudentFullProgress['competency'];
+}) {
+  const currentBySkill = new Map(competency.map(r => [r.skill.toUpperCase(), r.band_score]));
+  const hasBaseline = SKILL_ROWS.some(r => baseline[r.abbr] !== null);
+  const hasCurrent  = SKILL_ROWS.some(r => (currentBySkill.get(r.skill) ?? 0) > 0);
+
+  if (!hasBaseline && !hasCurrent) return null;
+
+  return (
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5">
+      <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-4">
+        Diagnostic Baseline vs Current
+      </h3>
+      <div className="space-y-3">
+        {SKILL_ROWS.map(({ abbr, label, skill }) => {
+          const base    = baseline[abbr];
+          const current = currentBySkill.get(skill) ?? null;
+          const delta   = base !== null && current !== null ? Math.round((current - base) * 10) / 10 : null;
+
+          return (
+            <div key={abbr} className="grid grid-cols-[80px_1fr_60px_60px_52px] items-center gap-2">
+              <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 shrink-0">{label}</span>
+              <div className="relative h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                {/* baseline marker */}
+                {base !== null && (
+                  <div
+                    className="absolute top-0 h-full bg-slate-300 dark:bg-slate-600 rounded-full"
+                    style={{ width: `${(base / 9) * 100}%` }}
+                  />
+                )}
+                {/* current fill */}
+                {current !== null && current > 0 && (
+                  <div
+                    className="absolute top-0 h-full bg-indigo-500 dark:bg-indigo-400 rounded-full opacity-80"
+                    style={{ width: `${(current / 9) * 100}%` }}
+                  />
+                )}
+              </div>
+              <span className="text-[10px] text-slate-400 text-right">
+                {base !== null ? base.toFixed(1) : '—'}
+              </span>
+              <span className={cn(
+                'text-xs font-black text-right',
+                (current ?? 0) >= 7.5 ? 'text-emerald-600 dark:text-emerald-400'
+                : (current ?? 0) >= 6.0 ? 'text-amber-600 dark:text-amber-400'
+                : (current ?? 0) > 0    ? 'text-rose-600 dark:text-rose-400'
+                : 'text-slate-400'
+              )}>
+                {current !== null && current > 0 ? current.toFixed(1) : '—'}
+              </span>
+              <span className={cn(
+                'text-[10px] font-bold text-right',
+                delta === null ? 'text-slate-300 dark:text-slate-600'
+                : delta > 0   ? 'text-emerald-600 dark:text-emerald-400'
+                : delta < 0   ? 'text-rose-600 dark:text-rose-400'
+                : 'text-slate-400'
+              )}>
+                {delta === null ? '—' : delta > 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1)}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      <div className="flex items-center gap-4 mt-4 text-[10px] text-slate-400">
+        <span className="flex items-center gap-1.5">
+          <span className="w-3 h-1.5 rounded bg-slate-300 dark:bg-slate-600 inline-block" /> Baseline
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-3 h-1.5 rounded bg-indigo-500 inline-block opacity-80" /> Current
+        </span>
+        <span className="ml-auto italic">Δ = current − baseline</span>
+      </div>
+    </div>
+  );
+}
+
 export function OverviewTab({ data }: Props) {
-  const { competency, ia_eligibility, lexigrid_stats } = data;
+  const { competency, ia_eligibility, lexigrid_stats, diagnostic_baseline } = data;
 
   const radarData = competency
     .filter(r => r.band_score > 0)
@@ -136,6 +221,9 @@ export function OverviewTab({ data }: Props) {
           />
         </div>
       </div>
+
+      {/* Diagnostic baseline vs current bands */}
+      <BaselineComparison baseline={diagnostic_baseline} competency={competency} />
     </div>
   );
 }

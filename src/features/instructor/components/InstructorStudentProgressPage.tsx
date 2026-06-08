@@ -1,22 +1,24 @@
 import { useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { ChevronLeft, BarChart3, ClipboardList, BookOpen, Activity } from 'lucide-react';
+import { ChevronLeft, BarChart3, ClipboardList, BookOpen, Activity, FileSearch } from 'lucide-react';
 import { InstructorSidebar } from '../components/dashboard/InstructorSidebar';
 import { cn } from '@/shared/utils';
 import { useStudentFullProgress } from '../hooks/useStudentFullProgress';
 import { StudentProfileHeader } from './student-progress/StudentProfileHeader';
-import { OverviewTab }       from './student-progress/OverviewTab';
-import { IASessionsTab }     from './student-progress/IASessionsTab';
-import { MockSessionsTab }   from './student-progress/MockSessionsTab';
-import { DrillsTab }         from './student-progress/DrillsTab';
+import { OverviewTab }          from './student-progress/OverviewTab';
+import { IASessionsTab }        from './student-progress/IASessionsTab';
+import { MockSessionsTab }      from './student-progress/MockSessionsTab';
+import { DrillsTab }            from './student-progress/DrillsTab';
+import { DiagnosticTab }        from './student-progress/DiagnosticTab';
 
-type Tab = 'overview' | 'ia' | 'mock' | 'drills';
+type Tab = 'overview' | 'ia' | 'mock' | 'drills' | 'diagnostic';
 
 const TABS: Array<{ id: Tab; label: string; icon: React.ReactNode }> = [
-  { id: 'overview', label: 'Overview',    icon: <BarChart3     className="h-4 w-4" /> },
-  { id: 'ia',       label: 'Assessments', icon: <ClipboardList className="h-4 w-4" /> },
-  { id: 'mock',     label: 'Mock Tests',  icon: <BookOpen      className="h-4 w-4" /> },
-  { id: 'drills',   label: 'Drills',      icon: <Activity      className="h-4 w-4" /> },
+  { id: 'overview',    label: 'Overview',    icon: <BarChart3     className="h-4 w-4" /> },
+  { id: 'ia',          label: 'Assessments', icon: <ClipboardList className="h-4 w-4" /> },
+  { id: 'mock',        label: 'Mock Tests',  icon: <BookOpen      className="h-4 w-4" /> },
+  { id: 'drills',      label: 'Drills',      icon: <Activity      className="h-4 w-4" /> },
+  { id: 'diagnostic',  label: 'Diagnostic',  icon: <FileSearch    className="h-4 w-4" /> },
 ];
 
 function PageSkeleton() {
@@ -43,9 +45,10 @@ export default function InstructorStudentProgressPage() {
   // and old route (/student/:studentSlug/progress) for backward compat
   const resolvedBatchId   = batchId   ?? (location.state?.batchId as string | undefined) ?? null;
   const resolvedStudentId = studentId ?? (location.state?.studentId as string | undefined) ?? null;
+  const initialTab        = (location.state?.initialTab as Tab | undefined) ?? 'overview';
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState<Tab>('overview');
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
 
   const { data, loading, error } = useStudentFullProgress(resolvedBatchId, resolvedStudentId);
 
@@ -119,15 +122,18 @@ export default function InstructorStudentProgressPage() {
               </div>
 
               {/* Tab content */}
-              {activeTab === 'overview' && <OverviewTab data={data} />}
-              {activeTab === 'ia'       && <IASessionsTab sessions={data.ia_sessions} />}
-              {activeTab === 'mock'     && <MockSessionsTab sessions={data.mock_sessions} />}
-              {activeTab === 'drills'   && (
+              {activeTab === 'overview'   && <OverviewTab data={data} />}
+              {activeTab === 'ia'         && <IASessionsTab sessions={data.ia_sessions} />}
+              {activeTab === 'mock'       && <MockSessionsTab sessions={data.mock_sessions} />}
+              {activeTab === 'drills'     && (
                 <DrillsTab
                   drillStats={data.drill_stats}
                   lexiStats={data.lexigrid_stats}
                   streak={data.daily_streak}
                 />
+              )}
+              {activeTab === 'diagnostic' && (
+                <DiagnosticTab results={data.diagnostic_results ?? []} />
               )}
             </div>
           )}
