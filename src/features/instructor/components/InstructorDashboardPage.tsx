@@ -9,9 +9,8 @@ import { AtRiskStudentList } from './dashboard/AtRiskStudentList';
 import { BandOverviewTable } from './dashboard/BandOverviewTable';
 import { PeriodSummaryRow } from './dashboard/PeriodSummaryRow';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { callBackend } from '@/features/auth/services/authClient';
+import { useInstructorBatches } from '../hooks/useInstructorBatches';
 import { useDashboardSummary } from '../hooks/useDashboardSummary';
-import type { InstructorBatch } from './dashboard/types';
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
 
@@ -35,33 +34,14 @@ export default function InstructorDashboardPage() {
   []);
 
   // ── Batches (for selector) ────────────────────────────────────────────────
-  const [batches,         setBatches]         = useState<InstructorBatch[]>([]);
-  const [batchesLoading,  setBatchesLoading]  = useState(true);
   const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
+  const { batches, loading: batchesLoading } = useInstructorBatches();
 
   useEffect(() => {
-    let cancelled = false;
-    setBatchesLoading(true);
-    callBackend(`${BACKEND}/api/instructor/batches`)
-      .then(res => {
-        if (cancelled) return;
-        const raw: any[] = res?.data ?? [];
-        const mapped: InstructorBatch[] = raw
-          .filter(b => b.status === 'ACTIVE')
-          .map(b => ({
-            id:             b.id,
-            name:           b.name,
-            status:         b.status,
-            studentCount:   b.studentCount ?? 0,
-            instructorCount: b.instructorCount ?? 0,
-          }));
-        setBatches(mapped);
-        if (mapped.length > 0) setSelectedBatchId(mapped[0].id);
-      })
-      .catch(console.error)
-      .finally(() => { if (!cancelled) setBatchesLoading(false); });
-    return () => { cancelled = true; };
-  }, []);
+    if (batches.length > 0 && selectedBatchId === null) {
+      setSelectedBatchId(batches[0].id);
+    }
+  }, [batches, selectedBatchId]);
 
   // ── Dashboard summary for selected batch ─────────────────────────────────
   const { data, loading, error, refetch } = useDashboardSummary(selectedBatchId);

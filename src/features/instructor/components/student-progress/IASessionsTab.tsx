@@ -32,9 +32,9 @@ function SectionPills({ scores }: { scores: SectionScore[] }) {
   };
   return (
     <div className="flex gap-1 flex-wrap">
-      {scores.filter(s => s.band > 0).map(s => (
+      {scores.filter(s => s.band > 0 && s.section).map(s => (
         <span key={s.section} className="px-1.5 py-0.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 rounded text-[10px] font-bold">
-          {abbr[s.section] ?? s.section.slice(0, 1)}: {s.band.toFixed(1)}
+          {abbr[s.section] ?? s.section?.slice(0, 1) ?? '?'}: {s.band.toFixed(1)}
         </span>
       ))}
     </div>
