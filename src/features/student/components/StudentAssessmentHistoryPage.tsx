@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -35,7 +35,7 @@ import { format } from "date-fns";
 
 export default function StudentAssessmentHistoryPage() {
   const navigate = useNavigate();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [history, setHistory] = useState<AssessmentHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -227,7 +227,7 @@ export default function StudentAssessmentHistoryPage() {
                                         <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
                                             <span className="flex items-center gap-1">
                                                 <Calendar className="w-3 h-3" />
-                                                {item.completedAt ? format(new Date(item.completedAt), "MMM d, yyyy • h:mm a") : (item.createdAt ? format(new Date(item.createdAt), "MMM d, yyyy • h:mm a") : "N/A")}
+                                                {item.completedAt ? format(new Date(item.completedAt), "MMM d, yyyy â€¢ h:mm a") : (item.createdAt ? format(new Date(item.createdAt), "MMM d, yyyy â€¢ h:mm a") : "N/A")}
                                             </span>
                                             <span className={`px-2 py-0.5 rounded-full capitalize ${
                                                 item.difficulty === 'hard' ? 'bg-red-100 text-red-600' :

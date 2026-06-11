@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { StudentSidebar } from './dashboard/StudentSidebar';
@@ -22,7 +22,7 @@ export default function StudentProfilePage() {
   const navigate = useNavigate();
   const { profile, loading, profileLoading, refreshProfile } = useAuth();
   const { toast } = useToast();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [activeTab, setActiveTab] = useState<'general' | 'security' | 'preferences'>('general');
   
   const [saving, setSaving] = useState(false);

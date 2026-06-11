@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+﻿import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   Play, Scissors, Mic, Square, Activity, Sparkles,
   Radio, ChevronLeft, BarChart3, CheckCircle2,
@@ -15,7 +15,7 @@ import { FILLER_SET } from '@/shared/data/fillers';
 import { cn } from '@/shared/utils';
 import { toast } from 'sonner';
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 type ViewState = 'dashboard' | 'anatomy' | 'resonance';
 type AnatomyPhase = 'setup' | 'recording' | 'results';
 type WordStatus = 'clean' | 'filter' | 'weak';
@@ -25,7 +25,7 @@ const ALL_BANDS: AnatomyBand[] = ['Band 5', 'Band 6', 'Band 7', 'Band 8'];
 
 interface DissectedWord { word: string; status: WordStatus; confidence?: number; }
 
-// ── Resonance demo data (kept from original) ──────────────────────────────────
+// â”€â”€ Resonance demo data (kept from original) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const RESONANCE_PHRASES = [
   { text: "The quarterly revenue exceeded all projections", scores: { res: 72, pitch: 70, tempo: 65, stress: 80, over: 72 } },
   { text: "We need to pivot our go-to-market strategy",   scores: { res: 82, pitch: 85, tempo: 75, stress: 90, over: 82 } },
@@ -34,7 +34,7 @@ const RESONANCE_PHRASES = [
   { text: "Customer acquisition cost dropped by forty percent", scores: { res: 85, pitch: 92, tempo: 75, stress: 80, over: 85 } },
 ];
 
-// ── Score helpers ─────────────────────────────────────────────────────────────
+// â”€â”€ Score helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function clamp(v: number, lo = 0, hi = 100) { return Math.min(hi, Math.max(lo, v)); }
 function calcWpmScore(wpm: number)          { return clamp(100 - Math.abs(wpm - 145) * 1.2); }
 function calcPauseScore(pauses: number, words: number) { return clamp(100 - (pauses / Math.max(words, 1)) * 150); }
@@ -51,12 +51,12 @@ function calcDelivery(durations: number[]) {
   return Math.round(clamp(100 - Math.abs(sd - 0.6) * 50));
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // ROOT COMPONENT
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function VoiceLab() {
   const [activeTab, setActiveTab]   = useState<ViewState>('dashboard');
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
   return (
     <div className="flex h-screen bg-[#f1f3f9] dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-sans transition-colors duration-300 overflow-hidden">
@@ -88,9 +88,9 @@ export default function VoiceLab() {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // HOME VIEW 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function HomeView({ onNavigate }: { onNavigate: (v: ViewState) => void }) {
   return (
     <div className="max-w-4xl animate-in fade-in duration-500">
@@ -143,11 +143,11 @@ function HomeView({ onNavigate }: { onNavigate: (v: ViewState) => void }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // ANATOMY VIEW
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (v: ViewState) => void }) {
-  // ── Phase state ──────────────────────────────────────────────────────────
+  // â”€â”€ Phase state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [phase, setPhase] = useState<AnatomyPhase>('setup');
   const [selectedBand, setSelectedBand] = useState<AnatomyBand>('Band 7');
   const [prompt, setPrompt] = useState<VoicePrompt | null>(null);
@@ -157,20 +157,20 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
   // Fetch initial prompt on mount
   useEffect(() => { loadPrompt('Band 7'); }, []);
 
-  // ── Recording state ───────────────────────────────────────────────────────
+  // â”€â”€ Recording state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [recordingTime, setRecordingTime]     = useState(0);
   const [pauseCount, setPauseCount]           = useState(0);
   const [isCurrentlyPausing, setIsCurrentlyPausing] = useState(false);
   const lastTranscriptTimeRef                  = useRef<number>(Date.now());
 
-  // ── Transcript + word accumulation ───────────────────────────────────────
+  // â”€â”€ Transcript + word accumulation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [dissectedWords, setDissectedWords]   = useState<DissectedWord[]>([]);
   const [fillerCount, setFillerCount]         = useState(0);
   const wordConfidencesRef                     = useRef<number[]>([]);
   const chunkDurationsRef                      = useRef<number[]>([]);
   const lastChunkTimeRef                       = useRef<number>(0);
 
-  // ── Final results ─────────────────────────────────────────────────────────
+  // â”€â”€ Final results â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [results, setResults] = useState<{
     confidenceScore: number;
     pronunciationScore: number;
@@ -181,7 +181,7 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
     fillerDetails: Record<string, number>;
   } | null>(null);
 
-  // ── STT hook ─────────────────────────────────────────────────────────────
+  // â”€â”€ STT hook â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const {
     isListening, isSTTReady,
     transcript,
@@ -227,7 +227,7 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
     onError: useCallback((err: string) => toast.error(err), []),
   });
 
-  // ── Word / pause derived data ─────────────────────────────────────────────
+  // â”€â”€ Word / pause derived data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const wordsArray = useMemo(() =>
     transcript.split(/\s+/).filter(w => w.length > 0), [transcript]);
 
@@ -235,14 +235,14 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
     recordingTime > 0 ? Math.round((wordsArray.length / recordingTime) * 60) : 0,
     [wordsArray.length, recordingTime]);
 
-  // ── Timer ─────────────────────────────────────────────────────────────────
+  // â”€â”€ Timer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(() => {
     if (!isListening || !isSTTReady) return;
     const t = setInterval(() => setRecordingTime(p => p + 1), 1000);
     return () => clearInterval(t);
   }, [isListening, isSTTReady]);
 
-  // ── Pause detection ───────────────────────────────────────────────────────
+  // â”€â”€ Pause detection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(() => {
     if (!isListening || !isSTTReady || wordsArray.length === 0) {
       setIsCurrentlyPausing(false);
@@ -258,7 +258,7 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
     return () => clearInterval(check);
   }, [isListening, isSTTReady, wordsArray.length, isCurrentlyPausing]);
 
-  // ── API prompt loader ─────────────────────────────────────────────────────
+  // â”€â”€ API prompt loader â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const loadPrompt = async (band: AnatomyBand, exclude: string[] = []) => {
     setIsLoadingPrompt(true);
     try {
@@ -273,7 +273,7 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
     }
   };
 
-  // ── Handlers ───────────────────────────────────────────────────────────────
+  // â”€â”€ Handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const handleBandSelect = (band: AnatomyBand) => {
     setSelectedBand(band);
     seenPromptIdsRef.current = [];
@@ -332,13 +332,13 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
   const formatTime = (s: number) =>
     `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
 
-  // ─────────────────────────────────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // RENDER
-  // ─────────────────────────────────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300 max-w-5xl mx-auto">
 
-      {/* ── Header ── */}
+      {/* â”€â”€ Header â”€â”€ */}
       {phase !== 'results' && (
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
         <button onClick={onExit} className="flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
@@ -350,7 +350,7 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
       </div>
       )}
 
-      {/* ── Page title ── */}
+      {/* â”€â”€ Page title â”€â”€ */}
       {phase !== 'results' && (
         <div className="mb-2">
           <h2 className="text-2xl font-bold text-[#0b132b] dark:text-white">
@@ -364,9 +364,9 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* PHASE 1 — SETUP                                                    */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* PHASE 1 â€” SETUP                                                    */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {phase === 'setup' && (
         <div className="flex flex-col gap-6">
 
@@ -420,7 +420,7 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
                   </div>
                   {prompt.hint && (
                     <div className="text-sm text-slate-500 dark:text-slate-400">
-                      💡 {prompt.hint}
+                      ðŸ’¡ {prompt.hint}
                     </div>
                   )}
                 </div>
@@ -444,9 +444,9 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* PHASE 2 — RECORDING                                                */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* PHASE 2 â€” RECORDING                                                */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {phase === 'recording' && (
         <div className="flex flex-col gap-6">
 
@@ -512,9 +512,9 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* PHASE 3 — RESULTS                                                  */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* PHASE 3 â€” RESULTS                                                  */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {phase === 'results' && results && (
         <div className="flex flex-col gap-6 animate-in fade-in flex items-center mt-4 w-full">
 
@@ -528,14 +528,14 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
 
           {/* 3 Score areas */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full">
-            <ScoreRing label="Confidence" sublabel="Fluency · Pauses · Fillers" score={results.confidenceScore} color="purple" />
-            <ScoreRing label="Pronunciation" sublabel="Word clarity · STT confidence" score={results.pronunciationScore} color="blue" />
-            <ScoreRing label="Delivery" sublabel="Pace · Rhythm · Tempo" score={results.deliveryScore} color="green" />
+            <ScoreRing label="Confidence" sublabel="Fluency Â· Pauses Â· Fillers" score={results.confidenceScore} color="purple" />
+            <ScoreRing label="Pronunciation" sublabel="Word clarity Â· STT confidence" score={results.pronunciationScore} color="blue" />
+            <ScoreRing label="Delivery" sublabel="Pace Â· Rhythm Â· Tempo" score={results.deliveryScore} color="green" />
           </div>
 
           {/* Breakdown stats */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full mt-2">
-            <MetricCard icon={<Activity size={14}/>} label="WPM" value={results.wpm} target={prompt ? `${prompt.targetWpmMin}–${prompt.targetWpmMax}` : '130–160'} />
+            <MetricCard icon={<Activity size={14}/>} label="WPM" value={results.wpm} target={prompt ? `${prompt.targetWpmMin}â€“${prompt.targetWpmMax}` : '130â€“160'} />
             <MetricCard icon={<Target size={14}/>} label="Pauses" value={results.pauseCount} target="< 3 ideal" />
             <MetricCard icon={<AlertTriangle size={14}/>} label="Fillers" value={results.fillersDetected} target="0 ideal" />
           </div>
@@ -560,7 +560,7 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
               </div>
               
               <div className="text-sm font-medium text-[#8a6a24] dark:text-amber-400 bg-amber-100/60 dark:bg-amber-900/30 p-4 rounded-xl flex items-start gap-2">
-                <span className="opacity-80">💡</span> 
+                <span className="opacity-80">ðŸ’¡</span> 
                 Tip: A brief pause is always better than a filler word. Take a breath instead.
               </div>
             </div>
@@ -606,9 +606,9 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // RESONANCE VIEW 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ResonanceView({ onExit, onNavigate }: { onExit: () => void, onNavigate: (view: ViewState) => void }) {
   const [selectedBand, setSelectedBand] = useState<AnatomyBand>('Band 7');
   const [prompt, setPrompt]             = useState<VoicePrompt | null>(null);
@@ -727,7 +727,7 @@ function ResonanceView({ onExit, onNavigate }: { onExit: () => void, onNavigate:
             <p className="text-[#0b132b] dark:text-white text-lg md:text-xl font-medium leading-relaxed">{prompt.question}</p>
             {prompt.hint && (
               <div className="text-sm text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl">
-                💡 {prompt.hint}
+                ðŸ’¡ {prompt.hint}
               </div>
             )}
           </div>
@@ -847,9 +847,9 @@ function ResonanceView({ onExit, onNavigate }: { onExit: () => void, onNavigate:
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // ATOMS
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function WordPill({ word, status }: { word: string; status: WordStatus }) {
   const cfg = {

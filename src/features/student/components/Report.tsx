@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { StudentSidebar } from "./dashboard/StudentSidebar";
 import { StudentTopbar } from "./dashboard/StudentTopbar";
 import { PremiumModal } from "@/features/payment/components/PremiumModal";
@@ -31,13 +31,13 @@ import {
   BarChart2,
 } from "lucide-react";
 
-// ─── TYPES ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ TYPES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 type TabId = "bandarc" | "radar" | "readiness";
 
-// ─── MOCK DATA ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ MOCK DATA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-// Band Arc — band score over time for all 4 skills
+// Band Arc â€” band score over time for all 4 skills
 const BAND_ARC_DATA = [
   { date: "Mar 10", Listening: 6.0, Reading: 5.5, Writing: 5.0, Speaking: 4.0 },
   { date: "Mar 13", Listening: 6.0, Reading: 5.5, Writing: 5.0, Speaking: 4.0 },
@@ -48,7 +48,7 @@ const BAND_ARC_DATA = [
   { date: "Mar 24", Listening: 6.5, Reading: 6.0, Writing: 5.5, Speaking: 4.5 },
 ];
 
-// Radar — current vs target per skill
+// Radar â€” current vs target per skill
 const RADAR_DATA = [
   { skill: "Listening", current: 6.5, target: 7.5 },
   { skill: "Reading",   current: 6.0, target: 7.5 },
@@ -56,7 +56,7 @@ const RADAR_DATA = [
   { skill: "Speaking",  current: 4.5, target: 7.0 },
 ];
 
-// Predicted Readiness — trajectory vs target over time
+// Predicted Readiness â€” trajectory vs target over time
 const READINESS_DATA = [
   { date: "Mar 24", actual: 5.5,  projected: 5.5,  target: 7.5 },
   { date: "Apr 07", actual: null, projected: 5.8,  target: 7.5 },
@@ -75,7 +75,7 @@ const PERFORMANCE_TABLE = [
   { skill: "Speaking",  current: 4.5, target: 7.0, delta: +0.5, sessions: 3, gap: 2.5,  status: "Critical" },
 ];
 
-// ─── SKILL COLORS ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ SKILL COLORS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const SKILL_COLORS: Record<string, string> = {
   Listening: "#0ea5e9",
@@ -91,12 +91,12 @@ const SKILL_ICONS: Record<string, React.ReactNode> = {
   Speaking:  <Mic className="h-4 w-4" />,
 };
 
-// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
+// â”€â”€â”€ MAIN COMPONENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const Report = () => {
   const [activeTab, setActiveTab]           = useState("reports");
   const [showPremiumModal, setShowPremiumModal] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [reportTab, setReportTab]           = useState<TabId>("bandarc");
 
   return (
@@ -120,11 +120,11 @@ const Report = () => {
               <h1 className="text-2xl font-black text-slate-800 dark:text-white">Reports</h1>
             </div>
             <p className="text-sm text-slate-500 mt-0.5">
-              Your performance breakdown — all mock data until Wednesday integration
+              Your performance breakdown â€” all mock data until Wednesday integration
             </p>
           </div>
 
-          {/* ── Tab Bar ──────────────────────────────────────────────── */}
+          {/* â”€â”€ Tab Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           <div className="flex gap-1 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-1.5 shadow-sm w-fit">
             {([
               { id: "bandarc",   label: "Band Arc",           icon: <TrendingUp className="h-4 w-4" /> },
@@ -145,12 +145,12 @@ const Report = () => {
             ))}
           </div>
 
-          {/* ── Tab Content ──────────────────────────────────────────── */}
+          {/* â”€â”€ Tab Content â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           {reportTab === "bandarc"   && <BandArcTab />}
           {reportTab === "radar"     && <RadarTab />}
           {reportTab === "readiness" && <ReadinessTab />}
 
-          {/* ── Performance Table (shown on all tabs) ────────────────── */}
+          {/* â”€â”€ Performance Table (shown on all tabs) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           <PerformanceTable />
 
         </main>
@@ -161,16 +161,16 @@ const Report = () => {
   );
 };
 
-// ─── TAB: BAND ARC ────────────────────────────────────────────────────────────
+// â”€â”€â”€ TAB: BAND ARC â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const BandArcTab = () => (
   <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6 shadow-sm">
     <div className="mb-5">
       <h2 className="text-base font-black text-slate-800 dark:text-white flex items-center gap-2">
-        <TrendingUp className="h-5 w-5 text-indigo-500" /> Band Score Arc — All 4 Skills
+        <TrendingUp className="h-5 w-5 text-indigo-500" /> Band Score Arc â€” All 4 Skills
       </h2>
       <p className="text-xs text-slate-500 mt-1">
-        Line chart showing band score progression over time · Mock data Mar 10 – Mar 24
+        Line chart showing band score progression over time Â· Mock data Mar 10 â€“ Mar 24
       </p>
     </div>
 
@@ -236,13 +236,13 @@ const BandArcTab = () => (
   </div>
 );
 
-// ─── TAB: RADAR ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ TAB: RADAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const RadarTab = () => (
   <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6 shadow-sm">
     <div className="mb-5">
       <h2 className="text-base font-black text-slate-800 dark:text-white flex items-center gap-2">
-        <Target className="h-5 w-5 text-indigo-500" /> Competency Radar — Current vs Target
+        <Target className="h-5 w-5 text-indigo-500" /> Competency Radar â€” Current vs Target
       </h2>
       <p className="text-xs text-slate-500 mt-1">
         Spider chart overlaying your current band per skill against your target band
@@ -306,7 +306,7 @@ const RadarTab = () => (
   </div>
 );
 
-// ─── TAB: READINESS ───────────────────────────────────────────────────────────
+// â”€â”€â”€ TAB: READINESS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const ReadinessTab = () => {
   const lastProjected = READINESS_DATA[READINESS_DATA.length - 1].projected!;
@@ -330,7 +330,7 @@ const ReadinessTab = () => {
           <p className={`text-sm font-bold ${isOnTrack ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300"}`}>
             {isOnTrack
               ? "On track to hit your target band by June 15!"
-              : `At current pace: projected band ${lastProjected.toFixed(1)} by June 15 — ${gap} below target 7.5`
+              : `At current pace: projected band ${lastProjected.toFixed(1)} by June 15 â€” ${gap} below target 7.5`
             }
           </p>
           <p className="text-xs text-slate-500 mt-0.5">
@@ -343,10 +343,10 @@ const ReadinessTab = () => {
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6 shadow-sm">
         <div className="mb-5">
           <h2 className="text-base font-black text-slate-800 dark:text-white flex items-center gap-2">
-            <CalendarClock className="h-5 w-5 text-indigo-500" /> Predicted Readiness — Overall Band Trajectory
+            <CalendarClock className="h-5 w-5 text-indigo-500" /> Predicted Readiness â€” Overall Band Trajectory
           </h2>
           <p className="text-xs text-slate-500 mt-1">
-            Current trajectory vs target band vs exam date (Jun 15) · Arithmetic projection from mock data
+            Current trajectory vs target band vs exam date (Jun 15) Â· Arithmetic projection from mock data
           </p>
         </div>
 
@@ -385,7 +385,7 @@ const ReadinessTab = () => {
                 fontWeight: "600",
               }}
               formatter={(value: number | null, name: string) =>
-                value !== null ? [`${value.toFixed(1)}`, name] : ["—", name]
+                value !== null ? [`${value.toFixed(1)}`, name] : ["â€”", name]
               }
             />
             <ReferenceLine
@@ -422,7 +422,7 @@ const ReadinessTab = () => {
   );
 };
 
-// ─── PERFORMANCE TABLE ────────────────────────────────────────────────────────
+// â”€â”€â”€ PERFORMANCE TABLE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const statusConfig = {
   "On Track": { color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-500/10" },
@@ -443,7 +443,7 @@ const PerformanceTable = () => (
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-slate-50 dark:bg-slate-800/50">
-            {["Skill", "Current Band", "Target Band", "Gap", "Sessions", "Δ Last", "Status"].map((h) => (
+            {["Skill", "Current Band", "Target Band", "Gap", "Sessions", "Î” Last", "Status"].map((h) => (
               <th
                 key={h}
                 className="px-5 py-3 text-left text-[11px] font-black text-slate-400 uppercase tracking-wider"

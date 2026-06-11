@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { StudentSidebar } from '../dashboard/StudentSidebar';
 import { StudentTopbar } from '../dashboard/StudentTopbar';
@@ -30,7 +30,7 @@ export default function DrillScreen() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { syncMomentum, updateStreak } = useMomentum();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
   const skill    = searchParams.get('skill')     || 'SPEAKING';
   const subSkill = searchParams.get('sub_skill') || 'PRONUNCIATION';
@@ -71,7 +71,7 @@ export default function DrillScreen() {
         if (activeRes.success && activeRes.session) {
           const sess = activeRes.session;
 
-          // Already fully completed — jump straight to result card
+          // Already fully completed â€” jump straight to result card
           if (sess.status === 'DRILL_DONE' || sess.status === 'APPLY_DONE') {
             setDrillSessionId(sess.id);
             setSessionId(sess.id);
@@ -81,7 +81,7 @@ export default function DrillScreen() {
             return;
           }
 
-          // STARTED — resume from where we left off
+          // STARTED â€” resume from where we left off
           const questions: any[] = activeRes.questions || [];
           setSessionId(sess.id);
           setPrompts(questions);
@@ -101,7 +101,7 @@ export default function DrillScreen() {
           return;
         }
 
-        // No active session — start a new one
+        // No active session â€” start a new one
         const startRes = await callBackend(`${backendUrl}/api/drills/start`, {
           method: 'POST',
           body: JSON.stringify({

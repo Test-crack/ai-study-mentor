@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StudentSidebar } from './dashboard/StudentSidebar';
 import { StudentTopbar } from './dashboard/StudentTopbar';
@@ -22,14 +22,14 @@ import {
   Zap,
 } from 'lucide-react';
 
-/* ─── Google Fonts injection ─────────────────────────────────────────── */
+/* â”€â”€â”€ Google Fonts injection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const fontLink = document.createElement('link');
 fontLink.rel = 'stylesheet';
 fontLink.href =
   'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,700;9..144,900&family=Outfit:wght@300;400;500;600;700&display=swap';
 document.head.appendChild(fontLink);
 
-/* ─── Types ──────────────────────────────────────────────────────────── */
+/* â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 type ResourceType = 'VIDEO' | 'BLOG' | 'PRACTICE_TEST';
 type SkillType = 'LISTENING' | 'READING' | 'WRITING' | 'SPEAKING';
 type LevelType = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
@@ -80,7 +80,7 @@ const LEVEL_META: Record<LevelType, { label: string; bg: string; border: string;
   ADVANCED:     { label: 'Advanced',     bg: 'bg-rose-50 dark:bg-rose-500/10', border: 'border-rose-200 dark:border-rose-500/30', text: 'text-rose-600 dark:text-rose-400' },
 };
 
-/* ─── Sub-components ─────────────────────────────────────────────────── */
+/* â”€â”€â”€ Sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function ResourceTypePill({ type }: { type: ResourceType }) {
   const map = {
@@ -149,7 +149,7 @@ function ResourceCard({
         : 'bg-white border-slate-200 dark:bg-slate-900 dark:border-white/10 hover:-translate-y-1 hover:shadow-xl hover:border-slate-300 dark:hover:border-white/20'
       }`}
     >
-      {/* ── Media ── */}
+      {/* â”€â”€ Media â”€â”€ */}
       <div className="relative w-full aspect-[16/9] shrink-0 overflow-hidden bg-slate-100 dark:bg-[#0a0f1e]">
         {embedId ? (
           <iframe
@@ -182,7 +182,7 @@ function ResourceCard({
         {/* Bottom fade overlay */}
         <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-white/60 dark:from-slate-900/90 to-transparent pointer-events-none" />
 
-        {/* Type pill – top left */}
+        {/* Type pill â€“ top left */}
         <div className="absolute top-3 left-3 z-10">
           <ResourceTypePill type={item.type} />
         </div>
@@ -195,7 +195,7 @@ function ResourceCard({
         )}
       </div>
 
-      {/* ── Body ── */}
+      {/* â”€â”€ Body â”€â”€ */}
       <div className="p-5 flex flex-col flex-1">
         {/* Source tag */}
         <div className="mb-2.5">
@@ -275,10 +275,10 @@ function SkeletonCard() {
   );
 }
 
-/* ─── Main Component ─────────────────────────────────────────────────── */
+/* â”€â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 export default function Suggestions() {
   const navigate = useNavigate();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
   const [recommendationsData, setRecommendationsData] = useState<RecommendationsData | null>(null);
   const [activeTab, setActiveTab] = useState<SkillType>('LISTENING');
@@ -324,7 +324,7 @@ export default function Suggestions() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#060B18] transition-colors duration-300 font-outfit text-slate-900 dark:text-slate-50">
       
-      {/* ── Ambient background orbs ── */}
+      {/* â”€â”€ Ambient background orbs â”€â”€ */}
       <div aria-hidden className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute -top-[20%] -left-[10%] w-[700px] h-[700px] rounded-full bg-indigo-500/5 dark:bg-indigo-500/10 blur-[80px]" />
         <div className="absolute top-[40%] -right-[15%] w-[600px] h-[600px] rounded-full bg-purple-500/5 dark:bg-purple-500/10 blur-[80px]" />
@@ -342,9 +342,9 @@ export default function Suggestions() {
 
         <main className="flex-1 px-6 py-8 md:p-10 lg:py-12 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
 
-          {/* ════════════════════════════════════════
+          {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
               HERO BANNER
-          ════════════════════════════════════════ */}
+          â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
           <div className="relative rounded-3xl overflow-hidden px-8 py-10 md:px-14 md:py-12 mb-12 border bg-gradient-to-br from-white via-indigo-50/50 to-purple-50/50 border-indigo-100 shadow-sm dark:from-[#0f0a2e] dark:via-[#1a0a3d] dark:to-[#0d1a3a] dark:border-indigo-500/20 dark:shadow-none">
             
             {/* Glowing orb dark mode only */}
@@ -357,7 +357,7 @@ export default function Suggestions() {
                 <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 dark:bg-amber-400/10 dark:border-amber-400/20 rounded-full px-3.5 py-1.5 mb-5">
                   <Sparkles className="w-3 h-3 text-amber-500 dark:text-amber-400" />
                   <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 tracking-widest uppercase">
-                    AI‑Curated Path
+                    AIâ€‘Curated Path
                   </span>
                 </div>
 
@@ -369,7 +369,7 @@ export default function Suggestions() {
                 </h1>
 
                 <p className="text-sm md:text-[15px] leading-relaxed text-slate-600 dark:text-slate-400 font-medium max-w-[460px]">
-                  We've analyzed your diagnostic results. These curated resources are calibrated to your exact weak points — follow them to unlock your target band score.
+                  We've analyzed your diagnostic results. These curated resources are calibrated to your exact weak points â€” follow them to unlock your target band score.
                 </p>
               </div>
 
@@ -399,9 +399,9 @@ export default function Suggestions() {
             </div>
           </div>
 
-          {/* ════════════════════════════════════════
+          {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
               CONTROLS ROW
-          ════════════════════════════════════════ */}
+          â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
           <div className="flex flex-wrap items-center justify-between gap-4 mb-10">
             {/* Tab bar */}
             <div className="inline-flex flex-wrap items-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-full p-1.5 shadow-sm gap-1">
@@ -431,9 +431,9 @@ export default function Suggestions() {
             )}
           </div>
 
-          {/* ════════════════════════════════════════
+          {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
               CARDS GRID
-          ════════════════════════════════════════ */}
+          â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {[1,2,3,4,5,6].map(n => <SkeletonCard key={n} />)}
@@ -463,9 +463,9 @@ export default function Suggestions() {
             </div>
           )}
 
-          {/* ════════════════════════════════════════
+          {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
               PAGINATION
-          ════════════════════════════════════════ */}
+          â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
           {!loading && totalPages > 1 && (
             <div className="mt-14 flex items-center justify-center gap-3">
               <button

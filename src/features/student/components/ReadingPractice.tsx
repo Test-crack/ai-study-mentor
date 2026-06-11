@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StudentSidebar } from './dashboard/StudentSidebar';
 import { StudentTopbar } from './dashboard/StudentTopbar';
@@ -22,7 +22,7 @@ import {
   type ReadingPracticeResult,
 } from '@/features/student/services/readingPracticeService';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 type ViewState = 'library' | 'reading' | 'results';
 
@@ -47,7 +47,7 @@ function formatTime(seconds: number): string {
   return m > 0 ? `${m}m ${s}s` : `${s}s`;
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const StatBadge = ({ label, value, color }: { label: string; value: string | number; color: string }) => (
   <div className="flex flex-col items-center bg-white dark:bg-slate-900 rounded-2xl px-5 py-4 border border-slate-200 dark:border-slate-800 shadow-sm min-w-[100px]">
@@ -56,14 +56,14 @@ const StatBadge = ({ label, value, color }: { label: string; value: string | num
   </div>
 );
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function ReadingPractice() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
   // Layout
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
   // View state machine
   const [view, setView] = useState<ViewState>('library');
@@ -87,7 +87,7 @@ export default function ReadingPractice() {
   // Results state
   const [results, setResults] = useState<ReadingPracticeResult | null>(null);
 
-  // ─── Load passages on mount ──────────────────────────────────────────────────
+  // â”€â”€â”€ Load passages on mount â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   useEffect(() => {
     (async () => {
@@ -102,7 +102,7 @@ export default function ReadingPractice() {
     })();
   }, []);
 
-  // ─── Timer Logic ─────────────────────────────────────────────────────────────
+  // â”€â”€â”€ Timer Logic â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const startTimer = useCallback(() => {
     startTimeRef.current = Date.now();
@@ -122,7 +122,7 @@ export default function ReadingPractice() {
     return () => stopTimer(); // cleanup on unmount
   }, [stopTimer]);
 
-  // ─── Derived values ───────────────────────────────────────────────────────────
+  // â”€â”€â”€ Derived values â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const categories = ['All', ...Array.from(new Set(passages.map(p => p.category)))];
 
@@ -130,7 +130,7 @@ export default function ReadingPractice() {
     ? passages
     : passages.filter(p => p.category === activeCategory);
 
-  // ─── Event Handlers ───────────────────────────────────────────────────────────
+  // â”€â”€â”€ Event Handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const handleSelectPassage = async (summary: SpeedReadingReportSummary) => {
     setLoadingPassage(true);
@@ -211,7 +211,7 @@ export default function ReadingPractice() {
     startTimer();
   };
 
-  // ─── Render: Loading Overlay ──────────────────────────────────────────────────
+  // â”€â”€â”€ Render: Loading Overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   if (loadingPassage) {
     return (
@@ -237,9 +237,9 @@ export default function ReadingPractice() {
 
         <main className="flex-1 p-4 sm:p-6 max-w-7xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
 
-          {/* ═══════════════════════════════════════════════════════════════════ */}
+          {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
           {/* VIEW 1: PASSAGE LIBRARY */}
-          {/* ═══════════════════════════════════════════════════════════════════ */}
+          {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
           {view === 'library' && (
             <div className="space-y-6">
 
@@ -339,9 +339,9 @@ export default function ReadingPractice() {
             </div>
           )}
 
-          {/* ═══════════════════════════════════════════════════════════════════ */}
+          {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
           {/* VIEW 2: READING + Q&A INTERFACE */}
-          {/* ═══════════════════════════════════════════════════════════════════ */}
+          {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
           {view === 'reading' && selectedPassage && (
             <div className="flex flex-col h-full flex-1 min-h-[calc(100vh-140px)]">
 
@@ -415,7 +415,7 @@ export default function ReadingPractice() {
                       <ul className="text-xs text-indigo-700 dark:text-indigo-400/80 space-y-1 list-disc list-inside">
                         <li>Read the questions first to know what details to look for.</li>
                         <li>Skim the passage once, then read key sections in depth.</li>
-                        <li>Your reading time is tracked — it contributes to your WPM score.</li>
+                        <li>Your reading time is tracked â€” it contributes to your WPM score.</li>
                       </ul>
                     </CardContent>
                   </Card>
@@ -477,7 +477,7 @@ export default function ReadingPractice() {
                     </div>
                   </Card>
                 ) : (
-                  // No questions — just submit to record time
+                  // No questions â€” just submit to record time
                   <div className="w-full lg:w-[45%] flex flex-col items-center justify-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-10 text-center gap-4">
                     <BookOpen className="w-12 h-12 text-slate-300" />
                     <p className="text-slate-500 text-sm">No comprehension questions for this passage. Submit to record your reading time and WPM.</p>
@@ -487,9 +487,9 @@ export default function ReadingPractice() {
             </div>
           )}
 
-          {/* ═══════════════════════════════════════════════════════════════════ */}
+          {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
           {/* VIEW 3: RESULTS */}
-          {/* ═══════════════════════════════════════════════════════════════════ */}
+          {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
           {view === 'results' && results && selectedPassage && (
             <div className="space-y-6 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
 

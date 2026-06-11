@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import {
   Play, Pause, ArrowLeft, AlertTriangle, CheckCircle, XCircle, Brain, Target,
   ChevronLeft, ChevronRight, Check, Settings, Loader2, AlertCircle, Clock, Hash, BookOpen, Briefcase, BrainCircuit, Sparkles
@@ -51,7 +51,7 @@ type View = 'dashboard' | 'reader' | 'quiz' | 'analysis';
 export default function SpeedReading() {
   const [activeTab, setActiveTab] = useState("speed-reading");
   const [showPremiumModal, setShowPremiumModal] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [reports, setReports] = useState<SpeedReadingReportSummary[]>([]);
   const [loadingReports, setLoadingReports] = useState(true);
   const [reportsError, setReportsError] = useState<string | null>(null);
@@ -142,7 +142,7 @@ export default function SpeedReading() {
         speedCategory: wpm >= 550 ? 'Advanced' : wpm >= 400 ? 'Proficient' : 'Developing',
         speedScore: Math.round((wpm - 200) / 6),
         efficiencyScore: Math.round(ret * 0.6 + ((wpm - 200) / 6) * 0.4),
-        feedback: ['Results computed offline — check your connection.'],
+        feedback: ['Results computed offline â€” check your connection.'],
         idealWpmSuggestion: ret >= 70 ? Math.min(wpm + 50, 800) : Math.max(wpm - 50, 200),
         scoredAnswers: qs.map(q => ({
           questionId: q.id, type: q.type, stem: q.stem, options: q.options,
@@ -201,7 +201,7 @@ export default function SpeedReading() {
                 <div className="w-full bg-white dark:bg-slate-900 rounded-xl md:rounded-2xl p-4 md:p-8 shadow-sm transition-colors duration-300">
                   {loadingReports ? (
                     <div className="flex items-center gap-3 text-slate-500 dark:text-gray-400 mb-6">
-                      <Loader2 size={17} className="animate-spin" /><span className="text-sm">Loading reports…</span>
+                      <Loader2 size={17} className="animate-spin" /><span className="text-sm">Loading reportsâ€¦</span>
                     </div>
                   ) : reportsError ? (
                     <div className="flex items-center gap-3 text-red-500 mb-6 bg-red-50 dark:bg-red-900/20 rounded-xl px-4 py-3">
@@ -481,7 +481,7 @@ export default function SpeedReading() {
                         ))}
                     </div>
                     <div className="text-[10px] md:text-xs font-semibold text-[#8a6a24] bg-amber-100/50 p-2 md:p-3 rounded-lg flex items-start gap-2">
-                        <span className="opacity-80 mt-0.5">💡</span>
+                        <span className="opacity-80 mt-0.5">ðŸ’¡</span>
                         <span>Tip: Next target speed should be around {evaluation.idealWpmSuggestion} WPM.</span>
                     </div>
                   </div>
@@ -510,7 +510,7 @@ export default function SpeedReading() {
                             <div className="text-xs md:text-sm space-y-1.5 md:space-y-2 bg-white dark:bg-slate-950 p-3 md:p-4 rounded-lg md:rounded-xl border border-slate-100">
                               {!a.isCorrect && (
                                 <p className="text-rose-600 flex justify-between border-b border-slate-100 pb-1.5 md:pb-2">
-                                  <span>Your answer:</span> <span className="font-bold text-right ml-2">{a.userAnswer || '—'}</span>
+                                  <span>Your answer:</span> <span className="font-bold text-right ml-2">{a.userAnswer || 'â€”'}</span>
                                 </p>
                               )}
                               <p className={`flex justify-between ${a.isCorrect ? 'text-[#10b981]' : 'text-slate-700 pt-0.5 md:pt-1'}`}>

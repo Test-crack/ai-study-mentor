@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StudentSidebar } from './dashboard/StudentSidebar';
 import { StudentTopbar } from './dashboard/StudentTopbar';
@@ -8,7 +8,7 @@ import { PremiumModal } from "@/features/payment/components/PremiumModal";
 
 export default function StudentSchedulePage() {
   const navigate = useNavigate();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   // Fake schedule items for the blurred background

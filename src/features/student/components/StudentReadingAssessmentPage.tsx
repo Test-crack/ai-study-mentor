@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+﻿import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   BookOpen, Mic, Target, Zap, Clock, CheckCircle, 
@@ -40,7 +40,7 @@ const FILLER_WORDS_LIST = [
 export default function StudentReadingAssessmentPage() {
   const navigate = useNavigate();
   const { profile } = useAuth();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [activeBand, setActiveBand] = useState<BandLevel>('All');
   const [selectedTopic, setSelectedTopic] = useState<IeltsReadingPractice | null>(null);
   const [topics, setTopics] = useState<IeltsReadingPracticeList[]>([]);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   Play, ArrowLeft, CheckCircle, XCircle, Brain, Target,
   ChevronRight, Check, BookOpen, Clock, BarChart, BookMarked, Sparkles
@@ -427,7 +427,7 @@ type ViewState = 'dashboard' | 'course' | 'module' | 'quiz' | 'feedback';
 
 export default function CourseSection() {
   const [activeTab, setActiveTab] = useState("courses");
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   const [view, setView] = useState<ViewState>('dashboard');
