@@ -70,16 +70,19 @@ export function ZenAssessmentRunner({ onCancel, onComplete }: RunnerProps) {
     }
   }, [modulesData]);
 
-  // Timer Tick
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (step === "reading" && readingStartTime) {
-      interval = setInterval(() => {
-        setCurrentTime(Math.floor((Date.now() - readingStartTime) / 1000));
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [step, readingStartTime]);
+    // Timer Tick
+    useEffect(() => {
+        // In browser environments setInterval returns a number; use ReturnType to be safe across runtimes
+        let interval: ReturnType<typeof setInterval> | undefined;
+        if (step === "reading" && readingStartTime) {
+            interval = setInterval(() => {
+                setCurrentTime(Math.floor((Date.now() - readingStartTime) / 1000));
+            }, 1000);
+        }
+        return () => {
+            if (interval !== undefined) clearInterval(interval as any);
+        };
+    }, [step, readingStartTime]);
 
   const loadPassage = async (moduleId: string, difficulty: string) => {
     setLoading(true);

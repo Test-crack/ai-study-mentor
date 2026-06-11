@@ -1,4 +1,4 @@
-import { useEffect, useState, memo } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
@@ -9,15 +9,12 @@ import { supabase } from '@/integrations/supabase/client';
 
 import {
   GraduationCap,
-  BookOpen,
   Zap,
   User,
   Target,
   Cpu,
-  Briefcase,
   FileBarChart,
   LayoutDashboard,
-  Bot,
   Sparkles,
   Users,
   Building2,
@@ -27,6 +24,7 @@ import {
   AlertTriangle,
   ShieldCheck,
   UserRound,
+  X,
 } from 'lucide-react';
 
 // Icons for the "Pain Points" Section
@@ -37,29 +35,64 @@ import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 
 // Icons for the "Tools" Section
 import Mic from 'lucide-react/dist/esm/icons/mic';
-import FileEdit from 'lucide-react/dist/esm/icons/file-edit';
-import Shield from 'lucide-react/dist/esm/icons/shield';
 import Laptop from 'lucide-react/dist/esm/icons/laptop';
+import Flame from 'lucide-react/dist/esm/icons/flame';
+
+// ── Demo request config ──────────────────────────────────────────────
+// Replace with your institute-sales WhatsApp number (country code, no '+').
+// Kept as a single constant so swapping it never touches JSX.
+const DEMO_WHATSAPP_NUMBER = '919999999999';
 
 const LandingPage = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const [processingAuth, setProcessingAuth] = useState(false);
-  
+
   // Public state for the interactive feature switcher
   const [activeTab, setActiveTab] = useState('students');
+
+  // Demo-request modal state
+  const [demoModalOpen, setDemoModalOpen] = useState(false);
+  const [demoSubmitted, setDemoSubmitted] = useState(false);
+  const [demoForm, setDemoForm] = useState({
+    name: '',
+    institute: '',
+    city: '',
+    whatsapp: '',
+    email: '',
+  });
+
+  const handleDemoField = (field: keyof typeof demoForm, value: string) => {
+    setDemoForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleDemoSubmit = () => {
+    if (!demoForm.name.trim() || !demoForm.institute.trim() || !demoForm.whatsapp.trim()) {
+      return;
+    }
+    const message = encodeURIComponent(
+      `Hi TestCrack team! I'd like to request a demo.\n\nName: ${demoForm.name}\nInstitute: ${demoForm.institute}\nCity: ${demoForm.city || '-'}\nWhatsApp: ${demoForm.whatsapp}\nEmail: ${demoForm.email || '-'}`
+    );
+    window.open(`https://wa.me/${DEMO_WHATSAPP_NUMBER}?text=${message}`, '_blank');
+    setDemoSubmitted(true);
+  };
+
+  const closeDemoModal = () => {
+    setDemoModalOpen(false);
+    setDemoSubmitted(false);
+  };
 
   // Handle auth callbacks (logic preserved exactly)
   useEffect(() => {
     const handleAuthCallback = async () => {
       const hash = window.location.hash;
-      
+
       if (!hash || !hash.includes("access_token")) {
         return;
       }
 
       setProcessingAuth(true);
-      
+
       const hashParams = new URLSearchParams(hash.substring(1));
       const type = hashParams.get("type");
       const accessToken = hashParams.get("access_token");
@@ -109,65 +142,65 @@ const LandingPage = () => {
     );
   }
 
-  // Content for the public switcher grid (ALL TEXT PRESERVED)
+  // Content for the public switcher grid — mapped to the live platform
   const tabContent = {
-  students: [
-      { icon: MonitorPlay, title: 'Adaptive Mock Test Simulator', description: 'Shake off the nerves with infinite, hyper-realistic interview simulations and online exam prep that adapts to your specific weaknesses in real-time.' },
-      { icon: Target, title: 'Personalized Skill Gaps & Drills', description: 'Skip what you already know. Our AI identifies knowledge gaps and generates instant micro-learning lessons to bridge them, making your study time 10x more efficient.' },
-      { icon: ShieldCheck, title: 'Blockchain-Verified Career Certifications', description: 'Earn dynamic, shareable proof of skill Showcase your interview readiness directly to LinkedIn recruiters with certificates that prove you have the expertise, not just the digital paper.' },
-      { icon: Bot, title: '24/7 AI Mentor', description: 'Get instant, actionable feedback on your performance Whether its coding interview prep or leadership coaching, get the answers you need without waiting days for a grade.' },
+    students: [
+      { icon: Target, title: 'Diagnostic-First Start', description: 'A one-time, four-skill baseline assessment (Listening, Reading, Writing, Speaking) builds your personal competency matrix — so from day one, you only drill what is actually weak.' },
+      { icon: Zap, title: 'Daily Drill Loop + DCS', description: 'Three targeted micro-drills and the LexiGrid vocabulary game every day. Your Daily Competency Score gives you visible proof of progress before you even open a textbook.' },
+      { icon: Cpu, title: 'Adaptive Internal Assessments', description: 'Every three days, a 40-minute IA tests your two weakest sub-skills at your current band level. AI grades writing and speaking instantly — with feedback, not just a score.' },
+      { icon: LineChart, title: 'Real Band + Momentum', description: 'Monthly full-length mocks produce a Real Band score you can trust. Momentum points and daily streaks reward consistency — and unlock extra drills and earned mocks.' },
     ],
     instructors: [
-      { icon: AlertTriangle, title: '"Confidently Wrong" AI Alerts', description: ' Our system flags students who are consistently incorrect with high confidence. This predictive student analytics tool allows you to intervene exactly where support is needed most. ' },
-      { icon: Zap, title: 'Auto-Generated Practice Drills', description: ' Instantly create customized practice sets based on yesterday’s classroom performance. It’s the ultimate automated lesson planning tool for busy educators.' },
-      { icon: LineChart, title: 'Real-Time Performance Tracking', description: 'See which students are on track and who needs a nudge before they ever reach the first mock exam. ' },
-      { icon: MessageSquareText, title: 'Instant Feedback Loops', description: ' Let the AI handle the repetitive "Why is this wrong?" questions. Provide automated student feedback so you can focus on high-level strategy and student inspiration.' },
+      { icon: AlertTriangle, title: 'At-Risk Auto Detection', description: 'Rule-based flags from real data — broken streaks, missed internal assessments, declining bands, students stuck before diagnostics. Intervene before they drop, not after.' },
+      { icon: LineChart, title: 'Live Band Score Table', description: 'Every student\'s current band vs. target band, gap-sorted, with trend arrows from their last two assessments. Know exactly who needs you this week.' },
+      { icon: Users, title: 'Student Deep Dive', description: 'IA history with sub-skill breakdowns, mock band progression, 14-day drill trends, and sub-skill coverage maps — one page per student, zero spreadsheets.' },
+      { icon: MessageSquareText, title: 'Zero Manual Marking', description: 'Nine AI scoring engines grade drills, writing tasks, and speaking responses against IELTS band descriptors. You review feedback and coach — the marking is done.' },
     ],
-    universities: [
-      { icon: LayoutDashboard, title: 'Centralized Institutional Command Center', description: ' Monitor the health, engagement, and progress of your entire student body through a single, high-level data visualization pane. ' },
-      { icon: FileBarChart, title: 'Automated Stakeholder Reports', description: ' Receive weekly, audit-ready reports on student growth, Mock Test Simulator scores, and curriculum completion rates.' },
-      { icon: Briefcase, title: 'Optimized Placement & Hireability', description: 'Use our proprietary "Hireability Score" to match top performers with partner employers, drastically increasing your institutional success metrics.' },
-      { icon: Cpu, title: 'Scalable AI Credits', description: ' Efficiently distribute AI processing power across departments or cohorts,ensuring every student gets support without overextending your budget. ' },
+    institutes: [
+      { icon: LayoutDashboard, title: 'Institute Command Center', description: 'Cohort band averages, IA completion rates, engagement health, and goal-achievement segmentation across every batch — in one daily-updated view.' },
+      { icon: FileBarChart, title: 'Batch Snapshot Reports', description: 'One-page, printable batch performance summaries: engagement this week, IA results, mock outcomes, and the at-risk list. Ready for parents and stakeholders.' },
+      { icon: ShieldCheck, title: 'Diagnostic → Outcome Proof', description: 'Show measurable improvement from baseline diagnostic to current Real Band per student and per batch — the proof that sells your institute.' },
+      { icon: Building2, title: 'B2B Onboarding + WhatsApp Outreach', description: 'Built for Kerala\'s coaching ecosystem: structured institute onboarding, role-based access for your team, and WhatsApp nudges for disengaged students. (Outreach in build.)' },
     ],
   };
 
-  // Data for the new Tools Section
+  // Data for the Tools Section — statuses reflect actual build state
   const toolsData = [
     {
-      icon: Mic,
-      title: "AI Speaking Assessor",
-      description: "Students record responses; our AI scores fluency, pronunciation, coherence, and vocabulary against IELTS band descriptors. Tutors get a full breakdown — no more guesswork.",
-      status: "LIVE"
-    },
-    {
-      icon: LayoutDashboard,
-      title: "Institute Performance Dashboard",
-      description: "One view for your institute head: cohort-level band averages, tutor effectiveness metrics, at-risk students, and predicted exam outcomes — updated daily.",
-      status: "LIVE"
-    },
-    {
-      icon: FileEdit,
-      title: "Writing Task Feedback Engine",
-      description: "Automated first-pass scoring on Task 1 & 2 essays — aligned with IELTS criteria. Tutors review, adjust, and save 60% of marking time per student.",
-      status: "BETA"
-    },
-    {
       icon: Target,
-      title: "Weak-Point Drill Generator",
-      description: "When the AI spots a recurring gap — say, conditional structures or academic vocabulary — it auto-generates targeted micro-drills for that student to practice between sessions.",
-      status: "BETA"
+      title: "Diagnostic Assessment Engine",
+      description: "Every student starts with a four-skill baseline. Band scores and sub-skill breakdowns seed a live competency matrix — so practice is targeted from day one, not generic.",
+      status: "LIVE"
     },
     {
-      icon: Shield,
-      title: "Role-Based Access Control",
-      description: "Institute Owner → Admin → Tutor → Student. Your team sees exactly what they need. Students only access their own content. You stay in control.",
+      icon: Zap,
+      title: "Daily Drill Engine + LexiGrid",
+      description: "Three daily micro-drills targeting weak sub-skills, plus a daily vocabulary game. The Daily Competency Score gates progress and shows tutors exactly who practised today.",
+      status: "LIVE"
+    },
+    {
+      icon: Cpu,
+      title: "Adaptive Internal Assessments",
+      description: "A 40-minute assessment every three days, auto-scheduled. Difficulty adapts to the student's current band; missed sessions carry forward so weak skills never slip through.",
       status: "LIVE"
     },
     {
       icon: Laptop,
-      title: "Adaptive Mock Tests",
-      description: "Full-length simulations that adapt difficulty based on a student's performance profile. Coming with per-section time analytics and a printable score report for the student's file.",
-      status: "COMING SOON"
+      title: "Monthly Mock Tests + Real Band",
+      description: "Full IELTS simulations across all four skills, producing a Real Band score updated monthly. Motivated students can earn extra mocks with momentum points.",
+      status: "LIVE"
+    },
+    {
+      icon: Mic,
+      title: "AI Speaking & Writing Scoring",
+      description: "Nine scoring engines grade fluency, WPM, filler words, grammar, coherence, task response, and vocabulary against IELTS band descriptors — instantly, with feedback rationale.",
+      status: "LIVE"
+    },
+    {
+      icon: LayoutDashboard,
+      title: "Tutor & Institute Dashboards",
+      description: "Batch engagement pulse, at-risk detection, band overview tables, student deep dives, and institute-level outcome reports — currently in pilot build for partner institutes.",
+      status: "BETA"
     }
   ];
 
@@ -177,12 +210,12 @@ const LandingPage = () => {
 <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 transform-gpu">
   <div className="w-full px-4 sm:px-6 lg:px-8">
     <div className="flex items-center justify-between h-16">
-      
+
       {/* Logo Section */}
       <div className="flex items-center space-x-2">
-        <div className="p-2 bg-indigo-700 rounded-xl">
-          <UserRound className="h-6 w-6 text-white" />
-        </div>
+       <div className="p-2 bg-indigo-700 rounded-xl">
+                <GraduationCap className="h-5 w-5 text-white" />
+              </div>
         <span className="text-xl font-bold text-indigo-700">
           TestCrack
         </span>
@@ -203,12 +236,12 @@ const LandingPage = () => {
     <div className="text-center max-w-4xl mx-auto">
       <Badge className="mb-6 bg-purple-100 text-purple-700 hover:bg-purple-100 border-none px-3 py-1 mt-5">
         <Sparkles className="h-3.5 w-3.5 mr-2" />
-        AI-Powered Education Platform
+        Diagnostic-First IELTS Prep for Institutes
       </Badge>
-      
+
       <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-900 mb-4 leading-tight tracking-tight mt-5 relative min-h-[1.2em]">
         <span className="sr-only">Lift Your Institute's Band Score Average Measurably.</span>
-        
+
         <Typewriter
           options={{
             autoStart: true,
@@ -226,29 +259,29 @@ const LandingPage = () => {
           }}
         />
       </h1>
-      
+
       <p className="text-lg sm:text-xl text-slate-600 mb-10 max-w-3xl mx-auto leading-relaxed text-balance">
-        <span className="block mt-2">   Transform your coaching institute with TestCrack’s AI co-pilot the ultimate tool for automated student performance tracking. </span>
+        <span className="block mt-2">A complete education ecosystem for Kerala's coaching institutes — diagnostic-first IELTS prep, a daily drill loop students stick to, adaptive assessments every three days, and a live Real Band score your tutors can act on.</span>
       </p>
 
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
         <Button
           size="lg"
           variant="outline"
-          onClick={() => navigate('/dashdemo')}
+          onClick={() => setDemoModalOpen(true)}
           className="px-8 py-6 h-auto bg-indigo-700 hover:bg-indigo-800 text-white transition-all shadow-md active:scale-95 border-none"
         >
-          <MonitorPlay className="mr-2 h-5 w-5 text-white" />
-          <span className='text-white font-bold'>View Demo</span>
+          <MessageSquareText className="mr-2 h-5 w-5 text-white" />
+          <span className='text-white font-bold'>Request Demo</span>
         </Button>
         <Button
           size="lg"
           variant="outline"
-          onClick={() => navigate('/Contact')}
+          onClick={() => navigate('/dashdemo')}
           className="px-8 py-6 h-auto bg-white hover:bg-gray-50 text-indigo-700 border-indigo-100 transition-all shadow-sm active:scale-95"
         >
-          <MessageSquareText className="mr-2 h-5 w-5 text-indigo-700" />
-          <span className='font-bold'>Contact Us</span>
+          <MonitorPlay className="mr-2 h-5 w-5 text-indigo-700" />
+          <span className='font-bold'>View Demo</span>
         </Button>
       </div>
     </div>
@@ -258,8 +291,7 @@ const LandingPage = () => {
 {/* Pain Points / Problem Statement Section */}
 <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white relative z-10">
   <div className="max-w-7xl mx-auto">
-    
-    {/* --- NEW HEADING --- */}
+
     <div className="text-center mb-16">
       <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest">
         The Industry Challenge
@@ -268,13 +300,12 @@ const LandingPage = () => {
         Hidden roadblocks limiting your <span className="text-indigo-600">growth.</span>
       </h2>
       <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
-        Traditional teaching methods are burning out tutors and capping student success. Here is what is standing in the way of your institute's scale.
+        Traditional coaching methods are burning out tutors and capping student outcomes. Here is what is standing in the way of your institute's scale.
       </p>
     </div>
-    {/* ------------------- */}
 
     <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-0">
-      
+
       {/* Card 1 */}
       <Card className="flex-1 w-full bg-white/50 backdrop-blur-sm border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 transform-gpu z-10 group">
         <CardContent className="p-8">
@@ -282,10 +313,10 @@ const LandingPage = () => {
             <TrendingDown className="h-6 w-6 text-red-500" />
           </div>
           <h3 className="text-xl font-bold text-slate-900 mb-3 leading-tight group-hover:text-indigo-700 transition-colors">
-            Pass rates stagnate after a plateau
+            Band scores plateau — and nobody knows why
           </h3>
           <p className="text-slate-600 text-sm leading-relaxed">
-            Most institutes hit a ceiling at 70–75% pass rate because tutors lack real-time data on where students are slipping.
+            Without sub-skill data, tutors can't see whether a student is stuck on coherence, grammar, or fluency — so practice stays generic and scores stay flat.
           </p>
         </CardContent>
       </Card>
@@ -305,7 +336,7 @@ const LandingPage = () => {
             Tutors spend hours marking, not teaching
           </h3>
           <p className="text-slate-600 text-sm leading-relaxed">
-            Manual essay and speaking corrections eat 40–60% of tutor time — time that could be spent on high-value coaching.
+            Manual essay and speaking corrections eat 40–60% of tutor time — time that could be spent on high-value coaching and intervention.
           </p>
         </CardContent>
       </Card>
@@ -322,10 +353,10 @@ const LandingPage = () => {
             <RefreshCw className="h-6 w-6 text-blue-500" />
           </div>
           <h3 className="text-xl font-bold text-slate-900 mb-3 leading-tight group-hover:text-indigo-700 transition-colors">
-            Students drop out before exam day
+            Students disengage silently before exam day
           </h3>
           <p className="text-slate-600 text-sm leading-relaxed">
-            Without visible progress, students lose motivation mid-course — and your institute loses revenue and referrals.
+            Without daily habits and visible progress, students drift away mid-course — and you find out only when they stop showing up. Lost revenue, lost referrals.
           </p>
         </CardContent>
       </Card>
@@ -346,10 +377,10 @@ const LandingPage = () => {
   <div className="max-w-7xl mx-auto relative z-10">
     <div className="text-center mb-16">
       <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-       What We Offer ?
+       One Platform. Three Wins.
       </h2>
       <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-        Our comprehensive platform combines cutting-edge AI with proven learning methodologies.
+        Students build a daily habit, tutors get actionable data, and institute owners get measurable outcomes.
       </p>
     </div>
 
@@ -357,15 +388,15 @@ const LandingPage = () => {
   <div className="inline-flex p-1 sm:p-1.5 bg-white/40 backdrop-blur-xl rounded-2xl border border-white/60 shadow-lg ring-1 ring-black/5 max-w-full transform-gpu">
     {[
       { id: 'students', label: 'Students', icon: GraduationCap },
-      { id: 'instructors', label: 'Instructors', icon: Users },
-      { id: 'universities', label: 'Universities', icon: Building2 },
+      { id: 'instructors', label: 'Tutors', icon: Users },
+      { id: 'institutes', label: 'Institutes', icon: Building2 },
     ].map((tab) => (
       <button
         key={tab.id}
         onClick={() => setActiveTab(tab.id)}
         className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-sm font-semibold transition-all duration-300 whitespace-nowrap ${
-          activeTab === tab.id 
-            ? "bg-indigo-700 text-white shadow-lg shadow-indigo-200" 
+          activeTab === tab.id
+            ? "bg-indigo-700 text-white shadow-lg shadow-indigo-200"
             : "text-gray-500 hover:text-indigo-700 hover:bg-white/50"
         }`}
       >
@@ -377,13 +408,13 @@ const LandingPage = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl">
         {tabContent[activeTab as keyof typeof tabContent].map((item, idx) => (
-          <Card 
-            key={`${activeTab}-${idx}`} 
+          <Card
+            key={`${activeTab}-${idx}`}
             className="group relative overflow-hidden border border-white/40 bg-white/30 backdrop-blur-md hover:bg-white/50 hover:border-white/80 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 animate-in fade-in slide-in-from-bottom-3 transform-gpu"
             style={{ animationDelay: `${idx * 100}ms` }}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            
+
             <CardContent className="p-6 text-left relative z-10">
               <div className="p-2.5 bg-indigo-100/50 backdrop-blur-sm rounded-xl w-fit mb-4 group-hover:bg-indigo-600 transition-all duration-300">
                 <item.icon className="h-5 w-5 text-indigo-700 group-hover:text-white" />
@@ -402,7 +433,7 @@ const LandingPage = () => {
   </div>
 </section>
 
-{/* NEW: Tools Section */}
+{/* Tools Section */}
 <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden">
   <div className="max-w-7xl mx-auto">
     <div className="text-center mb-16">
@@ -413,7 +444,7 @@ const LandingPage = () => {
         Tools your institute can use <span className="text-indigo-600">today.</span>
       </h2>
       <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
-        Each feature is built around one goal: helping your tutors teach better and your students score higher — with clear, trackable proof.
+        Every feature exists for one reason: a daily learning loop students actually complete, with clear, trackable proof for tutors and owners.
       </p>
     </div>
 
@@ -424,22 +455,22 @@ const LandingPage = () => {
             <div className="p-3 bg-indigo-50 rounded-xl w-fit mb-6">
               <tool.icon className="h-6 w-6 text-indigo-600" />
             </div>
-            
+
             <h3 className="text-xl font-bold text-slate-900 mb-4">
               {tool.title}
             </h3>
-            
+
             <p className="text-slate-600 text-sm leading-relaxed mb-8 flex-grow">
               {tool.description}
             </p>
-            
+
             <div className="mt-auto">
-              <Badge 
-                variant="secondary" 
+              <Badge
+                variant="secondary"
                 className={`px-3 py-1 text-[10px] font-bold tracking-wider uppercase rounded-md border ${
-                  tool.status === 'LIVE' 
-                    ? 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-50' 
-                    : tool.status === 'BETA' 
+                  tool.status === 'LIVE'
+                    ? 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-50'
+                    : tool.status === 'BETA'
                       ? 'bg-amber-50 text-amber-600 border-amber-100 hover:bg-amber-50'
                       : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-50'
                 }`}
@@ -458,22 +489,22 @@ const LandingPage = () => {
 <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-slate-50 overflow-hidden">
   <div className="max-w-7xl mx-auto">
     <div className="grid lg:grid-cols-2 gap-20 items-center">
-      
+
       <div className="relative group">
         <div className="absolute -top-20 -left-20 w-72 h-72 bg-indigo-200/40 rounded-full blur-[120px] group-hover:bg-indigo-300/60 transition-colors duration-700 transform-gpu" />
         <div className="absolute -bottom-20 -right-20 w-72 h-72 bg-purple-200/40 rounded-full blur-[120px] group-hover:bg-purple-300/60 transition-colors duration-700 transform-gpu" />
-        
+
         <Card className="relative border-white/60 bg-white/40 backdrop-blur-xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] overflow-hidden border transition-all duration-500 hover:shadow-indigo-500/10 transform-gpu">
           <CardContent className="p-8 sm:p-14">
             <div className="flex flex-col md:flex-row items-center justify-between gap-12 relative">
-              
+
               <div className="flex flex-col items-center gap-4 z-10">
                 <div className="w-20 h-20 rounded-2xl bg-white shadow-xl flex items-center justify-center border border-slate-100 group-hover:scale-105 transition-transform duration-500">
-<User className="h-10 w-10 text-purple-600" /> 
+<User className="h-10 w-10 text-purple-600" />
                 </div>
                 <div className="text-center">
-                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Level</span>
-                  <p className="text-sm font-bold text-slate-700">Beginner</p>
+                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Diagnostic</span>
+                  <p className="text-sm font-bold text-slate-700">Band 5.5</p>
                 </div>
               </div>
 
@@ -484,23 +515,23 @@ const LandingPage = () => {
                 <div className="hidden md:block absolute top-10 -right-24 w-24 h-[1px] bg-slate-200">
                    <div className="animate-data-flow" style={{ animationDelay: '1.5s' }} />
                 </div>
-                
+
                 <div className="relative">
                   <div className="absolute inset-0 bg-indigo-600 blur-2xl opacity-20 animate-pulse transform-gpu" />
                   <div className="w-28 h-28 rounded-full bg-gradient-to-br from-indigo-700 via-indigo-600 to-purple-700 flex items-center justify-center shadow-2xl relative z-10 border-4 border-white/20">
                     <Cpu className="h-12 w-12 text-white animate-[spin_10s_linear_infinite]" />
                   </div>
                 </div>
-                <span className="mt-6 text-xl font-black bg-gradient-to-r from-indigo-700 to-purple-700 bg-clip-text text-transparent">TESTCRACK AI</span>
+                <span className="mt-6 text-xl font-black bg-gradient-to-r from-indigo-700 to-purple-700 bg-clip-text text-transparent">TESTCRACK ENGINE</span>
               </div>
 
               <div className="flex flex-col items-center gap-4 z-10">
                 <div className="w-20 h-20 rounded-2xl bg-white shadow-xl flex items-center justify-center border border-slate-100 group-hover:scale-105 transition-transform duration-500">
-<User className="h-10 w-10 text-purple-600" /> 
+<User className="h-10 w-10 text-purple-600" />
                </div>
                 <div className="text-center">
-                  <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest">Level</span>
-                  <p className="text-sm font-bold text-slate-700">Expert</p>
+                  <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest">Real Band</span>
+                  <p className="text-sm font-bold text-slate-700">Band 7.5</p>
                 </div>
               </div>
             </div>
@@ -511,45 +542,45 @@ const LandingPage = () => {
       <div className="flex flex-col">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-wider mb-6 w-fit border border-indigo-100">
           <Sparkles className="h-3.5 w-3.5" />
-          Proprietary Intelligence
+          Nine Scoring Engines
         </div>
-        
+
         <h2 className="text-4xl sm:text-5xl font-extrabold text-slate-900 leading-[1.1] mb-6">
-          Clarity Over Cleverness <br />
-          <span className="text-indigo-600">Always Wins.</span>
+          From Diagnostic <br />
+          <span className="text-indigo-600">to Real Band.</span>
         </h2>
-        
+
         <p className="text-slate-600 text-lg mb-10 leading-relaxed max-w-xl">
-Our engine doesn't just track your mistakes; it benchmarks your performance against millions of data points to ensure you meet and exceed <span className="text-indigo-600 font-semibold ">Global Scoring Standards.</span>
+Nine scoring engines grade every drill, assessment, and mock against <span className="text-indigo-600 font-semibold">official IELTS band descriptors</span> — updating each student's live competency matrix after every attempt. No guesswork, no inflated scores.
         </p>
 
         <div className="grid grid-cols-2 gap-4">
           {[
-            { name: 'IELTS', level: 'Academic/General' },
-            { name: 'PTE', level: 'Pearson Official' },
-            { name: 'SAT', level: 'Digital Board' },
-            { name: 'GRE', level: 'Grad Readiness' }
-          ].map((exam) => (
-            <div 
-              key={exam.name} 
+            { name: 'Listening', level: 'Accuracy Engine' },
+            { name: 'Reading', level: 'Accuracy Engine' },
+            { name: 'Writing', level: 'Grammar · Coherence · Task · Vocab' },
+            { name: 'Speaking', level: 'Fluency · WPM · Pronunciation' }
+          ].map((skill) => (
+            <div
+              key={skill.name}
               className="p-5 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-indigo-100 hover:-translate-y-1 transition-all duration-300 group transform-gpu"
             >
-              <h3 className="text-xl font-black text-slate-800 group-hover:text-indigo-600 transition-colors">{exam.name}</h3>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-1">{exam.level}</p>
+              <h3 className="text-xl font-black text-slate-800 group-hover:text-indigo-600 transition-colors">{skill.name}</h3>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-1">{skill.level}</p>
             </div>
           ))}
         </div>
 
         <div className="mt-8 flex items-center gap-3 text-sm text-slate-400 italic">
           <ShieldCheck className="h-5 w-5 text-emerald-500" />
-          Aligned with CEFR and Cambridge assessment frameworks.
+          Scored against IELTS band descriptors, 0–9 scale, rounded to the nearest 0.5.
         </div>
       </div>
 
     </div>
   </div>
 </section>
-  
+
 {/* How It Works Section */}
 <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden">
   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-4xl bg-indigo-50/50 rounded-[100%] blur-[120px] -z-10 transform-gpu" />
@@ -557,13 +588,13 @@ Our engine doesn't just track your mistakes; it benchmarks your performance agai
   <div className="max-w-7xl mx-auto relative">
     <div className="text-center mb-20">
       <Badge className="mb-4 bg-indigo-50 text-indigo-700 hover:bg-indigo-50 border-indigo-100 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
-        The Roadmap
+        The Learning Loop
       </Badge>
       <h2 className="text-4xl sm:text-5xl font-black text-slate-900 mb-6 tracking-tight">
-        Mastering your exams is <span className="text-indigo-700">simple.</span>
+        Band improvement, made <span className="text-indigo-700">systematic.</span>
       </h2>
       <p className="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
-        Three intentional steps designed to take you from diagnostic uncertainty to exam-day confidence.
+        Three connected stages take every student from baseline uncertainty to a Real Band score they — and you — can trust.
       </p>
     </div>
 
@@ -577,21 +608,21 @@ Our engine doesn't just track your mistakes; it benchmarks your performance agai
       {[
         {
           step: '01',
-          title: 'Data-Driven Goal Setting',
-          description: 'Sign up for free and define your target score. Our engine immediately builds an AI-tailored curriculum mapped to your deadline and current skill level, ensuring every hour of study is optimized for your specific performance diagnostics.',
-          icon: Users,
+          title: 'Diagnose',
+          description: 'Every student takes a one-time, four-skill baseline assessment on joining. Band scores and sub-skill breakdowns seed their personal competency matrix — so the platform knows exactly where to focus before the first drill.',
+          icon: Target,
         },
         {
           step: '02',
-          title: ' High-Stakes Performance Analysis',
-          description: 'Upload your materials or take an adaptive mock test. Our proprietary AI Engine conducts a deep-dive assessment analysis to identify weak points instantly We dont just tell you whats wrong; we show you how to fix it according to Global Scoring Standards.',
-          icon: Zap,
+          title: 'Drill Daily',
+          description: 'Each day, students complete targeted micro-drills on their weakest sub-skills plus the LexiGrid vocabulary game. Momentum points, daily streaks, and the Daily Competency Score turn practice into a habit — and show tutors who is engaged.',
+          icon: Flame,
         },
         {
           step: '03',
-          title: 'Precision Iteration',
-          description: 'Practice with hyper-realistic simulations. Track your progress through our unique "Hireability Score" and predictive analytics. Move from "studying" to "dominating" and enter your exam center with the total certainty of a data-backed score.',
-          icon: Target,
+          title: 'Assess & Prove',
+          description: 'Adaptive Internal Assessments every three days and a full mock test every month keep the competency matrix honest. The Real Band score moves visibly toward the target — measurable proof of progress for students, parents, and your institute.',
+          icon: LineChart,
         },
       ].map((item, index) => (
         <div key={index} className="relative group">
@@ -619,7 +650,7 @@ Our engine doesn't just track your mistakes; it benchmarks your performance agai
     <div className="mt-20 text-center">
        <p className="text-slate-400 text-sm font-semibold flex items-center justify-center gap-2 italic">
          <Sparkles className="h-4 w-4 text-indigo-400" />
-         Each step is powered by our proprietary TestCrack Neural Engine.
+         Diagnostic → Daily Loop → IA → Mock → Real Band. Every step measured.
        </p>
     </div>
   </div>
@@ -638,21 +669,30 @@ Our engine doesn't just track your mistakes; it benchmarks your performance agai
       <CardContent className="text-center space-y-8">
         <div className="space-y-4">
           <Badge className="bg-white/10 text-white border-white/20 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
-            Instant Access
+            Pilot Onboarding Open
           </Badge>
           <h2 className="text-4xl sm:text-6xl font-black text-white leading-tight tracking-tight">
-            Ready to Transform <br />
-            <span className="text-indigo-200">Your Learning?</span>
+            Ready to Lift Your <br />
+            <span className="text-indigo-200">Batch Averages?</span>
           </h2>
           <p className="text-xl text-indigo-100/80 max-w-2xl mx-auto leading-relaxed font-medium">
-            Join us for mastering IELTS, PTE, and SAT with the power of TestCrack AI.
+            Join the Kerala coaching institutes piloting TestCrack — diagnostic-first IELTS prep with measurable outcomes from week one.
           </p>
         </div>
 
         <div className="flex flex-col items-center gap-6">
+          <Button
+            size="lg"
+            onClick={() => setDemoModalOpen(true)}
+            className="px-10 py-6 h-auto bg-white hover:bg-indigo-50 text-indigo-700 font-black text-lg transition-all shadow-xl active:scale-95 border-none"
+          >
+            <MessageSquareText className="mr-2 h-5 w-5" />
+            Request Demo
+          </Button>
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-2">
             {[
-              { icon: Zap, text: 'Instant Setup' }
+              { icon: Zap, text: 'Structured Institute Onboarding' },
+              { icon: MessageSquareText, text: 'WhatsApp-First Outreach' }
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-2 text-indigo-100/60 text-sm font-medium">
                 <item.icon className="h-4 w-4" />
@@ -677,11 +717,98 @@ Our engine doesn't just track your mistakes; it benchmarks your performance agai
               <span className="text-lg font-bold text-white">TestCrack</span>
             </div>
             <p className="text-sm">
-              © 2026 TestCrack. All rights reserved.
+              © 2026 TestCrack. Diagnostic-first IELTS prep for institutes. All rights reserved.
             </p>
           </div>
         </div>
       </footer>
+
+      {/* Demo Request Modal */}
+      {demoModalOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm"
+          onClick={closeDemoModal}
+        >
+          <div
+            className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-indigo-50 to-purple-50">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-indigo-700 rounded-lg">
+                  <MessageSquareText className="h-4 w-4 text-white" />
+                </div>
+                <h3 className="text-lg font-black text-slate-900">Request a Demo</h3>
+              </div>
+              <button
+                onClick={closeDemoModal}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                aria-label="Close demo request"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {demoSubmitted ? (
+              <div className="px-6 py-10 text-center space-y-4">
+                <div className="mx-auto w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center">
+                  <ShieldCheck className="h-7 w-7 text-emerald-500" />
+                </div>
+                <h4 className="text-xl font-bold text-slate-900">Request sent!</h4>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  We've opened WhatsApp with your details pre-filled. Hit send there and our team will get back to you within one working day.
+                </p>
+                <Button
+                  onClick={closeDemoModal}
+                  className="bg-indigo-700 hover:bg-indigo-800 text-white font-bold"
+                >
+                  Done
+                </Button>
+              </div>
+            ) : (
+              <div className="px-6 py-6 space-y-4">
+                <p className="text-sm text-slate-500 leading-relaxed">
+                  Tell us about your institute and we'll reach out on WhatsApp to schedule a walkthrough.
+                </p>
+
+                {[
+                  { field: 'name' as const, label: 'Your Name *', placeholder: 'e.g. Priya Nair', type: 'text' },
+                  { field: 'institute' as const, label: 'Institute Name *', placeholder: 'e.g. Crest IELTS Academy, Kochi', type: 'text' },
+                  { field: 'city' as const, label: 'City', placeholder: 'e.g. Kochi', type: 'text' },
+                  { field: 'whatsapp' as const, label: 'WhatsApp Number *', placeholder: 'e.g. 9876543210', type: 'tel' },
+                  { field: 'email' as const, label: 'Email', placeholder: 'e.g. priya@crestielts.in', type: 'email' },
+                ].map((input) => (
+                  <div key={input.field} className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">
+                      {input.label}
+                    </label>
+                    <input
+                      type={input.type}
+                      value={demoForm[input.field]}
+                      onChange={(e) => handleDemoField(input.field, e.target.value)}
+                      placeholder={input.placeholder}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+                ))}
+
+                <Button
+                  onClick={handleDemoSubmit}
+                  disabled={!demoForm.name.trim() || !demoForm.institute.trim() || !demoForm.whatsapp.trim()}
+                  className="w-full py-6 h-auto bg-indigo-700 hover:bg-indigo-800 disabled:opacity-50 text-white font-bold transition-all active:scale-[0.98]"
+                >
+                  <MessageSquareText className="mr-2 h-5 w-5" />
+                  Send via WhatsApp
+                </Button>
+
+                <p className="text-[11px] text-slate-400 text-center leading-relaxed">
+                  Opens WhatsApp with your details pre-filled — nothing is sent until you press send there.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
