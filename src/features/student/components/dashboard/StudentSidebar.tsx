@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  GraduationCap, LayoutDashboard, Mic, PenTool, Headphones,
+import { 
+  GraduationCap, LayoutDashboard, Mic, PenTool, Headphones, 
   ClipboardCheck, History, Sparkles, Settings, LogOut,
   Timer, FileText, BookOpen, Target, Gamepad2, Lock
 } from "lucide-react";
@@ -14,28 +14,25 @@ const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
 interface SidebarProps {
   activeTab?: string;
   onTabChange?: (tab: string) => void;
-  isCollapsed: boolean;
-  toggleCollapse: () => void;
-  isNewStudent?: boolean;
-  /** When provided by the parent (e.g. StudentDashboardPage), this value is used
-   *  directly and no extra API call is made. When omitted, the sidebar fetches
-   *  the lock state itself so any student page shows the correct locked sidebar. */
+  isCollapsed?: boolean;
+  toggleCollapse?: () => void;
+  isNewStudent?: boolean; 
   isLocked?: boolean;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   className?: string;
+  alignment?: 'left' | 'right';
 }
 
-export const StudentSidebar = ({
-  activeTab = 'dashboard',
-  onTabChange,
-  isCollapsed,
-  toggleCollapse,
+export const StudentSidebar = ({ 
+  activeTab = 'dashboard', 
+  onTabChange, 
   isNewStudent = false,
   isLocked: isLockedProp,
   onMouseEnter,
   onMouseLeave,
-  className
+  className,
+  alignment = 'left'
 }: SidebarProps) => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
@@ -56,6 +53,26 @@ export const StudentSidebar = ({
   const isLocked = isLockedProp ?? selfLocked;
 
   const isActivelyDrilling = location.pathname.includes('/drill');
+  const isLeft = alignment === 'left';
+
+  // State: false means closed, true means open
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Listen for explicit state changes from the topbar
+  useEffect(() => {
+    const handleSync = (e: any) => {
+      if (e.detail !== undefined) setIsOpen(e.detail.isOpen);
+    };
+
+    window.addEventListener('sidebar-sync', handleSync);
+    return () => window.removeEventListener('sidebar-sync', handleSync);
+  }, []);
+
+  // Tell the Topbar we are closing
+  const closeSidebar = () => {
+    setIsOpen(false);
+    window.dispatchEvent(new CustomEvent('sidebar-sync', { detail: { isOpen: false } }));
+  };
 
   const isItemDisabled = (itemId: string) => {
     if (isActivelyDrilling) return true;
@@ -113,7 +130,7 @@ export const StudentSidebar = ({
     if (isItemDisabled(item.id)) return;
     navigate(item.path);
     if (onTabChange) onTabChange(item.id);
-    if (window.innerWidth < 1024) toggleCollapse(); // Close on mobile
+    if (window.innerWidth < 1024) closeSidebar(); // Closes securely on mobile
   };
 
   const handleLogout = async () => {
@@ -130,16 +147,32 @@ export const StudentSidebar = ({
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}} />
 
+      {/* Mobile Backdrop Overlay - Forced to z-[9998] */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-[9998] lg:hidden transition-opacity duration-300"
+          onClick={closeSidebar}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Sidebar - Forced to z-[9999] */}
       <aside 
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
         className={cn(
-          "group fixed left-4 top-4 bottom-4 z-50 bg-white dark:bg-[#0B1120] rounded-2xl flex flex-col justify-between py-6 transition-[width,transform] duration-300 ease-in-out border border-slate-200 dark:border-slate-800 shadow-xl overflow-x-hidden",
-          // Mobile state (hidden by default)
-          isCollapsed ? "-translate-x-[150%] lg:translate-x-0" : "translate-x-0",
-          // Desktop state: 84px wide, hover expands to 256px (w-64)
-          "w-64 lg:w-[84px]",
+          "group fixed top-4 bottom-4 z-[9999] bg-white dark:bg-[#0B1120] rounded-2xl flex flex-col justify-between py-6 transition-[width,transform] duration-300 ease-in-out border border-slate-200 dark:border-slate-800 shadow-xl overflow-x-hidden",
+          
+          isLeft ? "left-4" : "right-4",
+          
+          // Mobile open/close logic reversed slightly to match standard isOpen boolean
+          !isOpen 
+            ? (isLeft ? "-translate-x-[150%]" : "translate-x-[150%]") 
+            : "translate-x-0",
+          
+          "lg:translate-x-0 w-64 lg:w-[84px]",
           !isLocked && !isActivelyDrilling && "lg:hover:w-64",
+          
           className
         )}
       >
