@@ -92,8 +92,15 @@ export default function InstructorStudentProgressPage() {
           )}
 
           {!loading && !error && !resolvedStudentId && (
-            <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-2xl p-8 text-center">
-              <p className="text-amber-700 dark:text-amber-400 font-semibold">Student ID missing. Please navigate from the dashboard.</p>
+            <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-2xl p-8 text-center space-y-3">
+              <p className="text-amber-700 dark:text-amber-400 font-semibold">Session expired or direct URL access.</p>
+              <p className="text-amber-600 dark:text-amber-500 text-sm">Please navigate to a student from the dashboard or batch view.</p>
+              <button
+                onClick={() => navigate('/instructor/dashboard')}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-600 text-white text-sm font-semibold hover:bg-amber-700 transition-colors"
+              >
+                Go to Dashboard
+              </button>
             </div>
           )}
 
