@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { StudentSidebar } from './dashboard/StudentSidebar';
-import { StudentTopbar } from './dashboard/StudentTopbar';
+
 import { Button } from '@/shared/components/ui/button';
 import { useToast } from '@/shared/hooks/use-toast';
 import {
@@ -10,7 +9,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
-
+import StudentLayout from './StudentLayout';
 // ── Types ────────────────────────────────────────────────────────────────────
 
 type QuestionType = 'mcq' | 'form' | 'image_label' | 'image_map' | 'image_match';
@@ -1908,20 +1907,13 @@ export default function ListeningPractice() {
   // ── Layout ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
-      <StudentSidebar
-        activeTab="listening"
-        isCollapsed={isSidebarCollapsed}
-        toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-      />
-      <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-24' : 'lg:pl-72'} flex flex-col min-h-screen`}>
-        <StudentTopbar onUpgradeClick={() => {}} />
-        <main className="flex-1 p-6 max-w-7xl mx-auto w-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
-          {screen === 'home' && renderHome()}
-          {screen === 'test' && renderTest()}
-          {screen === 'results' && renderResults()}
-        </main>
-      </div>
+
+  <StudentLayout activeTab="listening">
+    <div className="max-w-7xl mx-auto w-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {screen === 'home' && renderHome()}
+      {screen === 'test' && renderTest()}
+      {screen === 'results' && renderResults()}
     </div>
-  );
+  </StudentLayout>
+);
 }
