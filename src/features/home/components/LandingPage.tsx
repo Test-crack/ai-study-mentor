@@ -43,7 +43,7 @@ import Mic from 'lucide-react/dist/esm/icons/mic';
 import Laptop from 'lucide-react/dist/esm/icons/laptop';
 import Flame from 'lucide-react/dist/esm/icons/flame';
 
-const DEMO_WHATSAPP_NUMBER = '919999999999';
+const DEMO_WHATSAPP_NUMBER = '919995684689';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -546,6 +546,79 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* ── CONTACT SECTION ── */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-3xl bg-indigo-50/60 rounded-[100%] blur-[140px] -z-10 transform-gpu" />
+        <div className="max-w-4xl mx-auto relative">
+
+          <div className="text-center mb-14">
+            <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Get in Touch</span>
+            <h2 className="text-4xl sm:text-5xl font-black text-slate-900 mt-4 mb-4">
+              We'd love to <span className="text-indigo-600">hear from you.</span>
+            </h2>
+            <p className="text-lg text-slate-500 max-w-xl mx-auto leading-relaxed">
+              Reach out directly — whether you have a question, want a walkthrough, or are ready to onboard your institute.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-6">
+
+            {/* Email card */}
+            <a
+              href="mailto:officialtestcrack@gmail.com"
+              className="group flex items-start gap-5 p-7 rounded-2xl border border-slate-100 bg-white shadow-sm hover:shadow-xl hover:border-indigo-100 hover:-translate-y-1 transition-all duration-300"
+            >
+              <div className="p-3.5 rounded-xl bg-indigo-50 group-hover:bg-indigo-700 transition-colors duration-300 shrink-0">
+                <Mail className="h-6 w-6 text-indigo-600 group-hover:text-white transition-colors duration-300" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Email us</p>
+                <p className="text-base font-bold text-slate-900 group-hover:text-indigo-700 transition-colors break-all">
+                  officialtestcrack@gmail.com
+                </p>
+                <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">
+                  For partnerships, onboarding queries, or general enquiries — we reply within one working day.
+                </p>
+              </div>
+            </a>
+
+            {/* WhatsApp card */}
+            <a
+              href="https://wa.me/919995684689"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-start gap-5 p-7 rounded-2xl border border-slate-100 bg-white shadow-sm hover:shadow-xl hover:border-indigo-100 hover:-translate-y-1 transition-all duration-300"
+            >
+              <div className="p-3.5 rounded-xl bg-emerald-50 group-hover:bg-indigo-700 transition-colors duration-300 shrink-0">
+                <Phone className="h-6 w-6 text-emerald-600 group-hover:text-white transition-colors duration-300" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">WhatsApp us</p>
+                <p className="text-base font-bold text-slate-900 group-hover:text-indigo-700 transition-colors">
+                  +91 99956 84689
+                </p>
+                <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">
+                  Fastest way to reach us. Chat directly with the TestCrack team about demos or pilot onboarding.
+                </p>
+              </div>
+            </a>
+
+          </div>
+
+          {/* CTA nudge */}
+          <div className="mt-10 text-center">
+            <Button
+              onClick={() => setDemoModalOpen(true)}
+              className="px-8 py-5 h-auto bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-sm transition-all shadow-md active:scale-95 border-none"
+            >
+              <MessageSquareText className="mr-2 h-4 w-4" />
+              Or fill out the demo request form
+            </Button>
+          </div>
+
+        </div>
+      </section>
+
       {/* ── FOOTER ── */}
       <footer className="bg-gray-900 text-gray-400">
 
@@ -578,6 +651,12 @@ const LandingPage = () => {
                     <Mail className="h-3.5 w-3.5" />
                   </div>
                   officialtestcrack@gmail.com
+                </a>
+                <a href="https://wa.me/919995684689" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-gray-500 hover:text-indigo-400 transition-colors group">
+                  <div className="w-7 h-7 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center group-hover:bg-indigo-700 group-hover:border-indigo-600 transition-all">
+                    <Phone className="h-3.5 w-3.5" />
+                  </div>
+                  +91 99956 84689
                 </a>
                 <a href="https://testcrack.com/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-gray-500 hover:text-indigo-400 transition-colors group">
                   <div className="w-7 h-7 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center group-hover:bg-indigo-700 group-hover:border-indigo-600 transition-all">
