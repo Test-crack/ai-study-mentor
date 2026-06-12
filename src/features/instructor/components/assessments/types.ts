@@ -3,7 +3,7 @@
 
 export interface IAOverviewRow {
   student_id:   string;
-  user_id:      string;
+  user_id:      string;  // User.id — use this for navigation to full-progress
   name:         string;
   avatar:       string | null;
   ia_completed: number;
@@ -17,7 +17,7 @@ export interface IAOverviewRow {
 
 export interface MockOverviewRow {
   student_id:       string;
-  user_id:          string;
+  user_id:          string;  // User.id
   name:             string;
   avatar:           string | null;
   mock_count:       number;
@@ -28,7 +28,7 @@ export interface MockOverviewRow {
 
 export interface DiagnosticOverviewRow {
   student_id:     string;
-  user_id:        string;
+  user_id:        string;  // User.id
   name:           string;
   avatar:         string | null;
   is_diagnosed:   boolean;

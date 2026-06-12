@@ -37,7 +37,7 @@ function BaselineComparison({ baseline, competency }: {
   competency: StudentFullProgress['competency'];
 }) {
   const currentBySkill = new Map(competency.map(r => [r.skill.toUpperCase(), r.band_score]));
-  const hasBaseline = SKILL_ROWS.some(r => baseline[r.abbr] !== null);
+  const hasBaseline = baseline != null && SKILL_ROWS.some(r => baseline[r.abbr] !== null);
   const hasCurrent  = SKILL_ROWS.some(r => (currentBySkill.get(r.skill) ?? 0) > 0);
 
   if (!hasBaseline && !hasCurrent) return null;
@@ -111,7 +111,10 @@ function BaselineComparison({ baseline, competency }: {
 }
 
 export function OverviewTab({ data }: Props) {
-  const { competency, ia_eligibility, lexigrid_stats, diagnostic_baseline } = data;
+  const competency          = data.competency         ?? [];
+  const diagnostic_baseline = data.diagnostic_baseline ?? { L: null, R: null, W: null, S: null };
+  const lexigrid_stats      = data.lexigrid_stats      ?? { games_last_14: 0, avg_words_solved: 0, bonus_rate: 0 };
+  const ia_eligibility      = data.ia_eligibility      ?? { prerequisites_met: false, avg_dcs: 0, drills_completed: 0, next_ia_date: null };
 
   const radarData = competency
     .filter(r => r.band_score > 0)

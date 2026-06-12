@@ -71,7 +71,7 @@ import InstituteAdmins from "@/features/InstituteOwner/dashboard/InstituteAdmins
 import BatchAnalyticsView from "@/features/InstituteOwner/dashboard/BatchAnalyticsView";
 import VoiceLab from "@/features/student/components/VoiceLab";
 import SpeedReading from "@/features/student/components/SpeedReading";
-import InstructorReport from "@/features/instructor/components/InstructorReport";
+import { InstructorReportPage } from "@/features/instructor/components/InstructorReportPage";
 import Workflow from "@/features/instructor/components/Workflow";
 import IeltsWriting from "@/features/student/components/IeltsWriting";
 import ListeningPractice from "@/features/student/components/ListeningPractice";
@@ -324,7 +324,7 @@ const AppRoutes = () => {
       <Route path="/instructor/batches" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorBatchView /></RoleProtectedRoute>} />
       <Route path="/instructor/tech-pep" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><TechPrepPage /></RoleProtectedRoute>} />
       <Route path="/instructor/alignment" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><AlignmentPage /></RoleProtectedRoute>} />
-      <Route path="/instructor/reports" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorReport /></RoleProtectedRoute>} />
+      <Route path="/instructor/reports" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorReportPage /></RoleProtectedRoute>} />
       <Route path="/instructor/workflow" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><Workflow /></RoleProtectedRoute>} />
 
       {/* ── Shared protected routes ───────────────────────────────────────── */}
