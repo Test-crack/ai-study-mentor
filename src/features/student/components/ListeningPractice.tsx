@@ -1,7 +1,6 @@
-﻿import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { StudentSidebar } from './dashboard/StudentSidebar';
-import { StudentTopbar } from './dashboard/StudentTopbar';
+
 import { Button } from '@/shared/components/ui/button';
 import { useToast } from '@/shared/hooks/use-toast';
 import {
@@ -10,8 +9,8 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
-
-// â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+import StudentLayout from './StudentLayout';
+// ── Types ────────────────────────────────────────────────────────────────────
 
 type QuestionType = 'mcq' | 'form' | 'image_label' | 'image_map' | 'image_match';
 
@@ -21,9 +20,9 @@ interface Option {
 }
 
 /**
- * image_label  â†’ an SVG/image with numbered hotspots; user types/selects a label per hotspot
- * image_map    â†’ a floor-plan / map image with lettered zones; user picks which zone matches a description
- * image_match  â†’ a set of diagrams/icons shown side by side; user matches a statement to one
+ * image_label  → an SVG/image with numbered hotspots; user types/selects a label per hotspot
+ * image_map    → a floor-plan / map image with lettered zones; user picks which zone matches a description
+ * image_match  → a set of diagrams/icons shown side by side; user matches a statement to one
  */
 interface ImageHotspot {
   id: string;          // e.g. "A", "B", "1", "2"
@@ -70,7 +69,7 @@ interface SectionResult {
   results: Array<Question & { userAnswer: string; correct: boolean }>;
 }
 
-// â”€â”€ SVG Diagrams (inline, no external dependency) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── SVG Diagrams (inline, no external dependency) ────────────────────────────
 
 /**
  * Simple SVG floor-plan for the Library Orientation task.
@@ -126,7 +125,7 @@ const LIBRARY_FLOOR_PLAN_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
 `)}`;
 
 /**
- * Simple wildlife park map SVG â€” zones N/S/E/W + Central Arena.
+ * Simple wildlife park map SVG — zones N/S/E/W + Central Arena.
  */
 const WILDLIFE_PARK_MAP_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 380" font-family="system-ui,sans-serif">
@@ -168,7 +167,7 @@ const WILDLIFE_PARK_MAP_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
   <line x1="468" y1="40" x2="468" y2="55" stroke="#166534" stroke-width="1.5" marker-end="url(#arrow)"/>
 
   <!-- Main entrance label -->
-  <text x="250" y="375" text-anchor="middle" font-size="10" fill="#6b7280">â–¼ Main Entrance</text>
+  <text x="250" y="375" text-anchor="middle" font-size="10" fill="#6b7280">▼ Main Entrance</text>
 </svg>
 `)}`;
 
@@ -228,7 +227,7 @@ const ANGLERFISH_DIAGRAM_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
   <circle cx="175" cy="235" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5" opacity="0.9"/>
   <text x="175" y="239" text-anchor="middle" font-size="11" fill="white" font-weight="700">5</text>
 
-  <text x="260" y="305" text-anchor="middle" font-size="11" fill="#93c5fd">Fig 1 â€” Anatomy of a Deep-Sea Anglerfish</text>
+  <text x="260" y="305" text-anchor="middle" font-size="11" fill="#93c5fd">Fig 1 — Anatomy of a Deep-Sea Anglerfish</text>
 </svg>
 `)}`;
 
@@ -263,7 +262,7 @@ const MAP_PROJECTIONS_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
   <!-- Distortion annotation -->
   <line x1="58" y1="50" x2="58" y2="82" stroke="#ef4444" stroke-width="1.5" marker-end="url(#a)"/>
   <text x="25" y="44" font-size="9" fill="#ef4444">Distorted</text>
-  <text x="25" y="54" font-size="9" fill="#ef4444">â†‘ larger</text>
+  <text x="25" y="54" font-size="9" fill="#ef4444">↑ larger</text>
 
   <!-- Hotspot 1 -->
   <circle cx="80" cy="62" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5"/>
@@ -310,7 +309,7 @@ const MAP_PROJECTIONS_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
 </svg>
 `)}`;
 
-// â”€â”€ IELTS Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── IELTS Data ────────────────────────────────────────────────────────────────
 
 const IELTS_TASKS: ListeningTask[] = [
   // --- TEST 1 ---
@@ -330,7 +329,7 @@ Caller: Yes, it's Patricia Morrison. That's M-O-R-R-I-S-O-N.
 
 Agent: Thank you, Ms Morrison. And how many people will be staying?
 
-Caller: There'll be four of us â€” two adults and two children. The children are aged seven and ten.
+Caller: There'll be four of us — two adults and two children. The children are aged seven and ten.
 
 Agent: Perfect. And when would you like to arrive?
 
@@ -358,7 +357,7 @@ Caller: Could you spell that last part, please?
 
 Agent: Yes, it's T for Tango, R for Romeo, seven, two, H for Hotel, J for Juliet.
 
-Caller: Got it. And one more thing â€” is there a supermarket nearby?
+Caller: Got it. And one more thing — is there a supermarket nearby?
 
 Agent: There's a large supermarket about five minutes' walk away. There are also several restaurants and a pharmacy on the same street.
 
@@ -391,10 +390,10 @@ Caller: Brilliant. I'll go ahead and book it then.`,
         id: 'q1_4', type: 'mcq',
         text: '4. What is the total cost for two weeks?',
         options: [
-          { id: 'A', text: 'A. Â£350' },
-          { id: 'B', text: 'B. Â£600' },
-          { id: 'C', text: 'C. Â£700' },
-          { id: 'D', text: 'D. Â£800' },
+          { id: 'A', text: 'A. £350' },
+          { id: 'B', text: 'B. £600' },
+          { id: 'C', text: 'C. £700' },
+          { id: 'D', text: 'D. £800' },
         ],
         answer: 'C',
       },
@@ -455,7 +454,7 @@ Thank you for listening. Please feel free to pick up a copy of our library guide
     questions: [
       {
         id: 'q2_img1', type: 'image_map',
-        text: '1. Which zone (Aâ€“F) on the floor plan shows the Periodicals section?',
+        text: '1. Which zone (A–F) on the floor plan shows the Periodicals section?',
         image: { src: LIBRARY_FLOOR_PLAN_SVG, alt: 'Library floor plan' },
         options: [
           { id: 'A', text: 'Zone A' },
@@ -540,7 +539,7 @@ Sarah: Yes, thanks for seeing us, Dr. Chen. We've been doing quite a lot of read
 
 Dr. Chen: That's very common at this stage. Tell me what you've looked at so far.
 
-Jack: We started with the environmental benefits â€” you know, air quality, temperature regulation, biodiversity. There's a huge amount of literature on that.
+Jack: We started with the environmental benefits — you know, air quality, temperature regulation, biodiversity. There's a huge amount of literature on that.
 
 Dr. Chen: There certainly is. And what about the social dimension?
 
@@ -548,11 +547,11 @@ Sarah: That's actually where we got more interested. We found some compelling re
 
 Dr. Chen: Good. So you're leaning towards the psychological and social effects rather than the purely environmental angle?
 
-Jack: Partly, yes. But we also want to look at inequality â€” how green space is distributed unevenly across cities. Lower-income areas often have far less access.
+Jack: Partly, yes. But we also want to look at inequality — how green space is distributed unevenly across cities. Lower-income areas often have far less access.
 
 Dr. Chen: That's an excellent observation, and it's increasingly prominent in urban planning research. Are you planning any primary research, or will this be purely literature-based?
 
-Sarah: We'd like to do a small survey â€” maybe twenty or thirty participants from different parts of the city â€” to complement the secondary sources.
+Sarah: We'd like to do a small survey — maybe twenty or thirty participants from different parts of the city — to complement the secondary sources.
 
 Dr. Chen: That sounds manageable. Just be careful about making broad generalisations from such a small sample. Make sure your discussion acknowledges the limitations.
 
@@ -568,7 +567,7 @@ Sarah: How long should each section be, roughly?
 
 Dr. Chen: Given that it's a five-thousand-word assignment, I'd say roughly a thousand words on theory and methodology, two thousand on your literature review, fifteen hundred on your primary findings, and five hundred for the conclusion.
 
-Jack: That's really helpful. One last question â€” are we expected to include policy recommendations?
+Jack: That's really helpful. One last question — are we expected to include policy recommendations?
 
 Dr. Chen: It's not required, but it would definitely strengthen your argument if you can suggest how your findings might inform planning decisions. It shows you understand the real-world relevance of academic research.
 
@@ -595,9 +594,9 @@ Sarah: Great. Thank you, Dr. Chen. We feel much clearer about our direction now.
         id: 'q3_3', type: 'mcq',
         text: '3. How many participants are they planning for their survey?',
         options: [
-          { id: 'A', text: 'A. 10â€“15' },
-          { id: 'B', text: 'B. 20â€“30' },
-          { id: 'C', text: 'C. 50â€“100' },
+          { id: 'A', text: 'A. 10–15' },
+          { id: 'B', text: 'B. 20–30' },
+          { id: 'C', text: 'C. 50–100' },
           { id: 'D', text: 'D. Over 100' },
         ],
         answer: 'B',
@@ -638,7 +637,7 @@ Sarah: Great. Thank you, Dr. Chen. We feel much clearer about our direction now.
     topic: 'The History of Cartography',
     type: 'Academic lecture',
     description: 'Listen to an academic lecture on the history and evolution of mapmaking. Use the diagram to answer image-based questions.',
-    script: `Good afternoon, everyone. Today I'd like to take you on a journey through the history of cartography â€” the science and art of mapmaking â€” and explore how maps have shaped human understanding of the world.
+    script: `Good afternoon, everyone. Today I'd like to take you on a journey through the history of cartography — the science and art of mapmaking — and explore how maps have shaped human understanding of the world.
 
 The earliest known maps date back to ancient Babylon, around 2300 BCE. These were clay tablets that depicted not just physical geography but also the known cosmos. Interestingly, Babylon was placed at the very centre of these early world maps, reflecting the human tendency to position oneself at the heart of the universe.
 
@@ -648,18 +647,18 @@ However, during the European Middle Ages, cartographic progress stagnated. Maps 
 
 The Renaissance brought a dramatic revival of interest in accurate representation. The rediscovery of Ptolemy's works in the fifteenth century, combined with the explosion of maritime exploration, created an urgent demand for reliable navigational charts. Portuguese and Spanish explorers needed maps they could actually use at sea.
 
-A pivotal figure of this era was Gerardus Mercator, a Flemish cartographer working in the sixteenth century. His projection â€” a method of representing the curved surface of the earth on a flat plane â€” became the standard for nautical navigation. However, Mercator's projection significantly distorts the size of land masses near the poles. Greenland, for example, appears comparable in size to Africa on a Mercator map, when in reality Africa is approximately fourteen times larger.
+A pivotal figure of this era was Gerardus Mercator, a Flemish cartographer working in the sixteenth century. His projection — a method of representing the curved surface of the earth on a flat plane — became the standard for nautical navigation. However, Mercator's projection significantly distorts the size of land masses near the poles. Greenland, for example, appears comparable in size to Africa on a Mercator map, when in reality Africa is approximately fourteen times larger.
 
 This distortion sparked considerable controversy in the twentieth century, particularly from political geographers who argued that the map disproportionately enlarged northern, wealthier nations. In 1974, German historian Arno Peters proposed an alternative projection that preserved the relative size of land areas. Though more accurate in terms of area, the Peters projection distorts the shapes of continents.
 
 The twentieth century also witnessed the transformation of cartography through technology. Aerial photography, and later satellite imagery, revolutionised the accuracy and detail of maps. Today, we have access to real-time geographic data through systems like GPS and platforms like Google Earth.
 
-Yet despite these advances, maps remain profoundly interpretive documents. Every map involves choices â€” what to include, what to omit, how to represent borders â€” and those choices always reflect particular perspectives and priorities. As the geographer John Harley argued, maps are never neutral. They are instruments of communication, and sometimes, of power.
+Yet despite these advances, maps remain profoundly interpretive documents. Every map involves choices — what to include, what to omit, how to represent borders — and those choices always reflect particular perspectives and priorities. As the geographer John Harley argued, maps are never neutral. They are instruments of communication, and sometimes, of power.
 
 Thank you. I'll now take a few questions before we move on to the seminar discussion.`,
     sharedImage: {
       src: MAP_PROJECTIONS_SVG,
-      alt: 'Side-by-side comparison of Mercator and Peters map projections with hotspots labelled 1â€“4',
+      alt: 'Side-by-side comparison of Mercator and Peters map projections with hotspots labelled 1–4',
     },
     questions: [
       {
@@ -681,7 +680,7 @@ Thank you. I'll now take a few questions before we move on to the seminar discus
       },
       {
         id: 'q4_img1', type: 'image_label',
-        text: '3. Look at the diagram above. What does hotspot 1 (on the Mercator projection) represent â€” which land mass appears exaggerated in size?',
+        text: '3. Look at the diagram above. What does hotspot 1 (on the Mercator projection) represent — which land mass appears exaggerated in size?',
         image: {
           src: MAP_PROJECTIONS_SVG,
           alt: 'Mercator vs Peters projections diagram',
@@ -832,14 +831,14 @@ Have a wonderful day exploring the park, and if you need any assistance, any of 
     questions: [
       {
         id: 'q6_img1', type: 'image_map',
-        text: '1. Look at the park map. Which zone (Aâ€“E) is the Aquatic Zone, where the penguin feeding takes place?',
+        text: '1. Look at the park map. Which zone (A–E) is the Aquatic Zone, where the penguin feeding takes place?',
         image: { src: WILDLIFE_PARK_MAP_SVG, alt: 'Wildlife park map' },
         options: [
-          { id: 'A', text: 'Zone A â€” North' },
-          { id: 'B', text: 'Zone B â€” West' },
-          { id: 'C', text: 'Zone C â€” Central' },
-          { id: 'D', text: 'Zone D â€” East' },
-          { id: 'E', text: 'Zone E â€” South' },
+          { id: 'A', text: 'Zone A — North' },
+          { id: 'B', text: 'Zone B — West' },
+          { id: 'C', text: 'Zone C — Central' },
+          { id: 'D', text: 'Zone D — East' },
+          { id: 'E', text: 'Zone E — South' },
         ],
         answer: 'A',
         hint: 'The guide says the Aquatic Zone is in the northern sector.',
@@ -849,11 +848,11 @@ Have a wonderful day exploring the park, and if you need any assistance, any of 
         text: '2. The Birds of Prey demonstration takes place in which zone on the map?',
         image: { src: WILDLIFE_PARK_MAP_SVG, alt: 'Wildlife park map' },
         options: [
-          { id: 'A', text: 'Zone A â€” North' },
-          { id: 'B', text: 'Zone B â€” West' },
-          { id: 'C', text: 'Zone C â€” Central' },
-          { id: 'D', text: 'Zone D â€” East' },
-          { id: 'E', text: 'Zone E â€” South' },
+          { id: 'A', text: 'Zone A — North' },
+          { id: 'B', text: 'Zone B — West' },
+          { id: 'C', text: 'Zone C — Central' },
+          { id: 'D', text: 'Zone D — East' },
+          { id: 'E', text: 'Zone E — South' },
         ],
         answer: 'C',
         hint: 'Listen for the location of the central arena.',
@@ -880,11 +879,11 @@ Have a wonderful day exploring the park, and if you need any assistance, any of 
         text: '5. The Petting Zoo and Animal Interaction area is next to the cafeteria. Which zone does this match on the map?',
         image: { src: WILDLIFE_PARK_MAP_SVG, alt: 'Wildlife park map' },
         options: [
-          { id: 'A', text: 'Zone A â€” North' },
-          { id: 'B', text: 'Zone B â€” West' },
-          { id: 'C', text: 'Zone C â€” Central' },
-          { id: 'D', text: 'Zone D â€” East' },
-          { id: 'E', text: 'Zone E â€” South' },
+          { id: 'A', text: 'Zone A — North' },
+          { id: 'B', text: 'Zone B — West' },
+          { id: 'C', text: 'Zone C — Central' },
+          { id: 'D', text: 'Zone D — East' },
+          { id: 'E', text: 'Zone E — South' },
         ],
         answer: 'E',
         hint: 'The guide says the petting zoo is situated next to the cafeteria.',
@@ -903,7 +902,7 @@ Chloe: Yes, we have. We've decided to focus on the impact of influencer marketin
 
 Tutor: That's a very timely topic. Have you divided up the research workload yet?
 
-Mark: We have. I'm going to handle the historical context and the shift from traditional celebrity endorsements to micro-influencers. Chloe is going to focus on the psychological aspectsâ€”why younger consumers trust these influencers more than traditional advertising.
+Mark: We have. I'm going to handle the historical context and the shift from traditional celebrity endorsements to micro-influencers. Chloe is going to focus on the psychological aspects—why younger consumers trust these influencers more than traditional advertising.
 
 Tutor: That sounds like a solid division of labor. Are you planning to include any case studies?
 
@@ -978,7 +977,7 @@ Chloe: Great, we are on track to finish the draft by this Friday. We'll send it 
     topic: 'The Science of Bioluminescence',
     type: 'Academic lecture',
     description: 'Listen to a biology lecture on bioluminescence in marine life. Label the anglerfish anatomy diagram.',
-    script: `Welcome back to our marine biology module. Today, we are exploring one of the most mesmerizing phenomena in the natural world: bioluminescence. This is the biochemical emission of light by living organisms. While it can be found on landâ€”think of fireflies or certain fungiâ€”it is overwhelmingly a marine phenomenon. 
+    script: `Welcome back to our marine biology module. Today, we are exploring one of the most mesmerizing phenomena in the natural world: bioluminescence. This is the biochemical emission of light by living organisms. While it can be found on land—think of fireflies or certain fungi—it is overwhelmingly a marine phenomenon. 
 
 To understand bioluminescence, we must first look at the chemistry behind it. The light is produced by a chemical reaction involving a light-emitting molecule, generically called luciferin, and an enzyme called luciferase. When oxygen is introduced to this mixture, the luciferin oxidizes, and the energy from this reaction is released as visible light. Unlike the light from a traditional incandescent light bulb, which wastes a huge amount of energy as heat, bioluminescence is "cold light." Nearly 100% of the energy is emitted as light, making it incredibly efficient.
 
@@ -993,7 +992,7 @@ Finally, bioluminescence plays a vital role in communication and mating. Many de
 Interestingly, medical science is now borrowing from the ocean. Researchers are utilizing the green fluorescent protein, originally discovered in jellyfish, as a biological marker. By attaching this glowing protein to specific genes or cells, scientists can literally watch cellular processes unfold in real-time under a microscope, which has revolutionized genetics and cancer research.`,
     sharedImage: {
       src: ANGLERFISH_DIAGRAM_SVG,
-      alt: 'Labelled diagram of an anglerfish with numbered hotspots 1â€“5',
+      alt: 'Labelled diagram of an anglerfish with numbered hotspots 1–5',
       hotspots: [
         { id: '1', x: 37, y: 13, label: '1' },
         { id: '2', x: 31, y: 48, label: '2' },
@@ -1060,7 +1059,7 @@ Interestingly, medical science is now borrowing from the ocean. Researchers are 
   },
 ];
 
-// â”€â”€ Band Score Helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Band Score Helper ─────────────────────────────────────────────────────────
 
 function getIELTSBand(correct: number, total: number): string {
   const pct = total > 0 ? (correct / total) * 100 : 0;
@@ -1093,7 +1092,7 @@ function formatTime(seconds: number): string {
   return `${m}:${s}`;
 }
 
-// â”€â”€ Question type badge label helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Question type badge label helper ─────────────────────────────────────────
 
 function questionTypeBadge(type: QuestionType) {
   const map: Record<QuestionType, { label: string; color: string }> = {
@@ -1107,7 +1106,7 @@ function questionTypeBadge(type: QuestionType) {
   return <span className={`inline-block text-[10px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full ${color} mb-2`}>{label}</span>;
 }
 
-// â”€â”€ ImageQuestionBlock â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── ImageQuestionBlock ────────────────────────────────────────────────────────
 
 interface ImageQuestionBlockProps {
   question: Question;
@@ -1150,7 +1149,7 @@ function ImageQuestionBlock({ question, answer, onAnswer }: ImageQuestionBlockPr
                   ${selected ? 'border-[#7B61FF] bg-[#7B61FF] text-white' : 'border-slate-400 dark:border-slate-500'}`}>
                   {opt.id}
                 </span>
-                {opt.text.replace(`Zone ${opt.id} â€” `, '')}
+                {opt.text.replace(`Zone ${opt.id} — `, '')}
               </button>
             );
           })}
@@ -1177,7 +1176,7 @@ function ImageQuestionBlock({ question, answer, onAnswer }: ImageQuestionBlockPr
         {wordBank.length > 0 && (
           <div>
             <p className="text-xs text-slate-400 dark:text-slate-500 mb-2 uppercase tracking-wider font-semibold">
-              Word Bank â€” click to select your answer:
+              Word Bank — click to select your answer:
             </p>
             <div className="flex flex-wrap gap-2">
               {wordBank.map(word => {
@@ -1206,7 +1205,7 @@ function ImageQuestionBlock({ question, answer, onAnswer }: ImageQuestionBlockPr
             type="text"
             value={answer}
             onChange={e => onAnswer(e.target.value)}
-            placeholder="Type label hereâ€¦"
+            placeholder="Type label here…"
             className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-200 dark:border-slate-700
               bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm
               placeholder-slate-400 dark:placeholder-slate-500 outline-none
@@ -1220,7 +1219,7 @@ function ImageQuestionBlock({ question, answer, onAnswer }: ImageQuestionBlockPr
   return null;
 }
 
-// â”€â”€ Shared Image Panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Shared Image Panel ────────────────────────────────────────────────────────
 
 function SharedImagePanel({ image, isPlaying }: { image: ImageQuestion; isPlaying: boolean }) {
   const [expanded, setExpanded] = useState(false);
@@ -1259,7 +1258,7 @@ function SharedImagePanel({ image, isPlaying }: { image: ImageQuestion; isPlayin
   );
 }
 
-// â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Main Component ────────────────────────────────────────────────────────────
 
 type ScreenView = 'home' | 'test' | 'results';
 
@@ -1267,7 +1266,7 @@ export default function ListeningPractice() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [screen, setScreen] = useState<ScreenView>('home');
   const [selectedTask, setSelectedTask] = useState<ListeningTask | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -1395,7 +1394,7 @@ export default function ListeningPractice() {
     setTimeout(() => {
       const results = selectedTask.questions.map(q => ({
         ...q,
-        userAnswer: answers[q.id] || 'â€”',
+        userAnswer: answers[q.id] || '—',
         correct: checkAnswer(q, answers[q.id] || ''),
       }));
       setAllResults(prev => {
@@ -1435,7 +1434,7 @@ export default function ListeningPractice() {
   const imageQCount = (task: ListeningTask) =>
     task.questions.filter(q => q.type === 'image_label' || q.type === 'image_map' || q.type === 'image_match').length;
 
-  // â”€â”€ HOME VIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── HOME VIEW ──────────────────────────────────────────────────────────────
 
   const renderHome = () => (
     <div className="space-y-8">
@@ -1447,7 +1446,7 @@ export default function ListeningPractice() {
           </h1>
           <p className="text-indigo-50 max-w-2xl text-base md:text-lg leading-relaxed">
             Improve your listening skills with authentic voice scripts. Sections now include
-            <strong className="text-yellow-200"> diagram labelling and map / plan tasks</strong> â€” just like the real IELTS Academic exam.
+            <strong className="text-yellow-200"> diagram labelling and map / plan tasks</strong> — just like the real IELTS Academic exam.
           </p>
         </div>
       </div>
@@ -1478,7 +1477,7 @@ export default function ListeningPractice() {
                   <div className="flex flex-col items-end gap-2 flex-shrink-0">
                     {done ? (
                       <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
-                        {score}/{task.questions.length} âœ“
+                        {score}/{task.questions.length} ✓
                       </Badge>
                     ) : (
                       <Badge className="bg-indigo-50 text-[#7B61FF] hover:bg-indigo-100 dark:bg-[#7B61FF]/20 dark:text-[#9b86ff]">
@@ -1524,22 +1523,22 @@ export default function ListeningPractice() {
               <div>
                 <p className="font-semibold text-slate-800 dark:text-slate-100">Overall Progress</p>
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                  {totalCorrect}/{totalQ} correct Â· Estimated Band {band}
+                  {totalCorrect}/{totalQ} correct · Estimated Band {band}
                 </p>
               </div>
             </div>
-            <span className="text-[#7B61FF] dark:text-[#9b86ff] font-medium text-sm">View Results â†’</span>
+            <span className="text-[#7B61FF] dark:text-[#9b86ff] font-medium text-sm">View Results →</span>
           </CardContent>
         </Card>
       )}
 
       <p className="text-sm text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-900 rounded-xl p-4 border border-slate-100 dark:border-slate-800">
-        ðŸ’¡ <strong>Exam Tip:</strong> For diagram and map tasks, study the image carefully <em>before</em> pressing Play. In the real IELTS exam you hear each recording only once.
+        💡 <strong>Exam Tip:</strong> For diagram and map tasks, study the image carefully <em>before</em> pressing Play. In the real IELTS exam you hear each recording only once.
       </p>
     </div>
   );
 
-  // â”€â”€ TEST VIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── TEST VIEW ──────────────────────────────────────────────────────────────
 
   const renderTest = () => {
     if (!selectedTask) return null;
@@ -1632,13 +1631,13 @@ export default function ListeningPractice() {
                     {isPlaying && (
                       <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-sm font-medium">
                         <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                        Now playingâ€¦
+                        Now playing…
                       </div>
                     )}
                   </div>
                   {!hasPlayed && (
                     <p className="text-xs text-slate-400 mt-3">
-                      ðŸ‘† Press <strong>Play Audio</strong> to hear the recording. You can only listen to it once.
+                      👆 Press <strong>Play Audio</strong> to hear the recording. You can only listen to it once.
                     </p>
                   )}
                 </div>
@@ -1683,8 +1682,8 @@ export default function ListeningPractice() {
                     <li>Read all questions and study diagrams <strong>before</strong> pressing play.</li>
                     <li>In the real exam you hear the recording <strong>once only</strong>.</li>
                     <li>For <strong>map/plan tasks</strong>: identify key landmarks first.</li>
-                    <li>For <strong>diagram labelling</strong>: use the word bank â€” spelling counts.</li>
-                    <li>Answer while listening â€” don't wait until the end.</li>
+                    <li>For <strong>diagram labelling</strong>: use the word bank — spelling counts.</li>
+                    <li>Answer while listening — don't wait until the end.</li>
                   </ul>
                 </div>
               </CardContent>
@@ -1760,13 +1759,13 @@ export default function ListeningPractice() {
                   {question.type === 'form' && (
                     <div className="space-y-2">
                       {question.hint && (
-                        <p className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1">ðŸ’¬ {question.hint}</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1">💬 {question.hint}</p>
                       )}
                       <input
                         type="text"
                         value={answers[question.id] || ''}
                         onChange={e => handleFormInput(question.id, e.target.value)}
-                        placeholder="Type your answer hereâ€¦"
+                        placeholder="Type your answer here…"
                         className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700
                           bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm
                           placeholder-slate-400 dark:placeholder-slate-500 outline-none
@@ -1778,7 +1777,7 @@ export default function ListeningPractice() {
                   {/* Hint for image questions */}
                   {(question.type === 'image_label' || question.type === 'image_map') && question.hint && (
                     <p className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1 mt-1">
-                      ðŸ’¬ {question.hint}
+                      💬 {question.hint}
                     </p>
                   )}
                 </div>
@@ -1790,7 +1789,7 @@ export default function ListeningPractice() {
     );
   };
 
-  // â”€â”€ RESULTS VIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── RESULTS VIEW ───────────────────────────────────────────────────────────
 
   const renderResults = () => (
     <div className="space-y-6">
@@ -1897,7 +1896,7 @@ export default function ListeningPractice() {
               Complete all {IELTS_TASKS.length} sections for a full band score estimate.
             </p>
             <Button onClick={() => setScreen('home')} className="bg-[#7B61FF] hover:bg-[#6a50e5] text-white">
-              Continue Practising â†’
+              Continue Practising →
             </Button>
           </CardContent>
         </Card>
@@ -1905,23 +1904,16 @@ export default function ListeningPractice() {
     </div>
   );
 
-  // â”€â”€ Layout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Layout ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
-      <StudentSidebar
-        activeTab="listening"
-        isCollapsed={isSidebarCollapsed}
-        toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-      />
-      <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-24' : 'lg:pl-72'} flex flex-col min-h-screen`}>
-        <StudentTopbar onUpgradeClick={() => {}} />
-        <main className="flex-1 p-6 max-w-7xl mx-auto w-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
-          {screen === 'home' && renderHome()}
-          {screen === 'test' && renderTest()}
-          {screen === 'results' && renderResults()}
-        </main>
-      </div>
+
+  <StudentLayout activeTab="listening">
+    <div className="max-w-7xl mx-auto w-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {screen === 'home' && renderHome()}
+      {screen === 'test' && renderTest()}
+      {screen === 'results' && renderResults()}
     </div>
-  );
+  </StudentLayout>
+);
 }

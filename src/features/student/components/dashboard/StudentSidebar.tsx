@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  GraduationCap, LayoutDashboard, Mic, PenTool, Headphones, 
+import {
+  GraduationCap, LayoutDashboard, Mic, PenTool, Headphones,
   ClipboardCheck, History, Sparkles, Settings, LogOut,
   Timer, FileText, BookOpen, Target, Gamepad2, Lock
 } from "lucide-react";
@@ -10,13 +10,16 @@ import { callBackend } from "@/features/auth/services/authClient";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+// Desktop/tablet rail kicks in at md (768px) so iPad Mini (768) and iPad Air (820)
+// get the icon rail instead of an unreachable mobile drawer.
+const RAIL_BREAKPOINT = 768;
 
 interface SidebarProps {
   activeTab?: string;
   onTabChange?: (tab: string) => void;
   isCollapsed?: boolean;
   toggleCollapse?: () => void;
-  isNewStudent?: boolean; 
+  isNewStudent?: boolean;
   isLocked?: boolean;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
@@ -24,9 +27,9 @@ interface SidebarProps {
   alignment?: 'left' | 'right';
 }
 
-export const StudentSidebar = ({ 
-  activeTab = 'dashboard', 
-  onTabChange, 
+export const StudentSidebar = ({
+  activeTab = 'dashboard',
+  onTabChange,
   isNewStudent = false,
   isLocked: isLockedProp,
   onMouseEnter,
@@ -52,23 +55,21 @@ export const StudentSidebar = ({
 
   const isLocked = isLockedProp ?? selfLocked;
 
+
   const isActivelyDrilling = location.pathname.includes('/drill');
   const isLeft = alignment === 'left';
+  const canExpand = !isLocked && !isActivelyDrilling;
 
-  // State: false means closed, true means open
   const [isOpen, setIsOpen] = useState(false);
 
-  // Listen for explicit state changes from the topbar
   useEffect(() => {
     const handleSync = (e: any) => {
       if (e.detail !== undefined) setIsOpen(e.detail.isOpen);
     };
-
     window.addEventListener('sidebar-sync', handleSync);
     return () => window.removeEventListener('sidebar-sync', handleSync);
   }, []);
 
-  // Tell the Topbar we are closing
   const closeSidebar = () => {
     setIsOpen(false);
     window.dispatchEvent(new CustomEvent('sidebar-sync', { detail: { isOpen: false } }));
@@ -79,7 +80,7 @@ export const StudentSidebar = ({
     if (isLocked && itemId !== 'dashboard') return true;
     return false;
   };
-  
+
   const menuGroups = [
     {
       title: "Core",
@@ -130,15 +131,26 @@ export const StudentSidebar = ({
     if (isItemDisabled(item.id)) return;
     navigate(item.path);
     if (onTabChange) onTabChange(item.id);
-    if (window.innerWidth < 1024) closeSidebar(); // Closes securely on mobile
+    if (window.innerWidth < RAIL_BREAKPOINT) closeSidebar(); // only auto-close in drawer mode
   };
 
   const handleLogout = async () => {
     document.documentElement.classList.remove('dark');
-    localStorage.setItem('theme', 'light'); 
-    localStorage.setItem('vite-ui-theme', 'light'); 
+    localStorage.setItem('theme', 'light');
+    localStorage.setItem('vite-ui-theme', 'light');
     await signOut();
   };
+
+  // Hover-expand label: transitions ONLY layout/opacity props it needs,
+  // so lock-state changes elsewhere don't trigger animated repaints.
+  const labelCls = (extra?: string) => cn(
+    "whitespace-nowrap overflow-hidden",
+    "transition-[max-width,opacity,margin] duration-200 ease-out",
+    "max-w-[200px] opacity-100 ml-4",
+    "md:max-w-0 md:opacity-0 md:ml-0",
+    canExpand && "md:group-hover:max-w-[200px] md:group-hover:opacity-100 md:group-hover:ml-4",
+    extra
+  );
 
   return (
     <>
@@ -147,32 +159,33 @@ export const StudentSidebar = ({
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}} />
 
-      {/* Mobile Backdrop Overlay - Forced to z-[9998] */}
+      {/* Mobile Backdrop Overlay (phones only — tablets get the rail) */}
       {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-[9998] lg:hidden transition-opacity duration-300"
+        <div
+          className="fixed inset-0 bg-black/50 z-[9998] md:hidden transition-opacity duration-300"
           onClick={closeSidebar}
           aria-hidden="true"
         />
       )}
 
-      {/* Sidebar - Forced to z-[9999] */}
-      <aside 
+      <aside
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
         className={cn(
-          "group fixed top-4 bottom-4 z-[9999] bg-white dark:bg-[#0B1120] rounded-2xl flex flex-col justify-between py-6 transition-[width,transform] duration-300 ease-in-out border border-slate-200 dark:border-slate-800 shadow-xl overflow-x-hidden",
-          
+          "group fixed top-4 bottom-4 z-[9999] bg-white dark:bg-[#0B1120] rounded-2xl flex flex-col justify-between py-6 border border-slate-200 dark:border-slate-800 shadow-xl overflow-x-hidden",
+          "transition-[width,transform] duration-300 ease-in-out",
+
           isLeft ? "left-4" : "right-4",
-          
-          // Mobile open/close logic reversed slightly to match standard isOpen boolean
-          !isOpen 
-            ? (isLeft ? "-translate-x-[150%]" : "translate-x-[150%]") 
+
+          // Drawer behaviour below md only
+          !isOpen
+            ? (isLeft ? "-translate-x-[150%]" : "translate-x-[150%]")
             : "translate-x-0",
-          
-          "lg:translate-x-0 w-64 lg:w-[84px]",
-          !isLocked && !isActivelyDrilling && "lg:hover:w-64",
-          
+
+          // From md (768px) up: always-visible icon rail, hover to expand
+          "md:translate-x-0 w-64 md:w-[84px]",
+          canExpand && "md:hover:w-64",
+
           className
         )}
       >
@@ -181,12 +194,7 @@ export const StudentSidebar = ({
           <div className="bg-indigo-600 p-2.5 rounded-xl shrink-0 flex items-center justify-center shadow-lg shadow-indigo-600/20">
             <GraduationCap className="h-6 w-6 text-white" />
           </div>
-          <span className={cn(
-            "text-xl font-bold text-slate-900 dark:text-white tracking-wide transition-all duration-300 overflow-hidden",
-            "max-w-[200px] opacity-100 ml-4",
-            "lg:max-w-0 lg:opacity-0 lg:ml-0",
-            !isLocked && !isActivelyDrilling && "lg:group-hover:max-w-[200px] lg:group-hover:opacity-100 lg:group-hover:ml-4"
-          )}>
+          <span className={labelCls("text-xl font-bold text-slate-900 dark:text-white tracking-wide")}>
             TestCrack
           </span>
         </div>
@@ -196,10 +204,11 @@ export const StudentSidebar = ({
           {filteredGroups.map((group, groupIdx) => (
             <div key={groupIdx} className="mb-6">
               <div className={cn(
-                "text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 transition-all duration-300 whitespace-nowrap overflow-hidden",
+                "text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 whitespace-nowrap overflow-hidden",
+                "transition-[max-width,opacity,padding] duration-200 ease-out",
                 "max-w-[200px] opacity-100 px-3",
-                "lg:max-w-0 lg:opacity-0 lg:px-0",
-                !isLocked && !isActivelyDrilling && "lg:group-hover:max-w-[200px] lg:group-hover:opacity-100 lg:group-hover:px-3"
+                "md:max-w-0 md:opacity-0 md:px-0",
+                canExpand && "md:group-hover:max-w-[200px] md:group-hover:opacity-100 md:group-hover:px-3"
               )}>
                 {group.title}
               </div>
@@ -212,34 +221,36 @@ export const StudentSidebar = ({
                       key={item.id}
                       onClick={() => handleNavigation(item)}
                       disabled={disabled}
+                      aria-disabled={disabled}
                       className={cn(
-                        "w-full flex items-center rounded-xl transition-all duration-200 px-4 py-3 relative",
+                        "w-full flex items-center rounded-xl px-4 py-3 relative",
+                        // Only colors animate on hover; disabled state snaps instantly
+                        "transition-colors duration-150",
                         activeTab === item.id && !disabled
-                          ? "bg-indigo-600/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400" 
+                          ? "bg-indigo-600/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400"
                           : "bg-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800",
-                        disabled && "opacity-40 pointer-events-none grayscale"
+                        // No grayscale filter (expensive repaint) and no transition on opacity
+                        disabled && "opacity-40 pointer-events-none"
                       )}
                     >
                       <item.icon className={cn(
-                        "h-5 w-5 shrink-0 transition-transform",
-                        activeTab === item.id && !disabled ? "text-indigo-600 dark:text-indigo-400" : "text-slate-500 group-hover:text-indigo-500"
+                        "h-5 w-5 shrink-0",
+                        activeTab === item.id && !disabled
+                          ? "text-indigo-600 dark:text-indigo-400"
+                          : "text-slate-500"
                       )} />
-                      
-                      <span className={cn(
-                        "font-medium text-sm whitespace-nowrap text-left flex-1 transition-all duration-300 overflow-hidden",
-                        "max-w-[200px] opacity-100 ml-4",
-                        "lg:max-w-0 lg:opacity-0 lg:ml-0",
-                        !isLocked && !isActivelyDrilling && "lg:group-hover:max-w-[200px] lg:group-hover:opacity-100 lg:group-hover:ml-4"
-                      )}>
+
+                      <span className={labelCls("font-medium text-sm text-left flex-1")}>
                         {item.label}
                       </span>
 
                       {disabled && (
                         <Lock className={cn(
-                          "w-4 h-4 text-slate-400 shrink-0 transition-all duration-300 overflow-hidden",
+                          "w-4 h-4 text-slate-400 shrink-0 overflow-hidden",
+                          "transition-[max-width,opacity] duration-200",
                           "max-w-[20px] opacity-100",
-                          "lg:max-w-0 lg:opacity-0",
-                          !isActivelyDrilling && "lg:group-hover:max-w-[20px] lg:group-hover:opacity-100"
+                          "md:max-w-0 md:opacity-0",
+                          "md:group-hover:max-w-[20px] md:group-hover:opacity-100"
                         )} />
                       )}
                     </button>
@@ -252,38 +263,28 @@ export const StudentSidebar = ({
 
         {/* Bottom Actions */}
         <div className="pt-4 px-3 border-t border-slate-200 dark:border-slate-800 space-y-1.5 shrink-0">
-          <button 
+          <button
             onClick={() => handleNavigation({ id: 'settings', path: '/student/settings' })}
             disabled={isActivelyDrilling || isLocked}
             className={cn(
-              "w-full flex items-center rounded-xl bg-transparent px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200",
-              (isActivelyDrilling || isLocked) && "opacity-40 pointer-events-none grayscale"
+              "w-full flex items-center rounded-xl bg-transparent px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-150",
+              (isActivelyDrilling || isLocked) && "opacity-40 pointer-events-none"
             )}
           >
             <Settings className="h-5 w-5 shrink-0" />
-            <span className={cn(
-              "font-medium text-sm whitespace-nowrap transition-all duration-300 overflow-hidden",
-              "max-w-[200px] opacity-100 ml-4",
-              "lg:max-w-0 lg:opacity-0 lg:ml-0",
-              !isLocked && !isActivelyDrilling && "lg:group-hover:max-w-[200px] lg:group-hover:opacity-100 lg:group-hover:ml-4"
-            )}>Settings</span>
+            <span className={labelCls("font-medium text-sm")}>Settings</span>
           </button>
 
-          <button 
+          <button
             onClick={handleLogout}
             disabled={isActivelyDrilling}
             className={cn(
-              "w-full flex items-center rounded-xl bg-transparent px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 transition-all duration-200",
-              isActivelyDrilling && "opacity-40 pointer-events-none grayscale"
+              "w-full flex items-center rounded-xl bg-transparent px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 transition-colors duration-150",
+              isActivelyDrilling && "opacity-40 pointer-events-none"
             )}
           >
             <LogOut className="h-5 w-5 shrink-0" />
-            <span className={cn(
-              "font-medium text-sm whitespace-nowrap transition-all duration-300 overflow-hidden",
-              "max-w-[200px] opacity-100 ml-4",
-              "lg:max-w-0 lg:opacity-0 lg:ml-0",
-              !isLocked && !isActivelyDrilling && "lg:group-hover:max-w-[200px] lg:group-hover:opacity-100 lg:group-hover:ml-4"
-            )}>Logout</span>
+            <span className={labelCls("font-medium text-sm")}>Logout</span>
           </button>
         </div>
       </aside>
