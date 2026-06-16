@@ -122,12 +122,12 @@ function RiskCard({
       cfg.border
     )}>
       {/* Card header */}
-      <div className={cn('px-4 pt-4 pb-3', cfg.headerBg)}>
-        <div className="flex items-start justify-between gap-3">
+      <div className={cn('px-3 sm:px-4 pt-3 sm:pt-4 pb-3', cfg.headerBg)}>
+        <div className="flex items-start justify-between gap-2">
           {/* Severity badge + name */}
-          <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
             <div className={cn(
-              'h-9 w-9 rounded-full shrink-0 flex items-center justify-center text-xs font-black overflow-hidden',
+              'h-8 w-8 sm:h-9 sm:w-9 rounded-full shrink-0 flex items-center justify-center text-xs font-black overflow-hidden',
               student.avatar ? '' : avatarPalette(student.name)
             )}>
               {student.avatar
@@ -148,14 +148,14 @@ function RiskCard({
           </div>
 
           {/* Flag count badge */}
-          <span className="shrink-0 text-[11px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
+          <span className="shrink-0 text-[11px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full whitespace-nowrap">
             {student.flags.length} flag{student.flags.length !== 1 ? 's' : ''}
           </span>
         </div>
       </div>
 
       {/* Metrics strip */}
-      <div className="flex items-center divide-x divide-slate-100 dark:divide-slate-800 border-y border-slate-100 dark:border-slate-800">
+      <div className="grid grid-cols-3 divide-x divide-slate-100 dark:divide-slate-800 border-y border-slate-100 dark:border-slate-800">
         {[
           {
             label: 'Band',
@@ -179,23 +179,23 @@ function RiskCard({
               : 'text-slate-600 dark:text-slate-400',
           },
         ].map(m => (
-          <div key={m.label} className="flex-1 px-3 py-2 text-center">
-            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{m.label}</p>
-            <p className={cn('text-xs font-bold leading-tight', m.color)}>{m.value}</p>
+          <div key={m.label} className="px-2 sm:px-3 py-2 text-center">
+            <p className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5 truncate">{m.label}</p>
+            <p className={cn('text-[11px] sm:text-xs font-bold leading-tight', m.color)}>{m.value}</p>
           </div>
         ))}
       </div>
 
       {/* Flags list — numbered by priority */}
-      <div className="px-4 py-3 space-y-1.5 flex-1">
+      <div className="px-3 sm:px-4 py-3 space-y-1.5 flex-1">
         {student.flags.map((flag, i) => {
           const { icon, color } = getFlagMeta(flag);
           return (
-            <div key={i} className="flex items-center gap-2">
-              <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 w-3 shrink-0 tabular-nums">
+            <div key={i} className="flex items-start gap-2">
+              <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 w-3 shrink-0 tabular-nums mt-0.5">
                 {i + 1}
               </span>
-              <span className={cn('flex items-center gap-1.5 text-xs font-medium', color)}>
+              <span className={cn('flex items-center gap-1.5 text-xs font-medium leading-snug', color)}>
                 {icon}
                 {flag}
               </span>
@@ -205,7 +205,7 @@ function RiskCard({
       </div>
 
       {/* CTA */}
-      <div className="px-4 pb-4 pt-1">
+      <div className="px-3 sm:px-4 pb-3 sm:pb-4 pt-1">
         <button
           onClick={() => {
             if (!batchId) return;
@@ -215,7 +215,7 @@ function RiskCard({
           className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-xs font-bold transition-colors group border border-slate-200 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-500/40"
         >
           View Student Profile
-          <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+          <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform shrink-0" />
         </button>
       </div>
     </div>
@@ -227,27 +227,27 @@ function RiskCard({
 function CardSkeleton() {
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-200 dark:border-slate-700 overflow-hidden animate-pulse">
-      <div className="px-4 pt-4 pb-3 bg-slate-50 dark:bg-slate-800/30">
-        <div className="flex items-center gap-2.5">
-          <div className="h-9 w-9 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
+      <div className="px-3 sm:px-4 pt-3 sm:pt-4 pb-3 bg-slate-50 dark:bg-slate-800/30">
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
           <div className="space-y-1.5 flex-1">
             <div className="h-3 w-14 bg-slate-200 dark:bg-slate-700 rounded" />
             <div className="h-3.5 w-24 bg-slate-200 dark:bg-slate-700 rounded" />
           </div>
         </div>
       </div>
-      <div className="flex divide-x divide-slate-100 dark:divide-slate-800 border-y border-slate-100 dark:border-slate-800">
+      <div className="grid grid-cols-3 divide-x divide-slate-100 dark:divide-slate-800 border-y border-slate-100 dark:border-slate-800">
         {[1, 2, 3].map(i => (
-          <div key={i} className="flex-1 px-3 py-2 flex flex-col items-center gap-1">
-            <div className="h-2 w-10 bg-slate-100 dark:bg-slate-800 rounded" />
-            <div className="h-3 w-8 bg-slate-200 dark:bg-slate-700 rounded" />
+          <div key={i} className="px-2 sm:px-3 py-2 flex flex-col items-center gap-1">
+            <div className="h-2 w-8 bg-slate-100 dark:bg-slate-800 rounded" />
+            <div className="h-3 w-6 bg-slate-200 dark:bg-slate-700 rounded" />
           </div>
         ))}
       </div>
-      <div className="px-4 py-3 space-y-2">
+      <div className="px-3 sm:px-4 py-3 space-y-2">
         {[1, 2, 3].map(i => <div key={i} className="h-3 w-full bg-slate-100 dark:bg-slate-800 rounded" />)}
       </div>
-      <div className="px-4 pb-4 pt-1">
+      <div className="px-3 sm:px-4 pb-3 sm:pb-4 pt-1">
         <div className="h-9 w-full bg-slate-100 dark:bg-slate-800 rounded-xl" />
       </div>
     </div>
@@ -259,7 +259,8 @@ function CardSkeleton() {
 function SectionDivider({ label, count, severity }: { label: string; count: number; severity: Severity }) {
   const cfg = SEVERITY_CONFIG[severity];
   return (
-    <div className="flex items-center gap-3 col-span-2">
+    // col-span-full works for any grid width (1-col on mobile, 2-col on sm+)
+    <div className="flex items-center gap-3 col-span-full">
       <div className={cn('flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest shrink-0', cfg.sectionLabel)}>
         <span className={cn('h-1.5 w-1.5 rounded-full', cfg.dot)} />
         {label}
@@ -280,7 +281,7 @@ export function AtRiskStudentList({ students, batchId, loading }: AtRiskStudentL
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 space-y-4">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-5 space-y-4">
         <div className="h-5 w-40 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {[1, 2, 3, 4].map(i => <CardSkeleton key={i} />)}
@@ -339,36 +340,37 @@ export function AtRiskStudentList({ students, batchId, loading }: AtRiskStudentL
   });
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 space-y-5">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-5 space-y-4 sm:space-y-5">
 
       {/* Panel header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-2.5">
+      <div className="flex items-start sm:items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-2.5 min-w-0">
           <div className="h-8 w-8 rounded-xl bg-rose-100 dark:bg-rose-500/20 flex items-center justify-center shrink-0">
             <AlertTriangle className="h-4 w-4 text-rose-600 dark:text-rose-400" />
           </div>
-          <div>
+          <div className="min-w-0">
             <h3 className="text-sm font-bold text-slate-800 dark:text-white leading-tight">Student Risk Monitor</h3>
             <p className="text-[11px] text-slate-400 leading-tight">Flagged by activity &amp; performance rules</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        {/* Severity summary chips */}
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
           {groups.critical > 0 && (
-            <span className="flex items-center gap-1 text-[11px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-100 dark:border-rose-500/20">
-              <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+            <span className="flex items-center gap-1 text-[11px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 px-2 sm:px-2.5 py-1 rounded-full border border-rose-100 dark:border-rose-500/20 whitespace-nowrap">
+              <span className="h-1.5 w-1.5 rounded-full bg-rose-500 shrink-0" />
               {groups.critical} critical
             </span>
           )}
           {groups.warning > 0 && (
-            <span className="flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-100 dark:border-amber-500/20">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+            <span className="flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-2 sm:px-2.5 py-1 rounded-full border border-amber-100 dark:border-amber-500/20 whitespace-nowrap">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" />
               {groups.warning} warning
             </span>
           )}
           {groups.info > 0 && (
-            <span className="flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
-              <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+            <span className="flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 sm:px-2.5 py-1 rounded-full whitespace-nowrap">
+              <span className="h-1.5 w-1.5 rounded-full bg-slate-400 shrink-0" />
               {groups.info} monitor
             </span>
           )}

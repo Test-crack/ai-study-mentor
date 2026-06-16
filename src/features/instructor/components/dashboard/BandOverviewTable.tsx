@@ -49,21 +49,33 @@ function gapPillColor(gap: number | null) {
 
 function TrendCell({ trend }: { trend: BandOverviewRow['band_trend'] }) {
   if (trend === 'up')   return (
-    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full">
+    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full whitespace-nowrap">
       <TrendingUp className="h-3 w-3" /> Up
     </span>
   );
   if (trend === 'down') return (
-    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 px-2 py-0.5 rounded-full">
+    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 px-2 py-0.5 rounded-full whitespace-nowrap">
       <TrendingDown className="h-3 w-3" /> Down
     </span>
   );
   if (trend === 'flat') return (
-    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
+    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full whitespace-nowrap">
       <Minus className="h-3 w-3" /> Flat
     </span>
   );
   return <span className="text-[11px] text-slate-300 dark:text-slate-600">—</span>;
+}
+
+// ── Relative date helper ──────────────────────────────────────────────────────
+
+function relativeDate(dateStr: string) {
+  const d    = new Date(dateStr + 'T12:00:00');
+  const days = Math.floor((Date.now() - d.getTime()) / 86_400_000);
+  if (days === 0) return 'Today';
+  if (days === 1) return 'Yesterday';
+  if (days < 7)  return `${days}d ago`;
+  if (days < 30) return `${Math.floor(days / 7)}w ago`;
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
 }
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
@@ -83,6 +95,84 @@ function RowSkeleton() {
         </td>
       ))}
     </tr>
+  );
+}
+
+function MobileCardSkeleton() {
+  return (
+    <div className="px-4 py-3 flex items-center gap-3 animate-pulse">
+      <div className="h-9 w-9 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
+      <div className="flex-1 space-y-2">
+        <div className="h-3.5 w-28 bg-slate-200 dark:bg-slate-700 rounded" />
+        <div className="h-3 w-20 bg-slate-100 dark:bg-slate-800 rounded" />
+      </div>
+      <div className="h-5 w-12 bg-slate-100 dark:bg-slate-800 rounded-full" />
+    </div>
+  );
+}
+
+// ── Pagination bar (shared) ───────────────────────────────────────────────────
+
+function PaginationBar({
+  page, pageCount, hasPrev, hasNext, onPrev, onNext, onPage,
+}: {
+  page: number; pageCount: number;
+  hasPrev: boolean; hasNext: boolean;
+  onPrev: () => void; onNext: () => void;
+  onPage: (i: number) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-t border-slate-100 dark:border-slate-800">
+      <button
+        onClick={onPrev}
+        disabled={!hasPrev}
+        className={cn(
+          'h-8 w-8 rounded-full flex items-center justify-center transition-all',
+          hasPrev
+            ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 hover:text-indigo-600 dark:hover:text-indigo-400'
+            : 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
+        )}
+        aria-label="Previous page"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
+
+      {pageCount <= 7 ? (
+        <div className="flex items-center gap-1.5">
+          {Array.from({ length: pageCount }, (_, i) => (
+            <button
+              key={i}
+              onClick={() => onPage(i)}
+              className={cn(
+                'rounded-full transition-all',
+                i === page
+                  ? 'h-2 w-5 bg-indigo-500'
+                  : 'h-2 w-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600'
+              )}
+              aria-label={`Page ${i + 1}`}
+            />
+          ))}
+        </div>
+      ) : (
+        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+          {page + 1} / {pageCount}
+        </span>
+      )}
+
+      <button
+        onClick={onNext}
+        disabled={!hasNext}
+        className={cn(
+          'h-8 w-8 rounded-full flex items-center justify-center transition-all',
+          hasNext
+            ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 hover:text-indigo-600 dark:hover:text-indigo-400'
+            : 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
+        )}
+        aria-label="Next page"
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
+    </div>
   );
 }
 
@@ -109,7 +199,7 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
     <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
 
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800">
+      <div className="flex items-center justify-between px-4 sm:px-5 py-4 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-2.5">
           <div className="h-8 w-8 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center shrink-0">
             <Target className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
@@ -124,8 +214,71 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
         )}
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
+      {/* ── Mobile card view (< md) ── */}
+      <div className="md:hidden">
+        {loading ? (
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            {Array.from({ length: PAGE_SIZE }, (_, i) => <MobileCardSkeleton key={i} />)}
+          </div>
+        ) : rows.length === 0 ? (
+          <div className="px-5 py-12 text-center text-sm text-slate-400">
+            No students enrolled in this batch yet.
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            {pageRows.map(row => (
+              <div
+                key={row.student_id}
+                onClick={() => goToStudent(row)}
+                className="px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors group"
+              >
+                {/* Avatar */}
+                <div className={cn(
+                  'h-9 w-9 rounded-full shrink-0 flex items-center justify-center text-xs font-black overflow-hidden',
+                  row.avatar ? '' : avatarPalette(row.name)
+                )}>
+                  {row.avatar
+                    ? <img src={row.avatar} alt={row.name} className="h-full w-full object-cover" />
+                    : initials(row.name)
+                  }
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2 mb-0.5">
+                    <p className="text-sm font-semibold text-slate-800 dark:text-white truncate">{row.name}</p>
+                    <TrendCell trend={row.band_trend} />
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={cn('text-sm font-black tabular-nums', bandTextColor(row.current_band))}>
+                      {row.current_band !== null ? row.current_band.toFixed(1) : '—'}
+                    </span>
+                    {row.gap !== null && (
+                      <span className={cn('text-xs font-bold px-1.5 py-0.5 rounded-full', gapPillColor(row.gap))}>
+                        {row.gap <= 0
+                          ? `+${Math.abs(row.gap).toFixed(1)}`
+                          : `−${row.gap.toFixed(1)}`
+                        }
+                      </span>
+                    )}
+                    {row.last_ia_date && (
+                      <span className="text-[11px] text-slate-400">{relativeDate(row.last_ia_date)}</span>
+                    )}
+                    {!row.last_ia_date && (
+                      <span className="text-[11px] text-slate-300 dark:text-slate-600">No IA yet</span>
+                    )}
+                  </div>
+                </div>
+
+                <ChevronRight className="h-4 w-4 text-slate-300 dark:text-slate-600 group-hover:text-indigo-500 transition-colors shrink-0" />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── Desktop table view (md+) ── */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
@@ -201,19 +354,11 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
                     )}
                   </td>
 
-                  {/* Last IA — single line, relative date only */}
+                  {/* Last IA */}
                   <td className="px-5 py-3.5 whitespace-nowrap">
                     {row.last_ia_date ? (
                       <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
-                        {(() => {
-                          const d    = new Date(row.last_ia_date + 'T12:00:00');
-                          const days = Math.floor((Date.now() - d.getTime()) / 86_400_000);
-                          if (days === 0) return 'Today';
-                          if (days === 1) return 'Yesterday';
-                          if (days < 7)  return `${days}d ago`;
-                          if (days < 30) return `${Math.floor(days / 7)}w ago`;
-                          return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-                        })()}
+                        {relativeDate(row.last_ia_date)}
                       </span>
                     ) : (
                       <span className="text-xs text-slate-300 dark:text-slate-600">No IA yet</span>
@@ -238,58 +383,15 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
 
       {/* Pagination bar */}
       {!loading && pageCount > 1 && (
-        <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100 dark:border-slate-800">
-          <button
-            onClick={() => setPage(p => p - 1)}
-            disabled={!hasPrev}
-            className={cn(
-              'h-8 w-8 rounded-full flex items-center justify-center transition-all',
-              hasPrev
-                ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 hover:text-indigo-600 dark:hover:text-indigo-400'
-                : 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
-            )}
-            aria-label="Previous page"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-
-          {/* Dots ≤7 pages, text beyond */}
-          {pageCount <= 7 ? (
-            <div className="flex items-center gap-1.5">
-              {Array.from({ length: pageCount }, (_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setPage(i)}
-                  className={cn(
-                    'rounded-full transition-all',
-                    i === page
-                      ? 'h-2 w-5 bg-indigo-500'
-                      : 'h-2 w-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600'
-                  )}
-                  aria-label={`Page ${i + 1}`}
-                />
-              ))}
-            </div>
-          ) : (
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-              {page + 1} / {pageCount}
-            </span>
-          )}
-
-          <button
-            onClick={() => setPage(p => p + 1)}
-            disabled={!hasNext}
-            className={cn(
-              'h-8 w-8 rounded-full flex items-center justify-center transition-all',
-              hasNext
-                ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 hover:text-indigo-600 dark:hover:text-indigo-400'
-                : 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
-            )}
-            aria-label="Next page"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
+        <PaginationBar
+          page={page}
+          pageCount={pageCount}
+          hasPrev={hasPrev}
+          hasNext={hasNext}
+          onPrev={() => setPage(p => p - 1)}
+          onNext={() => setPage(p => p + 1)}
+          onPage={setPage}
+        />
       )}
     </div>
   );

@@ -63,10 +63,10 @@ export default function InstructorDashboardPage() {
       <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-24' : 'lg:pl-72'}`}>
         <InstructorTopbar />
 
-        <main className="px-4 sm:px-6 lg:px-8 py-6 space-y-6 max-w-7xl mx-auto">
+        <main className="px-3 sm:px-5 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6 max-w-7xl mx-auto pb-8">
 
           {/* ── Section 1: Welcome banner + batch selector ── */}
-          <div className="bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-600 rounded-2xl px-6 py-5 shadow-lg shadow-indigo-500/25 relative overflow-hidden">
+          <div className="bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-600 rounded-2xl px-4 sm:px-6 py-4 sm:py-5 shadow-lg shadow-indigo-500/25 relative overflow-hidden">
 
             {/* Decorative blobs */}
             <div className="pointer-events-none absolute -top-12 -right-12 w-56 h-56 rounded-full bg-white/10 blur-3xl" />
@@ -80,18 +80,18 @@ export default function InstructorDashboardPage() {
               }}
             />
 
-            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-5">
 
               {/* Left: greeting + stat chips */}
               <div className="min-w-0">
                 {/* Date */}
-                <div className="flex items-center gap-1.5 mb-2">
+                <div className="flex items-center gap-1.5 mb-1.5 sm:mb-2">
                   <CalendarDays className="h-3.5 w-3.5 text-white/50" />
                   <span className="text-[11px] font-semibold text-white/50 tracking-wide">{todayLabel}</span>
                 </div>
 
                 {/* Name */}
-                <h1 className="text-2xl font-black text-white tracking-tight leading-none mb-3">
+                <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-none mb-2 sm:mb-3">
                   {greeting}, {firstName}
                 </h1>
 
@@ -128,7 +128,7 @@ export default function InstructorDashboardPage() {
               </div>
 
               {/* Right: batch selector */}
-              <div className="shrink-0">
+              <div className="shrink-0 w-full sm:w-auto">
                 <BatchSelector
                   batches={batches}
                   selectedBatchId={selectedBatchId}
@@ -142,12 +142,12 @@ export default function InstructorDashboardPage() {
 
           {/* ── Error state ── */}
           {error && (
-            <div className="bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 rounded-2xl px-5 py-4 flex items-center gap-3">
+            <div className="bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 rounded-2xl px-4 sm:px-5 py-4 flex items-center gap-3">
               <AlertCircle className="h-5 w-5 text-rose-500 shrink-0" />
               <p className="text-sm text-rose-700 dark:text-rose-400 flex-1">{error}</p>
               <button
                 onClick={refetch}
-                className="flex items-center gap-1.5 text-xs font-bold text-rose-600 dark:text-rose-400 hover:text-rose-700 transition-colors"
+                className="flex items-center gap-1.5 text-xs font-bold text-rose-600 dark:text-rose-400 hover:text-rose-700 transition-colors whitespace-nowrap"
               >
                 <RefreshCw className="h-3.5 w-3.5" /> Retry
               </button>
