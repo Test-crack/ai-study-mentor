@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Mic, Activity, Volume2, Clock } from 'lucide-react'; 
 import { StudentSidebar } from './dashboard/StudentSidebar';
 // 1. Import Topbar and PremiumModal
@@ -45,7 +45,7 @@ const analysisData = {
 
 const SpeakingPractice = () => {
   const [activeTab, setActiveTab] = useState("speaking-practice");
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   // 2. Add Premium Modal State
   const [showPremiumModal, setShowPremiumModal] = useState(false);
 

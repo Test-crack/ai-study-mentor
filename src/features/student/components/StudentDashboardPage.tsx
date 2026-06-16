@@ -223,7 +223,6 @@ const StudentDashboardPage = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
-  const [isSidebarHovered, setIsSidebarHovered] = useState(false);
   const [skillBands, setSkillBands] = useState<SkillBand[]>(SKILL_BANDS);
   const [nextActionDrill, setNextActionDrill] = useState<any>(null);
   const [targetBand, setTargetBand] = useState(READINESS.targetBand);
@@ -483,16 +482,16 @@ const StudentDashboardPage = () => {
         toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         isLocked={isLocked}
         isNewStudent={false}
-        onMouseEnter={() => setIsSidebarHovered(true)}
-        onMouseLeave={() => setIsSidebarHovered(false)}
       />
 
-      <div
-        className={cn(
-          "min-h-screen flex flex-col transition-all duration-300 ease-in-out pl-0",
-          isSidebarHovered && !isLocked ? "md:pl-[288px]" : "md:pl-[116px]"
-        )}
-      >
+      {/*
+        Constant padding: the rail is 84px wide + 16px left offset + 16px gap = 116px.
+        On hover the sidebar expands as a fixed OVERLAY on top of the content
+        (it has z-[9999] and a shadow), so the content never needs to shift.
+        This removes the CSS-hover vs React-state desync that caused the
+        sidebar to cover the content on tablets / DevTools emulation.
+      */}
+      <div className="min-h-screen flex flex-col pl-0 md:pl-[116px]">
         <StudentTopbar onUpgradeClick={() => setShowPremiumModal(true)} />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 relative">
@@ -554,7 +553,7 @@ const StudentDashboardPage = () => {
 
           {/* ── Daily Notices ────────────────────────────────────────────────── */}
           <div className={cn("transition-all duration-500", isLocked && "relative z-50")}>
-            <DailyNotices />
+            <DailyNotices isLocked={isLocked} />
           </div>
 
           {/* ── Platform Lock Banner ──────────────────────────────────────── */}

@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  GraduationCap, ArrowRight, CheckCircle2, AlertCircle, Mic, PlayCircle,
-  Zap, Loader2, Lock, XCircle, Trophy, Calendar, BookOpen
-} from "lucide-react";
+
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useMomentum } from "@/features/student/Context/MomentumContext";
 import { callBackend } from "@/features/auth/services/authClient";
 import { transformSectionAudioUrls } from "@/features/student/utils/iaAudioUtils";
-
+import {
+  GraduationCap, ArrowRight, CheckCircle2, AlertCircle, Mic, PlayCircle,
+  Zap, Loader2, Lock, XCircle, Trophy, Calendar, BookOpen, ArrowLeft, Flame
+} from "lucide-react";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Phase = "gate" | "session" | "interim" | "scoring" | "results";
@@ -145,25 +145,70 @@ const CircleTimer: React.FC<{ timeLeft: number; total: number; size?: number }> 
 
 // ─── Nav ──────────────────────────────────────────────────────────────────────
 
-function TopNavBar({ totalMomentum }: { totalMomentum: number }) {
+function TopNavBar({
+  totalMomentum,
+  phase,
+  onBack,
+}: {
+  totalMomentum: number;
+  phase: Phase;
+  onBack: () => void;
+}) {
+  const { streak } = useMomentum();
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50" style={{
-      background: 'rgba(5, 8, 22, 0.85)',
-      backdropFilter: 'blur(20px)',
-      borderBottom: '1px solid rgba(0, 240, 255, 0.15)',
-      boxShadow: '0 0 40px rgba(0, 240, 255, 0.05)',
-    }}>
-      <div className="w-full px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center space-x-2.5">
-            <div className="p-2 bg-indigo-700 border-2 border-gray-900 rounded-lg" style={{ boxShadow: "3px 3px 0 #0F0F0F" }}>
-              <GraduationCap className="h-5 w-5 text-white" />
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b-2 border-gray-900 transform-gpu">
+      <div className="w-full px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14 sm:h-16">
+
+          {/* Left: back button (gate only) + brand */}
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            {phase === "gate" && (
+              <button
+                onClick={onBack}
+                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg border-2 border-gray-300 font-black text-xs text-gray-600 uppercase tracking-wide hover:bg-gray-50 transition-colors flex-shrink-0"
+                style={{ boxShadow: "2px 2px 0 #D1D5DB" }}
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Back</span>
+              </button>
+            )}
+            <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
+              <div
+                className="p-1.5 sm:p-2 bg-indigo-700 border-2 border-gray-900 rounded-lg flex-shrink-0"
+                style={{ boxShadow: "3px 3px 0 #0F0F0F" }}
+              >
+                <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+              </div>
+              <span className="text-base sm:text-xl font-black text-gray-900 uppercase tracking-tight truncate">
+                TestCrack
+              </span>
             </div>
-            <span className="text-xl font-black text-gray-900 uppercase tracking-tight">TestCrack</span>
           </div>
-          <div className="flex items-center gap-2 bg-indigo-500/10 border-2 border-gray-900 px-4 py-1.5 rounded-full" style={{ boxShadow: "2px 2px 0 #0F0F0F" }}>
-            <Zap className="w-4 h-4 text-amber-400 fill-amber-400" />
-            <span className="font-black text-gray-900">{totalMomentum}</span>
+
+          {/* Right: streak + momentum */}
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+
+            {/* Streak */}
+            <div
+              className="flex items-center gap-1 sm:gap-1.5 bg-orange-50 border-2 border-orange-200 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full"
+              style={{ boxShadow: "2px 2px 0 #0F0F0F" }}
+            >
+              <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-500 fill-orange-500 flex-shrink-0" />
+              <span className="font-black text-orange-600 text-xs sm:text-sm">{streak}</span>
+              <span className="hidden md:inline text-xs text-orange-400 font-medium">day streak</span>
+            </div>
+
+            {/* Momentum */}
+            <div
+              className="flex items-center gap-1 sm:gap-2 bg-indigo-500/10 border-2 border-gray-900 px-2 sm:px-4 py-1 sm:py-1.5 rounded-full"
+              style={{ boxShadow: "2px 2px 0 #0F0F0F" }}
+            >
+              <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 fill-amber-400 flex-shrink-0" />
+              <span className="font-black text-gray-900 text-xs sm:text-sm">{totalMomentum}</span>
+              <span className="hidden md:inline text-xs text-indigo-400 font-medium">pts</span>
+            </div>
+
           </div>
         </div>
       </div>
@@ -623,7 +668,7 @@ export default function FullMockAssessment() {
       );
     }
     if (mockStatus.has_active_session) return renderActiveSession();
-    if (!mockStatus.is_eligible)       return renderNotEligible();
+    if (!mockStatus.is_eligible)        return renderNotEligible();
     if (mockStatus.standard_used_this_month && !mockStatus.can_start_earned) return renderMonthUsed();
     if (mockStatus.standard_used_this_month && mockStatus.can_start_earned)  return renderMonthUsed();
     return renderMockAvailable();
@@ -1109,7 +1154,11 @@ export default function FullMockAssessment() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <TopNavBar totalMomentum={totalMomentum} />
+      <TopNavBar
+        totalMomentum={totalMomentum}
+        phase={phase}
+        onBack={() => navigate("/student/dashboard")}
+      />
       <div className="pt-16">
         {phase === "gate"    && renderGate()}
         {phase === "session" && renderSession()}

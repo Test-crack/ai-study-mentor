@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿﻿import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { StudentSidebar } from '../dashboard/StudentSidebar';
 import { StudentTopbar } from '../dashboard/StudentTopbar';
@@ -9,7 +9,6 @@ import type { McqDrillResult } from './McqDrill';
 import DrillResultCard from './DrillResultCard';
 import { callBackend } from '@/features/auth/services/authClient';
 import { useMomentum } from '@/features/student/Context/MomentumContext';
-import { formatSkillLabel } from '@/shared/utils/formatSkillLabel';
 import { ArrowLeft, Target, Loader2 } from 'lucide-react';
 
 interface DrillAnswer {
@@ -30,16 +29,13 @@ const parseCorrectAnswer = (raw: any): string => {
 export default function DrillScreen() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { syncMomentum, updateStreak, addPoints } = useMomentum();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const { syncMomentum, updateStreak } = useMomentum();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
   const skill    = searchParams.get('skill')     || 'SPEAKING';
   const subSkill = searchParams.get('sub_skill') || 'PRONUNCIATION';
   const level    = searchParams.get('level')     || 'INTERMEDIATE';
   const isExtra  = searchParams.get('extra')     === 'true';
-
-  // ─── Detect if this is an un-gated replay from the Open Practice sandbox ───
-  const isReplayMode = searchParams.get('mode') === 'replay';
 
   const QUESTIONS_PER_SESSION = 5;
 
@@ -75,7 +71,7 @@ export default function DrillScreen() {
         if (activeRes.success && activeRes.session) {
           const sess = activeRes.session;
 
-          // Already fully completed — jump straight to result card
+          // Already fully completed â€” jump straight to result card
           if (sess.status === 'DRILL_DONE' || sess.status === 'APPLY_DONE') {
             setDrillSessionId(sess.id);
             setSessionId(sess.id);
@@ -85,7 +81,7 @@ export default function DrillScreen() {
             return;
           }
 
-          // STARTED — resume from where we left off
+          // STARTED â€” resume from where we left off
           const questions: any[] = activeRes.questions || [];
           setSessionId(sess.id);
           setPrompts(questions);
@@ -105,7 +101,7 @@ export default function DrillScreen() {
           return;
         }
 
-        // No active session — start a new one
+        // No active session â€” start a new one
         const startRes = await callBackend(`${backendUrl}/api/drills/start`, {
           method: 'POST',
           body: JSON.stringify({
@@ -145,7 +141,7 @@ export default function DrillScreen() {
 
   const completeSession = async (finalAnswers: Record<string, string>, finalCorrectCount: number) => {
     const earned = 15 + finalCorrectCount * 10;
-    setMomentumScore(isReplayMode ? Math.round(earned * 0.5) : earned);
+    setMomentumScore(earned);
     setIsSubmitting(true);
 
     try {
@@ -194,10 +190,6 @@ export default function DrillScreen() {
     }
   };
 
-  // ── Display labels (formatted) — raw values kept for API/URL params ──
-  const skillDisplay    = formatSkillLabel(skill);
-  const subSkillDisplay = formatSkillLabel(subSkill);
-
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
       <StudentSidebar activeTab="dashboard" isCollapsed={isSidebarCollapsed} toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} />
@@ -223,7 +215,7 @@ export default function DrillScreen() {
             </div>
           ) : !isComplete ? (
             <>
-              {/* ── Header ── */}
+              {/* Header */}
               <div className="mb-8 text-center space-y-2">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-rose-100 text-rose-500 mb-2">
                   <Target className="w-6 h-6" />
@@ -232,15 +224,12 @@ export default function DrillScreen() {
                   Today's Focus: {skill.toLowerCase()} {subSkill.toLowerCase().replace(/_/g, ' ')}
                 </h1>
                 <p className="text-slate-500 font-medium tracking-wide uppercase text-sm">
-                  {skillDisplay} &middot; Prompt {currentPromptIndex + 1} of {totalPrompts}
+                  Prompt {currentPromptIndex + 1} of {totalPrompts}
                 </p>
                 <div className="flex justify-center items-center gap-2 mt-4">
                   <span className="text-xs font-bold text-amber-500 uppercase tracking-widest">Progress</span>
                   <div className="w-32 h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-amber-500 transition-all duration-500"
-                      style={{ width: `${(currentPromptIndex / totalPrompts) * 100}%` }}
-                    />
+                    <div className="h-full bg-amber-500 transition-all duration-500" style={{ width: `${(currentPromptIndex / totalPrompts) * 100}%` }} />
                   </div>
                 </div>
               </div>

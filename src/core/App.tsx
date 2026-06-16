@@ -71,7 +71,7 @@ import InstituteAdmins from "@/features/InstituteOwner/dashboard/InstituteAdmins
 import BatchAnalyticsView from "@/features/InstituteOwner/dashboard/BatchAnalyticsView";
 import VoiceLab from "@/features/student/components/VoiceLab";
 import SpeedReading from "@/features/student/components/SpeedReading";
-import InstructorReport from "@/features/instructor/components/InstructorReport";
+import { InstructorReportPage } from "@/features/instructor/components/InstructorReportPage";
 import Workflow from "@/features/instructor/components/Workflow";
 import IeltsWriting from "@/features/student/components/IeltsWriting";
 import ListeningPractice from "@/features/student/components/ListeningPractice";
@@ -90,7 +90,7 @@ import DrillScreen from "@/features/student/components/Drills/DrillScreen";
 import { MomentumProvider } from "@/features/student/Context/MomentumContext";
 import ApplyDrillScreen from "@/features/student/components/Drills/ApplyDrillScreen";
 import LexiGrid from "@/features/student/components/LexiGrid";
-import InternalAssessmentPage from "@/features/student/components/Internalassessmentpage";
+import InternalAssessmentPage from "@/features/student/components/Assessment";
 import FullMockAssessment from "@/features/student/components/FullMockAssessment";
 import StudentNotEnrolledPage from "@/features/student/components/StudentNotEnrolledPage";
 import B2CLoginPage from "@/features/B-C/pages/B2cloginpage";
@@ -101,7 +101,8 @@ import InferenceSprintGame from "@/features/B-C/games/Inferencesprintgame";
 import LexiGridGame from "@/features/B-C/games/Lexigridgame";
 import SentenceSurgeryGame from "@/features/B-C/games/Sentencesurgerygame";
 import TrapSpotterGame from "@/features/B-C/games/Trapspottergame";
-import QuestionBankManager from "@/features/TestCrackSuperAdmin/dashboard/Questionbankmanager";
+// import QuestionBankManager from "@/features/TestCrackSuperAdmin/dashboard/Questionbankmanager";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -252,7 +253,7 @@ const AppRoutes = () => {
       <Route path="/superadmin/priceconfig" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><PricingConfig /></RoleProtectedRoute>} />
       <Route path="/superadmin/supportickets" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SupportTicket /></RoleProtectedRoute>} />
       <Route path="/superadmin/platform" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><PlatformAnalytics /></RoleProtectedRoute>} />
-      <Route path="/superadmin/question" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><QuestionBankManager /></RoleProtectedRoute>} />
+      {/* <Route path="/superadmin/question" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><QuestionBankManager /></RoleProtectedRoute>} /> */}
       <Route path="/superadmin/allusers" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><AllUsers /></RoleProtectedRoute>} />
 
       {/* ── Auth & misc ───────────────────────────────────────────────────── */}
@@ -316,12 +317,14 @@ const AppRoutes = () => {
         }
       />
       <Route path="/instructor/student/:studentSlug/progress" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorStudentProgressPage /></RoleProtectedRoute>} />
+      <Route path="/instructor/students/:studentSlug/progress" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorStudentProgressPage /></RoleProtectedRoute>} />
+      <Route path="/instructor/batches/:batchId/students/:studentId/progress" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorStudentProgressPage /></RoleProtectedRoute>} />
       <Route path="/instructor/assessments" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorAssessmentPage /></RoleProtectedRoute>} />
       <Route path="/instructor/coursemanagement" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorCourseManagementPage /></RoleProtectedRoute>} />
       <Route path="/instructor/batches" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorBatchView /></RoleProtectedRoute>} />
       <Route path="/instructor/tech-pep" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><TechPrepPage /></RoleProtectedRoute>} />
       <Route path="/instructor/alignment" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><AlignmentPage /></RoleProtectedRoute>} />
-      <Route path="/instructor/reports" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorReport /></RoleProtectedRoute>} />
+      <Route path="/instructor/reports" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorReportPage /></RoleProtectedRoute>} />
       <Route path="/instructor/workflow" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><Workflow /></RoleProtectedRoute>} />
 
       {/* ── Shared protected routes ───────────────────────────────────────── */}

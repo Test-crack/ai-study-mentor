@@ -1,18 +1,15 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { StudentSidebar } from './dashboard/StudentSidebar';
-import { StudentTopbar } from './dashboard/StudentTopbar';
+import { useNavigate } from 'react-router-dom';
+
 import { Button } from '@/shared/components/ui/button';
 import { useToast } from '@/shared/hooks/use-toast';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
-import { Badge } from '@/shared/components/ui/badge';
-import { useMomentum } from "@/features/student/Context/MomentumContext";
-import { stampPassportSlot } from '@/features/student/utils/passportUtils';
 import {
   ArrowLeft, Send, Headphones, Info,
-  Sparkles, Play, Trophy, RotateCcw, CheckCircle2, XCircle, Clock, Map, Image as ImageIcon, ArrowRight
+  Sparkles, Play, Trophy, RotateCcw, CheckCircle2, XCircle, Clock, Map, Image as ImageIcon
 } from 'lucide-react';
-
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
+import { Badge } from '@/shared/components/ui/badge';
+import StudentLayout from './StudentLayout';
 // ── Types ────────────────────────────────────────────────────────────────────
 
 type QuestionType = 'mcq' | 'form' | 'image_label' | 'image_map' | 'image_match';
@@ -28,7 +25,7 @@ interface Option {
  * image_match  → a set of diagrams/icons shown side by side; user matches a statement to one
  */
 interface ImageHotspot {
-  id: string;         // e.g. "A", "B", "1", "2"
+  id: string;          // e.g. "A", "B", "1", "2"
   x: number;          // % from left
   y: number;          // % from top
   label?: string;     // display label on the hotspot marker
@@ -80,37 +77,47 @@ interface SectionResult {
  */
 const LIBRARY_FLOOR_PLAN_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 360" font-family="system-ui,sans-serif">
+  <!-- Background -->
   <rect width="500" height="360" fill="#f8fafc" rx="8"/>
+  <!-- Outer walls -->
   <rect x="20" y="20" width="460" height="320" fill="none" stroke="#334155" stroke-width="3" rx="6"/>
 
+  <!-- Ground Floor left: Periodicals (A) -->
   <rect x="20" y="20" width="130" height="160" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
   <text x="85" y="95" text-anchor="middle" font-size="13" fill="#1e40af" font-weight="600">Periodicals</text>
   <text x="85" y="112" text-anchor="middle" font-size="22" fill="#1d4ed8" font-weight="800">A</text>
 
+  <!-- Ground Floor centre: Info Desk (B) -->
   <rect x="150" y="20" width="200" height="80" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
   <text x="250" y="55" text-anchor="middle" font-size="13" fill="#166534" font-weight="600">Information Desk</text>
   <text x="250" y="78" text-anchor="middle" font-size="22" fill="#15803d" font-weight="800">B</text>
 
+  <!-- Ground Floor right: Children (C) -->
   <rect x="350" y="20" width="130" height="160" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.5"/>
   <text x="415" y="88" text-anchor="middle" font-size="13" fill="#854d0e" font-weight="600">Children's</text>
   <text x="415" y="106" text-anchor="middle" font-size="13" fill="#854d0e" font-weight="600">Library</text>
   <text x="415" y="130" text-anchor="middle" font-size="22" fill="#a16207" font-weight="800">C</text>
 
+  <!-- Ground Floor centre-bottom: Entrance (shared) -->
   <rect x="150" y="100" width="200" height="80" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
   <text x="250" y="142" text-anchor="middle" font-size="12" fill="#475569">Main Entrance Area</text>
 
+  <!-- First Floor left: Reference (D) -->
   <rect x="20" y="180" width="200" height="80" fill="#fce7f3" stroke="#db2777" stroke-width="1.5"/>
   <text x="120" y="217" text-anchor="middle" font-size="13" fill="#9d174d" font-weight="600">Reference Section</text>
   <text x="120" y="240" text-anchor="middle" font-size="22" fill="#be185d" font-weight="800">D</text>
 
+  <!-- First Floor right: Lending (E) -->
   <rect x="220" y="180" width="260" height="80" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
   <text x="350" y="217" text-anchor="middle" font-size="13" fill="#4c1d95" font-weight="600">Main Lending Collection</text>
   <text x="350" y="240" text-anchor="middle" font-size="22" fill="#6d28d9" font-weight="800">E</text>
 
+  <!-- Second Floor: Study Centre (F) -->
   <rect x="20" y="260" width="460" height="80" fill="#ffedd5" stroke="#ea580c" stroke-width="1.5"/>
   <text x="250" y="297" text-anchor="middle" font-size="13" fill="#9a3412" font-weight="600">Study Centre &amp; Meeting Rooms</text>
   <text x="250" y="322" text-anchor="middle" font-size="22" fill="#c2410c" font-weight="800">F</text>
 
+  <!-- Floor labels -->
   <text x="490" y="120" text-anchor="end" font-size="10" fill="#64748b" transform="rotate(-90,490,120)">Ground Floor</text>
   <text x="490" y="225" text-anchor="end" font-size="10" fill="#64748b" transform="rotate(-90,490,225)">1st Floor</text>
   <text x="490" y="305" text-anchor="end" font-size="10" fill="#64748b" transform="rotate(-90,490,305)">2nd Floor</text>
@@ -125,34 +132,41 @@ const WILDLIFE_PARK_MAP_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
   <rect width="500" height="380" fill="#f0fdf4" rx="8"/>
   <rect x="15" y="15" width="470" height="350" fill="none" stroke="#166534" stroke-width="2.5" rx="8"/>
 
+  <!-- North: Aquatic Zone (A) -->
   <rect x="150" y="15" width="200" height="100" fill="#bfdbfe" stroke="#2563eb" stroke-width="1.5"/>
   <text x="250" y="60" text-anchor="middle" font-size="13" fill="#1e3a8a" font-weight="600">Aquatic Zone</text>
   <text x="250" y="82" text-anchor="middle" font-size="11" fill="#1e40af">(Penguin Feeding)</text>
   <text x="250" y="105" text-anchor="middle" font-size="20" fill="#1d4ed8" font-weight="800">A</text>
 
+  <!-- West: Primate Enclosure (B) -->
   <rect x="15" y="115" width="130" height="140" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
   <text x="80" y="178" text-anchor="middle" font-size="12" fill="#065f46" font-weight="600">Primate</text>
   <text x="80" y="194" text-anchor="middle" font-size="12" fill="#065f46" font-weight="600">Enclosure</text>
   <text x="80" y="218" text-anchor="middle" font-size="20" fill="#047857" font-weight="800">B</text>
 
+  <!-- Central Arena (C) -->
   <ellipse cx="250" cy="195" rx="80" ry="70" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
   <text x="250" y="188" text-anchor="middle" font-size="12" fill="#92400e" font-weight="600">Central</text>
   <text x="250" y="204" text-anchor="middle" font-size="12" fill="#92400e" font-weight="600">Arena</text>
   <text x="250" y="224" text-anchor="middle" font-size="20" fill="#b45309" font-weight="800">C</text>
 
+  <!-- East: Gift Shop + Cafeteria (D) -->
   <rect x="355" y="115" width="130" height="140" fill="#fce7f3" stroke="#db2777" stroke-width="1.5"/>
   <text x="420" y="175" text-anchor="middle" font-size="12" fill="#9d174d" font-weight="600">Gift Shop &amp;</text>
   <text x="420" y="191" text-anchor="middle" font-size="12" fill="#9d174d" font-weight="600">Cafeteria</text>
   <text x="420" y="215" text-anchor="middle" font-size="20" fill="#be185d" font-weight="800">D</text>
 
+  <!-- South: Petting Zoo (E) -->
   <rect x="150" y="265" width="200" height="100" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
   <text x="250" y="308" text-anchor="middle" font-size="13" fill="#4c1d95" font-weight="600">Petting Zoo &amp;</text>
   <text x="250" y="324" text-anchor="middle" font-size="12" fill="#4c1d95">Animal Interaction</text>
   <text x="250" y="350" text-anchor="middle" font-size="20" fill="#6d28d9" font-weight="800">E</text>
 
+  <!-- Compass -->
   <text x="468" y="35" text-anchor="middle" font-size="14" fill="#166534" font-weight="700">N</text>
   <line x1="468" y1="40" x2="468" y2="55" stroke="#166534" stroke-width="1.5" marker-end="url(#arrow)"/>
 
+  <!-- Main entrance label -->
   <text x="250" y="375" text-anchor="middle" font-size="10" fill="#6b7280">▼ Main Entrance</text>
 </svg>
 `)}`;
@@ -164,38 +178,52 @@ const ANGLERFISH_DIAGRAM_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 320" font-family="system-ui,sans-serif">
   <rect width="520" height="320" fill="#0c1445" rx="8"/>
 
+  <!-- Body -->
   <ellipse cx="240" cy="180" rx="120" ry="80" fill="#1a3a6e" stroke="#3b82f6" stroke-width="2"/>
 
+  <!-- Tail -->
   <polygon points="360,150 440,120 440,240 360,210" fill="#1a3a6e" stroke="#3b82f6" stroke-width="2"/>
 
+  <!-- Mouth -->
   <path d="M130 200 Q100 230 130 250" fill="none" stroke="#60a5fa" stroke-width="2.5"/>
+  <!-- Teeth -->
   <line x1="115" y1="212" x2="122" y2="225" stroke="#93c5fd" stroke-width="1.5"/>
   <line x1="110" y1="222" x2="118" y2="234" stroke="#93c5fd" stroke-width="1.5"/>
   <line x1="113" y1="233" x2="121" y2="244" stroke="#93c5fd" stroke-width="1.5"/>
 
+  <!-- Eye -->
   <circle cx="160" cy="155" r="18" fill="#0ea5e9" stroke="#38bdf8" stroke-width="2"/>
   <circle cx="160" cy="155" r="8" fill="#0369a1"/>
   <circle cx="165" cy="150" r="3" fill="white" opacity="0.8"/>
 
+  <!-- Dorsal fin lure (modified fin) -->
   <line x1="220" y1="100" x2="200" y2="55" stroke="#a78bfa" stroke-width="3"/>
   <ellipse cx="193" cy="42" rx="16" ry="12" fill="#fbbf24" stroke="#f59e0b" stroke-width="2" opacity="0.9"/>
+  <!-- Glow effect -->
   <ellipse cx="193" cy="42" rx="24" ry="18" fill="none" stroke="#fde68a" stroke-width="1" opacity="0.5"/>
   <ellipse cx="193" cy="42" rx="32" ry="24" fill="none" stroke="#fde68a" stroke-width="0.5" opacity="0.25"/>
 
+  <!-- Pectoral fin -->
   <ellipse cx="175" cy="235" rx="35" ry="15" fill="#1e4080" stroke="#3b82f6" stroke-width="1.5" transform="rotate(-30 175 235)"/>
 
+  <!-- Hotspot labels -->
+  <!-- 1: Lure (esca) -->
   <circle cx="193" cy="42" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5" opacity="0.9"/>
   <text x="193" y="46" text-anchor="middle" font-size="11" fill="white" font-weight="700">1</text>
 
+  <!-- 2: Eye -->
   <circle cx="160" cy="155" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5" opacity="0.9"/>
   <text x="160" y="159" text-anchor="middle" font-size="11" fill="white" font-weight="700">2</text>
 
+  <!-- 3: Modified dorsal fin (spine) -->
   <circle cx="220" cy="100" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5" opacity="0.9"/>
   <text x="220" y="104" text-anchor="middle" font-size="11" fill="white" font-weight="700">3</text>
 
+  <!-- 4: Tail -->
   <circle cx="400" cy="185" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5" opacity="0.9"/>
   <text x="400" y="189" text-anchor="middle" font-size="11" fill="white" font-weight="700">4</text>
 
+  <!-- 5: Pectoral fin -->
   <circle cx="175" cy="235" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5" opacity="0.9"/>
   <text x="175" y="239" text-anchor="middle" font-size="11" fill="white" font-weight="700">5</text>
 
@@ -210,54 +238,69 @@ const MAP_PROJECTIONS_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 280" font-family="system-ui,sans-serif">
   <rect width="520" height="280" fill="#f8fafc" rx="8"/>
 
+  <!-- Mercator -->
   <rect x="20" y="40" width="220" height="180" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" rx="4"/>
+  <!-- Grid lines -->
   <line x1="20" y1="85" x2="240" y2="85" stroke="#93c5fd" stroke-width="0.8"/>
   <line x1="20" y1="130" x2="240" y2="130" stroke="#93c5fd" stroke-width="0.8"/>
   <line x1="20" y1="175" x2="240" y2="175" stroke="#93c5fd" stroke-width="0.8"/>
   <line x1="93" y1="40" x2="93" y2="220" stroke="#93c5fd" stroke-width="0.8"/>
   <line x1="167" y1="40" x2="167" y2="220" stroke="#93c5fd" stroke-width="0.8"/>
 
+  <!-- Greenland (exaggerated large near top) -->
   <ellipse cx="80" cy="62" rx="38" ry="20" fill="#16a34a" opacity="0.7"/>
   <text x="80" y="66" text-anchor="middle" font-size="9" fill="white" font-weight="600">Greenland</text>
 
+  <!-- Africa (appears smaller) -->
   <ellipse cx="160" cy="140" rx="30" ry="40" fill="#ca8a04" opacity="0.7"/>
   <text x="160" y="143" text-anchor="middle" font-size="9" fill="white" font-weight="600">Africa</text>
 
+  <!-- Europe -->
   <ellipse cx="110" cy="80" rx="22" ry="15" fill="#7c3aed" opacity="0.7"/>
   <text x="110" y="84" text-anchor="middle" font-size="8" fill="white">Europe</text>
 
+  <!-- Distortion annotation -->
   <line x1="58" y1="50" x2="58" y2="82" stroke="#ef4444" stroke-width="1.5" marker-end="url(#a)"/>
   <text x="25" y="44" font-size="9" fill="#ef4444">Distorted</text>
   <text x="25" y="54" font-size="9" fill="#ef4444">↑ larger</text>
 
+  <!-- Hotspot 1 -->
   <circle cx="80" cy="62" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5"/>
   <text x="80" y="66" text-anchor="middle" font-size="11" fill="white" font-weight="700">1</text>
 
+  <!-- Hotspot 2 -->
   <circle cx="160" cy="140" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5"/>
   <text x="160" y="144" text-anchor="middle" font-size="11" fill="white" font-weight="700">2</text>
 
   <text x="130" y="235" text-anchor="middle" font-size="12" fill="#1e40af" font-weight="700">Mercator Projection</text>
   <text x="130" y="250" text-anchor="middle" font-size="10" fill="#6b7280">Standard nautical navigation</text>
 
+  <!-- Peters -->
   <rect x="280" y="40" width="220" height="180" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" rx="4"/>
+  <!-- Grid lines -->
   <line x1="280" y1="85" x2="500" y2="85" stroke="#86efac" stroke-width="0.8"/>
   <line x1="280" y1="130" x2="500" y2="130" stroke="#86efac" stroke-width="0.8"/>
   <line x1="280" y1="175" x2="500" y2="175" stroke="#86efac" stroke-width="0.8"/>
   <line x1="353" y1="40" x2="353" y2="220" stroke="#86efac" stroke-width="0.8"/>
   <line x1="427" y1="40" x2="427" y2="220" stroke="#86efac" stroke-width="0.8"/>
 
+  <!-- Greenland (accurate, small) -->
   <ellipse cx="335" cy="65" rx="15" ry="8" fill="#16a34a" opacity="0.7"/>
   <text x="335" y="69" text-anchor="middle" font-size="8" fill="white">Greenland</text>
 
+  <!-- Africa (accurate, large) -->
   <ellipse cx="420" cy="135" rx="40" ry="60" fill="#ca8a04" opacity="0.7"/>
   <text x="420" y="137" text-anchor="middle" font-size="9" fill="white" font-weight="600">Africa</text>
 
+  <!-- Europe -->
   <ellipse cx="370" cy="82" rx="18" ry="10" fill="#7c3aed" opacity="0.7"/>
   <text x="370" y="86" text-anchor="middle" font-size="8" fill="white">Europe</text>
 
+  <!-- Hotspot 3 -->
   <circle cx="335" cy="65" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5"/>
   <text x="335" y="69" text-anchor="middle" font-size="11" fill="white" font-weight="700">3</text>
 
+  <!-- Hotspot 4 -->
   <circle cx="420" cy="135" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5"/>
   <text x="420" y="139" text-anchor="middle" font-size="11" fill="white" font-weight="700">4</text>
 
@@ -265,6 +308,8 @@ const MAP_PROJECTIONS_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
   <text x="390" y="250" text-anchor="middle" font-size="10" fill="#6b7280">Equal-area, proposed 1974</text>
 </svg>
 `)}`;
+
+// ── IELTS Data ────────────────────────────────────────────────────────────────
 
 const IELTS_TASKS: ListeningTask[] = [
   // --- TEST 1 ---
@@ -1220,16 +1265,8 @@ type ScreenView = 'home' | 'test' | 'results';
 export default function ListeningPractice() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { addPoints } = useMomentum();
-
-  // Mode Logic from Master Handoff Doc
-  const [searchParams] = useSearchParams();
-  const practiceMode = (searchParams.get('mode') ?? 'standalone') as 'gate' | 'standalone' | 'replay';
-  const isGateMode   = practiceMode === 'gate';
-  const isReplayMode = practiceMode === 'replay';
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isSidebarHovered, setIsSidebarHovered] = useState(false); // ADDED HOVER STATE
   const [screen, setScreen] = useState<ScreenView>('home');
   const [selectedTask, setSelectedTask] = useState<ListeningTask | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -1364,30 +1401,14 @@ export default function ListeningPractice() {
         const filtered = prev.filter(r => r.taskId !== selectedTask.id);
         return [...filtered, { taskId: selectedTask.id, results }];
       });
-      
       const score = results.filter(r => r.correct).length;
       setSubmitting(false);
-
-      // Multiplier applied if replay mode
-      addPoints(50, 'Completed Listening Module', isReplayMode ? 0.5 : 1.0);
-      stampPassportSlot('listening');
-
       toast({
         title: `${selectedTask.title} Complete!`,
         description: `You scored ${score} out of ${selectedTask.questions.length}.`,
       });
       setScreen('results');
     }, 1000);
-  };
-
-  // Gate handler
-  const handleGateContinue = () => {
-    try {
-      const today = new Date().toISOString().slice(0, 10);
-      localStorage.setItem('skill_module_completed_today',
-        JSON.stringify({ completed: true, date: today, skill: 'listening' }));
-    } catch { }
-    navigate('/student/dashboard', { state: { skillModuleCompleted: true } });
   };
 
   // Highlight active word in transcript
@@ -1800,20 +1821,6 @@ export default function ListeningPractice() {
         </div>
       </div>
 
-      {/* Gate completion CTA block */}
-      {isGateMode && (
-        <div className='bg-indigo-50 border border-indigo-200 rounded-2xl p-5 flex flex-col items-center justify-center text-center'>
-          <CheckCircle2 className='w-8 h-8 text-indigo-500 mb-2' />
-          <p className="text-indigo-900 font-bold mb-4">Practice complete — your drills are now unlocked</p>
-          <button 
-            onClick={handleGateContinue}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-2"
-          >
-            Continue to Drills <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-
       {allResults.map((r) => {
         const task = IELTS_TASKS.find(t => t.id === r.taskId);
         if (!task) return null;
@@ -1900,22 +1907,13 @@ export default function ListeningPractice() {
   // ── Layout ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
-      <StudentSidebar
-        activeTab="listening"
-        isCollapsed={isSidebarCollapsed}
-        toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        onMouseEnter={() => setIsSidebarHovered(true)}
-        onMouseLeave={() => setIsSidebarHovered(false)}
-      />
-      <div className={`transition-all duration-300 ease-in-out pl-0 ${isSidebarHovered ? 'md:pl-[288px]' : 'md:pl-[116px]'} flex flex-col min-h-screen`}>
-        <StudentTopbar onUpgradeClick={() => {}} />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 w-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
-          {screen === 'home' && renderHome()}
-          {screen === 'test' && renderTest()}
-          {screen === 'results' && renderResults()}
-        </main>
-      </div>
+
+  <StudentLayout activeTab="listening">
+    <div className="max-w-7xl mx-auto w-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {screen === 'home' && renderHome()}
+      {screen === 'test' && renderTest()}
+      {screen === 'results' && renderResults()}
     </div>
-  );
+  </StudentLayout>
+);
 }
