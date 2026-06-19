@@ -86,7 +86,6 @@ export default function InstituteStudentsPage() {
   // Filters
   const [search, setSearch]           = useState('');
   const [batchFilter, setBatchFilter] = useState('');
-  const [examFilter, setExamFilter]   = useState('');
   const [atRiskOnly, setAtRiskOnly]   = useState(false);
 
   const navigate = useNavigate();
@@ -96,9 +95,8 @@ export default function InstituteStudentsPage() {
     async function load() {
       try {
         setLoading(true);
-        const params: { batchId?: string; exam_type?: string; at_risk?: boolean } = {};
+        const params: { batchId?: string; at_risk?: boolean } = {};
         if (batchFilter) params.batchId = batchFilter;
-        if (examFilter)  params.exam_type = examFilter;
         if (atRiskOnly)  params.at_risk = true;
         const res = await fetchStudents(params);
         if (res.success) setStudents(res.data);
@@ -109,17 +107,13 @@ export default function InstituteStudentsPage() {
       }
     }
     load();
-  }, [batchFilter, examFilter, atRiskOnly]);
+  }, [batchFilter, atRiskOnly]);
 
   // Derived filter options
   const batchOptions = useMemo(() => {
     const map = new Map<string, string>();
     students.forEach(s => map.set(s.batch_id, s.batch_name));
     return Array.from(map.entries());
-  }, [students]);
-
-  const examOptions = useMemo(() => {
-    return [...new Set(students.map(s => s.exam_type))];
   }, [students]);
 
   // Client-side name search
@@ -179,16 +173,6 @@ export default function InstituteStudentsPage() {
                 ))}
               </select>
 
-              {/* Exam type */}
-              <select
-                value={examFilter}
-                onChange={e => setExamFilter(e.target.value)}
-                className="text-sm bg-slate-50 dark:bg-[#0a0a0a] border border-slate-200 dark:border-[#27272a] rounded-lg px-3 py-2 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
-              >
-                <option value="">All Exams</option>
-                {examOptions.map(e => <option key={e} value={e}>{e}</option>)}
-              </select>
-
               {/* At-risk toggle */}
               <button
                 onClick={() => setAtRiskOnly(!atRiskOnly)}
@@ -218,7 +202,7 @@ export default function InstituteStudentsPage() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-slate-100 dark:border-[#27272a]">
-                        {['Name', 'Batch', 'Exam', 'Band', 'Target', 'Gap', 'Streak', 'Drilled', 'Last Active', 'Flag'].map(h => (
+                        {['Name', 'Batch', 'Band', 'Target', 'Gap', 'Streak', 'Drilled', 'Last Active', 'Flag'].map(h => (
                           <th key={h} className="text-left text-xs font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wider px-4 py-3 whitespace-nowrap">
                             {h}
                           </th>
@@ -237,9 +221,6 @@ export default function InstituteStudentsPage() {
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             <span className="text-slate-600 dark:text-slate-300 text-xs">{row.batch_name}</span>
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap">
-                            <span className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full">{row.exam_type}</span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">{bandPill(row.current_band)}</td>
                           <td className="px-4 py-3 whitespace-nowrap">

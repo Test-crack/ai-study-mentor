@@ -104,7 +104,7 @@ function AtRiskList({ rows }: { rows: AtRiskRow[] }) {
             <p className="text-xs text-slate-500 dark:text-gray-400 truncate">{r.primary_flag}</p>
           </div>
           <div className="text-right flex-shrink-0">
-            <p className="text-xs text-rose-600 dark:text-rose-400 font-semibold">{r.days_inactive}d inactive</p>
+            <p className="text-xs text-rose-600 dark:text-rose-400 font-semibold">{r.days_inactive < 0 ? 'Never active' : `${r.days_inactive}d inactive`}</p>
             {bandPill(r.current_band)}
           </div>
         </div>

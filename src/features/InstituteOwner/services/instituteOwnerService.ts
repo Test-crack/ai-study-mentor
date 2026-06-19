@@ -32,19 +32,17 @@ export async function fetchSummary(): Promise<{ success: boolean; data: Institut
     return callBackend(`${BASE()}/summary`);
 }
 
-export async function fetchBatches(params?: { exam_type?: string }): Promise<{ success: boolean; data: BatchRow[] }> {
-    const qs = params?.exam_type ? `?exam_type=${encodeURIComponent(params.exam_type)}` : '';
-    return callBackend(`${BASE()}/batches${qs}`);
+export async function fetchBatches(): Promise<{ success: boolean; data: BatchRow[] }> {
+    return callBackend(`${BASE()}/batches`);
 }
 
 export async function fetchBatchDashboardSummary(batchId: string): Promise<{ success: boolean; data: BatchDashboardSummary }> {
     return callBackend(`${BASE()}/batches/${batchId}/dashboard-summary`);
 }
 
-export async function fetchStudents(params?: { batchId?: string; exam_type?: string; at_risk?: boolean }): Promise<{ success: boolean; data: StudentRow[]; total: number }> {
+export async function fetchStudents(params?: { batchId?: string; at_risk?: boolean }): Promise<{ success: boolean; data: StudentRow[]; total: number }> {
     const q = new URLSearchParams();
     if (params?.batchId)    q.set('batchId', params.batchId);
-    if (params?.exam_type)  q.set('exam_type', params.exam_type);
     if (params?.at_risk)    q.set('at_risk', 'true');
     const qs = q.toString() ? `?${q}` : '';
     return callBackend(`${BASE()}/students${qs}`);
@@ -62,10 +60,9 @@ export async function fetchInstructors(): Promise<{ success: boolean; data: Inst
     return callBackend(`${BASE()}/instructors`);
 }
 
-export async function fetchAssessmentOverview(params?: { batch_id?: string; exam_type?: string }): Promise<{ success: boolean; data: AssessmentOverview }> {
+export async function fetchAssessmentOverview(params?: { batch_id?: string }): Promise<{ success: boolean; data: AssessmentOverview }> {
     const q = new URLSearchParams();
     if (params?.batch_id)  q.set('batch_id', params.batch_id);
-    if (params?.exam_type) q.set('exam_type', params.exam_type);
     const qs = q.toString() ? `?${q}` : '';
     return callBackend(`${BASE()}/assessment-overview${qs}`);
 }
@@ -100,7 +97,6 @@ export async function fetchSubskillHeatmap(): Promise<{ success: boolean; data: 
 
 export interface InstituteSummary {
     institute_name: string;
-    exam_types: string[];
     total_students: number;
     active_today: number;
     platform_unlocked_today: number;
@@ -115,7 +111,6 @@ export interface InstituteSummary {
 export interface BatchRow {
     id: string;
     name: string;
-    exam_type: string;
     status: string;
     student_count: number;
     max_students: number | null;
@@ -125,8 +120,6 @@ export interface BatchRow {
     at_risk_count: number;
     active_today: number;
     ia_completion_rate: number;
-    start_date: string | null;
-    end_date: string | null;
 }
 
 export interface BatchDashboardSummary {
@@ -154,7 +147,7 @@ export interface BandOverviewRow {
 
 export interface AtRiskRow {
     student_id: string; user_id: string; name: string; avatar: string | null;
-    batch_id: string; batch_name: string; exam_type: string;
+    batch_id: string; batch_name: string;
     flags: string[]; primary_flag: string;
     days_inactive: number; missed_ia_count: number;
     current_band: number | null; target_band: number | null;
@@ -162,7 +155,7 @@ export interface AtRiskRow {
 
 export interface StudentRow {
     student_id: string; user_id: string; name: string; avatar: string | null;
-    batch_id: string; batch_name: string; exam_type: string;
+    batch_id: string; batch_name: string;
     current_band: number | null; target_band: number | null; gap: number | null;
     band_trend: 'up' | 'flat' | 'down' | null;
     daily_streak: number; drilled_today: boolean; drills_count_today: number;
@@ -192,8 +185,8 @@ export interface StudentFullProgress {
 
 export interface InstructorRow {
     user_id: string; name: string; email: string; avatar: string | null;
-    batches: { id: string; name: string; exam_type: string; student_count: number }[];
-    total_students: number; exam_types: string[];
+    batches: { batch_id: string; batch_name: string; student_count: number }[];
+    total_students: number;
 }
 
 export interface AssessmentOverview {
@@ -206,18 +199,17 @@ export interface AssessmentOverview {
 
 export interface CohortProgressData {
     monthly_points: { month: string; avg_ia_band: number | null; avg_real_band: number | null }[];
-    exam_type_breakdown: any[];
 }
 
 export interface BatchComparisonRow {
-    batch_id: string; batch_name: string; exam_type: string | null;
+    batch_id: string; batch_name: string;
     student_count: number; avg_band: number | null; diagnostic_baseline: number | null;
     improvement_delta: number | null; ia_completion_rate: number; engagement_rate: number;
     at_risk_pct: number;
 }
 
 export interface InstructorEffectivenessRow {
-    user_id: string; name: string; avatar: string | null; exam_types: string[];
+    user_id: string; name: string; avatar: string | null;
     batch_count: number; student_count: number; avg_band_improvement: number | null;
     ia_completion_rate: number; at_risk_students: number;
     students_at_target: number; avg_student_streak: number;
@@ -229,7 +221,7 @@ export interface EngagementWeek {
 
 export interface GoalAchievementData {
     below: number; near: number; at_or_above: number; exam_ready: number;
-    by_batch: { batch_id: string; batch_name: string; exam_type: string | null; below: number; near: number; at_or_above: number; exam_ready: number }[];
+    by_batch: { batch_id: string; batch_name: string; below: number; near: number; at_or_above: number; exam_ready: number }[];
 }
 
 export interface SubskillHeatmapRow {

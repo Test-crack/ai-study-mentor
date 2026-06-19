@@ -10,14 +10,8 @@ import { InstituteOwnerTopbar } from '../components/InstituteOwnerTopbar';
 import { callBackend } from '@/features/auth/services/authClient';
 import { getBackendUrl } from '@/shared/utils';
 import { useToast } from '@/shared/hooks/use-toast';
+import { fetchSummary, type InstituteSummary } from '../services/instituteOwnerService';
 
-// ─── Static overview metrics (kept as demo) ────────────────────────────────────
-const topMetrics = [
-  { title: "Total Batches", value: "—", subtext: "Across institute", subtextColor: "text-slate-500 dark:text-gray-500" },
-  { title: "Total Students", value: "—", subtext: "Across all batches", subtextColor: "text-slate-500 dark:text-gray-500" },
-  { title: "Avg Attendance", value: "90%", subtext: "This month", subtextColor: "text-slate-500 dark:text-gray-500" },
-  { title: "Avg Improvement", value: "15%", subtext: "Score delta", subtextColor: "text-slate-500 dark:text-gray-500" },
-];
 
 // Map API status to colours
 const STATUS = {
@@ -87,14 +81,19 @@ export default function BatchInsight() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [batches, setBatches] = useState<any[]>([]);
+  const [loading, setLoading]   = useState(true);
+  const [batches, setBatches]   = useState<any[]>([]);
+  const [summary, setSummary]   = useState<InstituteSummary | null>(null);
 
-  const loadBatches = useCallback(async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await callBackend(`${getBackendUrl()}/api/institute-owner/batches`);
-      setBatches(res.data || []);
+      const [batchRes, sumRes] = await Promise.all([
+        callBackend(`${getBackendUrl()}/api/institute-owner/batches`),
+        fetchSummary(),
+      ]);
+      setBatches(batchRes.data || []);
+      setSummary(sumRes.data);
     } catch (err: any) {
       toast({ title: 'Failed to load batches', description: err.message, variant: 'destructive' });
     } finally {
@@ -102,16 +101,18 @@ export default function BatchInsight() {
     }
   }, [toast]);
 
-  useEffect(() => { loadBatches(); }, [loadBatches]);
+  useEffect(() => { load(); }, [load]);
 
-  // Derived metrics from real data (backend returns student_count, not studentCount)
-  const totalStudents = batches.reduce((sum, b) => sum + (b.student_count ?? b.studentCount ?? 0), 0);
-  const dynamicMetrics = [
-    ...topMetrics.slice(0, 2).map((m, i) =>
-      i === 0 ? { ...m, value: String(batches.length) }
-              : { ...m, value: String(totalStudents) }
-    ),
-    ...topMetrics.slice(2),
+  // KPI cards use institute-level summary (deduplicated — students in multiple batches count once)
+  const iaCompRate = summary && summary.ia_completion_last_7_days.total_eligible > 0
+    ? Math.round(summary.ia_completion_last_7_days.completed / summary.ia_completion_last_7_days.total_eligible * 100)
+    : 0;
+
+  const topMetrics = [
+    { title: 'Total Batches',   value: String(batches.length),                                    subtext: 'Across institute' },
+    { title: 'Total Students',  value: String(summary?.total_students ?? '—'),                    subtext: `${summary?.active_today ?? 0} active today` },
+    { title: 'Avg Band Score',  value: summary?.avg_band != null ? summary.avg_band.toFixed(1) : '—', subtext: 'Across all students' },
+    { title: 'At Risk',         value: String(summary?.at_risk_count ?? '—'),                     subtext: `IA completion: ${iaCompRate}% (7d)` },
   ];
 
   return (
@@ -155,11 +156,11 @@ export default function BatchInsight() {
               <>
                 {/* Top Metric Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {dynamicMetrics.map((metric, idx) => (
+                  {topMetrics.map((metric, idx) => (
                     <div key={idx} className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl p-5 shadow-sm">
                       <p className="text-slate-500 dark:text-gray-400 text-sm mb-1">{metric.title}</p>
                       <h2 className="text-4xl font-bold mb-2">{metric.value}</h2>
-                      <p className={`text-xs ${metric.subtextColor}`}>{metric.subtext}</p>
+                      <p className="text-xs text-slate-500 dark:text-gray-500">{metric.subtext}</p>
                     </div>
                   ))}
                 </div>
@@ -173,12 +174,13 @@ export default function BatchInsight() {
                 ) : (
                   <div className="space-y-4">
                     {batches.map((batch) => {
-                      // backend returns student_count; legacy shape used studentCount
-                      const enrolled = batch.student_count ?? batch.studentCount ?? 0;
-                      const capacity = batch.max_students ?? batch.maxStudents;
+                      const enrolled = batch.student_count ?? 0;
+                      const capacity = batch.max_students ?? null;
                       const capacityPercentage = batch.capacity_pct ?? (capacity ? Math.round((enrolled / capacity) * 100) : null);
                       const statusStyle = STATUS[(batch.status as string)?.toUpperCase() as keyof typeof STATUS] ?? STATUS.ACTIVE;
-                      const instructorNames = batch.instructors?.map((i: any) => i.name).join(', ') || 'Unassigned';
+                      const instructorNames = batch.instructors?.length > 0
+                        ? batch.instructors.map((i: any) => i.name).join(', ')
+                        : 'No instructor assigned';
                       const atRisk = batch.at_risk_count ?? 0;
                       const avgBand = batch.avg_band as number | null;
 
@@ -199,7 +201,7 @@ export default function BatchInsight() {
                               </span>
                             </div>
                             <p className="text-sm text-slate-500 dark:text-gray-400">
-                              {batch.exam_type ?? 'IELTS'} · {instructorNames}
+                              {instructorNames}
                             </p>
                           </div>
 

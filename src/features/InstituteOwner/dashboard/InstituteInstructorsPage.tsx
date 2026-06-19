@@ -28,18 +28,6 @@ function InitialsAvatar({ name }: { name: string }) {
   );
 }
 
-function ExamPill({ exam }: { exam: string }) {
-  const cls: Record<string, string> = {
-    IELTS: 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 border-blue-200 dark:border-blue-800',
-    PTE:   'bg-violet-50 text-violet-700 dark:bg-violet-900/20 dark:text-violet-400 border-violet-200 dark:border-violet-800',
-    TOEFL: 'bg-teal-50 text-teal-700 dark:bg-teal-900/20 dark:text-teal-400 border-teal-200 dark:border-teal-800',
-  };
-  const style = cls[exam] ?? 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700';
-  return (
-    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${style}`}>{exam}</span>
-  );
-}
-
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function CardSkeleton() {
@@ -76,9 +64,6 @@ function InstructorCard({ instructor }: { instructor: InstructorRow }) {
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-slate-900 dark:text-white text-base leading-tight truncate">{instructor.name}</h3>
           <p className="text-xs text-slate-500 dark:text-gray-400 mt-0.5 truncate">{instructor.email}</p>
-          <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-            {instructor.exam_types.map(e => <ExamPill key={e} exam={e} />)}
-          </div>
         </div>
       </div>
 
@@ -94,10 +79,10 @@ function InstructorCard({ instructor }: { instructor: InstructorRow }) {
           <div className="flex flex-wrap gap-1.5">
             {visibleBatches.map(b => (
               <span
-                key={b.id}
+                key={b.batch_id}
                 className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-lg"
               >
-                {b.name}
+                {b.batch_name}
               </span>
             ))}
             {extra > 0 && (

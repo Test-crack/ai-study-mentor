@@ -126,7 +126,6 @@ function BatchCompPanel({ rows }: { rows: BatchComparisonRow[] }) {
                     <td className="px-6 py-3">
                       <div className="flex items-center gap-2">
                         <span className="font-medium text-slate-800 dark:text-slate-200">{b.batch_name}</span>
-                        {b.exam_type && <span className="text-[10px] text-slate-400">{b.exam_type}</span>}
                       </div>
                     </td>
                     <td className="px-4 py-3 text-center font-bold">{b.student_count}</td>

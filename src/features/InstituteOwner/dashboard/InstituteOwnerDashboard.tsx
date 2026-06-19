@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Users, BookOpen, BarChart2, AlertTriangle, Flame,
-  TrendingUp, TrendingDown, Minus, ChevronRight, Loader2, RefreshCw,
+  TrendingUp, TrendingDown, Minus, ChevronRight, ChevronLeft, Loader2, RefreshCw,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { InstituteOwnerSidebar } from '../components/InstitiuteOwnerSidebar';
@@ -77,14 +77,18 @@ export default function InstituteOwnerDashboard() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState<InstituteSummary | null>(null);
-  const [atRisk, setAtRisk] = useState<AtRiskRow[]>([]);
+  const [atRisk, setAtRisk]   = useState<AtRiskRow[]>([]);
+  const [riskPage, setRiskPage] = useState(0);
+
+  const RISK_PAGE_SIZE = 8;
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const [sumRes, riskRes] = await Promise.all([fetchSummary(), fetchAtRisk()]);
       setSummary(sumRes.data);
-      setAtRisk(riskRes.data.slice(0, 10));
+      setAtRisk(riskRes.data);
+      setRiskPage(0);
     } catch (err: any) {
       toast({ title: 'Failed to load dashboard', description: err.message, variant: 'destructive' });
     } finally {
@@ -99,6 +103,11 @@ export default function InstituteOwnerDashboard() {
       ? Math.round(summary.ia_completion_last_7_days.completed / summary.ia_completion_last_7_days.total_eligible * 100)
       : 0
     : 0;
+
+  const riskPageCount   = Math.ceil(atRisk.length / RISK_PAGE_SIZE);
+  const riskHasPrev     = riskPage > 0;
+  const riskHasNext     = riskPage < riskPageCount - 1;
+  const riskPageRows    = atRisk.slice(riskPage * RISK_PAGE_SIZE, (riskPage + 1) * RISK_PAGE_SIZE);
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0a0a0a] font-sans text-slate-900 dark:text-white transition-colors duration-300">
@@ -124,7 +133,6 @@ export default function InstituteOwnerDashboard() {
                 </h1>
                 <p className="text-sm text-slate-500 mt-0.5">
                   Live operational overview across all batches
-                  {summary?.exam_types?.length ? ` · ${summary.exam_types.join(', ')}` : ''}
                 </p>
               </div>
               <button
@@ -211,6 +219,7 @@ export default function InstituteOwnerDashboard() {
                       <p className="text-sm mt-1">No at-risk flags detected today</p>
                     </div>
                   ) : (
+                    <>
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead>
@@ -219,12 +228,12 @@ export default function InstituteOwnerDashboard() {
                             <th className="px-4 py-3 text-left font-semibold">Batch</th>
                             <th className="px-4 py-3 text-left font-semibold">Primary Flag</th>
                             <th className="px-4 py-3 text-center font-semibold">Band</th>
-                            <th className="px-4 py-3 text-center font-semibold">Inactive</th>
+                            <th className="px-4 py-3 text-center font-semibold">Last Active</th>
                             <th className="px-4 py-3 text-center font-semibold">Missed IAs</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50 dark:divide-[#27272a]">
-                          {atRisk.map(s => (
+                          {riskPageRows.map(s => (
                             <tr
                               key={s.student_id}
                               className="hover:bg-slate-50 dark:hover:bg-white/[0.02] cursor-pointer transition-colors"
@@ -264,6 +273,65 @@ export default function InstituteOwnerDashboard() {
                         </tbody>
                       </table>
                     </div>
+
+                    {/* Pagination */}
+                    {riskPageCount > 1 && (
+                      <div className="flex items-center justify-between px-6 py-3 border-t border-slate-100 dark:border-[#27272a]">
+                        <span className="text-xs text-slate-400">
+                          {riskPage * RISK_PAGE_SIZE + 1}–{Math.min((riskPage + 1) * RISK_PAGE_SIZE, atRisk.length)} of {atRisk.length}
+                        </span>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setRiskPage(p => p - 1)}
+                            disabled={!riskHasPrev}
+                            aria-label="Previous page"
+                            className={`h-8 w-8 rounded-full flex items-center justify-center transition-all ${
+                              riskHasPrev
+                                ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 hover:text-indigo-600 dark:hover:text-indigo-400'
+                                : 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
+                            }`}
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                          </button>
+
+                          <div className="flex items-center gap-1.5">
+                            {riskPageCount <= 7 ? (
+                              Array.from({ length: riskPageCount }, (_, i) => (
+                                <button
+                                  key={i}
+                                  onClick={() => setRiskPage(i)}
+                                  aria-label={`Page ${i + 1}`}
+                                  className={`rounded-full transition-all ${
+                                    i === riskPage
+                                      ? 'h-2 w-5 bg-indigo-500'
+                                      : 'h-2 w-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600'
+                                  }`}
+                                />
+                              ))
+                            ) : (
+                              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                {riskPage + 1} / {riskPageCount}
+                              </span>
+                            )}
+                          </div>
+
+                          <button
+                            onClick={() => setRiskPage(p => p + 1)}
+                            disabled={!riskHasNext}
+                            aria-label="Next page"
+                            className={`h-8 w-8 rounded-full flex items-center justify-center transition-all ${
+                              riskHasNext
+                                ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 hover:text-indigo-600 dark:hover:text-indigo-400'
+                                : 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
+                            }`}
+                          >
+                            <ChevronRight className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    </>
                   )}
                 </div>
 

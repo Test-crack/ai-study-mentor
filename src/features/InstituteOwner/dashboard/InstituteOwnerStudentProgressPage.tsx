@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import {
   ChevronLeft, Activity, Target, Zap, TrendingUp, TrendingDown,
-  Minus, Award, Loader2, Calendar, BookOpen,
+  Minus, Award, Loader2, Calendar, BookOpen, BarChart2,
 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { InstituteOwnerSidebar } from '../components/InstitiuteOwnerSidebar';
