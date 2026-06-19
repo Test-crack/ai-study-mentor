@@ -10,7 +10,10 @@
       "Bash(Select-Object FullName)",
       "Bash(Sort-Object)",
       "PowerShell(& npx tsc --noEmit --project \"e:\\\\FreeLance\\\\edtech\\\\backend-study-mentor\\\\tsconfig.json\" 2>&1)",
-      "PowerShell(& npx tsc --noEmit --project \"e:\\\\FreeLance\\\\edtech\\\\ai-study-mentor\\\\tsconfig.json\" 2>&1)"
+      "PowerShell(& npx tsc --noEmit --project \"e:\\\\FreeLance\\\\edtech\\\\ai-study-mentor\\\\tsconfig.json\" 2>&1)",
+      "Bash(git add *)",
+      "Skill(artifact-design)",
+      "Skill(artifact-design:*)"
     ],
     "additionalDirectories": [
       "e:\\FreeLance\\edtech\\backend-study-mentor\\src\\controllers",

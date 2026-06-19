@@ -62,13 +62,13 @@ import PlatformAnalytics from "@/features/TestCrackSuperAdmin/dashboard/Platform
 import AllUsers from "@/features/TestCrackSuperAdmin/dashboard/AllUsers";
 import InstituteOwnerDashboard from "@/features/InstituteOwner/dashboard/InstituteOwnerDashboard";
 import Performance from "@/features/InstituteOwner/dashboard/Performance";
-import RoiAnalytics from "@/features/InstituteOwner/dashboard/RoiAnalytics";
 import BatchInsight from "@/features/InstituteOwner/dashboard/BatchInsight";
-import TutorEffective from "@/features/InstituteOwner/dashboard/TutorEffective";
-import StrategicReport from "@/features/InstituteOwner/dashboard/StrategicReport";
-import AiCalibration from "@/features/InstituteOwner/dashboard/AiCalibration";
 import InstituteAdmins from "@/features/InstituteOwner/dashboard/InstituteAdmins";
 import BatchAnalyticsView from "@/features/InstituteOwner/dashboard/BatchAnalyticsView";
+import InstituteStudentsPage from "@/features/InstituteOwner/dashboard/InstituteStudentsPage";
+import InstituteInstructorsPage from "@/features/InstituteOwner/dashboard/InstituteInstructorsPage";
+import InstituteBatchDetailPage from "@/features/InstituteOwner/dashboard/InstituteBatchDetailPage";
+import { RoiAnalyticsPage, StrategicReportPage, AiCalibrationPage } from "@/features/InstituteOwner/dashboard/ComingSoonPages";
 import VoiceLab from "@/features/student/components/VoiceLab";
 import SpeedReading from "@/features/student/components/SpeedReading";
 import { InstructorReportPage } from "@/features/instructor/components/InstructorReportPage";
@@ -223,15 +223,16 @@ const AppRoutes = () => {
       {/* ── Routes that require the institute to be active ─────────────── */}
       <Route element={<RequireActiveInstitute />}>
         {/* Institute Owner Routes */}
-        <Route path="/institute-owner/dashboard" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteOwnerDashboard /></RoleProtectedRoute>} />
-        <Route path="/institute-owner/performance" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><Performance /></RoleProtectedRoute>} />
-        <Route path="/institute-owner/roi" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><RoiAnalytics /></RoleProtectedRoute>} />
-        <Route path="/institute-owner/insight" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><BatchInsight /></RoleProtectedRoute>} />
-        <Route path="/institute-owner/tuteffect" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><TutorEffective /></RoleProtectedRoute>} />
-        <Route path="/institute-owner/strategic" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><StrategicReport /></RoleProtectedRoute>} />
-        <Route path="/institute-owner/calibration" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><AiCalibration /></RoleProtectedRoute>} />
-        <Route path="/institute-owner/admins" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteAdmins /></RoleProtectedRoute>} />
-        <Route path="/institute-owner/batches/:batchSlug/analytics" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER', 'INSTRUCTOR']}><BatchAnalyticsView /></RoleProtectedRoute>} />
+        <Route path="/institute-owner/dashboard"    element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteOwnerDashboard /></RoleProtectedRoute>} />
+        <Route path="/institute-owner/insight"      element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><BatchInsight /></RoleProtectedRoute>} />
+        <Route path="/institute-owner/students"     element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteStudentsPage /></RoleProtectedRoute>} />
+        <Route path="/institute-owner/instructors"  element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteInstructorsPage /></RoleProtectedRoute>} />
+        <Route path="/institute-owner/performance"  element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><Performance /></RoleProtectedRoute>} />
+        <Route path="/institute-owner/admins"       element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteAdmins /></RoleProtectedRoute>} />
+        <Route path="/institute-owner/roi"          element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><RoiAnalyticsPage /></RoleProtectedRoute>} />
+        <Route path="/institute-owner/strategic"    element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><StrategicReportPage /></RoleProtectedRoute>} />
+        <Route path="/institute-owner/calibration"  element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><AiCalibrationPage /></RoleProtectedRoute>} />
+        <Route path="/institute-owner/batches/:batchSlug/analytics" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER', 'INSTRUCTOR']}><InstituteBatchDetailPage /></RoleProtectedRoute>} />
         <Route path="/institute-owner/students/:studentId/progress" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER', 'INSTRUCTOR']}><InstituteOwnerStudentProgressPage /></RoleProtectedRoute>} />
 
         {/* Institute Admin routes */}
