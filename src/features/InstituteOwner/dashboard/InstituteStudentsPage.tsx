@@ -9,6 +9,8 @@ import { InstituteOwnerTopbar } from '../components/InstituteOwnerTopbar';
 import { fetchStudents, StudentRow } from '../services/instituteOwnerService';
 import { useToast } from '@/shared/hooks/use-toast';
 
+const toSlug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function bandPill(band: number | null) {
@@ -213,7 +215,7 @@ export default function InstituteStudentsPage() {
                       {visible.map(row => (
                         <tr
                           key={row.student_id}
-                          onClick={() => navigate(`/institute-owner/students/${row.user_id}/progress`, { state: { student: row } })}
+                          onClick={() => navigate(`/institute-owner/students/${toSlug(row.name)}/progress`, { state: { studentId: row.user_id } })}
                           className="hover:bg-slate-50 dark:hover:bg-[#1a1a1a] cursor-pointer transition-colors"
                         >
                           <td className="px-4 py-3 whitespace-nowrap">

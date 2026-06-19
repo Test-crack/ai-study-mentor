@@ -120,8 +120,8 @@ export default function BatchInsight() {
       
       {/* Sidebar */}
       <div className="hidden lg:block">
-        <InstituteOwnerSidebar 
-          activeTab="insight"
+        <InstituteOwnerSidebar
+          activeTab="batches"
           isCollapsed={isSidebarCollapsed} 
           toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
         />

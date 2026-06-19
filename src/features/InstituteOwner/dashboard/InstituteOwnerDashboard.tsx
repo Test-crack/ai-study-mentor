@@ -12,6 +12,8 @@ import {
   type InstituteSummary, type AtRiskRow,
 } from '../services/instituteOwnerService';
 
+const toSlug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function BandPill({ band }: { band: number | null }) {
@@ -237,7 +239,7 @@ export default function InstituteOwnerDashboard() {
                             <tr
                               key={s.student_id}
                               className="hover:bg-slate-50 dark:hover:bg-white/[0.02] cursor-pointer transition-colors"
-                              onClick={() => navigate(`/institute-owner/students/${s.user_id}/progress`, { state: { student: s } })}
+                              onClick={() => navigate(`/institute-owner/students/${toSlug(s.name)}/progress`, { state: { studentId: s.user_id } })}
                             >
                               <td className="px-6 py-3">
                                 <div className="flex items-center gap-2">

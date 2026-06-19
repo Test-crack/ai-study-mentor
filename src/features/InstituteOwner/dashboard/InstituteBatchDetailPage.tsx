@@ -15,6 +15,8 @@ import {
 } from '../services/instituteOwnerService';
 import { useToast } from '@/shared/hooks/use-toast';
 
+const toSlug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function bandPill(band: number | null) {
@@ -217,7 +219,7 @@ export default function InstituteBatchDetailPage() {
   }, [batchId]);
 
   const handleStudentClick = (row: BandOverviewRow) => {
-    navigate(`/institute-owner/students/${row.user_id}/progress`, { state: { student: row } });
+    navigate(`/institute-owner/students/${toSlug(row.name)}/progress`, { state: { studentId: row.user_id } });
   };
 
   return (

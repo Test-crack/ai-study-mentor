@@ -233,7 +233,7 @@ const AppRoutes = () => {
         <Route path="/institute-owner/strategic"    element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><StrategicReportPage /></RoleProtectedRoute>} />
         <Route path="/institute-owner/calibration"  element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><AiCalibrationPage /></RoleProtectedRoute>} />
         <Route path="/institute-owner/batches/:batchSlug/analytics" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER', 'INSTRUCTOR']}><InstituteBatchDetailPage /></RoleProtectedRoute>} />
-        <Route path="/institute-owner/students/:studentId/progress" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER', 'INSTRUCTOR']}><InstituteOwnerStudentProgressPage /></RoleProtectedRoute>} />
+        <Route path="/institute-owner/students/:studentSlug/progress" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER', 'INSTRUCTOR']}><InstituteOwnerStudentProgressPage /></RoleProtectedRoute>} />
 
         {/* Institute Admin routes */}
         <Route path="/institute-admin/dashboard" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteDashboard /></RoleProtectedRoute>} />
