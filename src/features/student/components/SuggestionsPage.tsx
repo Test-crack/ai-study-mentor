@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { StudentSidebar } from "./dashboard/StudentSidebar";
 import { StudentTopbar } from "./dashboard/StudentTopbar";
 import { PremiumModal } from "@/features/payment/components/PremiumModal";
@@ -19,7 +19,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
-// ─── TYPES ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ TYPES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 type Skill = "Listening" | "Reading" | "Writing" | "Speaking";
 type ResourceType = "Video" | "Exercise" | "Article" | "Drill" | "Mock";
@@ -35,7 +35,7 @@ interface Suggestion {
   priority: "High" | "Medium" | "Low";
 }
 
-// ─── MOCK DATA ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ MOCK DATA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const INITIAL_SUGGESTIONS: Suggestion[] = [
   {
@@ -50,7 +50,7 @@ const INITIAL_SUGGESTIONS: Suggestion[] = [
   },
   {
     id: "s2",
-    resourceTitle: "Matching Headings Strategy — Step-by-Step Walkthrough",
+    resourceTitle: "Matching Headings Strategy â€” Step-by-Step Walkthrough",
     resourceType: "Video",
     skill: "Reading",
     weakness: "Matching Headings accuracy: 5.0",
@@ -60,7 +60,7 @@ const INITIAL_SUGGESTIONS: Suggestion[] = [
   },
   {
     id: "s3",
-    resourceTitle: "IELTS Writing Task 2 — Cohesion & Linking Words Practice",
+    resourceTitle: "IELTS Writing Task 2 â€” Cohesion & Linking Words Practice",
     resourceType: "Exercise",
     skill: "Writing",
     weakness: "Coherence & Cohesion score: 5.0",
@@ -70,10 +70,10 @@ const INITIAL_SUGGESTIONS: Suggestion[] = [
   },
   {
     id: "s4",
-    resourceTitle: "Academic Listening — Sections 3 & 4 Vocabulary Builder",
+    resourceTitle: "Academic Listening â€” Sections 3 & 4 Vocabulary Builder",
     resourceType: "Article",
     skill: "Listening",
-    weakness: "Sections 3–4 accuracy drop",
+    weakness: "Sections 3â€“4 accuracy drop",
     timeEstimate: 12,
     completed: false,
     priority: "Medium",
@@ -83,14 +83,14 @@ const INITIAL_SUGGESTIONS: Suggestion[] = [
     resourceTitle: "Fluency Booster: 2-Minute Monologue Practice (Part 2 Cue Cards)",
     resourceType: "Mock",
     skill: "Speaking",
-    weakness: "Fluency score: 4.5 — frequent pauses",
+    weakness: "Fluency score: 4.5 â€” frequent pauses",
     timeEstimate: 8,
     completed: false,
     priority: "Low",
   },
 ];
 
-// ─── CONFIG ───────────────────────────────────────────────────────────────────
+// â”€â”€â”€ CONFIG â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const SKILL_CONFIG: Record<Skill, { icon: React.ReactNode; color: string; bg: string; border: string }> = {
   Listening: { icon: <Headphones className="h-4 w-4" />, color: "text-sky-600",    bg: "bg-sky-50 dark:bg-sky-500/10",       border: "border-sky-200 dark:border-sky-500/30" },
@@ -113,12 +113,12 @@ const PRIORITY_CONFIG = {
   Low:    { label: "Low Priority",    color: "text-slate-500 dark:text-slate-400", bg: "bg-slate-50 dark:bg-slate-800",      border: "border-slate-200 dark:border-slate-700",    dot: "bg-slate-400" },
 };
 
-// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
+// â”€â”€â”€ MAIN COMPONENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const SuggestionsPage = () => {
   const [activeTab, setActiveTab] = useState("suggestions");
   const [showPremiumModal, setShowPremiumModal] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [suggestions, setSuggestions] = useState<Suggestion[]>(INITIAL_SUGGESTIONS);
   const [filterSkill, setFilterSkill] = useState<Skill | "All">("All");
 
@@ -149,7 +149,7 @@ const SuggestionsPage = () => {
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6">
 
-          {/* ── Header ─────────────────────────────────────────────── */}
+          {/* â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
@@ -181,13 +181,13 @@ const SuggestionsPage = () => {
               <div>
                 <p className="text-xs font-black text-slate-700 dark:text-slate-200">Tasks Done</p>
                 <p className="text-[11px] text-slate-400">
-                  {completedCount === totalCount ? "All complete 🎉" : `${totalCount - completedCount} remaining`}
+                  {completedCount === totalCount ? "All complete ðŸŽ‰" : `${totalCount - completedCount} remaining`}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* ── Filter Bar ─────────────────────────────────────────── */}
+          {/* â”€â”€ Filter Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-4 shadow-sm">
             <div className="flex flex-wrap items-center gap-2">
               <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-wider mr-1">
@@ -204,7 +204,7 @@ const SuggestionsPage = () => {
             </div>
           </div>
 
-          {/* ── Suggestion Cards ────────────────────────────────────── */}
+          {/* â”€â”€ Suggestion Cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           <div className="space-y-4">
             {filtered.length === 0 ? (
               <div className="text-center py-16 text-slate-400">
@@ -230,7 +230,7 @@ const SuggestionsPage = () => {
   );
 };
 
-// ─── SUGGESTION CARD ──────────────────────────────────────────────────────────
+// â”€â”€â”€ SUGGESTION CARD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const SuggestionCard = ({
   suggestion,
@@ -325,7 +325,7 @@ const SuggestionCard = ({
   );
 };
 
-// ─── FILTER CHIP ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ FILTER CHIP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const FilterChip = ({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) => (
   <button

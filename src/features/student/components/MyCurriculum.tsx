@@ -1,4 +1,4 @@
-import  { useState, useRef, useEffect } from 'react';
+﻿import  { useState, useRef, useEffect } from 'react';
 import { 
   CheckCircle2, 
   Sparkles, 
@@ -54,7 +54,7 @@ type ChatMessage = {
 export default function MyCurriculum() {
   // Layout States
 const [activeTab, setActiveTab] = useState("my-curriculum");
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   // Curriculum States
@@ -74,7 +74,7 @@ const [activeTab, setActiveTab] = useState("my-curriculum");
     if (currentView === 'chat') {
       setChatMessages([{
         role: 'ai',
-        text: `I'm your AI Tutor for Data Structures & Algorithms. I see you're studying **${selectedTopic?.title || 'Arrays & Linked Lists'}**. What would you like to understand better? I'll use the Socratic method — so expect me to challenge your thinking!`
+        text: `I'm your AI Tutor for Data Structures & Algorithms. I see you're studying **${selectedTopic?.title || 'Arrays & Linked Lists'}**. What would you like to understand better? I'll use the Socratic method â€” so expect me to challenge your thinking!`
       }]);
       setChatInput("");
       setShowToast(false);
@@ -238,7 +238,7 @@ const [activeTab, setActiveTab] = useState("my-curriculum");
 
       <div className="flex justify-between items-end">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Curriculum Breakdowns</h1>
-        <div className="text-sm text-slate-500 dark:text-slate-400 font-medium">14 weeks · 26 topics</div>
+        <div className="text-sm text-slate-500 dark:text-slate-400 font-medium">14 weeks Â· 26 topics</div>
       </div>
 
       <div className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-slate-800/80 rounded-2xl overflow-hidden shadow-sm transition-colors">
@@ -317,7 +317,7 @@ const [activeTab, setActiveTab] = useState("my-curriculum");
           <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-violet-600 dark:text-violet-500" /> AI Tutor
           </h1>
-          <p className="text-xs text-slate-500 font-medium">Socratic Method · Data Course</p>
+          <p className="text-xs text-slate-500 font-medium">Socratic Method Â· Data Course</p>
         </div>
       </div>
 

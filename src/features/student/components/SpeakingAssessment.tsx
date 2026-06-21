@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Mic, MicOff, Square, Play, RotateCcw, ChevronRight, ChevronLeft,
   Clock, Volume2, VolumeX, AlertCircle, CheckCircle, TrendingUp,
@@ -9,9 +9,9 @@ import { StudentSidebar } from "./dashboard/StudentSidebar";
 import { StudentTopbar } from "./dashboard/StudentTopbar";
 import { PremiumModal } from "@/features/payment/components/PremiumModal";
 
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Types
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 type AssessmentView = 'intro' | 'session' | 'analyzing' | 'results';
 type RecordingState = 'idle' | 'listening_ai' | 'recording' | 'processing';
 
@@ -52,22 +52,22 @@ interface AssessmentResult {
   overallFeedback: string;
 }
 
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Constants
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const IELTS_QUESTIONS: Question[] = [
   { id: 1, part: 1, text: "Can you tell me about yourself and where you're from?", hint: "Talk about your hometown, background, and current situation." },
   { id: 2, part: 1, text: "What do you enjoy doing in your free time?", hint: "Describe hobbies and interests with specific examples." },
-  { id: 3, part: 2, text: "Describe a person who has had a significant influence on your life. You should say: who this person is, how you know them, what qualities they have, and explain why they have influenced you so much.", hint: "You have 1 minute to prepare. Speak for 1–2 minutes." },
+  { id: 3, part: 2, text: "Describe a person who has had a significant influence on your life. You should say: who this person is, how you know them, what qualities they have, and explain why they have influenced you so much.", hint: "You have 1 minute to prepare. Speak for 1â€“2 minutes." },
   { id: 4, part: 3, text: "Do you think it's more important for young people to follow their passion or choose a stable career? Why?", hint: "Give a balanced argument with examples." },
   { id: 5, part: 3, text: "How has technology changed the way people communicate compared to previous generations?", hint: "Discuss both positive and negative changes." },
 ];
 
 const ELEVENLABS_VOICE_ID = 'EXAVITQu4vr4xnSDxMaL'; // "Bella" voice
 
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // ElevenLabs TTS Helper
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function speakWithElevenLabs(text: string, apiKey: string): Promise<void> {
   try {
     const response = await fetch(
@@ -107,9 +107,9 @@ async function speakWithElevenLabs(text: string, apiKey: string): Promise<void> 
   }
 }
 
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // GPT Evaluation Helper
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function evaluateWithGPT(
   transcripts: Transcript[],
   questions: Question[],
@@ -130,7 +130,7 @@ ${conversationLog}
 Evaluate and return a JSON object with this EXACT structure:
 {
   "bandScore": <number between 0-9, can be .5 increments>,
-  "projectedBand": "<e.g., 'Band 6.5 → 7.5'>",
+  "projectedBand": "<e.g., 'Band 6.5 â†’ 7.5'>",
   "weaknesses": [
     {"title": "<short title>", "description": "<2 sentence explanation>"},
     {"title": "<short title>", "description": "<2 sentence explanation>"},
@@ -168,9 +168,9 @@ Use official IELTS criteria: Fluency & Coherence, Lexical Resource, Grammatical 
   return JSON.parse(data.choices[0].message.content) as AssessmentResult;
 }
 
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Sub-components
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const BandScoreArc = ({ score }: { score: number }) => {
   const pct = score / 9;
@@ -253,9 +253,9 @@ const TimerDisplay = ({ seconds }: { seconds: number }) => {
   );
 };
 
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // API Key Modal
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const ApiKeyModal = ({
   onConfirm,
 }: {
@@ -308,7 +308,7 @@ const ApiKeyModal = ({
 
         <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 mb-5">
           <p className="text-xs text-amber-700 dark:text-amber-300">
-            🔒 Keys are only stored in memory for this session and never sent to our servers.
+            ðŸ”’ Keys are only stored in memory for this session and never sent to our servers.
           </p>
         </div>
 
@@ -324,13 +324,13 @@ const ApiKeyModal = ({
   );
 };
 
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Main Component
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function SpeakingAssessment() {
   const [activeTab, setActiveTab] = useState('speaking');
   const [showPremiumModal, setShowPremiumModal] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
   const [view, setView] = useState<AssessmentView>('intro');
   const [showApiModal, setShowApiModal] = useState(false);
@@ -418,7 +418,7 @@ export default function SpeakingAssessment() {
     // Use Deepgram for transcription if available, else Web Speech fallback
     let transcript = currentTranscript;
     if (!transcript) {
-      transcript = '[Response recorded — AI evaluation pending]';
+      transcript = '[Response recorded â€” AI evaluation pending]';
     }
 
     const newTranscript: Transcript = {
@@ -483,7 +483,7 @@ export default function SpeakingAssessment() {
       // Mock result for demo
       setResult({
         bandScore: 6.5,
-        projectedBand: 'Band 6.5 → 7.5',
+        projectedBand: 'Band 6.5 â†’ 7.5',
         weaknesses: [
           { title: 'Hesitation & Fillers', description: 'Frequent use of "um" and "uh" interrupts fluency. Long pauses reduce coherence score.' },
           { title: 'Vocabulary Range', description: 'Repetition of basic vocabulary limits lexical resource. Advanced words are underused.' },
@@ -522,9 +522,9 @@ export default function SpeakingAssessment() {
     setAnalysisProgress(0);
   };
 
-  // ─────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Render
-  // ─────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return (
     <div className="min-h-screen bg-[#f1f3f9] dark:bg-slate-950 transition-colors duration-300 font-sans text-slate-800 dark:text-slate-200">
       <StudentSidebar
@@ -540,7 +540,7 @@ export default function SpeakingAssessment() {
         <main className="flex-1 p-4 md:p-6 lg:p-8 flex justify-center items-start w-full">
           <div className="w-full max-w-5xl">
 
-            {/* ─── INTRO VIEW ─── */}
+            {/* â”€â”€â”€ INTRO VIEW â”€â”€â”€ */}
             {view === 'intro' && (
               <>
                 {/* Hero Banner */}
@@ -607,7 +607,7 @@ export default function SpeakingAssessment() {
               </>
             )}
 
-            {/* ─── SESSION VIEW ─── */}
+            {/* â”€â”€â”€ SESSION VIEW â”€â”€â”€ */}
             {view === 'session' && (
               <div className="space-y-4 md:space-y-6 animate-in fade-in duration-500">
                 {/* Session Header */}
@@ -670,7 +670,7 @@ export default function SpeakingAssessment() {
                     </span>
                     {recordingState === 'listening_ai' && (
                       <span className="flex items-center gap-1.5 px-2 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-[10px] font-bold uppercase">
-                        <Volume2 size={11} className="animate-pulse" /> AI Speaking…
+                        <Volume2 size={11} className="animate-pulse" /> AI Speakingâ€¦
                       </span>
                     )}
                     {recordingState === 'recording' && (
@@ -701,7 +701,7 @@ export default function SpeakingAssessment() {
                     <div className="mt-4 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl min-h-[60px]">
                       <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Live Transcript</p>
                       <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-                        {currentTranscript || <span className="italic text-slate-400">Listening…</span>}
+                        {currentTranscript || <span className="italic text-slate-400">Listeningâ€¦</span>}
                       </p>
                     </div>
                   )}
@@ -733,12 +733,12 @@ export default function SpeakingAssessment() {
                       )}
                       {recordingState === 'listening_ai' && (
                         <div className="flex items-center gap-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-5 py-3 rounded-xl font-semibold text-sm">
-                          <Loader2 size={16} className="animate-spin" /> AI is speaking…
+                          <Loader2 size={16} className="animate-spin" /> AI is speakingâ€¦
                         </div>
                       )}
                       {recordingState === 'processing' && (
                         <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-5 py-3 rounded-xl font-semibold text-sm">
-                          <Loader2 size={16} className="animate-spin" /> Processing…
+                          <Loader2 size={16} className="animate-spin" /> Processingâ€¦
                         </div>
                       )}
 
@@ -789,7 +789,7 @@ export default function SpeakingAssessment() {
               </div>
             )}
 
-            {/* ─── ANALYZING VIEW ─── */}
+            {/* â”€â”€â”€ ANALYZING VIEW â”€â”€â”€ */}
             {view === 'analyzing' && (
               <div className="flex flex-col items-center justify-center min-h-[60vh] animate-in fade-in duration-500">
                 <div className="bg-white dark:bg-slate-900 rounded-3xl p-10 md:p-14 shadow-sm border border-slate-100 dark:border-slate-800 max-w-md w-full text-center">
@@ -810,7 +810,7 @@ export default function SpeakingAssessment() {
                   </div>
                   <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2">Analyzing Your Test</h2>
                   <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
-                    GPT-4 is evaluating your responses against official IELTS rubrics…
+                    GPT-4 is evaluating your responses against official IELTS rubricsâ€¦
                   </p>
                   <div className="space-y-2 text-left">
                     {[
@@ -833,14 +833,14 @@ export default function SpeakingAssessment() {
               </div>
             )}
 
-            {/* ─── RESULTS VIEW ─── */}
+            {/* â”€â”€â”€ RESULTS VIEW â”€â”€â”€ */}
             {view === 'results' && result && (
               <div className="space-y-6 animate-in fade-in duration-500">
                 {/* Results Header */}
                 <div className="flex items-center justify-between">
                   <div>
                     <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white">Your Results</h1>
-                    <p className="text-sm text-slate-500 mt-0.5">IELTS Speaking Assessment · {new Date().toLocaleDateString()}</p>
+                    <p className="text-sm text-slate-500 mt-0.5">IELTS Speaking Assessment Â· {new Date().toLocaleDateString()}</p>
                   </div>
                   <button
                     onClick={handleReset}
@@ -882,7 +882,7 @@ export default function SpeakingAssessment() {
                   </div>
                 </div>
 
-                {/* Feedback Cards — Weaknesses */}
+                {/* Feedback Cards â€” Weaknesses */}
                 <div>
                   <h2 className="font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                     <AlertCircle size={18} className="text-red-500" /> 3 Key Weaknesses
@@ -902,7 +902,7 @@ export default function SpeakingAssessment() {
                   </div>
                 </div>
 
-                {/* Feedback Cards — Improvements */}
+                {/* Feedback Cards â€” Improvements */}
                 <div>
                   <h2 className="font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                     <TrendingUp size={18} className="text-[#10b981]" /> 3 Ways to Improve
@@ -932,7 +932,7 @@ export default function SpeakingAssessment() {
                       <h3 className="font-bold text-amber-800 dark:text-amber-300 text-lg mb-1">Your Score Projection</h3>
                       <p className="text-2xl font-black text-amber-700 dark:text-amber-400 mb-2">{result.projectedBand}</p>
                       <p className="text-sm text-amber-700/80 dark:text-amber-400/80 leading-relaxed">
-                        With consistent practice on the improvements above, you can realistically achieve this band improvement within 4–6 weeks. Focus especially on your top weakness.
+                        With consistent practice on the improvements above, you can realistically achieve this band improvement within 4â€“6 weeks. Focus especially on your top weakness.
                       </p>
                     </div>
                   </div>
