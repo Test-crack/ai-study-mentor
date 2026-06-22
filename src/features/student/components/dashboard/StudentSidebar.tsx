@@ -6,12 +6,11 @@ import {
 } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useTheme } from "@/features/theme/ThemeProvider";
 import { callBackend } from "@/features/auth/services/authClient";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
-// Desktop/tablet rail kicks in at md (768px) so iPad Mini (768) and iPad Air (820)
-// get the icon rail instead of an unreachable mobile drawer.
 const RAIL_BREAKPOINT = 768;
 
 interface SidebarProps {
@@ -38,6 +37,7 @@ export const StudentSidebar = ({
   alignment = 'left'
 }: SidebarProps) => {
   const { signOut } = useAuth();
+  const { setTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -45,7 +45,7 @@ export const StudentSidebar = ({
   // Default true (locked) prevents a flash of unlocked sidebar while loading.
   const [selfLocked, setSelfLocked] = useState(true);
   useEffect(() => {
-    if (isLockedProp !== undefined) return;   // parent owns the value — skip fetch
+    if (isLockedProp !== undefined) return;
     let cancelled = false;
     callBackend(`${BACKEND}/api/student/daily-drill-state`)
       .then((res) => { if (!cancelled) setSelfLocked(!res?.dashboard_unlocked); })
@@ -54,7 +54,6 @@ export const StudentSidebar = ({
   }, [isLockedProp]);
 
   const isLocked = isLockedProp ?? selfLocked;
-
 
   const isActivelyDrilling = location.pathname.includes('/drill');
   const isLeft = alignment === 'left';
@@ -132,18 +131,14 @@ export const StudentSidebar = ({
     if (isItemDisabled(item.id)) return;
     navigate(item.path);
     if (onTabChange) onTabChange(item.id);
-    if (window.innerWidth < RAIL_BREAKPOINT) closeSidebar(); // only auto-close in drawer mode
+    if (window.innerWidth < RAIL_BREAKPOINT) closeSidebar();
   };
 
   const handleLogout = async () => {
-    document.documentElement.classList.remove('dark');
-    localStorage.setItem('theme', 'light');
-    localStorage.setItem('vite-ui-theme', 'light');
+    setTheme('light');
     await signOut();
   };
 
-  // Hover-expand label: transitions ONLY layout/opacity props it needs,
-  // so lock-state changes elsewhere don't trigger animated repaints.
   const labelCls = (extra?: string) => cn(
     "whitespace-nowrap overflow-hidden",
     "transition-[max-width,opacity,margin] duration-200 ease-out",
@@ -160,7 +155,7 @@ export const StudentSidebar = ({
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}} />
 
-      {/* Mobile Backdrop Overlay (phones only — tablets get the rail) */}
+      {/* Mobile Backdrop Overlay */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-[9998] md:hidden transition-opacity duration-300"
@@ -175,18 +170,12 @@ export const StudentSidebar = ({
         className={cn(
           "group fixed top-4 bottom-4 z-[9999] bg-white dark:bg-[#0B1120] rounded-2xl flex flex-col justify-between py-6 border border-slate-200 dark:border-slate-800 shadow-xl overflow-x-hidden",
           "transition-[width,transform] duration-300 ease-in-out",
-
           isLeft ? "left-4" : "right-4",
-
-          // Drawer behaviour below md only
           !isOpen
             ? (isLeft ? "-translate-x-[150%]" : "translate-x-[150%]")
             : "translate-x-0",
-
-          // From md (768px) up: always-visible icon rail, hover to expand
           "md:translate-x-0 w-64 md:w-[84px]",
           canExpand && "md:hover:w-64",
-
           className
         )}
       >
@@ -225,12 +214,10 @@ export const StudentSidebar = ({
                       aria-disabled={disabled}
                       className={cn(
                         "w-full flex items-center rounded-xl px-4 py-3 relative",
-                        // Only colors animate on hover; disabled state snaps instantly
                         "transition-colors duration-150",
                         activeTab === item.id && !disabled
                           ? "bg-indigo-600/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400"
                           : "bg-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800",
-                        // No grayscale filter (expensive repaint) and no transition on opacity
                         disabled && "opacity-40 pointer-events-none"
                       )}
                     >

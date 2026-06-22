@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CalendarClock, PlayCircle, Trophy, BookOpen, AlertTriangle } from "lucide-react";
+import { CalendarClock, PlayCircle, Trophy, BookOpen, AlertTriangle, X } from "lucide-react";
 import { callBackend } from "@/features/auth/services/authClient";
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
@@ -108,17 +108,28 @@ const CONFIG: Record<NotificationType, BannerConfig> = {
   },
 };
 
-// Notification types whose CTA navigates outside the assessment/drill flow.
-// These are suppressed when the platform is locked so students can't escape
-// the lock screen by clicking a notification button.
 const LOCKED_SUPPRESSED_TYPES: NotificationType[] = ['IA_MISSED', 'MOCK_PENDING', 'MOCK_IN_PROGRESS'];
 
 function NotificationBanner({ notification, isLocked }: { notification: Notification; isLocked: boolean }) {
   const navigate = useNavigate();
   const cfg = CONFIG[notification.type];
 
+  // Build a stable key for this specific notification
+  const dismissKey = `dismissed-${notification.type}-${notification.ia_number ?? ''}-${notification.ia_date ?? ''}`;
+
+  const [dismissed, setDismissed] = useState(
+    () => sessionStorage.getItem(dismissKey) === 'true'
+  );
+
+  if (dismissed) return null;
+
   const showCta = cfg.ctaLabel && cfg.route &&
     !(isLocked && LOCKED_SUPPRESSED_TYPES.includes(notification.type));
+
+  const handleDismiss = () => {
+    sessionStorage.setItem(dismissKey, 'true');
+    setDismissed(true);
+  };
 
   return (
     <div
@@ -135,14 +146,23 @@ function NotificationBanner({ notification, isLocked }: { notification: Notifica
           {cfg.body(notification)}
         </p>
       </div>
-      {showCta && (
+      <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
+        {showCta && (
+          <button
+            onClick={() => navigate(cfg.route!)}
+            className={`${cfg.ctaClass} font-bold text-sm py-2.5 px-5 rounded-xl transition-colors shadow-sm whitespace-nowrap`}
+          >
+            {cfg.ctaLabel} →
+          </button>
+        )}
         <button
-          onClick={() => navigate(cfg.route!)}
-          className={`shrink-0 self-start sm:self-auto ${cfg.ctaClass} font-bold text-sm py-2.5 px-5 rounded-xl transition-colors shadow-sm whitespace-nowrap`}
+          onClick={handleDismiss}
+          className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-black/5 dark:hover:text-slate-300 dark:hover:bg-white/10 transition-colors"
+          aria-label="Dismiss notification"
         >
-          {cfg.ctaLabel} →
+          <X className="w-4 h-4" />
         </button>
-      )}
+      </div>
     </div>
   );
 }
