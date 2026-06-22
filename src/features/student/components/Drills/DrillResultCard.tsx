@@ -117,6 +117,7 @@ export default function DrillResultCard({
 
       {/* Score Summary */}
       <div className="bg-emerald-500 text-white p-8 rounded-3xl shadow-lg relative overflow-hidden">
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none" />
         <div className="relative z-10 flex flex-col items-center text-center mb-6">
           <CheckCircle2 className="w-16 h-16 mx-auto mb-4 opacity-90" />
           <h2 className="text-3xl font-black mb-2">Drill Complete!</h2>
@@ -138,7 +139,7 @@ export default function DrillResultCard({
         </div>
       </div>
 
-      {/* Session Feedback */}
+      {/* ─── 2. SESSION FEEDBACK ─── */}
       {feedback && feedback.length > 0 && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
           <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-widest mb-4 flex items-center gap-2">
@@ -155,10 +156,10 @@ export default function DrillResultCard({
         </div>
       )}
 
-      {/* Video Recommendation Gate */}
+      {/* ─── 3. WHAT'S NEXT (Dynamic Daily Loop State) ─── */}
       <div className="bg-white dark:bg-slate-900 border-2 border-indigo-100 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
         <h3 className="text-sm font-bold text-indigo-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-          <PlayCircle className="w-5 h-5" /> Recommended Lesson
+          <CalendarClock className="w-5 h-5" /> Your Journey
         </h3>
 
         {/* Thumbnail */}

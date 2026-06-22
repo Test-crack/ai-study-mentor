@@ -46,10 +46,10 @@ function StatCard({
 }) {
   if (loading) {
     return (
-      <div className="flex-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 animate-pulse">
+      <div className="flex-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 animate-pulse">
         <div className="flex items-center gap-2 mb-3">
-          <div className="h-8 w-8 rounded-xl bg-slate-200 dark:bg-slate-700" />
-          <div className="h-4 w-32 bg-slate-200 dark:bg-slate-700 rounded" />
+          <div className="h-8 w-8 rounded-xl bg-slate-200 dark:bg-slate-700 shrink-0" />
+          <div className="h-3.5 w-full max-w-[180px] bg-slate-200 dark:bg-slate-700 rounded" />
         </div>
         <div className="h-7 w-20 bg-slate-200 dark:bg-slate-700 rounded mb-2" />
         <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full" />
@@ -58,17 +58,17 @@ function StatCard({
   }
 
   return (
-    <div className="flex-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2.5">
+    <div className="flex-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-sm">
+      <div className="flex items-start sm:items-center justify-between mb-3 gap-2">
+        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
           <div className={cn('h-8 w-8 rounded-xl flex items-center justify-center shrink-0', iconBg, iconColor)}>
             {icon}
           </div>
-          <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{title}</span>
+          <span className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 leading-snug">{title}</span>
         </div>
         <button
           onClick={onCta}
-          className="flex items-center gap-1 text-xs font-semibold text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 transition-colors"
+          className="flex items-center gap-1 text-xs font-semibold text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 transition-colors shrink-0 whitespace-nowrap"
         >
           {ctaLabel} <ArrowRight className="h-3 w-3" />
         </button>
@@ -89,7 +89,7 @@ export function PeriodSummaryRow({ data, loading }: PeriodSummaryRowProps) {
   const navigate = useNavigate();
 
   return (
-    <div className="flex gap-4 flex-col sm:flex-row">
+    <div className="flex gap-3 sm:gap-4 flex-col sm:flex-row">
       <StatCard
         icon={<ClipboardCheck className="h-4 w-4" />}
         iconBg="bg-indigo-100 dark:bg-indigo-500/20"

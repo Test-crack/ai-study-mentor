@@ -1375,6 +1375,12 @@ export default function Assessment() {
                       setAnswers(p => ({ ...p, [currentQ.id]: text }));
                       persistWritingDebounced(currentQ.id, text);
                     }}
+                    // --- NEW LINES START HERE ---
+                    onPaste={(e) => e.preventDefault()}
+                    onCopy={(e) => e.preventDefault()}
+                    onCut={(e) => e.preventDefault()}
+                    onDrop={(e) => e.preventDefault()}
+                    // --- NEW LINES END HERE ---
                     className="w-full p-5 border-2 border-gray-900 rounded-xl text-base text-gray-900 font-medium outline-none focus:ring-2 focus:ring-indigo-200 bg-gray-50 resize-none"
                     style={{ boxShadow: 'inset 3px 3px 0 rgba(0,0,0,0.05)' }}
                   />

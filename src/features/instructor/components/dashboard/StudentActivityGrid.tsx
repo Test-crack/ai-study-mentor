@@ -61,7 +61,7 @@ function DrillDots({ count }: { count: number }) {
         <span
           key={i}
           className={cn(
-            'h-2.5 w-2.5 rounded-full transition-colors',
+            'h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full transition-colors',
             i < count
               ? count >= MAX
                 ? 'bg-emerald-500'
@@ -87,7 +87,7 @@ function LexiPill({ done, words }: { done: boolean; words: number | null }) {
       )}
     >
       {/* Simple grid icon made from dots */}
-      <span className="grid grid-cols-2 gap-px w-2.5 h-2.5 shrink-0">
+      <span className="grid grid-cols-2 gap-px w-2 h-2 sm:w-2.5 sm:h-2.5 shrink-0">
         {Array.from({ length: 4 }, (_, i) => (
           <span key={i} className={cn('rounded-[1px]', done ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600')} />
         ))}
@@ -126,10 +126,10 @@ function StudentCard({ row, batchId }: { row: BandOverviewRow; batchId: string |
       )}
     >
       {/* Card header — avatar + name + risk badge */}
-      <div className={cn('px-4 pt-4 pb-3 flex items-start gap-3 rounded-t-2xl', headerTint)}>
+      <div className={cn('px-3 sm:px-4 pt-3 sm:pt-4 pb-2 sm:pb-3 flex items-start gap-2 sm:gap-3 rounded-t-2xl', headerTint)}>
         {/* Avatar */}
         <div className={cn(
-          'h-10 w-10 rounded-full shrink-0 flex items-center justify-center text-sm font-black overflow-hidden',
+          'h-8 w-8 sm:h-10 sm:w-10 rounded-full shrink-0 flex items-center justify-center text-xs font-black overflow-hidden',
           row.avatar ? '' : avatarPalette(row.name)
         )}>
           {row.avatar
@@ -140,34 +140,34 @@ function StudentCard({ row, batchId }: { row: BandOverviewRow; batchId: string |
 
         {/* Name + risk */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5">
-            <p className="text-sm font-bold text-slate-800 dark:text-white truncate leading-tight">
+          <div className="flex items-center gap-1">
+            <p className="text-xs sm:text-sm font-bold text-slate-800 dark:text-white truncate leading-tight">
               {row.name}
             </p>
             {row.is_at_risk && (
               <AlertTriangle
-                className="h-3.5 w-3.5 text-amber-500 shrink-0"
+                className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-500 shrink-0"
                 title={row.risk_primary_flag ?? 'At risk'}
               />
             )}
           </div>
           {/* Band */}
-          <p className={cn('text-xs font-bold mt-0.5', bandTextColor(row.current_band))}>
+          <p className={cn('text-[11px] sm:text-xs font-bold mt-0.5', bandTextColor(row.current_band))}>
             {row.current_band !== null
               ? `Band ${row.current_band.toFixed(1)}`
-              : <span className="text-slate-400 font-normal">No band yet</span>
+              : <span className="text-slate-400 font-normal">No band</span>
             }
           </p>
         </div>
 
-        <ChevronRight className="h-3.5 w-3.5 text-slate-300 dark:text-slate-600 group-hover:text-indigo-500 transition-colors shrink-0 mt-1" />
+        <ChevronRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-slate-300 dark:text-slate-600 group-hover:text-indigo-500 transition-colors shrink-0 mt-0.5" />
       </div>
 
       {/* Card footer — drill dots + streak + lexigrid */}
-      <div className="px-4 pb-3.5 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2.5">
+      <div className="px-3 sm:px-4 pb-3 sm:pb-3.5 flex items-center justify-between gap-1">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
           <DrillDots count={row.drills_count_today} />
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+          <span className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">
             {row.drills_count_today === 0
               ? 'No drill'
               : `${row.drills_count_today} drill${row.drills_count_today !== 1 ? 's' : ''}`
@@ -175,10 +175,10 @@ function StudentCard({ row, batchId }: { row: BandOverviewRow; batchId: string |
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Streak */}
           {row.streak > 0 && (
-            <span className="flex items-center gap-0.5 text-[11px] font-bold text-amber-500">
+            <span className="flex items-center gap-0.5 text-[10px] sm:text-[11px] font-bold text-amber-500">
               <Flame className="h-3 w-3 shrink-0" />
               {row.streak}
             </span>
@@ -196,19 +196,19 @@ function StudentCard({ row, batchId }: { row: BandOverviewRow; batchId: string |
 function CardSkeleton() {
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-200 dark:border-slate-700 animate-pulse">
-      <div className="px-4 pt-4 pb-3 bg-slate-50 dark:bg-slate-800/40 rounded-t-2xl flex items-start gap-3">
-        <div className="h-10 w-10 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
+      <div className="px-3 sm:px-4 pt-3 sm:pt-4 pb-2 sm:pb-3 bg-slate-50 dark:bg-slate-800/40 rounded-t-2xl flex items-start gap-2 sm:gap-3">
+        <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
         <div className="flex-1 space-y-1.5">
-          <div className="h-3.5 w-24 bg-slate-200 dark:bg-slate-700 rounded" />
-          <div className="h-3 w-14 bg-slate-100 dark:bg-slate-800 rounded" />
+          <div className="h-3 w-20 sm:w-24 bg-slate-200 dark:bg-slate-700 rounded" />
+          <div className="h-2.5 w-12 sm:w-14 bg-slate-100 dark:bg-slate-800 rounded" />
         </div>
       </div>
-      <div className="px-4 pb-3.5 flex items-center justify-between">
+      <div className="px-3 sm:px-4 pb-3 sm:pb-3.5 flex items-center justify-between">
         <div className="flex gap-1">
-          <div className="h-2.5 w-2.5 rounded-full bg-slate-200 dark:bg-slate-700" />
-          <div className="h-2.5 w-2.5 rounded-full bg-slate-200 dark:bg-slate-700" />
+          <div className="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-slate-200 dark:bg-slate-700" />
+          <div className="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-slate-200 dark:bg-slate-700" />
         </div>
-        <div className="h-4 w-12 rounded bg-slate-100 dark:bg-slate-800" />
+        <div className="h-4 w-10 sm:w-12 rounded bg-slate-100 dark:bg-slate-800" />
       </div>
     </div>
   );
@@ -226,7 +226,7 @@ export function StudentActivityGrid({ rows, batchId, loading }: StudentActivityG
     return (
       <div className="space-y-3">
         <div className="h-5 w-36 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
           {Array.from({ length: PAGE_SIZE }, (_, i) => <CardSkeleton key={i} />)}
         </div>
       </div>
@@ -246,42 +246,43 @@ export function StudentActivityGrid({ rows, batchId, loading }: StudentActivityG
   const lexiCount       = rows.filter(r => r.lexigrid_done_today).length;
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 space-y-4">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-5 space-y-3 sm:space-y-4">
 
       {/* Section header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div>
           <h2 className="text-sm font-bold text-slate-800 dark:text-white">Today's Batch Activity</h2>
           <p className="text-[11px] text-slate-400 mt-0.5">
             Drill status, streak &amp; LexiGrid for each student
           </p>
         </div>
-        {/* Quick summary chips */}
-        <div className="hidden sm:flex items-center gap-2 flex-wrap justify-end">
-          <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+
+        {/* Summary chips — visible on all screen sizes */}
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+          <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full whitespace-nowrap">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
             {drilledCount} unlocked
           </span>
           {partialCount > 0 && (
-            <span className="flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 rounded-full">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+            <span className="flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 rounded-full whitespace-nowrap">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" />
               {partialCount} partial
             </span>
           )}
           {notDrilledCount > 0 && (
-            <span className="flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
-              <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+            <span className="flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full whitespace-nowrap">
+              <span className="h-1.5 w-1.5 rounded-full bg-slate-400 shrink-0" />
               {notDrilledCount} not started
             </span>
           )}
-          <span className="text-[11px] text-slate-400">
+          <span className="text-[11px] text-slate-400 whitespace-nowrap">
             · LexiGrid {lexiCount}/{rows.length}
           </span>
         </div>
       </div>
 
-      {/* 4 × 2 grid — always 4 columns on ≥sm, 2 on xs */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {/* 4 × 2 grid — 4 columns on ≥sm, 2 on xs */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
         {pageRows.map(row => (
           <StudentCard key={row.student_id} row={row} batchId={batchId} />
         ))}
@@ -290,7 +291,6 @@ export function StudentActivityGrid({ rows, batchId, loading }: StudentActivityG
       {/* Pagination bar — only rendered when more than one page */}
       {pageCount > 1 && (
         <div className="flex items-center justify-between pt-1">
-          {/* Left arrow */}
           <button
             onClick={() => setPage(p => p - 1)}
             disabled={!hasPrev}
@@ -305,7 +305,6 @@ export function StudentActivityGrid({ rows, batchId, loading }: StudentActivityG
             <ChevronLeft className="h-4 w-4" />
           </button>
 
-          {/* Page indicators — dots when ≤7 pages, text otherwise */}
           {pageCount <= 7 ? (
             <div className="flex items-center gap-1.5">
               {Array.from({ length: pageCount }, (_, i) => (
@@ -328,7 +327,6 @@ export function StudentActivityGrid({ rows, batchId, loading }: StudentActivityG
             </span>
           )}
 
-          {/* Right arrow */}
           <button
             onClick={() => setPage(p => p + 1)}
             disabled={!hasNext}

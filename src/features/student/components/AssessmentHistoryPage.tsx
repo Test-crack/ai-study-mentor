@@ -840,7 +840,18 @@ const DiagnosticReportTab = ({ data, onOpenReport }: { data: AssessmentEntry[]; 
   );
 };
 
-// ─── FILTER CHIP ──────────────────────────────────────────────────────────────
+const SectionLabel = ({
+  icon,
+  text,
+}: {
+  icon: React.ReactNode;
+  text: string;
+}) => (
+  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+    {icon}
+    {text}
+  </p>
+);
 
 const FilterChip = ({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) => (
   <button
