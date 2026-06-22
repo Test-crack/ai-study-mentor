@@ -10,14 +10,8 @@ import { InstituteOwnerTopbar } from '../components/InstituteOwnerTopbar';
 import { callBackend } from '@/features/auth/services/authClient';
 import { getBackendUrl } from '@/shared/utils';
 import { useToast } from '@/shared/hooks/use-toast';
+import { fetchSummary, type InstituteSummary } from '../services/instituteOwnerService';
 
-// ─── Static overview metrics (kept as demo) ────────────────────────────────────
-const topMetrics = [
-  { title: "Total Batches", value: "—", subtext: "Across institute", subtextColor: "text-slate-500 dark:text-gray-500" },
-  { title: "Total Students", value: "—", subtext: "Across all batches", subtextColor: "text-slate-500 dark:text-gray-500" },
-  { title: "Avg Attendance", value: "90%", subtext: "This month", subtextColor: "text-slate-500 dark:text-gray-500" },
-  { title: "Avg Improvement", value: "15%", subtext: "Score delta", subtextColor: "text-slate-500 dark:text-gray-500" },
-];
 
 // Map API status to colours
 const STATUS = {
@@ -87,14 +81,19 @@ export default function BatchInsight() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [batches, setBatches] = useState<any[]>([]);
+  const [loading, setLoading]   = useState(true);
+  const [batches, setBatches]   = useState<any[]>([]);
+  const [summary, setSummary]   = useState<InstituteSummary | null>(null);
 
-  const loadBatches = useCallback(async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await callBackend(`${getBackendUrl()}/api/institute-admin/batches`);
-      setBatches(res.data || []);
+      const [batchRes, sumRes] = await Promise.all([
+        callBackend(`${getBackendUrl()}/api/institute-owner/batches`),
+        fetchSummary(),
+      ]);
+      setBatches(batchRes.data || []);
+      setSummary(sumRes.data);
     } catch (err: any) {
       toast({ title: 'Failed to load batches', description: err.message, variant: 'destructive' });
     } finally {
@@ -102,16 +101,18 @@ export default function BatchInsight() {
     }
   }, [toast]);
 
-  useEffect(() => { loadBatches(); }, [loadBatches]);
+  useEffect(() => { load(); }, [load]);
 
-  // Derived metrics from real data
-  const totalStudents = batches.reduce((sum, b) => sum + (b.studentCount ?? 0), 0);
-  const dynamicMetrics = [
-    ...topMetrics.slice(0, 2).map((m, i) => 
-      i === 0 ? { ...m, value: String(batches.length) }
-              : { ...m, value: String(totalStudents) }
-    ),
-    ...topMetrics.slice(2),
+  // KPI cards use institute-level summary (deduplicated — students in multiple batches count once)
+  const iaCompRate = summary && summary.ia_completion_last_7_days.total_eligible > 0
+    ? Math.round(summary.ia_completion_last_7_days.completed / summary.ia_completion_last_7_days.total_eligible * 100)
+    : 0;
+
+  const topMetrics = [
+    { title: 'Total Batches',   value: String(batches.length),                                    subtext: 'Across institute' },
+    { title: 'Total Students',  value: String(summary?.total_students ?? '—'),                    subtext: `${summary?.active_today ?? 0} active today` },
+    { title: 'Avg Band Score',  value: summary?.avg_band != null ? summary.avg_band.toFixed(1) : '—', subtext: 'Across all students' },
+    { title: 'At Risk',         value: String(summary?.at_risk_count ?? '—'),                     subtext: `IA completion: ${iaCompRate}% (7d)` },
   ];
 
   return (
@@ -119,8 +120,8 @@ export default function BatchInsight() {
       
       {/* Sidebar */}
       <div className="hidden lg:block">
-        <InstituteOwnerSidebar 
-          activeTab="insight"
+        <InstituteOwnerSidebar
+          activeTab="batches"
           isCollapsed={isSidebarCollapsed} 
           toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
         />
@@ -155,11 +156,11 @@ export default function BatchInsight() {
               <>
                 {/* Top Metric Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {dynamicMetrics.map((metric, idx) => (
+                  {topMetrics.map((metric, idx) => (
                     <div key={idx} className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl p-5 shadow-sm">
                       <p className="text-slate-500 dark:text-gray-400 text-sm mb-1">{metric.title}</p>
                       <h2 className="text-4xl font-bold mb-2">{metric.value}</h2>
-                      <p className={`text-xs ${metric.subtextColor}`}>{metric.subtext}</p>
+                      <p className="text-xs text-slate-500 dark:text-gray-500">{metric.subtext}</p>
                     </div>
                   ))}
                 </div>
@@ -173,15 +174,19 @@ export default function BatchInsight() {
                 ) : (
                   <div className="space-y-4">
                     {batches.map((batch) => {
-                      const capacity = batch.maxStudents;
-                      const enrolled = batch.studentCount ?? 0;
-                      const capacityPercentage = capacity ? Math.round((enrolled / capacity) * 100) : null;
-                      const statusStyle = STATUS[batch.status as keyof typeof STATUS] ?? STATUS.ACTIVE;
-                      const instructorNames = batch.instructors?.map((i: any) => i.name).join(', ') || 'Unassigned';
+                      const enrolled = batch.student_count ?? 0;
+                      const capacity = batch.max_students ?? null;
+                      const capacityPercentage = batch.capacity_pct ?? (capacity ? Math.round((enrolled / capacity) * 100) : null);
+                      const statusStyle = STATUS[(batch.status as string)?.toUpperCase() as keyof typeof STATUS] ?? STATUS.ACTIVE;
+                      const instructorNames = batch.instructors?.length > 0
+                        ? batch.instructors.map((i: any) => i.name).join(', ')
+                        : 'No instructor assigned';
+                      const atRisk = batch.at_risk_count ?? 0;
+                      const avgBand = batch.avg_band as number | null;
 
                       return (
-                        <div 
-                          key={batch.id} 
+                        <div
+                          key={batch.id}
                           onClick={() => navigate(`/institute-owner/batches/${toSlug(batch.name)}/analytics`, { state: { batchId: batch.id } })}
                           className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-md transition-all cursor-pointer group"
                         >
@@ -196,31 +201,34 @@ export default function BatchInsight() {
                               </span>
                             </div>
                             <p className="text-sm text-slate-500 dark:text-gray-400">
-                              Tutor: {instructorNames}
+                              {instructorNames}
                             </p>
-                            {batch.description && (
-                              <p className="text-xs text-slate-400 mt-1 line-clamp-1">{batch.description}</p>
-                            )}
                           </div>
 
                           {/* Middle Columns: Metrics Grid */}
-                          <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-4 text-center md:text-left">
+                          <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center md:text-left">
                             <div>
                               <p className="text-xs text-slate-500 dark:text-gray-500 mb-1">Students</p>
                               <p className="text-2xl font-bold text-slate-900 dark:text-white">{enrolled}</p>
                             </div>
                             <div>
-                              <p className="text-xs text-slate-500 dark:text-gray-500 mb-1">Instructors</p>
-                              <p className="text-2xl font-bold text-slate-900 dark:text-white">{batch.instructorCount ?? 0}</p>
+                              <p className="text-xs text-slate-500 dark:text-gray-500 mb-1">Avg Band</p>
+                              <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                                {avgBand !== null ? avgBand.toFixed(1) : '—'}
+                              </p>
                             </div>
                             <div>
-                              <p className="text-xs text-slate-500 dark:text-gray-500 mb-1">Status</p>
-                              <p className={`text-lg font-bold ${statusStyle.text}`}>{batch.status}</p>
+                              <p className="text-xs text-slate-500 dark:text-gray-500 mb-1">Active Today</p>
+                              <p className="text-2xl font-bold text-slate-900 dark:text-white">{batch.active_today ?? '—'}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-slate-500 dark:text-gray-500 mb-1">At Risk</p>
+                              <p className={`text-2xl font-bold ${atRisk > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white'}`}>{atRisk}</p>
                             </div>
                           </div>
 
                           {/* Right Column: Capacity + Arrow */}
-                          <div className="md:w-48 pt-4 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-[#27272a] flex items-center gap-4">
+                          <div className="md:w-44 pt-4 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-[#27272a] flex items-center gap-4">
                             {capacityPercentage !== null ? (
                               <div className="flex-1">
                                 <div className="flex justify-between text-sm mb-2">
@@ -228,8 +236,8 @@ export default function BatchInsight() {
                                   <span className="font-medium text-slate-900 dark:text-white">{enrolled}/{capacity}</span>
                                 </div>
                                 <div className="w-full bg-slate-100 dark:bg-gray-800 rounded-full h-1.5 mb-2">
-                                  <div 
-                                    className="bg-indigo-600 dark:bg-purple-600 h-1.5 rounded-full transition-all" 
+                                  <div
+                                    className="bg-indigo-600 dark:bg-purple-600 h-1.5 rounded-full transition-all"
                                     style={{ width: `${Math.min(100, capacityPercentage)}%` }}
                                   />
                                 </div>

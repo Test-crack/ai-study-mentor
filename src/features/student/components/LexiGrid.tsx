@@ -27,9 +27,30 @@ const INTRO_WORDS = [
   "EVALUATE", "COMPREHENSIVE", "SYNONYM", "MOMENTUM", "EXCELLENCE"
 ];
 
-const DAILY_LIMIT     = 5;
-const MAX_TRIES       = 3;
-const POINTS_PER_WORD = 2; // Exactly 10 points total for a perfect 5-word game
+const DAILY_LIMIT = 5;
+const MAX_TRIES = 3;
+const POINTS_PER_WORD = 15;
+
+function fisherYatesShuffle<T>(arr: T[]): T[] {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// IST date string (YYYY-MM-DD) — must match the backend's currentISTDate() boundary.
+// Using toISOString() gives a UTC date which is wrong for the 5.5-hour window after
+// midnight IST but before midnight UTC (00:00–05:30 IST = still previous UTC day).
+function todayIST(): string {
+  const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+  const ist = new Date(Date.now() + IST_OFFSET_MS);
+  return [
+    ist.getUTCFullYear(),
+    String(ist.getUTCMonth() + 1).padStart(2, '0'),
+    String(ist.getUTCDate()).padStart(2, '0')
+  ].join('-');
+}
 
 const KEYBOARD_ROWS = [
   ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
@@ -64,6 +85,8 @@ export default function LexiGrid() {
 
   const totalAttemptsRef    = useRef(0);
   const allBonusEligibleRef = useRef(true);
+  // HMAC-signed token returned by the words API — sent back with score to prevent forgery
+  const sessionTokenRef = useRef<string>('');
 
   // --- State Management ---
   const [dailyWords, setDailyWords]     = useState<WordItem[]>([]);
@@ -76,17 +99,14 @@ export default function LexiGrid() {
   const [fetchError, setFetchError]     = useState(false);
   // Practice mode: daily round already done, student is playing for fun — no momentum
   const [isPracticeMode, setIsPracticeMode] = useState(false);
+  // Tracks whether the final score POST failed so we can show a retry prompt
+  const [submitError, setSubmitError] = useState(false);
 
-  const [introStage, setIntroStage]       = useState<'playing' | 'fading' | 'done'>('playing');
-  const [isErrorShake, setIsErrorShake]   = useState(false);
-  const [showHint, setShowHint]           = useState(false);
-  const [flyingScore, setFlyingScore]     = useState(false);
-  const [passportStamped, setPassportStamped] = useState(false);
-
-  // ── localMomentum mirrors global momentum for display in topbar.
-  //    We update it via addPoints (which updates the global context), and
-  //    we only call syncMomentum (which OVERWRITES local state from server)
-  //    in gate mode — never in standalone mode.
+  // UI States
+  const [introStage, setIntroStage]     = useState<'playing' | 'fading' | 'done'>('playing');
+  const [isErrorShake, setIsErrorShake] = useState(false);
+  const [showHint, setShowHint]         = useState(false);
+  const [flyingScore, setFlyingScore]   = useState(false);
   const [localMomentum, setLocalMomentum] = useState(totalMomentum);
 
   useEffect(() => {
@@ -142,6 +162,24 @@ export default function LexiGrid() {
       // 1. Backend is the single source of truth for whether today's session is done.
       //    Using IST on both sides prevents stale-localStorage false-positives in the
       //    00:00–05:30 IST window (new IST day, same UTC day).
+      // Retry any score submission that failed in a previous session
+      const pendingSubmit = localStorage.getItem('lexigrid_pending_submit');
+      if (pendingSubmit) {
+        try {
+          const pending = JSON.parse(pendingSubmit);
+          if (pending.date === today) {
+            const retryRes = await callBackend(`${backendUrl}/api/student/game-score`, {
+              method: 'POST',
+              body: JSON.stringify(pending),
+            });
+            if (retryRes.momentum_score !== undefined) syncMomentum(retryRes.momentum_score);
+          }
+          localStorage.removeItem('lexigrid_pending_submit');
+        } catch {
+          // Still failing — keep the entry for the next load
+        }
+      }
+
       let backendReachable = false;
       let savedDataStr: string | null = null;
       
@@ -172,37 +210,43 @@ export default function LexiGrid() {
         }
       } catch {
         // Backend unreachable — fall through to localStorage/fallback
-        savedDataStr = localStorage.getItem('lexigrid_state');
       }
 
-      if (isGateMode) {
-        // Gate mode: enforce daily lock
+      // 2. Resume an in-progress session from localStorage (same browser, mid-game).
+      //    Only trusted when: date matches today (IST), AND session is not yet complete.
+      //    If backend was reachable we already cleared stale completed entries above.
+      const savedData = localStorage.getItem('lexigrid_state');
+      if (savedData) {
         try {
-          if (savedDataStr) {
-            const parsed = JSON.parse(savedDataStr);
-            const sameDay    = parsed.date === today;
-            const inProgress = Array.isArray(parsed.words) && parsed.words.length > 0
-                               && parsed.currentIndex < DAILY_LIMIT;
-            const hasTargetBand = Array.isArray(parsed.words) && parsed.words.every((w: any) => 'target_band' in w);
-            if (sameDay && inProgress && hasTargetBand) {
-              setDailyWords(parsed.words);
-              setCurrentIndex(parsed.currentIndex || 0);
-              setTriesLeft(parsed.triesLeft ?? MAX_TRIES);
-              setCurrentGuess(parsed.currentGuess || "");
-              setWordsWon(parsed.wordsWon || 0);
-              setIsInitializing(false);
-              return;
-            }
-            // Stale or completed entry (different date, or completed when backend was offline)
-            if (!backendReachable && parsed.currentIndex >= DAILY_LIMIT && sameDay) {
-              // Backend was unreachable and localStorage shows completed — honour it
-              setWordsWon(parsed.wordsWon || 0);
-              setGameStatus('completed_day');
-              setIsInitializing(false);
-              return;
-            }
+          const parsed = JSON.parse(savedData);
+          const sameDay    = parsed.date === today;
+          const inProgress = Array.isArray(parsed.words) && parsed.words.length > 0
+                             && parsed.currentIndex < DAILY_LIMIT;
+          const hasTargetBand = Array.isArray(parsed.words) && parsed.words.every((w: any) => 'target_band' in w);
+          if (sameDay && inProgress && hasTargetBand) {
+            setDailyWords(parsed.words);
+            setCurrentIndex(parsed.currentIndex || 0);
+            setTriesLeft(parsed.triesLeft ?? MAX_TRIES);
+            setCurrentGuess(parsed.currentGuess || "");
+            setWordsWon(parsed.wordsWon || 0);
+            if (parsed.sessionToken) sessionTokenRef.current = parsed.sessionToken;
+            setIsInitializing(false);
+            return;
           }
-        } catch { /* backend unreachable — allow play */ }
+          // Stale or completed entry (different date, or completed when backend was offline)
+          if (!backendReachable && parsed.currentIndex >= DAILY_LIMIT && sameDay) {
+            // Backend was unreachable and localStorage shows completed — honour it
+            setWordsWon(parsed.wordsWon || 0);
+            setGameStatus('completed_day');
+            setIsInitializing(false);
+            return;
+          }
+          localStorage.removeItem('lexigrid_state');
+        } catch {
+          console.warn('[LexiGrid] Corrupted save data. Clearing...');
+          localStorage.removeItem('lexigrid_state');
+        }
+      }
 
         // 3. Fresh session — fetch today's words from backend
         try {
@@ -210,80 +254,59 @@ export default function LexiGrid() {
             `${backendUrl}/api/student/lexigrid-words?difficulty=${encodeURIComponent(difficulty)}`
           );
 
-          let words: WordItem[];
-          if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-            words = (res.data as any[]).map((w) => ({
-              base:        w.base_word.toUpperCase(),
-              target:      w.target_word.toUpperCase(),
-              hint:        w.hint,
-              target_band: w.target_band != null ? parseFloat(String(w.target_band)) : null,
-            }));
-          } else {
-            console.warn('[LexiGrid] No words from API, using fallback bank.');
-            words = [...FALLBACK_WORD_BANK].sort(() => 0.5 - Math.random()).slice(0, DAILY_LIMIT);
-          }
-
-          // Fresh gate session
-          setDailyWords(words);
-          setCurrentIndex(0); setTriesLeft(MAX_TRIES); setCurrentGuess(''); setWordsWon(0);
-          totalAttemptsRef.current = 0; allBonusEligibleRef.current = true;
-          localStorage.setItem('lexigrid_state', JSON.stringify({
-            date: today, words, currentIndex: 0, triesLeft: MAX_TRIES, currentGuess: '', wordsWon: 0,
+        let words: WordItem[];
+        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+          words = (res.data as any[]).map((w) => ({
+            base:        w.base_word.toUpperCase(),
+            target:      w.target_word.toUpperCase(),
+            hint:        w.hint,
+            target_band: w.target_band != null ? parseFloat(String(w.target_band)) : null,
           }));
-          setIsInitializing(false);
-          return;
-        } catch (err) {
-          console.error('[LexiGrid] Fresh session fallback fetch error', err);
-          const words = [...FALLBACK_WORD_BANK].sort(() => 0.5 - Math.random()).slice(0, DAILY_LIMIT);
-          setDailyWords(words);
-          setCurrentIndex(0); setTriesLeft(MAX_TRIES); setCurrentGuess(''); setWordsWon(0);
-          totalAttemptsRef.current = 0; allBonusEligibleRef.current = true;
-          setIsInitializing(false);
-          return;
+          sessionTokenRef.current = res.session_token ?? '';
+        } else {
+          console.warn('[LexiGrid] No words from API, using fallback bank.');
+          words = fisherYatesShuffle([...FALLBACK_WORD_BANK]).slice(0, DAILY_LIMIT);
+          sessionTokenRef.current = '';
         }
-      } // Close isGateMode
 
-      // ── STANDALONE MODE ───────────────────────────────────────────────────────
-      // Never lock. Try to resume a mid-game standalone session.
-      const saved = localStorage.getItem('lexigrid_standalone_state');
-      if (saved) {
-        try {
-          const p = JSON.parse(saved);
-          if (p.date === today && Array.isArray(p.words) && p.words.length > 0
-              && p.currentIndex < DAILY_LIMIT) {
-            setDailyWords(p.words);
-            setCurrentIndex(p.currentIndex || 0);
-            setTriesLeft(p.triesLeft ?? MAX_TRIES);
-            setCurrentGuess(p.currentGuess || '');
-            setWordsWon(p.wordsWon || 0);
-            setIsInitializing(false);
-            return;
-          }
-        } catch { localStorage.removeItem('lexigrid_standalone_state'); }
+        setDailyWords(words);
+        setCurrentIndex(0);
+        setTriesLeft(MAX_TRIES);
+        setCurrentGuess('');
+        setWordsWon(0);
+
+        localStorage.setItem('lexigrid_state', JSON.stringify({
+          date: todayIST(), words, currentIndex: 0, triesLeft: MAX_TRIES, currentGuess: '', wordsWon: 0,
+          sessionToken: sessionTokenRef.current,
+        }));
+      } catch (err) {
+        console.error('[LexiGrid] Failed to fetch words from API:', err);
+        setFetchError(true);
+        const words = fisherYatesShuffle([...FALLBACK_WORD_BANK]).slice(0, DAILY_LIMIT);
+        setDailyWords(words);
+        setCurrentIndex(0);
+        setTriesLeft(MAX_TRIES);
+        setCurrentGuess('');
+        setWordsWon(0);
+      } finally {
+        setIsInitializing(false);
       }
-
-      // Fresh standalone session
-      const words = await fetchWords();
-      setDailyWords(words);
-      setCurrentIndex(0); setTriesLeft(MAX_TRIES); setCurrentGuess(''); setWordsWon(0);
-      totalAttemptsRef.current = 0; allBonusEligibleRef.current = true;
-      setIsInitializing(false);
     };
 
     init();
   }, [isGateMode, fetchWords, difficulty]);
 
-  // ── Save state ───────────────────────────────────────────────────────────────
-  const saveState = useCallback((index: number, tries: number, guess: string, score: number) => {
-    const today = new Date().toISOString().split('T')[0];
-    const key   = isGateMode ? 'lexigrid_state' : 'lexigrid_standalone_state';
-    try {
-      localStorage.setItem(key, JSON.stringify({
-        date: today, words: dailyWords, currentIndex: index,
-        triesLeft: tries, currentGuess: guess, wordsWon: score,
-      }));
-    } catch { /* ignore */ }
-  }, [isGateMode, dailyWords]);
+  const saveState = (index: number, tries: number, guess: string, score: number) => {
+    localStorage.setItem('lexigrid_state', JSON.stringify({
+      date: todayIST(),
+      words: dailyWords,
+      currentIndex: index,
+      triesLeft: tries,
+      currentGuess: guess,
+      wordsWon: score,
+      sessionToken: sessionTokenRef.current,
+    }));
+  };
 
   // ── Keyboard ─────────────────────────────────────────────────────────────────
   const handleKeyPress = useCallback((key: string) => {
@@ -311,8 +334,14 @@ export default function LexiGrid() {
         saveState(currentIndex, newTries, currentGuess, wordsWon);
         setTimeout(() => {
           setIsErrorShake(false);
-          if (newTries <= 0) setGameStatus('lost');
-          else setCurrentGuess('');
+          if (newTries <= 0) {
+            // All attempts used — count them and void bonus eligibility
+            totalAttemptsRef.current += MAX_TRIES;
+            allBonusEligibleRef.current = false;
+            setGameStatus('lost');
+          } else {
+            setCurrentGuess("");
+          }
         }, 600);
       }
     } else if (key === '⌫' || key === 'BACKSPACE') {
@@ -359,12 +388,15 @@ export default function LexiGrid() {
           hint:        w.hint,
           target_band: w.target_band != null ? parseFloat(String(w.target_band)) : null,
         }));
+        sessionTokenRef.current = res.session_token ?? '';
       } else {
-        words = [...FALLBACK_WORD_BANK].sort(() => 0.5 - Math.random()).slice(0, DAILY_LIMIT);
+        words = fisherYatesShuffle([...FALLBACK_WORD_BANK]).slice(0, DAILY_LIMIT);
+        sessionTokenRef.current = '';
       }
       setDailyWords(words);
     } catch {
-      setDailyWords([...FALLBACK_WORD_BANK].sort(() => 0.5 - Math.random()).slice(0, DAILY_LIMIT));
+      sessionTokenRef.current = '';
+      setDailyWords(fisherYatesShuffle([...FALLBACK_WORD_BANK]).slice(0, DAILY_LIMIT));
     } finally {
       setIsInitializing(false);
     }
@@ -372,36 +404,37 @@ export default function LexiGrid() {
 
   // --- Backend sync on session complete ---
   const submitLexiGridSession = useCallback(async (finalWordsWon: number) => {
+    const attemptsUsed = totalAttemptsRef.current;
+    const bonusEligible = allBonusEligibleRef.current && finalWordsWon >= DAILY_LIMIT;
+    const payload = {
+      game_type:       'LEXIGRID',
+      words_solved:    finalWordsWon,
+      total_attempts:  attemptsUsed,
+      bonus_eligible:  bonusEligible,
+      session_token:   sessionTokenRef.current,
+    };
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
       const res = await callBackend(`${backendUrl}/api/student/game-score`, {
         method: 'POST',
-        body: JSON.stringify({
-          game_type:      'LEXIGRID',
-          words_solved:   finalWordsWon,
-          total_attempts: totalAttemptsRef.current,
-          bonus_eligible: allBonusEligibleRef.current && finalWordsWon >= DAILY_LIMIT,
-        }),
+        body: JSON.stringify(payload),
       });
 
       // Only sync momentum from server in GATE MODE.
       if (isGateMode && res.momentum_score !== undefined) {
         syncMomentum(res.momentum_score);
       }
+      localStorage.removeItem('lexigrid_pending_submit');
     } catch (err) {
       console.error('[LexiGrid] Failed to submit session:', err);
+      // Persist payload so the next page load can retry before the student notices
+      localStorage.setItem('lexigrid_pending_submit', JSON.stringify({ ...payload, date: todayIST() }));
+      setSubmitError(true);
     }
+  }, [syncMomentum]);
 
-    const { bonusJustUnlocked, streakBonusJustUnlocked } = stampPassportSlot('vocabulary');
-    setPassportStamped(true);
-    if (bonusJustUnlocked)       addPoints(PASSPORT_BONUS_PTS,        'Skill Passport complete');
-    if (streakBonusJustUnlocked) addPoints(PASSPORT_STREAK_BONUS_PTS, 'Skill Passport streak bonus');
-    
-  }, [isGateMode, syncMomentum, addPoints]);
-
-  // ── Win animation ────────────────────────────────────────────────────────────
+  // --- Animations & Progression ---
   const triggerWinAnimation = (attemptsForThisWord: number) => {
-    if (attemptsForThisWord > MAX_TRIES) allBonusEligibleRef.current = false;
     totalAttemptsRef.current += attemptsForThisWord;
 
     if (isPracticeMode) return; // No momentum gained in practice — skip all reward UI
@@ -550,7 +583,8 @@ export default function LexiGrid() {
                   </div>
                   <button
                     onClick={loadFreshWords}
-                    className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-lg py-4 rounded-2xl transition-all shadow-lg hover:shadow-indigo-500/25 active:scale-[0.98] mb-3"
+                    disabled={isInitializing}
+                    className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-lg py-4 rounded-2xl transition-all shadow-lg hover:shadow-indigo-500/25 active:scale-[0.98] mb-3"
                   >
                     Play Another Round
                   </button>
@@ -580,6 +614,11 @@ export default function LexiGrid() {
                       <p className="text-4xl font-black text-amber-400">+{wordsWon * POINTS_PER_WORD}</p>
                     </div>
                   </div>
+                  {submitError && (
+                    <div className="w-full mb-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl px-4 py-3 text-rose-400 text-xs font-bold text-center">
+                      Score couldn't be saved — check your connection. It will sync automatically next time you open the app.
+                    </div>
+                  )}
                   <button
                     onClick={() => navigate('/student/dashboard', { state: { lexigridCompleted: true } })}
                     className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-lg py-4 rounded-2xl transition-all shadow-lg hover:shadow-indigo-500/25 active:scale-[0.98] mb-3"
@@ -614,7 +653,7 @@ export default function LexiGrid() {
                   </div>
                 </div>
 
-                <p className="text-slate-400 font-medium mb-2 text-sm sm:text-base">Find the Band {currentWordObj.target_band ?? 8.0} synonym for:</p>
+                <p className="text-slate-400 font-medium mb-2 text-sm sm:text-base">Find the Band {currentWordObj.target_band ?? 7.0} synonym for:</p>
                 <p className="text-3xl sm:text-5xl font-black text-white uppercase tracking-widest mb-6 drop-shadow-lg break-words">
                   {currentWordObj?.base}
                 </p>
