@@ -27,8 +27,7 @@ interface RecommendationItem {
   level:         string;
 }
 
-const FALLBACK_THUMB =
-  'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1000&auto=format&fit=crop';
+const FALLBACK_THUMB = null; // use CSS gradient placeholder when no thumbnail available
 
 export default function DrillResultCard({
   skill, subSkill, momentumScore, feedback, drillSessionId, onUnlockNext,
@@ -103,8 +102,8 @@ export default function DrillResultCard({
   };
 
   // ── Derived display values ────────────────────────────────────────────────
-  const recTitle   = rec?.title ?? `Mastering ${subSkill.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}`;
-  const thumbSrc   = rec?.thumbnail_url ?? FALLBACK_THUMB;
+  const recTitle = rec?.title ?? `Mastering ${subSkill.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}`;
+  const thumbSrc = rec?.thumbnail_url ?? null;
 
   const targetTag = [rec?.skill_type ?? skill, rec?.sub_skill ?? subSkill]
     .filter(Boolean).join(' · ');
@@ -169,11 +168,15 @@ export default function DrillResultCard({
             </div>
           ) : (
             <>
-              <img
-                src={thumbSrc}
-                alt={recTitle}
-                className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity duration-300"
-              />
+              {thumbSrc ? (
+                <img
+                  src={thumbSrc}
+                  alt={recTitle}
+                  className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity duration-300"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-indigo-900 via-slate-800 to-slate-900" />
+              )}
               <div className="absolute inset-0 flex items-center justify-center">
                 <button
                   onClick={handleWatchClick}
@@ -265,7 +268,7 @@ export default function DrillResultCard({
               {savingReflection ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</>
               ) : (
-                'Continue to Apply Drill  +25 pts'
+                'Save Reflection · +25 pts'
               )}
             </button>
           </div>

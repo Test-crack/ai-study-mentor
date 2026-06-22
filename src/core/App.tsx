@@ -90,7 +90,6 @@ import SuggestionsPage from "@/features/student/components/SuggestionsPage";
 import Report from "@/features/student/components/Report";
 import DrillScreen from "@/features/student/components/Drills/DrillScreen";
 import { MomentumProvider } from "@/features/student/Context/MomentumContext";
-import ApplyDrillScreen from "@/features/student/components/Drills/ApplyDrillScreen";
 import LexiGrid from "@/features/student/components/LexiGrid";
 import InternalAssessmentPage from "@/features/student/components/Assessment";
 import FullMockAssessment from "@/features/student/components/FullMockAssessment";
@@ -306,7 +305,6 @@ const AppRoutes = () => {
       <Route path="/student/suggestion" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><Suggestion /></RoleProtectedRoute>} />
       <Route path="/student/speaking-practice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><SpeakingPractice /></RoleProtectedRoute>} />
       <Route path="/student/drill" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><DrillScreen /></RoleProtectedRoute>} />
-      <Route path="/student/apply-drill" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><ApplyDrillScreen /></RoleProtectedRoute>} />
       <Route path="/student/lexigrid" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><LexiGrid /></RoleProtectedRoute>} />
       <Route path="/student/internal" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><InternalAssessmentPage /></RoleProtectedRoute>} />
       <Route path="/student/mock" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><FullMockAssessment /></RoleProtectedRoute>} />

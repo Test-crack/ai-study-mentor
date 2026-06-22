@@ -1,15 +1,13 @@
-﻿﻿import React, { useState, useEffect } from 'react';
+﻿﻿import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { StudentSidebar } from '../dashboard/StudentSidebar';
 import { StudentTopbar } from '../dashboard/StudentTopbar';
-import AudioResponseDrill from './AudioResponseDrill';
-import ParagraphRepairDrill from './ParagraphRepairDrill';
 import McqDrill from './McqDrill';
 import type { McqDrillResult } from './McqDrill';
 import DrillResultCard from './DrillResultCard';
 import { callBackend } from '@/features/auth/services/authClient';
 import { useMomentum } from '@/features/student/Context/MomentumContext';
-import { ArrowLeft, Target, Loader2 } from 'lucide-react';
+import { ArrowLeft, Target, Loader2, AlertTriangle } from 'lucide-react';
 
 interface DrillAnswer {
   points: number;
@@ -51,7 +49,10 @@ export default function DrillScreen() {
   const [momentumScore, setMomentumScore]             = useState(0);
   const [isComplete, setIsComplete]                   = useState(false);
   const [isSubmitting, setIsSubmitting]               = useState(false);
+  const [submitFailed, setSubmitFailed]               = useState(false);
   const [drillSessionId, setDrillSessionId]           = useState<string | null>(null);
+
+  const pendingCompleteRef = useRef<{ answers: Record<string, string>; correctCount: number } | null>(null);
 
   const totalPrompts = prompts.length || QUESTIONS_PER_SESSION;
 
@@ -114,7 +115,19 @@ export default function DrillScreen() {
 
         if (startRes.success) {
           setSessionId(startRes.session_id);
-          setPrompts(startRes.questions || []);
+          const questions: any[] = startRes.questions || [];
+          setPrompts(questions);
+
+          if (startRes.resume) {
+            const savedAnswers = (startRes.saved_answers as Record<string, string>) ?? {};
+            setAnswers(savedAnswers);
+            let resumeCorrect = 0;
+            for (const q of questions) {
+              if (savedAnswers[q.id] && savedAnswers[q.id] === parseCorrectAnswer(q.correct_answer)) resumeCorrect++;
+            }
+            setCorrectAnswersCount(resumeCorrect);
+            setCurrentPromptIndex(Object.keys(savedAnswers).length);
+          }
         } else {
           setPrompts([]);
         }
@@ -142,7 +155,9 @@ export default function DrillScreen() {
   const completeSession = async (finalAnswers: Record<string, string>, finalCorrectCount: number) => {
     const earned = 15 + finalCorrectCount * 10;
     setMomentumScore(earned);
+    setSubmitFailed(false);
     setIsSubmitting(true);
+    pendingCompleteRef.current = { answers: finalAnswers, correctCount: finalCorrectCount };
 
     try {
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
@@ -156,14 +171,14 @@ export default function DrillScreen() {
       });
       if (res.momentum_score !== undefined) syncMomentum(res.momentum_score);
       if (res.daily_streak   !== undefined) updateStreak(res.daily_streak);
-      // Prefer the session id returned from the server; fall back to the one we started with
       setDrillSessionId(res.data?.id ?? sessionId);
+      pendingCompleteRef.current = null;
+      setIsComplete(true);
     } catch (err) {
       console.error('Failed to complete drill session', err);
-      setDrillSessionId(sessionId);
+      setSubmitFailed(true);
     } finally {
       setIsSubmitting(false);
-      setIsComplete(true);
     }
   };
 
@@ -209,6 +224,21 @@ export default function DrillScreen() {
                 {isSubmitting ? 'Saving session results...' : 'Loading your customized drills...'}
               </p>
             </div>
+          ) : submitFailed ? (
+            <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-red-200 dark:border-red-900 text-center px-8">
+              <AlertTriangle className="w-12 h-12 text-red-400 mb-4" />
+              <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Couldn't save your results</h2>
+              <p className="text-slate-500 mb-6 max-w-sm">Your answers are safe — tap Retry to save your session and claim your momentum points.</p>
+              <button
+                onClick={() => {
+                  const pending = pendingCompleteRef.current;
+                  if (pending) completeSession(pending.answers, pending.correctCount);
+                }}
+                className="px-6 py-3 bg-[#7B61FF] hover:bg-[#6A50EE] text-white font-semibold rounded-2xl transition-colors"
+              >
+                Retry
+              </button>
+            </div>
           ) : prompts.length === 0 ? (
             <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
               <p className="text-slate-500 font-medium">No drills available for this topic right now.</p>
@@ -244,11 +274,11 @@ export default function DrillScreen() {
                     return <McqDrill prompt={currentPrompt} onComplete={(result) => handleNextPrompt(result)} />;
                   }
 
-                  if (skill.toLowerCase() === 'writing') {
-                    return <ParagraphRepairDrill prompt={{ text: currentPrompt.prompt_text || 'Mock Prompt' }} onComplete={() => handleNextPrompt({ points: 5 })} />;
-                  }
-
-                  return <AudioResponseDrill prompt={{ text: currentPrompt.prompt_text || 'Mock Prompt' }} onComplete={() => handleNextPrompt({ points: 5 })} />;
+                  return (
+                    <div className="text-center py-10 text-slate-400 font-medium">
+                      This question type is not supported in the current flow.
+                    </div>
+                  );
                 })()}
               </div>
             </>
@@ -259,15 +289,7 @@ export default function DrillScreen() {
               momentumScore={momentumScore}
               feedback={[]}
               drillSessionId={drillSessionId}
-              onUnlockNext={() => {
-                const params = new URLSearchParams({
-                  skill,
-                  sub_skill: subSkill,
-                  score:     String(momentumScore),
-                  ...(drillSessionId ? { session_id: drillSessionId } : {}),
-                });
-                navigate(`/student/apply-drill?${params.toString()}`);
-              }}
+              onUnlockNext={() => navigate('/student/dashboard', { state: { drillCompleted: true } })}
             />
           )}
         </main>
