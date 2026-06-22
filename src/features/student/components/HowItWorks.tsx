@@ -6,7 +6,6 @@ import {
 import { StudentSidebar } from './dashboard/StudentSidebar';
 import { StudentTopbar } from './dashboard/StudentTopbar';
 import { cn } from '@/shared/utils';
-
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
 interface Section {
@@ -332,4 +331,4 @@ export default function HowItWorks() {
       </div>
     </div>
   );
-}git 
+}
