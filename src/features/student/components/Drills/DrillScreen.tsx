@@ -50,6 +50,7 @@ export default function DrillScreen() {
   const [isComplete, setIsComplete]                   = useState(false);
   const [isSubmitting, setIsSubmitting]               = useState(false);
   const [submitFailed, setSubmitFailed]               = useState(false);
+  const [initError, setInitError]                     = useState<string | null>(null);
   const [drillSessionId, setDrillSessionId]           = useState<string | null>(null);
 
   const pendingCompleteRef = useRef<{ answers: Record<string, string>; correctCount: number } | null>(null);
@@ -131,9 +132,9 @@ export default function DrillScreen() {
         } else {
           setPrompts([]);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Failed to initialize drill session', err);
-        setPrompts([]);
+        setInitError(err?.message || 'Failed to load drill session. Please go back and try again.');
       } finally {
         setLoading(false);
       }
@@ -223,6 +224,12 @@ export default function DrillScreen() {
               <p className="font-medium text-slate-500">
                 {isSubmitting ? 'Saving session results...' : 'Loading your customized drills...'}
               </p>
+            </div>
+          ) : initError ? (
+            <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-red-200 dark:border-red-900 text-center px-8">
+              <AlertTriangle className="w-12 h-12 text-red-400 mb-4" />
+              <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Couldn't load your drill</h2>
+              <p className="text-slate-500 mb-1 max-w-sm text-sm">{initError}</p>
             </div>
           ) : submitFailed ? (
             <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-red-200 dark:border-red-900 text-center px-8">
