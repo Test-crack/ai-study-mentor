@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   GraduationCap, LayoutDashboard, Mic, PenTool, Headphones,
   ClipboardCheck, History, Sparkles, Settings, LogOut,
-  Timer, FileText, BookOpen, Target, Gamepad2, Lock
+  Timer, FileText, BookOpen, Target, Gamepad2, Lock, HelpCircle
 } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -113,6 +113,7 @@ export const StudentSidebar = ({
         { id: 'suggestion', icon: Sparkles, label: 'Recommendations', path: '/student/suggestion' },
         { id: 'courses-section', icon: GraduationCap, label: 'My Courses', path: '/student/courses-section' },
         { id: 'Report', icon: FileText, label: 'Report', path: '/student/report' },
+        { id: 'how-it-works', icon: HelpCircle, label: 'How It Works', path: '/student/how-it-works' },
       ]
     }
   ];

@@ -83,6 +83,8 @@ import InstituteOwnerStudentProgressPage from "@/features/InstituteOwner/dashboa
 import Suggestion from "@/features/student/components/Suggestions";
 import SpeakingAssessment from "@/features/student/components/SpeakingAssessment";
 import Diagnosis from "@/features/student/components/Diagnosis/Diagnosis";
+import OnboardingWalkthrough from "@/features/student/components/Onboarding/OnboardingWalkthrough";
+import HowItWorks from "@/features/student/components/HowItWorks";
 import AssessmentHistoryPage from "@/features/student/components/AssessmentHistoryPage";
 import SuggestionsPage from "@/features/student/components/SuggestionsPage";
 import Report from "@/features/student/components/Report";
@@ -138,7 +140,7 @@ const LoginRedirect = () => {
       return <Navigate to="/student/not-enrolled" replace />;
     }
     if (!profile.isDiagnosed) {
-      return <Navigate to="/student/diagnosis" replace />;
+      return <Navigate to="/student/onboarding" replace />;
     }
   }
   return <Navigate to="/student/dashboard" replace />;
@@ -164,7 +166,7 @@ const ManualDashboardAccess = () => {
   // Students
   if (profile.role === 'STUDENT') {
     if (profile.isEnrolled === false) return <Navigate to="/student/not-enrolled" replace />;
-    if (!profile.isDiagnosed)        return <Navigate to="/student/diagnosis" replace />;
+    if (!profile.isDiagnosed)        return <Navigate to="/student/onboarding" replace />;
   }
   return <Navigate to="/student/dashboard" replace />;
 };
@@ -183,7 +185,7 @@ const StudentDiagnosisGuard = ({ children }: { children: React.ReactNode }) => {
 
   if (profile.role === 'STUDENT') {
     if (profile.isEnrolled === false) return <Navigate to="/student/not-enrolled" replace />;
-    if (!profile.isDiagnosed)        return <Navigate to="/student/diagnosis" replace />;
+    if (!profile.isDiagnosed)        return <Navigate to="/student/onboarding" replace />;
   }
 
   return <>{children}</>;
@@ -196,6 +198,7 @@ const AppRoutes = () => {
     <Routes>
       {/* ── Public routes ────────────────────────────────────────────────── */}
       <Route path="/" element={<LandingPage />} />
+      <Route path="/student/onboarding" element={<OnboardingWalkthrough />} />
       <Route path="/student/diagnosis" element={<Diagnosis />} />
       <Route path="/dashdemo" element={<Dashdemo />} />
       <Route path="/Contact" element={<Contactpage />} />
@@ -306,6 +309,7 @@ const AppRoutes = () => {
       <Route path="/student/lexigrid" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><LexiGrid /></RoleProtectedRoute>} />
       <Route path="/student/internal" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><InternalAssessmentPage /></RoleProtectedRoute>} />
       <Route path="/student/mock" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><FullMockAssessment /></RoleProtectedRoute>} />
+      <Route path="/student/how-it-works" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><HowItWorks /></RoleProtectedRoute>} />
 
       {/* ── Instructor Dashboard & Routes ─────────────────────────────────── */}
       <Route
