@@ -154,7 +154,18 @@ export default function DrillResultCard({
         </div>
       )}
 
-      {/* Video Recommendation Gate */}
+      {/* Video Recommendation Gate — skipped when no rec available */}
+      {!recLoad && !rec ? (
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm text-center">
+          <p className="text-slate-500 text-sm font-medium mb-4">No recommended lesson available for this topic right now.</p>
+          <button
+            onClick={onUnlockNext}
+            className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition-colors"
+          >
+            Continue to Next Drill
+          </button>
+        </div>
+      ) : (
       <div className="bg-white dark:bg-slate-900 border-2 border-indigo-100 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
         <h3 className="text-sm font-bold text-indigo-500 uppercase tracking-widest mb-4 flex items-center gap-2">
           <PlayCircle className="w-5 h-5" /> Recommended Lesson
@@ -280,6 +291,7 @@ export default function DrillResultCard({
           </p>
         )}
       </div>
+      )}
     </div>
   );
 }
