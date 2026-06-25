@@ -191,8 +191,7 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
 
   const goToStudent = (row: BandOverviewRow) => {
     if (!batchId) return;
-    const slug = row.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'student';
-    navigate(`/instructor/students/${slug}/progress`, { state: { batchId, studentId: row.user_id } });
+    navigate(`/instructor/batches/${batchId}/students/${row.user_id}/progress`, { state: { studentId: row.user_id } });
   };
 
   return (

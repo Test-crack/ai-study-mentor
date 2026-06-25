@@ -822,7 +822,12 @@ export default function InternalAssessmentPage() {
   };
 
   const renderInProgress = () => {
-    if (questions.length === 0) return null;
+    if (questions.length === 0) return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm text-slate-500 font-medium">Loading questions…</p>
+      </div>
+    );
     const q = questions[currentQ];
     const answered = !!answers[q.id]?.trim();
     const isLast   = currentQ === questions.length - 1;
@@ -988,7 +993,12 @@ export default function InternalAssessmentPage() {
 
   const renderCompleted = () => {
     const w = tracker.currentWindow!;
-    const r = w.result!;
+    if (!w.result) return (
+      <div className="max-w-xl mx-auto pt-8 text-center">
+        <p className="text-slate-500 text-sm font-medium">Result unavailable — please contact support.</p>
+      </div>
+    );
+    const r = w.result;
     const improved = r.band > getPreviousBand();
     const iasLeft  = Math.max(0, 6 - tracker.totalCompleted);
 

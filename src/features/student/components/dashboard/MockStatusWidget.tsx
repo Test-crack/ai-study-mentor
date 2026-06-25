@@ -214,7 +214,7 @@ export default function MockStatusWidget() {
               onClick={() => navigate("/student/mock")}
               className="mt-auto w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-wide hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
             >
-              View Results →
+              Go to Mock →
             </button>
           )}
         </>

@@ -209,8 +209,7 @@ function RiskCard({
         <button
           onClick={() => {
             if (!batchId) return;
-            const slug = student.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'student';
-            navigate(`/instructor/students/${slug}/progress`, { state: { batchId, studentId: student.user_id } });
+            navigate(`/instructor/batches/${batchId}/students/${student.user_id}/progress`, { state: { studentId: student.user_id } });
           }}
           className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-xs font-bold transition-colors group border border-slate-200 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-500/40"
         >

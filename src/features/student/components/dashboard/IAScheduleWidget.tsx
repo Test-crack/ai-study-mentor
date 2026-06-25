@@ -47,8 +47,35 @@ export default function IAScheduleWidget() {
     void fetch();
   }, []);
 
+  if (loading) return (
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm h-full flex flex-col animate-pulse">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex-shrink-0" />
+          <div className="space-y-1.5">
+            <div className="h-3 w-24 bg-slate-100 dark:bg-slate-800 rounded" />
+            <div className="h-2.5 w-16 bg-slate-100 dark:bg-slate-800 rounded" />
+          </div>
+        </div>
+        <div className="h-3 w-10 bg-slate-100 dark:bg-slate-800 rounded" />
+      </div>
+      <div className="flex flex-col gap-3 flex-1">
+        {[0, 1].map(i => (
+          <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+            <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex-shrink-0" />
+            <div className="flex-1 space-y-1.5">
+              <div className="h-3 w-36 bg-slate-100 dark:bg-slate-800 rounded" />
+              <div className="h-2.5 w-20 bg-slate-100 dark:bg-slate-800 rounded" />
+            </div>
+            <div className="h-5 w-14 bg-slate-100 dark:bg-slate-800 rounded-lg" />
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 h-9 w-full bg-slate-100 dark:bg-slate-800 rounded-xl" />
+    </div>
+  );
+
   // Only render when the student has a meaningful schedule to show
-  if (loading)                                          return null;
   if (!status?.has_schedule || !status.prerequisites_met) return null;
 
   const isIADay    = status.is_ia_day;

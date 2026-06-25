@@ -234,6 +234,7 @@ export default function FullMockAssessment() {
 
   // Session
   const [sessionId, setSessionId]               = useState<string | null>(null);
+  const sessionIdRef                            = useRef<string | null>(null);
   const [sections, setSections]                 = useState<MockSection[] | null>(null);
   const [currentSectionIdx, setCurrentSectionIdx] = useState(0);
   const [currentIdx, setCurrentIdx]             = useState(0);
@@ -307,7 +308,7 @@ export default function FullMockAssessment() {
     }
     setIsRecording(false);
     setLiveTranscript("");
-    if (writingDebounceRef.current) clearTimeout(writingDebounceRef.current);
+    if (writingDebounceRef.current) { clearTimeout(writingDebounceRef.current); writingDebounceRef.current = null; }
   }, [currentIdx, currentSectionIdx]);
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -315,9 +316,9 @@ export default function FullMockAssessment() {
   const backendUrl = () => import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
 
   const persistAnswer = (questionId: string, answer: string) => {
-    if (!sessionId) return;
+    if (!sessionIdRef.current) return;
     callBackend(`${backendUrl()}/api/mock/answer`, {
-      method: "POST", body: JSON.stringify({ session_id: sessionId, question_id: questionId, answer })
+      method: "POST", body: JSON.stringify({ session_id: sessionIdRef.current, question_id: questionId, answer })
     }).catch(e => console.warn("[Mock] answer save failed:", e));
   };
 
@@ -371,6 +372,7 @@ export default function FullMockAssessment() {
         if (s.success) setMockStatus(s);
         setIsLoading(false); return;
       }
+      sessionIdRef.current = res.session_id;
       setSessionId(res.session_id);
       setSections(transformSectionAudioUrls(res.sections));
       setCurrentSectionIdx(res.current_section_idx ?? 0);
@@ -399,7 +401,7 @@ export default function FullMockAssessment() {
       setPhase("scoring");
       try {
         const res = await callBackend(`${backendUrl()}/api/mock/submit`, {
-          method: "POST", body: JSON.stringify({ session_id: sessionId })
+          method: "POST", body: JSON.stringify({ session_id: sessionIdRef.current })
         });
         if (res.success) {
           setSessionMomentum(res.momentum_awarded ?? 0);
@@ -411,15 +413,15 @@ export default function FullMockAssessment() {
       }
       setTimeout(() => setPhase("results"), 3500);
     }
-  }, [sections, currentSectionIdx, sessionId]);
+  }, [sections, currentSectionIdx]);
 
   const advanceToNextSection = () => {
     const nextIdx = currentSectionIdx + 1;
     if (audioRef.current && !audioRef.current.paused) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
     // Stamp navigation position on backend — timer is global so no section_started_at needed
-    if (sessionId) {
+    if (sessionIdRef.current) {
       callBackend(`${backendUrl()}/api/mock/answer`, {
-        method: "POST", body: JSON.stringify({ session_id: sessionId, section_advance: nextIdx })
+        method: "POST", body: JSON.stringify({ session_id: sessionIdRef.current, section_advance: nextIdx })
       }).catch(e => console.warn("[Mock] section advance failed:", e));
     }
     setCurrentSectionIdx(nextIdx);
@@ -1017,7 +1019,7 @@ export default function FullMockAssessment() {
         <div className="bg-purple-700 border-2 border-gray-900 rounded-2xl p-8 mb-6 text-center shadow-[8px_8px_0_#0F0F0F] relative overflow-hidden">
           <div className="absolute -top-8 -right-8 text-[140px] opacity-10 pointer-events-none select-none">🏆</div>
           <p className="text-purple-200 font-black uppercase tracking-widest mb-1">Real Band Score</p>
-          <div className="text-8xl font-black text-white leading-none mb-2">{realBand > 0 ? realBand.toFixed(1) : "—"}</div>
+          <div className="text-8xl font-black text-white leading-none mb-2">{mockResults?.real_band_score != null ? realBand.toFixed(1) : "—"}</div>
           {delta !== 0 && (
             <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-lg font-black uppercase text-sm mt-2 ${delta > 0 ? "bg-emerald-500 text-white" : "bg-rose-500 text-white"}`}>
               {delta > 0 ? `↑ +${delta.toFixed(1)}` : `↓ ${delta.toFixed(1)}`} from previous {prevBand.toFixed(1)}

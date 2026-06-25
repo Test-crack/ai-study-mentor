@@ -59,17 +59,20 @@ export function IAOverviewTab({ rows, batchId }: Props) {
       : rows;
 
     return [...list].sort((a, b) => {
-      let av: number | string | null, bv: number | string | null;
+      let av: number | string, bv: number | string;
       switch (sortKey) {
         case 'name':         av = a.name;         bv = b.name;         break;
         case 'ia_completed': av = a.ia_completed; bv = b.ia_completed; break;
         case 'ia_missed':    av = a.ia_missed;    bv = b.ia_missed;    break;
-        case 'avg_ia_band':  av = a.avg_ia_band;  bv = b.avg_ia_band;  break;
-        case 'last_ia_date': av = a.last_ia_date; bv = b.last_ia_date; break;
+        case 'avg_ia_band':  av = a.avg_ia_band ?? (sortDir === 'asc' ? -1 : 99); bv = b.avg_ia_band ?? (sortDir === 'asc' ? -1 : 99); break;
+        case 'last_ia_date': {
+          const sentinel = sortDir === 'asc' ? '' : '9999-99-99';
+          av = a.last_ia_date ?? sentinel;
+          bv = b.last_ia_date ?? sentinel;
+          return sortDir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+        }
         default:             av = 0;              bv = 0;
       }
-      if (av === null || av === undefined) av = sortDir === 'asc' ? Infinity : -Infinity;
-      if (bv === null || bv === undefined) bv = sortDir === 'asc' ? Infinity : -Infinity;
       if (typeof av === 'string' && typeof bv === 'string') {
         return sortDir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
       }
