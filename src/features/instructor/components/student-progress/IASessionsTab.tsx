@@ -14,7 +14,7 @@ const STATUS_CONFIG = {
 
 function avgBand(scores: SectionScore[] | null): number | null {
   if (!scores || scores.length === 0) return null;
-  const bands = scores.map(s => s.band).filter(b => b > 0);
+  const bands = scores.map(s => s.band).filter((b): b is number => b !== null);
   if (bands.length === 0) return null;
   return Math.round((bands.reduce((a, b) => a + b, 0) / bands.length) * 10) / 10;
 }
@@ -62,7 +62,7 @@ function ScoreDetailPanel({ scores }: { scores: SectionScore[] }) {
                   </td>
                   <td className="py-2 text-center">
                     <span className={cn('font-black text-sm', bandColorText(s.band))}>
-                      {s.band > 0 ? s.band.toFixed(1) : '—'}
+                      {s.band !== null ? s.band.toFixed(1) : '—'}
                     </span>
                   </td>
                   <td className="py-2 text-center text-xs text-slate-500 dark:text-slate-400">

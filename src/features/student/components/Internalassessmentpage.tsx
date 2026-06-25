@@ -327,10 +327,34 @@ export default function InternalAssessmentPage() {
 
   const displayName  = profile?.name || user?.email?.split('@')[0] || 'Student';
   const tutorFiredRef = useRef(false);
+  // IA-F-02: always holds the current tracker + answers so the timer interval
+  // can read fresh values without being in the dep array (no stale closure).
+  const latestRef = useRef<{ tracker: IATracker; answers: Record<string, string> }>({ tracker, answers });
 
   // ── PREVIOUS BAND (mock — real value comes from competency scores API) ──────
   // TODO (Sarthak): Read from real competency scores instead
   const getPreviousBand = (): number => 5.5;
+
+  // ── AUTO-SUBMIT (timer expired or resume window expired) ─────────────────────
+  // IA-F-01: defined BEFORE checkEligibility so it can be listed in its dep array,
+  // preventing checkEligibility from calling a stale version after addPoints changes.
+  const handleAutoSubmit = useCallback((t: IATracker, savedAnswers: Record<string, string>) => {
+    const w = t.currentWindow!;
+    const result = scoreMockIA(savedAnswers, getPreviousBand());
+    const updated: IATracker = {
+      ...t,
+      totalCompleted:    t.totalCompleted + 1,
+      consecutiveMisses: 0,
+      lastCompletedDate: new Date().toISOString(),
+      currentWindow: { ...w, status: 'completed', result, inProgress: null },
+    };
+    writeIATracker(updated);
+    setTracker(updated);
+    // IA-F-08: new completion cycle — reset so the Level-2 alert can fire again.
+    tutorFiredRef.current = false;
+    addPoints(IA_COMPLETE_POINTS, 'Internal Assessment completed');
+    setPhase('completed');
+  }, [addPoints]);
 
   // ── ELIGIBILITY CHECK ────────────────────────────────────────────────────────
   const checkEligibility = useCallback(() => {
@@ -437,26 +461,13 @@ export default function InternalAssessmentPage() {
     setWaitSecondsLeft(WAIT_HOURS * 3600);
     setPhase('eligible_waiting');
 
-    // +50 Momentum for reaching IA eligibility milestone
-    addPoints(50, 'IA eligibility milestone reached');
-  }, [deductPoints, addPoints, displayName, user?.email]);
-
-  // ── AUTO-SUBMIT (timer expired or resume window expired) ─────────────────────
-  const handleAutoSubmit = useCallback((t: IATracker, savedAnswers: Record<string, string>) => {
-    const w = t.currentWindow!;
-    const result = scoreMockIA(savedAnswers, getPreviousBand());
-    const updated: IATracker = {
-      ...t,
-      totalCompleted:    t.totalCompleted + 1,
-      consecutiveMisses: 0,
-      lastCompletedDate: new Date().toISOString(),
-      currentWindow: { ...w, status: 'completed', result, inProgress: null },
-    };
-    writeIATracker(updated);
-    setTracker(updated);
-    addPoints(IA_COMPLETE_POINTS, 'Internal Assessment completed');
-    setPhase('completed');
-  }, [addPoints]);
+    // IA-F-04: only award on the very first window ever created.
+    // consecutiveMisses > 0 means a prior window existed and was missed —
+    // the student already received this award before the reset cycle.
+    if (t.totalCompleted === 0 && t.consecutiveMisses === 0) {
+      addPoints(50, 'IA eligibility milestone reached');
+    }
+  }, [handleAutoSubmit, deductPoints, addPoints, displayName, user?.email]);
 
   // ── MOUNT ────────────────────────────────────────────────────────────────────
   useEffect(() => { checkEligibility(); }, [checkEligibility]);
@@ -474,17 +485,29 @@ export default function InternalAssessmentPage() {
     return () => clearInterval(t);
   }, [phase, waitSecondsLeft, checkEligibility]);
 
+  // IA-F-02: keep latestRef in sync on every render so the interval always sees
+  // the current tracker and answers without needing them in the dep array.
+  useEffect(() => { latestRef.current = { tracker, answers }; }, [tracker, answers]);
+
   // ── SESSION TIMER ─────────────────────────────────────────────────────────────
+  // IA-F-02: a single interval lives for the full session (phase doesn't change
+  // while in_progress/resume). Removing timeLeft/tracker/answers from the dep array
+  // means the interval is never torn-down-and-recreated each second, so the
+  // auto-submit always fires with the latest state via latestRef, not a stale closure.
   useEffect(() => {
     if (phase !== 'in_progress' && phase !== 'resume') return;
-    if (timeLeft <= 0) {
-      // Auto-submit on timer expiry
-      handleAutoSubmit(tracker, answers);
-      return;
-    }
-    const t = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
-    return () => clearInterval(t);
-  }, [phase, timeLeft, tracker, answers, handleAutoSubmit]);
+    const id = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(id);
+          handleAutoSubmit(latestRef.current.tracker, latestRef.current.answers);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [phase, handleAutoSubmit]);
 
   // ── 3-WEEK BACKGROUND CHECK ───────────────────────────────────────────────────
   useEffect(() => {
@@ -535,7 +558,11 @@ export default function InternalAssessmentPage() {
           answers:         updated,
           currentQuestion: currentQ,
           exitedAt:        now,
-          resumeDeadline:  addMinutes(now, RESUME_TIMER_SECONDS / 60),
+          // IA-F-03: preserve the deadline set by a prior answer or by handleExitMidTest.
+          // Only initialise it here if this is the very first answer of the session
+          // (w.inProgress is null until the first save). handleExitMidTest then
+          // overwrites it with the actual exit timestamp.
+          resumeDeadline:  w.inProgress?.resumeDeadline ?? addMinutes(now, RESUME_TIMER_SECONDS / 60),
         },
       },
     };
@@ -547,19 +574,23 @@ export default function InternalAssessmentPage() {
     if (currentQ < questions.length - 1) {
       setCurrentQ(prev => prev + 1);
     } else {
-      // Last question — submit
-      const result = scoreMockIA(answers, getPreviousBand());
-      const w = tracker.currentWindow!;
+      // IA-F-05: read from latestRef so the last answer is always included even if
+      // the student selected it and clicked Next in the same event batch.
+      const { tracker: t, answers: a } = latestRef.current;
+      const result  = scoreMockIA(a, getPreviousBand());
+      const w       = t.currentWindow!;
       const improved = result.band > getPreviousBand();
       const updated: IATracker = {
-        ...tracker,
-        totalCompleted:    tracker.totalCompleted + 1,
+        ...t,
+        totalCompleted:    t.totalCompleted + 1,
         consecutiveMisses: 0,
         lastCompletedDate: new Date().toISOString(),
         currentWindow: { ...w, status: 'completed', result, inProgress: null },
       };
       writeIATracker(updated);
       setTracker(updated);
+      // IA-F-08: new completion cycle — reset so the Level-2 alert can fire again.
+      tutorFiredRef.current = false;
 
       addPoints(IA_COMPLETE_POINTS, 'Internal Assessment completed');
       if (improved) addPoints(IA_IMPROVE_BONUS, 'Band improved in IA');
@@ -573,8 +604,25 @@ export default function InternalAssessmentPage() {
   };
 
   const handleExitMidTest = () => {
-    // State already saved in handleAnswer — just navigate away
-    // Student can return within resumeDeadline
+    // IA-F-03: stamp the real exit time so the 18-minute resume window is measured
+    // from when the student actually left, not from their last answered question.
+    const w = tracker.currentWindow!;
+    const now = new Date().toISOString();
+    if (w.inProgress) {
+      const updatedTracker: IATracker = {
+        ...tracker,
+        currentWindow: {
+          ...w,
+          inProgress: {
+            ...w.inProgress,
+            exitedAt:       now,
+            resumeDeadline: addMinutes(now, RESUME_TIMER_SECONDS / 60),
+          },
+        },
+      };
+      writeIATracker(updatedTracker);
+      setTracker(updatedTracker);
+    }
     navigate('/student/dashboard');
   };
 
@@ -582,6 +630,8 @@ export default function InternalAssessmentPage() {
     const w = tracker.currentWindow!;
     const qs = getMockQuestions(w.targetSubSkill, w.targetSkill);
     setQuestions(qs);
+    // IA-F-07: restore the question index the student was on, not Q0.
+    setCurrentQ(w.inProgress!.currentQuestion);
     const resumeSeconds = Math.floor(minutesUntil(w.inProgress!.resumeDeadline) * 60);
     setTimeLeft(resumeSeconds);
     setPhase('in_progress');
@@ -592,6 +642,8 @@ export default function InternalAssessmentPage() {
     const updated: IATracker = { ...tracker, currentWindow: null };
     writeIATracker(updated);
     setTracker(updated);
+    // IA-F-08: reset so the Level-2 alert can fire again in the next cycle.
+    tutorFiredRef.current = false;
     setPhase('not_eligible');
     checkEligibility();
   };
@@ -774,7 +826,10 @@ export default function InternalAssessmentPage() {
     const q = questions[currentQ];
     const answered = !!answers[q.id]?.trim();
     const isLast   = currentQ === questions.length - 1;
-    const pct      = timeLeft / IA_TIMER_SECONDS;
+    // IA-F-06: resume phase has a shorter window (RESUME_TIMER_SECONDS), so pct must
+    // use that as the denominator or the bar starts above 100% and urgency never fires.
+    const maxTimer = phase === 'resume' ? RESUME_TIMER_SECONDS : IA_TIMER_SECONDS;
+    const pct      = timeLeft / maxTimer;
     const timerColor = pct < 0.2 ? 'text-rose-500' : pct < 0.5 ? 'text-amber-500' : 'text-indigo-500';
 
     return (

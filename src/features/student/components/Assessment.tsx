@@ -10,16 +10,6 @@ import { transformSectionAudioUrls } from "@/features/student/utils/iaAudioUtils
 // API INTEGRATION LAYER (Ready for Sarthak's Endpoints)
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const awardMomentum = async (
-  studentId: string, 
-  actionType: string, 
-  qualityScore: number
-): Promise<{ success: boolean; pointsAwarded: number }> => {
-  console.log(`[API CALL] awardMomentum`, { studentId, actionType, qualityScore });
-  return new Promise((resolve) => {
-    setTimeout(() => resolve({ success: true, pointsAwarded: Math.round(20 + (qualityScore * 30)) }), 1000);
-  });
-};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES & INTERFACES
@@ -554,7 +544,8 @@ export default function Assessment() {
 
   // ── STATE 1: Prerequisites not yet met (< 6 drills or < 2 days) ─────────────
   const renderNotEligible = () => {
-    const p = iaStatus!.progress;
+    if (!iaStatus) return null;
+    const p = iaStatus.progress;
     const conditions = [
       { key: "drills", label: "Drill Sessions",        met: p.cond_drills, value: `${p.drills_completed} / ${p.drills_required}`,       pct: Math.min(100, Math.round((p.drills_completed / p.drills_required) * 100)) },
       { key: "days",   label: "Days Since First Drill", met: p.cond_days,   value: `${p.days_since_first_drill} / ${p.min_days_required}`, pct: Math.min(100, Math.round((p.days_since_first_drill / p.min_days_required) * 100)) },

@@ -220,6 +220,29 @@ export default function MockStatusWidget() {
         </>
       )}
 
+      {/* ── State: Eligible but can_start_mock not yet true (edge / cooldown) ── */}
+      {!hasActive && !canStart && !usedMonth && !notEligible && (
+        <>
+          <div className="rounded-xl px-4 py-3 mb-4 bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/30 flex items-center gap-3">
+            <CheckCircle2 className="w-5 h-5 text-purple-500 dark:text-purple-400 flex-shrink-0" />
+            <div>
+              <p className="text-xs font-black uppercase tracking-widest text-purple-700 dark:text-purple-300 mb-0.5">
+                Eligible
+              </p>
+              <p className="text-xs font-medium text-purple-600 dark:text-purple-400">
+                Requirements met · mock opening soon
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate("/student/mock")}
+            className="mt-auto w-full py-2.5 rounded-xl border border-purple-200 dark:border-purple-500/40 text-purple-600 dark:text-purple-400 font-bold text-xs uppercase tracking-wide hover:bg-purple-50 dark:hover:bg-purple-500/10 transition-colors"
+          >
+            Go to Mock →
+          </button>
+        </>
+      )}
+
       {/* ── State: Not yet eligible — show progress ───────────────────────── */}
       {!hasActive && !canStart && !usedMonth && notEligible && (
         <>

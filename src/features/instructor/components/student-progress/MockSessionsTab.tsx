@@ -31,7 +31,7 @@ function titleCase(s: string): string {
 function SubSkillRow({ ss }: { ss: MockSubSkillScore }) {
   const [open, setOpen] = useState(false);
   const hasFeedback = !!(ss.ai_feedback?.rationale || (ss.ai_feedback?.key_observations?.length ?? 0) > 0);
-  const band = ss.band ?? 0;
+  const band = ss.band;
 
   return (
     <>
@@ -51,15 +51,16 @@ function SubSkillRow({ ss }: { ss: MockSubSkillScore }) {
             <div
               className={cn(
                 'h-full rounded-full',
-                band >= 7 ? 'bg-emerald-400 dark:bg-emerald-500'
+                band === null ? 'bg-slate-300 dark:bg-slate-600'
+                : band >= 7 ? 'bg-emerald-400 dark:bg-emerald-500'
                 : band >= 6 ? 'bg-amber-400 dark:bg-amber-500'
                 : 'bg-rose-400 dark:bg-rose-500'
               )}
-              style={{ width: `${Math.min(100, (band / 9) * 100)}%` }}
+              style={{ width: band !== null ? `${Math.min(100, (band / 9) * 100)}%` : '0%' }}
             />
           </div>
           <span className={cn('font-bold w-6 text-right', bandColorText(band))}>
-            {band > 0 ? band.toFixed(1) : '—'}
+            {band !== null ? band.toFixed(1) : '—'}
           </span>
           {hasFeedback && (
             open
@@ -105,7 +106,7 @@ function SkillCard({ sk }: { sk: MockSkillScore }) {
         <div className="flex items-center gap-1.5">
           {sk.ai_graded && <Cpu className="h-3 w-3 text-indigo-400" />}
           <span className={cn('text-lg font-black', bandColorText(band))}>
-            {band !== null && band > 0 ? band.toFixed(1) : '—'}
+            {band !== null ? band.toFixed(1) : '—'}
           </span>
         </div>
       </div>
@@ -210,8 +211,9 @@ function MockRow({ s }: { s: MockSession }) {
 
 export function MockSessionsTab({ sessions }: Props) {
   const completed = sessions.filter(s => s.status === 'COMPLETED');
-  const avgBand   = completed.length > 0
-    ? (completed.reduce((sum, s) => sum + (s.real_band_score ?? 0), 0) / completed.length).toFixed(1)
+  const scored    = completed.filter(s => s.real_band_score !== null);
+  const avgBand   = scored.length > 0
+    ? (scored.reduce((sum, s) => sum + s.real_band_score!, 0) / scored.length).toFixed(1)
     : null;
 
   if (sessions.length === 0) {

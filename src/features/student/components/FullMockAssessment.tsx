@@ -424,7 +424,8 @@ export default function FullMockAssessment() {
     }
     setCurrentSectionIdx(nextIdx);
     setCurrentIdx(0);
-    setAnswers({});
+    // MK-F-03: do NOT clear answers — the global timer means all sections share one
+    // Record<questionId, answer> map and Prev navigation must be able to show prior answers.
     // DO NOT reset timeLeft — global timer keeps counting down across all sections
     setAudioState("idle"); setShowPassage(false); setIsRecording(false);
     setPhase("session");
@@ -780,7 +781,7 @@ export default function FullMockAssessment() {
           <div className="flex items-center self-end sm:self-auto bg-gray-50 border-2 border-gray-900 px-4 py-2 rounded-xl" style={{ boxShadow: "inset 2px 2px 0 rgba(0,0,0,0.05)" }}>
             <CircleTimer timeLeft={timeLeft} total={currentSectionTotalSec} size={48} />
             <div className="ml-3">
-              <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Section Timer</p>
+              <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Total Test Timer</p>
               <p className="text-lg font-black text-gray-900 leading-none">{formatTime(timeLeft)}</p>
             </div>
           </div>
@@ -955,7 +956,7 @@ export default function FullMockAssessment() {
           </div>
           <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tight mb-2">Section {currentSectionIdx + 1} Complete</h2>
           <p className="text-gray-500 font-medium mb-8">
-            {SKILL_LABEL[sections?.[currentSectionIdx]?.skill ?? ""] ?? ""} done. Take a breath — the next section has its own fresh timer.
+            {SKILL_LABEL[sections?.[currentSectionIdx]?.skill ?? ""] ?? ""} done. Take a breath — your overall test timer continues running.
           </p>
           {nextSec && (
             <div className="bg-purple-50 border-2 border-gray-900 rounded-xl p-5 mb-8 text-left shadow-[4px_4px_0_#0F0F0F]">
