@@ -30,7 +30,9 @@ interface MockStatusResponse {
   has_active_session:        boolean;
   active_session_id:         string | null;
   standard_used_this_month:  boolean;
+  standard_session_status:   string | null;
   earned_used_this_month:    boolean;
+  earned_session_status:     string | null;
   earned_mock_eligible:      boolean;
   can_start_earned:          boolean;
   earned_mock_reasons:       { key: string; message: string }[];
@@ -591,6 +593,51 @@ export default function FullMockAssessment() {
     </div>
   );
 
+  const renderSlotExpired = () => (
+    <div className="max-w-2xl mx-auto animate-fade-in pt-12 px-4">
+      <div className="bg-white border-2 border-gray-900 rounded-2xl p-8 shadow-[8px_8px_0_#0F0F0F]">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 bg-amber-100 border-2 border-amber-400 rounded-xl flex items-center justify-center">
+            <Calendar className="w-6 h-6 text-amber-600" />
+          </div>
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">This Month</p>
+            <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tight">Session Expired</h2>
+          </div>
+        </div>
+
+        <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-4 mb-6">
+          <p className="font-black text-amber-800 text-sm mb-1">72-hour window closed without submission</p>
+          <p className="text-amber-700 text-sm">Your standard slot for this month has been consumed. No penalty — just no score recorded.</p>
+        </div>
+
+        <div className="bg-indigo-50 border-2 border-indigo-200 rounded-xl p-4 mb-6 flex items-center gap-3">
+          <Calendar className="w-5 h-5 text-indigo-600 flex-shrink-0" />
+          <div>
+            <p className="font-black text-indigo-800 text-sm">Next standard slot opens</p>
+            <p className="text-indigo-600 font-bold text-sm">{firstOfNextMonth()}</p>
+          </div>
+        </div>
+
+        {mockStatus!.can_start_earned && (
+          <div className="mb-4">
+            <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-2">Still want a mock this month?</p>
+            <button onClick={() => void beginMock("EARNED")} disabled={isLoading}
+              className="w-full bg-amber-50 hover:bg-amber-100 border-2 border-amber-400 rounded-xl py-3 font-black text-sm text-amber-800 uppercase tracking-wide flex items-center justify-center gap-2">
+              <Zap className="w-4 h-4 text-amber-500 fill-amber-500" />
+              Exchange {mockStatus!.earned_mock_cost.toLocaleString()} Momentum for Extra Mock
+            </button>
+          </div>
+        )}
+
+        <button onClick={() => navigate("/student/dashboard")}
+          className="w-full py-3 border-2 border-gray-300 rounded-xl font-black text-sm text-gray-500 uppercase tracking-wide hover:bg-gray-50">
+          Back to Dashboard
+        </button>
+      </div>
+    </div>
+  );
+
   const renderMonthUsed = () => (
     <div className="max-w-2xl mx-auto animate-fade-in pt-12 px-4">
       <div className="bg-white border-2 border-gray-900 rounded-2xl p-8 shadow-[8px_8px_0_#0F0F0F]">
@@ -669,8 +716,8 @@ export default function FullMockAssessment() {
     }
     if (mockStatus.has_active_session) return renderActiveSession();
     if (!mockStatus.is_eligible)        return renderNotEligible();
-    if (mockStatus.standard_used_this_month && !mockStatus.can_start_earned) return renderMonthUsed();
-    if (mockStatus.standard_used_this_month && mockStatus.can_start_earned)  return renderMonthUsed();
+    if (mockStatus.standard_session_status === 'ABANDONED') return renderSlotExpired();
+    if (mockStatus.standard_used_this_month)                return renderMonthUsed();
     return renderMockAvailable();
   };
 
