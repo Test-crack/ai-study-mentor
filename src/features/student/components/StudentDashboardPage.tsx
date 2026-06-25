@@ -13,7 +13,7 @@ import { cn } from "@/shared/utils";
 import {
   Flame, Trophy, Target, Zap, BookOpen, Mic, PenLine,
   Headphones, CalendarClock, CheckCircle2, ArrowRight, Sparkles,
-  Lock, AlertTriangle,
+  Lock, AlertTriangle, ChevronDown, Lightbulb, TrendingUp,
 } from "lucide-react";
 
 // ─── TYPES & CONSTANTS ────────────────────────────────────────────────────────
@@ -52,10 +52,70 @@ const LEVEL = {
   color: "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300",
 };
 
+// ─── SUB-SKILL GUIDANCE ────────────────────────────────────────────────────────
+/**
+ * Plain-English explanations + a recommended next step for each sub-skill.
+ * Keyed by a normalised (lowercased, non-alphanumeric-stripped) sub-skill name
+ * so backend variations like "grammar_score" / "Grammar Range" still match.
+ *
+ * `drillSlug` feeds the drill picker route. Tune the slugs to whatever your
+ * /student/drill endpoint expects; the labels are user-facing copy.
+ */
+interface SubSkillGuide {
+  blurb: string;       // what this sub-skill measures, in plain English
+  drillLabel: string;  // friendly name of the recommended drill
+  drillSlug: string;   // sub_skill value passed to the drill route
+}
+
+const SUB_SKILL_GUIDE: Record<string, SubSkillGuide> = {
+  grammar:        { blurb: "How accurately you build sentences.",            drillLabel: "Basic Tenses drill",        drillSlug: "Grammar" },
+  coherence:      { blurb: "How clearly your ideas connect and flow.",       drillLabel: "Linking Ideas drill",       drillSlug: "Coherence" },
+  vocabulary:     { blurb: "The range and precision of words you use.",      drillLabel: "Word Choice drill",         drillSlug: "Vocabulary" },
+  lexical:        { blurb: "The range and precision of words you use.",      drillLabel: "Word Choice drill",         drillSlug: "Lexical Resource" },
+  fluency:        { blurb: "How smoothly and steadily you speak.",           drillLabel: "Speaking Flow drill",       drillSlug: "Fluency" },
+  pronunciation:  { blurb: "How clearly individual sounds come across.",     drillLabel: "Sound Clarity drill",       drillSlug: "Pronunciation" },
+  taskresponse:   { blurb: "How fully you answer what the task asks.",       drillLabel: "Task Focus drill",          drillSlug: "Task Response" },
+  taskachievement:{ blurb: "How fully you cover every part of the task.",    drillLabel: "Task Focus drill",          drillSlug: "Task Achievement" },
+  detail:         { blurb: "Catching specific facts and figures.",          drillLabel: "Detail Spotting drill",     drillSlug: "Detail" },
+  inference:      { blurb: "Reading between the lines for implied meaning.", drillLabel: "Inference Sprint drill",    drillSlug: "Inference" },
+  mainidea:       { blurb: "Spotting the central point of a passage.",       drillLabel: "Main Idea drill",           drillSlug: "Main Idea" },
+};
+
+const normaliseSubSkill = (raw: string): string =>
+  raw.toLowerCase().replace(/score|range|resource/g, "").replace(/[^a-z]/g, "");
+
+const getSubSkillGuide = (rawKey: string): SubSkillGuide | undefined =>
+  SUB_SKILL_GUIDE[normaliseSubSkill(rawKey)];
+
+// A friendly, plain-English tier label for any band-style sub-score (0–9 scale).
+const scoreTier = (n: number): { label: string; tone: "low" | "mid" | "high" } => {
+  if (n < 4.0) return { label: "Just starting", tone: "low" };
+  if (n < 6.0) return { label: "Building up",   tone: "mid" };
+  if (n < 7.5) return { label: "Solid",         tone: "mid" };
+  return { label: "Strong",        tone: "high" };
+};
+
 // ─── UTILS ────────────────────────────────────────────────────────────────────
 
 const overallBand = (bands: SkillBand[]) =>
   Math.round((bands.reduce((s, b) => s + b.score, 0) / bands.length) * 2) / 2;
+
+/**
+ * Given the current overall band, returns the *next* half-band milestone and
+ * how far along the student is toward it. Frames progress as a short, winnable
+ * next step rather than the full distance to the final target.
+ */
+const getNextMilestone = (current: number, target: number) => {
+  // Cap milestones at the target so we never dangle a goal beyond what's needed.
+  const next = Math.min(Math.round((current + 0.5) * 2) / 2, target);
+  const reachedTarget = current >= target;
+  // Progress within the current half-band step (current → next).
+  const stepStart = next - 0.5;
+  const pctToNext = reachedTarget
+    ? 100
+    : Math.max(0, Math.min(100, ((current - stepStart) / 0.5) * 100));
+  return { next, reachedTarget, pctToNext };
+};
 
 // Maps a sub-skill band score to a drill level for the backend question picker
 const getLevelFromScore = (score: number): string => {
@@ -137,21 +197,25 @@ const StudentDashboardPage = () => {
 
   // ─── Dynamic Readiness ───────────────────────────────────────────────────────
   // targetBand is loaded from the backend; override the static READINESS constant.
+  // NOTE: status drives only the *tone* of the readiness card. Even the most
+  // delayed state now uses an encouraging amber ("catch-up") rather than red —
+  // see PredictedReadinessCard. The underlying penalty logic is unchanged.
   const dynamicReadiness = { ...READINESS, targetBand };
   if (missedData.misses === 1) {
     dynamicReadiness.targetDate = "2026-06-19";
     dynamicReadiness.daysLeft = 87;
     dynamicReadiness.status = "warn";
-    dynamicReadiness.trajectory = "Slight delay: 6.5 by June 19";
+    dynamicReadiness.trajectory = "A few days behind — a couple of sessions brings you right back.";
   } else if (missedData.misses >= 2) {
     dynamicReadiness.targetDate = "2026-06-23";
     dynamicReadiness.daysLeft = 91;
-    dynamicReadiness.status = "danger";
-    dynamicReadiness.trajectory = "Off track: Intervention required";
+    dynamicReadiness.status = "catchup";
+    dynamicReadiness.trajectory = "Let's rebuild your rhythm — your tutor is here to help you catch up.";
   }
 
   const displayName = profile?.name || user?.email?.split("@")[0] || "Student";
   const overall = overallBand(skillBands);
+  const milestone = getNextMilestone(overall, dynamicReadiness.targetBand);
   // Backend daily-drill-state is the single source of truth; locked until state loads or dashboard unlocked
   const isLocked = !dailyDrillState || !dailyDrillState.dashboard_unlocked || missedData.misses >= 2;
 
@@ -204,6 +268,9 @@ const StudentDashboardPage = () => {
    *
    * Miss 1 → −20 pts (gentle warning)
    * Miss 2 → −40 pts (escalation, on top of the previous −20)
+   *
+   * The deduction itself is unchanged; only how we *frame* it in the UI is now
+   * softer (recoverable setback, not a punishment) — see the lock banner copy.
    */
   useEffect(() => {
     if (missedData.misses === 1) {
@@ -307,6 +374,16 @@ const StudentDashboardPage = () => {
     ? { sub_skill: nextActionDrill.sub_skill, band: nextActionDrill.sub_skill_score ?? 5.0, skill: nextActionDrill.skill }
     : { sub_skill: "Loading...", band: 5.0, skill: "Overall" };
 
+  // Jump straight into the recommended drill for a given sub-skill from a chip.
+  const startSubSkillDrill = useCallback((skill: string, guide: SubSkillGuide, score: number) => {
+    const params = new URLSearchParams({
+      skill,
+      sub_skill: guide.drillSlug,
+      level: getLevelFromScore(score),
+    });
+    navigate(`/student/drill?${params.toString()}`);
+  }, [navigate]);
+
   // ─── Render ───────────────────────────────────────────────────────────────────
 
   return (
@@ -346,8 +423,8 @@ const StudentDashboardPage = () => {
           >
             <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
             <div className="pointer-events-none absolute right-24 bottom-0 h-28 w-28 rounded-full bg-purple-400/30 blur-xl" />
-            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
+            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div className="flex-1">
                 <div className="flex items-center gap-3 mb-1">
                   <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
                     Welcome back, {displayName} 👋
@@ -361,18 +438,27 @@ const StudentDashboardPage = () => {
                   <span className="font-bold text-white">
                     {dailyDrillState?.daily_streak ?? 0}-day streak
                   </span>{" "}
-                  — great momentum! Overall band:{" "}
-                  <span className="font-bold text-white">{overall}</span>.
+                  — keep the momentum going!
                 </p>
+
+                {/* ── Milestone progress: celebrates the NEXT small step, not the full gap ── */}
+                <MilestoneProgress
+                  current={overall}
+                  milestone={milestone}
+                  target={dynamicReadiness.targetBand}
+                />
               </div>
+
               <div className="flex-shrink-0 flex flex-col sm:flex-row gap-3">
                 <div className="text-center bg-white/15 border border-white/30 backdrop-blur-sm rounded-2xl px-6 py-3">
                   <p className="text-xs font-bold text-indigo-200 uppercase tracking-widest mb-0.5">
-                    Overall Band
+                    Current Band
                   </p>
-                  <p className="text-4xl font-black text-white leading-none">{overall}</p>
+                  <p className="text-4xl font-black text-white leading-none">{overall.toFixed(1)}</p>
                   <p className="text-xs text-indigo-200 mt-0.5">
-                    Target: {dynamicReadiness.targetBand}
+                    {milestone.reachedTarget
+                      ? "Target reached 🎉"
+                      : <>Next: {milestone.next.toFixed(1)}</>}
                   </p>
                 </div>
                 <div className="text-center bg-white/15 border border-white/30 backdrop-blur-sm rounded-2xl px-6 py-3">
@@ -390,6 +476,31 @@ const StudentDashboardPage = () => {
           <div className={cn("transition-all duration-500", isLocked && "relative z-50")}>
             <DailyNotices />
           </div>
+
+          {/* ── Gentle Catch-Up Banner (2+ misses) — encouraging, not punitive ── */}
+          {missedData.misses >= 2 && (
+            <div className="relative z-50 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 p-6 rounded-2xl shadow-xl flex flex-col sm:flex-row sm:items-center gap-4 animate-in slide-in-from-top-4">
+              <div className="w-12 h-12 flex-shrink-0 bg-amber-100 dark:bg-amber-500/20 rounded-full flex items-center justify-center">
+                <Sparkles className="w-6 h-6 text-amber-500" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-amber-900 dark:text-amber-200 tracking-tight">
+                  Let's pick things back up
+                </h3>
+                <p className="text-sm font-medium text-amber-800/80 dark:text-amber-300/80 mt-0.5">
+                  Looks like a couple of sessions slipped by — no worries, it happens to everyone.
+                  Your momentum will climb right back as soon as you start a drill, and your tutor
+                  is looped in to help.
+                </p>
+              </div>
+              <button
+                onClick={() => navigate("/student/drill")}
+                className="flex-shrink-0 inline-flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm py-3 px-5 rounded-xl transition-colors active:scale-[0.98]"
+              >
+                Get back on track <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
 
           {/* ── Platform Lock Banner ─────────────────────────────────────────── */}
           {isLocked && missedData.misses < 2 && dailyDrillState && (
@@ -526,10 +637,15 @@ const StudentDashboardPage = () => {
                       lexiBlocked && "opacity-40 grayscale pointer-events-none blur-[2px]"
                     )}
                   >
-                    <div
+                   <div
                       onClick={() => {
                         if (!lexiBlocked) {
-                          navigate(`/student/lexigrid?difficulty=${getLevelFromScore(overall)}`);
+                          const level = getLevelFromScore(overall);
+                          navigate(
+                            isLexiGate
+                              ? `/student/lexigrid?difficulty=${level}&mode=gate`
+                              : `/student/lexigrid?difficulty=${level}`
+                          );
                         }
                       }}
                       className={cn(
@@ -605,6 +721,7 @@ const StudentDashboardPage = () => {
                       key={band.skill}
                       band={band}
                       onNavigate={() => navigate(band.route)}
+                      onDrill={startSubSkillDrill}
                     />
                   ))}
                 </div>
@@ -659,6 +776,73 @@ const StudentDashboardPage = () => {
 const toTitleCase = (s: string) =>
   s.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
 
+/**
+ * MilestoneProgress
+ * Reframes "Band 3 / Target 9" into a short, winnable next step.
+ * Shows a segmented bar in half-band increments up to the target, with the
+ * current position filled and the immediate next milestone highlighted.
+ */
+const MilestoneProgress = ({
+  current, milestone, target,
+}: {
+  current: number;
+  milestone: { next: number; reachedTarget: boolean; pctToNext: number };
+  target: number;
+}) => {
+  // Build half-band segments from 0 up to the target (cap segment count for sanity).
+  const segments: number[] = [];
+  for (let b = 0.5; b <= target + 0.0001; b += 0.5) {
+    segments.push(Math.round(b * 2) / 2);
+  }
+
+  const headline = milestone.reachedTarget
+    ? `You've hit your target band of ${target.toFixed(1)} 🎉`
+    : `You're on your way to Band ${milestone.next.toFixed(1)} — almost there!`;
+
+  return (
+    <div className="mt-5 max-w-xl">
+      <div className="flex items-center gap-2 mb-2">
+        <TrendingUp className="h-4 w-4 text-emerald-300" />
+        <p className="text-sm font-semibold text-white">{headline}</p>
+      </div>
+
+      {/* Segmented progress bar — each segment is one half-band step */}
+      <div className="flex items-center gap-1" role="img" aria-label={`Current band ${current.toFixed(1)} of target ${target.toFixed(1)}`}>
+        {segments.map((seg) => {
+          const reached = current >= seg;
+          const isNext = !reached && seg === milestone.next;
+          // Partial fill for the in-progress segment.
+          const partial = isNext ? milestone.pctToNext : reached ? 100 : 0;
+          return (
+            <div
+              key={seg}
+              className="relative h-2.5 flex-1 rounded-full bg-white/15 overflow-hidden"
+              title={`Band ${seg.toFixed(1)}`}
+            >
+              <div
+                className={cn(
+                  "absolute inset-y-0 left-0 rounded-full transition-all duration-700",
+                  reached ? "bg-emerald-300" : isNext ? "bg-amber-300" : "bg-transparent"
+                )}
+                style={{ width: `${partial}%` }}
+              />
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="flex items-center justify-between mt-1.5">
+        <span className="text-[11px] font-medium text-indigo-200">
+          Now: Band {current.toFixed(1)}
+        </span>
+        <span className="text-[11px] font-medium text-indigo-200">
+          Goal: Band {target.toFixed(1)}
+        </span>
+      </div>
+    </div>
+  );
+};
+
 const FocusAreaCard = ({
   sub_skill, band, skill, isLocked, drillsLeft,
   nextAction, dailyDCS, dcsThreshold, extraCost, totalMomentum,
@@ -687,6 +871,9 @@ const FocusAreaCard = ({
   const isLowPts         = nextAction === 'DRILL_LOCKED_INSUFFICIENT_PTS';
   const isExtraLocked    = isLowDCS || isLowPts || isExtraReady || isExtraPrepaid;
   const showDCSMeter     = isLowDCS || isLowPts || isExtraReady; // not shown for prepaid (already cleared)
+
+  // Plain-English guide for the focused sub-skill, if we recognise it.
+  const guide = getSubSkillGuide(sub_skill);
 
   // card accent: blue when actively drillable, muted when waiting/locked
   const cardBg = isLocked
@@ -719,7 +906,7 @@ const FocusAreaCard = ({
       </div>
 
       {/* Drill info */}
-      <div className="flex items-center gap-5 mb-6">
+      <div className="flex items-center gap-5 mb-4">
         <div className="flex-shrink-0 h-16 w-16 rounded-2xl bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center border border-indigo-200 dark:border-indigo-500/30">
           <Target className="h-8 w-8 text-indigo-500" />
         </div>
@@ -734,6 +921,14 @@ const FocusAreaCard = ({
           </div>
         </div>
       </div>
+
+      {/* Plain-English context for the focused sub-skill */}
+      {guide && (
+        <div className="mb-6 flex items-start gap-2 text-xs text-slate-500 dark:text-slate-400 bg-white/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-700/60 rounded-xl px-3 py-2">
+          <Lightbulb className="h-3.5 w-3.5 text-amber-500 flex-shrink-0 mt-0.5" />
+          <span>{guide.blurb} Today's pick: the <strong className="text-slate-700 dark:text-slate-200">{guide.drillLabel}</strong>.</span>
+        </div>
+      )}
 
       {/* ── CTA area — driven entirely by nextAction ── */}
       <div className="mt-auto space-y-3">
@@ -837,58 +1032,137 @@ const FocusAreaCard = ({
   );
 };
 
-const SkillBandCard = ({ band, onNavigate }: { band: SkillBand; onNavigate: () => void }) => {
+const SkillBandCard = ({
+  band, onNavigate, onDrill,
+}: {
+  band: SkillBand;
+  onNavigate: () => void;
+  onDrill: (skill: string, guide: SubSkillGuide, score: number) => void;
+}) => {
+  const [expanded, setExpanded] = useState(false);
   const pct = Math.round((band.score / 9) * 100);
+
+  // Filter the raw sub-scores into displayable band-style values (0–9).
+  const subEntries = band.subScores
+    ? Object.entries(band.subScores).filter(([key, val]) => {
+        const numVal = Number(val);
+        if (isNaN(numVal) || numVal > 9.0) return false;
+        const k = key.toLowerCase();
+        return !k.includes("count") && !k.includes("total") && !k.includes("correct");
+      })
+    : [];
+
   return (
-    <button
-      onClick={onNavigate}
-      className={`text-left w-full rounded-3xl border p-5 flex flex-col transition-all duration-200 hover:scale-[1.02] hover:shadow-md bg-white dark:bg-slate-900 ${band.border} shadow-sm`}
+    <div
+      className={`text-left w-full rounded-3xl border p-5 flex flex-col transition-all duration-200 hover:shadow-md bg-white dark:bg-slate-900 ${band.border} shadow-sm`}
     >
-      <div className="flex items-center justify-between mb-4 w-full">
-        <div className={`flex items-center justify-center h-10 w-10 rounded-xl ${band.bg} ${band.color}`}>
-          {band.icon}
+      {/* Top: the band score itself is the primary nav target */}
+      <button onClick={onNavigate} className="text-left w-full">
+        <div className="flex items-center justify-between mb-4 w-full">
+          <div className={`flex items-center justify-center h-10 w-10 rounded-xl ${band.bg} ${band.color}`}>
+            {band.icon}
+          </div>
         </div>
-      </div>
-      <p className="text-3xl font-bold text-slate-800 dark:text-white tracking-tight">
-        {band.score.toFixed(1)}
-      </p>
-      <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1 mb-4">
-        {band.skill}
-      </p>
-      <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden mb-4">
-        <div
-          className={`h-full rounded-full transition-all duration-700 ${band.color.replace("text-", "bg-")}`}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-      {band.subScores && Object.keys(band.subScores).length > 0 && (
-        <div className="grid grid-cols-2 gap-2 w-full mt-auto">
-          {Object.entries(band.subScores)
-            .filter(([key, val]) => {
-              const numVal = Number(val);
-              if (isNaN(numVal) || numVal > 9.0) return false;
-              const k = key.toLowerCase();
-              return !k.includes("count") && !k.includes("total") && !k.includes("correct");
-            })
-            .map(([key, val]) => {
+        <p className="text-3xl font-bold text-slate-800 dark:text-white tracking-tight">
+          {band.score.toFixed(1)}
+        </p>
+        <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1 mb-4">
+          {band.skill}
+        </p>
+        <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden mb-4">
+          <div
+            className={`h-full rounded-full transition-all duration-700 ${band.color.replace("text-", "bg-")}`}
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      </button>
+
+      {/* Sub-score breakdown — now contextual + expandable */}
+      {subEntries.length > 0 && (
+        <div className="mt-auto w-full">
+          {/* Compact view: chip per sub-skill with a plain-English tier label */}
+          <div className="grid grid-cols-2 gap-2 w-full">
+            {subEntries.map(([key, val]) => {
               let label = key.replace(/Score/g, "").replace(/_/g, " ").replace(/([A-Z])/g, " $1").trim();
               label = label.charAt(0).toUpperCase() + label.slice(1);
               const numVal = Number(val);
+              const tier = scoreTier(numVal);
               return (
                 <div
                   key={key}
-                  className="flex justify-between items-center text-[10px] bg-slate-50 dark:bg-slate-800/50 px-2 py-1.5 rounded-lg border border-slate-100 dark:border-slate-800"
+                  className="flex flex-col gap-0.5 text-[10px] bg-slate-50 dark:bg-slate-800/50 px-2 py-1.5 rounded-lg border border-slate-100 dark:border-slate-800"
                 >
-                  <span className="text-slate-500 truncate mr-1" title={label}>{label}</span>
-                  <span className="font-bold text-slate-700 dark:text-slate-300">
-                    {!Number.isInteger(numVal) ? numVal.toFixed(1) : numVal}
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 truncate mr-1" title={label}>{label}</span>
+                    <span className="font-bold text-slate-700 dark:text-slate-300">
+                      {!Number.isInteger(numVal) ? numVal.toFixed(1) : numVal}
+                    </span>
+                  </div>
+                  <span className={cn(
+                    "font-semibold",
+                    tier.tone === "low" ? "text-amber-600 dark:text-amber-400"
+                      : tier.tone === "mid" ? "text-sky-600 dark:text-sky-400"
+                      : "text-emerald-600 dark:text-emerald-400"
+                  )}>
+                    {tier.label}
                   </span>
                 </div>
               );
             })}
+          </div>
+
+          {/* Toggle for the "what this means + next step" guidance */}
+          <button
+            onClick={() => setExpanded((e) => !e)}
+            className="mt-3 w-full flex items-center justify-center gap-1 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+            aria-expanded={expanded}
+          >
+            {expanded ? "Hide tips" : "What do these mean?"}
+            <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", expanded && "rotate-180")} />
+          </button>
+
+          {expanded && (
+            <div className="mt-3 space-y-2 animate-in fade-in slide-in-from-top-1">
+              {subEntries.map(([key, val]) => {
+                const numVal = Number(val);
+                const guide = getSubSkillGuide(key);
+                let label = key.replace(/Score/g, "").replace(/_/g, " ").replace(/([A-Z])/g, " $1").trim();
+                label = label.charAt(0).toUpperCase() + label.slice(1);
+                const needsWork = numVal < 6.0;
+                return (
+                  <div
+                    key={key}
+                    className="rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 p-2.5"
+                  >
+                    <p className="text-[11px] font-bold text-slate-700 dark:text-slate-200">
+                      {label} · {!Number.isInteger(numVal) ? numVal.toFixed(1) : numVal}
+                    </p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+                      {guide?.blurb ?? "A breakdown of this skill area."}
+                    </p>
+                    {guide && (
+                      <button
+                        onClick={() => onDrill(band.skill, guide, numVal)}
+                        className={cn(
+                          "mt-1.5 inline-flex items-center gap-1 text-[11px] font-semibold transition-colors",
+                          needsWork
+                            ? "text-amber-600 dark:text-amber-400 hover:text-amber-700"
+                            : "text-indigo-600 dark:text-indigo-400 hover:text-indigo-700"
+                        )}
+                      >
+                        {needsWork ? "Next step: " : "Sharpen it: "}
+                        {guide.drillLabel}
+                        <ArrowRight className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
-    </button>
+    </div>
   );
 };
 
@@ -906,14 +1180,17 @@ const PredictedReadinessCard = ({ readiness }: any) => {
       bg: "bg-amber-50 dark:bg-amber-500/5",
       border: "border-amber-200 dark:border-amber-500/20",
     },
-    danger: {
-      icon: <AlertTriangle className="h-5 w-5 text-red-500" />,
-      color: "text-red-600",
-      bg: "bg-red-50 dark:bg-red-500/5",
-      border: "border-red-200 dark:border-red-500/20",
+    // Formerly "danger" (red). Now a gentle, encouraging amber so a slipped
+    // schedule reads as "let's catch up" rather than "you've failed".
+    catchup: {
+      icon: <Sparkles className="h-5 w-5 text-amber-500" />,
+      color: "text-amber-600",
+      bg: "bg-amber-50 dark:bg-amber-500/5",
+      border: "border-amber-200 dark:border-amber-500/20",
     },
   };
-  const cfg = statusConfig[readiness.status as keyof typeof statusConfig];
+  const cfg =
+    statusConfig[readiness.status as keyof typeof statusConfig] ?? statusConfig["on-track"];
 
   return (
     <div className={`h-full rounded-3xl border ${cfg.bg} ${cfg.border} p-6 shadow-sm flex flex-col`}>
