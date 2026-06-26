@@ -123,6 +123,16 @@ const SKILL_ICON: Record<string, string> = {
   WRITING: '✍️', SPEAKING: '🎤', READING: '📖', LISTENING: '🎧',
 };
 
+// Per-skill SaaS accent colorways — keyed on parent skill (icons / pills / tiles).
+const SKILL_ACCENT: Record<string, { text: string; bg: string; border: string }> = {
+  LISTENING: { text: "text-teal-600",   bg: "bg-teal-50",   border: "border-teal-200" },
+  READING:   { text: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200" },
+  WRITING:   { text: "text-orange-500", bg: "bg-orange-50", border: "border-orange-200" },
+  SPEAKING:  { text: "text-rose-500",   bg: "bg-rose-50",   border: "border-rose-200" },
+};
+const accent = (skill: string) =>
+  SKILL_ACCENT[(skill ?? "").toUpperCase()] ?? { text: "text-slate-600", bg: "bg-slate-50", border: "border-slate-200" };
+
 const SKILL_ORDER: Skill[] = ["listening", "reading", "writing", "speaking"];
 const STORAGE_KEY = "tc_full_assessment_state";
 
@@ -148,7 +158,7 @@ function TopNavBar({ hideMomentum, totalMomentum }: { hideMomentum: boolean, tot
   const navigate = useNavigate();
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b-2 border-gray-900 transform-gpu">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200">
       <div className="w-full px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16">
 
@@ -157,21 +167,17 @@ function TopNavBar({ hideMomentum, totalMomentum }: { hideMomentum: boolean, tot
             {!hideMomentum && (
               <button
                 onClick={() => navigate('/student/dashboard')}
-                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg border-2 border-gray-300 font-black text-xs text-gray-600 uppercase tracking-wide hover:bg-gray-50 transition-colors flex-shrink-0"
-                style={{ boxShadow: '2px 2px 0 #D1D5DB' }}
+                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg border border-slate-200 font-medium text-xs text-slate-600 hover:bg-slate-50 transition-colors flex-shrink-0 shadow-sm"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Back</span>
               </button>
             )}
             <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
-              <div
-                className="p-1.5 sm:p-2 bg-indigo-700 border-2 border-gray-900 rounded-lg flex-shrink-0"
-                style={{ boxShadow: '3px 3px 0 #0F0F0F' }}
-              >
+              <div className="p-1.5 sm:p-2 bg-indigo-600 rounded-xl flex-shrink-0 shadow-sm">
                 <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
-              <span className="text-base sm:text-xl font-black text-gray-900 uppercase tracking-tight truncate">
+              <span className="text-base sm:text-xl font-semibold text-slate-900 tracking-tight truncate">
                 TestCrack
               </span>
             </div>
@@ -182,22 +188,16 @@ function TopNavBar({ hideMomentum, totalMomentum }: { hideMomentum: boolean, tot
             <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
 
               {/* Streak */}
-              <div
-                className="flex items-center gap-1 sm:gap-1.5 bg-orange-50 border-2 border-orange-200 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full"
-                style={{ boxShadow: '2px 2px 0 #0F0F0F' }}
-              >
+              <div className="flex items-center gap-1 sm:gap-1.5 bg-orange-50 border border-orange-200 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full shadow-sm">
                 <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-500 fill-orange-500 flex-shrink-0" />
-                <span className="font-black text-orange-600 text-xs sm:text-sm">{streak}</span>
+                <span className="font-semibold text-orange-600 text-xs sm:text-sm">{streak}</span>
                 <span className="hidden md:inline text-xs text-orange-400 font-medium">day streak</span>
               </div>
 
               {/* Momentum */}
-              <div
-                className="flex items-center gap-1 sm:gap-2 bg-indigo-500/10 border-2 border-gray-900 px-2 sm:px-4 py-1 sm:py-1.5 rounded-full"
-                style={{ boxShadow: '2px 2px 0 #0F0F0F' }}
-              >
+              <div className="flex items-center gap-1 sm:gap-2 bg-indigo-50 border border-indigo-200 px-2 sm:px-4 py-1 sm:py-1.5 rounded-full shadow-sm">
                 <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 fill-amber-400 flex-shrink-0" />
-                <span className="font-black text-gray-900 text-xs sm:text-sm">{totalMomentum}</span>
+                <span className="font-semibold text-slate-900 text-xs sm:text-sm">{totalMomentum}</span>
                 <span className="hidden md:inline text-xs text-indigo-400 font-medium">pts</span>
               </div>
 
@@ -210,6 +210,7 @@ function TopNavBar({ hideMomentum, totalMomentum }: { hideMomentum: boolean, tot
   );
 }
 
+// NOTE: CircleTimer colors intentionally untouched — threshold-based functional indicator.
 const CircleTimer: React.FC<{ timeLeft: number; total: number; size?: number }> = ({ timeLeft, total, size = 64 }) => {
   const pct = total > 0 ? timeLeft / total : 1;
   const r = (size - 8) / 2;
@@ -532,8 +533,8 @@ export default function Assessment() {
 
   if (eligibilityLoading) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-indigo-700 animate-spin" />
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
       </div>
     );
   }
@@ -549,36 +550,36 @@ export default function Assessment() {
     ];
     return (
       <div className="max-w-2xl mx-auto animate-fade-in pt-12 px-4">
-        <div className="bg-white border-2 border-gray-900 rounded-2xl p-8 sm:p-10 shadow-[8px_8px_0_#0F0F0F]">
+        <div className="bg-white border border-slate-200 rounded-2xl p-8 sm:p-10 shadow-md">
           <div className="flex flex-col items-center text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-rose-100 border-2 border-gray-900 flex items-center justify-center mb-4 shadow-[4px_4px_0_#0F0F0F]">
-              <Lock className="w-8 h-8 text-rose-600" />
+            <div className="w-16 h-16 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center mb-4">
+              <Lock className="w-8 h-8 text-rose-500" />
             </div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded border-2 border-gray-900 bg-rose-600 text-white text-xs font-black tracking-widest uppercase mb-3 shadow-[2px_2px_0_#0F0F0F]">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-rose-500 text-white text-xs font-semibold tracking-wider uppercase mb-3 shadow-sm">
               <XCircle className="w-3.5 h-3.5" /> Not Eligible Yet
             </div>
-            <h1 className="text-3xl font-black text-gray-900 tracking-tight uppercase">Internal Assessment Locked</h1>
-            <p className="text-gray-500 font-medium mt-2 max-w-md">Complete all three requirements below to unlock your Internal Assessment window.</p>
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Internal Assessment Locked</h1>
+            <p className="text-slate-500 font-medium mt-2 max-w-md">Complete all three requirements below to unlock your Internal Assessment window.</p>
           </div>
           <div className="space-y-4 mb-8">
             {conditions.map(c => (
-              <div key={c.key} className={`border-2 rounded-xl p-4 shadow-[3px_3px_0_#0F0F0F] ${c.met ? "border-emerald-400 bg-emerald-50" : "border-gray-300 bg-gray-50"}`}>
+              <div key={c.key} className={`border rounded-xl p-4 ${c.met ? "border-emerald-200 bg-emerald-50" : "border-slate-200 bg-slate-50"}`}>
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    {c.met ? <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" /> : <div className="w-5 h-5 rounded-full border-2 border-gray-400 flex-shrink-0" />}
-                    <span className="font-black text-sm text-gray-800 uppercase tracking-wide">{c.label}</span>
+                    {c.met ? <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" /> : <div className="w-5 h-5 rounded-full border-2 border-slate-300 flex-shrink-0" />}
+                    <span className="font-semibold text-sm text-slate-800 uppercase tracking-wide">{c.label}</span>
                   </div>
-                  <span className={`font-black text-sm tabular-nums ${c.met ? "text-emerald-700" : "text-gray-500"}`}>{c.value}</span>
+                  <span className={`font-semibold text-sm tabular-nums ${c.met ? "text-emerald-700" : "text-slate-500"}`}>{c.value}</span>
                 </div>
-                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
                   <div className={`h-full rounded-full transition-all duration-500 ${c.met ? "bg-emerald-500" : "bg-indigo-500"}`} style={{ width: `${c.pct}%` }} />
                 </div>
               </div>
             ))}
           </div>
           {iaStatus!.reasons.length > 0 && (
-            <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-4 mb-8 shadow-[3px_3px_0_#F59E0B]">
-              <p className="text-xs font-black text-amber-700 uppercase tracking-widest mb-2">What to do next</p>
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-8">
+              <p className="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-2">What to do next</p>
               <ul className="space-y-1.5">
                 {iaStatus!.reasons.map(r => (
                   <li key={r.key} className="flex items-start gap-2 text-sm text-amber-900 font-medium"><span className="mt-0.5 flex-shrink-0">•</span>{r.message}</li>
@@ -586,7 +587,7 @@ export default function Assessment() {
               </ul>
             </div>
           )}
-          <button onClick={() => navigate('/student/dashboard')} className="w-full bg-gray-900 hover:bg-gray-800 text-white font-black text-sm uppercase tracking-wide py-4 rounded-xl border-2 border-gray-900 transition-all shadow-[4px_4px_0_#4338CA]">
+          <button onClick={() => navigate('/student/dashboard')} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-none font-semibold text-sm uppercase tracking-wide py-4 rounded-xl transition-all shadow-sm hover:shadow-md">
             Back to Dashboard
           </button>
         </div>
@@ -601,40 +602,40 @@ export default function Assessment() {
     const eligible = iaStatus!.dcs_eligible;
     return (
       <div className="max-w-2xl mx-auto animate-fade-in pt-12 px-4">
-        <div className="bg-white border-2 border-gray-900 rounded-2xl p-8 sm:p-10 shadow-[8px_8px_0_#0F0F0F]">
+        <div className="bg-white border border-slate-200 rounded-2xl p-8 sm:p-10 shadow-md">
           {/* Header */}
           <div className="flex flex-col items-center text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-indigo-100 border-2 border-gray-900 flex items-center justify-center mb-4 shadow-[4px_4px_0_#0F0F0F]">
-              <CalendarClock className="w-8 h-8 text-indigo-700" />
+            <div className="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center mb-4">
+              <CalendarClock className="w-8 h-8 text-indigo-600" />
             </div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded border-2 border-gray-900 bg-indigo-700 text-white text-xs font-black tracking-widest uppercase mb-3 shadow-[2px_2px_0_#0F0F0F]">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-indigo-600 text-white text-xs font-semibold tracking-wider uppercase mb-3 shadow-sm">
               <Zap className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> Internal Assessment
             </div>
-            <h1 className="text-3xl font-black text-gray-900 tracking-tight uppercase mb-2">Next Assessment Scheduled</h1>
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight mb-2">Next Assessment Scheduled</h1>
             {next ? (
-              <p className="text-gray-500 font-medium">
+              <p className="text-slate-500 font-medium">
                 Your next Internal Assessment opens on{" "}
-                <span className="font-black text-indigo-700">{next.date_formatted}</span>
+                <span className="font-semibold text-indigo-600">{next.date_formatted}</span>
                 {next.days_away === 1 ? " — tomorrow!" : next.days_away === 0 ? " — today!" : ` — in ${next.days_away} days`}
               </p>
             ) : (
-              <p className="text-gray-500 font-medium">No upcoming assessment slot found.</p>
+              <p className="text-slate-500 font-medium">No upcoming assessment slot found.</p>
             )}
           </div>
 
           {/* DCS status block */}
-          <div className={`border-2 rounded-xl p-5 mb-6 shadow-[3px_3px_0_#0F0F0F] ${eligible ? "border-emerald-400 bg-emerald-50" : "border-rose-300 bg-rose-50"}`}>
+          <div className={`border rounded-xl p-5 mb-6 ${eligible ? "border-emerald-200 bg-emerald-50" : "border-rose-200 bg-rose-50"}`}>
             <div className="flex items-center justify-between mb-3">
-              <span className="font-black text-sm uppercase tracking-wide text-gray-800">Your Avg DCS Score</span>
-              <span className={`text-2xl font-black tabular-nums ${eligible ? "text-emerald-700" : "text-rose-600"}`}>{avg_dcs}%</span>
+              <span className="font-semibold text-sm uppercase tracking-wide text-slate-800">Your Avg DCS Score</span>
+              <span className={`text-2xl font-bold tabular-nums ${eligible ? "text-emerald-700" : "text-rose-600"}`}>{avg_dcs}%</span>
             </div>
-            <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden mb-3">
+            <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden mb-3">
               <div
                 className={`h-full rounded-full transition-all duration-700 ${eligible ? "bg-emerald-500" : "bg-rose-500"}`}
                 style={{ width: `${Math.min(100, avg_dcs)}%` }}
               />
             </div>
-            <p className={`text-sm font-semibold ${eligible ? "text-emerald-700" : "text-rose-700"}`}>
+            <p className={`text-sm font-medium ${eligible ? "text-emerald-700" : "text-rose-700"}`}>
               {eligible
                 ? "✓ Maintain your DCS score to stay eligible for your next IA."
                 : "✗ Improve your DCS score to be eligible — need 40% or above."}
@@ -643,19 +644,19 @@ export default function Assessment() {
 
           {/* Next date callout */}
           {next && (
-            <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-4 mb-6 flex items-center gap-4">
-              <div className="bg-indigo-700 border-2 border-gray-900 rounded-xl w-14 h-14 flex flex-col items-center justify-center flex-shrink-0 shadow-[3px_3px_0_#0F0F0F]">
-                <span className="text-white font-black text-xl leading-none">{next.date.split('-')[2]}</span>
-                <span className="text-indigo-200 text-[9px] font-black uppercase tracking-widest">{next.date_formatted.split(' ').slice(-1)[0]}</span>
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-6 flex items-center gap-4">
+              <div className="bg-indigo-600 rounded-xl w-14 h-14 flex flex-col items-center justify-center flex-shrink-0 shadow-sm">
+                <span className="text-white font-bold text-xl leading-none">{next.date.split('-')[2]}</span>
+                <span className="text-indigo-200 text-[9px] font-semibold uppercase tracking-wider">{next.date_formatted.split(' ').slice(-1)[0]}</span>
               </div>
               <div>
-                <p className="font-black text-gray-900 text-sm uppercase tracking-wide">IA #{next.number} Window Opens</p>
-                <p className="text-gray-500 text-xs font-medium mt-0.5">{next.date_formatted} · {next.days_away === 1 ? "1 day away" : `${next.days_away} days away`}</p>
+                <p className="font-semibold text-slate-900 text-sm uppercase tracking-wide">IA #{next.number} Window Opens</p>
+                <p className="text-slate-500 text-xs font-medium mt-0.5">{next.date_formatted} · {next.days_away === 1 ? "1 day away" : `${next.days_away} days away`}</p>
               </div>
             </div>
           )}
 
-          <button onClick={() => navigate('/student/dashboard')} className="w-full bg-gray-900 hover:bg-gray-800 text-white font-black text-sm uppercase tracking-wide py-4 rounded-xl border-2 border-gray-900 transition-all shadow-[4px_4px_0_#4338CA]">
+          <button onClick={() => navigate('/student/dashboard')} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-none font-semibold text-sm uppercase tracking-wide py-4 rounded-xl transition-all shadow-sm hover:shadow-md">
             Back to Dashboard
           </button>
         </div>
@@ -669,33 +670,33 @@ export default function Assessment() {
     const num     = iaStatus!.current_ia_number;
     return (
       <div className="max-w-2xl mx-auto animate-fade-in pt-12 px-4">
-        <div className="bg-white border-2 border-gray-900 rounded-2xl p-8 sm:p-10 text-center shadow-[8px_8px_0_#0F0F0F]">
-          <div className="w-16 h-16 rounded-2xl bg-rose-100 border-2 border-gray-900 flex items-center justify-center mx-auto mb-4 shadow-[4px_4px_0_#0F0F0F]">
-            <AlertCircle className="w-8 h-8 text-rose-600" />
+        <div className="bg-white border border-slate-200 rounded-2xl p-8 sm:p-10 text-center shadow-md">
+          <div className="w-16 h-16 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-8 h-8 text-rose-500" />
           </div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded border-2 border-gray-900 bg-rose-600 text-white text-xs font-black tracking-widest uppercase mb-4 shadow-[2px_2px_0_#0F0F0F]">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-rose-500 text-white text-xs font-semibold tracking-wider uppercase mb-4 shadow-sm">
             IA #{num} Window · Today
           </div>
-          <h1 className="text-3xl font-black text-gray-900 uppercase tracking-tight mb-3">Improve Your DCS to Take This IA</h1>
-          <p className="text-gray-500 font-medium mb-8 max-w-md mx-auto">
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight mb-3">Improve Your DCS to Take This IA</h1>
+          <p className="text-slate-500 font-medium mb-8 max-w-md mx-auto">
             Today is your Internal Assessment window but your average accuracy is below the required threshold. Complete more drills today to bring it up.
           </p>
           {/* DCS meter */}
-          <div className="bg-rose-50 border-2 border-rose-300 rounded-xl p-5 mb-8 text-left shadow-[3px_3px_0_#F87171]">
+          <div className="bg-rose-50 border border-rose-200 rounded-xl p-5 mb-8 text-left">
             <div className="flex items-center justify-between mb-2">
-              <span className="font-black text-sm uppercase tracking-wide text-gray-800">Current Avg DCS</span>
-              <span className="text-2xl font-black text-rose-600 tabular-nums">{avg_dcs}%</span>
+              <span className="font-semibold text-sm uppercase tracking-wide text-slate-800">Current Avg DCS</span>
+              <span className="text-2xl font-bold text-rose-600 tabular-nums">{avg_dcs}%</span>
             </div>
             <div className="w-full h-3 bg-rose-100 rounded-full overflow-hidden mb-2">
               <div className="h-full rounded-full bg-rose-500 transition-all duration-700" style={{ width: `${Math.min(100, avg_dcs)}%` }} />
             </div>
-            <p className="text-xs font-bold text-rose-700">Need 40% — you're {40 - avg_dcs}% short. Complete drills to improve your score.</p>
+            <p className="text-xs font-medium text-rose-700">Need 40% — you're {40 - avg_dcs}% short. Complete drills to improve your score.</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
-            <button onClick={() => navigate('/student/dashboard')} className="flex-1 px-6 py-4 rounded-xl border-2 border-gray-300 font-black text-gray-500 hover:bg-gray-50 uppercase tracking-wide transition-colors">
+            <button onClick={() => navigate('/student/dashboard')} className="flex-1 px-6 py-4 rounded-xl border border-slate-200 font-medium text-slate-500 hover:bg-slate-50 uppercase tracking-wide transition-colors">
               Dashboard
             </button>
-            <button onClick={() => navigate('/student/drill')} className="flex-1 bg-indigo-700 hover:bg-indigo-600 text-white font-black text-sm uppercase tracking-wide py-4 rounded-xl border-2 border-gray-900 transition-all shadow-[4px_4px_0_#0F0F0F]">
+            <button onClick={() => navigate('/student/drill')} className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white border-none font-semibold text-sm uppercase tracking-wide py-4 rounded-xl transition-all shadow-sm hover:shadow-md">
               Do a Drill Now →
             </button>
           </div>
@@ -718,21 +719,21 @@ export default function Assessment() {
       <div className="max-w-3xl mx-auto animate-fade-in pt-8 pb-24 px-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tight">IA #{iaNumber} Complete</h2>
+          <h2 className="text-3xl font-bold text-slate-900 tracking-tight">IA #{iaNumber} Complete</h2>
           <button
             onClick={() => navigate('/student/dashboard')}
-            className="px-6 py-3 bg-gray-900 text-white rounded-xl font-black text-sm uppercase tracking-wide hover:bg-gray-800 shadow-[4px_4px_0_#4338CA]">
+            className="px-6 py-3 bg-indigo-600 text-white border-none rounded-xl font-semibold text-sm uppercase tracking-wide hover:bg-indigo-700 shadow-sm hover:shadow-md transition-all">
             Dashboard
           </button>
         </div>
 
         {/* Completion banner */}
-        <div className="bg-emerald-600 border-2 border-gray-900 rounded-2xl p-8 mb-6 text-center shadow-[8px_8px_0_#0F0F0F] relative overflow-hidden">
+        <div className="bg-emerald-600 rounded-2xl p-8 mb-6 text-center shadow-md relative overflow-hidden">
           <div className="absolute -top-8 -right-8 text-[140px] opacity-10 pointer-events-none select-none">✓</div>
-          <div className="inline-flex items-center gap-2 bg-white text-emerald-900 px-5 py-2 rounded-lg font-black uppercase shadow-[3px_3px_0_#0F0F0F] mb-4">
+          <div className="inline-flex items-center gap-2 bg-white text-emerald-900 px-5 py-2 rounded-lg font-semibold uppercase shadow-sm mb-4">
             <CheckCircle2 className="w-5 h-5 text-emerald-500" /> Assessment Completed Today
           </div>
-          <p className="text-emerald-100 font-bold text-lg mb-2">
+          <p className="text-emerald-100 font-semibold text-lg mb-2">
             Submitted earlier today
           </p>
           <p className="text-emerald-200 font-medium">
@@ -742,9 +743,9 @@ export default function Assessment() {
 
         {/* Momentum earned */}
         {momentumAwarded > 0 && (
-          <div className="bg-indigo-700 border-2 border-gray-900 rounded-2xl p-6 mb-6 text-center shadow-[6px_6px_0_#0F0F0F]">
-            <p className="text-indigo-200 font-black uppercase tracking-widest mb-1 text-sm">Momentum Earned</p>
-            <div className="text-5xl font-black text-amber-400">+{momentumAwarded}</div>
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-6 text-center shadow-sm">
+            <p className="text-slate-400 font-semibold uppercase tracking-wider mb-1 text-sm">Momentum Earned</p>
+            <div className="text-5xl font-bold text-indigo-600">+{momentumAwarded}</div>
           </div>
         )}
 
@@ -758,53 +759,54 @@ export default function Assessment() {
               const deltaText = hasDelta
                 ? (isUp ? `+${s.delta!.toFixed(1)}` : isDown ? s.delta!.toFixed(1) : '±0.0')
                 : null;
+              const a = accent(s.skill);
 
               return (
-                <div key={i} className="bg-white border-2 border-gray-900 rounded-xl p-6 shadow-[4px_4px_0_#0F0F0F]">
+                <div key={i} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
                   {/* Sub-skill header */}
                   <div className="flex items-center gap-3 mb-4">
-                    <span className="text-2xl">{SKILL_ICON[s.skill] ?? '📝'}</span>
+                    <span className={`w-10 h-10 rounded-lg ${a.bg} border ${a.border} flex items-center justify-center text-2xl`}>{SKILL_ICON[s.skill] ?? '📝'}</span>
                     <div>
-                      <p className="font-black text-gray-900 text-sm uppercase tracking-wide">{SKILL_LABEL[s.sub_skill] ?? s.sub_skill}</p>
-                      <p className="text-gray-400 text-[10px] font-bold uppercase">{s.skill}{s.ai_graded ? ' · AI Graded' : ''}</p>
+                      <p className="font-semibold text-slate-900 text-sm uppercase tracking-wide">{SKILL_LABEL[s.sub_skill] ?? s.sub_skill}</p>
+                      <p className="text-slate-400 text-[10px] font-medium uppercase">{s.skill}{s.ai_graded ? ' · AI Graded' : ''}</p>
                     </div>
                   </div>
 
                   {/* Band score + delta */}
                   <div className="flex items-end gap-4">
-                    <span className="text-5xl font-black text-gray-900 leading-none">
+                    <span className="text-5xl font-bold text-slate-900 leading-none">
                       {s.band > 0 ? s.band.toFixed(1) : '—'}
                     </span>
                     {hasDelta && (
                       <div className="mb-1">
-                        <span className={`text-lg font-black ${isUp ? 'text-emerald-600' : isDown ? 'text-rose-600' : 'text-gray-500'}`}>
+                        <span className={`text-lg font-bold ${isUp ? 'text-emerald-600' : isDown ? 'text-rose-600' : 'text-slate-500'}`}>
                           {deltaText}
                         </span>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase">{comparisonLabel}</p>
+                        <p className="text-[10px] text-slate-400 font-medium uppercase">{comparisonLabel}</p>
                       </div>
                     )}
                   </div>
 
                   {/* Previous band */}
                   {s.previous_band !== null && s.previous_band !== undefined && (
-                    <p className="text-xs text-gray-400 font-medium mt-2">
-                      Previous: <span className="font-black">{s.previous_band.toFixed(1)}</span>
-                      {isUp && <span className="text-emerald-600 ml-1 font-black">↑ Improved</span>}
-                      {isDown && <span className="text-rose-600 ml-1 font-black">↓ Dropped</span>}
+                    <p className="text-xs text-slate-400 font-medium mt-2">
+                      Previous: <span className="font-semibold">{s.previous_band.toFixed(1)}</span>
+                      {isUp && <span className="text-emerald-600 ml-1 font-semibold">↑ Improved</span>}
+                      {isDown && <span className="text-rose-600 ml-1 font-semibold">↓ Dropped</span>}
                     </p>
                   )}
 
                   {/* MCQ score (if present) */}
                   {s.correct != null && s.total != null && s.total > 0 && (
-                    <p className="text-xs text-gray-400 font-bold mt-1">{s.correct} / {s.total} MCQ correct</p>
+                    <p className="text-xs text-slate-400 font-medium mt-1">{s.correct} / {s.total} MCQ correct</p>
                   )}
 
                   {/* Delta badge */}
                   {hasDelta && (
-                    <div className={`mt-3 inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide px-2.5 py-1 rounded border-2 ${
-                      isUp   ? 'bg-emerald-50 text-emerald-700 border-emerald-300' :
-                      isDown ? 'bg-rose-50 text-rose-700 border-rose-300' :
-                               'bg-gray-100 text-gray-600 border-gray-300'
+                    <div className={`mt-3 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide px-2.5 py-1 rounded-lg border ${
+                      isUp   ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                      isDown ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                               'bg-slate-100 text-slate-600 border-slate-200'
                     }`}>
                       {isUp ? '↑ Improved' : isDown ? '↓ Dropped' : '● Maintained'}
                     </div>
@@ -817,10 +819,10 @@ export default function Assessment() {
 
         {/* Next IA info */}
         {iaStatus!.next_ia && (
-          <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-6 text-center">
-            <p className="text-gray-500 font-medium mb-2">Next Internal Assessment</p>
-            <p className="text-2xl font-black text-gray-900">{iaStatus!.next_ia.date_formatted}</p>
-            <p className="text-sm text-gray-400 font-bold mt-1">
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center">
+            <p className="text-slate-500 font-medium mb-2">Next Internal Assessment</p>
+            <p className="text-2xl font-bold text-slate-900">{iaStatus!.next_ia.date_formatted}</p>
+            <p className="text-sm text-slate-400 font-medium mt-1">
               {iaStatus!.next_ia.days_away === 1 ? 'Tomorrow' : `In ${iaStatus!.next_ia.days_away} days`}
             </p>
           </div>
@@ -832,72 +834,78 @@ export default function Assessment() {
   // ── STATE 4: IA day + all conditions met → Start Test ─────────────────────
   const renderGate = () => (
     <div className="max-w-2xl mx-auto animate-fade-in pt-12 px-4">
-      <div className="bg-white border-2 border-gray-900 rounded-2xl p-8 sm:p-12 text-center shadow-[8px_8px_0_#0F0F0F]">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded border-2 border-gray-900 bg-indigo-700 text-white text-xs font-black tracking-widest uppercase mb-8 shadow-[3px_3px_0_#0F0F0F]">
+      <div className="bg-white border border-slate-200 rounded-2xl p-8 sm:p-12 text-center shadow-md">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold tracking-wider uppercase mb-8 shadow-sm">
           <Zap className="w-4 h-4 fill-amber-400 text-amber-400" /> Internal Assessment #{iaStatus?.current_ia_number ?? ""}
         </div>
         {/* DCS badge */}
         {iaStatus && (
           <div className="flex justify-end -mt-4 mb-2">
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-gray-200 bg-gray-50 text-xs font-black text-gray-500 uppercase tracking-wide">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wide">
               Avg DCS <span className="text-indigo-600">{iaStatus.avg_dcs}%</span>
             </span>
           </div>
         )}
         {/* Target sub-skills preview */}
         {iaStatus?.suggested_subskills && iaStatus.suggested_subskills.length === 2 && (
-          <div className="mb-8 bg-indigo-50 border-2 border-gray-200 rounded-xl p-4 text-left shadow-[3px_3px_0_#E5E7EB]">
-            <p className="text-[10px] font-black text-indigo-700 uppercase tracking-widest mb-3">Today's Focus Areas</p>
+          <div className="mb-8 bg-indigo-50 border border-indigo-200 rounded-xl p-4 text-left">
+            <p className="text-[10px] font-semibold text-indigo-700 uppercase tracking-wider mb-3">Today's Focus Areas</p>
             <div className="grid grid-cols-2 gap-3">
-              {iaStatus.suggested_subskills.map((s, i) => (
-                <div key={i} className="flex items-center gap-2 bg-white border-2 border-gray-900 rounded-xl px-3 py-2.5 shadow-[2px_2px_0_#0F0F0F]">
-                  <span className="text-xl">{SKILL_ICON[s.skill] ?? '📝'}</span>
-                  <div>
-                    <p className="font-black text-gray-900 text-xs uppercase tracking-wide">{SKILL_LABEL[s.sub_skill] ?? s.sub_skill}</p>
-                    <p className="text-gray-400 text-[10px] font-bold">{s.skill}</p>
+              {iaStatus.suggested_subskills.map((s, i) => {
+                const a = accent(s.skill);
+                return (
+                  <div key={i} className={`flex items-center gap-2 bg-white border ${a.border} rounded-xl px-3 py-2.5 shadow-sm`}>
+                    <span className="text-xl">{SKILL_ICON[s.skill] ?? '📝'}</span>
+                    <div>
+                      <p className="font-semibold text-slate-900 text-xs uppercase tracking-wide">{SKILL_LABEL[s.sub_skill] ?? s.sub_skill}</p>
+                      <p className={`text-[10px] font-medium ${a.text}`}>{s.skill}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
         
-        <h1 className="text-4xl sm:text-5xl font-black text-gray-900 tracking-tight uppercase mb-6">
-          Ready to test your <span className="text-indigo-700">Limits?</span>
+        <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 tracking-tight mb-6">
+          Ready to test your <span className="text-indigo-600">Limits?</span>
         </h1>
         
-        <p className="text-gray-600 leading-relaxed font-medium mb-10 max-w-lg mx-auto">
+        <p className="text-slate-600 leading-relaxed font-medium mb-10 max-w-lg mx-auto">
           This is a continuous, full-length IELTS simulation. You will complete all four sections back-to-back. Each section contains 10 sub-skill targeted questions with a strict 20-minute timer.
         </p>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
-          {SKILL_ORDER.map((s, i) => (
-            <div key={s} className="bg-gray-50 border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-2">
-              <span className="text-3xl">{SKILL_ICONS[s]}</span>
-              <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Part {i + 1}</span>
-            </div>
-          ))}
+          {SKILL_ORDER.map((s, i) => {
+            const a = accent(s);
+            return (
+              <div key={s} className={`${a.bg} border ${a.border} rounded-xl p-4 flex flex-col items-center justify-center gap-2`}>
+                <span className="text-3xl">{SKILL_ICONS[s]}</span>
+                <span className={`text-[10px] font-semibold uppercase tracking-wider ${a.text}`}>Part {i + 1}</span>
+              </div>
+            );
+          })}
         </div>
 
         {/* Window-closing-soon error banner */}
         {gateError && (
-          <div className="mb-4 flex items-start gap-3 bg-amber-50 border-2 border-amber-300 rounded-xl px-4 py-3">
+          <div className="mb-4 flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
             <span className="text-amber-500 text-lg flex-shrink-0">⚠️</span>
             <div>
-              <p className="font-black text-amber-800 text-sm uppercase tracking-wide mb-0.5">Window Closing Soon</p>
+              <p className="font-semibold text-amber-800 text-sm uppercase tracking-wide mb-0.5">Window Closing Soon</p>
               <p className="text-amber-700 text-xs font-medium leading-relaxed">{gateError}</p>
             </div>
           </div>
         )}
 
         <div className="flex flex-col sm:flex-row gap-4">
-          <button onClick={() => navigate(-1)} className="px-6 py-4 rounded-xl border-2 border-gray-300 font-black text-gray-500 hover:bg-gray-50 hover:border-gray-400 transition-colors uppercase tracking-wide">
+          <button onClick={() => navigate(-1)} className="px-6 py-4 rounded-xl border border-slate-200 font-medium text-slate-500 hover:bg-slate-50 transition-colors uppercase tracking-wide">
             Cancel
           </button>
           <button
             onClick={() => { setGateError(null); void beginFullTest(); }}
             disabled={isLoadingQuestions}
-            className="flex-1 bg-indigo-700 hover:bg-indigo-600 disabled:opacity-60 text-white font-black text-base uppercase tracking-wide rounded-xl border-2 border-gray-900 transition-all neo-btn shadow-[4px_4px_0_#0F0F0F] flex items-center justify-center gap-2"
+            className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white border-none font-semibold text-base uppercase tracking-wide rounded-xl transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
           >
             {isLoadingQuestions
             ? <><Loader2 className="w-4 h-4 animate-spin" /> Loading…</>
@@ -914,29 +922,29 @@ export default function Assessment() {
     const nextSec  = iaSections?.[currentSectionIdx + 1];
     return (
       <div className="min-h-[70vh] flex items-center justify-center animate-fade-in px-4 pt-12">
-        <div className="max-w-lg w-full bg-white border-2 border-gray-900 rounded-2xl p-10 text-center shadow-[8px_8px_0_#0F0F0F]">
-          <div className="w-20 h-20 bg-emerald-100 border-2 border-emerald-500 rounded-full flex items-center justify-center text-4xl mx-auto mb-6 shadow-[4px_4px_0_#10B981]">
+        <div className="max-w-lg w-full bg-white border border-slate-200 rounded-2xl p-10 text-center shadow-md">
+          <div className="w-20 h-20 bg-emerald-50 border border-emerald-200 rounded-full flex items-center justify-center text-4xl mx-auto mb-6">
             <CheckCircle2 className="w-10 h-10 text-emerald-600" />
           </div>
-          <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tight mb-2">
+          <h2 className="text-3xl font-bold text-slate-900 tracking-tight mb-2">
             Section {currentSectionIdx + 1} Complete
           </h2>
-          <p className="text-gray-500 font-medium mb-10">
+          <p className="text-slate-500 font-medium mb-10">
             Great work on {SKILL_LABEL[doneSec?.sub_skill ?? ''] ?? doneSec?.sub_skill}. Take a breath — the next section has its own 20-minute timer.
           </p>
           {nextSec && (
-            <div className="bg-indigo-50 border-2 border-gray-900 rounded-xl p-6 mb-8 text-left shadow-[4px_4px_0_#0F0F0F]">
-              <p className="text-xs font-black text-indigo-700 uppercase tracking-widest mb-1">Up Next</p>
+            <div className={`${accent(nextSec.skill).bg} border ${accent(nextSec.skill).border} rounded-xl p-6 mb-8 text-left shadow-sm`}>
+              <p className={`text-xs font-semibold uppercase tracking-wider mb-1 ${accent(nextSec.skill).text}`}>Up Next</p>
               <div className="flex items-center gap-3">
                 <span className="text-3xl">{SKILL_ICON[nextSec.skill] ?? '📝'}</span>
                 <div>
-                  <h3 className="text-xl font-black text-gray-900 uppercase tracking-wide">{SKILL_LABEL[nextSec.sub_skill] ?? nextSec.sub_skill}</h3>
-                  <p className="text-sm text-gray-500">{nextSec.questions.length} questions</p>
+                  <h3 className="text-xl font-semibold text-slate-900 uppercase tracking-wide">{SKILL_LABEL[nextSec.sub_skill] ?? nextSec.sub_skill}</h3>
+                  <p className="text-sm text-slate-500">{nextSec.questions.length} questions</p>
                 </div>
               </div>
             </div>
           )}
-          <button onClick={advanceToNextSection} className="w-full bg-gray-900 hover:bg-gray-800 text-white font-black text-lg py-4 rounded-xl border-2 border-gray-900 transition-all neo-btn shadow-[5px_5px_0_#4338CA]">
+          <button onClick={advanceToNextSection} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-none font-semibold text-lg py-4 rounded-xl transition-all shadow-sm hover:shadow-md">
             Continue to Section {currentSectionIdx + 2} <ArrowRight className="w-5 h-5 inline ml-1" />
           </button>
         </div>
@@ -947,11 +955,11 @@ export default function Assessment() {
   const renderScoring = () => (
     <div className="flex flex-col items-center justify-center min-h-[70vh] animate-fade-in">
       <div className="relative mb-8">
-        <div className="w-24 h-24 rounded-full border-[6px] border-gray-200 border-t-indigo-700 animate-spin" />
+        <div className="w-24 h-24 rounded-full border-[6px] border-slate-200 border-t-indigo-600 animate-spin" />
         <span className="absolute inset-0 flex items-center justify-center text-4xl">🧠</span>
       </div>
-      <h2 className="text-3xl font-black text-gray-900 uppercase tracking-wide mb-3">Scoring Your Assessment</h2>
-      <p className="text-gray-500 font-medium text-lg">Calculating your band scores and updating your competency matrix.</p>
+      <h2 className="text-3xl font-bold text-slate-900 tracking-tight mb-3">Scoring Your Assessment</h2>
+      <p className="text-slate-500 font-medium text-lg">Calculating your band scores and updating your competency matrix.</p>
     </div>
   );
 
@@ -976,27 +984,27 @@ export default function Assessment() {
 
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tight">IA Complete</h2>
+          <h2 className="text-3xl font-bold text-slate-900 tracking-tight">IA Complete</h2>
           <button
             onClick={() => { localStorage.removeItem(STORAGE_KEY); navigate('/student/dashboard', { state: { drillCompleted: true } }); }}
-            className="px-6 py-3 bg-gray-900 text-white rounded-xl font-black text-sm uppercase tracking-wide hover:bg-gray-800 shadow-[4px_4px_0_#4338CA]">
+            className="px-6 py-3 bg-indigo-600 text-white border-none rounded-xl font-semibold text-sm uppercase tracking-wide hover:bg-indigo-700 shadow-sm hover:shadow-md transition-all">
             Dashboard
           </button>
         </div>
 
         {/* Momentum banner */}
-        <div className="bg-indigo-700 border-2 border-gray-900 rounded-2xl p-8 mb-6 text-center shadow-[8px_8px_0_#0F0F0F] relative overflow-hidden">
+        <div className="bg-indigo-600 rounded-2xl p-8 mb-6 text-center shadow-md relative overflow-hidden">
           <div className="absolute -top-8 -right-8 text-[140px] opacity-10 pointer-events-none select-none">⚡</div>
-          <p className="text-indigo-200 font-black uppercase tracking-widest mb-1">Momentum Earned</p>
-          <div className="text-7xl font-black text-amber-400">+{momentumEarned}</div>
-          <div className="mt-4 inline-flex items-center gap-2 bg-white text-indigo-900 px-5 py-2 rounded-lg font-black uppercase shadow-[3px_3px_0_#0F0F0F]">
+          <p className="text-indigo-200 font-semibold uppercase tracking-wider mb-1">Momentum Earned</p>
+          <div className="text-7xl font-bold text-white">+{momentumEarned}</div>
+          <div className="mt-4 inline-flex items-center gap-2 bg-white text-indigo-900 px-5 py-2 rounded-lg font-semibold uppercase shadow-sm">
             <CheckCircle2 className="w-5 h-5 text-emerald-500" /> Assessment Submitted
           </div>
           {/* Breakdown pills */}
           {breakdown.length > 0 && (
             <div className="flex flex-wrap justify-center gap-2 mt-5">
               {breakdown.map((b, i) => (
-                <span key={i} className="bg-indigo-600 text-indigo-100 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-indigo-500">
+                <span key={i} className="bg-indigo-500 text-indigo-100 text-[10px] font-semibold uppercase tracking-wider px-3 py-1 rounded-full border border-indigo-400">
                   +{b.points} {b.reason}
                 </span>
               ))}
@@ -1024,45 +1032,46 @@ export default function Assessment() {
               const matrixUp   = matrixDelta !== null && matrixDelta > 0;
               const matrixDown = matrixDelta !== null && matrixDelta < 0;
               const smoothingVisible = hasMatrix && Math.abs(s.new_matrix_band! - s.band) >= 0.5;
+              const a = accent(s.skill);
 
               return (
-                <div key={i} className="bg-white border-2 border-gray-900 rounded-xl p-6 shadow-[4px_4px_0_#0F0F0F]">
+                <div key={i} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
 
                   {/* Sub-skill header */}
                   <div className="flex items-center gap-3 mb-4">
-                    <span className="text-2xl">{SKILL_ICON[s.skill] ?? '📝'}</span>
+                    <span className={`w-10 h-10 rounded-lg ${a.bg} border ${a.border} flex items-center justify-center text-2xl`}>{SKILL_ICON[s.skill] ?? '📝'}</span>
                     <div>
-                      <p className="font-black text-gray-900 text-sm uppercase tracking-wide">{SKILL_LABEL[s.sub_skill] ?? s.sub_skill}</p>
-                      <p className="text-gray-400 text-[10px] font-bold uppercase">{s.skill}{s.ai_graded ? ' · AI Graded' : ''}</p>
+                      <p className="font-semibold text-slate-900 text-sm uppercase tracking-wide">{SKILL_LABEL[s.sub_skill] ?? s.sub_skill}</p>
+                      <p className="text-slate-400 text-[10px] font-medium uppercase">{s.skill}{s.ai_graded ? ' · AI Graded' : ''}</p>
                     </div>
                   </div>
 
                   {/* ── IA Score (this session) ── */}
-                  <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-0.5">IA Score</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-0.5">IA Score</p>
                   <div className="flex items-end gap-4 mb-3">
-                    <span className="text-5xl font-black text-gray-900 leading-none">
+                    <span className="text-5xl font-bold text-slate-900 leading-none">
                       {s.band > 0 ? s.band.toFixed(1) : '—'}
                     </span>
                     {hasDelta && (
                       <div className="mb-1">
-                        <span className={`text-lg font-black ${isUp ? 'text-emerald-600' : isDown ? 'text-rose-600' : 'text-gray-500'}`}>
+                        <span className={`text-lg font-bold ${isUp ? 'text-emerald-600' : isDown ? 'text-rose-600' : 'text-slate-500'}`}>
                           {deltaText}
                         </span>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase">{comparisonLabel}</p>
+                        <p className="text-[10px] text-slate-400 font-medium uppercase">{comparisonLabel}</p>
                       </div>
                     )}
                   </div>
 
                   {/* MCQ correct count */}
                   {s.correct != null && s.total != null && s.total > 0 && (
-                    <p className="text-xs text-gray-400 font-bold mb-3">{s.correct} / {s.total} MCQ correct</p>
+                    <p className="text-xs text-slate-400 font-medium mb-3">{s.correct} / {s.total} MCQ correct</p>
                   )}
 
                   {/* ── AI Feedback (Writing/Speaking prompts only) ── */}
                   {s.ai_graded && s.ai_feedback?.rationale && (
-                    <div className="border-t border-gray-100 pt-3 mb-3">
-                      <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5">AI Feedback</p>
-                      <p className="text-xs text-gray-600 font-medium leading-relaxed">
+                    <div className="border-t border-slate-100 pt-3 mb-3">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">AI Feedback</p>
+                      <p className="text-xs text-slate-600 font-medium leading-relaxed">
                         &ldquo;{s.ai_feedback.rationale}&rdquo;
                       </p>
 
@@ -1071,10 +1080,10 @@ export default function Assessment() {
                         <div className="mt-2 relative">
                           <button
                             onClick={() => setExpandedFeedbackIdx(prev => prev === i ? null : i)}
-                            className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border transition-all ${
+                            className={`inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1.5 rounded-lg border transition-all ${
                               expandedFeedbackIdx === i
-                                ? 'bg-indigo-700 text-white border-indigo-700'
-                                : 'bg-white text-indigo-700 border-indigo-300 hover:bg-indigo-50'
+                                ? 'bg-indigo-600 text-white border-indigo-600'
+                                : 'bg-white text-indigo-600 border-indigo-200 hover:bg-indigo-50'
                             }`}
                           >
                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -1088,18 +1097,18 @@ export default function Assessment() {
 
                           {/* Popover panel — appears inline below the button */}
                           {expandedFeedbackIdx === i && (
-                            <div className="mt-2 bg-white border-2 border-indigo-200 rounded-xl shadow-[0_4px_20px_rgba(99,102,241,0.15)] overflow-hidden">
+                            <div className="mt-2 bg-white border border-indigo-200 rounded-xl shadow-sm overflow-hidden">
                               {/* Panel header */}
                               <div className="flex items-center justify-between px-4 py-2.5 bg-indigo-50 border-b border-indigo-100">
                                 <div className="flex items-center gap-2">
                                   <div className="w-1.5 h-4 bg-indigo-600 rounded-full" />
-                                  <p className="text-[10px] font-black uppercase tracking-widest text-indigo-700">
+                                  <p className="text-[10px] font-semibold uppercase tracking-wider text-indigo-700">
                                     Key Observations
                                   </p>
                                 </div>
                                 <button
                                   onClick={() => setExpandedFeedbackIdx(null)}
-                                  className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-indigo-200 text-indigo-500 transition-colors text-xs font-black"
+                                  className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-indigo-100 text-indigo-500 transition-colors text-xs font-semibold"
                                 >
                                   ✕
                                 </button>
@@ -1109,7 +1118,7 @@ export default function Assessment() {
                                 {s.ai_feedback.key_observations.map((obs, j) => (
                                   <li key={j} className="flex items-start gap-2.5">
                                     <span className="mt-1 w-1.5 h-1.5 rounded-full bg-indigo-500 flex-shrink-0" />
-                                    <span className="text-xs text-gray-700 font-medium leading-relaxed">{obs}</span>
+                                    <span className="text-xs text-slate-700 font-medium leading-relaxed">{obs}</span>
                                   </li>
                                 ))}
                               </ul>
@@ -1122,24 +1131,24 @@ export default function Assessment() {
 
                   {/* ── Competency Band Impact ── */}
                   {hasMatrix && (
-                    <div className="border-t border-gray-100 pt-3">
-                      <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5">Competency Band</p>
+                    <div className="border-t border-slate-100 pt-3">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Competency Band</p>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-black text-gray-400">
+                        <span className="text-sm font-semibold text-slate-400">
                           {prevMatrix !== null ? prevMatrix.toFixed(1) : '—'}
                         </span>
-                        <span className="text-gray-300 text-xs">→</span>
-                        <span className={`text-xl font-black ${matrixUp ? 'text-emerald-600' : matrixDown ? 'text-rose-600' : 'text-gray-700'}`}>
+                        <span className="text-slate-300 text-xs">→</span>
+                        <span className={`text-xl font-bold ${matrixUp ? 'text-emerald-600' : matrixDown ? 'text-rose-600' : 'text-slate-700'}`}>
                           {s.new_matrix_band!.toFixed(1)}
                         </span>
                         {matrixDelta !== null && (
-                          <span className={`text-xs font-black ml-0.5 ${matrixUp ? 'text-emerald-600' : matrixDown ? 'text-rose-600' : 'text-gray-400'}`}>
+                          <span className={`text-xs font-semibold ml-0.5 ${matrixUp ? 'text-emerald-600' : matrixDown ? 'text-rose-600' : 'text-slate-400'}`}>
                             {matrixUp ? `+${matrixDelta.toFixed(1)}` : matrixDelta.toFixed(1)}
                           </span>
                         )}
                       </div>
                       {smoothingVisible && (
-                        <p className="text-[10px] text-gray-400 font-medium mt-1">
+                        <p className="text-[10px] text-slate-400 font-medium mt-1">
                           Builds gradually — averaged over sessions
                         </p>
                       )}
@@ -1148,10 +1157,10 @@ export default function Assessment() {
 
                   {/* Delta badge */}
                   {hasDelta && (
-                    <div className={`mt-3 inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide px-2.5 py-1 rounded border-2 ${
-                      isUp   ? 'bg-emerald-50 text-emerald-700 border-emerald-300' :
-                      isDown ? 'bg-rose-50 text-rose-700 border-rose-300' :
-                               'bg-gray-100 text-gray-600 border-gray-300'
+                    <div className={`mt-3 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide px-2.5 py-1 rounded-lg border ${
+                      isUp   ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                      isDown ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                               'bg-slate-100 text-slate-600 border-slate-200'
                     }`}>
                       {isUp ? '↑ Improved' : isDown ? '↓ Dropped' : '● Maintained'}
                     </div>
@@ -1162,7 +1171,7 @@ export default function Assessment() {
           </div>
         )}
 
-        <p className="text-center text-gray-500 font-medium text-sm">
+        <p className="text-center text-slate-500 font-medium text-sm">
           Scores updated in your competency matrix. Continue drilling to build on this result.
         </p>
       </div>
@@ -1173,8 +1182,8 @@ export default function Assessment() {
     if (isLoadingQuestions || !currentSection) {
       return (
         <div className="min-h-[70vh] flex flex-col items-center justify-center animate-fade-in">
-          <Loader2 className="w-12 h-12 text-indigo-700 animate-spin mb-4" />
-          <p className="text-gray-500 font-black uppercase tracking-widest text-sm">Loading Questions…</p>
+          <Loader2 className="w-12 h-12 text-indigo-600 animate-spin mb-4" />
+          <p className="text-slate-500 font-semibold uppercase tracking-wider text-sm">Loading Questions…</p>
         </div>
       );
     }
@@ -1206,37 +1215,42 @@ export default function Assessment() {
 
         {/* Section progress pills */}
         <div className="flex items-center justify-center gap-3 mb-8">
-          {iaSections?.map((sec, i) => (
-            <div key={i} className="flex items-center gap-3">
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 font-black text-xs uppercase tracking-widest ${
-                i < currentSectionIdx ? 'bg-emerald-400 border-gray-900 text-gray-900' :
-                i === currentSectionIdx ? 'bg-gray-900 border-gray-900 text-white' :
-                'bg-white border-gray-300 text-gray-400'
-              }`} style={i <= currentSectionIdx ? { boxShadow: '2px 2px 0 #0F0F0F' } : {}}>
-                {i < currentSectionIdx ? <CheckCircle2 className="w-4 h-4" /> : <span>{SKILL_ICON[sec.skill] ?? '📝'}</span>}
-                <span className="hidden sm:inline">{SKILL_LABEL[sec.sub_skill] ?? sec.sub_skill}</span>
+          {iaSections?.map((sec, i) => {
+            const a = accent(sec.skill);
+            const done = i < currentSectionIdx;
+            const active = i === currentSectionIdx;
+            return (
+              <div key={i} className="flex items-center gap-3">
+                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border font-semibold text-xs uppercase tracking-wider ${
+                  done ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
+                  active ? `${a.bg} ${a.border} ${a.text}` :
+                  'bg-white border-slate-200 text-slate-400'
+                }`}>
+                  {done ? <CheckCircle2 className="w-4 h-4" /> : <span>{SKILL_ICON[sec.skill] ?? '📝'}</span>}
+                  <span className="hidden sm:inline">{SKILL_LABEL[sec.sub_skill] ?? sec.sub_skill}</span>
+                </div>
+                {i < (iaSections?.length ?? 1) - 1 && <div className={`w-6 h-1 rounded-full ${done ? 'bg-emerald-300' : 'bg-slate-200'}`} />}
               </div>
-              {i < (iaSections?.length ?? 1) - 1 && <div className={`w-6 h-1 ${i < currentSectionIdx ? 'bg-gray-900' : 'bg-gray-300'}`} />}
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Header: section info + global timer */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white border-2 border-gray-900 rounded-xl p-4 sm:p-6 mb-6 gap-4" style={{ boxShadow: '6px 6px 0 #0F0F0F' }}>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 mb-6 gap-4 shadow-sm">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-indigo-700 border-2 border-gray-900 rounded-xl flex items-center justify-center text-3xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+            <div className={`w-14 h-14 ${accent(currentSection.skill).bg} border ${accent(currentSection.skill).border} rounded-xl flex items-center justify-center text-3xl`}>
               {SKILL_ICON[currentSection.skill] ?? '📝'}
             </div>
             <div>
-              <p className="text-gray-900 font-black text-lg uppercase tracking-wide">{SKILL_LABEL[currentSection.sub_skill] ?? currentSection.sub_skill}</p>
-              <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1">Question {currentIdx + 1} of {totalQ}</p>
+              <p className="text-slate-900 font-semibold text-lg uppercase tracking-wide">{SKILL_LABEL[currentSection.sub_skill] ?? currentSection.sub_skill}</p>
+              <p className="text-slate-500 text-xs font-medium uppercase tracking-wider mt-1">Question {currentIdx + 1} of {totalQ}</p>
             </div>
           </div>
-          <div className="flex items-center self-end sm:self-auto bg-gray-50 border-2 border-gray-900 px-4 py-2 rounded-xl" style={{ boxShadow: 'inset 2px 2px 0 rgba(0,0,0,0.05)' }}>
+          <div className="flex items-center self-end sm:self-auto bg-slate-50 border border-slate-200 px-4 py-2 rounded-xl">
             <CircleTimer timeLeft={timeLeft} total={20 * 60} size={48} />
             <div className="ml-3">
-              <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Total Time Left</p>
-              <p className="text-lg font-black text-gray-900 leading-none">{formatTime(timeLeft)}</p>
+              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Total Time Left</p>
+              <p className="text-lg font-semibold text-slate-900 leading-none">{formatTime(timeLeft)}</p>
             </div>
           </div>
         </div>
@@ -1247,7 +1261,7 @@ export default function Assessment() {
           {/* LEFT: Audio player (LISTENING) or Reading Passage (READING) or nothing */}
           <div className="w-full lg:w-1/2 flex flex-col gap-4">
             {currentSection.section_type === 'AUDIO' && currentSection.audio_url ? (
-              <div className="bg-indigo-50 border-2 border-gray-900 rounded-xl p-8 text-center flex flex-col items-center" style={{ boxShadow: '6px 6px 0 #0F0F0F' }}>
+              <div className="bg-teal-50 border border-teal-200 rounded-2xl p-8 text-center flex flex-col items-center shadow-sm">
                 <button
                   onClick={() => { 
                     if (audioState === 'idle' && audioRef.current) { 
@@ -1256,16 +1270,16 @@ export default function Assessment() {
                     } 
                   }}
                   disabled={audioState !== 'idle'}
-                  className={`w-24 h-24 border-2 border-gray-900 rounded-full flex items-center justify-center text-white mb-6 transition-all shadow-[4px_4px_0_#0F0F0F] ${
-                    audioState === 'idle' ? 'bg-indigo-700 hover:bg-indigo-600' : audioState === 'playing' ? 'bg-amber-500' : 'bg-emerald-500'
+                  className={`w-24 h-24 rounded-full flex items-center justify-center text-white mb-6 transition-colors shadow-md ${
+                    audioState === 'idle' ? 'bg-teal-600 hover:bg-teal-700' : audioState === 'playing' ? 'bg-amber-500' : 'bg-emerald-500'
                   }`}
                 >
                   {audioState === 'idle' && <PlayCircle className="w-12 h-12 ml-1" />}
                   {audioState === 'playing' && <div className="flex items-center gap-1.5 h-10">{animBars.slice(0,4).map((h,i) => <div key={i} className="w-2 bg-white rounded-full animate-pulse" style={{ height: `${20 + h*40}px`, animationDelay: `${i*0.15}s` }} />)}</div>}
                   {audioState === 'played' && <CheckCircle2 className="w-12 h-12" />}
                 </button>
-                <p className="text-gray-900 font-black text-lg uppercase tracking-wide mb-2">Listening Audio</p>
-                <p className="text-gray-600 font-medium text-sm">{audioState === 'played' ? 'Playback complete — answer the questions.' : 'Listen carefully. The audio plays once.'}</p>
+                <p className="text-slate-900 font-semibold text-lg uppercase tracking-wide mb-2">Listening Audio</p>
+                <p className="text-slate-600 font-medium text-sm">{audioState === 'played' ? 'Playback complete — answer the questions.' : 'Listen carefully. The audio plays once.'}</p>
                 <audio 
                   ref={audioRef} 
                   src={currentSection.audio_url} 
@@ -1274,40 +1288,40 @@ export default function Assessment() {
                 />
               </div>
             ) : currentSection.section_type === 'PASSAGE' && currentSection.passage_text ? (
-              <div className="bg-white border-2 border-gray-900 rounded-xl flex flex-col max-h-[700px]" style={{ boxShadow: '6px 6px 0 #0F0F0F' }}>
-                <div className="p-4 border-b-2 border-gray-900 bg-gray-50 flex items-center justify-between">
-                  <span className="font-black text-sm uppercase tracking-widest text-gray-500">Reading Passage</span>
-                  <button onClick={() => setShowPassage(!showPassage)} className="lg:hidden font-black text-xs text-indigo-700 uppercase">{showPassage ? 'Hide' : 'Show'}</button>
+              <div className="bg-white border border-slate-200 rounded-2xl flex flex-col max-h-[700px] shadow-sm">
+                <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between rounded-t-2xl">
+                  <span className="font-semibold text-sm uppercase tracking-wider text-slate-500">Reading Passage</span>
+                  <button onClick={() => setShowPassage(!showPassage)} className="lg:hidden font-semibold text-xs text-purple-600 uppercase">{showPassage ? 'Hide' : 'Show'}</button>
                 </div>
                 <div className={`p-6 overflow-y-auto flex-1 ${!showPassage ? 'hidden lg:block' : 'block'}`}>
-                  <p className="font-serif text-gray-800 text-base leading-loose whitespace-pre-wrap">{currentSection.passage_text}</p>
+                  <p className="font-serif text-slate-800 text-base leading-loose whitespace-pre-wrap">{currentSection.passage_text}</p>
                 </div>
               </div>
             ) : (
               /* No left panel for pure MCQ/WRITING/SPEAKING — show a focus card */
-              <div className="bg-indigo-50 border-2 border-gray-200 rounded-xl p-6 hidden lg:flex flex-col items-center justify-center text-center gap-4">
+              <div className={`${accent(currentSection.skill).bg} border ${accent(currentSection.skill).border} rounded-2xl p-6 hidden lg:flex flex-col items-center justify-center text-center gap-4`}>
                 <span className="text-6xl">{SKILL_ICON[currentSection.skill] ?? '📝'}</span>
-                <p className="font-black text-gray-900 uppercase tracking-wide">{SKILL_LABEL[currentSection.sub_skill] ?? currentSection.sub_skill}</p>
-                <p className="text-gray-400 text-sm font-medium">Section {currentSectionIdx + 1} of {iaSections?.length}</p>
-                <div className="text-xs font-black text-gray-400 uppercase tracking-widest mt-4">{currentIdx + 1} / {totalQ} questions answered</div>
+                <p className="font-semibold text-slate-900 uppercase tracking-wide">{SKILL_LABEL[currentSection.sub_skill] ?? currentSection.sub_skill}</p>
+                <p className="text-slate-400 text-sm font-medium">Section {currentSectionIdx + 1} of {iaSections?.length}</p>
+                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-4">{currentIdx + 1} / {totalQ} questions answered</div>
               </div>
             )}
           </div>
 
           {/* RIGHT: Question + input */}
           <div className="w-full lg:w-1/2 flex flex-col gap-4">
-            <div className="bg-white border-2 border-gray-900 rounded-xl p-6 sm:p-8" style={{ boxShadow: '6px 6px 0 #0F0F0F' }}>
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm">
 
               <div className="flex justify-between items-center mb-6">
-                <span className="bg-gray-100 text-gray-500 text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded border-2 border-gray-200">
+                <span className="bg-slate-100 text-slate-500 text-xs font-semibold uppercase tracking-wider px-4 py-1.5 rounded-lg border border-slate-200">
                   Q {currentIdx + 1} / {totalQ}
                 </span>
-                <span className="bg-indigo-100 text-indigo-800 border-2 border-indigo-300 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg">
+                <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-semibold uppercase tracking-wider px-3 py-1.5 rounded-lg">
                   {currentQ.question_type.replace('_', ' ')}
                 </span>
               </div>
 
-              <h3 className="text-xl font-black text-gray-900 mb-8 leading-snug">
+              <h3 className="text-xl font-semibold text-slate-900 mb-8 leading-snug">
                 {currentQ.question_type === 'SPEAKING_PROMPT' ? `"${currentQ.prompt_text}"` : currentQ.prompt_text}
               </h3>
 
@@ -1319,9 +1333,8 @@ export default function Assessment() {
                     return (
                       <button key={key}
                         onClick={() => setAnswers(p => ({ ...p, [currentQ.id]: key }))}
-                        className={`text-left p-4 rounded-xl border-2 font-bold text-sm transition-all flex items-start gap-3 ${selected ? 'bg-gray-900 border-gray-900 text-white' : 'bg-white border-gray-300 text-gray-700 hover:border-gray-900'}`}
-                        style={selected ? { boxShadow: '3px 3px 0 #0F0F0F' } : {}}>
-                        <span className={`w-6 h-6 flex-shrink-0 rounded border-2 flex items-center justify-center font-black text-xs ${selected ? 'border-white text-white' : 'border-gray-400 text-gray-500'}`}>{key}</span>
+                        className={`text-left p-4 rounded-xl border font-medium text-sm transition-all flex items-start gap-3 ${selected ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300 hover:bg-slate-50'}`}>
+                        <span className={`w-6 h-6 flex-shrink-0 rounded-lg border flex items-center justify-center font-semibold text-xs ${selected ? 'border-white text-white' : 'border-slate-300 text-slate-500'}`}>{key}</span>
                         <span>{optionsMap[key]}</span>
                       </button>
                     );
@@ -1334,14 +1347,14 @@ export default function Assessment() {
                 <div className="flex flex-col gap-3">
                   {['TRUE', 'FALSE', 'NOT GIVEN'].map(val => {
                     const selected = answers[currentQ.id] === val;
-                    const color = val === 'TRUE' ? 'emerald' : val === 'FALSE' ? 'rose' : 'amber';
+                    const color = val === 'TRUE' ? 'bg-emerald-500' : val === 'FALSE' ? 'bg-rose-500' : 'bg-amber-500';
                     return (
                       <button key={val}
                         onClick={() => setAnswers(p => ({ ...p, [currentQ.id]: val }))}
-                        className={`p-4 rounded-xl border-2 font-black text-sm uppercase tracking-wide transition-all ${
+                        className={`p-4 rounded-xl border font-semibold text-sm uppercase tracking-wide transition-all ${
                           selected
-                            ? `bg-${color}-600 border-gray-900 text-white shadow-[3px_3px_0_#0F0F0F]`
-                            : `bg-white border-gray-300 text-gray-700 hover:border-gray-900`
+                            ? `${color} border-transparent text-white shadow-sm`
+                            : `bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50`
                         }`}>
                         {val}
                       </button>
@@ -1368,14 +1381,13 @@ export default function Assessment() {
                     onCut={(e) => e.preventDefault()}
                     onDrop={(e) => e.preventDefault()}
                     // --- NEW LINES END HERE ---
-                    className="w-full p-5 border-2 border-gray-900 rounded-xl text-base text-gray-900 font-medium outline-none focus:ring-2 focus:ring-indigo-200 bg-gray-50 resize-none"
-                    style={{ boxShadow: 'inset 3px 3px 0 rgba(0,0,0,0.05)' }}
+                    className="w-full p-5 border border-slate-200 rounded-xl text-base text-slate-900 font-medium outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 bg-slate-50 resize-none transition-all"
                   />
                   <div className="flex justify-between items-center mt-2">
-                    <p className="text-xs text-gray-400 font-bold">
+                    <p className="text-xs text-slate-400 font-medium">
                       {(answers[currentQ.id] ?? '').trim().split(/\s+/).filter(Boolean).length} words
                     </p>
-                    <p className="text-[10px] text-gray-300 font-medium">Auto-saved</p>
+                    <p className="text-[10px] text-slate-300 font-medium">Auto-saved</p>
                   </div>
                 </div>
               )}
@@ -1384,7 +1396,7 @@ export default function Assessment() {
               {currentQ.question_type === 'SPEAKING_PROMPT' && (() => {
                 const hasTranscript = !!(answers[currentQ.id]?.trim());
                 return (
-                  <div className="bg-gray-50 border-2 border-gray-300 rounded-2xl p-6">
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6">
                     {isRecording ? (
                       /* ── Active recording ── */
                       <div className="flex flex-col items-center gap-4">
@@ -1395,14 +1407,14 @@ export default function Assessment() {
                           ))}
                         </div>
                         {liveTranscript ? (
-                          <div className="w-full bg-white border border-gray-200 rounded-xl p-3 text-sm text-gray-700 font-medium italic min-h-[56px] max-h-[120px] overflow-y-auto leading-relaxed">
+                          <div className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm text-slate-700 font-medium italic min-h-[56px] max-h-[120px] overflow-y-auto leading-relaxed">
                             "{liveTranscript}"
                           </div>
                         ) : (
-                          <p className="text-xs text-gray-400 font-medium">Speak clearly — transcript appears here</p>
+                          <p className="text-xs text-slate-400 font-medium">Speak clearly — transcript appears here</p>
                         )}
                         <button onClick={() => stopSpeakingRecording(currentQ.id)}
-                          className="bg-rose-600 hover:bg-rose-700 text-white font-black text-sm px-8 py-3 rounded-xl border-2 border-gray-900 uppercase tracking-wide shadow-[3px_3px_0_#0F0F0F]">
+                          className="bg-rose-500 hover:bg-rose-600 text-white font-semibold text-sm px-8 py-3 rounded-xl uppercase tracking-wide shadow-sm hover:shadow-md transition-all">
                           Stop &amp; Save
                         </button>
                       </div>
@@ -1411,29 +1423,27 @@ export default function Assessment() {
                       <div className="flex flex-col gap-3">
                         <div className="flex items-center gap-2">
                           <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                          <span className="text-xs font-black uppercase tracking-widest text-emerald-700">Response Saved</span>
+                          <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700">Response Saved</span>
                         </div>
-                        <div className="bg-white border-2 border-emerald-200 rounded-xl p-4 text-sm text-gray-700 font-medium italic max-h-[120px] overflow-y-auto leading-relaxed">
+                        <div className="bg-white border border-emerald-200 rounded-xl p-4 text-sm text-slate-700 font-medium italic max-h-[120px] overflow-y-auto leading-relaxed">
                           "{answers[currentQ.id]}"
                         </div>
                         <button onClick={() => startSpeakingRecording(currentQ.id)}
-                          className="text-sm font-black uppercase tracking-wide px-6 py-3 rounded-xl border-2 border-gray-900 bg-white text-gray-900 hover:bg-gray-50 self-start"
-                          style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+                          className="text-sm font-semibold uppercase tracking-wide px-6 py-3 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 self-start shadow-sm transition-colors">
                           Re-record Answer
                         </button>
                       </div>
                     ) : (
                       /* ── Not yet recorded ── */
                       <div className="flex flex-col items-center gap-4 text-center">
-                        <div className="w-16 h-16 rounded-full bg-indigo-100 border-2 border-indigo-700 flex items-center justify-center">
-                          <Mic className="w-8 h-8 text-indigo-700" />
+                        <div className="w-16 h-16 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center">
+                          <Mic className="w-8 h-8 text-rose-500" />
                         </div>
-                        <p className="text-sm text-gray-600 font-medium max-w-xs">
+                        <p className="text-sm text-slate-600 font-medium max-w-xs">
                           Tap the button and speak your answer. Your response will be transcribed automatically.
                         </p>
                         <button onClick={() => startSpeakingRecording(currentQ.id)}
-                          className="bg-indigo-700 hover:bg-indigo-600 text-white font-black text-sm uppercase tracking-wide px-8 py-4 rounded-xl border-2 border-gray-900"
-                          style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white border-none font-semibold text-sm uppercase tracking-wide px-8 py-4 rounded-xl shadow-sm hover:shadow-md transition-all">
                           Start Speaking
                         </button>
                         {!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) && (
@@ -1448,14 +1458,13 @@ export default function Assessment() {
               {/* Navigation */}
               <div className="mt-8 flex gap-4">
                 <button onClick={() => setCurrentIdx(i => i - 1)} disabled={currentIdx === 0}
-                  className="px-6 py-4 border-2 border-gray-900 rounded-xl font-black text-gray-600 disabled:opacity-30 disabled:pointer-events-none hover:bg-gray-50 uppercase text-sm tracking-wide">
+                  className="px-6 py-4 border border-slate-200 rounded-xl font-semibold text-slate-600 disabled:opacity-30 disabled:pointer-events-none hover:bg-slate-50 uppercase text-sm tracking-wide transition-colors">
                   Prev
                 </button>
                 <button
                   onClick={handleNextQuestion}
                   disabled={!canProceed || (currentQ.question_type === 'SPEAKING_PROMPT' && isRecording)}
-                  className={`flex-1 font-black text-sm uppercase tracking-wide border-2 border-gray-900 rounded-xl py-4 transition-all ${!canProceed ? 'bg-gray-100 text-gray-400 opacity-60 cursor-not-allowed' : 'bg-indigo-700 text-white hover:bg-indigo-600'}`}
-                  style={canProceed ? { boxShadow: '4px 4px 0 #0F0F0F' } : {}}>
+                  className={`flex-1 font-semibold text-sm uppercase tracking-wide border-none rounded-xl py-4 transition-all ${!canProceed ? 'bg-slate-100 text-slate-400 opacity-60 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm hover:shadow-md'}`}>
                   {currentIdx === totalQ - 1
                     ? (currentSectionIdx < (iaSections?.length ?? 1) - 1 ? 'Complete Section →' : 'Submit IA →')
                     : 'Next Question →'}
@@ -1470,9 +1479,9 @@ export default function Assessment() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans text-gray-900 selection:bg-indigo-200">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-indigo-200">
       <TopNavBar hideMomentum={phase === 'session'} totalMomentum={totalMomentum} />
-      <div className="fixed inset-0 pointer-events-none z-0" style={{ backgroundImage: 'radial-gradient(circle, #d1d5db 1px, transparent 1px)', backgroundSize: '24px 24px', opacity: 0.5 }} />
+      <div className="fixed inset-0 pointer-events-none z-0" style={{ backgroundImage: 'radial-gradient(circle, #e2e8f0 1px, transparent 1px)', backgroundSize: '24px 24px', opacity: 0.4 }} />
       
       <div className="relative z-10 pt-16">
         {phase === "gate" && (() => {
@@ -1491,9 +1500,6 @@ export default function Assessment() {
       <style>{`
         @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .neo-btn { transition: transform 0.1s ease, box-shadow 0.1s ease; }
-        .neo-btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 #0F0F0F !important; }
-        .neo-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #0F0F0F !important; }
       `}</style>
     </div>
   );
