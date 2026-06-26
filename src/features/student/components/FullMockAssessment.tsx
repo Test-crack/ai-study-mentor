@@ -30,7 +30,9 @@ interface MockStatusResponse {
   has_active_session:        boolean;
   active_session_id:         string | null;
   standard_used_this_month:  boolean;
+  standard_session_status:   string | null;
   earned_used_this_month:    boolean;
+  earned_session_status:     string | null;
   earned_mock_eligible:      boolean;
   can_start_earned:          boolean;
   earned_mock_reasons:       { key: string; message: string }[];
@@ -232,6 +234,7 @@ export default function FullMockAssessment() {
 
   // Session
   const [sessionId, setSessionId]               = useState<string | null>(null);
+  const sessionIdRef                            = useRef<string | null>(null);
   const [sections, setSections]                 = useState<MockSection[] | null>(null);
   const [currentSectionIdx, setCurrentSectionIdx] = useState(0);
   const [currentIdx, setCurrentIdx]             = useState(0);
@@ -305,7 +308,7 @@ export default function FullMockAssessment() {
     }
     setIsRecording(false);
     setLiveTranscript("");
-    if (writingDebounceRef.current) clearTimeout(writingDebounceRef.current);
+    if (writingDebounceRef.current) { clearTimeout(writingDebounceRef.current); writingDebounceRef.current = null; }
   }, [currentIdx, currentSectionIdx]);
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -313,9 +316,9 @@ export default function FullMockAssessment() {
   const backendUrl = () => import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
 
   const persistAnswer = (questionId: string, answer: string) => {
-    if (!sessionId) return;
+    if (!sessionIdRef.current) return;
     callBackend(`${backendUrl()}/api/mock/answer`, {
-      method: "POST", body: JSON.stringify({ session_id: sessionId, question_id: questionId, answer })
+      method: "POST", body: JSON.stringify({ session_id: sessionIdRef.current, question_id: questionId, answer })
     }).catch(e => console.warn("[Mock] answer save failed:", e));
   };
 
@@ -369,6 +372,7 @@ export default function FullMockAssessment() {
         if (s.success) setMockStatus(s);
         setIsLoading(false); return;
       }
+      sessionIdRef.current = res.session_id;
       setSessionId(res.session_id);
       setSections(transformSectionAudioUrls(res.sections));
       setCurrentSectionIdx(res.current_section_idx ?? 0);
@@ -397,7 +401,7 @@ export default function FullMockAssessment() {
       setPhase("scoring");
       try {
         const res = await callBackend(`${backendUrl()}/api/mock/submit`, {
-          method: "POST", body: JSON.stringify({ session_id: sessionId })
+          method: "POST", body: JSON.stringify({ session_id: sessionIdRef.current })
         });
         if (res.success) {
           setSessionMomentum(res.momentum_awarded ?? 0);
@@ -409,20 +413,21 @@ export default function FullMockAssessment() {
       }
       setTimeout(() => setPhase("results"), 3500);
     }
-  }, [sections, currentSectionIdx, sessionId]);
+  }, [sections, currentSectionIdx]);
 
   const advanceToNextSection = () => {
     const nextIdx = currentSectionIdx + 1;
     if (audioRef.current && !audioRef.current.paused) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
     // Stamp navigation position on backend — timer is global so no section_started_at needed
-    if (sessionId) {
+    if (sessionIdRef.current) {
       callBackend(`${backendUrl()}/api/mock/answer`, {
-        method: "POST", body: JSON.stringify({ session_id: sessionId, section_advance: nextIdx })
+        method: "POST", body: JSON.stringify({ session_id: sessionIdRef.current, section_advance: nextIdx })
       }).catch(e => console.warn("[Mock] section advance failed:", e));
     }
     setCurrentSectionIdx(nextIdx);
     setCurrentIdx(0);
-    setAnswers({});
+    // MK-F-03: do NOT clear answers — the global timer means all sections share one
+    // Record<questionId, answer> map and Prev navigation must be able to show prior answers.
     // DO NOT reset timeLeft — global timer keeps counting down across all sections
     setAudioState("idle"); setShowPassage(false); setIsRecording(false);
     setPhase("session");
@@ -591,6 +596,51 @@ export default function FullMockAssessment() {
     </div>
   );
 
+  const renderSlotExpired = () => (
+    <div className="max-w-2xl mx-auto animate-fade-in pt-12 px-4">
+      <div className="bg-white border-2 border-gray-900 rounded-2xl p-8 shadow-[8px_8px_0_#0F0F0F]">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 bg-amber-100 border-2 border-amber-400 rounded-xl flex items-center justify-center">
+            <Calendar className="w-6 h-6 text-amber-600" />
+          </div>
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">This Month</p>
+            <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tight">Session Expired</h2>
+          </div>
+        </div>
+
+        <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-4 mb-6">
+          <p className="font-black text-amber-800 text-sm mb-1">72-hour window closed without submission</p>
+          <p className="text-amber-700 text-sm">Your standard slot for this month has been consumed. No penalty — just no score recorded.</p>
+        </div>
+
+        <div className="bg-indigo-50 border-2 border-indigo-200 rounded-xl p-4 mb-6 flex items-center gap-3">
+          <Calendar className="w-5 h-5 text-indigo-600 flex-shrink-0" />
+          <div>
+            <p className="font-black text-indigo-800 text-sm">Next standard slot opens</p>
+            <p className="text-indigo-600 font-bold text-sm">{firstOfNextMonth()}</p>
+          </div>
+        </div>
+
+        {mockStatus!.can_start_earned && (
+          <div className="mb-4">
+            <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-2">Still want a mock this month?</p>
+            <button onClick={() => void beginMock("EARNED")} disabled={isLoading}
+              className="w-full bg-amber-50 hover:bg-amber-100 border-2 border-amber-400 rounded-xl py-3 font-black text-sm text-amber-800 uppercase tracking-wide flex items-center justify-center gap-2">
+              <Zap className="w-4 h-4 text-amber-500 fill-amber-500" />
+              Exchange {mockStatus!.earned_mock_cost.toLocaleString()} Momentum for Extra Mock
+            </button>
+          </div>
+        )}
+
+        <button onClick={() => navigate("/student/dashboard")}
+          className="w-full py-3 border-2 border-gray-300 rounded-xl font-black text-sm text-gray-500 uppercase tracking-wide hover:bg-gray-50">
+          Back to Dashboard
+        </button>
+      </div>
+    </div>
+  );
+
   const renderMonthUsed = () => (
     <div className="max-w-2xl mx-auto animate-fade-in pt-12 px-4">
       <div className="bg-white border-2 border-gray-900 rounded-2xl p-8 shadow-[8px_8px_0_#0F0F0F]">
@@ -669,8 +719,8 @@ export default function FullMockAssessment() {
     }
     if (mockStatus.has_active_session) return renderActiveSession();
     if (!mockStatus.is_eligible)        return renderNotEligible();
-    if (mockStatus.standard_used_this_month && !mockStatus.can_start_earned) return renderMonthUsed();
-    if (mockStatus.standard_used_this_month && mockStatus.can_start_earned)  return renderMonthUsed();
+    if (mockStatus.standard_session_status === 'ABANDONED') return renderSlotExpired();
+    if (mockStatus.standard_used_this_month)                return renderMonthUsed();
     return renderMockAvailable();
   };
 
@@ -733,7 +783,7 @@ export default function FullMockAssessment() {
           <div className="flex items-center self-end sm:self-auto bg-gray-50 border-2 border-gray-900 px-4 py-2 rounded-xl" style={{ boxShadow: "inset 2px 2px 0 rgba(0,0,0,0.05)" }}>
             <CircleTimer timeLeft={timeLeft} total={currentSectionTotalSec} size={48} />
             <div className="ml-3">
-              <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Section Timer</p>
+              <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Total Test Timer</p>
               <p className="text-lg font-black text-gray-900 leading-none">{formatTime(timeLeft)}</p>
             </div>
           </div>
@@ -908,7 +958,7 @@ export default function FullMockAssessment() {
           </div>
           <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tight mb-2">Section {currentSectionIdx + 1} Complete</h2>
           <p className="text-gray-500 font-medium mb-8">
-            {SKILL_LABEL[sections?.[currentSectionIdx]?.skill ?? ""] ?? ""} done. Take a breath — the next section has its own fresh timer.
+            {SKILL_LABEL[sections?.[currentSectionIdx]?.skill ?? ""] ?? ""} done. Take a breath — your overall test timer continues running.
           </p>
           {nextSec && (
             <div className="bg-purple-50 border-2 border-gray-900 rounded-xl p-5 mb-8 text-left shadow-[4px_4px_0_#0F0F0F]">
@@ -969,7 +1019,7 @@ export default function FullMockAssessment() {
         <div className="bg-purple-700 border-2 border-gray-900 rounded-2xl p-8 mb-6 text-center shadow-[8px_8px_0_#0F0F0F] relative overflow-hidden">
           <div className="absolute -top-8 -right-8 text-[140px] opacity-10 pointer-events-none select-none">🏆</div>
           <p className="text-purple-200 font-black uppercase tracking-widest mb-1">Real Band Score</p>
-          <div className="text-8xl font-black text-white leading-none mb-2">{realBand > 0 ? realBand.toFixed(1) : "—"}</div>
+          <div className="text-8xl font-black text-white leading-none mb-2">{mockResults?.real_band_score != null ? realBand.toFixed(1) : "—"}</div>
           {delta !== 0 && (
             <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-lg font-black uppercase text-sm mt-2 ${delta > 0 ? "bg-emerald-500 text-white" : "bg-rose-500 text-white"}`}>
               {delta > 0 ? `↑ +${delta.toFixed(1)}` : `↓ ${delta.toFixed(1)}`} from previous {prevBand.toFixed(1)}

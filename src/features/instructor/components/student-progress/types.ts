@@ -4,7 +4,7 @@
 export interface SectionScore {
   skill:      string;
   sub_skill:  string;
-  band:       number;
+  band:       number | null;
   correct:    number;
   total:      number;
   ai_graded:  boolean;
@@ -28,7 +28,7 @@ export interface IASession {
 
 export interface MockSubSkillScore {
   sub_skill:  string;
-  band:       number;
+  band:       number | null;
   ai_band?:   number;
   correct:    number;
   total_mcq:  number;
@@ -40,7 +40,7 @@ export interface MockSubSkillScore {
 
 export interface MockSkillScore {
   skill:             string;
-  band:              number;
+  band:              number | null;
   total:             number;
   correct:           number;
   ai_graded:         boolean;

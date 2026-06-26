@@ -172,8 +172,8 @@ function StudentRow({
   const ia   = iaStatusConfig(enrich);
 
   const goToProgress = () => {
-    navigate(`/instructor/students/${slug}/progress`, {
-      state: { batchId, studentId: student.userId },
+    navigate(`/instructor/batches/${batchId}/students/${student.userId}/progress`, {
+      state: { studentId: student.userId },
     });
   };
 

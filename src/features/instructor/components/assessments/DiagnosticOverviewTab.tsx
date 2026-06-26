@@ -54,9 +54,8 @@ export function DiagnosticOverviewTab({ rows, batchId }: Props) {
   }, [rows, search]);
 
   const goToStudent = (row: DiagnosticOverviewRow) => {
-    const slug = row.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'student';
-    navigate(`/instructor/students/${slug}/progress`, {
-      state: { batchId, studentId: row.user_id, initialTab: 'diagnostic' },
+    navigate(`/instructor/batches/${batchId}/students/${row.user_id}/progress`, {
+      state: { studentId: row.user_id, initialTab: 'diagnostic' },
     });
   };
 

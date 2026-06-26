@@ -10,16 +10,6 @@ import { transformSectionAudioUrls } from "@/features/student/utils/iaAudioUtils
 // API INTEGRATION LAYER (Ready for Sarthak's Endpoints)
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const awardMomentum = async (
-  studentId: string, 
-  actionType: string, 
-  qualityScore: number
-): Promise<{ success: boolean; pointsAwarded: number }> => {
-  console.log(`[API CALL] awardMomentum`, { studentId, actionType, qualityScore });
-  return new Promise((resolve) => {
-    setTimeout(() => resolve({ success: true, pointsAwarded: Math.round(20 + (qualityScore * 30)) }), 1000);
-  });
-};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES & INTERFACES
@@ -290,9 +280,6 @@ export default function Assessment() {
   // Timer: 20 min per section (2 sections = 40 min total). Resets on section advance.
   const [timeLeft, setTimeLeft]               = useState(20 * 60);
 
-  // Restore flag (kept for localStorage persistence hook)
-  const [isRestoring, setIsRestoring]         = useState(false);
-
   // Convenience: current section and question
   const currentSection  = iaSections?.[currentSectionIdx] ?? null;
   const sessionData     = currentSection; // alias so existing helpers still compile
@@ -302,7 +289,6 @@ export default function Assessment() {
   // --- IA ELIGIBILITY CHECK ---
   // Only check when the student lands on the gate screen (not mid-session resume).
   useEffect(() => {
-    if (isRestoring) return;
     // If a session is already in progress from localStorage, skip eligibility — don't block a resumed test.
     if (phase !== "gate") {
       setEligibilityLoading(false);
@@ -320,7 +306,7 @@ export default function Assessment() {
       }
     };
     void check();
-  }, [isRestoring, phase]);
+  }, [phase]);
 
 
 
@@ -518,10 +504,10 @@ export default function Assessment() {
 
   // Global Timer Tick
   useEffect(() => {
-    if (phase !== "session" || isLoadingSession || isRestoring || timeLeft <= 0) return;
+    if (phase !== "session" || isLoadingSession || timeLeft <= 0) return;
     const t = setInterval(() => setTimeLeft(s => s - 1), 1000);
     return () => clearInterval(t);
-  }, [phase, timeLeft, isLoadingSession, isRestoring]);
+  }, [phase, timeLeft, isLoadingSession]);
 
   // Section timer expired: force-complete current section (advances to next or submits if last)
   useEffect(() => {
@@ -544,7 +530,7 @@ export default function Assessment() {
 
   // ── RENDERERS ──
 
-  if (isRestoring || eligibilityLoading) {
+  if (eligibilityLoading) {
     return (
       <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
         <Loader2 className="w-10 h-10 text-indigo-700 animate-spin" />
@@ -554,7 +540,8 @@ export default function Assessment() {
 
   // ── STATE 1: Prerequisites not yet met (< 6 drills or < 2 days) ─────────────
   const renderNotEligible = () => {
-    const p = iaStatus!.progress;
+    if (!iaStatus) return null;
+    const p = iaStatus.progress;
     const conditions = [
       { key: "drills", label: "Drill Sessions",        met: p.cond_drills, value: `${p.drills_completed} / ${p.drills_required}`,       pct: Math.min(100, Math.round((p.drills_completed / p.drills_required) * 100)) },
       { key: "days",   label: "Days Since First Drill", met: p.cond_days,   value: `${p.days_since_first_drill} / ${p.min_days_required}`, pct: Math.min(100, Math.round((p.days_since_first_drill / p.min_days_required) * 100)) },

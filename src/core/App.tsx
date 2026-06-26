@@ -307,6 +307,7 @@ const AppRoutes = () => {
       <Route path="/student/drill" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><DrillScreen /></RoleProtectedRoute>} />
       <Route path="/student/lexigrid" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><LexiGrid /></RoleProtectedRoute>} />
       <Route path="/student/internal" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><InternalAssessmentPage /></RoleProtectedRoute>} />
+      <Route path="/student/assessment" element={<Navigate to="/student/internal" replace />} />
       <Route path="/student/mock" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><FullMockAssessment /></RoleProtectedRoute>} />
       <Route path="/student/how-it-works" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><HowItWorks /></RoleProtectedRoute>} />
 
@@ -319,8 +320,6 @@ const AppRoutes = () => {
           </RoleProtectedRoute>
         }
       />
-      <Route path="/instructor/student/:studentSlug/progress" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorStudentProgressPage /></RoleProtectedRoute>} />
-      <Route path="/instructor/students/:studentSlug/progress" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorStudentProgressPage /></RoleProtectedRoute>} />
       <Route path="/instructor/batches/:batchId/students/:studentId/progress" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorStudentProgressPage /></RoleProtectedRoute>} />
       <Route path="/instructor/assessments" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorAssessmentPage /></RoleProtectedRoute>} />
       <Route path="/instructor/coursemanagement" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorCourseManagementPage /></RoleProtectedRoute>} />

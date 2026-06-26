@@ -160,7 +160,7 @@ export default function LexiGrid() {
 
   // ── Init ─────────────────────────────────────────────────────────────────────
   useEffect(() => {
-    const today      = new Date().toISOString().split('T')[0];
+    const today      = todayIST();
     const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
 
     const init = async () => {
@@ -520,16 +520,9 @@ const saveState = (index: number, tries: number, guess: string, score: number, s
 
   // ── Play Again (standalone only) ─────────────────────────────────────────────
   const handlePlayAgain = async () => {
-    setIsInitializing(true);
-    setPassportStamped(false);
-    totalAttemptsRef.current    = 0;
-    allBonusEligibleRef.current = true;
-    localStorage.removeItem('lexigrid_standalone_state');
-    const words = await fetchWords();
-    setDailyWords(words);
-    setCurrentIndex(0); setTriesLeft(MAX_TRIES); setCurrentGuess(''); setWordsWon(0);
-    setGameStatus('playing'); setShowHint(false);
-    setIsInitializing(false);
+    localStorage.removeItem('lexigrid_state');
+    setShowHint(false);
+    await loadFreshWords();
   };
 
   // ─────────────────────────────────────────────────────────────────────────────

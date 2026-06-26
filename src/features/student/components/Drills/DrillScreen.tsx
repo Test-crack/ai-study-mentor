@@ -154,6 +154,7 @@ export default function DrillScreen() {
   };
 
   const completeSession = async (finalAnswers: Record<string, string>, finalCorrectCount: number) => {
+    if (isSubmitting) return;
     const earned = 15 + finalCorrectCount * 10;
     setMomentumScore(earned);
     setSubmitFailed(false);

@@ -9,7 +9,9 @@ interface MockWidgetStatus {
   has_active_session:       boolean;
   active_session_id:        string | null;
   standard_used_this_month: boolean;
+  standard_session_status:  string | null;
   earned_used_this_month:   boolean;
+  earned_session_status:    string | null;
   can_start_earned:         boolean;
   earned_mock_eligible:     boolean;
   momentum_score:           number;
@@ -61,10 +63,12 @@ export default function MockStatusWidget() {
   const skillsCovered = allSkills.filter(s => p.ia_per_skill[s]).length;
 
   // ── Determine which state to render ─────────────────────────────────────
-  const hasActive    = status.has_active_session;
-  const canStart     = status.can_start_mock;
-  const usedMonth    = status.standard_used_this_month && !hasActive;
-  const notEligible  = !status.is_eligible;
+  const hasActive       = status.has_active_session;
+  const canStart        = status.can_start_mock;
+  const slotExpired     = status.standard_session_status === 'ABANDONED' && !hasActive;
+  const slotCompleted   = status.standard_used_this_month && !hasActive && !slotExpired;
+  const usedMonth       = slotExpired || slotCompleted;
+  const notEligible     = !status.is_eligible;
 
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm h-full flex flex-col">
@@ -134,8 +138,49 @@ export default function MockStatusWidget() {
         </>
       )}
 
-      {/* ── State: Used this month ────────────────────────────────────────── */}
-      {!hasActive && usedMonth && (
+      {/* ── State: Slot expired (ABANDONED) ──────────────────────────────── */}
+      {!hasActive && slotExpired && (
+        <>
+          <div className="rounded-xl px-4 py-3 mb-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 flex items-center gap-3">
+            <Calendar className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+            <div>
+              <p className="text-xs font-black uppercase tracking-widest text-amber-700 dark:text-amber-300 mb-0.5">
+                Session Expired
+              </p>
+              <p className="text-xs font-medium text-amber-600 dark:text-amber-400">
+                72-hour window closed · slot consumed
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700 mb-3">
+            <Calendar className="w-4 h-4 text-slate-400 flex-shrink-0" />
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Next standard slot</p>
+              <p className="text-xs font-bold text-slate-700 dark:text-slate-200">{firstOfNextMonth()}</p>
+            </div>
+          </div>
+          {status.can_start_earned && (
+            <button
+              onClick={() => navigate("/student/mock")}
+              className="w-full py-2 rounded-xl border border-amber-300 dark:border-amber-500/40 text-amber-700 dark:text-amber-400 font-bold text-xs uppercase tracking-wide hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors flex items-center justify-center gap-1.5"
+            >
+              <Zap className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+              Extra Mock — {status.earned_mock_cost.toLocaleString()} pts
+            </button>
+          )}
+          {!status.can_start_earned && (
+            <button
+              onClick={() => navigate("/student/mock")}
+              className="mt-auto w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-wide hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+            >
+              Go to Mock →
+            </button>
+          )}
+        </>
+      )}
+
+      {/* ── State: Completed this month ───────────────────────────────────── */}
+      {!hasActive && slotCompleted && (
         <>
           <div className="rounded-xl px-4 py-3 mb-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 flex items-center gap-3">
             <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
@@ -155,7 +200,6 @@ export default function MockStatusWidget() {
               <p className="text-xs font-bold text-slate-700 dark:text-slate-200">{firstOfNextMonth()}</p>
             </div>
           </div>
-          {/* Earned path teaser if eligible */}
           {status.can_start_earned && (
             <button
               onClick={() => navigate("/student/mock")}
@@ -170,9 +214,32 @@ export default function MockStatusWidget() {
               onClick={() => navigate("/student/mock")}
               className="mt-auto w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-wide hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
             >
-              View Results →
+              Go to Mock →
             </button>
           )}
+        </>
+      )}
+
+      {/* ── State: Eligible but can_start_mock not yet true (edge / cooldown) ── */}
+      {!hasActive && !canStart && !usedMonth && !notEligible && (
+        <>
+          <div className="rounded-xl px-4 py-3 mb-4 bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/30 flex items-center gap-3">
+            <CheckCircle2 className="w-5 h-5 text-purple-500 dark:text-purple-400 flex-shrink-0" />
+            <div>
+              <p className="text-xs font-black uppercase tracking-widest text-purple-700 dark:text-purple-300 mb-0.5">
+                Eligible
+              </p>
+              <p className="text-xs font-medium text-purple-600 dark:text-purple-400">
+                Requirements met · mock opening soon
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate("/student/mock")}
+            className="mt-auto w-full py-2.5 rounded-xl border border-purple-200 dark:border-purple-500/40 text-purple-600 dark:text-purple-400 font-bold text-xs uppercase tracking-wide hover:bg-purple-50 dark:hover:bg-purple-500/10 transition-colors"
+          >
+            Go to Mock →
+          </button>
         </>
       )}
 
