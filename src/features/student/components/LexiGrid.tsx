@@ -228,13 +228,18 @@ export default function LexiGrid() {
           const inProgress = Array.isArray(parsed.words) && parsed.words.length > 0
                              && parsed.currentIndex < DAILY_LIMIT;
           const hasTargetBand = Array.isArray(parsed.words) && parsed.words.every((w: any) => 'target_band' in w);
-          if (sameDay && inProgress && hasTargetBand) {
+        if (sameDay && inProgress && hasTargetBand) {
             setDailyWords(parsed.words);
             setCurrentIndex(parsed.currentIndex || 0);
             setTriesLeft(parsed.triesLeft ?? MAX_TRIES);
             setCurrentGuess(parsed.currentGuess || "");
             setWordsWon(parsed.wordsWon || 0);
             if (parsed.sessionToken) sessionTokenRef.current = parsed.sessionToken;
+            // Restore lost state so the "Out of tries" overlay re-renders on return.
+            // The student sees the correct answer again and can click Next Word normally.
+            if (parsed.gameStatus === 'lost' && (parsed.triesLeft ?? MAX_TRIES) <= 0) {
+              setGameStatus('lost');
+            }
             setIsInitializing(false);
             return;
           }
@@ -301,17 +306,21 @@ export default function LexiGrid() {
     init();
   }, [isGateMode, fetchWords, difficulty]);
 
-  const saveState = (index: number, tries: number, guess: string, score: number) => {
-    localStorage.setItem('lexigrid_state', JSON.stringify({
-      date: todayIST(),
-      words: dailyWords,
-      currentIndex: index,
-      triesLeft: tries,
-      currentGuess: guess,
-      wordsWon: score,
-      sessionToken: sessionTokenRef.current,
-    }));
-  };
+// src/features/B-C/games/Lexigridgame.tsx
+
+// REPLACE the existing saveState function
+const saveState = (index: number, tries: number, guess: string, score: number, status: typeof gameStatus = gameStatus) => {
+  localStorage.setItem('lexigrid_state', JSON.stringify({
+    date: todayIST(),
+    words: dailyWords,
+    currentIndex: index,
+    triesLeft: tries,
+    currentGuess: guess,
+    wordsWon: score,
+    sessionToken: sessionTokenRef.current,
+    gameStatus: status,  // ← persisted now
+  }));
+};
 
   // ── Keyboard ─────────────────────────────────────────────────────────────────
   const handleKeyPress = useCallback((key: string) => {
@@ -337,13 +346,13 @@ export default function LexiGrid() {
         setTriesLeft(newTries);
         setIsErrorShake(true);
         saveState(currentIndex, newTries, currentGuess, wordsWon);
-        setTimeout(() => {
+    setTimeout(() => {
           setIsErrorShake(false);
           if (newTries <= 0) {
-            // All attempts used — count them and void bonus eligibility
             totalAttemptsRef.current += MAX_TRIES;
             allBonusEligibleRef.current = false;
             setGameStatus('lost');
+            saveState(currentIndex, newTries, currentGuess, wordsWon, 'lost'); // ← persist lost status
           } else {
             setCurrentGuess("");
           }

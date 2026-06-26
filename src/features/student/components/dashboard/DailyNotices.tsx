@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CalendarClock, PlayCircle, Trophy, BookOpen, AlertTriangle, X } from "lucide-react";
+import { CalendarClock, PlayCircle, Trophy, BookOpen, Compass, X } from "lucide-react";
 import { callBackend } from "@/features/auth/services/authClient";
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
@@ -88,22 +88,26 @@ const CONFIG: Record<NotificationType, BannerConfig> = {
     ctaClass: "bg-amber-600 hover:bg-amber-700 text-white",
     route: "/student/mock",
   },
+  // Reframed from punitive to a gentle, recoverable nudge.
+  // Light-blue gradient with white text — calm, low-pressure, and clearly a
+  // "let's find your way back" moment rather than an alarm.
   IA_MISSED: {
-    bgColor:     "bg-rose-50 dark:bg-rose-500/10",
-    borderColor: "border-rose-200 dark:border-rose-500/30",
-    iconBg:      "bg-rose-100 dark:bg-rose-500/20",
-    icon:        <AlertTriangle className="w-6 h-6 text-rose-600 dark:text-rose-400" />,
-    titleColor:  "text-rose-900 dark:text-rose-300",
-    bodyColor:   "text-rose-700/80 dark:text-rose-400/80",
-    title:  (n) => `Internal Assessment #${n.ia_number ?? ""} Missed`,
+    bgColor:     "bg-gradient-to-r from-sky-800 to-indigo-600 dark:from-sky-800 dark:to-indigo-600",
+    borderColor: "border-sky-300/40 dark:border-sky-400/30",
+    iconBg:      "bg-white/20",
+    icon:        <Compass className="w-6 h-6 text-white" />,
+    titleColor:  "text-white",
+    bodyColor:   "text-white/90",
+    title:  ()  => "Let's find your way back on track",
     body:   (n) => {
       const date = n.ia_date
         ? new Date(n.ia_date + "T12:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
-        : "a recent date";
-      return `You did not submit your IA on ${date}. −${n.momentum_deducted ?? 20} Momentum was deducted from your score.`;
+        : "recently";
+      const pts = n.momentum_deducted ?? 20;
+      return `No worries — it happens to everyone. Your assessment on ${date} slipped by, so your Momentum dipped by ${pts} pts for now. The good news: you'll earn it right back the moment you complete your next drill.`;
     },
-    ctaLabel: "View History",
-    ctaClass: "bg-rose-100 hover:bg-rose-200 dark:bg-rose-500/20 dark:hover:bg-rose-500/30 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/40",
+    ctaLabel: "Get back on track",
+    ctaClass: "bg-white hover:bg-white/90 text-blue-600",
     route: "/student/assessment-history",
   },
 };
@@ -157,7 +161,7 @@ function NotificationBanner({ notification, isLocked }: { notification: Notifica
         )}
         <button
           onClick={handleDismiss}
-          className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-black/5 dark:hover:text-slate-300 dark:hover:bg-white/10 transition-colors"
+          className={`p-2 rounded-xl ${cfg.bodyColor} opacity-60 hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/10 transition-all`}
           aria-label="Dismiss notification"
         >
           <X className="w-4 h-4" />
