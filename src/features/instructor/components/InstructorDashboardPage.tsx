@@ -11,6 +11,7 @@ import { PeriodSummaryRow } from './dashboard/PeriodSummaryRow';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useInstructorBatches } from '../hooks/useInstructorBatches';
 import { useDashboardSummary } from '../hooks/useDashboardSummary';
+import { cn } from '@/shared/utils';
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
 
@@ -20,7 +21,6 @@ export default function InstructorDashboardPage() {
 
   const firstName = (profile?.name || user?.email?.split('@')[0] || 'Instructor').split(' ')[0];
 
-  // Time-of-day greeting
   const greeting = useMemo(() => {
     const h = new Date().getHours();
     if (h < 12) return 'Good morning';
@@ -28,12 +28,10 @@ export default function InstructorDashboardPage() {
     return 'Good evening';
   }, []);
 
-  // Today's date label
   const todayLabel = useMemo(() =>
     new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }),
   []);
 
-  // ── Batches (for selector) ────────────────────────────────────────────────
   const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
   const { batches, loading: batchesLoading } = useInstructorBatches();
 
@@ -43,83 +41,114 @@ export default function InstructorDashboardPage() {
     }
   }, [batches, selectedBatchId]);
 
-  // ── Dashboard summary for selected batch ─────────────────────────────────
   const { data, loading, error, refetch } = useDashboardSummary(selectedBatchId);
 
-  // ── Derived subtitle for welcome banner ──────────────────────────────────
   const activeToday   = data?.engagement_today.active_students ?? 0;
   const atRiskCount   = data?.at_risk.length ?? 0;
   const totalStudents = batches.find(b => b.id === selectedBatchId)?.studentCount ?? 0;
 
-
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#09090E] font-sans text-slate-900 dark:text-slate-200 transition-colors duration-300">
+    <div className="
+      relative min-h-screen font-sans antialiased overflow-x-hidden
+      bg-[#F4F6F9] text-slate-900
+      dark:bg-[#080B11] dark:text-slate-200
+      transition-colors duration-500
+    ">
+
+      {/* ── Ambient Background Glows ── */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden dark:block hidden transition-opacity duration-500">
+        <div className="absolute -top-60 left-1/4 w-[40rem] h-[40rem] rounded-full bg-indigo-900/10 blur-[120px]" />
+        <div className="absolute top-1/2 -right-32 w-[30rem] h-[30rem] rounded-full bg-blue-900/10 blur-[100px]" />
+      </div>
+
       <InstructorSidebar
         activeTab="dashboard"
         isCollapsed={isSidebarCollapsed}
         toggleCollapse={() => setIsSidebarCollapsed(prev => !prev)}
       />
 
-      <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-24' : 'lg:pl-72'}`}>
+      <div className={`relative z-10 transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-24' : 'lg:pl-72'}`}>
         <InstructorTopbar />
 
-        <main className="px-3 sm:px-5 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6 max-w-7xl mx-auto pb-8">
+        <main className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 max-w-[90rem] mx-auto pb-16">
 
-          {/* ── Section 1: Welcome banner + batch selector ── */}
-          <div className="bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-600 rounded-2xl px-4 sm:px-6 py-4 sm:py-5 shadow-lg shadow-indigo-500/25 relative overflow-hidden">
+          {/* ══════════════════════════════════════════
+              Section 1 — The Premium Hero Banner
+          ══════════════════════════════════════════ */}
+          <div className="
+            relative overflow-hidden rounded-[2rem]
+            bg-[#E8EDF5]/50 border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.02)]
+            dark:bg-[#111623]/80 dark:border-white/[0.04] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]
+            backdrop-blur-xl transition-colors duration-500
+          ">
 
-            {/* Decorative blobs */}
-            <div className="pointer-events-none absolute -top-12 -right-12 w-56 h-56 rounded-full bg-white/10 blur-3xl" />
-            <div className="pointer-events-none absolute bottom-0 -left-8 w-40 h-40 rounded-full bg-violet-400/20 blur-2xl" />
-            {/* Subtle dot grid */}
-            <div
-              className="pointer-events-none absolute inset-0 opacity-[0.07]"
-              style={{
-                backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-                backgroundSize: '24px 24px',
-              }}
-            />
+            {/* Ambient Background Orbs */}
+            <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-indigo-200/30 dark:bg-indigo-600/10 blur-[80px] transition-colors duration-500" />
+            <div className="pointer-events-none absolute -bottom-32 -left-20 w-80 h-80 rounded-full bg-blue-200/30 dark:bg-blue-600/10 blur-[90px] transition-colors duration-500" />
 
-            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-5">
+            {/* Scattered Floating Particles (Mimicking the Video) */}
+            <div className="pointer-events-none absolute inset-0 opacity-70">
+              <div className="absolute top-8 left-[30%] w-2 h-2 rounded-full bg-blue-400/50 dark:bg-blue-400/80 blur-[1px]" />
+              <div className="absolute top-1/4 left-[45%] w-1.5 h-1.5 rounded-full bg-indigo-400/60 dark:bg-indigo-400/90" />
+              <div className="absolute bottom-12 left-[35%] w-3 h-3 rounded-full bg-purple-400/40 dark:bg-purple-400/60 blur-[2px]" />
+              <div className="absolute top-1/3 right-[35%] w-2.5 h-2.5 rounded-full bg-teal-400/50 dark:bg-teal-400/70" />
+              <div className="absolute bottom-1/4 right-[40%] w-1.5 h-1.5 rounded-full bg-blue-500/50 dark:bg-blue-400/80 blur-[1px]" />
+            </div>
 
-              {/* Left: greeting + stat chips */}
-              <div className="min-w-0">
-                {/* Date */}
-                <div className="flex items-center gap-1.5 mb-1.5 sm:mb-2">
-                  <CalendarDays className="h-3.5 w-3.5 text-white/50" />
-                  <span className="text-[11px] font-semibold text-white/50 tracking-wide">{todayLabel}</span>
+            {/* Top edge light shine */}
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/80 dark:via-white/10 to-transparent" />
+
+            {/* Banner Content */}
+            <div className="relative z-10 px-6 sm:px-10 py-8 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+
+              {/* Left — Greeting & Context */}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 mb-3">
+                  <CalendarDays className="h-4 w-4 text-slate-400 dark:text-slate-500" />
+                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-[0.15em] uppercase">
+                    {todayLabel}
+                  </span>
                 </div>
 
-                {/* Name */}
-                <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-none mb-2 sm:mb-3">
+                <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-tight mb-2 text-slate-800 dark:text-slate-100 transition-colors duration-500">
                   {greeting}, {firstName}
                 </h1>
 
-                {/* Stat chips */}
-                <div className="flex flex-wrap gap-2">
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 font-medium transition-colors duration-500">
+                  Here is the performance and engagement breakdown for your batches today.
+                </p>
+
+                {/* Status Chips */}
+                <div className="flex flex-wrap gap-3">
                   {loading ? (
                     <>
-                      <div className="h-7 w-32 rounded-full bg-white/15 animate-pulse" />
-                      <div className="h-7 w-28 rounded-full bg-white/10 animate-pulse" />
+                      <div className="h-9 w-40 rounded-full bg-white/40 dark:bg-white/5 animate-pulse" />
+                      <div className="h-9 w-32 rounded-full bg-white/40 dark:bg-white/5 animate-pulse" />
                     </>
                   ) : (
                     <>
-                      {/* At-risk chip */}
-                      <div className={`flex items-center gap-1.5 h-7 px-3 rounded-full text-xs font-bold border backdrop-blur-sm ${
+                      <div className={cn(
+                        'flex items-center gap-2 h-9 pl-3 pr-4 rounded-full text-xs font-bold border backdrop-blur-md transition-colors duration-500',
                         atRiskCount > 0
-                          ? 'bg-rose-500/30 border-rose-300/40 text-rose-100'
-                          : 'bg-white/10 border-white/20 text-white/70'
-                      }`}>
-                        <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                          ? 'bg-rose-100/50 border-rose-200/60 text-rose-700 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-300'
+                          : 'bg-emerald-100/50 border-emerald-200/60 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-300'
+                      )}>
+                        <span className={cn(
+                          'grid place-items-center h-5 w-5 rounded-full',
+                          atRiskCount > 0 ? 'bg-rose-200/60 dark:bg-rose-500/20' : 'bg-emerald-200/60 dark:bg-emerald-500/20'
+                        )}>
+                          <AlertTriangle className="h-3 w-3 shrink-0" />
+                        </span>
                         {atRiskCount > 0
                           ? `${atRiskCount} student${atRiskCount !== 1 ? 's' : ''} at risk`
                           : 'All students on track'
                         }
                       </div>
 
-                      {/* Active today chip */}
-                      <div className="flex items-center gap-1.5 h-7 px-3 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-white/70 backdrop-blur-sm">
-                        <Users className="h-3.5 w-3.5 shrink-0" />
+                      <div className="flex items-center gap-2 h-9 pl-3 pr-4 rounded-full text-xs font-bold bg-blue-100/50 border border-blue-200/60 text-blue-700 dark:bg-indigo-500/10 dark:border-indigo-500/20 dark:text-indigo-300 backdrop-blur-md transition-colors duration-500">
+                        <span className="grid place-items-center h-5 w-5 rounded-full bg-blue-200/60 dark:bg-indigo-500/20">
+                          <Users className="h-3 w-3 shrink-0" />
+                        </span>
                         {activeToday} / {totalStudents} active today
                       </div>
                     </>
@@ -127,75 +156,155 @@ export default function InstructorDashboardPage() {
                 </div>
               </div>
 
-              {/* Right: batch selector */}
-              <div className="shrink-0 w-full sm:w-auto">
-                <BatchSelector
-                  batches={batches}
-                  selectedBatchId={selectedBatchId}
-                  onSelect={id => setSelectedBatchId(id)}
-                  loading={batchesLoading}
-                  onGradient
-                />
+              {/* Right — Batch Selector & Clean Floating Cards */}
+              <div className="shrink-0 flex flex-col gap-4 items-stretch lg:items-end">
+                <div className="w-full lg:w-auto">
+                  <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-slate-400 dark:text-slate-500 mb-2 lg:text-right">
+                    Current Batch
+                  </p>
+                  <BatchSelector
+                    batches={batches}
+                    selectedBatchId={selectedBatchId}
+                    onSelect={id => setSelectedBatchId(id)}
+                    loading={batchesLoading}
+                  />
+                </div>
+
+                {!loading ? (
+                  <div className="flex gap-3">
+                    <div className="flex flex-col items-center justify-center w-24 h-24 bg-white dark:bg-[#1A1F2E] rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm transition-colors duration-500">
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">
+                        Active
+                      </p>
+                      <p className="text-2xl font-black text-slate-800 dark:text-slate-100 leading-none">
+                        {activeToday}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-center justify-center w-24 h-24 bg-white dark:bg-[#1A1F2E] rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm transition-colors duration-500">
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-1">
+                        <AlertTriangle className="h-2.5 w-2.5" /> Risk
+                      </p>
+                      <p className={cn(
+                        'text-2xl font-black leading-none transition-colors duration-500',
+                        atRiskCount > 0 ? 'text-rose-500 dark:text-rose-400' : 'text-emerald-500 dark:text-emerald-400'
+                      )}>
+                        {atRiskCount}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-center justify-center w-24 h-24 bg-white dark:bg-[#1A1F2E] rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm transition-colors duration-500">
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">
+                        Batch
+                      </p>
+                      <p className="text-2xl font-black text-slate-800 dark:text-slate-100 leading-none">
+                        {totalStudents}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex gap-3">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="w-24 h-24 bg-white/50 dark:bg-white/5 rounded-2xl animate-pulse" />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* ── Error state ── */}
+          {/* ══════════════════════════════════════════
+              Error State
+          ══════════════════════════════════════════ */}
           {error && (
-            <div className="bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 rounded-2xl px-4 sm:px-5 py-4 flex items-center gap-3">
-              <AlertCircle className="h-5 w-5 text-rose-500 shrink-0" />
-              <p className="text-sm text-rose-700 dark:text-rose-400 flex-1">{error}</p>
+            <div className="
+              rounded-2xl border px-5 py-4 flex items-center gap-4
+              bg-rose-50 border-rose-100 text-rose-700
+              dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-300
+              transition-colors duration-500
+            ">
+              <AlertCircle className="h-5 w-5 shrink-0 text-rose-500 dark:text-rose-400" />
+              <p className="text-sm font-medium flex-1">{error}</p>
               <button
                 onClick={refetch}
-                className="flex items-center gap-1.5 text-xs font-bold text-rose-600 dark:text-rose-400 hover:text-rose-700 transition-colors whitespace-nowrap"
+                className="flex items-center gap-1.5 text-sm font-bold hover:opacity-80 transition-opacity whitespace-nowrap"
               >
-                <RefreshCw className="h-3.5 w-3.5" /> Retry
+                <RefreshCw className="h-4 w-4" /> Retry
               </button>
             </div>
           )}
 
-          {/* ── No batches state ── */}
+          {/* ══════════════════════════════════════════
+              No Batches State
+          ══════════════════════════════════════════ */}
           {!batchesLoading && batches.length === 0 && (
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 px-6 py-12 text-center">
-              <p className="text-slate-500 dark:text-slate-400 text-sm">
+            <div className="
+              rounded-2xl border px-8 py-16 text-center
+              bg-white border-slate-200/60
+              dark:bg-[#1A1F2E] dark:border-white/5
+              shadow-sm transition-colors duration-500
+            ">
+              <p className="text-base text-slate-500 dark:text-slate-400 font-medium">
                 You are not assigned to any active batches yet.
               </p>
             </div>
           )}
 
-          {/* ── Section 2: Engagement Pulse ── */}
-          <EngagementPulseCards
-            data={data?.engagement_today ?? null}
-            loading={loading}
-            totalStudents={totalStudents}
-          />
+          {/* ══════════════════════════════════════════
+              Dashboard Content Sections
+          ══════════════════════════════════════════ */}
+          
+          <section className="space-y-4">
+            <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-slate-400 dark:text-slate-500 px-1">
+              Engagement Pulse
+            </p>
+            <EngagementPulseCards
+              data={data?.engagement_today ?? null}
+              loading={loading}
+              totalStudents={totalStudents}
+            />
+          </section>
 
-          {/* ── Section 3: Today's Batch Activity grid (full width) ── */}
-          <StudentActivityGrid
-            rows={data?.band_overview ?? []}
-            batchId={selectedBatchId}
-            loading={loading}
-          />
+          <section className="space-y-4">
+            <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-slate-400 dark:text-slate-500 px-1">
+              Today's Batch Activity
+            </p>
+            <StudentActivityGrid
+              rows={data?.band_overview ?? []}
+              batchId={selectedBatchId}
+              loading={loading}
+            />
+          </section>
 
-          {/* ── Section 4: Band Score Overview table (full width) ── */}
-          <BandOverviewTable
-            rows={data?.band_overview ?? []}
-            batchId={selectedBatchId}
-            loading={loading}
-          />
+          <section className="space-y-4">
+            <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-slate-400 dark:text-slate-500 px-1">
+              Band Score Overview
+            </p>
+            <BandOverviewTable
+              rows={data?.band_overview ?? []}
+              batchId={selectedBatchId}
+              loading={loading}
+            />
+          </section>
 
-          {/* ── Section 5: Risk Monitor ── */}
-          <AtRiskStudentList
-            students={data?.at_risk ?? []}
-            batchId={selectedBatchId}
-            loading={loading}
-          />
+          <section className="space-y-4">
+            <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-slate-400 dark:text-slate-500 px-1">
+              Risk Monitor
+            </p>
+            <AtRiskStudentList
+              students={data?.at_risk ?? []}
+              batchId={selectedBatchId}
+              loading={loading}
+            />
+          </section>
 
-          {/* ── Section 6: Period Summary ── */}
-          <PeriodSummaryRow
-            data={data?.period_summary ?? null}
-            loading={loading}
-          />
+          <section className="space-y-4">
+            <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-slate-400 dark:text-slate-500 px-1">
+              Period Summary
+            </p>
+            <PeriodSummaryRow
+              data={data?.period_summary ?? null}
+              loading={loading}
+            />
+          </section>
 
         </main>
       </div>

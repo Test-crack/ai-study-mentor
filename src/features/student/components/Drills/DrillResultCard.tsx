@@ -1,3 +1,4 @@
+// src/features/student/drills/DrillResultCard.tsx
 import React, { useState, useEffect } from 'react';
 import { CheckCircle2, PlayCircle, Lock, ExternalLink, MessageSquare, Flame, Zap, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -27,7 +28,7 @@ interface RecommendationItem {
   level:         string;
 }
 
-const FALLBACK_THUMB = null; // use CSS gradient placeholder when no thumbnail available
+const FALLBACK_THUMB = null;
 
 export default function DrillResultCard({
   skill, subSkill, momentumScore, feedback, drillSessionId, onUnlockNext,
@@ -39,13 +40,11 @@ export default function DrillResultCard({
   const [hasClicked,          setHasClicked]          = useState(false);
   const [savingReflection,    setSavingReflection]    = useState(false);
 
-  // Recommendation state
   const [rec,     setRec]     = useState<RecommendationItem | null>(null);
   const [recLoad, setRecLoad] = useState(true);
 
   const { totalMomentum, streak, syncMomentum } = useMomentum();
 
-  // ── Fetch recommendation on mount ────────────────────────────────────────
   useEffect(() => {
     const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
     const params = new URLSearchParams({ skill: skill.toUpperCase() });
@@ -57,7 +56,6 @@ export default function DrillResultCard({
       .finally(() => setRecLoad(false));
   }, [skill, subSkill]);
 
-  // ── Watch timer ───────────────────────────────────────────────────────────
   useEffect(() => {
     if (!hasClicked || watchTimer <= 0) return;
     const t = setInterval(() => setWatchTimer(p => p - 1), 1000);
@@ -94,14 +92,12 @@ export default function DrillResultCard({
       }
     } catch (err) {
       console.warn('[DrillResultCard] reflection save failed:', err);
-      // Non-blocking — still let the user proceed
     } finally {
       setSavingReflection(false);
       onUnlockNext();
     }
   };
 
-  // ── Derived display values ────────────────────────────────────────────────
   const recTitle = rec?.title ?? `Mastering ${subSkill.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}`;
   const thumbSrc = rec?.thumbnail_url ?? null;
 
@@ -114,39 +110,43 @@ export default function DrillResultCard({
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8">
 
-      {/* Score Summary */}
-      <div className="bg-emerald-500 text-white p-8 rounded-3xl shadow-lg relative overflow-hidden">
+      {/* Score Summary — white pop-out card with emerald numerals */}
+      <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-white/[0.06] p-8 rounded-3xl shadow-sm dark:shadow-[0_0_30px_rgba(16,185,129,0.08)] relative overflow-hidden">
+        {/* Soft emerald glow */}
+        <div className="pointer-events-none absolute -top-12 -right-12 w-44 h-44 rounded-full bg-emerald-400/15 dark:bg-emerald-500/15 blur-3xl" />
         <div className="relative z-10 flex flex-col items-center text-center mb-6">
-          <CheckCircle2 className="w-16 h-16 mx-auto mb-4 opacity-90" />
-          <h2 className="text-3xl font-black mb-2">Drill Complete!</h2>
-          <p className="text-emerald-100 font-medium text-lg">You earned +{momentumScore} points.</p>
-        </div>
-        <div className="grid grid-cols-2 gap-4 border-t border-emerald-400/50 pt-6 mt-2 relative z-10">
-          <div className="text-center">
-            <p className="text-emerald-100 text-xs font-bold uppercase tracking-wider mb-1 flex justify-center items-center gap-1">
-              <Zap className="w-4 h-4" /> Total Momentum
-            </p>
-            <p className="text-2xl font-black">{totalMomentum}</p>
+          <div className="h-16 w-16 rounded-2xl bg-emerald-50 dark:bg-emerald-500/15 flex items-center justify-center mb-4 ring-4 ring-emerald-100/50 dark:ring-emerald-500/10">
+            <CheckCircle2 className="w-9 h-9 text-emerald-500" />
           </div>
-          <div className="text-center border-l border-emerald-400/50">
-            <p className="text-emerald-100 text-xs font-bold uppercase tracking-wider mb-1 flex justify-center items-center gap-1">
-              <Flame className="w-4 h-4 text-orange-300" /> Streak
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white mb-2">Drill Complete!</h2>
+          <p className="text-emerald-600 dark:text-emerald-400 font-bold text-lg">You earned +{momentumScore} points.</p>
+        </div>
+        <div className="grid grid-cols-2 gap-4 border-t border-slate-100 dark:border-white/[0.06] pt-6 mt-2 relative z-10">
+          <div className="text-center">
+            <p className="text-slate-400 dark:text-slate-500 text-[11px] font-bold uppercase tracking-wider mb-1 flex justify-center items-center gap-1">
+              <Zap className="w-4 h-4 text-amber-500" /> Total Momentum
             </p>
-            <p className="text-2xl font-black">Day {streak}</p>
+            <p className="text-2xl font-black text-slate-800 dark:text-white tabular-nums">{totalMomentum}</p>
+          </div>
+          <div className="text-center border-l border-slate-100 dark:border-white/[0.06]">
+            <p className="text-slate-400 dark:text-slate-500 text-[11px] font-bold uppercase tracking-wider mb-1 flex justify-center items-center gap-1">
+              <Flame className="w-4 h-4 text-orange-500" /> Streak
+            </p>
+            <p className="text-2xl font-black text-slate-800 dark:text-white tabular-nums">Day {streak}</p>
           </div>
         </div>
       </div>
 
       {/* Session Feedback */}
       {feedback && feedback.length > 0 && (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+        <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-white/[0.06] rounded-3xl p-6 shadow-sm">
           <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-widest mb-4 flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-blue-500" /> Session Feedback
+            <MessageSquare className="w-5 h-5 text-indigo-500" /> Session Feedback
           </h3>
           <div className="space-y-3">
             {feedback.map((text, i) => (
-              <div key={i} className="flex gap-3 text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl">
-                <span className="font-bold text-blue-500 shrink-0">Q{i + 1}.</span>
+              <div key={i} className="flex gap-3 text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-white/[0.03] p-3.5 rounded-xl">
+                <span className="font-bold text-indigo-500 shrink-0">Q{i + 1}.</span>
                 <p>{text}</p>
               </div>
             ))}
@@ -154,19 +154,19 @@ export default function DrillResultCard({
         </div>
       )}
 
-      {/* Video Recommendation Gate — skipped when no rec available */}
+      {/* Video Recommendation Gate */}
       {!recLoad && !rec ? (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm text-center">
-          <p className="text-slate-500 text-sm font-medium mb-4">No recommended lesson available for this topic right now.</p>
+        <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-white/[0.06] rounded-3xl p-6 shadow-sm text-center">
+          <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-4">No recommended lesson available for this topic right now.</p>
           <button
             onClick={onUnlockNext}
-            className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition-colors"
+            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors shadow-md"
           >
             Continue to Next Drill
           </button>
         </div>
       ) : (
-      <div className="bg-white dark:bg-slate-900 border-2 border-indigo-100 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+      <div className="bg-white dark:bg-slate-900/60 border border-indigo-100 dark:border-white/[0.06] rounded-3xl p-6 shadow-sm">
         <h3 className="text-sm font-bold text-indigo-500 uppercase tracking-widest mb-4 flex items-center gap-2">
           <PlayCircle className="w-5 h-5" /> Recommended Lesson
         </h3>
@@ -203,20 +203,18 @@ export default function DrillResultCard({
         </div>
 
         {/* Info row */}
-        <div className="bg-slate-50 dark:bg-slate-800 p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
+        <div className="bg-slate-50 dark:bg-white/[0.03] p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
           <div className="flex-1 min-w-0">
-            {/* Title */}
             <p className="font-bold text-slate-800 dark:text-white text-base leading-snug mb-1">{recTitle}</p>
 
-            {/* Meta tags */}
             <div className="flex flex-wrap items-center gap-1.5 mb-2">
               {targetTag && (
-                <span className="text-[10px] font-black uppercase tracking-widest bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-bold uppercase tracking-widest bg-indigo-100 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full">
                   {targetTag}
                 </span>
               )}
               {levelTag && (
-                <span className="text-[10px] font-black uppercase tracking-widest bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-bold uppercase tracking-widest bg-slate-200 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full">
                   {levelTag}
                 </span>
               )}
@@ -232,9 +230,8 @@ export default function DrillResultCard({
               )}
             </div>
 
-            {/* Description */}
             {rec?.description && (
-              <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">{rec.description}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">{rec.description}</p>
             )}
           </div>
 
@@ -244,14 +241,14 @@ export default function DrillResultCard({
               disabled={!hasClicked || watchTimer > 0}
               className={`px-6 py-2.5 text-white text-sm font-bold rounded-xl w-full sm:w-auto transition-all ${
                 !hasClicked || watchTimer > 0
-                  ? 'bg-slate-300 dark:bg-slate-700 cursor-not-allowed text-slate-500'
-                  : 'bg-indigo-500 hover:bg-indigo-600 shadow-md'
+                  ? 'bg-slate-300 dark:bg-white/[0.08] cursor-not-allowed text-slate-500'
+                  : 'bg-indigo-600 hover:bg-indigo-700 shadow-md'
               }`}
             >
               {!hasClicked ? 'Mark as Watched' : watchTimer > 0 ? `Wait ${watchTimer}s…` : 'Mark as Watched'}
             </button>
           ) : (
-            <span className="flex items-center text-emerald-500 font-bold bg-emerald-50 px-4 py-2 rounded-lg">
+            <span className="flex items-center text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-500/10 px-4 py-2 rounded-lg">
               <CheckCircle2 className="w-4 h-4 mr-2" /> Watched
             </span>
           )}
@@ -259,7 +256,7 @@ export default function DrillResultCard({
 
         {/* Reflection gate */}
         {videoWatched && (
-          <div className="space-y-4 animate-in fade-in zoom-in duration-300 border-t border-slate-100 dark:border-slate-800 pt-6">
+          <div className="space-y-4 animate-in fade-in zoom-in duration-300 border-t border-slate-100 dark:border-white/[0.06] pt-6">
             <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">
               In one sentence, what is one thing from this video you will try in your next session?
             </label>
@@ -267,14 +264,14 @@ export default function DrillResultCard({
               value={reflection}
               onChange={e => setReflection(e.target.value)}
               placeholder="E.g., I will focus on my syllable stress…"
-              className="w-full p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-indigo-500 outline-none resize-none"
+              className="w-full p-4 rounded-xl border border-slate-200 dark:border-white/[0.07] bg-transparent focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none resize-none text-slate-800 dark:text-slate-200 transition-all"
               rows={3}
             />
             {error && <p className="text-rose-500 text-sm font-bold">{error}</p>}
             <button
               onClick={handleSubmitReflection}
               disabled={savingReflection}
-              className="w-full py-4 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+              className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2 shadow-md"
             >
               {savingReflection ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</>

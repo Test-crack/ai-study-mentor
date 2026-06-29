@@ -1,3 +1,4 @@
+// src/features/Instructor/components/InstructorBatchView.tsx
 import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import {
   Layers, Users, RefreshCw, Loader2, GraduationCap,
@@ -96,11 +97,11 @@ function bandColorText(b: number | null): string {
 }
 
 function bandBg(b: number | null): string {
-  if (b === null) return 'bg-slate-100 dark:bg-slate-800 text-slate-400';
-  if (b >= 7.5) return 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30';
-  if (b >= 6.0) return 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30';
-  if (b > 0)    return 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30';
-  return 'bg-slate-100 dark:bg-slate-800 text-slate-400';
+  if (b === null) return 'bg-slate-100 dark:bg-white/[0.05] text-slate-400';
+  if (b >= 7.5) return 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 dark:shadow-[0_0_10px_rgba(16,185,129,0.15)]';
+  if (b >= 6.0) return 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30 dark:shadow-[0_0_10px_rgba(245,158,11,0.15)]';
+  if (b > 0)    return 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30 dark:shadow-[0_0_10px_rgba(244,63,94,0.15)]';
+  return 'bg-slate-100 dark:bg-white/[0.05] text-slate-400';
 }
 
 function iaStatusConfig(item: BandOverviewItem | undefined) {
@@ -115,7 +116,7 @@ function iaStatusConfig(item: BandOverviewItem | undefined) {
       return { dot: 'bg-emerald-500', cls: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30', label: 'IA recent' };
     }
   }
-  return { dot: 'bg-slate-300 dark:bg-slate-600', cls: 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700', label: 'No IA yet' };
+  return { dot: 'bg-slate-300 dark:bg-slate-600', cls: 'bg-slate-100 dark:bg-white/[0.05] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/[0.07]', label: 'No IA yet' };
 }
 
 // ─── Status config ─────────────────────────────────────────────────────────────
@@ -123,7 +124,7 @@ function iaStatusConfig(item: BandOverviewItem | undefined) {
 const STATUS_CONFIG = {
   ACTIVE:    { label: 'Active',    dot: 'bg-emerald-500', cls: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30' },
   INACTIVE:  { label: 'Inactive',  dot: 'bg-amber-500',   cls: 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30' },
-  COMPLETED: { label: 'Completed', dot: 'bg-slate-400',   cls: 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700' },
+  COMPLETED: { label: 'Completed', dot: 'bg-slate-400',   cls: 'bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/[0.07]' },
 } as const;
 
 // ─── Skeletons ────────────────────────────────────────────────────────────────
@@ -132,7 +133,7 @@ function StatsSkeleton() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       {[0, 1, 2].map(i => (
-        <div key={i} className="rounded-2xl h-[104px] bg-slate-200 dark:bg-slate-800 animate-pulse" />
+        <div key={i} className="rounded-2xl h-[104px] bg-slate-200 dark:bg-white/[0.04] animate-pulse" />
       ))}
     </div>
   );
@@ -140,16 +141,16 @@ function StatsSkeleton() {
 
 function BatchSkeleton() {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+    <div className="bg-white dark:bg-[#0E0E16] rounded-2xl border border-slate-200/70 dark:border-white/[0.06] p-5 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.08)] dark:shadow-none">
       <div className="flex items-start justify-between gap-4 animate-pulse">
         <div className="flex items-start gap-4">
-          <div className="w-11 h-11 rounded-xl bg-slate-200 dark:bg-slate-700 shrink-0" />
+          <div className="w-11 h-11 rounded-xl bg-slate-200 dark:bg-white/5 shrink-0" />
           <div className="space-y-2 py-1">
-            <div className="h-5 w-48 bg-slate-200 dark:bg-slate-700 rounded" />
-            <div className="h-3 w-32 bg-slate-200 dark:bg-slate-700 rounded" />
+            <div className="h-5 w-48 bg-slate-200 dark:bg-white/5 rounded" />
+            <div className="h-3 w-32 bg-slate-200 dark:bg-white/5 rounded" />
           </div>
         </div>
-        <div className="w-20 h-6 bg-slate-200 dark:bg-slate-700 rounded-full" />
+        <div className="w-20 h-6 bg-slate-200 dark:bg-white/5 rounded-full" />
       </div>
     </div>
   );
@@ -178,10 +179,10 @@ function StudentRow({
   };
 
   return (
-    <div className="flex items-center gap-3 py-2.5 px-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors group">
+    <div className="flex items-center gap-3 py-2.5 px-4 rounded-xl hover:bg-indigo-50/50 dark:hover:bg-indigo-500/[0.06] transition-colors group">
       {/* Avatar */}
       {student.profileImage ? (
-        <img src={student.profileImage} alt="" className="w-9 h-9 rounded-full object-cover shrink-0 ring-2 ring-white dark:ring-slate-900" />
+        <img src={student.profileImage} alt="" className="w-9 h-9 rounded-full object-cover shrink-0 ring-2 ring-white dark:ring-white/[0.06]" />
       ) : (
         <div className="w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center text-xs font-black text-indigo-600 dark:text-indigo-400 shrink-0">
           {getInitials(student.name, student.email)}
@@ -190,10 +191,10 @@ function StudentRow({
 
       {/* Name + email */}
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate leading-tight">
+        <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate leading-tight">
           {student.name ?? <span className="italic text-slate-400 font-normal text-xs">Name not set</span>}
         </p>
-        <p className="flex items-center gap-1 text-xs text-slate-400 mt-0.5 truncate">
+        <p className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500 mt-0.5 truncate">
           <Mail className="w-3 h-3 shrink-0" />
           {student.email}
         </p>
@@ -215,7 +216,7 @@ function StudentRow({
             'inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold',
             enrich && (enrich.streak > 0 || enrich.drilled_today)
               ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/30'
-              : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+              : 'bg-slate-100 dark:bg-white/[0.05] text-slate-400'
           )}>
             <Flame className="w-3 h-3 shrink-0" />
             {enrich && enrich.streak > 0 ? enrich.streak : '—'}
@@ -236,7 +237,7 @@ function StudentRow({
 
         {/* Enrolled — w-24 (hidden below lg) */}
         <div className="w-24 hidden lg:flex justify-end">
-          <span className="text-xs text-slate-400">{formatDate(student.enrolledAt)}</span>
+          <span className="text-xs text-slate-400 dark:text-slate-500">{formatDate(student.enrolledAt)}</span>
         </div>
 
         {/* View button — w-20 */}
@@ -287,7 +288,7 @@ function BatchSummaryBar({ batch, enrichment }: { batch: InstructorBatch; enrich
   ].filter(Boolean) as Array<{ label: string; cls: string; icon: ReactNode }>;
 
   return (
-    <div className="flex items-center gap-0 flex-wrap px-5 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/20">
+    <div className="flex items-center gap-0 flex-wrap px-5 py-3 border-b border-slate-100 dark:border-white/[0.05] bg-slate-50/80 dark:bg-white/[0.02]">
       {items.map((item, i) => (
         <span key={i} className="flex items-center gap-1">
           {i > 0 && <span className="text-slate-300 dark:text-slate-600 mx-2">·</span>}
@@ -340,7 +341,7 @@ function BatchCard({
     : null;
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-all duration-200">
+    <div className="bg-white dark:bg-[#0E0E16] rounded-2xl border border-slate-200/70 dark:border-white/[0.06] shadow-[0_2px_12px_-4px_rgba(15,23,42,0.08)] dark:shadow-none overflow-hidden transition-all duration-200">
       {/* ── Card Header ── */}
       <button
         onClick={() => setExpanded(v => !v)}
@@ -348,7 +349,7 @@ function BatchCard({
       >
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-4 min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shrink-0 shadow-md shadow-indigo-500/20">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shrink-0 shadow-md shadow-indigo-500/25">
               <Layers className="w-5 h-5 text-white" />
             </div>
             <div className="min-w-0">
@@ -359,7 +360,7 @@ function BatchCard({
               {batch.institute.name && (
                 <div className="flex items-center gap-1 mt-1">
                   <Building2 className="w-3 h-3 text-slate-400" />
-                  <span className="text-xs text-slate-400">{batch.institute.name}</span>
+                  <span className="text-xs text-slate-400 dark:text-slate-500">{batch.institute.name}</span>
                 </div>
               )}
             </div>
@@ -380,7 +381,7 @@ function BatchCard({
           <div className="flex items-center gap-2">
             <GraduationCap className="w-3.5 h-3.5 text-indigo-500" />
             <span className="text-sm font-bold text-slate-800 dark:text-white">{batch.studentCount}</span>
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-slate-400 dark:text-slate-500">
               {batch.maxStudents ? `/ ${batch.maxStudents} ` : ''}students
             </span>
           </div>
@@ -392,7 +393,7 @@ function BatchCard({
           </div>
           {fillPct !== null && (
             <div className="flex items-center gap-2 flex-1 min-w-[120px]">
-              <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+              <div className="flex-1 h-1.5 bg-slate-100 dark:bg-white/[0.06] rounded-full overflow-hidden">
                 <div
                   className={cn(
                     'h-full rounded-full transition-all',
@@ -401,7 +402,7 @@ function BatchCard({
                   style={{ width: `${fillPct}%` }}
                 />
               </div>
-              <span className="text-xs font-medium text-slate-400">{fillPct}%</span>
+              <span className="text-xs font-medium text-slate-400 dark:text-slate-500">{fillPct}%</span>
             </div>
           )}
         </div>
@@ -409,14 +410,14 @@ function BatchCard({
 
       {/* ── Expanded Section ── */}
       {expanded && (
-        <div className="border-t border-slate-100 dark:border-slate-800">
+        <div className="border-t border-slate-100 dark:border-white/[0.05]">
           {/* Summary bar */}
           <BatchSummaryBar batch={batch} enrichment={enrichment} />
 
           {/* Co-instructors */}
           {batch.instructors.length > 1 && (
-            <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">Co-instructors:</span>
+            <div className="px-5 py-3 border-b border-slate-100 dark:border-white/[0.05] flex items-center gap-2 flex-wrap">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mr-1">Co-instructors:</span>
               {batch.instructors.map(i => (
                 <span key={i.userId} className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 text-xs font-medium border border-violet-200 dark:border-violet-500/20">
                   {i.profileImage
@@ -430,7 +431,7 @@ function BatchCard({
           )}
 
           {/* Search + enrichment hint */}
-          <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center gap-4 flex-wrap">
+          <div className="px-5 py-3 border-b border-slate-100 dark:border-white/[0.05] flex items-center gap-4 flex-wrap">
             <div className="relative flex-1 min-w-[200px] max-w-xs">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
               <input
@@ -438,7 +439,7 @@ function BatchCard({
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Search students…"
-                className="w-full pl-9 pr-4 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
+                className="w-full pl-9 pr-4 py-2 text-sm bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.07] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
               />
             </div>
             {enrichLoading && (
@@ -451,7 +452,7 @@ function BatchCard({
 
           {/* Column header — widths must match StudentRow fixed columns exactly */}
           {batch.students.length > 0 && (
-            <div className="hidden sm:flex items-center px-4 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/20">
+            <div className="hidden sm:flex items-center px-4 py-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider border-b border-slate-100 dark:border-white/[0.05] bg-slate-50/60 dark:bg-white/[0.02]">
               <div className="w-9 shrink-0" />
               <div className="flex-1 min-w-0 pl-3">Student</div>
               <div className="flex items-center shrink-0">
@@ -465,7 +466,7 @@ function BatchCard({
           )}
 
           {/* Student list */}
-          <div className="px-1 py-2 divide-y divide-slate-50 dark:divide-slate-800/50">
+          <div className="px-1 py-2 divide-y divide-slate-50 dark:divide-white/[0.03]">
             {filtered.length === 0 ? (
               <div className="py-10 text-center">
                 <GraduationCap className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
@@ -521,14 +522,25 @@ export default function InstructorBatchView() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 transition-colors duration-300">
+    <div className="
+      relative min-h-screen
+      bg-[#f8fafc] text-slate-900
+      dark:bg-[#0A0A0F] dark:text-slate-200
+      transition-colors duration-500
+    ">
+      {/* Ambient page glows (dark only) */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden hidden dark:block">
+        <div className="absolute -top-60 left-1/4 w-[44rem] h-[44rem] rounded-full bg-blue-700/10 blur-[140px]" />
+        <div className="absolute -bottom-20 -left-20 w-[32rem] h-[32rem] rounded-full bg-indigo-600/8 blur-[130px]" />
+      </div>
+
       <InstructorSidebar
         activeTab="batches"
         isCollapsed={isCollapsed}
         toggleCollapse={() => setIsCollapsed(v => !v)}
       />
 
-      <div className={cn('transition-all duration-300 flex flex-col min-h-screen', isCollapsed ? 'lg:pl-[112px]' : 'lg:pl-[288px]')}>
+      <div className={cn('relative z-10 transition-all duration-300 flex flex-col min-h-screen', isCollapsed ? 'lg:pl-[112px]' : 'lg:pl-[288px]')}>
         <InstructorTopbar />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
@@ -537,9 +549,9 @@ export default function InstructorBatchView() {
             {/* Header */}
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-black text-slate-900 dark:text-white">My Batches</h1>
+                <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">My Batches</h1>
                 {loading ? (
-                  <div className="h-4 w-48 bg-slate-200 dark:bg-slate-700 rounded animate-pulse mt-1.5" />
+                  <div className="h-4 w-48 bg-slate-200 dark:bg-white/5 rounded animate-pulse mt-1.5" />
                 ) : (
                   <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
                     {totals.batches} batch{totals.batches !== 1 ? 'es' : ''} · {totals.students} total students
@@ -548,7 +560,7 @@ export default function InstructorBatchView() {
               </div>
               <button
                 onClick={load}
-                className="p-2 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                className="p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-colors"
               >
                 <RefreshCw className={cn('w-4 h-4', loading && 'animate-spin text-indigo-500')} />
               </button>
@@ -563,7 +575,7 @@ export default function InstructorBatchView() {
                 </div>
               </>
             ) : batches.length === 0 ? (
-              <div className="py-24 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <div className="py-24 text-center bg-white dark:bg-[#0E0E16] rounded-2xl border border-slate-200/70 dark:border-white/[0.06] shadow-[0_2px_12px_-4px_rgba(15,23,42,0.08)] dark:shadow-none">
                 <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center mx-auto mb-4">
                   <Layers className="w-8 h-8 text-indigo-400" />
                 </div>
@@ -574,15 +586,19 @@ export default function InstructorBatchView() {
               </div>
             ) : (
               <>
-                {/* Summary stat cards */}
+                {/* Summary stat cards — tinted like Engagement Pulse */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {[
-                    { label: 'Total Batches',  value: totals.batches,  cls: 'text-indigo-600 dark:text-indigo-400' },
-                    { label: 'Active Batches', value: totals.active,   cls: 'text-emerald-600 dark:text-emerald-400' },
-                    { label: 'Total Students', value: totals.students, cls: 'text-violet-600 dark:text-violet-400' },
+                    { label: 'Total Batches',  value: totals.batches,  cls: 'text-indigo-700 dark:text-indigo-300',  cardBg: 'bg-indigo-50/80 border-indigo-100 dark:bg-indigo-950/40 dark:border-indigo-500/20 dark:shadow-[0_0_28px_rgba(99,102,241,0.18)]' },
+                    { label: 'Active Batches', value: totals.active,   cls: 'text-emerald-700 dark:text-emerald-300', cardBg: 'bg-emerald-50/80 border-emerald-100 dark:bg-emerald-950/40 dark:border-emerald-500/20 dark:shadow-[0_0_28px_rgba(16,185,129,0.15)]' },
+                    { label: 'Total Students', value: totals.students, cls: 'text-violet-700 dark:text-violet-300',   cardBg: 'bg-violet-50/80 border-violet-100 dark:bg-violet-950/40 dark:border-violet-500/20 dark:shadow-[0_0_28px_rgba(139,92,246,0.16)]' },
                   ].map(s => (
-                    <div key={s.label} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm text-center">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{s.label}</p>
+                    <div key={s.label} className={cn(
+                      'rounded-2xl border p-5 text-center transition-all duration-200 hover:-translate-y-0.5',
+                      'shadow-[0_2px_8px_-2px_rgba(15,23,42,0.06)] dark:backdrop-blur-sm',
+                      s.cardBg
+                    )}>
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{s.label}</p>
                       <p className={cn('text-3xl font-black mt-1', s.cls)}>{s.value}</p>
                     </div>
                   ))}

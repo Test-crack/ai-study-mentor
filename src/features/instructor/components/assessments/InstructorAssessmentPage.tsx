@@ -1,3 +1,4 @@
+// src/features/Instructor/components/assessments/InstructorAssessmentPage.tsx
 import { useState, useEffect } from 'react';
 import { ClipboardList, BookOpen, Stethoscope, RefreshCw } from 'lucide-react';
 import { InstructorSidebar } from '../dashboard/InstructorSidebar';
@@ -21,14 +22,14 @@ const TABS: Array<{ id: Tab; label: string; icon: React.ReactNode }> = [
 
 function SkeletonTable() {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-pulse">
+    <div className="bg-white dark:bg-[#0E0E16] rounded-2xl border border-slate-200/70 dark:border-white/[0.06] overflow-hidden animate-pulse">
       {[...Array(6)].map((_, i) => (
-        <div key={i} className="flex items-center gap-4 px-5 py-4 border-b border-slate-100 dark:border-slate-800 last:border-0">
-          <div className="h-8 w-8 rounded-full bg-slate-200 dark:bg-slate-800 shrink-0" />
-          <div className="h-3 w-36 bg-slate-200 dark:bg-slate-800 rounded" />
-          <div className="h-3 w-12 bg-slate-100 dark:bg-slate-800 rounded ml-auto" />
-          <div className="h-3 w-12 bg-slate-100 dark:bg-slate-800 rounded" />
-          <div className="h-3 w-12 bg-slate-100 dark:bg-slate-800 rounded" />
+        <div key={i} className="flex items-center gap-4 px-5 py-4 border-b border-slate-100 dark:border-white/[0.04] last:border-0">
+          <div className="h-8 w-8 rounded-full bg-slate-200 dark:bg-white/5 shrink-0" />
+          <div className="h-3 w-36 bg-slate-200 dark:bg-white/5 rounded" />
+          <div className="h-3 w-12 bg-slate-100 dark:bg-white/5 rounded ml-auto" />
+          <div className="h-3 w-12 bg-slate-100 dark:bg-white/5 rounded" />
+          <div className="h-3 w-12 bg-slate-100 dark:bg-white/5 rounded" />
         </div>
       ))}
     </div>
@@ -51,7 +52,18 @@ export default function InstructorAssessmentPage() {
   }, [batches, batchId]);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 transition-colors duration-300">
+    <div className="
+      relative min-h-screen
+      bg-[#f8fafc] text-slate-900
+      dark:bg-[#0A0A0F] dark:text-slate-200
+      transition-colors duration-500
+    ">
+      {/* Ambient page glows (dark only) */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden hidden dark:block">
+        <div className="absolute -top-60 left-1/4 w-[44rem] h-[44rem] rounded-full bg-blue-700/10 blur-[140px]" />
+        <div className="absolute -bottom-20 -left-20 w-[32rem] h-[32rem] rounded-full bg-indigo-600/8 blur-[130px]" />
+      </div>
+
       <InstructorSidebar
         activeTab="assessments"
         isCollapsed={isSidebarCollapsed}
@@ -59,10 +71,9 @@ export default function InstructorAssessmentPage() {
       />
 
       <div className={cn(
-        'transition-all duration-300 flex flex-col min-h-screen',
+        'relative z-10 transition-all duration-300 flex flex-col min-h-screen',
         isSidebarCollapsed ? 'lg:pl-24' : 'lg:pl-72'
       )}>
-        {/* Topbar — matches the reference page pattern */}
         <InstructorTopbar />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
@@ -99,7 +110,7 @@ export default function InstructorAssessmentPage() {
 
             {/* ── No batch selected ─────────────────────────────────────────────── */}
             {!batchId && (
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-16 text-center">
+              <div className="bg-white dark:bg-[#0E0E16] rounded-2xl border border-slate-200/70 dark:border-white/[0.06] shadow-[0_2px_12px_-4px_rgba(15,23,42,0.08)] dark:shadow-none p-16 text-center">
                 <ClipboardList className="h-10 w-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
                 <p className="text-slate-500 dark:text-slate-400 font-semibold text-sm">
                   Select a batch to view assessment data
@@ -112,18 +123,18 @@ export default function InstructorAssessmentPage() {
               <div className="space-y-5 animate-pulse">
                 <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
                   {[...Array(6)].map((_, i) => (
-                    <div key={i} className="h-24 bg-slate-200 dark:bg-slate-800 rounded-2xl" />
+                    <div key={i} className="h-24 bg-slate-200 dark:bg-white/[0.04] rounded-2xl" />
                   ))}
                 </div>
-                <div className="h-12 w-full max-w-sm bg-slate-200 dark:bg-slate-800 rounded-2xl" />
+                <div className="h-12 w-full max-w-sm bg-slate-200 dark:bg-white/[0.04] rounded-2xl" />
                 <SkeletonTable />
               </div>
             )}
 
             {/* ── Error ─────────────────────────────────────────────────────────── */}
             {batchId && !loading && error && (
-              <div className="bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 rounded-2xl p-8 text-center">
-                <p className="text-rose-700 dark:text-rose-400 font-semibold text-sm">{error}</p>
+              <div className="bg-rose-50 dark:bg-rose-500/[0.08] border border-rose-200 dark:border-rose-400/20 rounded-2xl p-8 text-center shadow-[0_2px_10px_-3px_rgba(244,63,94,0.12)] dark:shadow-none">
+                <p className="text-rose-700 dark:text-rose-300 font-semibold text-sm">{error}</p>
                 <button
                   onClick={refetch}
                   className="mt-3 text-xs font-bold text-rose-600 dark:text-rose-400 hover:underline"
@@ -146,7 +157,7 @@ export default function InstructorAssessmentPage() {
 
                 {/* Tab bar — horizontally scrollable on mobile */}
                 <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0 pb-0.5">
-                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-1.5 flex gap-1 w-fit">
+                  <div className="bg-white dark:bg-[#0E0E16] rounded-2xl border border-slate-200/70 dark:border-white/[0.06] shadow-[0_2px_12px_-4px_rgba(15,23,42,0.08)] dark:shadow-none p-1.5 flex gap-1 w-fit">
                     {TABS.map(tab => (
                       <button
                         key={tab.id}
@@ -154,8 +165,8 @@ export default function InstructorAssessmentPage() {
                         className={cn(
                           'flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 whitespace-nowrap',
                           activeTab === tab.id
-                            ? 'bg-indigo-600 text-white shadow-sm'
-                            : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                            ? 'bg-indigo-600 text-white shadow-[0_4px_14px_-2px_rgba(99,102,241,0.5)] dark:bg-indigo-500/15 dark:text-indigo-300 dark:border dark:border-indigo-500/20 dark:shadow-[0_0_20px_rgba(99,102,241,0.15)]'
+                            : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/[0.04]'
                         )}
                       >
                         {tab.icon}

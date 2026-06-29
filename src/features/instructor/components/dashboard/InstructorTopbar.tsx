@@ -1,3 +1,4 @@
+// src/features/Instructor/dashboard/InstructorTopbar.tsx
 import { Search, Bell, Menu, Plus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { Button } from "@/shared/components/ui/button";
@@ -16,81 +17,86 @@ export const InstructorTopbar = ({ onCreateCourse }: InstructorTopbarProps) => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
-  
+
   const displayName = profile?.name || user?.email?.split('@')[0] || "Instructor";
 
   return (
-    <header className="flex items-center justify-between w-full py-4 px-4 sm:px-6 gap-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-30 lg:rounded-2xl lg:mx-4 lg:mt-4 lg:shadow-sm border-b lg:border-none border-slate-100 dark:border-slate-800 transition-colors">
-      
-      {/* Mobile Menu Trigger */}
+    <header className={[
+      // Layout
+      "sticky top-0 z-30 flex items-center justify-between w-full px-4 sm:px-5 py-3 gap-4",
+      // Light surface — floated card look
+      "bg-white/80 backdrop-blur-md",
+      "border-b border-slate-200/70",
+      "lg:mx-4 lg:mt-4 lg:rounded-2xl lg:border lg:border-slate-200/60",
+      "lg:shadow-[0_2px_12px_-4px_rgba(15,23,42,0.08)]",
+      // Dark surface
+      "dark:bg-[#0D0D14]/80 dark:border-white/[0.05]",
+      "dark:lg:shadow-[0_2px_20px_rgba(0,0,0,0.4)]",
+      // Transition
+      "transition-colors duration-500",
+    ].join(" ")}
+    >
+
+      {/* Mobile menu trigger */}
       <div className="lg:hidden">
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="text-slate-500 dark:text-slate-400">
-              <Menu className="h-6 w-6" />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.06]"
+            >
+              <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="p-0 bg-slate-900 border-none w-72">
-         <InstructorSidebar 
-   isCollapsed={false} 
-   toggleCollapse={() => {}} 
-   activeTab={activeTab}
-   onTabChange={setActiveTab}
-   // Add 'flex' here to override the 'hidden' class from the base component
-   className="flex static w-full h-full rounded-none shadow-none border-none" 
-/>
+          <SheetContent
+            side="left"
+            className="p-0 w-72 bg-white dark:bg-[#0D0D14] border-r border-slate-200/70 dark:border-white/[0.05]"
+          >
+            <InstructorSidebar
+              isCollapsed={false}
+              toggleCollapse={() => {}}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              className="flex static w-full h-full rounded-none shadow-none border-none left-0 top-0 bottom-0"
+            />
           </SheetContent>
         </Sheet>
       </div>
 
-      {/* Search Input */}
-      {/* <div className="flex-1 max-w-xl hidden sm:block">
-        <div className="relative group">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
-          <input 
-            type="text" 
-            placeholder="Search students, courses, or resources..." 
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm font-medium text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
-          />
-        </div>
-      </div> */}
+      {/* Right actions */}
+      <div className="flex items-center gap-2 sm:gap-3 ml-auto">
 
-      {/* Right Actions - Added ml-auto here to push content to the right edge */}
-      <div className="flex items-center gap-3 sm:gap-4 ml-auto">
-        {/* Create Course Button */}
-        {/* <Button 
-          size="sm"
-          onClick={() => {
-             if (onCreateCourse) onCreateCourse();
-             else navigate('/courses/admin/manage/new');
-          }}
-          className="hidden md:flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white transition-colors rounded-full px-4"
-        >
-          <Plus className="h-4 w-4" />
-          <span className="font-semibold text-xs uppercase tracking-wide">Create Course</span>
-        </Button> */}
-
-        {/* Theme Toggle */}
+        {/* Theme toggle */}
         <ThemeToggle />
 
-        {/* Notifications */}
-        {/* <button className="relative p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-800 rounded-full transition-all">
-          <Bell className="h-5 w-5" />
-          <span className="absolute top-2 right-2.5 h-2 w-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
-        </button> */}
+        {/* Divider */}
+        <div className="h-7 w-px bg-slate-200/80 dark:bg-white/[0.07]" />
 
-        {/* Profile */}
-        <div className="flex items-center gap-3 pl-2 border-l border-slate-100 dark:border-slate-800">
+        {/* Profile block */}
+        <div className="flex items-center gap-2.5">
           <div className="text-right hidden md:block">
-            <p className="text-sm font-bold text-slate-700 dark:text-slate-200 leading-none">{displayName}</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 uppercase tracking-wider">Instructor</p>
+            <p className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-none">
+              {displayName}
+            </p>
+            <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-slate-400 dark:text-slate-500 mt-0.5">
+              Instructor
+            </p>
           </div>
-          <Avatar 
-            className="h-9 w-9 border-2 border-white dark:border-slate-800 shadow-sm ring-1 ring-slate-100 dark:ring-slate-700 cursor-pointer hover:ring-indigo-100 transition-all"
+
+          <Avatar
+            className={[
+              "h-8 w-8 cursor-pointer shrink-0",
+              "ring-2 ring-slate-100 dark:ring-white/[0.06]",
+              "hover:ring-indigo-200 dark:hover:ring-indigo-500/30",
+              "transition-all duration-200",
+              "border-2 border-white dark:border-[#0D0D14]",
+              "shadow-sm",
+            ].join(" ")}
             onClick={() => navigate('/profile')}
           >
             <AvatarImage src={profile?.profileImage || ""} />
-            <AvatarFallback className="bg-indigo-600 text-white font-bold">
+            <AvatarFallback className="bg-indigo-600 text-white text-xs font-black">
               {displayName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>

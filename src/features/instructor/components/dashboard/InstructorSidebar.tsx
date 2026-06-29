@@ -1,10 +1,7 @@
+// src/features/Instructor/dashboard/InstructorSidebar.tsx
 import {
-  LayoutDashboard,
-  LogOut,
-  GraduationCap, ClipboardCheck,
-  ChevronLeft,
-  ChevronRight, Laptop,
-  Home, GitMerge, Workflow,
+  LayoutDashboard, LogOut, GraduationCap, ClipboardCheck,
+  ChevronLeft, ChevronRight, Laptop, Home, GitMerge, Workflow,
   Settings, BarChart3, Layers
 } from "lucide-react";
 import { cn } from "@/shared/utils";
@@ -25,20 +22,14 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
   const location = useLocation();
 
   const menuItems = [
-    { id: 'dashboard',   icon: LayoutDashboard, label: 'Dashboard',          path: '/instructor/dashboard' },
-    // { id: 'courses',     icon: GraduationCap,   label: 'Course Management',  path: '/instructor/coursemanagement' },
-    { id: 'batches',     icon: Layers,          label: 'Batch Management',   path: '/instructor/batches' },
-    { id: 'assessments', icon: ClipboardCheck,  label: 'Student Assessments',path: '/instructor/assessments' },
-    // { id: 'techprep',    icon: Laptop,          label: 'Tech Prep',          path: '/instructor/tech-pep' },
-    // { id: 'alignment',   icon: GitMerge,        label: 'Alignment',          path: '/instructor/alignment' },
-    { id: 'report',      icon: BarChart3,       label: 'Report',             path: '/instructor/reports' },
-    { id: 'settings',    icon: Settings,        label: 'Settings',           path: '/profile' },
-    { id: 'work',        icon: Workflow,        label: 'Workflow',           path: '/instructor/workflow' },
+    { id: 'dashboard',   icon: LayoutDashboard, label: 'Dashboard',           path: '/instructor/dashboard' },
+    { id: 'batches',     icon: Layers,          label: 'Batch Management',    path: '/instructor/batches' },
+    { id: 'assessments', icon: ClipboardCheck,  label: 'Student Assessments', path: '/instructor/assessments' },
+    { id: 'report',      icon: BarChart3,       label: 'Report',              path: '/instructor/reports' },
+    { id: 'settings',    icon: Settings,        label: 'Settings',            path: '/profile' },
+    { id: 'work',        icon: Workflow,        label: 'Workflow',            path: '/instructor/workflow' },
   ];
 
-  // Derive active tab from current URL so the sidebar is always correct
-  // regardless of which parent renders it (desktop aside or mobile topbar drawer).
-  // Falls back to the prop only when no path matches (e.g. a nested route).
   const resolvedActiveTab =
     menuItems.find(item =>
       location.pathname === item.path ||
@@ -47,9 +38,7 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
 
   const handleNavigation = (item: typeof menuItems[0]) => {
     navigate(item.path);
-    if (onTabChange) {
-      onTabChange(item.id);
-    }
+    if (onTabChange) onTabChange(item.id);
   };
 
   const handleLogout = async () => {
@@ -62,81 +51,120 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
   return (
     <aside
       className={cn(
-        "fixed left-4 top-4 bottom-4 bg-white dark:bg-[#12121A] rounded-2xl shadow-xl dark:shadow-2xl flex flex-col justify-between py-6 z-40 hidden lg:flex transition-all duration-300 border border-slate-200 dark:border-[#1E1E2A]",
-        isCollapsed ? "w-20 px-2" : "w-64 px-4",
+        // Structure
+        "fixed left-4 top-4 bottom-4 z-40 hidden lg:flex flex-col justify-between py-6",
+        "transition-all duration-300",
+        isCollapsed ? "w-20 px-3" : "w-64 px-4",
+        // Light surface
+        "bg-white border border-slate-200/70 rounded-2xl",
+        "shadow-[0_4px_24px_-4px_rgba(15,23,42,0.08)]",
+        // Dark surface
+        "dark:bg-[#0D0D14] dark:border-white/[0.05]",
+        "dark:shadow-[0_4px_32px_rgba(0,0,0,0.5)]",
         className
       )}
     >
-      {/* Brand */}
-      <div className={cn("flex items-center gap-3 mb-10", isCollapsed ? "justify-center px-0" : "px-2")}>
-        <div className="bg-indigo-600 p-2 rounded-lg shrink-0 shadow-md shadow-indigo-500/20">
-          <GraduationCap className="h-6 w-6 text-white" />
+      {/* ── Brand ── */}
+      <div className={cn("flex items-center gap-3 mb-10", isCollapsed ? "justify-center" : "px-1")}>
+        <div className="shrink-0 bg-indigo-600 p-2 rounded-xl shadow-md shadow-indigo-500/25">
+          <GraduationCap className="h-5 w-5 text-white" />
         </div>
         {!isCollapsed && (
-          <span className="text-xl font-bold text-slate-900 dark:text-white tracking-wide animate-in fade-in duration-300">
-            Instructor
-          </span>
+          <div className="animate-in fade-in duration-200">
+            <span className="text-base font-black tracking-tight text-slate-900 dark:text-white">
+              TestCrack
+            </span>
+            <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-slate-400 dark:text-slate-500 leading-none mt-0.5">
+              Instructor
+            </p>
+          </div>
         )}
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 space-y-2">
-        {menuItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => handleNavigation(item)}
-            title={isCollapsed ? item.label : undefined}
-            className={cn(
-              "w-full flex items-center gap-3 rounded-xl transition-all duration-200 group relative",
-              isCollapsed ? "justify-center p-3" : "px-4 py-3",
-              resolvedActiveTab === item.id
-                ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/20 dark:shadow-indigo-900/20"
-                : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-[#1A1A24] hover:text-indigo-600 dark:hover:text-white"
-            )}
-          >
-            <item.icon className={cn(
-              "h-5 w-5 transition-transform group-hover:scale-105 shrink-0",
-              resolvedActiveTab === item.id ? "text-white" : "text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-white"
-            )} />
-            {!isCollapsed && (
-              <span className="font-medium text-sm animate-in fade-in duration-200">{item.label}</span>
-            )}
-          </button>
-        ))}
+      {/* ── Navigation ── */}
+      <nav className="flex-1 space-y-1">
+        {menuItems.map((item) => {
+          const isActive = resolvedActiveTab === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => handleNavigation(item)}
+              title={isCollapsed ? item.label : undefined}
+              className={cn(
+                "w-full flex items-center gap-3 rounded-xl transition-all duration-200 group relative",
+                isCollapsed ? "justify-center p-3" : "px-3 py-2.5",
+                isActive
+                  ? [
+                      // Light active
+                      "bg-indigo-600 text-white",
+                      "shadow-[0_4px_14px_-2px_rgba(99,102,241,0.5)]",
+                      // Dark active
+                      "dark:bg-indigo-500/15 dark:text-indigo-300",
+                      "dark:shadow-[0_0_20px_rgba(99,102,241,0.15)]",
+                      "dark:border dark:border-indigo-500/20",
+                    ].join(" ")
+                  : [
+                      // Light inactive
+                      "text-slate-600 hover:bg-slate-50 hover:text-indigo-600",
+                      // Dark inactive
+                      "dark:text-slate-400 dark:hover:bg-white/[0.04] dark:hover:text-slate-100",
+                    ].join(" ")
+              )}
+            >
+              <item.icon className={cn(
+                "h-4.5 w-4.5 shrink-0 transition-transform duration-200 group-hover:scale-105",
+                isActive
+                  ? "text-white dark:text-indigo-300"
+                  : "text-slate-400 group-hover:text-indigo-500 dark:group-hover:text-slate-200"
+              )} />
+              {!isCollapsed && (
+                <span className="font-medium text-sm leading-none animate-in fade-in duration-200">
+                  {item.label}
+                </span>
+              )}
+              {/* Active pill indicator in dark mode */}
+              {isActive && !isCollapsed && (
+                <span className="hidden dark:block absolute right-3 h-1.5 w-1.5 rounded-full bg-indigo-400" />
+              )}
+            </button>
+          );
+        })}
       </nav>
 
-      {/* Collapse Toggle */}
+      {/* ── Collapse toggle ── */}
       <button
         onClick={toggleCollapse}
-        className="absolute -right-3 top-1/2 -translate-y-1/2 bg-indigo-600 text-white p-1.5 rounded-full shadow-lg hover:bg-indigo-700 transition-colors z-50 border-2 border-slate-50 dark:border-[#09090E]"
+        className={cn(
+          "absolute -right-3 top-1/2 -translate-y-1/2 z-50",
+          "h-6 w-6 grid place-items-center rounded-full",
+          "bg-indigo-600 text-white border-2",
+          "border-white dark:border-[#0D0D14]",
+          "shadow-md hover:bg-indigo-700 transition-colors"
+        )}
       >
         {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
       </button>
 
-      {/* Bottom Actions */}
-      <div className={cn("pt-6 border-t border-slate-200 dark:border-[#1E1E2A] space-y-2", isCollapsed ? "px-0" : "px-0")}>
-        {/* <button
-          onClick={() => navigate('/')}
-          title={isCollapsed ? "Home Page" : undefined}
-          className={cn(
-            "w-full flex items-center gap-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-[#1A1A24] hover:text-indigo-600 dark:hover:text-white transition-all duration-200 group",
-            isCollapsed ? "justify-center p-3" : "px-4 py-3"
-          )}
-        >
-          <Home className="h-5 w-5 group-hover:scale-105 transition-transform shrink-0" />
-          {!isCollapsed && <span className="font-medium text-sm">Home Page</span>}
-        </button> */}
-
+      {/* ── Bottom actions ── */}
+      <div className={cn(
+        "pt-4 border-t space-y-1",
+        "border-slate-200/70 dark:border-white/[0.05]"
+      )}>
         <button
           onClick={handleLogout}
           title={isCollapsed ? "Logout" : undefined}
           className={cn(
-            "w-full flex items-center gap-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200 group",
-            isCollapsed ? "justify-center p-3" : "px-4 py-3"
+            "w-full flex items-center gap-3 rounded-xl transition-all duration-200 group",
+            isCollapsed ? "justify-center p-3" : "px-3 py-2.5",
+            "text-slate-500 dark:text-slate-500",
+            "hover:bg-rose-50 hover:text-rose-600",
+            "dark:hover:bg-rose-500/[0.08] dark:hover:text-rose-400"
           )}
         >
-          <LogOut className="h-5 w-5 group-hover:translate-x-1 transition-transform shrink-0" />
-          {!isCollapsed && <span className="font-medium text-sm">Logout</span>}
+          <LogOut className="h-4.5 w-4.5 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+          {!isCollapsed && (
+            <span className="font-medium text-sm animate-in fade-in duration-200">Logout</span>
+          )}
         </button>
       </div>
     </aside>

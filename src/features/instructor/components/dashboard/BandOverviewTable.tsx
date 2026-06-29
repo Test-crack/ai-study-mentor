@@ -1,3 +1,4 @@
+// src/features/Instructor/dashboard/BandOverviewTable.tsx
 import { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, Minus, ChevronRight, ChevronLeft, Target } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +13,7 @@ interface BandOverviewTableProps {
 
 const PAGE_SIZE = 8;
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Helpers (unchanged) ───────────────────────────────────────────────────────
 
 function initials(name: string) {
   return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
@@ -39,22 +40,31 @@ function bandTextColor(band: number | null) {
   return 'text-rose-600 dark:text-rose-400';
 }
 
+// Colored badge with border
+function bandBadge(band: number | null): string {
+  if (band === null) return 'bg-slate-100 dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700';
+  if (band >= 7.5)  return 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.15)]';
+  if (band >= 6.0)  return 'bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-500/30 shadow-[0_0_10px_rgba(14,165,233,0.15)]';
+  if (band >= 5.0)  return 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.15)]';
+  return 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30 shadow-[0_0_10px_rgba(244,63,94,0.15)]';
+}
+
 function gapPillColor(gap: number | null) {
-  if (gap === null)  return 'bg-slate-100 dark:bg-slate-800 text-slate-500';
-  if (gap <= 0)      return 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400';
-  if (gap > 2.0)     return 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400';
-  if (gap > 1.0)     return 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400';
-  return 'bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400';
+  if (gap === null) return 'bg-slate-100 dark:bg-slate-800 text-slate-500';
+  if (gap <= 0)     return 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20';
+  if (gap > 2.0)    return 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20';
+  if (gap > 1.0)    return 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20';
+  return 'bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-500/20';
 }
 
 function TrendCell({ trend }: { trend: BandOverviewRow['band_trend'] }) {
-  if (trend === 'up')   return (
-    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full whitespace-nowrap">
+  if (trend === 'up') return (
+    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-500/20 whitespace-nowrap">
       <TrendingUp className="h-3 w-3" /> Up
     </span>
   );
   if (trend === 'down') return (
-    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 px-2 py-0.5 rounded-full whitespace-nowrap">
+    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-200 dark:border-rose-500/20 whitespace-nowrap">
       <TrendingDown className="h-3 w-3" /> Down
     </span>
   );
@@ -66,8 +76,6 @@ function TrendCell({ trend }: { trend: BandOverviewRow['band_trend'] }) {
   return <span className="text-[11px] text-slate-300 dark:text-slate-600">—</span>;
 }
 
-// ── Relative date helper ──────────────────────────────────────────────────────
-
 function relativeDate(dateStr: string) {
   const d    = new Date(dateStr + 'T12:00:00');
   const days = Math.floor((Date.now() - d.getTime()) / 86_400_000);
@@ -78,20 +86,23 @@ function relativeDate(dateStr: string) {
   return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
 }
 
-// ── Skeleton ──────────────────────────────────────────────────────────────────
+// ── Skeletons ─────────────────────────────────────────────────────────────────
 
-function RowSkeleton() {
+function RowSkeleton({ even }: { even: boolean }) {
   return (
-    <tr className="border-b border-slate-50 dark:border-slate-800/60 animate-pulse">
+    <tr className={cn(
+      'border-b border-slate-100 dark:border-white/[0.04] animate-pulse',
+      even ? 'bg-slate-50/50 dark:bg-white/[0.015]' : 'bg-white dark:bg-transparent'
+    )}>
       <td className="px-5 py-3.5">
         <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
-          <div className="h-3.5 w-24 bg-slate-200 dark:bg-slate-700 rounded" />
+          <div className="h-8 w-8 rounded-full bg-slate-200 dark:bg-white/5 shrink-0" />
+          <div className="h-3.5 w-24 bg-slate-200 dark:bg-white/5 rounded" />
         </div>
       </td>
       {[1, 2, 3, 4, 5].map(i => (
         <td key={i} className="px-5 py-3.5">
-          <div className="h-3.5 w-12 bg-slate-100 dark:bg-slate-800 rounded" />
+          <div className="h-3.5 w-12 bg-slate-100 dark:bg-white/5 rounded" />
         </td>
       ))}
     </tr>
@@ -101,17 +112,17 @@ function RowSkeleton() {
 function MobileCardSkeleton() {
   return (
     <div className="px-4 py-3 flex items-center gap-3 animate-pulse">
-      <div className="h-9 w-9 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
+      <div className="h-9 w-9 rounded-full bg-slate-200 dark:bg-white/5 shrink-0" />
       <div className="flex-1 space-y-2">
-        <div className="h-3.5 w-28 bg-slate-200 dark:bg-slate-700 rounded" />
-        <div className="h-3 w-20 bg-slate-100 dark:bg-slate-800 rounded" />
+        <div className="h-3.5 w-28 bg-slate-200 dark:bg-white/5 rounded" />
+        <div className="h-3 w-20 bg-slate-100 dark:bg-white/5 rounded" />
       </div>
-      <div className="h-5 w-12 bg-slate-100 dark:bg-slate-800 rounded-full" />
+      <div className="h-5 w-12 bg-slate-100 dark:bg-white/5 rounded-full" />
     </div>
   );
 }
 
-// ── Pagination bar (shared) ───────────────────────────────────────────────────
+// ── Pagination (unchanged logic, reskinned) ───────────────────────────────────
 
 function PaginationBar({
   page, pageCount, hasPrev, hasNext, onPrev, onNext, onPage,
@@ -122,14 +133,14 @@ function PaginationBar({
   onPage: (i: number) => void;
 }) {
   return (
-    <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-t border-slate-100 dark:border-slate-800">
+    <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-t border-slate-100 dark:border-white/[0.05]">
       <button
         onClick={onPrev}
         disabled={!hasPrev}
         className={cn(
           'h-8 w-8 rounded-full flex items-center justify-center transition-all',
           hasPrev
-            ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 hover:text-indigo-600 dark:hover:text-indigo-400'
+            ? 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 hover:text-indigo-600 dark:hover:text-indigo-400'
             : 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
         )}
         aria-label="Previous page"
@@ -146,8 +157,8 @@ function PaginationBar({
               className={cn(
                 'rounded-full transition-all',
                 i === page
-                  ? 'h-2 w-5 bg-indigo-500'
-                  : 'h-2 w-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600'
+                  ? 'h-2 w-5 bg-indigo-500 dark:bg-indigo-400'
+                  : 'h-2 w-2 bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20'
               )}
               aria-label={`Page ${i + 1}`}
             />
@@ -165,7 +176,7 @@ function PaginationBar({
         className={cn(
           'h-8 w-8 rounded-full flex items-center justify-center transition-all',
           hasNext
-            ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 hover:text-indigo-600 dark:hover:text-indigo-400'
+            ? 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 hover:text-indigo-600 dark:hover:text-indigo-400'
             : 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
         )}
         aria-label="Next page"
@@ -195,28 +206,32 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-
+    <div className="
+      rounded-2xl overflow-hidden
+      bg-white dark:bg-[#0E0E16]
+      border border-slate-200/70 dark:border-white/[0.06]
+      shadow-[0_2px_12px_-4px_rgba(15,23,42,0.08)] dark:shadow-none
+    ">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 sm:px-5 py-4 border-b border-slate-100 dark:border-slate-800">
+      <div className="flex items-center justify-between px-4 sm:px-5 py-4 border-b border-slate-100 dark:border-white/[0.05]">
         <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center shrink-0">
+          <div className="h-8 w-8 rounded-xl bg-indigo-100 dark:bg-indigo-500/15 flex items-center justify-center shrink-0">
             <Target className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
           </div>
           <div>
             <h3 className="text-sm font-bold text-slate-800 dark:text-white leading-tight">Band Score Overview</h3>
-            <p className="text-[11px] text-slate-400 leading-tight">Sorted by gap to target — widest first</p>
+            <p className="text-[11px] text-slate-400 dark:text-slate-500 leading-tight">Sorted by gap to target — widest first</p>
           </div>
         </div>
         {!loading && rows.length > 0 && (
-          <span className="text-xs text-slate-400 font-medium">{rows.length} students</span>
+          <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">{rows.length} students</span>
         )}
       </div>
 
-      {/* ── Mobile card view (< md) ── */}
+      {/* ── Mobile card view ── */}
       <div className="md:hidden">
         {loading ? (
-          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+          <div className="divide-y divide-slate-100 dark:divide-white/[0.04]">
             {Array.from({ length: PAGE_SIZE }, (_, i) => <MobileCardSkeleton key={i} />)}
           </div>
         ) : rows.length === 0 ? (
@@ -224,14 +239,19 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
             No students enrolled in this batch yet.
           </div>
         ) : (
-          <div className="divide-y divide-slate-100 dark:divide-slate-800">
-            {pageRows.map(row => (
+          <div className="divide-y divide-slate-100 dark:divide-white/[0.04]">
+            {pageRows.map((row, idx) => (
               <div
                 key={row.student_id}
                 onClick={() => goToStudent(row)}
-                className="px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors group"
+                className={cn(
+                  'px-4 py-3 flex items-center gap-3 cursor-pointer transition-colors group',
+                  idx % 2 === 0
+                    ? 'bg-white dark:bg-transparent'
+                    : 'bg-slate-50/60 dark:bg-white/[0.018]',
+                  'hover:bg-indigo-50/60 dark:hover:bg-indigo-500/[0.06]',
+                )}
               >
-                {/* Avatar */}
                 <div className={cn(
                   'h-9 w-9 rounded-full shrink-0 flex items-center justify-center text-xs font-black overflow-hidden',
                   row.avatar ? '' : avatarPalette(row.name)
@@ -241,34 +261,27 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
                     : initials(row.name)
                   }
                 </div>
-
-                {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2 mb-0.5">
                     <p className="text-sm font-semibold text-slate-800 dark:text-white truncate">{row.name}</p>
                     <TrendCell trend={row.band_trend} />
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className={cn('text-sm font-black tabular-nums', bandTextColor(row.current_band))}>
+                    {/* Band badge */}
+                    <span className={cn('text-xs font-black px-2 py-0.5 rounded-full tabular-nums', bandBadge(row.current_band))}>
                       {row.current_band !== null ? row.current_band.toFixed(1) : '—'}
                     </span>
                     {row.gap !== null && (
                       <span className={cn('text-xs font-bold px-1.5 py-0.5 rounded-full', gapPillColor(row.gap))}>
-                        {row.gap <= 0
-                          ? `+${Math.abs(row.gap).toFixed(1)}`
-                          : `−${row.gap.toFixed(1)}`
-                        }
+                        {row.gap <= 0 ? `+${Math.abs(row.gap).toFixed(1)}` : `−${row.gap.toFixed(1)}`}
                       </span>
                     )}
-                    {row.last_ia_date && (
-                      <span className="text-[11px] text-slate-400">{relativeDate(row.last_ia_date)}</span>
-                    )}
-                    {!row.last_ia_date && (
-                      <span className="text-[11px] text-slate-300 dark:text-slate-600">No IA yet</span>
-                    )}
+                    {row.last_ia_date
+                      ? <span className="text-[11px] text-slate-400">{relativeDate(row.last_ia_date)}</span>
+                      : <span className="text-[11px] text-slate-300 dark:text-slate-600">No IA yet</span>
+                    }
                   </div>
                 </div>
-
                 <ChevronRight className="h-4 w-4 text-slate-300 dark:text-slate-600 group-hover:text-indigo-500 transition-colors shrink-0" />
               </div>
             ))}
@@ -276,15 +289,15 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
         )}
       </div>
 
-      {/* ── Desktop table view (md+) ── */}
+      {/* ── Desktop table view ── */}
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
+            <tr className="border-b border-slate-100 dark:border-white/[0.05] bg-slate-50/80 dark:bg-white/[0.02]">
               {['Student', 'Current Band', 'Target', 'Gap', 'Last IA', 'Trend', ''].map(h => (
                 <th
                   key={h}
-                  className="px-5 py-2.5 text-left text-[11px] font-black text-slate-400 uppercase tracking-wider whitespace-nowrap"
+                  className="px-5 py-3 text-left text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.12em] whitespace-nowrap"
                 >
                   {h}
                 </th>
@@ -293,7 +306,7 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
           </thead>
           <tbody>
             {loading ? (
-              Array.from({ length: PAGE_SIZE }, (_, i) => <RowSkeleton key={i} />)
+              Array.from({ length: PAGE_SIZE }, (_, i) => <RowSkeleton key={i} even={i % 2 === 1} />)
             ) : rows.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-5 py-12 text-center text-sm text-slate-400">
@@ -301,11 +314,20 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
                 </td>
               </tr>
             ) : (
-              pageRows.map(row => (
+              pageRows.map((row, idx) => (
                 <tr
                   key={row.student_id}
                   onClick={() => goToStudent(row)}
-                  className="border-b border-slate-50 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors group"
+                  className={cn(
+                    'border-b border-slate-50 dark:border-white/[0.03] cursor-pointer transition-all duration-150 group',
+                    // Zebra
+                    idx % 2 === 0
+                      ? 'bg-white dark:bg-transparent'
+                      : 'bg-slate-50/60 dark:bg-white/[0.018]',
+                    // Hover: subtle glow row
+                    'hover:bg-indigo-50/50 dark:hover:bg-indigo-500/[0.06]',
+                    'dark:hover:shadow-[inset_0_0_0_1px_rgba(99,102,241,0.12)]',
+                  )}
                 >
                   {/* Student */}
                   <td className="px-5 py-3.5">
@@ -319,15 +341,18 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
                           : initials(row.name)
                         }
                       </div>
-                      <span className="font-semibold text-slate-800 dark:text-white text-sm whitespace-nowrap">
+                      <span className="font-semibold text-slate-800 dark:text-slate-100 text-sm whitespace-nowrap">
                         {row.name}
                       </span>
                     </div>
                   </td>
 
-                  {/* Current Band */}
+                  {/* Current Band — colored badge */}
                   <td className="px-5 py-3.5">
-                    <span className={cn('text-base font-black tabular-nums', bandTextColor(row.current_band))}>
+                    <span className={cn(
+                      'inline-block text-sm font-black tabular-nums px-2.5 py-0.5 rounded-full',
+                      bandBadge(row.current_band)
+                    )}>
                       {row.current_band !== null ? row.current_band.toFixed(1) : '—'}
                     </span>
                   </td>
@@ -371,7 +396,7 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
 
                   {/* Arrow */}
                   <td className="px-5 py-3.5">
-                    <ChevronRight className="h-4 w-4 text-slate-300 dark:text-slate-600 group-hover:text-indigo-500 transition-colors" />
+                    <ChevronRight className="h-4 w-4 text-slate-300 dark:text-slate-600 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors" />
                   </td>
                 </tr>
               ))
@@ -380,13 +405,10 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
         </table>
       </div>
 
-      {/* Pagination bar */}
       {!loading && pageCount > 1 && (
         <PaginationBar
-          page={page}
-          pageCount={pageCount}
-          hasPrev={hasPrev}
-          hasNext={hasNext}
+          page={page} pageCount={pageCount}
+          hasPrev={hasPrev} hasNext={hasNext}
           onPrev={() => setPage(p => p - 1)}
           onNext={() => setPage(p => p + 1)}
           onPage={setPage}

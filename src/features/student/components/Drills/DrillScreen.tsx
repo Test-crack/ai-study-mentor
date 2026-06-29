@@ -1,4 +1,5 @@
-﻿﻿import React, { useState, useEffect, useRef } from 'react';
+﻿﻿// src/features/student/drills/DrillScreen.tsx
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { StudentSidebar } from '../dashboard/StudentSidebar';
 import { StudentTopbar } from '../dashboard/StudentTopbar';
@@ -7,13 +8,49 @@ import type { McqDrillResult } from './McqDrill';
 import DrillResultCard from './DrillResultCard';
 import { callBackend } from '@/features/auth/services/authClient';
 import { useMomentum } from '@/features/student/Context/MomentumContext';
-import { ArrowLeft, Target, Loader2, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Headphones, BookOpen, PenLine, Mic, Loader2, AlertTriangle } from 'lucide-react';
 
 interface DrillAnswer {
   points: number;
   questionId?: string;
   selectedAnswer?: string;
 }
+
+// ─── Per-skill accent system (presentational only) ──────────────────────────
+// teal=Listening · violet=Reading · amber=Writing · rose=Speaking — matches dashboard
+const SKILL_ACCENT: Record<string, {
+  icon: React.ReactNode; chipBg: string; chipText: string; fill: string; glow: string;
+}> = {
+  LISTENING: {
+    icon: <Headphones className="w-5 h-5" />,
+    chipBg: 'bg-teal-100 dark:bg-teal-500/15',
+    chipText: 'text-teal-600 dark:text-teal-400',
+    fill: 'bg-teal-500',
+    glow: 'dark:shadow-[0_0_18px_rgba(20,184,166,0.18)]',
+  },
+  READING: {
+    icon: <BookOpen className="w-5 h-5" />,
+    chipBg: 'bg-violet-100 dark:bg-violet-500/15',
+    chipText: 'text-violet-600 dark:text-violet-400',
+    fill: 'bg-violet-500',
+    glow: 'dark:shadow-[0_0_18px_rgba(139,92,246,0.18)]',
+  },
+  WRITING: {
+    icon: <PenLine className="w-5 h-5" />,
+    chipBg: 'bg-amber-100 dark:bg-amber-500/15',
+    chipText: 'text-amber-600 dark:text-amber-400',
+    fill: 'bg-amber-500',
+    glow: 'dark:shadow-[0_0_18px_rgba(245,158,11,0.16)]',
+  },
+  SPEAKING: {
+    icon: <Mic className="w-5 h-5" />,
+    chipBg: 'bg-rose-100 dark:bg-rose-500/15',
+    chipText: 'text-rose-600 dark:text-rose-400',
+    fill: 'bg-rose-500',
+    glow: 'dark:shadow-[0_0_18px_rgba(244,63,94,0.16)]',
+  },
+};
+const getAccent = (skill: string) => SKILL_ACCENT[skill.toUpperCase()] ?? SKILL_ACCENT.SPEAKING;
 
 const parseCorrectAnswer = (raw: any): string => {
   try {
@@ -56,6 +93,7 @@ export default function DrillScreen() {
   const pendingCompleteRef = useRef<{ answers: Record<string, string>; correctCount: number } | null>(null);
 
   const totalPrompts = prompts.length || QUESTIONS_PER_SESSION;
+  const accent = getAccent(skill);
 
   useEffect(() => {
     const initSession = async () => {
@@ -73,7 +111,7 @@ export default function DrillScreen() {
         if (activeRes.success && activeRes.session) {
           const sess = activeRes.session;
 
-          // Already fully completed â€” jump straight to result card
+          // Already fully completed — jump straight to result card
           if (sess.status === 'DRILL_DONE' || sess.status === 'APPLY_DONE') {
             setDrillSessionId(sess.id);
             setSessionId(sess.id);
@@ -83,7 +121,7 @@ export default function DrillScreen() {
             return;
           }
 
-          // STARTED â€” resume from where we left off
+          // STARTED — resume from where we left off
           const questions: any[] = activeRes.questions || [];
           setSessionId(sess.id);
           setPrompts(questions);
@@ -103,7 +141,7 @@ export default function DrillScreen() {
           return;
         }
 
-        // No active session â€” start a new one
+        // No active session — start a new one
         const startRes = await callBackend(`${backendUrl}/api/drills/start`, {
           method: 'POST',
           body: JSON.stringify({
@@ -207,73 +245,105 @@ export default function DrillScreen() {
     }
   };
 
+  const progressPct = (currentPromptIndex / totalPrompts) * 100;
+
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#020617] transition-colors duration-500">
       <StudentSidebar activeTab="dashboard" isCollapsed={isSidebarCollapsed} toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} />
 
       <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'} flex flex-col min-h-screen`}>
         <StudentTopbar onUpgradeClick={() => {}} />
 
+        {/* ── Focus-mode sticky progress strip (only during the active drill) ── */}
+        {!loading && !isSubmitting && !initError && !submitFailed && prompts.length > 0 && !isComplete && (
+          <div className="sticky top-0 z-30 bg-[#F8FAFC]/90 dark:bg-[#020617]/90 backdrop-blur-md border-b border-slate-100 dark:border-white/[0.05]">
+            <div className="max-w-4xl mx-auto px-6 py-3">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className={`grid place-items-center h-7 w-7 rounded-lg shrink-0 ${accent.chipBg} ${accent.chipText}`}>
+                    {accent.icon}
+                  </span>
+                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 capitalize truncate">
+                    {skill.toLowerCase()} · {subSkill.toLowerCase().replace(/_/g, ' ')}
+                  </span>
+                </div>
+                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 tabular-nums shrink-0">
+                  {currentPromptIndex + 1} / {totalPrompts}
+                </span>
+              </div>
+              <div className="h-1.5 w-full bg-slate-200 dark:bg-white/[0.06] rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ease-out ${accent.fill}`}
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
         <main className="flex-1 p-6 max-w-4xl mx-auto w-full animate-in fade-in">
-          <button onClick={() => navigate('/student/dashboard', { state: isComplete ? { drillCompleted: true } : undefined })} className="flex items-center text-slate-500 hover:text-slate-800 dark:hover:text-white mb-6 transition-colors">
+          <button onClick={() => navigate('/student/dashboard', { state: isComplete ? { drillCompleted: true } : undefined })} className="flex items-center text-slate-500 hover:text-slate-800 dark:hover:text-white mb-6 transition-colors text-sm font-medium">
             <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
           </button>
 
           {loading || isSubmitting ? (
             <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-              <Loader2 className="w-10 h-10 animate-spin mb-4 text-[#7B61FF]" />
-              <p className="font-medium text-slate-500">
+              <Loader2 className="w-10 h-10 animate-spin mb-4 text-indigo-500" />
+              <p className="font-medium text-slate-500 dark:text-slate-400">
                 {isSubmitting ? 'Saving session results...' : 'Loading your customized drills...'}
               </p>
             </div>
           ) : initError ? (
-            <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-red-200 dark:border-red-900 text-center px-8">
-              <AlertTriangle className="w-12 h-12 text-red-400 mb-4" />
+            <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-900/60 rounded-3xl border border-rose-200 dark:border-rose-500/20 text-center px-8 shadow-sm">
+              <div className="h-14 w-14 rounded-2xl bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center mb-4">
+                <AlertTriangle className="w-7 h-7 text-rose-400" />
+              </div>
               <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Couldn't load your drill</h2>
-              <p className="text-slate-500 mb-1 max-w-sm text-sm">{initError}</p>
+              <p className="text-slate-500 dark:text-slate-400 mb-1 max-w-sm text-sm">{initError}</p>
             </div>
           ) : submitFailed ? (
-            <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-red-200 dark:border-red-900 text-center px-8">
-              <AlertTriangle className="w-12 h-12 text-red-400 mb-4" />
+            <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-900/60 rounded-3xl border border-rose-200 dark:border-rose-500/20 text-center px-8 shadow-sm">
+              <div className="h-14 w-14 rounded-2xl bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center mb-4">
+                <AlertTriangle className="w-7 h-7 text-rose-400" />
+              </div>
               <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Couldn't save your results</h2>
-              <p className="text-slate-500 mb-6 max-w-sm">Your answers are safe — tap Retry to save your session and claim your momentum points.</p>
+              <p className="text-slate-500 dark:text-slate-400 mb-6 max-w-sm">Your answers are safe — tap Retry to save your session and claim your momentum points.</p>
               <button
                 onClick={() => {
                   const pending = pendingCompleteRef.current;
                   if (pending) completeSession(pending.answers, pending.correctCount);
                 }}
-                className="px-6 py-3 bg-[#7B61FF] hover:bg-[#6A50EE] text-white font-semibold rounded-2xl transition-colors"
+                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl transition-colors shadow-md"
               >
                 Retry
               </button>
             </div>
           ) : prompts.length === 0 ? (
-            <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
-              <p className="text-slate-500 font-medium">No drills available for this topic right now.</p>
+            <div className="text-center py-20 bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-white/[0.06] shadow-sm">
+              <p className="text-slate-500 dark:text-slate-400 font-medium">No drills available for this topic right now.</p>
             </div>
           ) : !isComplete ? (
             <>
-              {/* Header */}
-              <div className="mb-8 text-center space-y-2">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-rose-100 text-rose-500 mb-2">
-                  <Target className="w-6 h-6" />
+              {/* Calmer header — single line, accent chip */}
+              <div className="mb-6 flex items-center gap-3">
+                <div className={`inline-flex items-center justify-center w-11 h-11 rounded-2xl shrink-0 ${accent.chipBg} ${accent.chipText} ${accent.glow}`}>
+                  {accent.icon}
                 </div>
-                <h1 className="text-3xl font-black text-slate-800 dark:text-white capitalize">
-                  Today's Focus: {skill.toLowerCase()} {subSkill.toLowerCase().replace(/_/g, ' ')}
-                </h1>
-                <p className="text-slate-500 font-medium tracking-wide uppercase text-sm">
-                  Prompt {currentPromptIndex + 1} of {totalPrompts}
-                </p>
-                <div className="flex justify-center items-center gap-2 mt-4">
-                  <span className="text-xs font-bold text-amber-500 uppercase tracking-widest">Progress</span>
-                  <div className="w-32 h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-amber-500 transition-all duration-500" style={{ width: `${(currentPromptIndex / totalPrompts) * 100}%` }} />
-                  </div>
+                <div className="min-w-0">
+                  <h1 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-white capitalize leading-tight truncate">
+                    {skill.toLowerCase()} {subSkill.toLowerCase().replace(/_/g, ' ')}
+                  </h1>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider">
+                    Today's Focus · Prompt {currentPromptIndex + 1} of {totalPrompts}
+                  </p>
                 </div>
               </div>
 
-              {/* Drill content */}
-              <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-sm border border-slate-200 dark:border-slate-800">
+              {/* Drill content — keyed wrapper animates each prompt in */}
+              <div
+                key={currentPromptIndex}
+                className="bg-white dark:bg-slate-900/60 rounded-3xl p-6 sm:p-8 shadow-sm dark:shadow-none border border-slate-200 dark:border-white/[0.06] animate-in fade-in slide-in-from-bottom-3 duration-300"
+              >
                 {(() => {
                   const currentPrompt = prompts[currentPromptIndex];
                   if (!currentPrompt) return null;
