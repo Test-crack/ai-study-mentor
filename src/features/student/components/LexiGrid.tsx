@@ -62,6 +62,7 @@ const KEYBOARD_ROWS = [
 ];
 
 interface WordItem {
+  id?:         string;
   base:        string;
   target:      string;
   hint:        string;
@@ -397,6 +398,7 @@ const saveState = (index: number, tries: number, guess: string, score: number, s
       let words: WordItem[];
       if (res.success && Array.isArray(res.data) && res.data.length > 0) {
         words = (res.data as any[]).map((w: any) => ({
+          id:          w.id,
           base:        w.base_word.toUpperCase(),
           target:      w.target_word.toUpperCase(),
           hint:        w.hint,
@@ -420,12 +422,14 @@ const saveState = (index: number, tries: number, guess: string, score: number, s
   const submitLexiGridSession = useCallback(async (finalWordsWon: number) => {
     const attemptsUsed = totalAttemptsRef.current;
     const bonusEligible = allBonusEligibleRef.current && finalWordsWon >= DAILY_LIMIT;
+    const playedIds = dailyWords.map(w => w.id).filter(Boolean) as string[];
     const payload = {
-      game_type:       'LEXIGRID',
-      words_solved:    finalWordsWon,
-      total_attempts:  attemptsUsed,
-      bonus_eligible:  bonusEligible,
-      session_token:   sessionTokenRef.current,
+      game_type:        'LEXIGRID',
+      words_solved:     finalWordsWon,
+      total_attempts:   attemptsUsed,
+      bonus_eligible:   bonusEligible,
+      session_token:    sessionTokenRef.current,
+      played_word_ids:  playedIds.length > 0 ? playedIds : undefined,
     };
     try {
       const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
