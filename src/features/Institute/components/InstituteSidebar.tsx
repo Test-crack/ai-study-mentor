@@ -1,3 +1,4 @@
+// src/features/Institute/components/InstituteSidebar.tsx
 import { 
   LayoutDashboard, 
   BookOpen, 
@@ -67,7 +68,7 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
   return (
     <aside 
       className={cn(
-        "fixed left-4 top-4 bottom-4 bg-white dark:bg-[#12121A] rounded-2xl shadow-xl dark:shadow-2xl flex flex-col py-5 z-40 hidden lg:flex transition-all duration-300 border border-slate-200 dark:border-[#1E1E2A]",
+        "fixed left-4 top-4 bottom-4 bg-white dark:bg-[#0D0D14] rounded-2xl shadow-[0_2px_12px_-4px_rgba(15,23,42,0.08)] dark:shadow-none flex flex-col py-5 z-40 hidden lg:flex transition-all duration-300 border border-slate-200/70 dark:border-white/[0.05]",
         isCollapsed ? "w-20 px-2" : "w-64 px-4",
         className
       )}
@@ -84,8 +85,8 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
         )}
       </div>
 
-      {/* Navigation - Now vertically scrollable with a hidden/slim scrollbar */}
-      <nav className="flex-1 space-y-1.5 overflow-y-auto overflow-x-hidden pr-2 -mr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-200 dark:[&::-webkit-scrollbar-thumb]:bg-slate-700 [&::-webkit-scrollbar-track]:bg-transparent">
+      {/* Navigation */}
+      <nav className="flex-1 space-y-1.5 overflow-y-auto overflow-x-hidden pr-2 -mr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-200 dark:[&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-track]:bg-transparent">
         {menuItems.map((item) => (
           <button
             key={item.id}
@@ -95,13 +96,13 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
               "w-full flex items-center gap-3 rounded-xl transition-all duration-200 group relative",
               isCollapsed ? "justify-center p-3" : "px-4 py-3",
               activeTab === item.id 
-                ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/20 dark:shadow-indigo-900/20" 
-                : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-[#1A1A24] hover:text-indigo-600 dark:hover:text-white"
+                ? "bg-indigo-600 text-white shadow-md dark:bg-indigo-500/15 dark:text-indigo-300 dark:border dark:border-indigo-500/20 dark:shadow-[0_0_20px_rgba(99,102,241,0.15)]" 
+                : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/[0.04] hover:text-indigo-600 dark:hover:text-white"
             )}
           >
             <item.icon className={cn(
               "h-5 w-5 transition-transform group-hover:scale-105 shrink-0",
-              activeTab === item.id ? "text-white" : "text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-white"
+              activeTab === item.id ? "text-white dark:text-indigo-300" : "text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-white"
             )} />
             {!isCollapsed && (
               <span className="font-medium text-sm animate-in fade-in duration-200">{item.label}</span>
@@ -119,8 +120,8 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
             className={cn(
               "w-full flex items-center gap-3 rounded-xl transition-all duration-200 group",
               isCollapsed ? "justify-center p-3" : "px-4 py-3",
-              "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300",
-              "hover:bg-indigo-100 dark:hover:bg-indigo-800/30 border border-indigo-200 dark:border-indigo-700/40"
+              "bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300",
+              "hover:bg-indigo-100 dark:hover:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-500/20"
             )}
           >
             <ArrowLeftRight className="h-4 w-4 shrink-0" />
@@ -134,13 +135,13 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
       {/* Collapse Toggle */}
       <button
         onClick={toggleCollapse}
-        className="absolute -right-3 top-1/2 -translate-y-1/2 bg-indigo-600 text-white p-1.5 rounded-full shadow-lg hover:bg-indigo-700 transition-colors z-50 border-2 border-slate-50 dark:border-[#09090E]"
+        className="absolute -right-3 top-1/2 -translate-y-1/2 bg-indigo-600 text-white p-1.5 rounded-full shadow-lg hover:bg-indigo-700 transition-colors z-50 border-2 border-slate-50 dark:border-[#0A0A0F]"
       >
         {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
       </button>
 
       {/* Bottom Actions */}
-      <div className={cn("pt-4 mt-2 border-t border-slate-200 dark:border-[#1E1E2A] shrink-0", isCollapsed ? "px-0" : "px-0")}>
+      <div className={cn("pt-4 mt-2 border-t border-slate-200 dark:border-white/[0.06] shrink-0", isCollapsed ? "px-0" : "px-0")}>
         <button 
           onClick={handleLogout}
           title={isCollapsed ? "Logout" : undefined}

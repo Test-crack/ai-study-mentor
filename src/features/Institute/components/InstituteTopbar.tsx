@@ -1,3 +1,4 @@
+// src/features/Institute/components/InstituteTopbar.tsx
 import { Search, Bell, Menu, Plus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { Button } from "@/shared/components/ui/button";
@@ -19,7 +20,7 @@ export const InstituteTopbar = ({ onCreateCourse }: InstituteTopbarProps) => {
   const displayName = profile?.name || user?.email?.split('@')[0] || "Institute";
 
   return (
-    <header className="flex items-center justify-between py-4 px-4 sm:px-6 gap-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-30 lg:rounded-2xl lg:mx-4 lg:mt-4 lg:shadow-sm border-b lg:border-none border-slate-100 dark:border-slate-800 transition-colors">
+    <header className="flex items-center justify-between py-4 px-4 sm:px-6 gap-4 bg-white/80 dark:bg-[#0D0D14]/80 backdrop-blur-sm sticky top-0 z-30 lg:rounded-2xl lg:mx-4 lg:mt-4 lg:shadow-[0_2px_12px_-4px_rgba(15,23,42,0.08)] dark:lg:shadow-none border-b lg:border border-slate-200/70 dark:border-white/[0.05] transition-colors duration-500">
       
       {/* Mobile Menu Trigger */}
       <div className="lg:hidden">
@@ -29,7 +30,7 @@ export const InstituteTopbar = ({ onCreateCourse }: InstituteTopbarProps) => {
               <Menu className="h-6 w-6" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="p-0 bg-slate-900 border-none w-72">
+          <SheetContent side="left" className="p-0 bg-white dark:bg-[#0D0D14] border-none w-72">
      <InstituteSidebar
    isCollapsed={false} 
    toggleCollapse={() => {}} 
@@ -49,7 +50,7 @@ export const InstituteTopbar = ({ onCreateCourse }: InstituteTopbarProps) => {
           <input 
             type="text" 
             placeholder="Search students, courses, or resources..." 
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm font-medium text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-white/[0.04] border border-slate-200/70 dark:border-white/[0.06] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm font-medium text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
           />
         </div>
       </div>
@@ -63,19 +64,19 @@ export const InstituteTopbar = ({ onCreateCourse }: InstituteTopbarProps) => {
         <ThemeToggle />
 
         {/* Notifications */}
-        <button className="relative p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-800 rounded-full transition-all">
+        <button className="relative p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-white/[0.04] rounded-full transition-all">
           <Bell className="h-5 w-5" />
-          <span className="absolute top-2 right-2.5 h-2 w-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
+          <span className="absolute top-2 right-2.5 h-2 w-2 bg-red-500 rounded-full border-2 border-white dark:border-[#0D0D14]"></span>
         </button>
 
         {/* Profile */}
-        <div className="flex items-center gap-3 pl-2 border-l border-slate-100 dark:border-slate-800">
+        <div className="flex items-center gap-3 pl-2 border-l border-slate-100 dark:border-white/[0.06]">
           <div className="text-right hidden md:block">
             <p className="text-sm font-bold text-slate-700 dark:text-slate-200 leading-none">{displayName}</p>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 uppercase tracking-wider">Institute</p>
           </div>
           <Avatar 
-            className="h-9 w-9 border-2 border-white dark:border-slate-800 shadow-sm ring-1 ring-slate-100 dark:ring-slate-700 cursor-pointer hover:ring-indigo-100 transition-all"
+            className="h-9 w-9 border-2 border-white dark:border-white/[0.06] shadow-sm ring-1 ring-slate-100 dark:ring-white/[0.06] cursor-pointer hover:ring-indigo-100 transition-all"
             onClick={() => navigate('/profile')}
           >
             <AvatarImage src={profile?.profileImage || ""} />

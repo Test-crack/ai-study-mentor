@@ -1,3 +1,4 @@
+// src/core/App.tsx
 import { Toaster } from "@/shared/components/ui/toaster";
 import { ThemeProvider } from "@/features/theme/ThemeProvider";
 import { Toaster as Sonner } from "@/shared/components/ui/sonner";
@@ -197,8 +198,9 @@ const AppRoutes = () => {
     <Routes>
       {/* ── Public routes ────────────────────────────────────────────────── */}
       <Route path="/" element={<LandingPage />} />
-      <Route path="/student/onboarding" element={<OnboardingWalkthrough />} />
-      <Route path="/student/diagnosis" element={<Diagnosis />} />
+      {/* Login-protected (STUDENT only) — pre-diagnosis flow, no DiagnosisGuard to avoid redirect loop */}
+      <Route path="/student/onboarding" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><OnboardingWalkthrough /></RoleProtectedRoute>} />
+      <Route path="/student/diagnosis" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><Diagnosis /></RoleProtectedRoute>} />
       <Route path="/dashdemo" element={<Dashdemo />} />
       <Route path="/Contact" element={<Contactpage />} />
 
