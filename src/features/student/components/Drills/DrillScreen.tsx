@@ -191,6 +191,29 @@ export default function DrillScreen() {
     }).catch(err => console.warn('[DrillScreen] Progress save failed:', err));
   };
 
+  // ── Lock navigation until the reflection in DrillResultCard is submitted ──
+  useEffect(() => {
+    const locked = !loading && !initError && (prompts.length > 0 || isComplete);
+    if (!locked) return;
+
+    // Trap back button / swipe-back — re-push the current entry on every attempt
+    window.history.pushState(null, '', window.location.href);
+    const onPopState = () => window.history.pushState(null, '', window.location.href);
+    window.addEventListener('popstate', onPopState);
+
+    // Warn on refresh / tab close (delete these 4 lines if unwanted)
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+
+    return () => {
+      window.removeEventListener('popstate', onPopState);
+      window.removeEventListener('beforeunload', onBeforeUnload);
+    };
+  }, [loading, initError, prompts.length, isComplete]);
+
   const completeSession = async (finalAnswers: Record<string, string>, finalCorrectCount: number) => {
     if (isSubmitting) return;
     const earned = 15 + finalCorrectCount * 10;
@@ -282,9 +305,7 @@ export default function DrillScreen() {
         )}
 
         <main className="flex-1 p-6 max-w-4xl mx-auto w-full animate-in fade-in">
-          <button onClick={() => navigate('/student/dashboard', { state: isComplete ? { drillCompleted: true } : undefined })} className="flex items-center text-slate-500 hover:text-slate-800 dark:hover:text-white mb-6 transition-colors text-sm font-medium">
-            <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
-          </button>
+         
 
           {loading || isSubmitting ? (
             <div className="flex flex-col items-center justify-center py-20 text-slate-400">
@@ -318,7 +339,7 @@ export default function DrillScreen() {
                 Retry
               </button>
             </div>
-          ) : prompts.length === 0 ? (
+          ) : prompts.length === 0 && !isComplete ? (
             <div className="text-center py-20 bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-white/[0.06] shadow-sm">
               <p className="text-slate-500 dark:text-slate-400 font-medium">No drills available for this topic right now.</p>
             </div>
