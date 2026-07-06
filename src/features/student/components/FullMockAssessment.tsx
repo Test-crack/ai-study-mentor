@@ -317,12 +317,21 @@ export default function FullMockAssessment() {
 
   const backendUrl = () => import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
 
-  const persistAnswer = (questionId: string, answer: string) => {
-    if (!sessionIdRef.current) return;
-    callBackend(`${backendUrl()}/api/mock/answer`, {
+  const persistAnswer = (questionId: string, answer: string): Promise<void> => {
+    if (!sessionIdRef.current) return Promise.resolve();
+    return callBackend(`${backendUrl()}/api/mock/answer`, {
       method: "POST", body: JSON.stringify({ session_id: sessionIdRef.current, question_id: questionId, answer })
-    }).catch(e => console.warn("[Mock] answer save failed:", e));
+    }).then(() => undefined).catch(e => console.warn("[Mock] answer save failed:", e));
   };
+
+  /** Flush the current question's answer to the backend (awaitable). */
+  const flushCurrentAnswer = useCallback(async () => {
+    if (writingDebounceRef.current) { clearTimeout(writingDebounceRef.current); writingDebounceRef.current = null; }
+    const q = currentSection?.questions[currentIdx];
+    const a = q ? answers[q.id] : undefined;
+    if (q && a) await persistAnswer(q.id, a);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentSection, currentIdx, answers]);
 
   const persistWritingDebounced = (questionId: string, text: string) => {
     if (writingDebounceRef.current) clearTimeout(writingDebounceRef.current);
@@ -402,6 +411,9 @@ export default function FullMockAssessment() {
     } else {
       setPhase("scoring");
       try {
+        // Persist the final answer BEFORE submit reads stored answers, so the last
+        // question isn't graded as unanswered (fire-and-forget race).
+        await flushCurrentAnswer();
         const res = await callBackend(`${backendUrl()}/api/mock/submit`, {
           method: "POST", body: JSON.stringify({ session_id: sessionIdRef.current })
         });
@@ -411,11 +423,16 @@ export default function FullMockAssessment() {
           setMockResults(res);
         }
       } catch (err) {
-        console.error("[Mock] submit error:", err);
+        // Submit failed (e.g. AI grading temporarily down → 502). The backend leaves the
+        // session IN_PROGRESS and recoverable within its 72h window, so return the student
+        // to the session to retry rather than showing an empty results screen.
+        console.error("[Mock] submit error — returning to session for retry:", err);
+        setPhase("session");
+        return;
       }
       setTimeout(() => setPhase("results"), 3500);
     }
-  }, [sections, currentSectionIdx]);
+  }, [sections, currentSectionIdx, flushCurrentAnswer]);
 
   const advanceToNextSection = () => {
     const nextIdx = currentSectionIdx + 1;

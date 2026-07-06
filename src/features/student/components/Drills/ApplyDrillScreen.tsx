@@ -42,16 +42,20 @@ export default function ApplyDrillScreen() {
     setIsRecording(false);
     setIsProcessing(true);
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
-      const url = sessionId
-        ? `${backendUrl}/api/drills/session/${sessionId}/apply-done`
-        : `${backendUrl}/api/drills/apply-complete`;
-      const res = await callBackend(url, { method: 'POST' });
-      if (res.success && res.momentum_score !== undefined) {
-        syncMomentum(res.momentum_score);
+      // The apply reward is tied to a specific drill session. Without a session id
+      // there is nothing to credit — skip the call rather than hitting the removed
+      // legacy /apply-complete faucet (which awarded +30 with no idempotency).
+      if (!sessionId) {
+        console.warn('[ApplyDrill] No session id — skipping apply reward.');
+      } else {
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+        const res = await callBackend(`${backendUrl}/api/drills/session/${sessionId}/apply-done`, { method: 'POST' });
+        if (res.success && res.momentum_score !== undefined) {
+          syncMomentum(res.momentum_score);
+        }
       }
     } catch (err) {
-      console.error('[ApplyDrill] Failed to persist +30 pts:', err);
+      console.error('[ApplyDrill] Failed to persist apply reward:', err);
     } finally {
       setIsProcessing(false);
       setIsComplete(true);

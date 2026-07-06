@@ -311,15 +311,25 @@ export default function Assessment() {
 
 
 
-  /** Save one answer to backend — fire-and-forget, never blocks UI. */
-  const persistAnswer = (questionId: string, answer: string) => {
-    if (!iaSessionId) return;
+  /** Save one answer to backend. Returns the promise so callers can await it
+   *  before submitting (the final answer must land before grading reads answers). */
+  const persistAnswer = (questionId: string, answer: string): Promise<void> => {
+    if (!iaSessionId) return Promise.resolve();
     const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
-    callBackend(`${backendUrl}/api/ia/answer`, {
+    return callBackend(`${backendUrl}/api/ia/answer`, {
       method: 'POST',
       body: JSON.stringify({ session_id: iaSessionId, question_id: questionId, answer })
-    }).catch(e => console.warn('[IA] answer save failed:', e));
+    }).then(() => undefined).catch(e => console.warn('[IA] answer save failed:', e));
   };
+
+  /** Flush the current question's answer to the backend (awaitable). */
+  const flushCurrentAnswer = useCallback(async () => {
+    if (writingDebounceRef.current) { clearTimeout(writingDebounceRef.current); writingDebounceRef.current = null; }
+    const q = currentSection?.questions[currentIdx];
+    const a = q ? answers[q.id] : undefined;
+    if (q && a) await persistAnswer(q.id, a);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentSection, currentIdx, answers, iaSessionId]);
 
   /** Debounced writing save — waits 1.5s after the student stops typing. */
   const persistWritingDebounced = (questionId: string, text: string) => {
@@ -439,6 +449,9 @@ export default function Assessment() {
       // Last section complete — submit
       setPhase("scoring");
       try {
+        // Ensure the final answer is persisted BEFORE submit reads stored answers,
+        // otherwise the last question can be graded as unanswered (fire-and-forget race).
+        await flushCurrentAnswer();
         const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
         const res = await callBackend(`${backendUrl}/api/ia/submit`, {
           method: 'POST',
@@ -450,11 +463,16 @@ export default function Assessment() {
           setIaResults(res);
         }
       } catch (err) {
-        console.error('[IA] submit error:', err);
+        // Submit failed (e.g. AI grading temporarily down → 502). The backend keeps the
+        // session IN_PROGRESS and answers saved, so return to the session for retry
+        // rather than showing an empty results screen.
+        console.error('[IA] submit error — returning to session for retry:', err);
+        setPhase("session");
+        return;
       }
       setTimeout(() => setPhase("results"), 3500);
     }
-  }, [iaSections, currentSectionIdx, iaSessionId]);
+  }, [iaSections, currentSectionIdx, iaSessionId, flushCurrentAnswer]);
 
   const advanceToNextSection = () => {
     const nextIdx = currentSectionIdx + 1;

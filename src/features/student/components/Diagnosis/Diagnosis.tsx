@@ -1,6 +1,6 @@
 "use client";
 import { GraduationCap } from "lucide-react";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import React, {
   useState,
   useEffect,
@@ -174,19 +174,27 @@ const SK = {
   activeTabLock:      "tc_active_tab",
 };
 
+// Per-student namespace so diagnostic progress on a shared device never leaks
+// between accounts (e.g. Student B seeing Student A's answers/scores, or being
+// dropped mid-test into A's saved phase). Set once from the logged-in student id
+// before any phase component reads storage.
+let storageNamespace = '';
+function setStorageNamespace(id: string) { storageNamespace = id || ''; }
+function nsKey(key: string): string { return storageNamespace ? `${storageNamespace}:${key}` : key; }
+
 function storageSave<T>(key: string, value: T) {
-  try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+  try { localStorage.setItem(nsKey(key), JSON.stringify(value)); } catch {}
 }
 
 function storageLoad<T>(key: string): T | null {
   try {
-    const raw = localStorage.getItem(key);
+    const raw = localStorage.getItem(nsKey(key));
     return raw ? (JSON.parse(raw) as T) : null;
   } catch { return null; }
 }
 
 function storageClear(...keys: string[]) {
-  try { keys.forEach((k) => localStorage.removeItem(k)); } catch {}
+  try { keys.forEach((k) => localStorage.removeItem(nsKey(k))); } catch {}
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1817,14 +1825,14 @@ function DiagnosticSummaryScreen({
         })}
       </div>
 
-      <Link
-        to="/student/dashboard"
+      <button
+        type="button"
         onClick={onGoToDashboard}
         className="inline-block text-center w-full py-4 bg-gray-900 hover:bg-gray-800 text-white font-black text-base uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all neo-btn"
         style={{ boxShadow: '5px 5px 0 #4338CA' }}
       >
         Go to Dashboard →
-      </Link>
+      </button>
     </div>
   );
 }
@@ -1836,8 +1844,11 @@ function DiagnosticSummaryScreen({
 type Phase = "gate" | Skill | "speaking_result" | "summary";
 
 function DiagnosisInner() {
-  const { profile } = useAuth();
+  const { profile, refreshProfile } = useAuth();
+  const navigate = useNavigate();
   const studentId = profile?.id || profile?.student_id || "unknown-student";
+  // Bind localStorage to this student before any phase child reads it.
+  setStorageNamespace(studentId);
 
   const [tabConflict, setTabConflict] = useState(false);
   const tabIdRef = useRef(Math.random().toString(36).substring(2, 15));
@@ -2027,8 +2038,13 @@ function DiagnosisInner() {
     speaking: "Results",
   };
 
-  const handleGoToDashboard = () => {
+  const handleGoToDashboard = async () => {
     storageClear(SK.phase, SK.results, SK.listeningAnswers, SK.listeningAudioPlayed, SK.readingAnswers, SK.readingTimeLeft, SK.writingText, SK.speakingResult);
+    // Force-refresh the cached profile BEFORE navigating. The dashboard route guard
+    // reads profile.isDiagnosed from the cache; without this the freshly-diagnosed
+    // student still looks un-diagnosed and gets bounced back into onboarding (a loop).
+    try { await refreshProfile(); } catch { /* navigate anyway; guard will re-check */ }
+    navigate('/student/dashboard', { replace: true });
   };
 
   if (isCheckingStatus) {

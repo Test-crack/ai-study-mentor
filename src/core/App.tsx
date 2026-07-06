@@ -306,11 +306,11 @@ const AppRoutes = () => {
       <Route path="/student/report" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><Report /></RoleProtectedRoute>} />
       <Route path="/student/suggestion" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><Suggestion /></RoleProtectedRoute>} />
       <Route path="/student/speaking-practice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><SpeakingPractice /></RoleProtectedRoute>} />
-      <Route path="/student/drill" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><DrillScreen /></RoleProtectedRoute>} />
-      <Route path="/student/lexigrid" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><LexiGrid /></RoleProtectedRoute>} />
-      <Route path="/student/internal" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><InternalAssessmentPage /></RoleProtectedRoute>} />
+      <Route path="/student/drill" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDiagnosisGuard><DrillScreen /></StudentDiagnosisGuard></RoleProtectedRoute>} />
+      <Route path="/student/lexigrid" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDiagnosisGuard><LexiGrid /></StudentDiagnosisGuard></RoleProtectedRoute>} />
+      <Route path="/student/internal" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDiagnosisGuard><InternalAssessmentPage /></StudentDiagnosisGuard></RoleProtectedRoute>} />
       <Route path="/student/assessment" element={<Navigate to="/student/internal" replace />} />
-      <Route path="/student/mock" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><FullMockAssessment /></RoleProtectedRoute>} />
+      <Route path="/student/mock" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDiagnosisGuard><FullMockAssessment /></StudentDiagnosisGuard></RoleProtectedRoute>} />
       <Route path="/student/how-it-works" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><HowItWorks /></RoleProtectedRoute>} />
 
       {/* ── Instructor Dashboard & Routes ─────────────────────────────────── */}
