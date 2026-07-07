@@ -55,7 +55,7 @@ This is the most important part to verify.
 
 **Listening & Reading (objective):**
 - Band = (correct answers ÷ total questions) × 9, rounded to the nearest 0.5, capped at 9.0.
-- Example: 5 of 6 listening correct → 7.5 band. 3 of 4 reading correct → 6.75 → rounds to **6.5**.
+- Example: 5 of 6 listening correct → 7.5 band. 3 of 4 reading correct → 6.75 → rounds to the nearest half, **7.0**.
 
 **Writing (AI-graded):**
 - Graded by an AI model against the four official IELTS criteria: Task Achievement, Coherence & Cohesion, Lexical Resource, Grammatical Range & Accuracy.
