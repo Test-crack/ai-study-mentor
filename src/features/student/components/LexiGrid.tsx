@@ -495,6 +495,9 @@ const saveState = (index: number, tries: number, guess: string, score: number, s
   // --- Animations & Progression ---
   const triggerWinAnimation = (attemptsForThisWord: number) => {
     totalAttemptsRef.current += attemptsForThisWord;
+    // Spec: the +5 perfect bonus requires every word solved within 2 attempts.
+    // Solving on the 3rd try previously kept the bonus (it was only cleared on a loss).
+    if (attemptsForThisWord > 2) allBonusEligibleRef.current = false;
 
     if (isPracticeMode) return; // No momentum gained in practice — skip all reward UI
 

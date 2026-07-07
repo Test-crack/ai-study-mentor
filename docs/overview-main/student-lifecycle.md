@@ -230,13 +230,17 @@ The paid (earned) mock additionally requires ≥ 1500 momentum, ≥ 4 completed 
 - **All 4 skills, 80 questions total** — Listening (20 MCQ), Reading (20 MCQ), Writing (16 MCQ + 4 prompts), Speaking (16 MCQ + 4 prompts). Writing and Speaking cover all 4 of their sub-skills.
 - **3-hour global timer** — no per-section limits. The student can start any time; once started they have 3 hours of test time.
 - **72-hour submission window** — the session stays resumable for up to 72 hours after starting. Answers save continuously; a browser crash loses nothing.
-- If the 72-hour window passes without submission, the session is marked **ABANDONED**: the month's slot is consumed, but **no momentum penalty** is applied (unlike a missed IA).
+- If the 72-hour window passes without submission:
+  - **With saved answers** → the system **auto-grades the saved work** on the next status check (same behaviour as IA): the session becomes COMPLETED with real scores, bands update, momentum is awarded, and the slot is consumed.
+  - **With no real answers** → the session is marked **ABANDONED**: the month's slot is consumed, but **no momentum penalty** is applied (unlike a missed IA).
 
 ### 5.4 Grading & Real Band Score Update (the critical formula)
 
 - Listening/Reading: band = (correct ÷ 20) × 9, rounded to 0.5.
 - Writing/Speaking: each of the 4 sub-skills is scored (MCQ 1× + AI-graded prompt 2×, same combination as IA), then the skill band = average of its 4 sub-skill bands.
-- **Skill band update:** new band = **60% mock result + 40% existing band**, rounded to 0.5, clamped 0–9.
+- **Skill band update:**
+  - Listening/Reading: new band = **60% mock result + 40% existing band**, rounded to 0.5, clamped 0–9.
+  - Writing/Speaking: the same 60/40 blend is applied **per sub-skill** (each rounded to 0.5), and the skill band = average of the four updated sub-skill bands. This keeps sub-skill history smooth and consistent with how IA updates the matrix; a sub-skill with no prior score adopts the mock result directly.
 - **Real band score** (the headline number) = average of the four updated skill bands, rounded to 0.5.
 - **Momentum:** +200 for completing a mock; if the real band score crosses a 0.5 boundary vs. before (e.g., 6.0 → 6.5), a **+500 bonus** applies (700 total).
 
@@ -286,7 +290,7 @@ Momentum is earned by doing work and spent on conveniences. It can never go belo
 | 19 | Student misses 3 IAs while away | All 3 marked missed on return; −60 total (floored at 0 balance) |
 | 20 | An excellent IA result (e.g., +3 bands) | Band rises by at most 2 (smoothing cap), not the full jump |
 | 21 | Student attempts a 2nd free mock in the same month | Rejected — slot already consumed |
-| 22 | Mock started but never submitted within 72h | Marked ABANDONED; slot consumed; no momentum penalty |
+| 22 | Mock started but never submitted within 72h | If it has saved answers → auto-graded as COMPLETED on next status check (bands update, momentum awarded). If empty → ABANDONED; slot consumed either way; no penalty |
 | 23 | Mock submitted late but within the 72h window (past 3h timer) | Accepted — the 3-hour timer is a client-side pacing limit; 72h is the hard server limit |
 | 24 | Real band crosses 6.0 → 6.5 via mock | +700 momentum (200 base + 500 threshold bonus) |
 | 25 | All timers/dates | Computed on IST (Indian Standard Time) calendar days, not UTC |

@@ -202,8 +202,19 @@ function storageClear(...keys: string[]) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function fetchDiagnosticQuestionsData(skill: string) {
-  const data = await callBackend(`/api/diagnostic/questions/${skill}`, { method: "GET" });
+  // M-20: pin the question set across refreshes. First fetch stores the served
+  // set_id (L/R) or prompt id (W/S); later fetches pass it back so the backend
+  // re-serves the SAME questions instead of re-rolling a random set (which
+  // silently invalidated the student's saved answers mid-section).
+  const servedKey = `tc_served_${skill}`;
+  const servedId  = storageLoad<string>(servedKey);
+  const param     = servedId
+    ? (skill === "listening" || skill === "reading" ? `?set_id=${encodeURIComponent(servedId)}` : `?question_id=${encodeURIComponent(servedId)}`)
+    : "";
+  const data = await callBackend(`/api/diagnostic/questions/${skill}${param}`, { method: "GET" });
   if (!data?.ok) throw new Error("Fetch failed");
+  const idToPersist = (skill === "listening" || skill === "reading") ? data.set_id : data.id;
+  if (idToPersist) storageSave(servedKey, String(idToPersist));
   return data;
 }
 
@@ -2039,7 +2050,10 @@ function DiagnosisInner() {
   };
 
   const handleGoToDashboard = async () => {
-    storageClear(SK.phase, SK.results, SK.listeningAnswers, SK.listeningAudioPlayed, SK.readingAnswers, SK.readingTimeLeft, SK.writingText, SK.speakingResult);
+    storageClear(
+      SK.phase, SK.results, SK.listeningAnswers, SK.listeningAudioPlayed, SK.readingAnswers, SK.readingTimeLeft, SK.writingText, SK.speakingResult,
+      "tc_served_listening", "tc_served_reading", "tc_served_writing", "tc_served_speaking",
+    );
     // Force-refresh the cached profile BEFORE navigating. The dashboard route guard
     // reads profile.isDiagnosed from the cache; without this the freshly-diagnosed
     // student still looks un-diagnosed and gets bounced back into onboarding (a loop).

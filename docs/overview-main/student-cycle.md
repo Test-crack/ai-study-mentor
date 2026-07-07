@@ -281,7 +281,7 @@ If a student starts an IA or a Mock but forgets to submit, the system **auto-sub
 | Assessment | What triggers auto-submit | Result |
 |---|---|---|
 | Internal Assessment | The section/test time (20 min per section) elapses without a manual submit. | The IA is submitted and graded on whatever answers exist at that point. |
-| Mock Test | The 3-hour test timer elapses (or the 72-hour session window closes) without a manual submit. | The mock is finalised; an expired unsubmitted mock session is closed out. Note: a mock that lapses this way costs the student their monthly slot, but (unlike a missed IA) carries no momentum penalty. |
+| Mock Test | The 3-hour test timer elapses (or the 72-hour session window closes) without a manual submit. | If the student saved any real answers, the mock is auto-graded on the next status check — scores, band updates and momentum apply as if submitted. A session with no answers is closed out as abandoned. Either way the monthly slot is consumed, and (unlike a missed IA) there is no momentum penalty. |
 
 > **Tester's note**
 > - Verify auto-submit fires from the timer expiry itself, and that the answers captured are the student's most recent ones (the last answer entered should not be dropped).
