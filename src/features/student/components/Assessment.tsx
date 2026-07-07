@@ -731,7 +731,7 @@ export default function Assessment() {
     const momentumAwarded = iaStatus.completed_session_momentum ?? 0;
     const iaNumber = iaStatus.current_ia_number ?? 1;
     const isFirstIA = iaNumber === 1;
-    const comparisonLabel = isFirstIA ? 'vs Diagnostic' : 'vs Last IA';
+    const comparisonLabel = isFirstIA ? 'vs Diagnostic' : 'vs Current Band';
 
     return (
       <div className="max-w-3xl mx-auto animate-fade-in pt-8 pb-24 px-4">
@@ -890,7 +890,7 @@ export default function Assessment() {
         </h1>
         
         <p className="text-slate-600 leading-relaxed font-medium mb-10 max-w-lg mx-auto">
-          This is a continuous, full-length IELTS simulation. You will complete all four sections back-to-back. Each section contains 10 sub-skill targeted questions with a strict 20-minute timer.
+          This assessment targets your two weakest sub-skills. You will complete two sections back-to-back, each with 10 targeted questions and a strict 20-minute timer.
         </p>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
@@ -985,7 +985,7 @@ export default function Assessment() {
     const momentumEarned   = sessionMomentumAward || iaResults?.momentum_awarded || 0;
     const breakdown: Array<{ reason: string; points: number }> = iaResults?.momentum_breakdown ?? [];
     const isFirstIA        = iaResults?.is_first_ia ?? false;
-    const comparisonLabel  = isFirstIA ? 'vs Diagnostic' : 'vs Last IA';
+    const comparisonLabel  = isFirstIA ? 'vs Diagnostic' : 'vs Current Band';
 
     type ScoreRow = {
       sub_skill: string; skill: string; band: number;

@@ -398,7 +398,7 @@ const StudentDashboardPage = () => {
                       nextAction={nextAction}
                       dailyDCS={dailyDCS}
                       dcsThreshold={dcsThreshold}
-                      extraCost={dailyDrillState?.extra_session_cost ?? 75}
+                      extraCost={dailyDrillState?.extra_session_cost ?? 300}
                       totalMomentum={totalMomentum}
                       buyingExtra={buyingExtra}
                       confirmExtra={confirmExtra}
