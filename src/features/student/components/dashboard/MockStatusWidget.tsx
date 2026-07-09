@@ -26,9 +26,9 @@ interface MockWidgetStatus {
 }
 
 function firstOfNextMonth(): string {
-  const d = new Date();
-  d.setMonth(d.getMonth() + 1);
-  d.setDate(1);
+  const now = new Date();
+  // Construct the 1st directly — d.setMonth(+1) on e.g. Jan 31 overflows into March.
+  const d = new Date(now.getFullYear(), now.getMonth() + 1, 1);
   return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 

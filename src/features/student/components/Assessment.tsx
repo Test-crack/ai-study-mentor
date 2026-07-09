@@ -311,15 +311,25 @@ export default function Assessment() {
 
 
 
-  /** Save one answer to backend — fire-and-forget, never blocks UI. */
-  const persistAnswer = (questionId: string, answer: string) => {
-    if (!iaSessionId) return;
+  /** Save one answer to backend. Returns the promise so callers can await it
+   *  before submitting (the final answer must land before grading reads answers). */
+  const persistAnswer = (questionId: string, answer: string): Promise<void> => {
+    if (!iaSessionId) return Promise.resolve();
     const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
-    callBackend(`${backendUrl}/api/ia/answer`, {
+    return callBackend(`${backendUrl}/api/ia/answer`, {
       method: 'POST',
       body: JSON.stringify({ session_id: iaSessionId, question_id: questionId, answer })
-    }).catch(e => console.warn('[IA] answer save failed:', e));
+    }).then(() => undefined).catch(e => console.warn('[IA] answer save failed:', e));
   };
+
+  /** Flush the current question's answer to the backend (awaitable). */
+  const flushCurrentAnswer = useCallback(async () => {
+    if (writingDebounceRef.current) { clearTimeout(writingDebounceRef.current); writingDebounceRef.current = null; }
+    const q = currentSection?.questions[currentIdx];
+    const a = q ? answers[q.id] : undefined;
+    if (q && a) await persistAnswer(q.id, a);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentSection, currentIdx, answers, iaSessionId]);
 
   /** Debounced writing save — waits 1.5s after the student stops typing. */
   const persistWritingDebounced = (questionId: string, text: string) => {
@@ -439,6 +449,9 @@ export default function Assessment() {
       // Last section complete — submit
       setPhase("scoring");
       try {
+        // Ensure the final answer is persisted BEFORE submit reads stored answers,
+        // otherwise the last question can be graded as unanswered (fire-and-forget race).
+        await flushCurrentAnswer();
         const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
         const res = await callBackend(`${backendUrl}/api/ia/submit`, {
           method: 'POST',
@@ -450,11 +463,16 @@ export default function Assessment() {
           setIaResults(res);
         }
       } catch (err) {
-        console.error('[IA] submit error:', err);
+        // Submit failed (e.g. AI grading temporarily down → 502). The backend keeps the
+        // session IN_PROGRESS and answers saved, so return to the session for retry
+        // rather than showing an empty results screen.
+        console.error('[IA] submit error — returning to session for retry:', err);
+        setPhase("session");
+        return;
       }
       setTimeout(() => setPhase("results"), 3500);
     }
-  }, [iaSections, currentSectionIdx, iaSessionId]);
+  }, [iaSections, currentSectionIdx, iaSessionId, flushCurrentAnswer]);
 
   const advanceToNextSection = () => {
     const nextIdx = currentSectionIdx + 1;
@@ -713,7 +731,7 @@ export default function Assessment() {
     const momentumAwarded = iaStatus.completed_session_momentum ?? 0;
     const iaNumber = iaStatus.current_ia_number ?? 1;
     const isFirstIA = iaNumber === 1;
-    const comparisonLabel = isFirstIA ? 'vs Diagnostic' : 'vs Last IA';
+    const comparisonLabel = isFirstIA ? 'vs Diagnostic' : 'vs Current Band';
 
     return (
       <div className="max-w-3xl mx-auto animate-fade-in pt-8 pb-24 px-4">
@@ -872,7 +890,7 @@ export default function Assessment() {
         </h1>
         
         <p className="text-slate-600 leading-relaxed font-medium mb-10 max-w-lg mx-auto">
-          This is a continuous, full-length IELTS simulation. You will complete all four sections back-to-back. Each section contains 10 sub-skill targeted questions with a strict 20-minute timer.
+          This assessment targets your two weakest sub-skills. You will complete two sections back-to-back, each with 10 targeted questions and a strict 20-minute timer.
         </p>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
@@ -967,7 +985,7 @@ export default function Assessment() {
     const momentumEarned   = sessionMomentumAward || iaResults?.momentum_awarded || 0;
     const breakdown: Array<{ reason: string; points: number }> = iaResults?.momentum_breakdown ?? [];
     const isFirstIA        = iaResults?.is_first_ia ?? false;
-    const comparisonLabel  = isFirstIA ? 'vs Diagnostic' : 'vs Last IA';
+    const comparisonLabel  = isFirstIA ? 'vs Diagnostic' : 'vs Current Band';
 
     type ScoreRow = {
       sub_skill: string; skill: string; band: number;

@@ -179,15 +179,6 @@ const getLevelFromScore = (score: number): string => {
   return 'ADVANCED';
 };
 
-const buildMissCycleKey = (missCount: number): string => {
-  const now = new Date();
-  const startOfYear = new Date(now.getFullYear(), 0, 1);
-  const week = Math.ceil(
-    ((now.getTime() - startOfYear.getTime()) / 86400000 + startOfYear.getDay() + 1) / 7
-  );
-  return `${now.getFullYear()}-W${String(week).padStart(2, "0")}_miss${missCount}`;
-};
-
 // ─── MAIN COMPONENT ──────────────────────────────────────────────────────────
 
 const StudentDashboardPage = () => {
@@ -219,15 +210,14 @@ const StudentDashboardPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { applyMissPenalty, syncMomentum, updateStreak, totalMomentum } = useMomentum();
+  const { syncMomentum, updateStreak, totalMomentum } = useMomentum();
 
-  const tutorAlertFiredRef = useRef(false);
-
-  const MOCK_MISSED_STATE = 1; // Change to 0, 1, or 2 to test UI states
-  const missedData = {
-    misses: MOCK_MISSED_STATE,
-    subSkills: MOCK_MISSED_STATE === 1 ? ["Grammar"] : ["Grammar", "Coherence"],
-  };
+  // Missed-IA state is authoritative on the server (getIAStatus deducts momentum and
+  // records misses). Until that feed is surfaced here, show no fabricated misses — the
+  // previous hard-coded MOCK_MISSED_STATE=1 shipped a fake "behind schedule" banner,
+  // a fake client-side −20/week penalty that fought syncMomentum, and could lock the
+  // dashboard for every student.
+  const missedData = { misses: 0, subSkills: [] as string[] };
 
   const displayName = profile?.name || user?.email?.split("@")[0] || "Student";
   const overall = overallBand(skillBands);
@@ -243,7 +233,7 @@ const StudentDashboardPage = () => {
   );
 
   const milestone = getNextMilestone(overall, dynamicReadiness.targetBand);
-  const isLocked = !dailyDrillState || !dailyDrillState.dashboard_unlocked || missedData.misses >= 2;
+  const isLocked = !dailyDrillState || !dailyDrillState.dashboard_unlocked;
 
   const fetchDailyDrillState = useCallback(async () => {
     try {
@@ -280,46 +270,6 @@ const StudentDashboardPage = () => {
       setNextActionDrill({ sub_skill: "General Practice", skill: "Overall", sub_skill_score: 5.5 });
     }
   }, []);
-
-  useEffect(() => {
-    if (missedData.misses === 1) {
-      const key = buildMissCycleKey(1);
-      applyMissPenalty(1, key);
-    } else if (missedData.misses >= 2) {
-      applyMissPenalty(1, buildMissCycleKey(1));
-      applyMissPenalty(2, buildMissCycleKey(2));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [missedData.misses]);
-
-  useEffect(() => {
-    if (missedData.misses < 2 || tutorAlertFiredRef.current) return;
-
-    const fireTutorAlert = async () => {
-      tutorAlertFiredRef.current = true;
-      try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
-        await callBackend(`${backendUrl}/api/student/tutor-alert`, {
-          method: "POST",
-          body: JSON.stringify({
-            student_name: displayName,
-            student_email: user?.email,
-            missed_sub_skills: missedData.subSkills,
-            consecutive_misses: missedData.misses,
-            last_login: new Date().toISOString(),
-            exam_days_remaining: dynamicReadiness.daysLeft,
-          }),
-        });
-        console.info("[TutorAlert] Alert fired successfully for", displayName);
-      } catch (err) {
-        console.error("[TutorAlert] Failed to fire tutor alert:", err);
-        tutorAlertFiredRef.current = false;
-      }
-    };
-
-    fireTutorAlert();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [missedData.misses]);
 
   useEffect(() => {
     const fetchCompetencyScores = async () => {
@@ -534,7 +484,7 @@ const StudentDashboardPage = () => {
                       nextAction={nextAction}
                       dailyDCS={dailyDCS}
                       dcsThreshold={dcsThreshold}
-                      extraCost={dailyDrillState?.extra_session_cost ?? 75}
+                      extraCost={dailyDrillState?.extra_session_cost ?? 300}
                       totalMomentum={totalMomentum}
                       buyingExtra={buyingExtra}
                       confirmExtra={confirmExtra}

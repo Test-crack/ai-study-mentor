@@ -45,9 +45,12 @@ export const MomentumProvider = ({ children }: { children: ReactNode }) => {
   // Handles standard additions + the ?mode=replay multiplier (0.5x)
   const addPoints = useCallback((points: number, reason?: string, multiplier: number = 1.0) => {
     const finalPoints = Math.round(points * multiplier);
-    if (reason) console.info(`[Momentum] +${finalPoints} (Base: ${points}, Mult: ${multiplier}x) — ${reason}`);
-    
-    setTotalMomentum(prev => prev + Math.abs(finalPoints));
+    if (reason) console.info(`[Momentum] ${finalPoints >= 0 ? '+' : ''}${finalPoints} (Base: ${points}, Mult: ${multiplier}x) — ${reason}`);
+
+    // Respect the sign: a negative value (e.g. the -150 optimistic LexiGrid-skip
+    // deduction) must subtract. Math.abs previously turned every call into an add,
+    // so skipping visibly *raised* the topbar until syncMomentum corrected it.
+    setTotalMomentum(prev => Math.max(0, prev + finalPoints));
   }, []);
 
   // Handles skips (-20 pts) and missed assessment penalties (-20/-40 pts)
