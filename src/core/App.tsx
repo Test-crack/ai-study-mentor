@@ -1,4 +1,5 @@
 // src/core/App.tsx
+import { useState, useEffect } from "react";
 import { Toaster } from "@/shared/components/ui/toaster";
 import { ThemeProvider } from "@/features/theme/ThemeProvider";
 import { Toaster as Sonner } from "@/shared/components/ui/sonner";
@@ -6,6 +7,7 @@ import { TooltipProvider } from "@/shared/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/features/auth/hooks/useAuth";
+import { callBackend } from "@/features/auth/services/authClient";
 import LandingPage from "@/features/home/components/LandingPage";
 import DashboardPage from "@/features/home/components/DashboardPage";
 import LoginPage from "@/features/auth/components/LoginPage";
@@ -191,6 +193,66 @@ const StudentDiagnosisGuard = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+/**
+ * 4. Student Drill-Lock Guard
+ *
+ * Blocks direct navigation into locked /student/* sections (typed URL,
+ * bookmark, sidebar click, back/forward) until today's drill/lexigrid gate
+ * clears. Evaluated at the ROUTE level — StudentDashboardPage's local
+ * `isLocked` only runs when that page is the mounted one, which is the exact
+ * gap this closes.
+ *
+ * Locked → redirect to /student/dashboard (where the unlock UI lives).
+ * Fails CLOSED on fetch error — same default StudentDashboardPage uses
+ * (`!dailyDrillState` counts as locked).
+ *
+ * Deliberately NOT applied to: /student/dashboard, /student/settings,
+ * /student/drill, /student/lexigrid, /student/onboarding, /student/diagnosis,
+ * /student/not-enrolled.
+ *
+ * NOTE: the `missedData.misses >= 2` half of the dashboard's isLocked is
+ * intentionally omitted — it's driven by MOCK_MISSED_STATE (a hardcoded test
+ * constant), not backend data. Wire in the real misses field here if/when it
+ * exists.
+ */
+const StudentDrillLockGuard = ({ children }: { children: React.ReactNode }) => {
+  const { profile, loading, profileLoading } = useAuth();
+  const [dashboardUnlocked, setDashboardUnlocked] = useState<boolean | null>(null);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    if (!profile || profile.role !== 'STUDENT') {
+      setChecking(false);
+      return;
+    }
+    let cancelled = false;
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+    callBackend(`${backendUrl}/api/student/daily-drill-state`)
+      .then((res: any) => {
+        if (cancelled) return;
+        // Match the dashboard: only an explicit unlocked=true counts as unlocked.
+        setDashboardUnlocked(res?.success ? Boolean(res.dashboard_unlocked) : false);
+      })
+      .catch(() => {
+        if (!cancelled) setDashboardUnlocked(false); // fail closed
+      })
+      .finally(() => {
+        if (!cancelled) setChecking(false);
+      });
+    return () => { cancelled = true; };
+  }, [profile]);
+
+  if ((loading || profileLoading) && !profile) return null;
+  if (!profile) return <Navigate to="/login" replace />;
+
+  if (profile.role === 'STUDENT') {
+    if (checking) return null; // avoid a flash-then-redirect while status resolves
+    if (!dashboardUnlocked) return <Navigate to="/student/dashboard" replace />;
+  }
+
+  return <>{children}</>;
+};
+
 const AppRoutes = () => {
   const { user } = useAuth();
 
@@ -285,33 +347,39 @@ const AppRoutes = () => {
           </RoleProtectedRoute>
         }
       />
+      {/* Settings stays reachable while locked (per spec). */}
       <Route path="/student/settings" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentProfilePage /></RoleProtectedRoute>} />
-      <Route path="/student/courses" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentCoursesPage /></RoleProtectedRoute>} />
-      <Route path="/student/schedule" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentSchedulePage /></RoleProtectedRoute>} />
-      <Route path="/student/voice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><VoiceLab /></RoleProtectedRoute>} />
-      <Route path="/student/speed" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><SpeedReading /></RoleProtectedRoute>} />
-      <Route path="/student/speaking-assessment" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentReadingAssessmentPage /></RoleProtectedRoute>} />
-      <Route path="/student/writing" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><IeltsWriting /></RoleProtectedRoute>} />
-      <Route path="/student/listening" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><ListeningPractice /></RoleProtectedRoute>} />
-      <Route path="/student/asess" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><SpeakingAssessment /></RoleProtectedRoute>} />
-      <Route path="/student/reading" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><ReadingPractice /></RoleProtectedRoute>} />
-      <Route path="/student/courses-section" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><CourseSection /></RoleProtectedRoute>} />
-      <Route path="/student/reading-assessment/history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentAssessmentHistoryPage /></RoleProtectedRoute>} />
-      <Route path="/student/speaking-history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentSpeakingHistoryPage /></RoleProtectedRoute>} />
-      <Route path="/student/reading-history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><ReadingHistoryPage /></RoleProtectedRoute>} />
-      <Route path="/student/my-curriculum" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><MyCurriculum /></RoleProtectedRoute>} />
-      <Route path="/student/batches" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentBatchView /></RoleProtectedRoute>} />
-      <Route path="/student/assessment-history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><AssessmentHistoryPage /></RoleProtectedRoute>} />
-      <Route path="/student/suggestion-page" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><SuggestionsPage /></RoleProtectedRoute>} />
-      <Route path="/student/report" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><Report /></RoleProtectedRoute>} />
-      <Route path="/student/suggestion" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><Suggestion /></RoleProtectedRoute>} />
-      <Route path="/student/speaking-practice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><SpeakingPractice /></RoleProtectedRoute>} />
+
+      {/* ── Drill-locked sections: blocked until today's drill/lexigrid gate clears ── */}
+      <Route path="/student/courses" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><StudentCoursesPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
+      <Route path="/student/schedule" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><StudentSchedulePage /></StudentDrillLockGuard></RoleProtectedRoute>} />
+      <Route path="/student/voice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><VoiceLab /></StudentDrillLockGuard></RoleProtectedRoute>} />
+      <Route path="/student/speed" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><SpeedReading /></StudentDrillLockGuard></RoleProtectedRoute>} />
+      <Route path="/student/speaking-assessment" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><StudentReadingAssessmentPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
+      <Route path="/student/writing" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><IeltsWriting /></StudentDrillLockGuard></RoleProtectedRoute>} />
+      <Route path="/student/listening" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><ListeningPractice /></StudentDrillLockGuard></RoleProtectedRoute>} />
+      <Route path="/student/asess" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><SpeakingAssessment /></StudentDrillLockGuard></RoleProtectedRoute>} />
+      <Route path="/student/reading" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><ReadingPractice /></StudentDrillLockGuard></RoleProtectedRoute>} />
+      <Route path="/student/courses-section" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><CourseSection /></StudentDrillLockGuard></RoleProtectedRoute>} />
+      <Route path="/student/reading-assessment/history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><StudentAssessmentHistoryPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
+      <Route path="/student/speaking-history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><StudentSpeakingHistoryPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
+      <Route path="/student/reading-history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><ReadingHistoryPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
+      <Route path="/student/my-curriculum" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><MyCurriculum /></StudentDrillLockGuard></RoleProtectedRoute>} />
+      <Route path="/student/batches" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><StudentBatchView /></StudentDrillLockGuard></RoleProtectedRoute>} />
+      <Route path="/student/assessment-history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><AssessmentHistoryPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
+      <Route path="/student/suggestion-page" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><SuggestionsPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
+      <Route path="/student/report" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><Report /></StudentDrillLockGuard></RoleProtectedRoute>} />
+      <Route path="/student/suggestion" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><Suggestion /></StudentDrillLockGuard></RoleProtectedRoute>} />
+      <Route path="/student/speaking-practice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><SpeakingPractice /></StudentDrillLockGuard></RoleProtectedRoute>} />
+
+      {/* Unlock mechanism — deliberately NOT wrapped (gating these would prevent unlocking). */}
       <Route path="/student/drill" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><DrillScreen /></RoleProtectedRoute>} />
       <Route path="/student/lexigrid" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><LexiGrid /></RoleProtectedRoute>} />
-      <Route path="/student/internal" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><InternalAssessmentPage /></RoleProtectedRoute>} />
+
+      <Route path="/student/internal" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><InternalAssessmentPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
       <Route path="/student/assessment" element={<Navigate to="/student/internal" replace />} />
-      <Route path="/student/mock" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><FullMockAssessment /></RoleProtectedRoute>} />
-      <Route path="/student/how-it-works" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><HowItWorks /></RoleProtectedRoute>} />
+      <Route path="/student/mock" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><FullMockAssessment /></StudentDrillLockGuard></RoleProtectedRoute>} />
+      <Route path="/student/how-it-works" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><HowItWorks /></StudentDrillLockGuard></RoleProtectedRoute>} />
 
       {/* ── Instructor Dashboard & Routes ─────────────────────────────────── */}
       <Route

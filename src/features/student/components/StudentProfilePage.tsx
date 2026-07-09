@@ -444,7 +444,7 @@ export default function StudentProfilePage() {
                     <Input
                       id="phone"
                       value={formData.phoneNo}
-                      onChange={(e) => handleInputChange('phone', e.target.value)}
+                      onChange={(e) => handleInputChange('phoneNo', e.target.value)}
                       placeholder="+1 234 567 890"
                       className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:ring-indigo-500"
                     />
