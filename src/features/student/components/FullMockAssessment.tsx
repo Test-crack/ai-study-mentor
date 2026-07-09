@@ -132,6 +132,20 @@ function firstOfNextMonth(): string {
   return d.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
 }
 
+// Defensive mirror of the server's ±2 band-movement cap. The server (and the DB
+// trigger) are the source of truth; this only guards the DISPLAY so a mis-capped
+// payload can never render an implausible >2 band jump. It warns (surfacing a
+// server bug) rather than silently hiding, and is a no-op in normal operation.
+const BAND_MOVE_CAP = 2;
+function clampBandMove(prev: number | null, next: number): number {
+  if (prev === null || prev === undefined) return next;
+  const capped = Math.min(prev + BAND_MOVE_CAP, Math.max(prev - BAND_MOVE_CAP, next));
+  if (capped !== next) {
+    console.warn(`[Mock] band movement ${prev} -> ${next} exceeded ±${BAND_MOVE_CAP}; clamped to ${capped}`);
+  }
+  return capped;
+}
+
 // ─── Circular timer ───────────────────────────────────────────────────────────
 // NOTE: colors intentionally untouched — threshold-based functional indicator.
 
@@ -1080,8 +1094,9 @@ export default function FullMockAssessment() {
         {skillScores.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
             {skillScores.map((s, i) => {
+              const displayNewBand = clampBandMove(s.prev_matrix_band, s.new_matrix_band);
               const matrixDelta = s.prev_matrix_band !== null
-                ? Math.round((s.new_matrix_band - s.prev_matrix_band) * 10) / 10
+                ? Math.round((displayNewBand - s.prev_matrix_band) * 10) / 10
                 : null;
               const matrixUp   = matrixDelta !== null && matrixDelta > 0;
               const diagDelta  = s.delta_from_diag;
@@ -1193,7 +1208,7 @@ export default function FullMockAssessment() {
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-sm font-semibold text-slate-400">{s.prev_matrix_band !== null ? s.prev_matrix_band.toFixed(1) : "—"}</span>
                       <span className="text-slate-300 text-xs">→</span>
-                      <span className={`text-xl font-bold ${matrixUp ? "text-emerald-600" : "text-slate-700"}`}>{s.new_matrix_band.toFixed(1)}</span>
+                      <span className={`text-xl font-bold ${matrixUp ? "text-emerald-600" : "text-slate-700"}`}>{displayNewBand.toFixed(1)}</span>
                       {matrixDelta !== null && (
                         <span className={`text-xs font-semibold ${matrixUp ? "text-emerald-600" : "text-rose-600"}`}>
                           {matrixUp ? `+${matrixDelta.toFixed(1)}` : matrixDelta.toFixed(1)}
