@@ -1231,7 +1231,9 @@ function WritingPhase({
 
   const wordCount = countWords(text);
   const raw = data?.minWords;
-  const MIN_WORDS = (typeof raw === 'number' && Number.isFinite(raw) && raw > 0) ? raw : 250;
+  // Default must match the backend's fallback (150) so the on-screen requirement and
+  // the server-side under-length cap agree when a prompt has no min_words set.
+  const MIN_WORDS = (typeof raw === 'number' && Number.isFinite(raw) && raw > 0) ? raw : 150;
 
   useEffect(() => {
     storageSave(SK.writingText, text);
@@ -1866,20 +1868,24 @@ function DiagnosisInner() {
 
   useEffect(() => {
     const tabId = tabIdRef.current;
-    const channel = new BroadcastChannel("tc_diagnostic_sync");
+    // Namespace the lock key AND the channel per student — otherwise two different
+    // students in two tabs on the same device falsely trip each other's "Session
+    // Already Active" conflict (the lock/channel were previously global).
+    const lockKey = nsKey(SK.activeTabLock);
+    const channel = new BroadcastChannel(`tc_diagnostic_sync:${storageNamespace || 'anon'}`);
     let deadLockTimeout: ReturnType<typeof setTimeout>;
 
     const attemptClaim = () => {
-      const currentLock = localStorage.getItem(SK.activeTabLock);
+      const currentLock = localStorage.getItem(lockKey);
       if (!currentLock || currentLock === tabId) {
-        localStorage.setItem(SK.activeTabLock, tabId);
+        localStorage.setItem(lockKey, tabId);
         channel.postMessage({ type: "CLAIMED", tabId });
         setTabConflict(false);
       } else {
         setTabConflict(true);
         channel.postMessage({ type: "PING", tabId });
         deadLockTimeout = setTimeout(() => {
-          localStorage.setItem(SK.activeTabLock, tabId);
+          localStorage.setItem(lockKey, tabId);
           channel.postMessage({ type: "CLAIMED", tabId });
           setTabConflict(false);
         }, 1000);
@@ -1891,12 +1897,12 @@ function DiagnosisInner() {
       if (data.type === "CLAIMED") {
         if (data.tabId !== tabId) {
           clearTimeout(deadLockTimeout);
-          if (localStorage.getItem(SK.activeTabLock) !== tabId) {
+          if (localStorage.getItem(lockKey) !== tabId) {
             setTabConflict(true);
           }
         }
       } else if (data.type === "PING") {
-        if (localStorage.getItem(SK.activeTabLock) === tabId) {
+        if (localStorage.getItem(lockKey) === tabId) {
           channel.postMessage({ type: "CLAIMED", tabId });
         }
       } else if (data.type === "RELEASED") {
@@ -1907,8 +1913,8 @@ function DiagnosisInner() {
     attemptClaim();
 
     const handleUnload = () => {
-      if (localStorage.getItem(SK.activeTabLock) === tabId) {
-        localStorage.removeItem(SK.activeTabLock);
+      if (localStorage.getItem(lockKey) === tabId) {
+        localStorage.removeItem(lockKey);
         channel.postMessage({ type: "RELEASED", tabId });
       }
     };
