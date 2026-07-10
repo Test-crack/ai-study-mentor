@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getUserProfile } from '../services/profile';
 
 export interface UserProfile {
+  student_id: string;
   id: string;
   email: string;
   name: string | null;
