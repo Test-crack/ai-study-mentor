@@ -228,11 +228,11 @@ export default function StudentProfilePage() {
     setSavingBand(true);
     try {
       const backendUrl = getBackendUrl();
-      // Backend casing unconfirmed — send both. Trim to the real key once the
-      // PUT /api/profile handler contract is verified.
+      // Contract: PUT /api/profile accepts `targetBand` (validated 4.0–9.0, snapped to 0.5)
+      // and writes institute_students.target_band.
       await callBackend(`${backendUrl}/api/profile`, {
         method: 'PUT',
-        body: JSON.stringify({ targetBand: selectedBand, target_band: selectedBand }),
+        body: JSON.stringify({ targetBand: selectedBand }),
       });
 
       // Verify against the same endpoint the dashboard reads, so a silently
@@ -255,7 +255,7 @@ export default function StudentProfilePage() {
       } else {
         toast({
           title: 'Save did not persist',
-          description: 'The server accepted the request but target_band is unchanged — the PUT /api/profile handler likely needs to whitelist targetBand.',
+          description: 'The server accepted the request but your target band did not update. Please try again.',
           variant: 'destructive',
         });
       }
@@ -280,10 +280,11 @@ export default function StudentProfilePage() {
     setSavingExamDate(true);
     try {
       const backendUrl = getBackendUrl();
-      // Dual casing until the PUT /api/profile contract is confirmed.
+      // Contract: PUT /api/profile accepts `examDate` (validated future date) and
+      // writes institute_students.exam_date.
       await callBackend(`${backendUrl}/api/profile`, {
         method: 'PUT',
-        body: JSON.stringify({ examDate: examDateDraft, exam_date: examDateDraft }),
+        body: JSON.stringify({ examDate: examDateDraft }),
       });
 
       // Verify against the endpoint the dashboard reads.
@@ -305,7 +306,7 @@ export default function StudentProfilePage() {
       } else {
         toast({
           title: 'Save did not persist',
-          description: 'The server accepted the request but exam_date is unchanged — the PUT /api/profile handler likely needs to whitelist examDate.',
+          description: 'The server accepted the request but your exam date did not update. Please try again.',
           variant: 'destructive',
         });
       }
