@@ -1,3 +1,4 @@
+// src/features/Student/pages/StudentDashboardPage.tsx
 import { useState, useEffect, useRef, useCallback } from "react";
 import { StudentSidebar } from "./dashboard/StudentSidebar";
 import { StudentTopbar } from "./dashboard/StudentTopbar";
@@ -38,18 +39,89 @@ const SKILL_BANDS: SkillBand[] = [
   { skill: "Speaking", score: 0.0, target: 0.0, delta: 0.0, route: "/student/speaking-assessment", icon: <Mic className="h-5 w-5" />, color: "text-rose-600", bg: "bg-rose-50 dark:bg-rose-500/10", border: "border-rose-200 dark:border-rose-500/30" },
 ];
 
-const READINESS = {
-  targetBand: 7.5,
-  targetDate: "2026-06-15",
-  currentOverall: 5.5,
-  trajectory: "At current pace: 6.5 by June 15",
-  status: "on-track",
-  daysLeft: 83,
-};
 const LEVEL = {
   label: "Intermediate",
   tier: "B2",
   color: "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300",
+};
+
+// ─── PREDICTED READINESS (frontend-only model) ────────────────────────────────
+// Base improvement pace: ≈ 0.5 band per 4 weeks of consistent practice.
+const BASE_PACE_PER_WEEK = 0.125;
+
+// Consistency multiplier — misses/streak directly scale the projected pace:
+// less login, less output.
+const consistencyFactor = (misses: number, streak: number): number => {
+  if (misses >= 2) return 0.6;
+  if (misses === 1) return 0.8;
+  return streak >= 7 ? 1.1 : 1.0;
+};
+
+type ReadinessStatus = "on-track" | "warn" | "catchup" | "no-date" | "exam-passed";
+
+interface Readiness {
+  status: ReadinessStatus;
+  targetBand: number;
+  targetDate: string | null;
+  daysLeft: number;
+  projectedBand: number | null;
+  trajectory: string;
+}
+
+const computeReadiness = (
+  current: number,
+  target: number,
+  examDate: string | null,
+  misses: number,
+  streak: number
+): Readiness => {
+  if (!examDate) {
+    return {
+      status: "no-date",
+      targetBand: target,
+      targetDate: null,
+      daysLeft: 0,
+      projectedBand: null,
+      trajectory: "Set your exam date in your profile to unlock readiness prediction.",
+    };
+  }
+  const daysLeft = Math.ceil((new Date(examDate).getTime() - Date.now()) / 86400000);
+  if (daysLeft <= 0) {
+    return {
+      status: "exam-passed",
+      targetBand: target,
+      targetDate: examDate,
+      daysLeft: 0,
+      projectedBand: current,
+      trajectory: "Your exam date has passed — update it in your profile.",
+    };
+  }
+  const weeksLeft = daysLeft / 7;
+  const factor = consistencyFactor(misses, streak);
+  const projectedRaw = Math.min(9.0, current + BASE_PACE_PER_WEEK * factor * weeksLeft);
+  const projected = Math.round(projectedRaw * 2) / 2;
+  const gap = target - projectedRaw;
+
+  let status: ReadinessStatus;
+  let trajectory: string;
+  if (current >= target) {
+    status = "on-track";
+    trajectory = `You're already at Band ${current.toFixed(1)} — hold steady until ${examDate}.`;
+  } else if (gap <= 0) {
+    status = "on-track";
+    trajectory = `At current pace: Band ${projected.toFixed(1)} by ${examDate} — on track.`;
+  } else if (gap <= 0.5) {
+    status = "warn";
+    trajectory = misses === 1
+      ? `Projected Band ${projected.toFixed(1)} — a missed session is slowing you. A couple of drills brings you back.`
+      : `Projected Band ${projected.toFixed(1)} — slightly behind. Consistent daily drills close the gap.`;
+  } else {
+    status = "catchup";
+    trajectory = misses >= 2
+      ? `Projected Band ${projected.toFixed(1)} — let's rebuild your rhythm. Your tutor is looped in to help.`
+      : `Projected Band ${projected.toFixed(1)} — the gap to ${target.toFixed(1)} needs more sessions per week.`;
+  }
+  return { status, targetBand: target, targetDate: examDate, daysLeft, projectedBand: projected, trajectory };
 };
 
 // ─── SUB-SKILL GUIDANCE ────────────────────────────────────────────────────────
@@ -115,7 +187,8 @@ const StudentDashboardPage = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [skillBands, setSkillBands] = useState<SkillBand[]>(SKILL_BANDS);
   const [nextActionDrill, setNextActionDrill] = useState<any>(null);
-  const [targetBand, setTargetBand] = useState(READINESS.targetBand);
+  const [targetBand, setTargetBand] = useState(7.0);
+  const [examDate, setExamDate] = useState<string | null>(null); // 'YYYY-MM-DD'
 
   const [dailyDrillState, setDailyDrillState] = useState<{
     drills_completed_today: number;
@@ -146,10 +219,19 @@ const StudentDashboardPage = () => {
   // dashboard for every student.
   const missedData = { misses: 0, subSkills: [] as string[] };
 
-  const dynamicReadiness = { ...READINESS, targetBand };
-
   const displayName = profile?.name || user?.email?.split("@")[0] || "Student";
   const overall = overallBand(skillBands);
+
+  // Real frontend-only readiness calculation — current band, target, exam
+  // date, and consistency (misses + streak) all feed the projection.
+  const dynamicReadiness = computeReadiness(
+    overall,
+    targetBand,
+    examDate,
+    missedData.misses,
+    dailyDrillState?.daily_streak ?? 0
+  );
+
   const milestone = getNextMilestone(overall, dynamicReadiness.targetBand);
   const isLocked = !dailyDrillState || !dailyDrillState.dashboard_unlocked;
 
@@ -197,6 +279,10 @@ const StudentDashboardPage = () => {
         if (resData.success && resData.data) {
           const fetchedTarget = Number(resData.target_band) || 7.0;
           setTargetBand(fetchedTarget);
+          // Exam date — dual casing until the backend contract is confirmed.
+          const rawExam = resData.exam_date ?? resData.examDate ?? null;
+          const d = rawExam ? new Date(rawExam) : null;
+          setExamDate(d && !isNaN(d.getTime()) ? d.toISOString().slice(0, 10) : null);
           setSkillBands((prevBands) =>
             prevBands.map((band) => {
               const dbRecord = resData.data.find(
@@ -1257,8 +1343,9 @@ const SkillBandCard = ({
   );
 };
 
-const PredictedReadinessCard = ({ readiness }: any) => {
-  const statusConfig = {
+const PredictedReadinessCard = ({ readiness }: { readiness: Readiness }) => {
+  const navigate = useNavigate();
+  const statusConfig: Record<string, any> = {
     "on-track": {
       icon: <CheckCircle2 className="h-5 w-5 text-emerald-500" />,
       color: "text-emerald-600",
@@ -1277,9 +1364,41 @@ const PredictedReadinessCard = ({ readiness }: any) => {
       bg: "bg-amber-50 dark:bg-amber-500/5",
       border: "border-amber-200 dark:border-amber-500/20",
     },
+    "no-date": {
+      icon: <CalendarClock className="h-5 w-5 text-indigo-500" />,
+      color: "text-indigo-600",
+      bg: "bg-indigo-50 dark:bg-indigo-500/5",
+      border: "border-indigo-200 dark:border-indigo-500/20",
+    },
+    "exam-passed": {
+      icon: <AlertTriangle className="h-5 w-5 text-slate-400" />,
+      color: "text-slate-500",
+      bg: "bg-slate-50 dark:bg-slate-800/40",
+      border: "border-slate-200 dark:border-slate-700",
+    },
   };
-  const cfg =
-    statusConfig[readiness.status as keyof typeof statusConfig] ?? statusConfig["on-track"];
+  const cfg = statusConfig[readiness.status] ?? statusConfig["on-track"];
+
+  if (readiness.status === "no-date" || readiness.status === "exam-passed") {
+    return (
+      <div className={`h-full rounded-3xl border ${cfg.bg} ${cfg.border} p-6 shadow-sm flex flex-col items-center justify-center text-center`}>
+        <div className="h-12 w-12 rounded-full bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center justify-center mb-3">
+          {cfg.icon}
+        </div>
+        <h2 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider mb-2">
+          Predicted Readiness
+        </h2>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">{readiness.trajectory}</p>
+        <button
+          onClick={() => navigate("/student/settings")}
+          className="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2 px-4 rounded-xl transition-colors"
+        >
+          {readiness.status === "no-date" ? "Set exam date" : "Update exam date"}
+          <ArrowRight className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className={`h-full rounded-3xl border ${cfg.bg} ${cfg.border} p-6 shadow-sm flex flex-col`}>
@@ -1292,7 +1411,11 @@ const PredictedReadinessCard = ({ readiness }: any) => {
       <div className="space-y-4 mt-2">
         <div className="flex justify-between items-center">
           <span className="text-sm text-slate-500">Target Band</span>
-          <span className="text-base font-semibold text-slate-800 dark:text-white">{readiness.targetBand}</span>
+          <span className="text-base font-semibold text-slate-800 dark:text-white">{readiness.targetBand.toFixed(1)}</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-slate-500">Projected Band</span>
+          <span className={`text-base font-bold ${cfg.color}`}>{readiness.projectedBand?.toFixed(1)}</span>
         </div>
         <div className="flex justify-between items-center">
           <span className="text-sm text-slate-500">Days Left</span>

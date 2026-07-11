@@ -1,6 +1,7 @@
 "use client";
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, LogOut } from "lucide-react";
 import { Link, useNavigate } from 'react-router-dom';
+import ResumePasswordModal from "../Diagnosis/ResumePasswordModal";
 import React, {
   useState,
   useEffect,
@@ -196,7 +197,16 @@ function storageLoad<T>(key: string): T | null {
 function storageClear(...keys: string[]) {
   try { keys.forEach((k) => localStorage.removeItem(nsKey(k))); } catch {}
 }
-
+// Per-tab resume verification flag. sessionStorage dies when the tab/browser
+// closes, so reopening ALWAYS forces re-verification. A plain F5 refresh in
+// the same tab keeps the flag (accidental refresh shouldn't interrupt a test).
+const RESUME_VERIFIED = "tc_resume_ok";
+function isResumeVerified(): boolean {
+  try { return sessionStorage.getItem(nsKey(RESUME_VERIFIED)) === "1"; } catch { return false; }
+}
+function markResumeVerified() {
+  try { sessionStorage.setItem(nsKey(RESUME_VERIFIED), "1"); } catch {}
+}
 // ─────────────────────────────────────────────────────────────────────────────
 // API CALLS  (unchanged)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -302,6 +312,7 @@ async function submitSpeaking(
 // ─────────────────────────────────────────────────────────────────────────────
 
 function TopNavBar() {
+  const { signOut } = useAuth();
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b-2 border-gray-900 transform-gpu">
       <div className="w-full px-4 sm:px-6 lg:px-8">
@@ -314,6 +325,15 @@ function TopNavBar() {
               TestCrack
             </span>
           </div>
+          <button
+            onClick={() => signOut()}
+            title="Your progress is saved — resume after logging back in"
+            className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-red-50 text-gray-900 hover:text-red-700 text-xs font-black uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all"
+            style={{ boxShadow: '3px 3px 0 #0F0F0F' }}
+          >
+            <LogOut className="h-4 w-4" />
+            <span className="hidden sm:inline">Log Out</span>
+          </button>
         </div>
       </div>
     </nav>
@@ -686,7 +706,7 @@ function ListeningPhase({
   initialAnswers?: Record<string, string>;
 }) {
   const { profile } = useAuth();
-  const studentId = profile?.id || profile?.student_id || "unknown-student";
+  const studentId = profile?.id || "unknown-student";
 
   const [sectionState, setSectionState] = useState<SectionState>("loading");
   const [answers, setAnswers] = useState<Record<string, string>>(initialAnswers);
@@ -1209,7 +1229,7 @@ function WritingPhase({
   initialText?: string;
 }) {
   const { profile } = useAuth();
-  const studentId = profile?.id || profile?.student_id || "unknown-student";
+  const studentId = profile?.id || (profile as { student_id?: string })?.student_id || "unknown-student";
 
   const [sectionState, setSectionState] = useState<SectionState>("loading");
   const [text, setText] = useState(initialText);
@@ -1382,7 +1402,7 @@ function WritingPhase({
 
       <button
         onClick={handleSubmit}
-        disabled={wordCount < MIN_WORDS || sectionState === "scoring"}
+        disabled={wordCount < MIN_WORDS || sectionState === "submitting"}
         className={`w-full py-3.5 rounded-lg font-black text-sm uppercase tracking-wide border-2 transition-all ${
           wordCount >= MIN_WORDS
             ? "bg-indigo-700 hover:bg-indigo-600 text-white border-gray-900 neo-btn"
@@ -1390,7 +1410,7 @@ function WritingPhase({
         }`}
         style={wordCount >= MIN_WORDS ? { boxShadow: '4px 4px 0 #0F0F0F' } : {}}
       >
-        {sectionState === "scoring" ? (
+        {sectionState === "submitting" ? (
           <span className="flex items-center justify-center gap-2">
             <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             Submitting…
@@ -1859,7 +1879,9 @@ type Phase = "gate" | Skill | "speaking_result" | "summary";
 function DiagnosisInner() {
   const { profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
-  const studentId = profile?.id || profile?.student_id || "unknown-student";
+  const studentId =
+    profile?.id || (profile as { student_id?: string })?.student_id ||
+    "unknown-student";
   // Bind localStorage to this student before any phase child reads it.
   setStorageNamespace(studentId);
 
@@ -1935,6 +1957,7 @@ function DiagnosisInner() {
   const [lastSpeakingResult, setLastSpeakingResult] = useState<SkillResult | null>(null);
   const [resumePhase, setResumePhase] = useState<Skill | undefined>();
   const [isCheckingStatus, setIsCheckingStatus] = useState(true);
+  const [needsResumeAuth, setNeedsResumeAuth] = useState(false);
   const [interimSkill, setInterimSkill] = useState<Skill | null>(null);
   const [pendingNextPhase, setPendingNextPhase] = useState<Phase | null>(null);
 
@@ -1988,16 +2011,17 @@ function DiagnosisInner() {
           const nextSkill = skillOrder.find((s) => !statusMap[s]);
           setResumePhase(nextSkill);
           setGateState("in_progress");
-
-          if (currentSavedPhase && currentSavedPhase !== "gate" && currentSavedPhase !== "summary") {
+  if (!isResumeVerified()) setNeedsResumeAuth(true);
+          if (currentSavedPhase && currentSavedPhase !== "gate") {
             const savedSkill = currentSavedPhase as Skill;
             if (skillOrder.includes(savedSkill) && !statusMap[savedSkill]) {
               setPhase(currentSavedPhase);
             }
           }
-        } else if (currentSavedPhase && currentSavedPhase !== "gate" && currentSavedPhase !== "summary") {
+        } else if (currentSavedPhase && currentSavedPhase !== "gate") {
           setPhase(currentSavedPhase);
           setGateState("in_progress");
+             if (!isResumeVerified()) setNeedsResumeAuth(true); 
         } else {
           setGateState("idle");
         }
@@ -2005,6 +2029,7 @@ function DiagnosisInner() {
         if (currentSavedPhase && currentSavedPhase !== "gate") {
           setPhase(currentSavedPhase);
           setGateState("in_progress");
+             if (!isResumeVerified()) setNeedsResumeAuth(true); 
         } else {
           setGateState("idle");
         }
@@ -2032,7 +2057,10 @@ function DiagnosisInner() {
     storageSave(SK.results, results);
   }, [results]);
 
-  const handleStart = () => {
+ const handleStart = () => {
+    // Reaching this click = fresh start, or resume already password-verified.
+    // Mark the tab verified so the 10s status poll never re-prompts mid-test.
+    markResumeVerified();
     setPhase(resumePhase ?? "listening");
   };
 
@@ -2097,7 +2125,19 @@ function DiagnosisInner() {
       </>
     );
   }
-
+ if (needsResumeAuth) {
+    return (
+      <>
+        <TopNavBar />
+        <ResumePasswordModal
+          onVerified={() => {
+            markResumeVerified();
+            setNeedsResumeAuth(false);
+          }}
+        />
+      </>
+    );
+  }
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <TopNavBar />

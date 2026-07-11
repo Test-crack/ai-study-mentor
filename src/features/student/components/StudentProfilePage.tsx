@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+// src/features/Student/pages/StudentProfilePage.tsx
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { Button } from '@/shared/components/ui/button';
@@ -6,16 +7,37 @@ import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Textarea } from '@/shared/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
+} from '@/shared/components/ui/dialog';
 import { useToast } from '@/shared/hooks/use-toast';
 import { getBackendUrl } from '@/shared/utils';
 import { callBackend, uploadFileToBackend } from '@/features/auth/services/authClient';
 import {
   Loader2, Upload, Trash2, User, Mail, Phone, Calendar,
-  Shield, Bell, Settings, CheckCircle2, Camera
+  Shield, Bell, Settings, CheckCircle2, Camera, Target, Pencil,
+  TrendingUp, AlertTriangle, RefreshCw
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
 import StudentLayout from './StudentLayout';
+
+// ─── Band scale (IELTS): 4.0 → 9.0 in 0.5 steps ─────────────────────────────
+const BAND_MIN = 4.0;
+const BAND_MAX = 9.0;
+const BAND_STEP = 0.5;
+const BAND_OPTIONS = Array.from(
+  { length: Math.round((BAND_MAX - BAND_MIN) / BAND_STEP) + 1 },
+  (_, i) => Number((BAND_MIN + i * BAND_STEP).toFixed(1))
+);
+
+// Same rounding the dashboard uses (overallBand in StudentDashboardPage).
+const roundToHalf = (n: number) => Math.round(n * 2) / 2;
+
+// ─── Exam date bounds: tomorrow → ~2 years out ──────────────────────────────
+const toDateInputValue = (d: Date) => d.toISOString().slice(0, 10);
+const MIN_EXAM_DATE = toDateInputValue(new Date(Date.now() + 86400000));
+const MAX_EXAM_DATE = toDateInputValue(new Date(Date.now() + 2 * 365 * 86400000));
 
 export default function StudentProfilePage() {
   const navigate = useNavigate();
@@ -26,6 +48,62 @@ export default function StudentProfilePage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // ─── Target Band editor state ──────────────────────────────────────────────
+  const [bandDialogOpen, setBandDialogOpen] = useState(false);
+  const [selectedBand, setSelectedBand] = useState<number | null>(null);
+  const [savingBand, setSavingBand] = useState(false);
+
+  // ─── Exam Date editor state ────────────────────────────────────────────────
+  const [examDate, setExamDateState] = useState<string | null>(null); // 'YYYY-MM-DD'
+  const [examDateDraft, setExamDateDraft] = useState('');
+  const [savingExamDate, setSavingExamDate] = useState(false);
+
+  // Band data — same source of truth as the student dashboard:
+  // GET /api/student/competency-scores → data[].band_score + target_band + exam_date
+  const [bandsLoading, setBandsLoading] = useState(true);
+  const [bandsError, setBandsError] = useState(false);
+  const [currentBand, setCurrentBand] = useState<number | null>(null);
+  const [targetBand, setTargetBandState] = useState<number | null>(null);
+
+  const fetchBandData = useCallback(async () => {
+    setBandsLoading(true);
+    setBandsError(false);
+    try {
+      const backendUrl = getBackendUrl();
+      const resData = await callBackend(`${backendUrl}/api/student/competency-scores`);
+      if (resData.success && Array.isArray(resData.data) && resData.data.length > 0) {
+        // Identical derivation to overallBand() on the dashboard: average of
+        // the 4 skill band_scores, rounded to the nearest half band.
+        const scores = resData.data.map((m: any) => Number(m.band_score) || 0);
+        const avg = scores.reduce((s: number, n: number) => s + n, 0) / scores.length;
+        setCurrentBand(roundToHalf(avg));
+      } else {
+        setCurrentBand(null);
+      }
+      const t = Number(resData.target_band);
+      setTargetBandState(Number.isFinite(t) && t > 0 ? roundToHalf(t) : null);
+      // Exam date — dual casing until the backend contract is confirmed.
+      const rawExam = resData.exam_date ?? resData.examDate ?? null;
+      const d = rawExam ? new Date(rawExam) : null;
+      const iso = d && !isNaN(d.getTime()) ? toDateInputValue(d) : null;
+      setExamDateState(iso);
+      setExamDateDraft(iso ?? '');
+    } catch (err) {
+      console.error('[TargetBand] competency-scores fetch failed:', err);
+      setBandsError(true);
+      setCurrentBand(null);
+      setTargetBandState(null);
+      setExamDateState(null);
+      setExamDateDraft('');
+    } finally {
+      setBandsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchBandData();
+  }, [fetchBandData]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -106,6 +184,135 @@ export default function StudentProfilePage() {
       toast({ title: 'Update failed', description: 'Please try again later.', variant: 'destructive' });
     } finally {
       setSaving(false);
+    }
+  };
+
+  // ─── Target Band handlers ──────────────────────────────────────────────────
+  // Guard 1: chips render disabled. Fail closed while loading or on error.
+  const isBandLocked = (band: number) => {
+    if (bandsLoading || bandsError) return true;
+    return currentBand != null && band < currentBand;
+  };
+
+  const targetTooLow =
+    selectedBand != null && currentBand != null && selectedBand < currentBand;
+
+  const openBandDialog = () => {
+    // Pre-select saved target, clamped up to current band if legacy data sits below it.
+    const base = targetBand ?? currentBand ?? null;
+    const clamped =
+      base != null && currentBand != null && base < currentBand ? currentBand : base;
+    setSelectedBand(clamped);
+    setBandDialogOpen(true);
+  };
+
+  const handleTargetBandSave = async () => {
+    if (selectedBand == null) return;
+    // Guard 3: re-validate at save time.
+    if (bandsLoading || bandsError) {
+      toast({
+        title: 'Current band unavailable',
+        description: 'We could not load your current band, so the target cannot be changed right now.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    if (currentBand != null && selectedBand < currentBand) {
+      toast({
+        title: 'Target too low',
+        description: `Your target can't be below your current Band ${currentBand.toFixed(1)}.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+    setSavingBand(true);
+    try {
+      const backendUrl = getBackendUrl();
+      // Backend casing unconfirmed — send both. Trim to the real key once the
+      // PUT /api/profile handler contract is verified.
+      await callBackend(`${backendUrl}/api/profile`, {
+        method: 'PUT',
+        body: JSON.stringify({ targetBand: selectedBand, target_band: selectedBand }),
+      });
+
+      // Verify against the same endpoint the dashboard reads, so a silently
+      // ignored field surfaces as an error instead of a fake success.
+      let persisted: number | null = null;
+      let verified = false;
+      try {
+        const check = await callBackend(`${backendUrl}/api/student/competency-scores`);
+        const t = Number(check?.target_band);
+        persisted = Number.isFinite(t) && t > 0 ? roundToHalf(t) : null;
+        verified = true;
+      } catch {
+        // Verification unavailable — proceed optimistically.
+      }
+
+      if (!verified || persisted === selectedBand) {
+        setTargetBandState(selectedBand);
+        setBandDialogOpen(false);
+        toast({ title: 'Target updated', description: `You're now aiming for Band ${selectedBand.toFixed(1)}.` });
+      } else {
+        toast({
+          title: 'Save did not persist',
+          description: 'The server accepted the request but target_band is unchanged — the PUT /api/profile handler likely needs to whitelist targetBand.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      toast({ title: 'Update failed', description: 'Could not save your target band. Please try again.', variant: 'destructive' });
+    } finally {
+      setSavingBand(false);
+    }
+  };
+
+  // ─── Exam Date handler ─────────────────────────────────────────────────────
+  const handleExamDateSave = async () => {
+    if (!examDateDraft) return;
+    if (examDateDraft < MIN_EXAM_DATE || examDateDraft > MAX_EXAM_DATE) {
+      toast({
+        title: 'Invalid date',
+        description: 'Exam date must be in the future (within 2 years).',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setSavingExamDate(true);
+    try {
+      const backendUrl = getBackendUrl();
+      // Dual casing until the PUT /api/profile contract is confirmed.
+      await callBackend(`${backendUrl}/api/profile`, {
+        method: 'PUT',
+        body: JSON.stringify({ examDate: examDateDraft, exam_date: examDateDraft }),
+      });
+
+      // Verify against the endpoint the dashboard reads.
+      let persisted: string | null = null;
+      let verified = false;
+      try {
+        const check = await callBackend(`${backendUrl}/api/student/competency-scores`);
+        const raw = check?.exam_date ?? check?.examDate ?? null;
+        const d = raw ? new Date(raw) : null;
+        persisted = d && !isNaN(d.getTime()) ? toDateInputValue(d) : null;
+        verified = true;
+      } catch {
+        // Verification unavailable — proceed optimistically.
+      }
+
+      if (!verified || persisted === examDateDraft) {
+        setExamDateState(examDateDraft);
+        toast({ title: 'Exam date saved', description: `Locked in for ${examDateDraft}. Your dashboard readiness now uses it.` });
+      } else {
+        toast({
+          title: 'Save did not persist',
+          description: 'The server accepted the request but exam_date is unchanged — the PUT /api/profile handler likely needs to whitelist examDate.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      toast({ title: 'Update failed', description: 'Could not save your exam date. Please try again.', variant: 'destructive' });
+    } finally {
+      setSavingExamDate(false);
     }
   };
 
@@ -294,6 +501,123 @@ export default function StudentProfilePage() {
 
         {/* Right Column: Stats / Info */}
         <div className="space-y-6">
+          {/* Goal Tracking — Target Band + Exam Date */}
+          <Card className="border-none shadow-sm bg-white dark:bg-slate-900">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <CardTitle className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                <Target className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                Goal Tracking
+              </CardTitle>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={openBandDialog}
+                disabled={bandsLoading || bandsError}
+                className="dark:border-slate-700 dark:text-slate-300"
+              >
+                <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                Edit
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-slate-500 dark:text-slate-400">Current band</span>
+                <span className="font-bold text-slate-800 dark:text-white">
+                  {bandsLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+                  ) : currentBand != null ? (
+                    currentBand.toFixed(1)
+                  ) : (
+                    '—'
+                  )}
+                </span>
+              </div>
+              <div className="flex justify-between items-center border-t border-slate-100 dark:border-slate-800 pt-3">
+                <span className="text-sm text-slate-500 dark:text-slate-400">Target band</span>
+                <span className="font-bold text-indigo-600 dark:text-indigo-400">
+                  {bandsLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+                  ) : targetBand != null ? (
+                    targetBand.toFixed(1)
+                  ) : (
+                    'Not set'
+                  )}
+                </span>
+              </div>
+
+              {/* Exam date */}
+              <div className="border-t border-slate-100 dark:border-slate-800 pt-3 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                    <Calendar className="h-3.5 w-3.5" /> Exam date
+                  </span>
+                  <span className="font-bold text-slate-800 dark:text-white text-sm">
+                    {bandsLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+                    ) : (
+                      examDate ?? 'Not set'
+                    )}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="date"
+                    value={examDateDraft}
+                    min={MIN_EXAM_DATE}
+                    max={MAX_EXAM_DATE}
+                    onChange={(e) => setExamDateDraft(e.target.value)}
+                    disabled={bandsLoading}
+                    className="h-8 text-sm bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                  />
+                  <Button
+                    size="sm"
+                    onClick={handleExamDateSave}
+                    disabled={savingExamDate || bandsLoading || !examDateDraft || examDateDraft === examDate}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white shrink-0"
+                  >
+                    {savingExamDate ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Save'}
+                  </Button>
+                </div>
+                {!bandsLoading && !examDate && (
+                  <p className="text-xs text-slate-400 dark:text-slate-500">
+                    Your dashboard uses this to predict exam readiness.
+                  </p>
+                )}
+              </div>
+
+              {bandsError && (
+                <div className="flex items-start justify-between gap-2 text-sm text-amber-600 dark:text-amber-400 pt-1">
+                  <span className="flex items-start gap-1.5">
+                    <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                    Couldn't load your band data — editing is locked.
+                  </span>
+                  <button
+                    onClick={fetchBandData}
+                    className="inline-flex items-center gap-1 font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 shrink-0"
+                  >
+                    <RefreshCw className="h-3.5 w-3.5" /> Retry
+                  </button>
+                </div>
+              )}
+              {!bandsLoading && !bandsError && currentBand != null && targetBand != null && targetBand > currentBand && (
+                <div className="flex items-center gap-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-400 pt-1">
+                  <TrendingUp className="h-4 w-4" />
+                  {(targetBand - currentBand).toFixed(1)} bands to go
+                </div>
+              )}
+              {!bandsLoading && !bandsError && currentBand != null && targetBand != null && targetBand <= currentBand && (
+                <p className="text-sm text-amber-600 dark:text-amber-400 pt-1">
+                  You've reached your target — time to aim higher.
+                </p>
+              )}
+              {!bandsLoading && !bandsError && targetBand == null && (
+                <p className="text-sm text-slate-400 dark:text-slate-500 pt-1">
+                  Set a target to track your progress.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
           <Card className="border-none shadow-sm bg-indigo-600 dark:bg-indigo-900 text-white overflow-hidden relative">
             <div className="absolute top-0 right-0 p-8 opacity-10">
               <Shield className="h-32 w-32 rotate-12" />
@@ -333,6 +657,83 @@ export default function StudentProfilePage() {
           </Card>
         </div>
       </div>
+
+      {/* Target Band Edit Dialog */}
+      <Dialog open={bandDialogOpen} onOpenChange={(open) => !savingBand && setBandDialogOpen(open)}>
+        <DialogContent className="sm:max-w-md bg-white dark:bg-slate-900">
+          <DialogHeader>
+            <DialogTitle className="text-slate-900 dark:text-white">Update your target band</DialogTitle>
+            <DialogDescription className="dark:text-slate-400">
+              {bandsLoading || bandsError
+                ? 'Your current band is unavailable, so editing is locked to prevent an invalid target.'
+                : currentBand != null
+                  ? `Bands below your current Band ${currentBand.toFixed(1)} are locked — no aiming backwards.`
+                  : 'Pick the band score you want to work towards.'}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid grid-cols-4 gap-2 py-2">
+            {BAND_OPTIONS.map((band) => {
+              const locked = isBandLocked(band);
+              const isSelected = selectedBand === band;
+              return (
+                <button
+                  key={band}
+                  type="button"
+                  disabled={locked}
+                  aria-disabled={locked}
+                  onClick={() => {
+                    // Guard 2: no-op even if `disabled` is stripped in devtools.
+                    if (!locked) setSelectedBand(band);
+                  }}
+                  title={
+                    locked
+                      ? currentBand != null
+                        ? `Below your current Band ${currentBand.toFixed(1)}`
+                        : 'Locked'
+                      : `Band ${band.toFixed(1)}`
+                  }
+                  className={`py-2.5 rounded-lg text-sm font-semibold border transition-all ${
+                    isSelected
+                      ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
+                      : locked
+                        ? 'bg-slate-50 dark:bg-slate-800/40 border-slate-100 dark:border-slate-800 text-slate-300 dark:text-slate-600 cursor-not-allowed line-through'
+                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-indigo-400 dark:hover:border-indigo-500'
+                  }`}
+                >
+                  {band.toFixed(1)}
+                </button>
+              );
+            })}
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setBandDialogOpen(false)}
+              disabled={savingBand}
+              className="dark:border-slate-700 dark:text-slate-300"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleTargetBandSave}
+              disabled={
+                savingBand ||
+                bandsLoading ||
+                bandsError ||
+                selectedBand == null ||
+                selectedBand === targetBand ||
+                targetTooLow
+              }
+              className="bg-indigo-600 hover:bg-indigo-700 text-white min-w-[120px]"
+            >
+              {savingBand ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
+              Save Target
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </StudentLayout>
   );
 }

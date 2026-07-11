@@ -1,3 +1,4 @@
+// filepath: src/features/student/pages/FullMockAssessment.tsx
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -7,11 +8,13 @@ import { callBackend } from "@/features/auth/services/authClient";
 import { transformSectionAudioUrls } from "@/features/student/utils/iaAudioUtils";
 import {
   GraduationCap, ArrowRight, CheckCircle2, AlertCircle, Mic, PlayCircle,
-  Zap, Loader2, Lock, XCircle, Trophy, Calendar, BookOpen, ArrowLeft, Flame
+  Zap, Loader2, Lock, XCircle, Trophy, Calendar, BookOpen, ArrowLeft, Flame,
+  ChevronDown,
 } from "lucide-react";
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Phase = "gate" | "session" | "interim" | "scoring" | "results";
+type Phase = "gate" | "listening_intro" | "session" | "interim" | "scoring" | "results";
 
 interface MockProgress {
   ia_completed:  number;
@@ -90,7 +93,8 @@ interface MockSkillScore {
   correct:            number;
   total:              number;
   ai_graded:          boolean;
-  sub_skill_scores?:  MockSubSkillScore[];  // W/S only
+  sub_skill_scores?:  MockSubSkillScore[];  // W/S always; L/R when backend adds it
+  insight?:           string;                // optional backend-supplied insight
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -104,6 +108,7 @@ const SKILL_LABEL: Record<string, string> = {
 const SUBSKILL_LABEL: Record<string, string> = {
   GRAMMAR: "Grammar", VOCABULARY: "Vocabulary", COHERENCE: "Coherence",
   TASK_RESPONSE: "Task Response", FLUENCY: "Fluency", PRONUNCIATION: "Pronunciation",
+  OVERALL: "Overall Accuracy",
 };
 
 // Per-skill SaaS accent colorways (icons, pills, coverage tiles)
@@ -146,8 +151,42 @@ function clampBandMove(prev: number | null, next: number): number {
   return capped;
 }
 
+// Plain-English insight generator — used as fallback when backend doesn't send `insight`.
+function skillInsight(s: MockSkillScore): string {
+  const label = SKILL_LABEL[s.skill] ?? s.skill;
+  if (s.total === 0 && s.band === 0) return `${label} section awaiting scoring.`;
+
+  const band = s.band;
+  const tier =
+    band >= 7.5 ? "excellent" :
+    band >= 6.5 ? "solid"     :
+    band >= 5.5 ? "developing":
+    band >= 4.0 ? "foundational" : "early stage";
+
+  const accuracy = s.total > 0 ? Math.round((s.correct / s.total) * 100) : null;
+
+  const diagTrend =
+    s.delta_from_diag !== null && s.delta_from_diag !== undefined && Math.abs(s.delta_from_diag) >= 0.5
+      ? s.delta_from_diag > 0
+        ? ` — a ${s.delta_from_diag.toFixed(1)}-point gain from your diagnostic`
+        : ` — down ${Math.abs(s.delta_from_diag).toFixed(1)} from your diagnostic`
+      : "";
+
+  let advice = "";
+  if (accuracy !== null) {
+    if (accuracy >= 80)      advice = " Accuracy is strong; focus on speed and rare question types.";
+    else if (accuracy >= 60) advice = " Solid accuracy with clear room to sharpen weaker question types.";
+    else                     advice = " Prioritize targeted drills — accuracy needs to lift before the next mock.";
+  } else if (s.ai_graded) {
+    advice = band >= 6.5
+      ? " Refine the specific sub-skills below for tighter consistency."
+      : " Focus on the sub-skills flagged below in your next drills.";
+  }
+
+  return `Your ${label} performance sits at a ${tier} band of ${band.toFixed(1)}${diagTrend}.${advice}`;
+}
+
 // ─── Circular timer ───────────────────────────────────────────────────────────
-// NOTE: colors intentionally untouched — threshold-based functional indicator.
 
 const CircleTimer: React.FC<{ timeLeft: number; total: number; size?: number }> = ({ timeLeft, total, size = 64 }) => {
   const pct   = total > 0 ? timeLeft / total : 1;
@@ -189,9 +228,9 @@ function TopNavBar({
       <div className="w-full px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16">
 
-          {/* Left: back button (gate only) + brand */}
+          {/* Left: back button (gate + intro only) + brand */}
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            {phase === "gate" && (
+            {(phase === "gate" || phase === "listening_intro") && (
               <button
                 onClick={onBack}
                 className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg border border-slate-200 font-medium text-xs text-slate-600 hover:bg-slate-50 transition-colors flex-shrink-0 shadow-sm"
@@ -258,8 +297,14 @@ export default function FullMockAssessment() {
   const [answers, setAnswers]                   = useState<Record<string, string>>({});
   const [mockResults, setMockResults]           = useState<any>(null);
   const [sessionMomentum, setSessionMomentum]   = useState(0);
-  // Which sub-skill feedback panel is open: "skillIdx-subSkillName" | null
-  const [expandedMockFeedback, setExpandedMockFeedback] = useState<string | null>(null);
+  // Skill-card AI feedback accordion open state — set of skill card indices
+  const [expandedFeedback, setExpandedFeedback] = useState<Set<number>>(new Set());
+  const toggleFeedback = (i: number) =>
+    setExpandedFeedback(prev => {
+      const next = new Set(prev);
+      if (next.has(i)) next.delete(i); else next.add(i);
+      return next;
+    });
 
   // Global 3-hour timer — never resets between sections
   const [timeLeft, setTimeLeft]                 = useState(MOCK_TOTAL_SECS);
@@ -400,7 +445,9 @@ export default function FullMockAssessment() {
       sessionIdRef.current = res.session_id;
       setSessionId(res.session_id);
       setSections(transformSectionAudioUrls(res.sections));
-      setCurrentSectionIdx(res.current_section_idx ?? 0);
+      const startIdx   = res.current_section_idx ?? 0;
+      const startSkill = res.sections[startIdx]?.skill ?? "LISTENING";
+      setCurrentSectionIdx(startIdx);
       setCurrentIdx(0);
       setAnswers(res.saved_answers ?? {});
       setAudioState("idle");
@@ -408,7 +455,10 @@ export default function FullMockAssessment() {
       setIsRecording(false);
       // Global timer — restore remaining time from backend (accounts for time away)
       setTimeLeft(Math.floor((res.time_remaining_ms ?? MOCK_TOTAL_SECS * 1000) / 1000));
-      setPhase("session");
+
+      // Show intro gate only before Listening, and only on fresh start (not resume).
+      const showIntro = !res.resume && startSkill === "LISTENING";
+      setPhase(showIntro ? "listening_intro" : "session");
     } catch (err) {
       console.error("[Mock] begin error:", err);
     } finally {
@@ -765,6 +815,59 @@ export default function FullMockAssessment() {
   };
 
   // ═══════════════════════════════════════════════════════════════════════════
+  // LISTENING INTRO GATE
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  const renderListeningIntro = () => (
+    <div className="max-w-2xl mx-auto animate-fade-in pt-12 px-4">
+      <div className="bg-white border border-slate-200 rounded-2xl p-8 sm:p-10 shadow-md">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-teal-600 text-white text-xs font-semibold tracking-wider uppercase mb-6 shadow-sm">
+          <span className="text-base leading-none">🎧</span> Section 1 · Listening
+        </div>
+
+        <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight mb-2">
+          Before you begin
+        </h1>
+        <p className="text-slate-500 font-medium text-sm mb-8 leading-relaxed">
+          Complete each set of questions as you listen. There's no separate transfer time.
+        </p>
+
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-5 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="font-semibold text-amber-800 text-sm mb-1">
+              Audio plays once, like the real exam.
+            </p>
+            <p className="text-amber-700 text-xs font-medium leading-relaxed">
+              You cannot pause, rewind, or replay any recording. Scan the questions before the audio starts.
+            </p>
+          </div>
+        </div>
+
+        <ul className="flex flex-col gap-2.5 mb-8">
+          {[
+            "Use a quiet environment and headphones if possible.",
+            "The section starts when you click Start below.",
+            "Answer as you listen — audio will not repeat.",
+          ].map((tip, i) => (
+            <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600 font-medium">
+              <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+              <span>{tip}</span>
+            </li>
+          ))}
+        </ul>
+
+        <button
+          onClick={() => setPhase("session")}
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-none font-semibold text-base uppercase tracking-wide py-4 rounded-xl flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all"
+        >
+          Start Listening Section <ArrowRight className="w-5 h-5" />
+        </button>
+      </div>
+    </div>
+  );
+
+  // ═══════════════════════════════════════════════════════════════════════════
   // SESSION SCREEN
   // ═══════════════════════════════════════════════════════════════════════════
 
@@ -1090,125 +1193,174 @@ export default function FullMockAssessment() {
           )}
         </div>
 
-        {/* 4 Skill cards */}
+        {/* 4 Skill cards — insight-first, collapsible AI feedback below */}
         {skillScores.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
             {skillScores.map((s, i) => {
               const displayNewBand = clampBandMove(s.prev_matrix_band, s.new_matrix_band);
+              const a           = accent(s.skill);
               const matrixDelta = s.prev_matrix_band !== null
                 ? Math.round((displayNewBand - s.prev_matrix_band) * 10) / 10
                 : null;
-              const matrixUp   = matrixDelta !== null && matrixDelta > 0;
-              const diagDelta  = s.delta_from_diag;
-              const diagUp     = diagDelta !== null && diagDelta > 0;
+              const matrixUp    = matrixDelta !== null && matrixDelta > 0;
+              const diagDelta   = s.delta_from_diag;
+              const diagUp      = diagDelta !== null && diagDelta !== undefined && diagDelta > 0;
 
-              const hasSubSkills = (s.sub_skill_scores?.length ?? 0) > 0;
-              const a = accent(s.skill);
+              // Sub-skills: use backend data; else fall back to a single OVERALL tile
+              // for pure-MCQ skills (Listening, Reading) so the layout stays consistent.
+              const subSkills: MockSubSkillScore[] = (s.sub_skill_scores && s.sub_skill_scores.length > 0)
+                ? s.sub_skill_scores
+                : (s.total > 0
+                    ? [{
+                        sub_skill:  "OVERALL",
+                        band:       s.band,
+                        correct:    s.correct,
+                        total_mcq:  s.total,
+                        ai_band:    null,
+                      }]
+                    : []);
+
+              const feedbackItems  = (s.sub_skill_scores ?? []).filter(ss => ss.ai_feedback?.rationale);
+              const hasAnyFeedback = feedbackItems.length > 0;
+              const isFeedbackOpen = expandedFeedback.has(i);
+              const insight        = s.insight ?? skillInsight(s);
 
               return (
-                <div key={i} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                <div key={i} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col">
+
                   {/* Skill header */}
                   <div className="flex items-center gap-3 mb-4">
-                    <span className={`w-10 h-10 rounded-lg ${a.bg} border ${a.border} flex items-center justify-center text-2xl`}>{SKILL_ICON[s.skill] ?? "📝"}</span>
+                    <span className={`w-10 h-10 rounded-lg ${a.bg} border ${a.border} flex items-center justify-center text-2xl`}>
+                      {SKILL_ICON[s.skill] ?? "📝"}
+                    </span>
                     <div>
-                      <p className="font-semibold text-slate-900 text-sm uppercase tracking-wide">{SKILL_LABEL[s.skill] ?? s.skill}</p>
-                      <p className="text-slate-400 text-[10px] font-medium uppercase">{s.ai_graded ? "MCQ + AI Graded" : "Pure MCQ"}</p>
+                      <p className="font-semibold text-slate-900 text-sm uppercase tracking-wide">
+                        {SKILL_LABEL[s.skill] ?? s.skill}
+                      </p>
+                      <p className="text-slate-400 text-[10px] font-medium uppercase">
+                        {s.ai_graded ? "MCQ + AI Graded" : "Pure MCQ"}
+                      </p>
                     </div>
                   </div>
 
-                  {/* Mock score (overall for this skill) */}
+                  {/* Mock score headline */}
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-0.5">Mock Score</p>
-                  <p className="text-5xl font-bold text-slate-900 leading-none mb-1">{s.band > 0 ? s.band.toFixed(1) : "—"}</p>
-                  {s.correct != null && s.total > 0 && (
-                    <p className="text-xs text-slate-400 font-medium mb-3">{s.correct} / {s.total} MCQ correct</p>
+                  <p className="text-5xl font-bold text-slate-900 leading-none mb-1">
+                    {s.band > 0 ? s.band.toFixed(1) : "—"}
+                  </p>
+                  {s.total > 0 && (
+                    <p className="text-xs text-slate-400 font-medium mb-3">
+                      {s.correct} / {s.total} MCQ correct
+                    </p>
                   )}
 
-                  {/* Sub-skill breakdown (W/S only) */}
-                  {hasSubSkills && (
-                    <div className="mb-3">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-2">Sub-skill Breakdown</p>
+                  {/* Plain-English insight — always visible, leads the card */}
+                  <div className={`${a.bg} border ${a.border} rounded-xl p-3 mb-4`}>
+                    <p className={`text-[10px] font-semibold uppercase tracking-wider ${a.text} mb-1`}>Insight</p>
+                    <p className="text-xs text-slate-700 font-medium leading-relaxed">{insight}</p>
+                  </div>
+
+                  {/* Sub-skill breakdown — pure score tiles */}
+                  {subSkills.length > 0 && (
+                    <div className="mb-4">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                        Sub-skill Breakdown
+                      </p>
                       <div className="grid grid-cols-2 gap-1.5">
-                        {s.sub_skill_scores!.map((ss, j) => {
-                          const feedbackKey = `${i}-${ss.sub_skill}`;
-                          const isOpen      = expandedMockFeedback === feedbackKey;
-                          const hasFeedback = !!(ss.ai_feedback?.rationale);
-                          return (
-                            <div key={j} className={`border rounded-lg px-3 py-2 transition-colors ${isOpen ? 'border-indigo-300 bg-indigo-50' : 'bg-slate-50 border-slate-200'}`}>
-                              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{SUBSKILL_LABEL[ss.sub_skill] ?? ss.sub_skill}</p>
-                              <div className="flex items-baseline gap-1.5 mt-0.5">
-                                <span className="text-lg font-bold text-slate-900">{ss.band.toFixed(1)}</span>
-                                {ss.ai_band !== null && (
-                                  <span className="text-[9px] text-slate-400 font-medium">AI: {ss.ai_band.toFixed(1)}</span>
-                                )}
-                              </div>
-                              <p className="text-[9px] text-slate-400 font-medium mb-1.5">{ss.correct}/{ss.total_mcq} MCQ</p>
-                              {hasFeedback && (
-                                <button
-                                  onClick={() => setExpandedMockFeedback(prev => prev === feedbackKey ? null : feedbackKey)}
-                                  className={`inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-lg border transition-all ${
-                                    isOpen ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-indigo-600 border-indigo-200 hover:bg-indigo-50'
-                                  }`}
-                                >
-                                  <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                  </svg>
-                                  {isOpen ? 'Hide' : 'Feedback'}
-                                </button>
+                        {subSkills.map((ss, j) => (
+                          <div key={j} className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                              {SUBSKILL_LABEL[ss.sub_skill] ?? ss.sub_skill}
+                            </p>
+                            <div className="flex items-baseline gap-1.5 mt-0.5">
+                              <span className="text-lg font-bold text-slate-900">{ss.band.toFixed(1)}</span>
+                              {ss.ai_band !== null && ss.ai_band !== undefined && (
+                                <span className="text-[9px] text-slate-400 font-medium">
+                                  AI: {ss.ai_band.toFixed(1)}
+                                </span>
                               )}
                             </div>
-                          );
-                        })}
-                      </div>
-
-                      {/* AI feedback panel — appears below the 2×2 grid for the selected sub-skill */}
-                      {s.sub_skill_scores!.map((ss, j) => {
-                        const feedbackKey = `${i}-${ss.sub_skill}`;
-                        if (expandedMockFeedback !== feedbackKey || !ss.ai_feedback?.rationale) return null;
-                        return (
-                          <div key={`fb-${j}`} className="mt-2 bg-white border border-indigo-200 rounded-xl shadow-sm overflow-hidden">
-                            {/* Panel header */}
-                            <div className="flex items-center justify-between px-4 py-2.5 bg-indigo-50 border-b border-indigo-100">
-                              <div className="flex items-center gap-2">
-                                <div className="w-1.5 h-4 bg-indigo-600 rounded-full" />
-                                <p className="text-[10px] font-semibold uppercase tracking-wider text-indigo-700">
-                                  {SUBSKILL_LABEL[ss.sub_skill] ?? ss.sub_skill} — AI Feedback
-                                </p>
-                              </div>
-                              <button
-                                onClick={() => setExpandedMockFeedback(null)}
-                                className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-indigo-100 text-indigo-500 transition-colors text-xs font-semibold"
-                              >✕</button>
-                            </div>
-                            {/* Rationale */}
-                            <div className="px-4 pt-3 pb-2">
-                              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Summary</p>
-                              <p className="text-xs text-slate-600 font-medium leading-relaxed italic">&ldquo;{ss.ai_feedback.rationale}&rdquo;</p>
-                            </div>
-                            {/* Key observations */}
-                            {(ss.ai_feedback.key_observations?.length ?? 0) > 0 && (
-                              <ul className="px-4 pb-3 flex flex-col gap-2">
-                                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mt-1 mb-0.5">Key Observations</p>
-                                {ss.ai_feedback.key_observations.map((obs, k) => (
-                                  <li key={k} className="flex items-start gap-2">
-                                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-indigo-500 flex-shrink-0" />
-                                    <span className="text-xs text-slate-700 font-medium leading-relaxed">{obs}</span>
-                                  </li>
-                                ))}
-                              </ul>
+                            {ss.total_mcq > 0 && (
+                              <p className="text-[9px] text-slate-400 font-medium mt-0.5">
+                                {ss.correct}/{ss.total_mcq} MCQ
+                              </p>
                             )}
                           </div>
-                        );
-                      })}
+                        ))}
+                      </div>
                     </div>
                   )}
 
-                  {/* Real Band impact */}
-                  <div className="border-t border-slate-100 pt-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Real Band (Updated)</p>
+                  {/* Collapsible detailed AI feedback — only rendered if any subskill has feedback */}
+                  {hasAnyFeedback && (
+                    <div className="mb-4">
+                      <button
+                        onClick={() => toggleFeedback(i)}
+                        aria-expanded={isFeedbackOpen}
+                        className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors"
+                      >
+                        <span className="text-xs font-semibold uppercase tracking-wider text-slate-600 flex items-center gap-2">
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                          </svg>
+                          Detailed AI Feedback ({feedbackItems.length})
+                        </span>
+                        <ChevronDown
+                          className={`w-4 h-4 text-slate-500 transition-transform ${isFeedbackOpen ? "rotate-180" : ""}`}
+                        />
+                      </button>
+
+                      {isFeedbackOpen && (
+                        <div className="mt-3 flex flex-col gap-3">
+                          {feedbackItems.map((ss, j) => (
+                            <div key={j} className="bg-white border border-indigo-200 rounded-xl overflow-hidden shadow-sm">
+                              <div className="px-4 py-2.5 bg-indigo-50 border-b border-indigo-100 flex items-center gap-2">
+                                <div className="w-1.5 h-4 bg-indigo-600 rounded-full" />
+                                <p className="text-[10px] font-semibold uppercase tracking-wider text-indigo-700">
+                                  {SUBSKILL_LABEL[ss.sub_skill] ?? ss.sub_skill}
+                                </p>
+                              </div>
+                              <div className="px-4 pt-3 pb-2">
+                                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Summary</p>
+                                <p className="text-xs text-slate-600 font-medium leading-relaxed italic">
+                                  &ldquo;{ss.ai_feedback!.rationale}&rdquo;
+                                </p>
+                              </div>
+                              {(ss.ai_feedback!.key_observations?.length ?? 0) > 0 && (
+                                <div className="px-4 pb-3">
+                                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mt-1 mb-2">
+                                    Key Observations
+                                  </p>
+                                  <ul className="flex flex-col gap-2">
+                                    {ss.ai_feedback!.key_observations.map((obs, k) => (
+                                      <li key={k} className="flex items-start gap-2">
+                                        <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-indigo-500 flex-shrink-0" />
+                                        <span className="text-xs text-slate-700 font-medium leading-relaxed">{obs}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Real Band impact — pinned to bottom of the card */}
+                  <div className="border-t border-slate-100 pt-3 mt-auto">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                      Real Band (Updated)
+                    </p>
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm font-semibold text-slate-400">{s.prev_matrix_band !== null ? s.prev_matrix_band.toFixed(1) : "—"}</span>
+                      <span className="text-sm font-semibold text-slate-400">
+                        {s.prev_matrix_band !== null ? s.prev_matrix_band.toFixed(1) : "—"}
+                      </span>
                       <span className="text-slate-300 text-xs">→</span>
-                      <span className={`text-xl font-bold ${matrixUp ? "text-emerald-600" : "text-slate-700"}`}>{displayNewBand.toFixed(1)}</span>
+                      <span className={`text-xl font-bold ${matrixUp ? "text-emerald-600" : "text-slate-700"}`}>
+                        {displayNewBand.toFixed(1)}
+                      </span>
                       {matrixDelta !== null && (
                         <span className={`text-xs font-semibold ${matrixUp ? "text-emerald-600" : "text-rose-600"}`}>
                           {matrixUp ? `+${matrixDelta.toFixed(1)}` : matrixDelta.toFixed(1)}
@@ -1219,7 +1371,7 @@ export default function FullMockAssessment() {
                       <div className={`flex items-center gap-2 text-xs font-medium ${diagUp ? "text-emerald-600" : "text-slate-500"}`}>
                         <BookOpen className="w-3 h-3" />
                         <span>Diagnostic: {s.diagnostic_band.toFixed(1)}</span>
-                        {diagDelta !== null && (
+                        {diagDelta !== null && diagDelta !== undefined && (
                           <span className={`font-semibold ${diagUp ? "text-emerald-600" : "text-rose-600"}`}>
                             {diagUp ? `↑ +${diagDelta.toFixed(1)}` : `↓ ${Math.abs(diagDelta).toFixed(1)}`} from start
                           </span>
@@ -1252,11 +1404,12 @@ export default function FullMockAssessment() {
         onBack={() => navigate("/student/dashboard")}
       />
       <div className="pt-16">
-        {phase === "gate"    && renderGate()}
-        {phase === "session" && renderSession()}
-        {phase === "interim" && renderInterim()}
-        {phase === "scoring" && renderScoring()}
-        {phase === "results" && renderResults()}
+        {phase === "gate"            && renderGate()}
+        {phase === "listening_intro" && renderListeningIntro()}
+        {phase === "session"         && renderSession()}
+        {phase === "interim"         && renderInterim()}
+        {phase === "scoring"         && renderScoring()}
+        {phase === "results"         && renderResults()}
       </div>
     </div>
   );
