@@ -54,8 +54,8 @@ The questions the student sees depend on the **target band** they choose during 
 This is the most important part to verify.
 
 **Listening & Reading (objective):**
-- Band = (correct answers ÷ total questions) × 9, rounded to the nearest 0.5, capped at 9.0.
-- Example: 5 of 6 listening correct → 7.5 band. 3 of 4 reading correct → 6.75 → rounds to the nearest half, **7.0**.
+- Band = 4.0 + (correct answers ÷ total questions) × 5.0, rounded to the nearest 0.5 — 0% correct = 4.0 (the platform floor), 100% = 9.0.
+- Example: 5 of 6 listening correct → 4 + (5/6)×5 = 8.17 → **8.0**. 3 of 4 reading correct → 4 + 3.75 = 7.75 → **8.0**.
 
 **Writing (AI-graded):**
 - Graded by an AI model against the four official IELTS criteria: Task Achievement, Coherence & Cohesion, Lexical Resource, Grammatical Range & Accuracy.
@@ -141,7 +141,7 @@ After Drill 1, the student must pass through **LexiGrid**, a gamified vocabulary
 
 ### 3.4 Band Scores (What the Student Sees on the Dashboard)
 
-- Four skill-level bands: Listening, Reading, Writing, Speaking (0–9 scale, 0.5 steps).
+- Four skill-level bands: Listening, Reading, Writing, Speaking (4.0–9.0 scale, 0.5 steps — 4.0 is the platform floor).
 - Writing and Speaking each break down into 4 sub-skills:
   - Writing: Grammar, Vocabulary, Coherence, Task Response
   - Speaking: Grammar, Vocabulary, Fluency, Pronunciation
@@ -236,10 +236,10 @@ The paid (earned) mock additionally requires ≥ 1500 momentum, ≥ 4 completed 
 
 ### 5.4 Grading & Real Band Score Update (the critical formula)
 
-- Listening/Reading: band = (correct ÷ 20) × 9, rounded to 0.5.
+- Listening/Reading: band = 4.0 + (correct ÷ 20) × 5.0, rounded to 0.5 (0 correct = 4.0 floor, all correct = 9.0).
 - Writing/Speaking: each of the 4 sub-skills is scored (MCQ 1× + AI-graded prompt 2×, same combination as IA), then the skill band = average of its 4 sub-skill bands.
 - **Skill band update:**
-  - Listening/Reading: new band = **60% mock result + 40% existing band**, rounded to 0.5, clamped 0–9.
+  - Listening/Reading: new band = **60% mock result + 40% existing band**, ±2 movement cap (same smoothing as IA), rounded to 0.5, clamped 4–9.
   - Writing/Speaking: the same 60/40 blend is applied **per sub-skill** (each rounded to 0.5), and the skill band = average of the four updated sub-skill bands. This keeps sub-skill history smooth and consistent with how IA updates the matrix; a sub-skill with no prior score adopts the mock result directly.
 - **Real band score** (the headline number) = average of the four updated skill bands, rounded to 0.5.
 - **Momentum:** +200 for completing a mock; if the real band score crosses a 0.5 boundary vs. before (e.g., 6.0 → 6.5), a **+500 bonus** applies (700 total).
@@ -301,7 +301,7 @@ Momentum is earned by doing work and spent on conveniences. It can never go belo
 
 | Term | Meaning |
 |---|---|
-| **Band / Band Score** | IELTS proficiency scale, 0–9 in 0.5 steps |
+| **Band / Band Score** | IELTS proficiency scale — platform domain 4.0–9.0 in 0.5 steps (4.0 is the absolute floor) |
 | **Diagnostic** | One-time entry test that sets the student's baseline bands |
 | **Drill** | 5-question daily practice session on one sub-skill |
 | **LexiGrid** | Daily vocabulary puzzle gate between Drill 1 and Drill 2 |

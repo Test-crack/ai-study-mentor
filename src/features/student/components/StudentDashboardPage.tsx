@@ -11,6 +11,7 @@ import MockStatusWidget  from "./dashboard/MockStatusWidget";
 import { DailyNotices }  from "./dashboard/DailyNotices";
 import { useMomentum } from "@/features/student/Context/MomentumContext";
 import { cn } from "@/shared/utils";
+import { bandFillPct } from "@/shared/utils/bandScale";
 import {
   Flame, Trophy, Target, Zap, BookOpen, Mic, PenLine,
   Headphones, CalendarClock, CheckCircle2, ArrowRight, Puzzle,
@@ -152,8 +153,8 @@ const getSubSkillGuide = (rawKey: string): SubSkillGuide | undefined =>
   SUB_SKILL_GUIDE[normaliseSubSkill(rawKey)];
 
 const scoreTier = (n: number): { label: string; tone: "low" | "mid" | "high" } => {
-  if (n < 4.0) return { label: "Just starting", tone: "low" };
-  if (n < 6.0) return { label: "Building up",   tone: "mid" };
+  if (n < 5.0) return { label: "Just starting", tone: "low" };
+  if (n < 6.5) return { label: "Building up",   tone: "mid" };
   if (n < 7.5) return { label: "Solid",         tone: "mid" };
   return { label: "Strong",        tone: "high" };
 };
@@ -174,7 +175,7 @@ const getNextMilestone = (current: number, target: number) => {
 };
 
 const getLevelFromScore = (score: number): string => {
-  if (score < 5.0) return 'BEGINNER';
+  if (score < 5.5) return 'BEGINNER';
   if (score < 7.0) return 'INTERMEDIATE';
   return 'ADVANCED';
 };
@@ -877,7 +878,7 @@ const ClimbHero = ({
   const animatedPts = useCountUp(momentum, 1200, 0);
 
   const rungs: number[] = [];
-  for (let b = 0.5; b <= target + 0.0001; b += 0.5) rungs.push(Math.round(b * 2) / 2);
+  for (let b = 4.0; b <= target + 0.0001; b += 0.5) rungs.push(Math.round(b * 2) / 2);
   const rungsToGoal = Math.max(0, Math.round((target - overall) / 0.5));
 
   const headline = justLeveled
@@ -1222,7 +1223,7 @@ const SkillBandCard = ({
   onDrill: (skill: string, guide: SubSkillGuide, score: number) => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
-  const pct = Math.round((band.score / 9) * 100);
+  const pct = Math.round(bandFillPct(band.score));
 
   const subEntries = band.subScores
     ? Object.entries(band.subScores).filter(([key, val]) => {

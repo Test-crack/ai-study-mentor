@@ -154,14 +154,13 @@ function clampBandMove(prev: number | null, next: number): number {
 // Plain-English insight generator — used as fallback when backend doesn't send `insight`.
 function skillInsight(s: MockSkillScore): string {
   const label = SKILL_LABEL[s.skill] ?? s.skill;
-  if (s.total === 0 && s.band === 0) return `${label} section awaiting scoring.`;
+  if (s.total === 0 && s.band <= 4.0) return `${label} section awaiting scoring.`;
 
   const band = s.band;
   const tier =
     band >= 7.5 ? "excellent" :
     band >= 6.5 ? "solid"     :
-    band >= 5.5 ? "developing":
-    band >= 4.0 ? "foundational" : "early stage";
+    band >= 5.5 ? "developing" : "foundational";
 
   const accuracy = s.total > 0 ? Math.round((s.correct / s.total) * 100) : null;
 

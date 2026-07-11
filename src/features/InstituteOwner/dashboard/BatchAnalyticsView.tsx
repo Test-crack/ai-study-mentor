@@ -314,7 +314,7 @@ export default function BatchAnalyticsView() {
                           <LineChart data={data.writingTrends}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                             <XAxis dataKey="date" stroke="#888" fontSize={12} tickMargin={10} />
-                            <YAxis stroke="#888" fontSize={12} domain={[0, 9]} ticks={[0,1,2,3,4,5,6,7,8,9]} />
+                            <YAxis stroke="#888" fontSize={12} domain={[4, 9]} ticks={[4,5,6,7,8,9]} />
                             <RechartsTooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px', color: '#fff' }} />
                             <Legend />
                             <Line type="monotone" dataKey="score" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4, fill: '#8b5cf6' }} name="Writing AI Band" />
@@ -636,7 +636,7 @@ export default function BatchAnalyticsView() {
                           </defs>
                           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                           <XAxis dataKey="date" stroke="#888" fontSize={12} />
-                          <YAxis stroke="#888" fontSize={12} domain={[0, 9]} ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]} />
+                          <YAxis stroke="#888" fontSize={12} domain={[4, 9]} ticks={[4, 5, 6, 7, 8, 9]} />
                           <RechartsTooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
                           <Legend />
                           <Area type="monotone" dataKey="score" stroke="#8b5cf6" strokeWidth={3} fill="url(#gradWriting)" name="Writing Score" />

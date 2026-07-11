@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import type { StudentFullProgress } from '../student-progress/types';
+import { bandFillPct } from '@/shared/utils/bandScale';
 
 interface Props {
   data: StudentFullProgress;
@@ -193,13 +194,13 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
                 {/* Current band marker */}
                 <div
                   className="absolute top-0 h-full bg-indigo-500 rounded-full"
-                  style={{ width: `${(current_band / 9) * 100}%` }}
+                  style={{ width: `${bandFillPct(current_band)}%` }}
                 />
                 {/* Target band marker */}
                 {target_band !== null && (
                   <div
                     className="absolute top-0 h-full border-r-2 border-violet-600"
-                    style={{ width: `${(target_band / 9) * 100}%` }}
+                    style={{ width: `${bandFillPct(target_band)}%` }}
                   />
                 )}
               </div>
@@ -246,7 +247,7 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
                   <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full ${bandBgBar(bandScore)}`}
-                      style={{ width: bandScore !== null ? `${(bandScore / 9) * 100}%` : '0%' }}
+                      style={{ width: bandScore !== null ? `${bandFillPct(bandScore)}%` : '0%' }}
                     />
                   </div>
                   <div className={`w-10 text-right text-xs font-bold ${bandColor(bandScore)}`}>

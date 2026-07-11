@@ -75,8 +75,8 @@ interface TFNGQuestion {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function getBandLevel(score: number): Level {
-  if (score <= 4.5) return "A";
-  if (score <= 6.5) return "B";
+  if (score < 5.5) return "A";
+  if (score < 7.0) return "B";
   return "C";
 }
 
@@ -112,7 +112,7 @@ function getLevelConfig(level: Level) {
 
 function getAverageScore(results: AllResults): number {
   const scores = Object.values(results)
-    .map((r) => r?.band_score ?? 0)
+    .map((r) => r?.band_score ?? 4.0)
     .filter(Boolean);
   if (!scores.length) return 0;
   return scores.reduce((a, b) => a + b, 0) / scores.length;
@@ -2345,7 +2345,7 @@ function OnboardingScreen({ onComplete }: { onComplete: () => void }) {
                 className="w-full border-2 border-gray-900 rounded-lg p-3.5 text-sm font-black focus:border-indigo-700 focus:ring-2 focus:ring-indigo-100 outline-none transition-all bg-white appearance-none text-indigo-700 cursor-pointer"
                 style={{ boxShadow: '3px 3px 0 #0F0F0F' }}
               >
-                {[4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0].map(band => (
+                {[4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0].map(band => (
                   <option key={band} value={band.toFixed(1)}>{band.toFixed(1)} Band</option>
                 ))}
               </select>

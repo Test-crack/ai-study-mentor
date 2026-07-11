@@ -20,6 +20,9 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
+import { Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui/popover';
+import { Calendar as DayCalendar } from '@/shared/components/ui/calendar';
+import { format } from 'date-fns';
 import StudentLayout from './StudentLayout';
 
 // ─── Band scale (IELTS): 4.0 → 9.0 in 0.5 steps ─────────────────────────────
@@ -34,10 +37,25 @@ const BAND_OPTIONS = Array.from(
 // Same rounding the dashboard uses (overallBand in StudentDashboardPage).
 const roundToHalf = (n: number) => Math.round(n * 2) / 2;
 
+// ─── Date helpers (local-time, no UTC day-shift) ────────────────────────────
+// A date picked at local midnight, run through toISOString(), can roll back a day
+// in western timezones. These stay in local terms end-to-end.
+const ymdLocal = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const parseYMD = (s: string) => {
+  const [y, m, d] = s.split('-').map(Number);
+  return new Date(y, m - 1, d);
+};
+const startOfLocalDay = (d: Date) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
+
+// Backend sends exam_date already as YYYY-MM-DD; keep a tolerant converter for reads.
+const toDateInputValue = (d: Date) => ymdLocal(d);
+
 // ─── Exam date bounds: tomorrow → ~2 years out ──────────────────────────────
-const toDateInputValue = (d: Date) => d.toISOString().slice(0, 10);
-const MIN_EXAM_DATE = toDateInputValue(new Date(Date.now() + 86400000));
-const MAX_EXAM_DATE = toDateInputValue(new Date(Date.now() + 2 * 365 * 86400000));
+const MIN_EXAM_DATE = ymdLocal(new Date(Date.now() + 86400000));
+const MAX_EXAM_DATE = ymdLocal(new Date(Date.now() + 2 * 365 * 86400000));
+const MIN_EXAM_DATE_OBJ = startOfLocalDay(new Date(Date.now() + 86400000));
+const MAX_EXAM_DATE_OBJ = startOfLocalDay(new Date(Date.now() + 2 * 365 * 86400000));
 
 export default function StudentProfilePage() {
   const navigate = useNavigate();
@@ -58,6 +76,7 @@ export default function StudentProfilePage() {
   const [examDate, setExamDateState] = useState<string | null>(null); // 'YYYY-MM-DD'
   const [examDateDraft, setExamDateDraft] = useState('');
   const [savingExamDate, setSavingExamDate] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   // Band data — same source of truth as the student dashboard:
   // GET /api/student/competency-scores → data[].band_score + target_band + exam_date
@@ -75,7 +94,7 @@ export default function StudentProfilePage() {
       if (resData.success && Array.isArray(resData.data) && resData.data.length > 0) {
         // Identical derivation to overallBand() on the dashboard: average of
         // the 4 skill band_scores, rounded to the nearest half band.
-        const scores = resData.data.map((m: any) => Number(m.band_score) || 0);
+        const scores = resData.data.map((m: any) => Number(m.band_score) || 4.0);
         const avg = scores.reduce((s: number, n: number) => s + n, 0) / scores.length;
         setCurrentBand(roundToHalf(avg));
       } else {
@@ -83,10 +102,15 @@ export default function StudentProfilePage() {
       }
       const t = Number(resData.target_band);
       setTargetBandState(Number.isFinite(t) && t > 0 ? roundToHalf(t) : null);
-      // Exam date — dual casing until the backend contract is confirmed.
+      // Exam date — backend returns YYYY-MM-DD. Use it as-is when it already matches
+      // that shape (no Date round-trip, so no timezone day-shift).
       const rawExam = resData.exam_date ?? resData.examDate ?? null;
-      const d = rawExam ? new Date(rawExam) : null;
-      const iso = d && !isNaN(d.getTime()) ? toDateInputValue(d) : null;
+      const iso =
+        typeof rawExam === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(rawExam)
+          ? rawExam
+          : rawExam
+            ? ymdLocal(new Date(rawExam))
+            : null;
       setExamDateState(iso);
       setExamDateDraft(iso ?? '');
     } catch (err) {
@@ -293,8 +317,12 @@ export default function StudentProfilePage() {
       try {
         const check = await callBackend(`${backendUrl}/api/student/competency-scores`);
         const raw = check?.exam_date ?? check?.examDate ?? null;
-        const d = raw ? new Date(raw) : null;
-        persisted = d && !isNaN(d.getTime()) ? toDateInputValue(d) : null;
+        persisted =
+          typeof raw === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(raw)
+            ? raw
+            : raw
+              ? ymdLocal(new Date(raw))
+              : null;
         verified = true;
       } catch {
         // Verification unavailable — proceed optimistically.
@@ -561,20 +589,47 @@ export default function StudentProfilePage() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Input
-                    type="date"
-                    value={examDateDraft}
-                    min={MIN_EXAM_DATE}
-                    max={MAX_EXAM_DATE}
-                    onChange={(e) => setExamDateDraft(e.target.value)}
-                    disabled={bandsLoading}
-                    className="h-8 text-sm bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
-                  />
+                  <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        disabled={bandsLoading}
+                        className={`flex h-9 flex-1 items-center gap-2 rounded-lg border px-3 text-sm transition-colors
+                          ${examDateDraft
+                            ? 'border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100'
+                            : 'border-dashed border-slate-300 dark:border-slate-600 text-slate-400 dark:text-slate-500'}
+                          bg-slate-50 dark:bg-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500
+                          focus:outline-none focus:ring-2 focus:ring-indigo-500/40 disabled:opacity-60 disabled:cursor-not-allowed`}
+                      >
+                        <Calendar className="h-4 w-4 shrink-0 text-indigo-500 dark:text-indigo-400" />
+                        <span className="truncate">
+                          {examDateDraft ? format(parseYMD(examDateDraft), 'EEE, d MMM yyyy') : 'Pick a date'}
+                        </span>
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent align="start" className="w-auto p-0 rounded-xl overflow-hidden">
+                      <DayCalendar
+                        mode="single"
+                        selected={examDateDraft ? parseYMD(examDateDraft) : undefined}
+                        defaultMonth={examDateDraft ? parseYMD(examDateDraft) : MIN_EXAM_DATE_OBJ}
+                        onSelect={(d) => {
+                          if (d) setExamDateDraft(ymdLocal(d));
+                          setDatePickerOpen(false);
+                        }}
+                        disabled={{ before: MIN_EXAM_DATE_OBJ, after: MAX_EXAM_DATE_OBJ }}
+                        classNames={{
+                          day_selected:
+                            'bg-indigo-600 text-white hover:bg-indigo-600 hover:text-white focus:bg-indigo-600 focus:text-white rounded-lg',
+                          day_today: 'text-indigo-600 dark:text-indigo-400 font-semibold',
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
                   <Button
                     size="sm"
                     onClick={handleExamDateSave}
                     disabled={savingExamDate || bandsLoading || !examDateDraft || examDateDraft === examDate}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white shrink-0"
+                    className="h-9 bg-indigo-600 hover:bg-indigo-700 text-white shrink-0"
                   >
                     {savingExamDate ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Save'}
                   </Button>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, Cpu, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/shared/utils';
+import { bandFillPct } from '@/shared/utils/bandScale';
 import type { MockSession, MockSkillScore, MockSubSkillScore } from './types';
 
 interface Props { sessions: MockSession[]; }
@@ -56,7 +57,7 @@ function SubSkillRow({ ss }: { ss: MockSubSkillScore }) {
                 : band >= 6 ? 'bg-amber-400 dark:bg-amber-500'
                 : 'bg-rose-400 dark:bg-rose-500'
               )}
-              style={{ width: band !== null ? `${Math.min(100, (band / 9) * 100)}%` : '0%' }}
+              style={{ width: band !== null ? `${bandFillPct(band)}%` : '0%' }}
             />
           </div>
           <span className={cn('font-bold w-6 text-right', bandColorText(band))}>

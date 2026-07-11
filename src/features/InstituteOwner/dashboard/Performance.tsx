@@ -91,7 +91,7 @@ function BatchCompPanel({ rows }: { rows: BatchComparisonRow[] }) {
             <BarChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.5} />
               <XAxis dataKey="name" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
-              <YAxis domain={[0, 9]} tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+              <YAxis domain={[4, 9]} tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={{ borderRadius: 12, fontSize: 12, border: '1px solid rgba(148,163,184,0.25)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }} />
               <Bar dataKey="band" name="Avg Band" fill="#6366f1" radius={[4, 4, 0, 0]} />
               <Bar dataKey="imp" name="Improvement" fill="#10b981" radius={[4, 4, 0, 0]} />
