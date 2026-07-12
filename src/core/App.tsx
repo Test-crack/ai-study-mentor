@@ -12,6 +12,7 @@ import LandingPage from "@/features/home/components/LandingPage";
 import DashboardPage from "@/features/home/components/DashboardPage";
 import LoginPage from "@/features/auth/components/LoginPage";
 import ResetPasswordPage from "@/features/auth/components/ResetPasswordPage";
+import AuthCallbackPage from "@/features/auth/components/AuthCallbackPage";
 import NotFoundPage from "@/shared/components/layout/NotFoundPage";
 import SpeedAssessmentPage from "@/features/speed-assessment/components/SpeedAssessmentPage";
 import ReadingAssessmentPage from "@/features/reading-assessment/components/ReadingAssessmentPage";
@@ -326,6 +327,9 @@ const AppRoutes = () => {
       {/* ── Auth & misc ───────────────────────────────────────────────────── */}
       <Route path="/login" element={user ? <LoginRedirect /> : <LoginPage />} />
       <Route path="/auth" element={<Navigate to="/login" replace />} />
+      {/* Supabase invite/recovery action links land here — must render regardless of
+          session state so the set-password flow runs before any role redirect. */}
+      <Route path="/auth/callback" element={<AuthCallbackPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/courses" element={<CoursesPage />} />
