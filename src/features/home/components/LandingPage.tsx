@@ -180,7 +180,7 @@ const LandingPage = () => {
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-2">
-              <div className="p-2 bg-indigo-700 rounded-xl">
+              <div className="p-2 bg-indigo-700 rounded-xl" aria-hidden="true">
                 <GraduationCap className="h-5 w-5 text-white" />
               </div>
               <span className="text-xl font-bold text-indigo-700">TestCrack</span>
@@ -191,40 +191,43 @@ const LandingPage = () => {
 
       {/* Hero Section */}
       <section className="relative min-h-[80vh] flex items-center pt-24 pb-10 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-50 via-white to-indigo-100 overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10" aria-hidden="true">
           <div className="absolute top-[10%] left-[10%] w-64 h-64 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 transform-gpu will-change-transform"></div>
           <div className="absolute bottom-[10%] right-[10%] w-64 h-64 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 transform-gpu will-change-transform"></div>
         </div>
         <div className="max-w-7xl mx-auto w-full">
           <div className="text-center max-w-4xl mx-auto">
             <Badge className="mb-6 bg-purple-100 text-purple-700 hover:bg-purple-100 border-none px-3 py-1 mt-5">
-              <Sparkles className="h-3.5 w-3.5 mr-2" />
+              <Sparkles className="h-3.5 w-3.5 mr-2" aria-hidden="true" />
               Diagnostic-First IELTS Prep for Institutes
             </Badge>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-900 mb-4 leading-tight tracking-tight mt-5 relative min-h-[1.2em]">
+            {/* CLS Fix: Replaced min-h-[1.2em] with explicit responsive min-heights to reserve layout space */}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-900 mb-4 leading-tight tracking-tight mt-5 relative min-h-[96px] sm:min-h-[120px] md:min-h-[144px]">
               <span className="sr-only">Lift Your Institute's Band Score Average Measurably.</span>
-              <Typewriter
-                options={{ autoStart: true, loop: true, delay: 75, cursor: '|' }}
-                onInit={(typewriter) => {
-                  typewriter
-                    .typeString("Lift Your Institute's Band Score Average ")
-                    .typeString('<span class="text-indigo-700">Measurably.</span>')
-                    .pauseFor(3000)
-                    .deleteAll()
-                    .start();
-                }}
-              />
+              <div aria-hidden="true">
+                <Typewriter
+                  options={{ autoStart: true, loop: true, delay: 75, cursor: '|' }}
+                  onInit={(typewriter) => {
+                    typewriter
+                      .typeString("Lift Your Institute's Band Score Average ")
+                      .typeString('<span class="text-indigo-700">Measurably.</span>')
+                      .pauseFor(3000)
+                      .deleteAll()
+                      .start();
+                  }}
+                />
+              </div>
             </h1>
             <p className="text-lg sm:text-xl text-slate-600 mb-10 max-w-3xl mx-auto leading-relaxed text-balance">
               <span className="block mt-2">A complete education ecosystem for Kerala's coaching institutes — diagnostic-first IELTS prep, a daily drill loop students stick to, adaptive assessments every three days, and a live Real Band score your tutors can act on.</span>
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
               <Button size="lg" variant="outline" onClick={() => setDemoModalOpen(true)} className="px-8 py-6 h-auto bg-indigo-700 hover:bg-indigo-800 text-white transition-all shadow-md active:scale-95 border-none">
-                <MessageSquareText className="mr-2 h-5 w-5 text-white" />
+                <MessageSquareText className="mr-2 h-5 w-5 text-white" aria-hidden="true" />
                 <span className='text-white font-bold'>Request Demo</span>
               </Button>
               <Button size="lg" variant="outline" onClick={() => navigate('/dashdemo')} className="px-8 py-6 h-auto bg-white hover:bg-gray-50 text-indigo-700 border-indigo-100 transition-all shadow-sm active:scale-95">
-                <MonitorPlay className="mr-2 h-5 w-5 text-indigo-700" />
+                <MonitorPlay className="mr-2 h-5 w-5 text-indigo-700" aria-hidden="true" />
                 <span className='font-bold'>View Demo</span>
               </Button>
             </div>
@@ -247,31 +250,31 @@ const LandingPage = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-0">
             <Card className="flex-1 w-full bg-white/50 backdrop-blur-sm border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 transform-gpu z-10 group">
               <CardContent className="p-8">
-                <div className="p-3 bg-red-50 rounded-xl w-fit mb-6 group-hover:bg-red-100 transition-colors">
+                <div className="p-3 bg-red-50 rounded-xl w-fit mb-6 group-hover:bg-red-100 transition-colors" aria-hidden="true">
                   <TrendingDown className="h-6 w-6 text-red-500" />
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 mb-3 leading-tight group-hover:text-indigo-700 transition-colors">Band scores plateau — and nobody knows why</h3>
                 <p className="text-slate-600 text-sm leading-relaxed">Without sub-skill data, tutors can't see whether a student is stuck on coherence, grammar, or fluency — so practice stays generic and scores stay flat.</p>
               </CardContent>
             </Card>
-            <div className="hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white shrink-0 z-20 -mx-4 shadow-md">
+            <div className="hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white shrink-0 z-20 -mx-4 shadow-md" aria-hidden="true">
               <ArrowRight className="h-4 w-4" />
             </div>
             <Card className="flex-1 w-full bg-white/50 backdrop-blur-sm border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 transform-gpu z-10 group">
               <CardContent className="p-8">
-                <div className="p-3 bg-amber-50 rounded-xl w-fit mb-6 group-hover:bg-amber-100 transition-colors">
+                <div className="p-3 bg-amber-50 rounded-xl w-fit mb-6 group-hover:bg-amber-100 transition-colors" aria-hidden="true">
                   <Hourglass className="h-6 w-6 text-amber-500" />
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 mb-3 leading-tight group-hover:text-indigo-700 transition-colors">Tutors spend hours marking, not teaching</h3>
                 <p className="text-slate-600 text-sm leading-relaxed">Manual essay and speaking corrections eat 40–60% of tutor time — time that could be spent on high-value coaching and intervention.</p>
               </CardContent>
             </Card>
-            <div className="hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white shrink-0 z-20 -mx-4 shadow-md">
+            <div className="hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white shrink-0 z-20 -mx-4 shadow-md" aria-hidden="true">
               <ArrowRight className="h-4 w-4" />
             </div>
             <Card className="flex-1 w-full bg-white/50 backdrop-blur-sm border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 transform-gpu z-10 group">
               <CardContent className="p-8">
-                <div className="p-3 bg-blue-50 rounded-xl w-fit mb-6 group-hover:bg-blue-100 transition-colors">
+                <div className="p-3 bg-blue-50 rounded-xl w-fit mb-6 group-hover:bg-blue-100 transition-colors" aria-hidden="true">
                   <RefreshCw className="h-6 w-6 text-blue-500" />
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 mb-3 leading-tight group-hover:text-indigo-700 transition-colors">Students disengage silently before exam day</h3>
@@ -284,7 +287,7 @@ const LandingPage = () => {
 
       {/* Features Section */}
       <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden bg-[#f8fafc]">
-        <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
           <div className="absolute -top-[10%] -right-[5%] w-[45%] h-[45%] rounded-full bg-indigo-200/40 blur-[120px] animate-pulse transform-gpu" />
           <div className="absolute top-[20%] -left-[10%] w-[40%] h-[40%] rounded-full bg-purple-200/30 blur-[120px] transform-gpu" />
           <div className="absolute -bottom-[10%] left-[30%] w-[50%] h-[50%] rounded-full bg-blue-100/50 blur-[120px] transform-gpu" />
@@ -295,7 +298,7 @@ const LandingPage = () => {
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">Students build a daily habit, tutors get actionable data, and institute owners get measurable outcomes.</p>
           </div>
           <div className="flex flex-col items-center gap-8 sm:gap-12 mb-12 px-2">
-            <div className="inline-flex p-1 sm:p-1.5 bg-white/40 backdrop-blur-xl rounded-2xl border border-white/60 shadow-lg ring-1 ring-black/5 max-w-full transform-gpu">
+            <div className="inline-flex p-1 sm:p-1.5 bg-white/40 backdrop-blur-xl rounded-2xl border border-white/60 shadow-lg ring-1 ring-black/5 max-w-full transform-gpu" role="tablist" aria-label="Target Audience Features">
               {[
                 { id: 'students', label: 'Students', icon: GraduationCap },
                 { id: 'instructors', label: 'Tutors', icon: Users },
@@ -303,26 +306,35 @@ const LandingPage = () => {
               ].map((tab) => (
                 <button
                   key={tab.id}
+                  id={`tab-${tab.id}`}
+                  role="tab"
+                  aria-selected={activeTab === tab.id}
+                  aria-controls={`panel-${tab.id}`}
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-sm font-semibold transition-all duration-300 whitespace-nowrap ${
                     activeTab === tab.id ? "bg-indigo-700 text-white shadow-lg shadow-indigo-200" : "text-gray-500 hover:text-indigo-700 hover:bg-white/50"
                   }`}
                 >
-                  <tab.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                  <tab.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" aria-hidden="true" />
                   {tab.label}
                 </button>
               ))}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl">
+            <div 
+              id={`panel-${activeTab}`} 
+              role="tabpanel" 
+              aria-labelledby={`tab-${activeTab}`} 
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl"
+            >
               {tabContent[activeTab as keyof typeof tabContent].map((item, idx) => (
                 <Card
                   key={`${activeTab}-${idx}`}
                   className="group relative overflow-hidden border border-white/40 bg-white/30 backdrop-blur-md hover:bg-white/50 hover:border-white/80 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 animate-in fade-in slide-in-from-bottom-3 transform-gpu"
                   style={{ animationDelay: `${idx * 100}ms` }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
                   <CardContent className="p-6 text-left relative z-10">
-                    <div className="p-2.5 bg-indigo-100/50 backdrop-blur-sm rounded-xl w-fit mb-4 group-hover:bg-indigo-600 transition-all duration-300">
+                    <div className="p-2.5 bg-indigo-100/50 backdrop-blur-sm rounded-xl w-fit mb-4 group-hover:bg-indigo-600 transition-all duration-300" aria-hidden="true">
                       <item.icon className="h-5 w-5 text-indigo-700 group-hover:text-white" />
                     </div>
                     <h4 className="font-bold text-gray-900 mb-2 group-hover:text-indigo-900 transition-colors">{item.title}</h4>
@@ -349,7 +361,7 @@ const LandingPage = () => {
             {toolsData.map((tool, index) => (
               <Card key={index} className="border border-slate-100 bg-white shadow-sm hover:shadow-xl hover:border-indigo-100 transition-all duration-300 transform-gpu flex flex-col h-full">
                 <CardContent className="p-8 flex flex-col h-full relative">
-                  <div className="p-3 bg-indigo-50 rounded-xl w-fit mb-6">
+                  <div className="p-3 bg-indigo-50 rounded-xl w-fit mb-6" aria-hidden="true">
                     <tool.icon className="h-6 w-6 text-indigo-600" />
                   </div>
                   <h3 className="text-xl font-bold text-slate-900 mb-4">{tool.title}</h3>
@@ -380,13 +392,13 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-20 items-center">
             <div className="relative group">
-              <div className="absolute -top-20 -left-20 w-72 h-72 bg-indigo-200/40 rounded-full blur-[120px] group-hover:bg-indigo-300/60 transition-colors duration-700 transform-gpu" />
-              <div className="absolute -bottom-20 -right-20 w-72 h-72 bg-purple-200/40 rounded-full blur-[120px] group-hover:bg-purple-300/60 transition-colors duration-700 transform-gpu" />
+              <div className="absolute -top-20 -left-20 w-72 h-72 bg-indigo-200/40 rounded-full blur-[120px] group-hover:bg-indigo-300/60 transition-colors duration-700 transform-gpu" aria-hidden="true" />
+              <div className="absolute -bottom-20 -right-20 w-72 h-72 bg-purple-200/40 rounded-full blur-[120px] group-hover:bg-purple-300/60 transition-colors duration-700 transform-gpu" aria-hidden="true" />
               <Card className="relative border-white/60 bg-white/40 backdrop-blur-xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] overflow-hidden border transition-all duration-500 hover:shadow-indigo-500/10 transform-gpu">
                 <CardContent className="p-8 sm:p-14">
                   <div className="flex flex-col md:flex-row items-center justify-between gap-12 relative">
                     <div className="flex flex-col items-center gap-4 z-10">
-                      <div className="w-20 h-20 rounded-2xl bg-white shadow-xl flex items-center justify-center border border-slate-100 group-hover:scale-105 transition-transform duration-500">
+                      <div className="w-20 h-20 rounded-2xl bg-white shadow-xl flex items-center justify-center border border-slate-100 group-hover:scale-105 transition-transform duration-500" aria-hidden="true">
                         <User className="h-10 w-10 text-purple-600" />
                       </div>
                       <div className="text-center">
@@ -395,13 +407,13 @@ const LandingPage = () => {
                       </div>
                     </div>
                     <div className="relative flex flex-col items-center">
-                      <div className="hidden md:block absolute top-10 -left-24 w-24 h-[1px] bg-slate-200">
+                      <div className="hidden md:block absolute top-10 -left-24 w-24 h-[1px] bg-slate-200" aria-hidden="true">
                         <div className="animate-data-flow" style={{ animationDelay: '0s' }} />
                       </div>
-                      <div className="hidden md:block absolute top-10 -right-24 w-24 h-[1px] bg-slate-200">
+                      <div className="hidden md:block absolute top-10 -right-24 w-24 h-[1px] bg-slate-200" aria-hidden="true">
                         <div className="animate-data-flow" style={{ animationDelay: '1.5s' }} />
                       </div>
-                      <div className="relative">
+                      <div className="relative" aria-hidden="true">
                         <div className="absolute inset-0 bg-indigo-600 blur-2xl opacity-20 animate-pulse transform-gpu" />
                         <div className="w-28 h-28 rounded-full bg-gradient-to-br from-indigo-700 via-indigo-600 to-purple-700 flex items-center justify-center shadow-2xl relative z-10 border-4 border-white/20">
                           <Cpu className="h-12 w-12 text-white animate-[spin_10s_linear_infinite]" />
@@ -410,7 +422,7 @@ const LandingPage = () => {
                       <span className="mt-6 text-xl font-black bg-gradient-to-r from-indigo-700 to-purple-700 bg-clip-text text-transparent">TESTCRACK ENGINE</span>
                     </div>
                     <div className="flex flex-col items-center gap-4 z-10">
-                      <div className="w-20 h-20 rounded-2xl bg-white shadow-xl flex items-center justify-center border border-slate-100 group-hover:scale-105 transition-transform duration-500">
+                      <div className="w-20 h-20 rounded-2xl bg-white shadow-xl flex items-center justify-center border border-slate-100 group-hover:scale-105 transition-transform duration-500" aria-hidden="true">
                         <User className="h-10 w-10 text-purple-600" />
                       </div>
                       <div className="text-center">
@@ -424,7 +436,7 @@ const LandingPage = () => {
             </div>
             <div className="flex flex-col">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-wider mb-6 w-fit border border-indigo-100">
-                <Sparkles className="h-3.5 w-3.5" />
+                <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
                 Nine Scoring Engines
               </div>
               <h2 className="text-4xl sm:text-5xl font-extrabold text-slate-900 leading-[1.1] mb-6">
@@ -448,7 +460,7 @@ const LandingPage = () => {
                 ))}
               </div>
               <div className="mt-8 flex items-center gap-3 text-sm text-slate-400 italic">
-                <ShieldCheck className="h-5 w-5 text-emerald-500" />
+                <ShieldCheck className="h-5 w-5 text-emerald-500" aria-hidden="true" />
                 Scored against IELTS band descriptors, 0–9 scale, rounded to the nearest 0.5.
               </div>
             </div>
@@ -458,7 +470,7 @@ const LandingPage = () => {
 
       {/* How It Works Section */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-4xl bg-indigo-50/50 rounded-[100%] blur-[120px] -z-10 transform-gpu" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-4xl bg-indigo-50/50 rounded-[100%] blur-[120px] -z-10 transform-gpu" aria-hidden="true" />
         <div className="max-w-7xl mx-auto relative">
           <div className="text-center mb-20">
             <Badge className="mb-4 bg-indigo-50 text-indigo-700 hover:bg-indigo-50 border-indigo-100 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
@@ -480,15 +492,15 @@ const LandingPage = () => {
               <div key={index} className="relative group">
                 <Card className="h-full border-white/60 bg-white/50 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 border hover:-translate-y-2 transform-gpu">
                   <CardContent className="p-8 pt-12 flex flex-col items-center text-center">
-                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-14 h-14 rounded-2xl bg-indigo-700 shadow-lg shadow-indigo-200 flex items-center justify-center text-white text-xl font-black z-20 group-hover:scale-110 transition-transform duration-500">
+                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-14 h-14 rounded-2xl bg-indigo-700 shadow-lg shadow-indigo-200 flex items-center justify-center text-white text-xl font-black z-20 group-hover:scale-110 transition-transform duration-500" aria-hidden="true">
                       {item.step}
                     </div>
-                    <div className="mb-6 p-4 rounded-full bg-slate-50 text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-700 transition-colors duration-500">
+                    <div className="mb-6 p-4 rounded-full bg-slate-50 text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-700 transition-colors duration-500" aria-hidden="true">
                       <item.icon className="h-8 w-8" />
                     </div>
                     <h3 className="text-xl font-extrabold text-slate-900 mb-4 group-hover:text-indigo-700 transition-colors">{item.title}</h3>
                     <p className="text-slate-500 text-sm leading-relaxed font-medium">{item.description}</p>
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-700 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-700 opacity-0 group-hover:opacity-100 transition-opacity duration-500" aria-hidden="true" />
                   </CardContent>
                 </Card>
               </div>
@@ -496,7 +508,7 @@ const LandingPage = () => {
           </div>
           <div className="mt-20 text-center">
             <p className="text-slate-400 text-sm font-semibold flex items-center justify-center gap-2 italic">
-              <Sparkles className="h-4 w-4 text-indigo-400" />
+              <Sparkles className="h-4 w-4 text-indigo-400" aria-hidden="true" />
               Diagnostic → Daily Loop → IA → Mock → Real Band. Every step measured.
             </p>
           </div>
@@ -505,7 +517,7 @@ const LandingPage = () => {
 
       {/* CTA Section */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 bg-indigo-700 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none" aria-hidden="true">
           <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[80%] rounded-full bg-indigo-600 blur-[120px] opacity-50 transform-gpu" />
           <div className="absolute -bottom-[20%] -right-[10%] w-[50%] h-[80%] rounded-full bg-indigo-500 blur-[120px] opacity-30 transform-gpu" />
         </div>
@@ -526,7 +538,7 @@ const LandingPage = () => {
               </div>
               <div className="flex flex-col items-center gap-6">
                 <Button size="lg" onClick={() => setDemoModalOpen(true)} className="px-10 py-6 h-auto bg-white hover:bg-indigo-50 text-indigo-700 font-black text-lg transition-all shadow-xl active:scale-95 border-none">
-                  <MessageSquareText className="mr-2 h-5 w-5" />
+                  <MessageSquareText className="mr-2 h-5 w-5" aria-hidden="true" />
                   Request Demo
                 </Button>
                 <div className="flex flex-wrap justify-center gap-x-8 gap-y-2">
@@ -535,7 +547,7 @@ const LandingPage = () => {
                     { icon: MessageSquareText, text: 'WhatsApp-First Outreach' }
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-2 text-indigo-100/60 text-sm font-medium">
-                      <item.icon className="h-4 w-4" />
+                      <item.icon className="h-4 w-4" aria-hidden="true" />
                       {item.text}
                     </div>
                   ))}
@@ -548,7 +560,7 @@ const LandingPage = () => {
 
       {/* ── CONTACT SECTION ── */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-3xl bg-indigo-50/60 rounded-[100%] blur-[140px] -z-10 transform-gpu" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-3xl bg-indigo-50/60 rounded-[100%] blur-[140px] -z-10 transform-gpu" aria-hidden="true" />
         <div className="max-w-4xl mx-auto relative">
 
           <div className="text-center mb-14">
@@ -568,7 +580,7 @@ const LandingPage = () => {
               href="mailto:officialtestcrack@gmail.com"
               className="group flex items-start gap-5 p-7 rounded-2xl border border-slate-100 bg-white shadow-sm hover:shadow-xl hover:border-indigo-100 hover:-translate-y-1 transition-all duration-300"
             >
-              <div className="p-3.5 rounded-xl bg-indigo-50 group-hover:bg-indigo-700 transition-colors duration-300 shrink-0">
+              <div className="p-3.5 rounded-xl bg-indigo-50 group-hover:bg-indigo-700 transition-colors duration-300 shrink-0" aria-hidden="true">
                 <Mail className="h-6 w-6 text-indigo-600 group-hover:text-white transition-colors duration-300" />
               </div>
               <div>
@@ -589,7 +601,7 @@ const LandingPage = () => {
               rel="noopener noreferrer"
               className="group flex items-start gap-5 p-7 rounded-2xl border border-slate-100 bg-white shadow-sm hover:shadow-xl hover:border-indigo-100 hover:-translate-y-1 transition-all duration-300"
             >
-              <div className="p-3.5 rounded-xl bg-emerald-50 group-hover:bg-indigo-700 transition-colors duration-300 shrink-0">
+              <div className="p-3.5 rounded-xl bg-emerald-50 group-hover:bg-indigo-700 transition-colors duration-300 shrink-0" aria-hidden="true">
                 <Phone className="h-6 w-6 text-emerald-600 group-hover:text-white transition-colors duration-300" />
               </div>
               <div>
@@ -611,7 +623,7 @@ const LandingPage = () => {
               onClick={() => setDemoModalOpen(true)}
               className="px-8 py-5 h-auto bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-sm transition-all shadow-md active:scale-95 border-none"
             >
-              <MessageSquareText className="mr-2 h-4 w-4" />
+              <MessageSquareText className="mr-2 h-4 w-4" aria-hidden="true" />
               Or fill out the demo request form
             </Button>
           </div>
@@ -630,7 +642,7 @@ const LandingPage = () => {
             <div className="lg:col-span-2 flex flex-col gap-6">
               {/* Logo + name */}
               <div className="flex items-center space-x-3">
-                <div className="p-2 bg-indigo-700 rounded-xl">
+                <div className="p-2 bg-indigo-700 rounded-xl" aria-hidden="true">
                   <GraduationCap className="h-5 w-5 text-white" />
                 </div>
                 <div>
@@ -647,25 +659,25 @@ const LandingPage = () => {
               {/* Contact info */}
               <div className="flex flex-col gap-3">
                 <a href="mailto:officialtestcrack@gmail.com" className="flex items-center gap-3 text-sm text-gray-500 hover:text-indigo-400 transition-colors group">
-                  <div className="w-7 h-7 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center group-hover:bg-indigo-700 group-hover:border-indigo-600 transition-all">
+                  <div className="w-7 h-7 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center group-hover:bg-indigo-700 group-hover:border-indigo-600 transition-all" aria-hidden="true">
                     <Mail className="h-3.5 w-3.5" />
                   </div>
                   officialtestcrack@gmail.com
                 </a>
                 <a href="https://wa.me/919995684689" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-gray-500 hover:text-indigo-400 transition-colors group">
-                  <div className="w-7 h-7 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center group-hover:bg-indigo-700 group-hover:border-indigo-600 transition-all">
+                  <div className="w-7 h-7 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center group-hover:bg-indigo-700 group-hover:border-indigo-600 transition-all" aria-hidden="true">
                     <Phone className="h-3.5 w-3.5" />
                   </div>
                   +91 99956 84689
                 </a>
                 <a href="https://testcrack.com/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-gray-500 hover:text-indigo-400 transition-colors group">
-                  <div className="w-7 h-7 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center group-hover:bg-indigo-700 group-hover:border-indigo-600 transition-all">
+                  <div className="w-7 h-7 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center group-hover:bg-indigo-700 group-hover:border-indigo-600 transition-all" aria-hidden="true">
                     <Globe className="h-3.5 w-3.5" />
                   </div>
                   testcrack.com
                 </a>
                 <div className="flex items-center gap-3 text-sm text-gray-500">
-                  <div className="w-7 h-7 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center">
+                  <div className="w-7 h-7 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center" aria-hidden="true">
                     <MapPin className="h-3.5 w-3.5" />
                   </div>
                   Kochi, Kerala
@@ -674,17 +686,17 @@ const LandingPage = () => {
 
               {/* Social links */}
               <div className="flex items-center gap-3 pt-1">
-                <a href="https://www.linkedin.com/in/test-crack-aa92203b0/" target="_blank" rel="noopener noreferrer"
+                <a href="https://www.linkedin.com/in/test-crack-aa92203b0/" target="_blank" rel="noopener noreferrer" aria-label="Visit TestCrack on LinkedIn"
                   className="w-9 h-9 rounded-xl bg-gray-800 border border-gray-700 flex items-center justify-center text-gray-400 hover:bg-indigo-700 hover:border-indigo-600 hover:text-white transition-all">
-                  <Linkedin className="h-4 w-4" />
+                  <Linkedin className="h-4 w-4" aria-hidden="true" />
                 </a>
-                <a href="https://www.instagram.com/testcrackforinstitutes/" target="_blank" rel="noopener noreferrer"
+                <a href="https://www.instagram.com/testcrackforinstitutes/" target="_blank" rel="noopener noreferrer" aria-label="Visit TestCrack on Instagram"
                   className="w-9 h-9 rounded-xl bg-gray-800 border border-gray-700 flex items-center justify-center text-gray-400 hover:bg-indigo-700 hover:border-indigo-600 hover:text-white transition-all">
-                  <Instagram className="h-4 w-4" />
+                  <Instagram className="h-4 w-4" aria-hidden="true" />
                 </a>
-                <a href="https://www.youtube.com/@TESTCRACK-1" target="_blank" rel="noopener noreferrer"
+                <a href="https://www.youtube.com/@TESTCRACK-1" target="_blank" rel="noopener noreferrer" aria-label="Visit TestCrack on YouTube"
                   className="w-9 h-9 rounded-xl bg-gray-800 border border-gray-700 flex items-center justify-center text-gray-400 hover:bg-indigo-700 hover:border-indigo-600 hover:text-white transition-all">
-                  <Youtube className="h-4 w-4" />
+                  <Youtube className="h-4 w-4" aria-hidden="true" />
                 </a>
               </div>
             </div>
@@ -701,7 +713,7 @@ const LandingPage = () => {
                           onClick={() => setDemoModalOpen(true)}
                           className="text-sm text-gray-500 hover:text-indigo-400 transition-colors text-left flex items-center gap-1.5 group"
                         >
-                          <MessageSquareText className="h-3.5 w-3.5 text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <MessageSquareText className="h-3.5 w-3.5 text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
                           {link.label}
                         </button>
                       ) : (
@@ -709,7 +721,7 @@ const LandingPage = () => {
                           href={link.href}
                           className="text-sm text-gray-500 hover:text-indigo-400 transition-colors flex items-center gap-1.5 group"
                         >
-                          <span className="w-1 h-1 rounded-full bg-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <span className="w-1 h-1 rounded-full bg-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
                           {link.label}
                         </a>
                       )}
@@ -734,11 +746,11 @@ const LandingPage = () => {
             {/* Status badges */}
             <div className="flex items-center gap-3">
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-950 border border-emerald-900 text-[10px] font-bold text-emerald-500 uppercase tracking-wider">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true" />
                 Platform Live
               </span>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-950 border border-indigo-900 text-[10px] font-bold text-indigo-400 uppercase tracking-wider">
-                <MapPin className="h-3 w-3" />
+                <MapPin className="h-3 w-3" aria-hidden="true" />
                 Kerala-first EdTech
               </span>
             </div>
@@ -751,21 +763,21 @@ const LandingPage = () => {
       {/* Demo Request Modal */}
       {demoModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm" onClick={closeDemoModal}>
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="demo-modal-title">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-indigo-50 to-purple-50">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-indigo-700 rounded-lg">
+                <div className="p-1.5 bg-indigo-700 rounded-lg" aria-hidden="true">
                   <MessageSquareText className="h-4 w-4 text-white" />
                 </div>
-                <h3 className="text-lg font-black text-slate-900">Request a Demo</h3>
+                <h3 id="demo-modal-title" className="text-lg font-black text-slate-900">Request a Demo</h3>
               </div>
               <button onClick={closeDemoModal} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors" aria-label="Close demo request">
-                <X className="h-5 w-5" />
+                <X className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
             {demoSubmitted ? (
               <div className="px-6 py-10 text-center space-y-4">
-                <div className="mx-auto w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center">
+                <div className="mx-auto w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center" aria-hidden="true">
                   <ShieldCheck className="h-7 w-7 text-emerald-500" />
                 </div>
                 <h4 className="text-xl font-bold text-slate-900">Request sent!</h4>
@@ -783,8 +795,9 @@ const LandingPage = () => {
                   { field: 'email' as const, label: 'Email', placeholder: 'e.g. priya@crestielts.in', type: 'email' },
                 ].map((input) => (
                   <div key={input.field} className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">{input.label}</label>
+                    <label htmlFor={`demo-${input.field}`} className="text-xs font-bold text-slate-700 uppercase tracking-wide">{input.label}</label>
                     <input
+                      id={`demo-${input.field}`}
                       type={input.type}
                       value={demoForm[input.field]}
                       onChange={(e) => handleDemoField(input.field, e.target.value)}
@@ -798,7 +811,7 @@ const LandingPage = () => {
                   disabled={!demoForm.name.trim() || !demoForm.institute.trim() || !demoForm.whatsapp.trim()}
                   className="w-full py-6 h-auto bg-indigo-700 hover:bg-indigo-800 disabled:opacity-50 text-white font-bold transition-all active:scale-[0.98]"
                 >
-                  <MessageSquareText className="mr-2 h-5 w-5" />
+                  <MessageSquareText className="mr-2 h-5 w-5" aria-hidden="true" />
                   Send via WhatsApp
                 </Button>
                 <p className="text-[11px] text-slate-400 text-center leading-relaxed">Opens WhatsApp with your details pre-filled — nothing is sent until you press send there.</p>
