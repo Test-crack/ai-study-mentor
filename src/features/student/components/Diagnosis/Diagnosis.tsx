@@ -75,8 +75,8 @@ interface TFNGQuestion {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function getBandLevel(score: number): Level {
-  if (score <= 4.5) return "A";
-  if (score <= 6.5) return "B";
+  if (score < 5.5) return "A";
+  if (score < 7.0) return "B";
   return "C";
 }
 
@@ -112,7 +112,7 @@ function getLevelConfig(level: Level) {
 
 function getAverageScore(results: AllResults): number {
   const scores = Object.values(results)
-    .map((r) => r?.band_score ?? 0)
+    .map((r) => r?.band_score ?? 4.0)
     .filter(Boolean);
   if (!scores.length) return 0;
   return scores.reduce((a, b) => a + b, 0) / scores.length;
@@ -1251,7 +1251,9 @@ function WritingPhase({
 
   const wordCount = countWords(text);
   const raw = data?.minWords;
-  const MIN_WORDS = (typeof raw === 'number' && Number.isFinite(raw) && raw > 0) ? raw : 250;
+  // Default must match the backend's fallback (150) so the on-screen requirement and
+  // the server-side under-length cap agree when a prompt has no min_words set.
+  const MIN_WORDS = (typeof raw === 'number' && Number.isFinite(raw) && raw > 0) ? raw : 150;
 
   useEffect(() => {
     storageSave(SK.writingText, text);
@@ -1888,20 +1890,24 @@ function DiagnosisInner() {
 
   useEffect(() => {
     const tabId = tabIdRef.current;
-    const channel = new BroadcastChannel("tc_diagnostic_sync");
+    // Namespace the lock key AND the channel per student — otherwise two different
+    // students in two tabs on the same device falsely trip each other's "Session
+    // Already Active" conflict (the lock/channel were previously global).
+    const lockKey = nsKey(SK.activeTabLock);
+    const channel = new BroadcastChannel(`tc_diagnostic_sync:${storageNamespace || 'anon'}`);
     let deadLockTimeout: ReturnType<typeof setTimeout>;
 
     const attemptClaim = () => {
-      const currentLock = localStorage.getItem(SK.activeTabLock);
+      const currentLock = localStorage.getItem(lockKey);
       if (!currentLock || currentLock === tabId) {
-        localStorage.setItem(SK.activeTabLock, tabId);
+        localStorage.setItem(lockKey, tabId);
         channel.postMessage({ type: "CLAIMED", tabId });
         setTabConflict(false);
       } else {
         setTabConflict(true);
         channel.postMessage({ type: "PING", tabId });
         deadLockTimeout = setTimeout(() => {
-          localStorage.setItem(SK.activeTabLock, tabId);
+          localStorage.setItem(lockKey, tabId);
           channel.postMessage({ type: "CLAIMED", tabId });
           setTabConflict(false);
         }, 1000);
@@ -1913,12 +1919,12 @@ function DiagnosisInner() {
       if (data.type === "CLAIMED") {
         if (data.tabId !== tabId) {
           clearTimeout(deadLockTimeout);
-          if (localStorage.getItem(SK.activeTabLock) !== tabId) {
+          if (localStorage.getItem(lockKey) !== tabId) {
             setTabConflict(true);
           }
         }
       } else if (data.type === "PING") {
-        if (localStorage.getItem(SK.activeTabLock) === tabId) {
+        if (localStorage.getItem(lockKey) === tabId) {
           channel.postMessage({ type: "CLAIMED", tabId });
         }
       } else if (data.type === "RELEASED") {
@@ -1929,8 +1935,8 @@ function DiagnosisInner() {
     attemptClaim();
 
     const handleUnload = () => {
-      if (localStorage.getItem(SK.activeTabLock) === tabId) {
-        localStorage.removeItem(SK.activeTabLock);
+      if (localStorage.getItem(lockKey) === tabId) {
+        localStorage.removeItem(lockKey);
         channel.postMessage({ type: "RELEASED", tabId });
       }
     };
@@ -2339,7 +2345,7 @@ function OnboardingScreen({ onComplete }: { onComplete: () => void }) {
                 className="w-full border-2 border-gray-900 rounded-lg p-3.5 text-sm font-black focus:border-indigo-700 focus:ring-2 focus:ring-indigo-100 outline-none transition-all bg-white appearance-none text-indigo-700 cursor-pointer"
                 style={{ boxShadow: '3px 3px 0 #0F0F0F' }}
               >
-                {[4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0].map(band => (
+                {[4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0].map(band => (
                   <option key={band} value={band.toFixed(1)}>{band.toFixed(1)} Band</option>
                 ))}
               </select>

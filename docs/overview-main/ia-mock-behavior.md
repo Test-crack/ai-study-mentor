@@ -15,28 +15,30 @@
 
 ### A.1 How a single section/skill is scored
 
+> **Band domain:** the platform band scale runs **4.0 (absolute minimum) to 9.0 (maximum)** in 0.5 steps. Every score — including empty/invalid attempts — lands in [4,9]. There is no band below 4.0 anywhere.
+
 **Listening & Reading (pure MCQ):**
 ```
-band = (correct ÷ total_questions) × 9, rounded to nearest 0.5, clamped 0–9
+band = 4.0 + (correct ÷ total_questions) × 5.0, rounded to nearest 0.5, clamped [4,9]
 ```
-Unanswered questions count as wrong (the denominator is the full question set, never the subset the student answered).
+0% correct = 4.0 (the floor), 100% = 9.0. Unanswered questions count as wrong (the denominator is the full question set, never the subset the student answered).
 
 **Writing & Speaking (MCQ + AI prompt):**
-Each sub-skill is scored on a 1–10 internal scale, then converted to the 0–9 band:
+Each sub-skill is scored on a 1–10 internal scale, then rebased onto the [4,9] band:
 ```
-mcqScore  = 1 + (correct ÷ mcqCount) × 9        (1–10; null if no MCQs)
-aiScore   = AI grade of the prompt              (1–10; null if no prompt)
-combined  = (mcqScore × 1 + aiScore × 2) ÷ 3    (AI weighted 2×, MCQ 1×)
-band      = (combined − 1) × 0.5, rounded to 0.5, clamped 0–9
+mcqScore  = 1 + (correct ÷ mcqCount) × 9            (1–10; null if no MCQs)
+aiScore   = AI grade of the prompt                  (1–10; null if no prompt)
+combined  = (mcqScore × 1 + aiScore × 2) ÷ 3        (AI weighted 2×, MCQ 1×)
+band      = 4.0 + ((combined − 1) ÷ 9) × 5.0, rounded to 0.5, clamped [4,9]
 ```
-If both are missing, `combined = 1` → band 0.
+Internal 1 anchors to band 4.0, internal 10 to 9.0. If both components are missing, `combined = 1` → band 4.0.
 
 ### A.2 How a band gets updated (never overwritten)
 
 Both IA and Mock blend the new result with the existing stored band — a single session can never swing a band wildly:
 
-- **IA:** `new = 0.4 × old + 0.6 × result`, then **capped at ±2 bands of movement**, rounded to 0.5, clamped 0–9. A brand-new sub-skill with no prior score adopts the result directly.
-- **Mock:** `new = 0.6 × result + 0.4 × old`, rounded to 0.5, clamped 0–9. For W/S this blend is applied **per sub-skill**, then the skill band = average of the four updated sub-skills. (No ±2 cap on the mock path.)
+- **IA:** `new = 0.4 × old + 0.6 × result`, then **capped at ±2 bands of movement**, rounded to 0.5, clamped [4,9]. A brand-new sub-skill with no prior score adopts the result directly.
+- **Mock:** same smoothing rule as IA (shared implementation) — `0.6 × result + 0.4 × old`, **±2 movement cap**, rounded to 0.5, clamped [4,9]. For W/S the blend is applied **per sub-skill**, then the skill band = average of the four updated sub-skills.
 
 ### A.3 What counts as a "real answer"
 

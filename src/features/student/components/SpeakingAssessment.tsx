@@ -8,6 +8,7 @@ import {
 import { StudentSidebar } from "./dashboard/StudentSidebar";
 import { StudentTopbar } from "./dashboard/StudentTopbar";
 import { PremiumModal } from "@/features/payment/components/PremiumModal";
+import { bandFillPct, bandFillFrac } from "@/shared/utils/bandScale";
 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Types
@@ -173,7 +174,7 @@ Use official IELTS criteria: Fluency & Coherence, Lexical Resource, Grammatical 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const BandScoreArc = ({ score }: { score: number }) => {
-  const pct = score / 9;
+  const pct = bandFillFrac(score);
   const radius = 80;
   const circumference = Math.PI * radius;
   const offset = circumference * (1 - pct);
@@ -214,7 +215,7 @@ const SubScoreBar = ({ label, score, color }: { label: string; score: number; co
     <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
       <div
         className="h-full rounded-full transition-all duration-1000"
-        style={{ width: `${(score / 9) * 100}%`, backgroundColor: color }}
+        style={{ width: `${bandFillPct(score)}%`, backgroundColor: color }}
       />
     </div>
   </div>

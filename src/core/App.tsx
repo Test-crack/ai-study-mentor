@@ -15,6 +15,7 @@ import { MomentumProvider } from "@/features/student/Context/MomentumContext";
 
 // Landing page stays EAGER — this is the route we're optimizing.
 import LandingPage from "@/features/home/components/LandingPage";
+import AuthCallbackPage from "@/features/auth/components/AuthCallbackPage";
 
 // Everything else becomes its own chunk, downloaded only when its route is visited.
 const DashboardPage = lazy(() => import("@/features/home/components/DashboardPage"));
@@ -292,6 +293,9 @@ const AppRoutes = () => {
 
       <Route path="/login" element={user ? <LoginRedirect /> : <LoginPage />} />
       <Route path="/auth" element={<Navigate to="/login" replace />} />
+      {/* Supabase invite/recovery action links land here — must render regardless of
+          session state so the set-password flow runs before any role redirect. */}
+      <Route path="/auth/callback" element={<AuthCallbackPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/courses" element={<CoursesPage />} />

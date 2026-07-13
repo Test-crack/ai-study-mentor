@@ -137,17 +137,30 @@ function firstOfNextMonth(): string {
   return d.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
 }
 
+// Defensive mirror of the server's ±2 band-movement cap. The server (and the DB
+// trigger) are the source of truth; this only guards the DISPLAY so a mis-capped
+// payload can never render an implausible >2 band jump. It warns (surfacing a
+// server bug) rather than silently hiding, and is a no-op in normal operation.
+const BAND_MOVE_CAP = 2;
+function clampBandMove(prev: number | null, next: number): number {
+  if (prev === null || prev === undefined) return next;
+  const capped = Math.min(prev + BAND_MOVE_CAP, Math.max(prev - BAND_MOVE_CAP, next));
+  if (capped !== next) {
+    console.warn(`[Mock] band movement ${prev} -> ${next} exceeded ±${BAND_MOVE_CAP}; clamped to ${capped}`);
+  }
+  return capped;
+}
+
 // Plain-English insight generator — used as fallback when backend doesn't send `insight`.
 function skillInsight(s: MockSkillScore): string {
   const label = SKILL_LABEL[s.skill] ?? s.skill;
-  if (s.total === 0 && s.band === 0) return `${label} section awaiting scoring.`;
+  if (s.total === 0 && s.band <= 4.0) return `${label} section awaiting scoring.`;
 
   const band = s.band;
   const tier =
     band >= 7.5 ? "excellent" :
     band >= 6.5 ? "solid"     :
-    band >= 5.5 ? "developing":
-    band >= 4.0 ? "foundational" : "early stage";
+    band >= 5.5 ? "developing" : "foundational";
 
   const accuracy = s.total > 0 ? Math.round((s.correct / s.total) * 100) : null;
 
@@ -1183,9 +1196,10 @@ export default function FullMockAssessment() {
         {skillScores.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
             {skillScores.map((s, i) => {
+              const displayNewBand = clampBandMove(s.prev_matrix_band, s.new_matrix_band);
               const a           = accent(s.skill);
               const matrixDelta = s.prev_matrix_band !== null
-                ? Math.round((s.new_matrix_band - s.prev_matrix_band) * 10) / 10
+                ? Math.round((displayNewBand - s.prev_matrix_band) * 10) / 10
                 : null;
               const matrixUp    = matrixDelta !== null && matrixDelta > 0;
               const diagDelta   = s.delta_from_diag;
@@ -1344,7 +1358,7 @@ export default function FullMockAssessment() {
                       </span>
                       <span className="text-slate-300 text-xs">→</span>
                       <span className={`text-xl font-bold ${matrixUp ? "text-emerald-600" : "text-slate-700"}`}>
-                        {s.new_matrix_band.toFixed(1)}
+                        {displayNewBand.toFixed(1)}
                       </span>
                       {matrixDelta !== null && (
                         <span className={`text-xs font-semibold ${matrixUp ? "text-emerald-600" : "text-rose-600"}`}>

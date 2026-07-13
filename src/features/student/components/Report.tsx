@@ -217,7 +217,7 @@ const RadarTab = () => (
       <RadarChart data={RADAR_DATA} margin={{ top: 10, right: 30, bottom: 10, left: 30 }}>
         <PolarGrid stroke="#e2e8f0" />
         <PolarAngleAxis dataKey="skill" tick={{ fontSize: 12, fontWeight: "700", fill: "#64748b" }} />
-        <PolarRadiusAxis angle={90} domain={[0, 9]} tick={{ fontSize: 10, fill: "#94a3b8" }} tickCount={4} />
+        <PolarRadiusAxis angle={90} domain={[4, 9]} tick={{ fontSize: 10, fill: "#94a3b8" }} tickCount={4} />
         <Radar name="Target Band" dataKey="target" stroke="#cbd5e1" fill="#cbd5e1" fillOpacity={0.15} strokeDasharray="5 3" strokeWidth={2} />
         <Radar name="Current Band" dataKey="current" stroke="#6366f1" fill="#6366f1" fillOpacity={0.25} strokeWidth={2.5} />
         <Tooltip

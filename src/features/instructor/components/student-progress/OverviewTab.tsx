@@ -4,6 +4,7 @@ import {
   ResponsiveContainer, Tooltip,
 } from 'recharts';
 import { cn } from '@/shared/utils';
+import { bandFillPct } from '@/shared/utils/bandScale';
 import type { StudentFullProgress } from './types';
 
 interface Props { data: StudentFullProgress; }
@@ -61,14 +62,14 @@ function BaselineComparison({ baseline, competency }: {
                 {base !== null && (
                   <div
                     className="absolute top-0 h-full bg-slate-300 dark:bg-slate-600 rounded-full"
-                    style={{ width: `${(base / 9) * 100}%` }}
+                    style={{ width: `${bandFillPct(base)}%` }}
                   />
                 )}
                 {/* current fill */}
                 {current !== null && current > 0 && (
                   <div
                     className="absolute top-0 h-full bg-indigo-500 dark:bg-indigo-400 rounded-full opacity-80"
-                    style={{ width: `${(current / 9) * 100}%` }}
+                    style={{ width: `${bandFillPct(current)}%` }}
                   />
                 )}
               </div>
@@ -160,7 +161,7 @@ export function OverviewTab({ data }: Props) {
                   />
                   <PolarRadiusAxis
                     angle={30}
-                    domain={[0, 9]}
+                    domain={[4, 9]}
                     tick={{ fontSize: 9, fill: '#94a3b8' }}
                     tickCount={4}
                   />
@@ -187,7 +188,7 @@ export function OverviewTab({ data }: Props) {
                   <div className="flex-1 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-indigo-500 rounded-full"
-                      style={{ width: `${(r.band / 9) * 100}%` }}
+                      style={{ width: `${bandFillPct(r.band)}%` }}
                     />
                   </div>
                   <span className="text-xs font-black text-slate-700 dark:text-slate-300 w-8 text-right">{r.band.toFixed(1)}</span>
