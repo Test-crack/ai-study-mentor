@@ -1,6 +1,6 @@
 // src/features/student/drills/DrillResultCard.tsx
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, PlayCircle, Lock, ExternalLink, MessageSquare, Flame, Zap, Loader2 } from 'lucide-react';
+import { CheckCircle2, PlayCircle, Lock, ExternalLink, MessageSquare, Flame, Zap, Loader2, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { useMomentum } from "@/features/student/Context/MomentumContext";
 import { callBackend } from "@/features/auth/services/authClient";
@@ -109,6 +109,17 @@ export default function DrillResultCard({
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8">
+
+      {/* ── Back to Dashboard ── */}
+      <div className="flex justify-end">
+        <button
+          onClick={onUnlockNext}
+          className="flex items-center gap-2 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Dashboard
+        </button>
+      </div>
 
       {/* Score Summary — white pop-out card with emerald numerals */}
       <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-white/[0.06] p-8 rounded-3xl shadow-sm dark:shadow-[0_0_30px_rgba(16,185,129,0.08)] relative overflow-hidden">
