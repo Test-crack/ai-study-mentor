@@ -94,6 +94,8 @@ import SuggestionsPage from "@/features/student/components/SuggestionsPage";
 import Report from "@/features/student/components/Report";
 import DrillScreen from "@/features/student/components/Drills/DrillScreen";
 import { MomentumProvider } from "@/features/student/Context/MomentumContext";
+import { NotificationsProvider } from "@/features/student/Context/NotificationsContext";
+import { InstructorNotificationsProvider } from "@/features/instructor/Context/InstructorNotificationsContext";
 import LexiGrid from "@/features/student/components/LexiGrid";
 import InternalAssessmentPage from "@/features/student/components/Assessment";
 import FullMockAssessment from "@/features/student/components/FullMockAssessment";
@@ -427,9 +429,13 @@ const App = () => (
         <BrowserRouter>
           <AuthProvider>
             <MomentumProvider>
-              <WebSocketProvider>
-                <AppRoutes />
-              </WebSocketProvider>
+              <NotificationsProvider>
+                <InstructorNotificationsProvider>
+                  <WebSocketProvider>
+                    <AppRoutes />
+                  </WebSocketProvider>
+                </InstructorNotificationsProvider>
+              </NotificationsProvider>
             </MomentumProvider>
           </AuthProvider>
         </BrowserRouter>

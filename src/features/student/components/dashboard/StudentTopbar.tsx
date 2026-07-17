@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Search, Bell, Zap, Menu, Flame, X } from "lucide-react";
+import { Zap, Menu, Flame, X } from "lucide-react";
+import { NotificationBell } from "./NotificationBell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { Button } from "@/shared/components/ui/button";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -81,7 +82,9 @@ export const StudentTopbar = ({ onUpgradeClick }: StudentTopbarProps) => {
 
         <ThemeToggle />
 
-        <Avatar 
+        <NotificationBell />
+
+        <Avatar
           className="h-8 w-8 ml-1 border border-slate-200 dark:border-slate-700 cursor-pointer hover:ring-2 hover:ring-indigo-100 transition-all shrink-0"
           onClick={() => navigate('/student/settings')}
         >
