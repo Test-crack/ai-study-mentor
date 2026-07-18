@@ -40,8 +40,8 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
     { id: 'tutor-onboard', icon: UserPlus, label: 'Tutor Onboarding', path: '/institute-admin/tutorOnboarding' },
     { id: 'students', icon: GraduationCap, label: 'Students', path: '/institute-admin/students' },
     { id: 'students-onboard', icon: UserCheck, label: 'Student Onboarding', path: '/institute-admin/studentOnboarding' },
-    // { id: 'billings', icon: CreditCard, label: 'Billings & Plans', path: '/institute-admin/billings' }, 
-    // { id: 'report', icon: BarChart3, label: 'Report', path: '/institute-admin/reports' },
+    { id: 'reports', icon: BarChart3, label: 'Reports', path: '/institute-admin/reports' },
+    // { id: 'billings', icon: CreditCard, label: 'Billings & Plans', path: '/institute-admin/billings' },
     { id: 'settings', icon: Settings, label: 'Institute Setting', path: '/institute-admin/Setting' },
   ];
 

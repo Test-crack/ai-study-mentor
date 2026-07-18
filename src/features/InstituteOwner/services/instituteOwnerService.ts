@@ -106,6 +106,9 @@ export interface InstituteSummary {
     ia_completion_last_7_days: { completed: number; total_eligible: number };
     mock_completed_this_month: number;
     admins_count: number;
+    instructor_count: number;
+    unassigned_tutor_count: number;
+    invited_not_started_count: number;
 }
 
 export interface BatchRow {

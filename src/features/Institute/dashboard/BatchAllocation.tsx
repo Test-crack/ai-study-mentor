@@ -4,8 +4,7 @@ import {
   Users, GraduationCap, Layers, CheckCircle2, ChevronRight,
   UserMinus, UserPlus, Edit2, Check,
 } from 'lucide-react';
-import { InstituteSidebar } from '../components/InstituteSidebar';
-import { InstituteTopbar } from '../components/InstituteTopbar';
+import { InstituteAdminLayout } from '../components/InstituteAdminLayout';
 import {
   fetchBatches, fetchBatchDetail, createBatch, updateBatch, deleteBatch,
   addInstructor as batchAddInstructor,
@@ -489,7 +488,6 @@ function BatchDetailPanel({ batchId, batchName, onClose, allTutors, allStudents 
 
 export default function BatchAllocation() {
   const { toast } = useToast();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [batches, setBatches] = useState<BatchSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -549,8 +547,7 @@ export default function BatchAllocation() {
   const selectedBatch = batches.find(b => b.id === selectedBatchId);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0A10] font-sans text-slate-900 dark:text-slate-200 transition-colors duration-300">
-
+    <InstituteAdminLayout activeTab="batches">
       {/* Modals */}
       {(showForm || editTarget) && (
         <BatchFormModal
@@ -603,19 +600,6 @@ export default function BatchAllocation() {
         </>
       )}
 
-      {/* Sidebar */}
-      <div className="hidden lg:block">
-        <InstituteSidebar
-          activeTab="batches"
-          isCollapsed={isSidebarCollapsed}
-          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        />
-      </div>
-
-      <div className={`transition-all duration-300 flex flex-col min-h-screen ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
-        <InstituteTopbar />
-
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <div className="max-w-[1200px] mx-auto space-y-6">
 
             {/* Header */}
@@ -777,8 +761,6 @@ export default function BatchAllocation() {
               </div>
             )}
           </div>
-        </main>
-      </div>
-    </div>
+    </InstituteAdminLayout>
   );
 }

@@ -1,263 +1,152 @@
-import React, { useState } from 'react';
-import { Building2, Palette, Bell, Check } from 'lucide-react';
-import { InstituteSidebar } from '../components/InstituteSidebar';
-import { InstituteTopbar } from '../components/InstituteTopbar';
+// src/features/Institute/dashboard/InstituteSetting.tsx
+// Institute Settings — wired to the real institute profile
+// (GET/PATCH /api/institute-admin/institute). The old page showed a hardcoded
+// "Ace English Academy"; the fake email/phone/domain/notification-preference
+// fields had no backend and were dropped rather than left lying.
+import { useCallback, useEffect, useState } from "react";
+import { Building2, MapPin, Image as ImageIcon, Save, ShieldCheck } from "lucide-react";
+import { InstituteAdminLayout } from "../components/InstituteAdminLayout";
+import { SectionCard, StatusBadge, ErrorBanner } from "../components/shared/primitives";
+import {
+  fetchInstituteProfile, updateInstituteProfile, InstituteProfile,
+} from "../services/instituteAdminService";
+import { useToast } from "@/shared/hooks/use-toast";
 
 export default function InstituteSettings() {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const { toast } = useToast();
+  const [profile, setProfile] = useState<InstituteProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  // Form States
-  const [profile, setProfile] = useState({
-    name: 'Ace English Academy',
-    email: 'admin@ace-english.edu',
-    phone: '+91 9876543210',
-    address: '123 Education Street, Mumbai',
-  });
+  const [name, setName] = useState("");
+  const [address, setAddress] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
 
-  const [branding, setBranding] = useState({
-    domain: 'learn.ace-english.edu',
-    logo: 'https://...',
-  });
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetchInstituteProfile();
+      setProfile(res.data);
+      setName(res.data.name ?? "");
+      setAddress(res.data.address ?? "");
+      setLogoUrl(res.data.logoUrl ?? "");
+    } catch (err: any) {
+      setError(err?.message ?? "Failed to load institute profile.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const [notifications, setNotifications] = useState({
-    studentEnrollment: true,
-    tutorApplication: false,
-    batchCapacity: true,
-    monthlyReport: true,
-  });
+  useEffect(() => { load(); }, [load]);
 
-  // Toast State
-  const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false });
+  const dirty = profile !== null && (
+    name !== (profile.name ?? "") ||
+    address !== (profile.address ?? "") ||
+    logoUrl !== (profile.logoUrl ?? "")
+  );
 
-  // Toast Helper
-  const showToast = (message: string) => {
-    setToast({ message, visible: true });
-    setTimeout(() => {
-      setToast({ message: '', visible: false });
-    }, 3000);
+  const save = async () => {
+    if (!dirty || !name.trim()) return;
+    setSaving(true);
+    try {
+      const res = await updateInstituteProfile({ name: name.trim(), address, logoUrl });
+      setProfile(prev => prev ? { ...prev, ...res.data } : prev);
+      toast({ title: "Settings saved", description: "Your institute profile has been updated." });
+    } catch (err: any) {
+      toast({ title: "Failed to save", description: err?.message, variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
   };
 
-  // Handlers
-  const handleSaveProfile = (e: React.FormEvent) => {
-    e.preventDefault();
-    showToast('Profile updated');
-  };
-
-  const handleSaveBranding = (e: React.FormEvent) => {
-    e.preventDefault();
-    showToast('Branding saved');
-  };
-
-  const handleSaveNotifications = (e: React.FormEvent) => {
-    e.preventDefault();
-    showToast('Preferences saved');
-  };
+  const inputClass =
+    "w-full px-4 py-2.5 bg-white dark:bg-white/[0.04] border border-slate-200/70 dark:border-white/[0.06] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm font-medium text-slate-700 dark:text-slate-200 placeholder:text-slate-400";
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0A10] font-sans text-slate-900 dark:text-slate-200 transition-colors duration-300">
-      
-      {/* Sidebar */}
-      <div className="hidden lg:block">
-        <InstituteSidebar 
-          activeTab="settings" 
-          isCollapsed={isSidebarCollapsed} 
-          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
-        />
+    <InstituteAdminLayout activeTab="settings">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Institute Settings</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Your institute's identity across the platform and invite emails.</p>
       </div>
 
-      <div className={`transition-all duration-300 flex flex-col min-h-screen ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
-        
-        {/* Topbar */}
-        <InstituteTopbar />
+      {error && <ErrorBanner message={error} onRetry={load} />}
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="max-w-[900px] mx-auto space-y-6">
-            
-            {/* Institute Profile Card */}
-            <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl shadow-sm transition-colors overflow-hidden">
-              <div className="p-6">
-                <div className="flex items-center gap-2 mb-6">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-[#2D1F4D] flex items-center justify-center shrink-0">
-                    <Building2 className="w-4 h-4 text-indigo-600 dark:text-[#A67CFF]" />
-                  </div>
-                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">Institute Profile</h2>
+      {loading ? (
+        <div className="space-y-4 animate-pulse">
+          <div className="h-64 bg-slate-100 dark:bg-white/[0.04] rounded-2xl" />
+          <div className="h-40 bg-slate-100 dark:bg-white/[0.04] rounded-2xl" />
+        </div>
+      ) : profile && (
+        <div className="max-w-2xl space-y-6">
+          <SectionCard
+            title="Institute Profile"
+            icon={Building2}
+            actions={
+              <StatusBadge tone={profile.isActive ? "success" : "danger"}>
+                {profile.isActive ? "Active" : "Inactive"}
+              </StatusBadge>
+            }
+          >
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">
+                  Institute name
+                </label>
+                <input value={name} onChange={(e) => setName(e.target.value)} className={inputClass} placeholder="Your institute's name" />
+                {!name.trim() && <p className="text-xs text-rose-500 mt-1 font-medium">Name is required.</p>}
+                <p className="text-xs text-slate-400 mt-1.5">Shown on student/tutor dashboards and in every invite email.</p>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">
+                  <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> Address</span>
+                </label>
+                <textarea value={address} onChange={(e) => setAddress(e.target.value)} rows={2} className={inputClass} placeholder="Street, city, state" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">
+                  <span className="inline-flex items-center gap-1"><ImageIcon className="h-3 w-3" /> Logo URL</span>
+                </label>
+                <div className="flex items-center gap-3">
+                  <input value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} className={inputClass} placeholder="https://…/logo.png" />
+                  {logoUrl && (
+                    <img
+                      src={logoUrl}
+                      alt="Logo preview"
+                      className="h-11 w-11 rounded-xl object-cover border border-slate-200 dark:border-white/[0.08] shrink-0"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                    />
+                  )}
                 </div>
+              </div>
 
-                <form onSubmit={handleSaveProfile} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-slate-500 dark:text-gray-400">Institute Name</label>
-                      <input 
-                        type="text" 
-                        value={profile.name}
-                        onChange={(e) => setProfile({...profile, name: e.target.value})}
-                        className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 dark:focus:border-[#8B5CF6] transition-colors text-slate-900 dark:text-white"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-slate-500 dark:text-gray-400">Contact Email</label>
-                      <input 
-                        type="email" 
-                        value={profile.email}
-                        onChange={(e) => setProfile({...profile, email: e.target.value})}
-                        className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 dark:focus:border-[#8B5CF6] transition-colors text-slate-900 dark:text-white"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-slate-500 dark:text-gray-400">Phone</label>
-                      <input 
-                        type="text" 
-                        value={profile.phone}
-                        onChange={(e) => setProfile({...profile, phone: e.target.value})}
-                        className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 dark:focus:border-[#8B5CF6] transition-colors text-slate-900 dark:text-white"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-slate-500 dark:text-gray-400">Address</label>
-                      <input 
-                        type="text" 
-                        value={profile.address}
-                        onChange={(e) => setProfile({...profile, address: e.target.value})}
-                        className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 dark:focus:border-[#8B5CF6] transition-colors text-slate-900 dark:text-white"
-                      />
-                    </div>
-                  </div>
-                  <button 
-                    type="submit"
-                    className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-[#7C3AED] dark:hover:bg-[#6D28D9] text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
-                  >
-                    Save Changes
-                  </button>
-                </form>
+              <div className="pt-2 flex items-center gap-3">
+                <button
+                  onClick={save}
+                  disabled={!dirty || saving || !name.trim()}
+                  className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors shadow-sm"
+                >
+                  <Save className="h-4 w-4" /> {saving ? "Saving…" : "Save changes"}
+                </button>
+                {dirty && !saving && <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">Unsaved changes</p>}
               </div>
             </div>
+          </SectionCard>
 
-            {/* Branding Card */}
-            <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl shadow-sm transition-colors overflow-hidden">
-              <div className="p-6">
-                <div className="flex items-center gap-2 mb-6">
-                  <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-[#1F3A4D] flex items-center justify-center shrink-0">
-                    <Palette className="w-4 h-4 text-blue-600 dark:text-[#7CBAFF]" />
-                  </div>
-                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">Branding</h2>
-                </div>
-
-                <form onSubmit={handleSaveBranding} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-slate-500 dark:text-gray-400">Custom Domain</label>
-                      <input 
-                        type="text" 
-                        value={branding.domain}
-                        onChange={(e) => setBranding({...branding, domain: e.target.value})}
-                        className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 dark:focus:border-[#8B5CF6] transition-colors text-slate-900 dark:text-white"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-slate-500 dark:text-gray-400">Logo URL</label>
-                      <input 
-                        type="text" 
-                        value={branding.logo}
-                        onChange={(e) => setBranding({...branding, logo: e.target.value})}
-                        className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 dark:focus:border-[#8B5CF6] transition-colors text-slate-900 dark:text-white"
-                      />
-                    </div>
-                  </div>
-                  <button 
-                    type="submit"
-                    className="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-900 dark:bg-[#26252D] dark:hover:bg-[#2E2D38] dark:text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
-                  >
-                    Update Branding
-                  </button>
-                </form>
-              </div>
+          <SectionCard title="Account" icon={ShieldCheck}>
+            <div className="text-sm text-slate-500 dark:text-slate-400 space-y-1.5">
+              <p>
+                Institute created on{" "}
+                <strong className="text-slate-700 dark:text-slate-300 font-semibold">
+                  {new Date(profile.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
+                </strong>.
+              </p>
+              <p>Institute activation is managed by the platform — contact TestCrack support to change it.</p>
             </div>
-
-            {/* Notification Preferences Card */}
-            <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl shadow-sm transition-colors overflow-hidden">
-              <div className="p-6">
-                <div className="flex items-center gap-2 mb-6">
-                  <div className="w-8 h-8 rounded-lg bg-rose-50 dark:bg-[#4D1F2D] flex items-center justify-center shrink-0">
-                    <Bell className="w-4 h-4 text-rose-600 dark:text-[#FF7C9C]" />
-                  </div>
-                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">Notification Preferences</h2>
-                </div>
-
-                <form onSubmit={handleSaveNotifications} className="space-y-6">
-                  <div className="flex flex-col gap-4">
-                    <label className="flex items-center gap-3 cursor-pointer group">
-                      <input 
-                        type="checkbox" 
-                        checked={notifications.studentEnrollment}
-                        onChange={(e) => setNotifications({...notifications, studentEnrollment: e.target.checked})}
-                        className="w-4 h-4 rounded border-slate-300 dark:border-gray-600 text-rose-600 dark:text-rose-500 focus:ring-rose-500/50 bg-transparent transition-colors cursor-pointer"
-                      />
-                      <span className="text-sm font-medium text-slate-700 dark:text-gray-200 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
-                        New student enrollment
-                      </span>
-                    </label>
-
-                    <label className="flex items-center gap-3 cursor-pointer group">
-                      <input 
-                        type="checkbox" 
-                        checked={notifications.tutorApplication}
-                        onChange={(e) => setNotifications({...notifications, tutorApplication: e.target.checked})}
-                        className="w-4 h-4 rounded border-slate-300 dark:border-gray-600 text-rose-600 dark:text-rose-500 focus:ring-rose-500/50 bg-transparent transition-colors cursor-pointer"
-                      />
-                      <span className="text-sm font-medium text-slate-700 dark:text-gray-200 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
-                        Tutor application
-                      </span>
-                    </label>
-
-                    <label className="flex items-center gap-3 cursor-pointer group">
-                      <input 
-                        type="checkbox" 
-                        checked={notifications.batchCapacity}
-                        onChange={(e) => setNotifications({...notifications, batchCapacity: e.target.checked})}
-                        className="w-4 h-4 rounded border-slate-300 dark:border-gray-600 text-rose-600 dark:text-rose-500 focus:ring-rose-500/50 bg-transparent transition-colors cursor-pointer"
-                      />
-                      <span className="text-sm font-medium text-slate-700 dark:text-gray-200 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
-                        Batch capacity alert
-                      </span>
-                    </label>
-
-                    <label className="flex items-center gap-3 cursor-pointer group">
-                      <input 
-                        type="checkbox" 
-                        checked={notifications.monthlyReport}
-                        onChange={(e) => setNotifications({...notifications, monthlyReport: e.target.checked})}
-                        className="w-4 h-4 rounded border-slate-300 dark:border-gray-600 text-rose-600 dark:text-rose-500 focus:ring-rose-500/50 bg-transparent transition-colors cursor-pointer"
-                      />
-                      <span className="text-sm font-medium text-slate-700 dark:text-gray-200 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
-                        Monthly report ready
-                      </span>
-                    </label>
-                  </div>
-                  
-                  <button 
-                    type="submit"
-                    className="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-900 dark:bg-[#26252D] dark:hover:bg-[#2E2D38] dark:text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
-                  >
-                    Save Preferences
-                  </button>
-                </form>
-              </div>
-            </div>
-
-          </div>
-        </main>
-
-        {/* Toast Notification */}
-        {toast.visible && (
-          <div className="fixed bottom-6 right-6 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-3 rounded-lg shadow-xl flex items-center gap-3 animate-fade-in-up z-50">
-            <div className="bg-emerald-500/20 dark:bg-emerald-100 rounded-full p-1">
-              <Check className="w-4 h-4 text-emerald-400 dark:text-emerald-600" />
-            </div>
-            <p className="text-sm font-medium pr-2">{toast.message}</p>
-          </div>
-        )}
-
-      </div>
-    </div>
+          </SectionCard>
+        </div>
+      )}
+    </InstituteAdminLayout>
   );
 }

@@ -1,324 +1,264 @@
-import React, { useState } from 'react';
-import { 
-  Search, 
-  Users, 
-  TrendingUp, 
-  AlertTriangle, 
-  Target,
-  Clock,
-  ChevronDown,
-  CheckCircle2
-} from 'lucide-react';
-import { InstituteSidebar } from '../components/InstituteSidebar';
-import { InstituteTopbar } from '../components/InstituteTopbar';
+// src/features/Institute/dashboard/InstituteStudents.tsx
+// Students — fully data-driven table (replaces the 16-fake-students mock).
+// Source: GET /students-overview (owner handler reused on admin routes):
+// band, trend, streak, momentum, at-risk flags per student.
+// Row click → the student's full progress page (admin route).
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Search, Users, AlertTriangle, TrendingUp, TrendingDown, Minus,
+  Flame, Zap, UserPlus, ChevronRight,
+} from "lucide-react";
+import { InstituteAdminLayout } from "../components/InstituteAdminLayout";
+import {
+  KpiCard, StatusBadge, BandPill, TableSkeleton, EmptyState, ErrorBanner, SectionCard,
+} from "../components/shared/primitives";
+import { fetchStudentsOverview } from "../services/instituteAdminService";
+import type { StudentRow } from "@/features/InstituteOwner/services/instituteOwnerService";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 
-// --- Mock Data ---
-const topMetrics = [
-  { title: "Total", value: "64", icon: Users, color: "text-slate-600 dark:text-slate-400", bg: "bg-slate-100 dark:bg-slate-800" },
-  { title: "Top Performers", value: "20", icon: TrendingUp, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-100 dark:bg-emerald-900/30" },
-  { title: "At Risk", value: "18", icon: AlertTriangle, color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-100 dark:bg-rose-900/30" },
-  { title: "Avg Accuracy", value: "60%", icon: Target, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-100 dark:bg-blue-900/30" },
-  { title: "Avg Time/Q", value: "56s", icon: Clock, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-100 dark:bg-amber-900/30" },
-];
+type RiskFilter = "all" | "at-risk" | "on-track";
 
-const filters = ["All", "At Risk", "Top", "Conceptual", "Tactical", "Psychological"];
+function TrendIcon({ trend }: { trend: StudentRow["band_trend"] }) {
+  if (trend === "up")   return <TrendingUp className="h-4 w-4 text-emerald-500" />;
+  if (trend === "down") return <TrendingDown className="h-4 w-4 text-rose-500" />;
+  if (trend === "flat") return <Minus className="h-4 w-4 text-slate-400" />;
+  return null;
+}
 
-type Student = {
-  id: string;
-  name: string;
-  batchName: string;
-  tutor: string;
-  accuracy: number;
-  hesitation: number;
-  avgTime: number;
-  struggle: 'Conceptual' | 'Tactical' | 'Psychological';
-  status: 'Excelling' | 'On Track' | 'At Risk';
-};
-
-const studentsData: Student[] = [
-  { id: '1', name: "Rahul Joshi", batchName: "IELTS Band 7+", tutor: "Sarah Khan", accuracy: 95, hesitation: 8, avgTime: 39, struggle: "Psychological", status: "Excelling" },
-  { id: '2', name: "Tushar Kumar", batchName: "IELTS Band 7+", tutor: "Sarah Khan", accuracy: 92, hesitation: 15, avgTime: 39, struggle: "Tactical", status: "Excelling" },
-  { id: '3', name: "Kunal Chopra", batchName: "Tech Interview Prep", tutor: "Deepak Sharma", accuracy: 91, hesitation: 9, avgTime: 31, struggle: "Conceptual", status: "Excelling" },
-  { id: '4', name: "Suresh Gupta", batchName: "IELTS Band 7+", tutor: "Sarah Khan", accuracy: 90, hesitation: 24, avgTime: 36, struggle: "Conceptual", status: "Excelling" },
-  { id: '5', name: "Sahil Banerjee", batchName: "IELTS Band 7+", tutor: "Sarah Khan", accuracy: 90, hesitation: 25, avgTime: 23, struggle: "Tactical", status: "Excelling" },
-  { id: '6', name: "Aditya Patel", batchName: "IELTS Band 7+", tutor: "Sarah Khan", accuracy: 89, hesitation: 16, avgTime: 23, struggle: "Tactical", status: "Excelling" },
-  { id: '7', name: "Pankaj Pandey", batchName: "IELTS Band 7+", tutor: "Sarah Khan", accuracy: 89, hesitation: 20, avgTime: 29, struggle: "Conceptual", status: "Excelling" },
-  { id: '8', name: "Rajnish Roy", batchName: "IELTS Band 7+", tutor: "Sarah Khan", accuracy: 86, hesitation: 5, avgTime: 31, struggle: "Psychological", status: "Excelling" },
-  { id: '9', name: "Amit Banerjee", batchName: "Tech Interview Prep", tutor: "Deepak Sharma", accuracy: 85, hesitation: 49, avgTime: 61, struggle: "Conceptual", status: "On Track" },
-  { id: '10', name: "Vivek Patel", batchName: "Tech Interview Prep", tutor: "Deepak Sharma", accuracy: 84, hesitation: 56, avgTime: 96, struggle: "Psychological", status: "On Track" },
-  { id: '11', name: "Arjun Mehta", batchName: "IELTS Band 7+", tutor: "Sarah Khan", accuracy: 42, hesitation: 45, avgTime: 68, struggle: "Conceptual", status: "At Risk" },
-  { id: '12', name: "Megha Mishra", batchName: "Spoken English - Morning", tutor: "Ravi Kumar", accuracy: 41, hesitation: 51, avgTime: 81, struggle: "Tactical", status: "At Risk" },
-  { id: '13', name: "Lavanya Pillai", batchName: "IELTS Evening", tutor: "Priya Menon", accuracy: 41, hesitation: 10, avgTime: 33, struggle: "Conceptual", status: "At Risk" },
-  { id: '14', name: "Neha Srinivasan", batchName: "IELTS Evening", tutor: "Priya Menon", accuracy: 40, hesitation: 15, avgTime: 35, struggle: "Conceptual", status: "At Risk" },
-  { id: '15', name: "Aisha Verma", batchName: "IELTS Evening", tutor: "Priya Menon", accuracy: 38, hesitation: 15, avgTime: 26, struggle: "Tactical", status: "At Risk" },
-  { id: '16', name: "Sneha Reddy", batchName: "Spoken English - Morning", tutor: "Ravi Kumar", accuracy: 27, hesitation: 61, avgTime: 83, struggle: "Conceptual", status: "At Risk" },
-];
+const PAGE_SIZE = 15;
 
 export default function InstituteStudents() {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [activeFilter, setActiveFilter] = useState("All");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("Accuracy");
-  const [isSortOpen, setIsSortOpen] = useState(false);
+  const navigate = useNavigate();
+  const [students, setStudents] = useState<StudentRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [risk, setRisk] = useState<RiskFilter>("all");
+  const [batchFilter, setBatchFilter] = useState<string>("all");
+  const [page, setPage] = useState(0);
 
-  // Styling Helpers
-  const getStruggleStyle = (struggle: string) => {
-    switch (struggle) {
-      case 'Conceptual': return 'text-rose-600 bg-rose-50 border-rose-200 dark:text-rose-400 dark:bg-rose-500/10 dark:border-rose-500/20';
-      case 'Tactical': return 'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-500/10 dark:border-amber-500/20';
-      case 'Psychological': return 'text-purple-600 bg-purple-50 border-purple-200 dark:text-purple-400 dark:bg-purple-500/10 dark:border-purple-500/20';
-      default: return 'text-slate-600 bg-slate-50 border-slate-200 dark:text-slate-400 dark:bg-slate-800 dark:border-slate-700';
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetchStudentsOverview();
+      setStudents(res.data ?? []);
+    } catch (err: any) {
+      setError(err?.message ?? "Failed to load students.");
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
 
-  const getStatusStyle = (status: string) => {
-    switch (status) {
-      case 'Excelling': return 'text-emerald-700 bg-emerald-50 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-500/10 dark:border-emerald-500/20';
-      case 'At Risk': return 'text-rose-700 bg-rose-50 border-rose-200 dark:text-rose-400 dark:bg-rose-500/10 dark:border-rose-500/20';
-      case 'On Track': return 'text-slate-700 bg-slate-50 border-slate-200 dark:text-slate-300 dark:bg-slate-800 dark:border-slate-700';
-      default: return '';
-    }
-  };
+  useEffect(() => { load(); }, [load]);
 
-  const getAccuracyColor = (acc: number) => {
-    if (acc >= 80) return 'text-emerald-600 dark:text-emerald-400';
-    if (acc < 60) return 'text-rose-600 dark:text-rose-400';
-    return 'text-slate-900 dark:text-slate-100';
-  };
+  const batches = useMemo(() => {
+    const map = new Map<string, string>();
+    students.forEach(s => { if (s.batch_id) map.set(s.batch_id, s.batch_name); });
+    return [...map.entries()].map(([id, name]) => ({ id, name }));
+  }, [students]);
 
-  // Filter & Sort Logic
-  const processedStudents = studentsData
-    .filter(student => {
-      // Search
-      if (searchTerm && !student.name.toLowerCase().includes(searchTerm.toLowerCase()) && !student.batchName.toLowerCase().includes(searchTerm.toLowerCase())) return false;
-      // Tabs
-      if (activeFilter === "All") return true;
-      if (activeFilter === "At Risk") return student.status === "At Risk";
-      if (activeFilter === "Top") return student.status === "Excelling";
-      if (activeFilter === "Conceptual") return student.struggle === "Conceptual";
-      if (activeFilter === "Tactical") return student.struggle === "Tactical";
-      if (activeFilter === "Psychological") return student.struggle === "Psychological";
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return students.filter(s => {
+      if (q && !s.name?.toLowerCase().includes(q)) return false;
+      if (risk === "at-risk" && !s.is_at_risk) return false;
+      if (risk === "on-track" && s.is_at_risk) return false;
+      if (batchFilter !== "all" && s.batch_id !== batchFilter) return false;
       return true;
-    })
-    .sort((a, b) => {
-      if (sortBy === "Accuracy") return b.accuracy - a.accuracy; // Descending
-      if (sortBy === "Name") return a.name.localeCompare(b.name); // Alphabetical
-      return 0;
     });
+  }, [students, search, risk, batchFilter]);
+
+  useEffect(() => { setPage(0); }, [search, risk, batchFilter]);
+
+  const paged = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+
+  const atRiskCount = students.filter(s => s.is_at_risk).length;
+  const activeTodayCount = students.filter(s => s.drilled_today).length;
+  const avgBand = (() => {
+    const withBand = students.filter(s => s.current_band != null);
+    if (!withBand.length) return null;
+    return Math.round(withBand.reduce((sum, s) => sum + (s.current_band as number), 0) / withBand.length * 10) / 10;
+  })();
+
+  const openProgress = (s: StudentRow) => {
+    const slug = (s.name ?? "student").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    navigate(`/institute-admin/students/${slug}/progress`, { state: { studentId: s.user_id } });
+  };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-200 transition-colors duration-300">
-      
-      {/* Sidebar */}
-      <div className="hidden lg:block">
-        <InstituteSidebar 
-          activeTab="students" 
-          isCollapsed={isSidebarCollapsed} 
-          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
-        />
+    <InstituteAdminLayout activeTab="students">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Students</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Live band, streak and risk status for every student.</p>
+        </div>
+        <button
+          onClick={() => navigate("/institute-admin/studentOnboarding")}
+          className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition-colors shadow-sm self-start sm:self-auto"
+        >
+          <UserPlus className="h-4 w-4" /> Onboard Student
+        </button>
       </div>
 
-      <div className={`transition-all duration-300 flex flex-col min-h-screen ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
-        
-        <InstituteTopbar />
+      {error && <ErrorBanner message={error} onRetry={load} />}
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="max-w-[1400px] mx-auto space-y-6">
-            
-            {/* Top Metrics */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              {topMetrics.map((metric, idx) => (
-                <div key={idx} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm flex flex-col items-center justify-center text-center transition-colors">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${metric.bg}`}>
-                    <metric.icon className={`w-5 h-5 ${metric.color}`} />
-                  </div>
-                  <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{metric.title}</p>
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mt-0.5">{metric.value}</h3>
-                </div>
-              ))}
+      {loading ? (
+        <TableSkeleton rows={10} />
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <KpiCard label="Total Students" value={students.length} icon={Users} accent="indigo" />
+            <KpiCard label="Active Today" value={activeTodayCount} icon={Flame} accent="emerald" />
+            <KpiCard label="At Risk" value={atRiskCount} icon={AlertTriangle} accent={atRiskCount > 0 ? "rose" : "emerald"} />
+            <KpiCard label="Average Band" value={avgBand ?? "—"} icon={Zap} accent="blue" />
+          </div>
+
+          {/* Filters */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search students…"
+                className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-white/[0.04] border border-slate-200/70 dark:border-white/[0.06] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm font-medium text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
+              />
             </div>
-
-            {/* Controls Row (Search, Filters, Sort) */}
-            <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
-              
-              {/* Search */}
-              <div className="relative w-full xl:w-64 shrink-0">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <input 
-                  type="text" 
-                  placeholder="Search students..." 
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm font-medium text-slate-700 dark:text-slate-200 placeholder:text-slate-400 shadow-sm"
-                />
-              </div>
-
-              {/* Filter Tabs */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-2 xl:pb-0 no-scrollbar w-full xl:justify-center">
-                {filters.map((filter) => (
-                  <button
-                    key={filter}
-                    onClick={() => setActiveFilter(filter)}
-                    className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all whitespace-nowrap ${
-                      activeFilter === filter 
-                        ? 'bg-indigo-600 text-white shadow-sm' 
-                        : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'
-                    }`}
-                  >
-                    {filter}
-                  </button>
-                ))}
-              </div>
-
-              {/* Sort Dropdown */}
-              <div className="relative shrink-0 self-start xl:self-auto">
-                <button 
-                  onClick={() => setIsSortOpen(!isSortOpen)}
-                  className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm"
+            <div className="flex gap-2">
+              {(["all", "at-risk", "on-track"] as RiskFilter[]).map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setRisk(f)}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-colors ${
+                    risk === f
+                      ? "bg-indigo-600 text-white shadow-sm"
+                      : "bg-white dark:bg-white/[0.04] text-slate-600 dark:text-slate-300 border border-slate-200/70 dark:border-white/[0.06] hover:bg-slate-50 dark:hover:bg-white/[0.08]"
+                  }`}
                 >
-                  Sort: {sortBy} <ChevronDown className="w-4 h-4 text-slate-400" />
+                  {f === "all" ? "All" : f === "at-risk" ? "At Risk" : "On Track"}
                 </button>
-                
-                {isSortOpen && (
-                  <>
-                    <div className="fixed inset-0 z-10" onClick={() => setIsSortOpen(false)}></div>
-                    <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-xl z-20 overflow-hidden">
-                      {['Accuracy', 'Name'].map((option) => (
-                        <button
-                          key={option}
-                          onClick={() => { setSortBy(option); setIsSortOpen(false); }}
-                          className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${sortBy === option ? 'text-indigo-600 dark:text-indigo-400 font-semibold bg-indigo-50/50 dark:bg-indigo-500/10' : 'text-slate-700 dark:text-slate-300'}`}
-                        >
-                          Sort: {option}
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
+              ))}
+              {batches.length > 0 && (
+                <select
+                  value={batchFilter}
+                  onChange={(e) => setBatchFilter(e.target.value)}
+                  className="px-3 py-2 rounded-xl text-xs font-bold bg-white dark:bg-[#131318] text-slate-600 dark:text-slate-300 border border-slate-200/70 dark:border-white/[0.06] focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                >
+                  <option value="all">All batches</option>
+                  {batches.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+                </select>
+              )}
             </div>
+          </div>
 
-            {/* Students Table */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden transition-colors">
+          {/* Table */}
+          {filtered.length === 0 ? (
+            <SectionCard title="Students" icon={Users}>
+              <EmptyState
+                title={search || risk !== "all" || batchFilter !== "all" ? "No students match these filters" : "No students yet"}
+                hint={search || risk !== "all" || batchFilter !== "all" ? "Try widening the filters." : "Onboard your first students to see them here."}
+              />
+            </SectionCard>
+          ) : (
+            <div className="rounded-2xl bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-[11px] uppercase tracking-wider font-semibold border-b border-slate-200 dark:border-slate-800">
-                    <tr>
-                      <th className="px-6 py-4">Student</th>
-                      <th className="px-6 py-4">Batch</th>
-                      <th className="px-6 py-4 text-center">Accuracy</th>
-                      <th className="px-6 py-4 text-center">Hesitation</th>
-                      <th className="px-6 py-4 text-center">Avg Time</th>
-                      <th className="px-6 py-4 text-center">Struggle</th>
-                      <th className="px-6 py-4 text-center">Status</th>
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="text-[10px] uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 bg-slate-50/60 dark:bg-white/[0.02]">
+                      <th className="px-5 py-3 font-bold">Student</th>
+                      <th className="px-4 py-3 font-bold">Batch</th>
+                      <th className="px-4 py-3 font-bold">Band</th>
+                      <th className="px-4 py-3 font-bold">Target</th>
+                      <th className="px-4 py-3 font-bold">Streak</th>
+                      <th className="px-4 py-3 font-bold">Momentum</th>
+                      <th className="px-4 py-3 font-bold">Status</th>
+                      <th className="px-4 py-3" />
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-sm">
-                    {processedStudents.map((student) => (
-                      <tr key={student.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
-                        <td className="px-6 py-4 font-semibold text-slate-900 dark:text-white whitespace-nowrap">
-                          {student.name}
+                  <tbody className="divide-y divide-slate-50 dark:divide-white/[0.04]">
+                    {paged.map((s) => (
+                      <tr
+                        key={s.student_id}
+                        onClick={() => openProgress(s)}
+                        className="hover:bg-slate-50/70 dark:hover:bg-white/[0.03] cursor-pointer transition-colors"
+                      >
+                        <td className="px-5 py-3">
+                          <div className="flex items-center gap-3 min-w-[180px]">
+                            <Avatar className="h-9 w-9 shrink-0">
+                              <AvatarImage src={s.avatar ?? ""} />
+                              <AvatarFallback className="bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-bold">
+                                {(s.name ?? "?").slice(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{s.name}</p>
+                              {s.drilled_today && <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">active today</p>}
+                            </div>
+                          </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <p className="font-medium text-slate-800 dark:text-slate-200">{student.batchName}</p>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{student.tutor}</p>
+                        <td className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap">{s.batch_name || "—"}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1.5">
+                            <BandPill band={s.current_band} />
+                            <TrendIcon trend={s.band_trend} />
+                          </div>
                         </td>
-                        <td className={`px-6 py-4 text-center font-bold ${getAccuracyColor(student.accuracy)}`}>
-                          {student.accuracy}%
-                        </td>
-                        <td className="px-6 py-4 text-center text-slate-600 dark:text-slate-400">
-                          {student.hesitation}%
-                        </td>
-                        <td className="px-6 py-4 text-center text-slate-600 dark:text-slate-400">
-                          {student.avgTime}s
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <span className={`inline-flex px-2.5 py-1 text-[10px] font-bold border rounded-md uppercase tracking-wider ${getStruggleStyle(student.struggle)}`}>
-                            {student.struggle}
+                        <td className="px-4 py-3"><BandPill band={s.target_band} /></td>
+                        <td className="px-4 py-3">
+                          <span className="inline-flex items-center gap-1 text-sm font-bold text-slate-700 dark:text-slate-300">
+                            <Flame className={`h-3.5 w-3.5 ${s.daily_streak > 0 ? "text-orange-500" : "text-slate-300 dark:text-slate-600"}`} />
+                            {s.daily_streak}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-center">
-                          <span className={`inline-flex px-2.5 py-1 text-[10px] font-bold border rounded-md uppercase tracking-wider ${getStatusStyle(student.status)}`}>
-                            {student.status}
+                        <td className="px-4 py-3">
+                          <span className="inline-flex items-center gap-1 text-sm font-bold text-slate-700 dark:text-slate-300">
+                            <Zap className="h-3.5 w-3.5 text-indigo-500" /> {s.momentum_score}
                           </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          {s.is_at_risk
+                            ? <StatusBadge tone="danger">{s.primary_flag ?? "At risk"}</StatusBadge>
+                            : <StatusBadge tone="success">On track</StatusBadge>}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <ChevronRight className="h-4 w-4 text-slate-300 dark:text-slate-600 inline" />
                         </td>
                       </tr>
                     ))}
-                    {processedStudents.length === 0 && (
-                      <tr>
-                        <td colSpan={7} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
-                          No students found matching your criteria.
-                        </td>
-                      </tr>
-                    )}
                   </tbody>
                 </table>
               </div>
+
+              {pageCount > 1 && (
+                <div className="px-5 py-3 border-t border-slate-100 dark:border-white/[0.06] flex items-center justify-between">
+                  <p className="text-xs text-slate-400 font-medium">
+                    {filtered.length} student{filtered.length !== 1 ? "s" : ""} · page {page + 1} of {pageCount}
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setPage(p => Math.max(0, p - 1))}
+                      disabled={page === 0}
+                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-50 dark:bg-white/[0.04] text-slate-600 dark:text-slate-300 disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-white/[0.08] transition-colors"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      onClick={() => setPage(p => Math.min(pageCount - 1, p + 1))}
+                      disabled={page >= pageCount - 1}
+                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-50 dark:bg-white/[0.04] text-slate-600 dark:text-slate-300 disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-white/[0.08] transition-colors"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
-
-            {/* Institute Struggle Distribution Section */}
-            <div className="pt-6">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Institute Struggle Distribution</h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                
-                {/* Conceptual */}
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm transition-colors">
-                  <div className="flex justify-between items-end mb-3">
-                    <h3 className="text-base font-bold text-slate-900 dark:text-white">Conceptual</h3>
-                    <div className="text-right">
-                      <span className="text-lg font-bold text-slate-900 dark:text-white">21</span>
-                      <span className="text-sm text-slate-500 ml-1">(33%)</span>
-                    </div>
-                  </div>
-                  <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden mb-4">
-                    <div className="bg-rose-500 h-full rounded-full" style={{ width: '33%' }}></div>
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                    These students have knowledge gaps. They need teaching — concept maps, visual aids, or scaffolded problem sets.
-                  </p>
-                </div>
-
-                {/* Tactical */}
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm transition-colors">
-                  <div className="flex justify-between items-end mb-3">
-                    <h3 className="text-base font-bold text-slate-900 dark:text-white">Tactical</h3>
-                    <div className="text-right">
-                      <span className="text-lg font-bold text-slate-900 dark:text-white">22</span>
-                      <span className="text-sm text-slate-500 ml-1">(34%)</span>
-                    </div>
-                  </div>
-                  <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden mb-4">
-                    <div className="bg-amber-500 h-full rounded-full" style={{ width: '34%' }}></div>
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                    These students know the concepts but pick wrong approaches. They need practice — method selection drills and pattern recognition.
-                  </p>
-                </div>
-
-                {/* Psychological */}
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm transition-colors">
-                  <div className="flex justify-between items-end mb-3">
-                    <h3 className="text-base font-bold text-slate-900 dark:text-white">Psychological</h3>
-                    <div className="text-right">
-                      <span className="text-lg font-bold text-slate-900 dark:text-white">21</span>
-                      <span className="text-sm text-slate-500 ml-1">(33%)</span>
-                    </div>
-                  </div>
-                  <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden mb-4">
-                    <div className="bg-purple-500 h-full rounded-full" style={{ width: '33%' }}></div>
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                    These students know the material but freeze under pressure. They need coaching — progressive exposure and confidence building.
-                  </p>
-                </div>
-
-              </div>
-            </div>
-
-          </div>
-        </main>
-      </div>
-    </div>
+          )}
+        </>
+      )}
+    </InstituteAdminLayout>
   );
 }

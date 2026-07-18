@@ -3,8 +3,7 @@ import {
   Search, Plus, X, Loader2, RefreshCw, Trash2,
   MoreVertical, CheckCircle2, Mail, User, BookOpen,
 } from 'lucide-react';
-import { InstituteSidebar } from '../components/InstituteSidebar';
-import { InstituteTopbar } from '../components/InstituteTopbar';
+import { InstituteAdminLayout } from '../components/InstituteAdminLayout';
 import {
   fetchTutors, addTutor, removeTutor,
   TutorRecord,
@@ -219,7 +218,6 @@ function ConfirmRemoveDialog({ tutor, onConfirm, onCancel, loading }: {
 
 export default function TutorOnboarding() {
   const { toast } = useToast();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [tutors, setTutors] = useState<TutorRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -262,8 +260,7 @@ export default function TutorOnboarding() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0A10] font-sans text-slate-900 dark:text-slate-200 transition-colors duration-300">
-
+    <InstituteAdminLayout activeTab="tutor-onboard">
       {showAddModal && <AddTutorModal onClose={() => setShowAddModal(false)} onAdded={load} />}
       {removeTarget && (
         <ConfirmRemoveDialog
@@ -274,19 +271,6 @@ export default function TutorOnboarding() {
         />
       )}
 
-      {/* Sidebar */}
-      <div className="hidden lg:block">
-        <InstituteSidebar
-          activeTab="tutor-onboard"
-          isCollapsed={isSidebarCollapsed}
-          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        />
-      </div>
-
-      <div className={`transition-all duration-300 flex flex-col min-h-screen ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
-        <InstituteTopbar />
-
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <div className="max-w-[1200px] mx-auto space-y-6">
 
             {/* Header */}
@@ -393,8 +377,6 @@ export default function TutorOnboarding() {
             </div>
 
           </div>
-        </main>
-      </div>
-    </div>
+    </InstituteAdminLayout>
   );
 }

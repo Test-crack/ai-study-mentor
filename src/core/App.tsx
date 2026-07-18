@@ -84,6 +84,7 @@ import Dashdemo from "@/features/home/components/Dashdemo";
 import Contactpage from "@/features/home/components/ContactPage";
 import CourseSection from "@/features/student/components/CourseSection";
 import InstituteOwnerStudentProgressPage from "@/features/InstituteOwner/dashboard/InstituteOwnerStudentProgressPage";
+import InstituteAdminStudentProgressPage from "@/features/Institute/dashboard/InstituteAdminStudentProgressPage";
 import Suggestion from "@/features/student/components/Suggestions";
 import SpeakingAssessment from "@/features/student/components/SpeakingAssessment";
 import Diagnosis from "@/features/student/components/Diagnosis/Diagnosis";
@@ -309,6 +310,7 @@ const AppRoutes = () => {
         <Route path="/institute-admin/batches" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteBatches /></RoleProtectedRoute>} />
         <Route path="/institute-admin/tutor" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteTutor /></RoleProtectedRoute>} />
         <Route path="/institute-admin/students" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteStudents /></RoleProtectedRoute>} />
+        <Route path="/institute-admin/students/:studentSlug/progress" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteAdminStudentProgressPage /></RoleProtectedRoute>} />
         <Route path="/institute-admin/billings" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteBillings /></RoleProtectedRoute>} />
         <Route path="/institute-admin/reports" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteReports /></RoleProtectedRoute>} />
         <Route path="/institute-admin/studentOnboarding" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><StudentOnboarding /></RoleProtectedRoute>} />

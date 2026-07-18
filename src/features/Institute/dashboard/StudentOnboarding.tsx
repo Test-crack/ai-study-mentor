@@ -3,8 +3,7 @@ import {
   Search, Plus, X, Check, Loader2, RefreshCw, Trash2,
   MoreVertical, CheckCircle2, Mail, User, UserCheck,
 } from 'lucide-react';
-import { InstituteSidebar } from '../components/InstituteSidebar';
-import { InstituteTopbar } from '../components/InstituteTopbar';
+import { InstituteAdminLayout } from '../components/InstituteAdminLayout';
 import {
   fetchStudents, addStudent, removeStudent, updateStudentStatus,
   StudentRecord,
@@ -232,7 +231,6 @@ function ConfirmRemoveDialog({ student, onConfirm, onCancel, loading }: {
 
 export default function StudentOnboarding() {
   const { toast } = useToast();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [students, setStudents] = useState<StudentRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -287,8 +285,7 @@ export default function StudentOnboarding() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0A10] font-sans text-slate-900 dark:text-slate-200 transition-colors duration-300">
-
+    <InstituteAdminLayout activeTab="students-onboard">
       {showAddModal && <AddStudentModal onClose={() => setShowAddModal(false)} onAdded={load} />}
       {removeTarget && (
         <ConfirmRemoveDialog
@@ -299,19 +296,6 @@ export default function StudentOnboarding() {
         />
       )}
 
-      {/* Sidebar */}
-      <div className="hidden lg:block">
-        <InstituteSidebar
-          activeTab="students-onboard"
-          isCollapsed={isSidebarCollapsed}
-          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        />
-      </div>
-
-      <div className={`transition-all duration-300 flex flex-col min-h-screen ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
-        <InstituteTopbar />
-
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <div className="max-w-[1200px] mx-auto space-y-6">
 
             {/* Header */}
@@ -427,8 +411,6 @@ export default function StudentOnboarding() {
             </div>
 
           </div>
-        </main>
-      </div>
-    </div>
+    </InstituteAdminLayout>
   );
 }

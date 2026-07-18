@@ -1,5 +1,6 @@
 // src/features/Institute/components/InstituteTopbar.tsx
-import { Search, Bell, Menu, Plus } from "lucide-react";
+import { Search, Menu } from "lucide-react";
+import { AdminNotificationBell } from "./AdminNotificationBell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { Button } from "@/shared/components/ui/button";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -63,11 +64,8 @@ export const InstituteTopbar = ({ onCreateCourse }: InstituteTopbarProps) => {
         {/* Theme Toggle */}
         <ThemeToggle />
 
-        {/* Notifications */}
-        <button className="relative p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-white/[0.04] rounded-full transition-all">
-          <Bell className="h-5 w-5" />
-          <span className="absolute top-2 right-2.5 h-2 w-2 bg-red-500 rounded-full border-2 border-white dark:border-[#0D0D14]"></span>
-        </button>
+        {/* Notifications — real feed from user_notifications */}
+        <AdminNotificationBell />
 
         {/* Profile */}
         <div className="flex items-center gap-3 pl-2 border-l border-slate-100 dark:border-white/[0.06]">
