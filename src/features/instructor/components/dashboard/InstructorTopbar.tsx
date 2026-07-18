@@ -1,5 +1,6 @@
 // src/features/Instructor/dashboard/InstructorTopbar.tsx
-import { Search, Bell, Menu, Plus } from "lucide-react";
+import { Menu } from "lucide-react";
+import { InstructorNotificationBell } from "./InstructorNotificationBell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { Button } from "@/shared/components/ui/button";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -69,6 +70,9 @@ export const InstructorTopbar = ({ onCreateCourse }: InstructorTopbarProps) => {
 
         {/* Theme toggle */}
         <ThemeToggle />
+
+        {/* Notification bell */}
+        <InstructorNotificationBell />
 
         {/* Divider */}
         <div className="h-7 w-px bg-slate-200/80 dark:bg-white/[0.07]" />

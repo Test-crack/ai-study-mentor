@@ -113,6 +113,10 @@ const InferenceSprintGame = lazy(() => import("@/features/B-C/games/Inferencespr
 const LexiGridGame = lazy(() => import("@/features/B-C/games/Lexigridgame"));
 const SentenceSurgeryGame = lazy(() => import("@/features/B-C/games/Sentencesurgerygame"));
 const TrapSpotterGame = lazy(() => import("@/features/B-C/games/Trapspottergame"));
+import { NotificationsProvider } from "@/features/student/Context/NotificationsContext";
+import { InstructorNotificationsProvider } from "@/features/instructor/Context/InstructorNotificationsContext";
+
+// import QuestionBankManager from "@/features/TestCrackSuperAdmin/dashboard/Questionbankmanager";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -386,9 +390,13 @@ const App = () => (
         <BrowserRouter>
           <AuthProvider>
             <MomentumProvider>
-              <WebSocketProvider>
-                <AppRoutes />
-              </WebSocketProvider>
+              <NotificationsProvider>
+                <InstructorNotificationsProvider>
+                  <WebSocketProvider>
+                    <AppRoutes />
+                  </WebSocketProvider>
+                </InstructorNotificationsProvider>
+              </NotificationsProvider>
             </MomentumProvider>
           </AuthProvider>
         </BrowserRouter>
