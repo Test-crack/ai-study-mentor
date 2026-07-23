@@ -1306,7 +1306,7 @@ const SkillBandCard = ({
                 const guide = getSubSkillGuide(key);
                 let label = key.replace(/Score/g, "").replace(/_/g, " ").replace(/([A-Z])/g, " $1").trim();
                 label = label.charAt(0).toUpperCase() + label.slice(1);
-                const needsWork = numVal < 6.0;
+                
                 return (
                   <div
                     key={key}
@@ -1318,21 +1318,6 @@ const SkillBandCard = ({
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
                       {guide?.blurb ?? "A breakdown of this skill area."}
                     </p>
-                    {guide && (
-                      <button
-                        onClick={() => onDrill(band.skill, guide, numVal)}
-                        className={cn(
-                          "mt-1.5 inline-flex items-center gap-1 text-[11px] font-semibold transition-colors",
-                          needsWork
-                            ? "text-amber-600 dark:text-amber-400 hover:text-amber-700"
-                            : "text-indigo-600 dark:text-indigo-400 hover:text-indigo-700"
-                        )}
-                      >
-                        {needsWork ? "Next step: " : "Sharpen it: "}
-                        {guide.drillLabel}
-                        <ArrowRight className="h-3 w-3" />
-                      </button>
-                    )}
                   </div>
                 );
               })}
