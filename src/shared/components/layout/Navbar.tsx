@@ -4,6 +4,7 @@ import {
   LogOut, Menu, X, Home, FileText, Video, BookMarked,
   TrendingUp, User, GraduationCap, Zap
 } from "lucide-react";
+import testcrackLogo from '@/assets/testcrack-logo.svg';
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/shared/utils";
@@ -83,9 +84,7 @@ export function Navbar({
               }
             }}
              className="flex items-center gap-3 active:scale-95 transition-transform">
-              <div className="bg-gradient-to-br from-indigo-600 to-violet-600 text-white p-2 rounded-xl shadow-lg">
-                <GraduationCap className="h-6 w-6" />
-              </div>
+              <img src={testcrackLogo} alt="TestCrack" className="h-10 w-10 object-contain" />
               <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 hidden sm:block">
                 TestCrack
               </span>

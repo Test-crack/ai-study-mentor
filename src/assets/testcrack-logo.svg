@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Top-left: dark navy -->
+  <rect x="4" y="4" width="42" height="42" rx="10" fill="#1B2D4B"/>
+  <!-- Top-right: purple -->
+  <rect x="54" y="4" width="42" height="42" rx="10" fill="#8A68C8"/>
+  <!-- Bottom-left: amber -->
+  <rect x="4" y="54" width="42" height="42" rx="10" fill="#F1A91C"/>
+  <!-- Bottom-right: teal -->
+  <rect x="54" y="54" width="42" height="42" rx="10" fill="#2BB59C"/>
+</svg>

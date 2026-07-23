@@ -1,9 +1,10 @@
 import {
   LayoutDashboard, BookOpen, Users, UserCheck,
   BarChart2, ShieldCheck, LogOut,
-  GraduationCap, ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight,
   Lock, ArrowLeftRight, DollarSign, Megaphone, Rocket,
 } from 'lucide-react';
+import testcrackLogo from '@/assets/testcrack-logo.svg';
 import { cn } from '@/shared/utils';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -92,9 +93,7 @@ export const InstituteOwnerSidebar = ({
 
       {/* Brand */}
       <div className={cn('flex items-center gap-3 mb-6', isCollapsed ? 'justify-center px-0' : 'px-2')}>
-        <div className="bg-indigo-600 p-2 rounded-lg shrink-0 shadow-md shadow-indigo-500/20">
-          <GraduationCap className="h-6 w-6 text-white" />
-        </div>
+        <img src={testcrackLogo} alt="TestCrack" className="h-9 w-9 object-contain shrink-0" />
         {!isCollapsed && (
           <span className="text-xl font-bold text-slate-900 dark:text-white tracking-wide animate-in fade-in duration-300">
             Institute
