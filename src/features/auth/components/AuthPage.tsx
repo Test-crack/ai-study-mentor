@@ -5,7 +5,8 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { useToast } from "@/shared/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, EyeOff, GraduationCap, ChevronLeft, Rocket } from "lucide-react";
+import { Eye, EyeOff, ChevronLeft, Rocket } from "lucide-react";
+import testcrackLogo from '@/assets/testcrack-logo.svg';
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -118,9 +119,7 @@ const Auth = () => {
           
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-10">
-              <div className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-lg ring-1 ring-white/10">
-                <GraduationCap className="h-7 w-7 text-indigo-100" />
-              </div>
+              <img src={testcrackLogo} alt="TestCrack" className="h-10 w-10 object-contain shrink-0" />
               <span className="text-2xl font-bold tracking-tight text-white/95 drop-shadow-sm">TestCrack</span>
             </div>
             

@@ -5,7 +5,8 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { useToast } from "@/shared/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, EyeOff, GraduationCap, AlertCircle, CheckCircle, ChevronLeft, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, AlertCircle, CheckCircle, ChevronLeft, ShieldCheck } from "lucide-react";
+import testcrackLogo from '@/assets/testcrack-logo.svg';
 
 const ResetPasswordPage = () => {
   const [newPassword, setNewPassword] = useState("");
@@ -97,9 +98,7 @@ const ResetPasswordPage = () => {
           
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-12">
-              <div className="p-2.5 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-xl">
-                <GraduationCap className="h-8 w-8 text-white" />
-              </div>
+              <img src={testcrackLogo} alt="TestCrack" className="h-10 w-10 object-contain shrink-0" />
               <span className="text-2xl font-bold tracking-tight">TestCrack</span>
             </div>
             

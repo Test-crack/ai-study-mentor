@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { 
-  User, Mail, Phone, MessageSquare, 
-  CheckCircle, X, GraduationCap,UserRound, ArrowLeft, AlertCircle 
+import {
+  User, Mail, Phone, MessageSquare,
+  CheckCircle, X, UserRound, ArrowLeft, AlertCircle
 } from 'lucide-react';
+import testcrackLogo from '@/assets/testcrack-logo.svg';
 
 interface FormData {
   name: string;
@@ -111,10 +112,7 @@ const Contactpage: React.FC = () => {
       
       {/* Logo Section - Now stays at the far left */}
       <div className="flex items-center space-x-2">
-        <div className="p-2 bg-indigo-700 rounded-xl">
-          {/* Replaced GraduationCap with UserRound */}
-          <UserRound className="h-6 w-6 text-white" />
-        </div>
+        <img src={testcrackLogo} alt="TestCrack" className="h-9 w-9 object-contain" />
         <span className="text-xl font-bold text-indigo-700">
           TestCrack
         </span>

@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
+import testcrackLogo from '@/assets/testcrack-logo.svg';
 import {
   GraduationCap,
   Zap,
@@ -180,9 +181,7 @@ const LandingPage = () => {
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-2">
-              <div className="p-2 bg-indigo-700 rounded-xl" aria-hidden="true">
-                <GraduationCap className="h-5 w-5 text-white" />
-              </div>
+              <img src={testcrackLogo} alt="TestCrack" className="h-9 w-9 object-contain" />
               <span className="text-xl font-bold text-indigo-700">TestCrack</span>
             </div>
           </div>
@@ -642,9 +641,7 @@ const LandingPage = () => {
             <div className="lg:col-span-2 flex flex-col gap-6">
               {/* Logo + name */}
               <div className="flex items-center space-x-3">
-                <div className="p-2 bg-indigo-700 rounded-xl" aria-hidden="true">
-                  <GraduationCap className="h-5 w-5 text-white" />
-                </div>
+                <img src={testcrackLogo} alt="TestCrack" className="h-9 w-9 object-contain" />
                 <div>
                   <span className="text-lg font-black text-white">TestCrack</span>
                   <span className="block text-[10px] font-bold text-indigo-400 tracking-widest uppercase">for Institutes</span>
