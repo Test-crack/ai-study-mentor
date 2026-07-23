@@ -7,21 +7,9 @@ import { useMomentum } from "@/features/student/Context/MomentumContext";
 import { callBackend } from "@/features/auth/services/authClient";
 import { transformSectionAudioUrls } from "@/features/student/utils/iaAudioUtils";
 import {
-  getSectionDurationSec,
-  getState as getTimerState,
-  startSection,
-  setSectionEndsAt,
-  isSectionStarted,
-  isSectionExpired,
-  getSectionRemainingSec,
-  getWindowRemainingMs,
-  isWindowExpired,
-  clearState as clearTimerState,
-} from "@/features/student/utils/mockTimerStore";
-import {
   GraduationCap, ArrowRight, CheckCircle2, AlertCircle, Mic, PlayCircle,
   Zap, Loader2, Lock, XCircle, Trophy, Calendar, BookOpen, ArrowLeft, Flame,
-  ChevronDown, Clock, Hourglass, TimerOff,
+  ChevronDown,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -84,9 +72,6 @@ interface MockSessionResponse {
   time_remaining_ms:   number;
   total_time_ms:       number;
   already_done?:       boolean;
-  section_ends_at_ms?:  Record<string, number>;
-  window_closes_at_ms?: number;
-  course_id?:           string | null;
 }
 
 interface MockSubSkillScore {
@@ -108,8 +93,8 @@ interface MockSkillScore {
   correct:            number;
   total:              number;
   ai_graded:          boolean;
-  sub_skill_scores?:  MockSubSkillScore[];
-  insight?:           string;
+  sub_skill_scores?:  MockSubSkillScore[];  // W/S always; L/R when backend adds it
+  insight?:           string;                // optional backend-supplied insight
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -126,25 +111,17 @@ const SUBSKILL_LABEL: Record<string, string> = {
   OVERALL: "Overall Accuracy",
 };
 
-const SKILL_ACCENT: Record<string, { text: string; bg: string; border: string; ring: string; stroke: string }> = {
-  LISTENING: { text: "text-teal-600",   bg: "bg-teal-50",   border: "border-teal-200",   ring: "text-teal-500",   stroke: "#14B8A6" },
-  READING:   { text: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200", ring: "text-purple-500", stroke: "#A855F7" },
-  WRITING:   { text: "text-orange-500", bg: "bg-orange-50", border: "border-orange-200", ring: "text-orange-500", stroke: "#F97316" },
-  SPEAKING:  { text: "text-rose-500",   bg: "bg-rose-50",   border: "border-rose-200",   ring: "text-rose-500",   stroke: "#F43F5E" },
+// Per-skill SaaS accent colorways (icons, pills, coverage tiles)
+const SKILL_ACCENT: Record<string, { text: string; bg: string; border: string }> = {
+  LISTENING: { text: "text-teal-600",   bg: "bg-teal-50",   border: "border-teal-200" },
+  READING:   { text: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200" },
+  WRITING:   { text: "text-orange-500", bg: "bg-orange-50", border: "border-orange-200" },
+  SPEAKING:  { text: "text-rose-500",   bg: "bg-rose-50",   border: "border-rose-200" },
 };
 const accent = (skill: string) =>
-  SKILL_ACCENT[skill] ?? { text: "text-slate-600", bg: "bg-slate-50", border: "border-slate-200", ring: "text-slate-500", stroke: "#64748B" };
+  SKILL_ACCENT[skill] ?? { text: "text-slate-600", bg: "bg-slate-50", border: "border-slate-200" };
 
-/** Return the index of the first section at or after `fromIdx` whose timer
- *  hasn't expired yet (or hasn't been started). Returns -1 if none remain. */
-function findNextPlayable(sid: string, secs: MockSection[], fromIdx: number): number {
-  for (let i = fromIdx; i < secs.length; i++) {
-    const skill = secs[i].skill;
-    if (!isSectionStarted(sid, skill) || !isSectionExpired(sid, skill)) return i;
-  }
-  return -1;
-}
-
+const MOCK_TOTAL_SECS = 3 * 60 * 60;   // 3-hour global timer — no per-section resets
 const STORAGE_KEY = "tc_full_mock_assessment_state";
 
 function formatTime(seconds: number): string {
@@ -153,20 +130,17 @@ function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-function formatHMS(totalSeconds: number): string {
-  const s = Math.max(0, Math.floor(totalSeconds));
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sec = s % 60;
-  return `${h}:${m.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
-}
-
 function firstOfNextMonth(): string {
   const now = new Date();
+  // Construct the 1st directly — d.setMonth(+1) on e.g. Jan 31 overflows into March.
   const d = new Date(now.getFullYear(), now.getMonth() + 1, 1);
   return d.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
 }
 
+// Defensive mirror of the server's ±2 band-movement cap. The server (and the DB
+// trigger) are the source of truth; this only guards the DISPLAY so a mis-capped
+// payload can never render an implausible >2 band jump. It warns (surfacing a
+// server bug) rather than silently hiding, and is a no-op in normal operation.
 const BAND_MOVE_CAP = 2;
 function clampBandMove(prev: number | null, next: number): number {
   if (prev === null || prev === undefined) return next;
@@ -177,6 +151,7 @@ function clampBandMove(prev: number | null, next: number): number {
   return capped;
 }
 
+// Plain-English insight generator — used as fallback when backend doesn't send `insight`.
 function skillInsight(s: MockSkillScore): string {
   const label = SKILL_LABEL[s.skill] ?? s.skill;
   if (s.total === 0 && s.band <= 4.0) return `${label} section awaiting scoring.`;
@@ -209,19 +184,16 @@ function skillInsight(s: MockSkillScore): string {
 
   return `Your ${label} performance sits at a ${tier} band of ${band.toFixed(1)}${diagTrend}.${advice}`;
 }
-// ─── Circular timer ──────────────────────────────────────────────────────────
-const CircleTimer: React.FC<{
-  timeLeft: number; total: number; size?: number; stroke?: string; label?: string; forceColor?: string;
-}> = ({ timeLeft, total, size = 64, stroke, label, forceColor }) => {
+
+// ─── Circular timer ───────────────────────────────────────────────────────────
+
+const CircleTimer: React.FC<{ timeLeft: number; total: number; size?: number }> = ({ timeLeft, total, size = 64 }) => {
   const pct   = total > 0 ? timeLeft / total : 1;
   const r     = (size - 8) / 2;
   const circ  = 2 * Math.PI * r;
-  const dash  = circ * Math.max(0, Math.min(1, pct));
-  const auto  = pct < 0.15 ? "#EF4444" : pct < 0.35 ? "#F59E0B" : (stroke ?? "#4338CA");
-  const color = forceColor ?? auto;
-  const display = label ?? formatTime(timeLeft);
-  const isRed = color === "#EF4444";
-  const fontSize = display.length > 5 ? size / 6 : size / 4.6;
+  const dash  = circ * pct;
+  const isUrgent = pct < 0.2;
+  const color = isUrgent ? "#EF4444" : pct < 0.5 ? "#F59E0B" : "#4338CA";
   return (
     <svg width={size} height={size} style={{ transform: "rotate(-90deg)", flexShrink: 0 }}>
       <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#E5E7EB" strokeWidth={6} />
@@ -229,65 +201,11 @@ const CircleTimer: React.FC<{
         strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
         style={{ transition: "stroke-dasharray 0.5s linear, stroke 0.3s" }} />
       <text x={size/2} y={size/2+1} textAnchor="middle" dominantBaseline="middle"
-        fill={isRed ? "#EF4444" : "#111827"} fontSize={fontSize} fontWeight="900" fontFamily="monospace"
+        fill={isUrgent ? "#EF4444" : "#111827"} fontSize={size/4.2} fontWeight="900" fontFamily="monospace"
         style={{ transform: "rotate(90deg)", transformOrigin: `${size/2}px ${size/2}px` }}>
-        {display}
+        {formatTime(timeLeft)}
       </text>
     </svg>
-  );
-};
-
-// ─── "Time's up" modal — auto-dismiss after 1s ─────────────────────────────
-const TimeUpModal: React.FC<{
-  skill: string;
-  answeredNote: string;
-  isLastSection: boolean;
-  onContinue: () => void;
-}> = ({ skill, answeredNote, isLastSection, onContinue }) => {
-  const firedRef = useRef(false);
-  const mountedAt = useRef(Date.now());
-
-  useEffect(() => {
-    const fire = () => {
-      if (firedRef.current) return;
-      firedRef.current = true;
-      onContinue();
-    };
-
-    // Primary: 1s timeout (works if tab stays focused)
-    const t = setTimeout(fire, 1000);
-
-    // Fallback: if tab was backgrounded, fire as soon as it's visible again
-    const onVisible = () => {
-      if (document.visibilityState === "visible" && Date.now() - mountedAt.current >= 900) {
-        fire();
-      }
-    };
-    document.addEventListener("visibilitychange", onVisible);
-
-    return () => {
-      clearTimeout(t);
-      document.removeEventListener("visibilitychange", onVisible);
-    };
-  }, [onContinue]);
-
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
-      <div className="max-w-sm w-full bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in duration-200">
-        <div className="h-1.5 w-full bg-rose-500" />
-        <div className="p-8 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center mx-auto mb-4">
-            <TimerOff className="w-7 h-7 text-rose-500" />
-          </div>
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight mb-1">
-            Time's up — {SKILL_LABEL[skill] ?? skill}
-          </h2>
-          <p className="text-slate-400 font-medium text-xs">
-            Answers saved · {isLastSection ? "Submitting…" : "Moving to next section…"}
-          </p>
-        </div>
-      </div>
-    </div>
   );
 };
 
@@ -309,6 +227,7 @@ function TopNavBar({
       <div className="w-full px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16">
 
+          {/* Left: back button (gate + intro only) + brand */}
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             {(phase === "gate" || phase === "listening_intro") && (
               <button
@@ -329,23 +248,30 @@ function TopNavBar({
             </div>
           </div>
 
+          {/* Right: streak + momentum */}
           <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+
+            {/* Streak */}
             <div className="flex items-center gap-1 sm:gap-1.5 bg-orange-50 border border-orange-200 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full shadow-sm">
               <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-500 fill-orange-500 flex-shrink-0" />
               <span className="font-semibold text-orange-600 text-xs sm:text-sm">{streak}</span>
               <span className="hidden md:inline text-xs text-orange-400 font-medium">day streak</span>
             </div>
+
+            {/* Momentum */}
             <div className="flex items-center gap-1 sm:gap-2 bg-indigo-50 border border-indigo-200 px-2 sm:px-4 py-1 sm:py-1.5 rounded-full shadow-sm">
               <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 fill-amber-400 flex-shrink-0" />
               <span className="font-semibold text-slate-900 text-xs sm:text-sm">{totalMomentum}</span>
               <span className="hidden md:inline text-xs text-indigo-400 font-medium">pts</span>
             </div>
+
           </div>
         </div>
       </div>
     </nav>
   );
 }
+
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
@@ -370,7 +296,7 @@ export default function FullMockAssessment() {
   const [answers, setAnswers]                   = useState<Record<string, string>>({});
   const [mockResults, setMockResults]           = useState<any>(null);
   const [sessionMomentum, setSessionMomentum]   = useState(0);
-  const [courseId, setCourseId]                 = useState<string | null>(null);
+  // Skill-card AI feedback accordion open state — set of skill card indices
   const [expandedFeedback, setExpandedFeedback] = useState<Set<number>>(new Set());
   const toggleFeedback = (i: number) =>
     setExpandedFeedback(prev => {
@@ -379,29 +305,14 @@ export default function FullMockAssessment() {
       return next;
     });
 
-  // Timers
-  const [timeLeft, setTimeLeft]                   = useState(0);
-  const [windowRemainingMs, setWindowRemainingMs] = useState<number | null>(null);
-
-  // Time-up modal
-  const [showTimeUpModal, setShowTimeUpModal]     = useState(false);
-  const [expiredSkill, setExpiredSkill]           = useState<string | null>(null);
-  const [disableInteraction, setDisableInteraction] = useState(false);
+  // Global 3-hour timer — never resets between sections
+  const [timeLeft, setTimeLeft]                 = useState(MOCK_TOTAL_SECS);
 
   // Audio / Passage
   const audioRef                                = useRef<HTMLAudioElement>(null);
   const [audioState, setAudioState]             = useState<"idle" | "playing" | "played">("idle");
   const [showPassage, setShowPassage]           = useState(false);
   const [animBars]                              = useState(() => Array.from({ length: 12 }, () => Math.random()));
-
-  // Writing anti-paste
-  const [pasteBlocked, setPasteBlocked] = useState(false);
-  const pasteFlashRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const flashPasteBlocked = () => {
-    setPasteBlocked(true);
-    if (pasteFlashRef.current) clearTimeout(pasteFlashRef.current);
-    pasteFlashRef.current = setTimeout(() => setPasteBlocked(false), 2000);
-  };
 
   // Speaking
   const recognitionRef                          = useRef<any>(null);
@@ -413,20 +324,9 @@ export default function FullMockAssessment() {
   // Writing
   const writingDebounceRef                      = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Expiry guards & handler refs
-  const expiryHandledRef        = useRef(false);
-  const windowExpiryHandledRef  = useRef(false);
-  const prevSectionIdxRef       = useRef<number | null>(null);
-  const flushCurrentAnswerRef   = useRef<() => Promise<void>>(async () => {});
-  const triggerSectionExpiryRef = useRef<() => Promise<void>>(async () => {});
-  const runSubmitRef            = useRef<(allowRetry: boolean) => Promise<void>>(async () => {});
-
   const currentSection = sections?.[currentSectionIdx] ?? null;
-  const currentSectionTotalSec = currentSection
-    ? getSectionDurationSec(currentSection.skill, courseId)
-    : 30 * 60;
-
-  const isLastSection = !!sections && currentSectionIdx >= sections.length - 1;
+  // For CircleTimer the max is always the full 3-hour test duration
+  const currentSectionTotalSec = MOCK_TOTAL_SECS;
 
   // ── Status check ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -445,77 +345,20 @@ export default function FullMockAssessment() {
     void check();
   }, [phase]);
 
-  // ── On entering a section: if it's ALREADY expired, skip it ─────────────────
+  // ── Timer tick ──────────────────────────────────────────────────────────────
   useEffect(() => {
-    if (phase !== "session" || !currentSection || !sessionIdRef.current) return;
-    const sid = sessionIdRef.current;
-    const skill = currentSection.skill;
-
-    if (prevSectionIdxRef.current !== currentSectionIdx) {
-      expiryHandledRef.current = false;
-      prevSectionIdxRef.current = currentSectionIdx;
-    }
-
-    if (isSectionStarted(sid, skill) && isSectionExpired(sid, skill)) {
-      if (!expiryHandledRef.current) {
-        expiryHandledRef.current = true;
-        void triggerSectionExpiryRef.current?.();
-      }
-      return;
-    }
-
-    setTimeLeft(getSectionRemainingSec(sid, skill, currentSectionTotalSec));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, currentSectionIdx, currentSection?.skill]);
-
-  // ── SECTION timer tick ──────────────────────────────────────────────────────
-  useEffect(() => {
-    if (phase !== "session" || !currentSection || !sessionIdRef.current) return;
-    const sid = sessionIdRef.current;
-    const skill = currentSection.skill;
-    const total = currentSectionTotalSec;
-
-    const tick = () => {
-      if (!isSectionStarted(sid, skill)) { setTimeLeft(total); return; }
-      const remaining = getSectionRemainingSec(sid, skill, total);
-      setTimeLeft(remaining);
-      if (remaining <= 0 && !expiryHandledRef.current) {
-        expiryHandledRef.current = true;
-        void triggerSectionExpiryRef.current?.();
-      }
-    };
-
-    tick();
-    const t = setInterval(tick, 1000);
+    if (phase !== "session" || timeLeft <= 0) return;
+    const t = setInterval(() => setTimeLeft(s => s - 1), 1000);
     return () => clearInterval(t);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, currentSectionIdx, currentSection?.skill, currentSectionTotalSec]);
+  }, [phase, timeLeft]);
 
-  // ── 24-HOUR overall window ──────────────────────────────────────────────────
+  // ── Timer expiry → force-complete section ───────────────────────────────────
   useEffect(() => {
-    if (phase !== "session" && phase !== "interim") return;
-    if (!sessionIdRef.current) return;
-    const sid = sessionIdRef.current;
-
-    const update = () => {
-      const winMs = getWindowRemainingMs(sid);
-      setWindowRemainingMs(winMs);
-      if (winMs <= 0 && !windowExpiryHandledRef.current) {
-        windowExpiryHandledRef.current = true;
-        setIsRecording(false);
-        setShowTimeUpModal(false);
-        void (async () => {
-          await flushCurrentAnswerRef.current?.();
-          await runSubmitRef.current?.(false);
-        })();
-      }
-    };
-
-    update();
-    const t = setInterval(update, 1000);
-    return () => clearInterval(t);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase]);
+    if (phase === "session" && timeLeft === 0) {
+      setIsRecording(false);
+      void handleSectionComplete();
+    }
+  }, [timeLeft, phase]);
 
   // ── Cleanup recording/debounce on question or section change ────────────────
   useEffect(() => {
@@ -539,6 +382,7 @@ export default function FullMockAssessment() {
     }).then(() => undefined).catch(e => console.warn("[Mock] answer save failed:", e));
   };
 
+  /** Flush the current question's answer to the backend (awaitable). */
   const flushCurrentAnswer = useCallback(async () => {
     if (writingDebounceRef.current) { clearTimeout(writingDebounceRef.current); writingDebounceRef.current = null; }
     const q = currentSection?.questions[currentIdx];
@@ -546,7 +390,6 @@ export default function FullMockAssessment() {
     if (q && a) await persistAnswer(q.id, a);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSection, currentIdx, answers]);
-  useEffect(() => { flushCurrentAnswerRef.current = flushCurrentAnswer; }, [flushCurrentAnswer]);
 
   const persistWritingDebounced = (questionId: string, text: string) => {
     if (writingDebounceRef.current) clearTimeout(writingDebounceRef.current);
@@ -584,39 +427,6 @@ export default function FullMockAssessment() {
     setRecordedPrompts(p => ({ ...p, [questionId]: true }));
   };
 
-  // ── Section expiry ──────────────────────────────────────────────────────────
-  const triggerSectionExpiry = useCallback(async () => {
-    setIsRecording(false);
-    await flushCurrentAnswerRef.current?.();
-    setExpiredSkill(currentSection?.skill ?? null);
-    setShowTimeUpModal(true);
-    setDisableInteraction(true);
-  }, [currentSection?.skill]);
-  useEffect(() => { triggerSectionExpiryRef.current = triggerSectionExpiry; }, [triggerSectionExpiry]);
-
-  // ── Submit ──────────────────────────────────────────────────────────────────
-  const runSubmit = useCallback(async (allowRetry: boolean) => {
-    setShowTimeUpModal(false);
-    setPhase("scoring");
-    try {
-      await flushCurrentAnswerRef.current?.();
-      const res = await callBackend(`${backendUrl()}/api/mock/submit`, {
-        method: "POST", body: JSON.stringify({ session_id: sessionIdRef.current })
-      });
-      if (res.success) {
-        setSessionMomentum(res.momentum_awarded ?? 0);
-        if (res.updated_momentum !== undefined) syncMomentum(res.updated_momentum);
-        setMockResults(res);
-        if (sessionIdRef.current) clearTimerState(sessionIdRef.current);
-      }
-    } catch (err) {
-      console.error("[Mock] submit error:", err);
-      if (allowRetry) { setPhase("session"); return; }
-    }
-    setTimeout(() => setPhase("results"), 3500);
-  }, [syncMomentum]);
-  useEffect(() => { runSubmitRef.current = runSubmit; }, [runSubmit]);
-
   // ── Begin / Resume mock ──────────────────────────────────────────────────────
 
   const beginMock = async (attemptType: "STANDARD" | "EARNED" = "STANDARD") => {
@@ -633,7 +443,6 @@ export default function FullMockAssessment() {
       }
       sessionIdRef.current = res.session_id;
       setSessionId(res.session_id);
-      setCourseId(res.course_id ?? null);
       setSections(transformSectionAudioUrls(res.sections));
       const startIdx   = res.current_section_idx ?? 0;
       const startSkill = res.sections[startIdx]?.skill ?? "LISTENING";
@@ -643,58 +452,11 @@ export default function FullMockAssessment() {
       setAudioState("idle");
       setShowPassage(false);
       setIsRecording(false);
-      setShowTimeUpModal(false);
-      setExpiredSkill(null);
-      prevSectionIdxRef.current = null;
-      windowExpiryHandledRef.current = false;
-      expiryHandledRef.current = false;
+      // Global timer — restore remaining time from backend (accounts for time away)
+      setTimeLeft(Math.floor((res.time_remaining_ms ?? MOCK_TOTAL_SECS * 1000) / 1000));
 
-      // Initialize the timer store
-      const serverWindow = res.window_closes_at_ms ?? undefined;
-      getTimerState(res.session_id, serverWindow);
-
-      // Sync per-section deadlines from backend (synchronous).
-      if (res.section_ends_at_ms) {
-        Object.entries(res.section_ends_at_ms).forEach(([skill, endsAt]) => {
-          setSectionEndsAt(res.session_id, skill, endsAt as number);
-        });
-      }
-
-      // If the 24h window has already lapsed, auto-submit.
-      if (isWindowExpired(res.session_id)) {
-        setIsLoading(false);
-        windowExpiryHandledRef.current = true;
-        void runSubmit(false);
-        return;
-      }
-      setWindowRemainingMs(getWindowRemainingMs(res.session_id));
-
-      // ── Resume path: skip past any sections whose timers already expired ──
-      if (res.resume) {
-        const playableIdx = findNextPlayable(res.session_id, res.sections, startIdx);
-
-        if (playableIdx === -1) {
-          // Every remaining section expired while away → submit what's saved.
-          setIsLoading(false);
-          void runSubmit(false);
-          return;
-        }
-
-        if (playableIdx > startIdx) {
-          // Skipped one or more expired sections — land on interim.
-          setCurrentSectionIdx(playableIdx - 1);
-          setPhase("interim");
-          return;
-        }
-
-        // Current section still playable — drop straight into it.
-        setCurrentSectionIdx(playableIdx);
-        setPhase("session");
-        return;
-      }
-
-      // ── Fresh start path ──
-      const showIntro = startSkill === "LISTENING";
+      // Show intro gate only before Listening, and only on fresh start (not resume).
+      const showIntro = !res.resume && startSkill === "LISTENING";
       setPhase(showIntro ? "listening_intro" : "session");
     } catch (err) {
       console.error("[Mock] begin error:", err);
@@ -702,69 +464,55 @@ export default function FullMockAssessment() {
       setIsLoading(false);
     }
   };
-  // ── Explicit section starts ─────────────────────────────────────────────────
 
-  const startListeningSection = () => {
-    const sid = sessionIdRef.current;
-    const skill = sections?.[currentSectionIdx]?.skill;
-    if (sid && skill) startSection(sid, skill, getSectionDurationSec(skill, courseId));
-    setPhase("session");
-  };
+  // ── Section completion ───────────────────────────────────────────────────────
 
   const handleSectionComplete = useCallback(async () => {
     if (!sections) return;
     if (currentSectionIdx < sections.length - 1) {
       setPhase("interim");
     } else {
-      await runSubmit(true);
+      setPhase("scoring");
+      try {
+        // Persist the final answer BEFORE submit reads stored answers, so the last
+        // question isn't graded as unanswered (fire-and-forget race).
+        await flushCurrentAnswer();
+        const res = await callBackend(`${backendUrl()}/api/mock/submit`, {
+          method: "POST", body: JSON.stringify({ session_id: sessionIdRef.current })
+        });
+        if (res.success) {
+          setSessionMomentum(res.momentum_awarded ?? 0);
+          if (res.updated_momentum !== undefined) syncMomentum(res.updated_momentum);
+          setMockResults(res);
+        }
+      } catch (err) {
+        // Submit failed (e.g. AI grading temporarily down → 502). The backend leaves the
+        // session IN_PROGRESS and recoverable within its 72h window, so return the student
+        // to the session to retry rather than showing an empty results screen.
+        console.error("[Mock] submit error — returning to session for retry:", err);
+        setPhase("session");
+        return;
+      }
+      setTimeout(() => setPhase("results"), 3500);
     }
-  }, [sections, currentSectionIdx, runSubmit]);
+  }, [sections, currentSectionIdx, flushCurrentAnswer]);
 
-  // Interim "Continue to Section N" — starts the NEXT playable section's timer.
   const advanceToNextSection = () => {
-    const sid = sessionIdRef.current;
-    if (!sid || !sections) return;
-
-    // Skip past any sections that expired while on interim / away.
-    const nextIdx = findNextPlayable(sid, sections, currentSectionIdx + 1);
-
-    if (nextIdx === -1) {
-      // Nothing left → submit.
-      void runSubmit(true);
-      return;
-    }
-
+    const nextIdx = currentSectionIdx + 1;
     if (audioRef.current && !audioRef.current.paused) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
-
-    const nextSkill = sections[nextIdx].skill;
-    // Start the section timer NOW (explicit click).
-    if (!isSectionStarted(sid, nextSkill)) {
-      startSection(sid, nextSkill, getSectionDurationSec(nextSkill, courseId));
+    // Stamp navigation position on backend — timer is global so no section_started_at needed
+    if (sessionIdRef.current) {
+      callBackend(`${backendUrl()}/api/mock/answer`, {
+        method: "POST", body: JSON.stringify({ session_id: sessionIdRef.current, section_advance: nextIdx })
+      }).catch(e => console.warn("[Mock] section advance failed:", e));
     }
-
-    // Stamp navigation position on backend.
-    callBackend(`${backendUrl()}/api/mock/answer`, {
-      method: "POST", body: JSON.stringify({ session_id: sid, section_advance: nextIdx })
-    }).catch(e => console.warn("[Mock] section advance failed:", e));
-
     setCurrentSectionIdx(nextIdx);
     setCurrentIdx(0);
+    // MK-F-03: do NOT clear answers — the global timer means all sections share one
+    // Record<questionId, answer> map and Prev navigation must be able to show prior answers.
+    // DO NOT reset timeLeft — global timer keeps counting down across all sections
     setAudioState("idle"); setShowPassage(false); setIsRecording(false);
-    setShowTimeUpModal(false); setExpiredSkill(null); setDisableInteraction(false);
     setPhase("session");
-  };
-
-  // Modal "Continue" — dismiss the time-up modal and move on.
-  const handleTimeUpContinue = () => {
-    setShowTimeUpModal(false);
-    setDisableInteraction(false);
-    const sid = sessionIdRef.current;
-    // If no playable sections remain, submit immediately.
-    if (!sid || !sections || findNextPlayable(sid, sections, currentSectionIdx + 1) === -1) {
-      void runSubmit(true);
-    } else {
-      setPhase("interim");
-    }
   };
 
   const handleNextQuestion = useCallback(() => {
@@ -837,6 +585,7 @@ export default function FullMockAssessment() {
             )}
           </div>
 
+          {/* Per-skill IA coverage visual */}
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-6">
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Skill Coverage</p>
             <div className="grid grid-cols-4 gap-2">
@@ -871,9 +620,12 @@ export default function FullMockAssessment() {
   const renderMockAvailable = () => (
     <div className="max-w-2xl mx-auto animate-fade-in pt-12 px-4">
       <div className="bg-white border border-slate-200 rounded-2xl p-8 sm:p-10 shadow-md">
+        {/* Badge */}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold tracking-wider uppercase mb-6 shadow-sm">
           <Trophy className="w-4 h-4" /> Full Mock IELTS
         </div>
+
+        {/* All requirements met */}
         <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-6 flex items-center gap-3">
           <CheckCircle2 className="w-6 h-6 text-emerald-600 flex-shrink-0" />
           <div>
@@ -881,34 +633,31 @@ export default function FullMockAssessment() {
             <p className="text-xs text-emerald-600 font-medium">{mockStatus!.progress.ia_completed} IAs · All 4 skills covered · Band improved +{mockStatus!.progress.best_improvement.toFixed(1)}</p>
           </div>
         </div>
+
         <h1 className="text-4xl font-bold text-slate-900 tracking-tight mb-3">Ready for Your<br /><span className="text-indigo-600">Mock IELTS?</span></h1>
         <p className="text-slate-500 font-medium text-sm mb-6 leading-relaxed">
-          A full-length IELTS simulation across all 4 skills. Each section has its own fixed timer that starts when you begin it and does not pause. The whole mock must be finished within 24 hours of starting. Your Real Band score updates after this session.
+          A full-length IELTS simulation across all 4 skills. Hard timers, no pause. Your Real Band score updates after this session.
         </p>
-        <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 mb-6 flex items-start gap-3">
-          <Hourglass className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="font-semibold text-indigo-800 text-sm">24-hour completion window</p>
-            <p className="text-xs text-indigo-600 font-medium">Each section timer runs continuously once started — if it runs out, that section closes and you move on to the next. The overall 24-hour clock never stops; when it ends, whatever you've completed is submitted automatically.</p>
-          </div>
-        </div>
+
+        {/* Section breakdown */}
         <div className="grid grid-cols-4 gap-2 mb-8">
           {[
             { skill: "LISTENING", time: "30 min" },
-            { skill: "READING",   time: "60 min" },
-            { skill: "WRITING",   time: "60 min" },
-            { skill: "SPEAKING",  time: "15 min" },
+            { skill: "READING",   time: "30 min" },
+            { skill: "WRITING",   time: "40 min" },
+            { skill: "SPEAKING",  time: "20 min" },
           ].map(s => {
             const a = accent(s.skill);
             return (
               <div key={s.skill} className={`${a.bg} border ${a.border} rounded-xl p-3 flex flex-col items-center gap-1.5`}>
                 <span className="text-2xl">{SKILL_ICON[s.skill]}</span>
                 <span className={`text-[10px] font-semibold uppercase tracking-wider ${a.text}`}>{s.skill.slice(0, 3)}</span>
-                <span className="text-[10px] font-medium text-slate-400 flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" /> {s.time}</span>
+                <span className="text-[10px] font-medium text-slate-400">{s.time}</span>
               </div>
             );
           })}
         </div>
+
         <div className="flex flex-col gap-3">
           <button onClick={() => void beginMock("STANDARD")} disabled={isLoading}
             className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white border-none font-semibold text-base uppercase tracking-wide py-4 rounded-xl flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all">
@@ -919,6 +668,8 @@ export default function FullMockAssessment() {
             Cancel
           </button>
         </div>
+
+        {/* Earned path — indigo (primary) per design choice */}
         {mockStatus!.can_start_earned && (
           <div className="mt-6 border-t border-slate-100 pt-6">
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Or Exchange Momentum</p>
@@ -946,10 +697,12 @@ export default function FullMockAssessment() {
             <h2 className="text-2xl font-semibold text-slate-900 tracking-tight">Session Expired</h2>
           </div>
         </div>
+
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
-          <p className="font-semibold text-amber-800 text-sm mb-1">24-hour window closed without submission</p>
+          <p className="font-semibold text-amber-800 text-sm mb-1">72-hour window closed without submission</p>
           <p className="text-amber-700 text-sm">Your standard slot for this month has been consumed. No penalty — just no score recorded.</p>
         </div>
+
         <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 mb-6 flex items-center gap-3">
           <Calendar className="w-5 h-5 text-indigo-600 flex-shrink-0" />
           <div>
@@ -957,6 +710,7 @@ export default function FullMockAssessment() {
             <p className="text-indigo-600 font-medium text-sm">{firstOfNextMonth()}</p>
           </div>
         </div>
+
         {mockStatus!.can_start_earned && (
           <div className="mb-4">
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Still want a mock this month?</p>
@@ -967,6 +721,7 @@ export default function FullMockAssessment() {
             </button>
           </div>
         )}
+
         <button onClick={() => navigate("/student/dashboard")}
           className="w-full py-3 border border-slate-200 rounded-xl font-medium text-sm text-slate-500 hover:bg-slate-50 transition-colors">
           Back to Dashboard
@@ -987,6 +742,7 @@ export default function FullMockAssessment() {
             <h2 className="text-2xl font-semibold text-slate-900 tracking-tight">Mock Completed</h2>
           </div>
         </div>
+
         <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 mb-6 flex items-center gap-3">
           <Calendar className="w-5 h-5 text-indigo-600 flex-shrink-0" />
           <div>
@@ -994,9 +750,11 @@ export default function FullMockAssessment() {
             <p className="text-indigo-600 font-medium text-sm">{firstOfNextMonth()}</p>
           </div>
         </div>
+
         <p className="text-slate-500 text-sm font-medium mb-6">
           One standard mock per calendar month keeps your progress meaningful. Your Real Band has been updated — keep drilling to build on it.
         </p>
+
         {mockStatus!.can_start_earned && (
           <div className="mb-4">
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Want an extra mock this month?</p>
@@ -1007,6 +765,7 @@ export default function FullMockAssessment() {
             </button>
           </div>
         )}
+
         <button onClick={() => navigate("/student/dashboard")}
           className="w-full py-3 border border-slate-200 rounded-xl font-medium text-sm text-slate-500 hover:bg-slate-50 transition-colors">
           Back to Dashboard
@@ -1022,11 +781,11 @@ export default function FullMockAssessment() {
           <div className="w-12 h-12 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-center text-2xl">⏱</div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">In Progress</p>
-            <h2 className="text-2xl font-semibold text-slate-900 tracking-tight">Resume Mock</h2>
+            <h2 className="text-2xl font-semibold text-slate-900 tracking-tight">Mock Paused</h2>
           </div>
         </div>
         <p className="text-slate-500 text-sm font-medium mb-6">
-          You have an active mock session. Section timers keep running whether you're here or not — if a section's time ran out while you were away, you'll move on to the next one. You must still be inside the 24-hour window.
+          You have an active mock session. The timer counts elapsed real time — continue from where you left off.
         </p>
         <button onClick={() => void beginMock("STANDARD")} disabled={isLoading}
           className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white border-none font-semibold text-base uppercase tracking-wide py-4 rounded-xl flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all">
@@ -1062,27 +821,32 @@ export default function FullMockAssessment() {
     <div className="max-w-2xl mx-auto animate-fade-in pt-12 px-4">
       <div className="bg-white border border-slate-200 rounded-2xl p-8 sm:p-10 shadow-md">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-teal-600 text-white text-xs font-semibold tracking-wider uppercase mb-6 shadow-sm">
-          <span className="text-base leading-none">🎧</span> Section 1 · Listening · 30 min
+          <span className="text-base leading-none">🎧</span> Section 1 · Listening
         </div>
+
         <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight mb-2">
           Before you begin
         </h1>
         <p className="text-slate-500 font-medium text-sm mb-8 leading-relaxed">
-          Complete each set of questions as you listen. There's no separate transfer time. This section has its own 30-minute timer that starts when you click Start — and does not pause.
+          Complete each set of questions as you listen. There's no separate transfer time.
         </p>
+
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-5 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="font-semibold text-amber-800 text-sm mb-1">Audio plays once, like the real exam.</p>
-            <p className="text-amber-700 text-xs font-medium leading-relaxed">You cannot pause, rewind, or replay any recording. Scan the questions before the audio starts.</p>
+            <p className="font-semibold text-amber-800 text-sm mb-1">
+              Audio plays once, like the real exam.
+            </p>
+            <p className="text-amber-700 text-xs font-medium leading-relaxed">
+              You cannot pause, rewind, or replay any recording. Scan the questions before the audio starts.
+            </p>
           </div>
         </div>
+
         <ul className="flex flex-col gap-2.5 mb-8">
           {[
             "Use a quiet environment and headphones if possible.",
-            "The 30-minute timer starts the moment you click Start — and keeps running even if you leave.",
-            "If the timer runs out, this section closes and you move on to the next.",
-            "The overall 24-hour clock runs the whole time, across all sections.",
+            "The section starts when you click Start below.",
             "Answer as you listen — audio will not repeat.",
           ].map((tip, i) => (
             <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600 font-medium">
@@ -1091,8 +855,9 @@ export default function FullMockAssessment() {
             </li>
           ))}
         </ul>
+
         <button
-          onClick={startListeningSection}
+          onClick={() => setPhase("session")}
           className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-none font-semibold text-base uppercase tracking-wide py-4 rounded-xl flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all"
         >
           Start Listening Section <ArrowRight className="w-5 h-5" />
@@ -1100,6 +865,7 @@ export default function FullMockAssessment() {
       </div>
     </div>
   );
+
   // ═══════════════════════════════════════════════════════════════════════════
   // SESSION SCREEN
   // ═══════════════════════════════════════════════════════════════════════════
@@ -1127,7 +893,7 @@ export default function FullMockAssessment() {
     else canProceed = !!answers[currentQ.id];
 
     return (
-      <div className={`max-w-6xl mx-auto pt-6 pb-16 px-4 animate-fade-in transition-opacity ${disableInteraction ? "pointer-events-none opacity-40" : ""}`}>
+      <div className="max-w-6xl mx-auto pt-6 pb-16 px-4 animate-fade-in">
 
         {/* Section progress pills */}
         <div className="flex items-center justify-center gap-3 mb-8">
@@ -1161,61 +927,12 @@ export default function FullMockAssessment() {
               <p className="text-slate-500 text-xs font-medium uppercase tracking-wider mt-1">Question {currentIdx + 1} of {totalQ}</p>
             </div>
           </div>
-          {/* Timer cluster */}
-          <div className="flex items-center gap-3 self-end sm:self-auto">
-            {/* Section timer — primary */}
-            <div className={`relative flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-colors ${
-              timeLeft <= 60 ? "bg-rose-50 border-rose-200" :
-              timeLeft <= 300 ? "bg-amber-50 border-amber-200" :
-              `${accent(currentSection.skill).bg} ${accent(currentSection.skill).border}`
-            }`}>
-              <CircleTimer
-                timeLeft={timeLeft}
-                total={currentSectionTotalSec}
-                size={44}
-                stroke={accent(currentSection.skill).stroke}
-              />
-              <div>
-                <p className={`text-[9px] font-bold uppercase tracking-widest ${
-                  timeLeft <= 60 ? "text-rose-500" :
-                  timeLeft <= 300 ? "text-amber-600" :
-                  accent(currentSection.skill).text
-                }`}>
-                  {SKILL_LABEL[currentSection.skill] ?? "Section"}
-                </p>
-                <p className={`text-xl font-black tabular-nums leading-none tracking-tight ${
-                  timeLeft <= 60 ? "text-rose-600 animate-pulse" :
-                  timeLeft <= 300 ? "text-amber-700" :
-                  "text-slate-900"
-                }`}>
-                  {formatTime(timeLeft)}
-                </p>
-              </div>
-              {timeLeft <= 60 && (
-                <span className="absolute -top-1.5 -right-1.5 flex h-3.5 w-3.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-rose-500" />
-                </span>
-              )}
+          <div className="flex items-center self-end sm:self-auto bg-slate-50 border border-slate-200 px-4 py-2 rounded-xl">
+            <CircleTimer timeLeft={timeLeft} total={currentSectionTotalSec} size={48} />
+            <div className="ml-3">
+              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Total Test Timer</p>
+              <p className="text-lg font-semibold text-slate-900 leading-none">{formatTime(timeLeft)}</p>
             </div>
-            {/* 24h window — secondary */}
-            {windowRemainingMs != null && (
-              <div className={`hidden sm:flex items-center gap-2 px-3 py-2.5 rounded-xl border ${
-                windowRemainingMs < 60 * 60 * 1000 ? "bg-rose-50 border-rose-200" : "bg-slate-50 border-slate-200"
-              }`}>
-                <Hourglass className={`w-3.5 h-3.5 flex-shrink-0 ${
-                  windowRemainingMs < 60 * 60 * 1000 ? "text-rose-500" : "text-slate-400"
-                }`} />
-                <div>
-                  <p className="text-[8px] font-bold uppercase tracking-widest text-slate-400">24h</p>
-                  <p className={`text-xs font-bold tabular-nums leading-none ${
-                    windowRemainingMs < 60 * 60 * 1000 ? "text-rose-600" : "text-slate-500"
-                  }`}>
-                    {formatHMS(Math.floor(windowRemainingMs / 1000))}
-                  </p>
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
@@ -1305,17 +1022,10 @@ export default function FullMockAssessment() {
                   <textarea rows={8} placeholder="Write your response here (minimum 10 words)…"
                     value={answers[currentQ.id] || ""}
                     onChange={e => { const text = e.target.value; setAnswers(p => ({ ...p, [currentQ.id]: text })); persistWritingDebounced(currentQ.id, text); }}
-                    onPaste={e => { e.preventDefault(); flashPasteBlocked(); }}
-                    onCopy={e => { e.preventDefault(); flashPasteBlocked(); }}
-                    onCut={e => { e.preventDefault(); flashPasteBlocked(); }}
-                    onDrop={e => { e.preventDefault(); flashPasteBlocked(); }}
                     className="w-full p-5 border border-slate-200 rounded-xl text-base text-slate-900 font-medium outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 bg-slate-50 resize-none transition-all" />
                   <div className="flex justify-between mt-2">
                     <p className="text-xs text-slate-400 font-medium">{(answers[currentQ.id] ?? "").trim().split(/\s+/).filter(Boolean).length} words</p>
-                    {pasteBlocked
-                      ? <p className="text-xs text-rose-500 font-semibold animate-pulse">Copy/paste disabled</p>
-                      : <p className="text-[10px] text-slate-300 font-medium">Auto-saved</p>
-                    }
+                    <p className="text-[10px] text-slate-300 font-medium">Auto-saved</p>
                   </div>
                 </div>
               )}
@@ -1381,21 +1091,7 @@ export default function FullMockAssessment() {
   // ═══════════════════════════════════════════════════════════════════════════
 
   const renderInterim = () => {
-    const sid = sessionIdRef.current;
-    // Find the first section that's still playable.
-    const nextPlayableIdx = (sid && sections) ? findNextPlayable(sid, sections, currentSectionIdx + 1) : -1;
-    const nextSec = nextPlayableIdx !== -1 ? sections?.[nextPlayableIdx] ?? null : null;
-
-    // If nothing left (edge case — timer expired while staring at interim), submit.
-    if (!nextSec) {
-      void runSubmit(true);
-      return null;
-    }
-
-    const nextDurMin = Math.round(getSectionDurationSec(nextSec.skill, courseId) / 60);
-    const windowSec = windowRemainingMs != null ? Math.floor(windowRemainingMs / 1000) : 0;
-    const windowUrgent = windowRemainingMs != null && windowRemainingMs < 60 * 60 * 1000;
-
+    const nextSec = sections?.[currentSectionIdx + 1];
     return (
       <div className="min-h-[70vh] flex items-center justify-center animate-fade-in px-4 pt-12">
         <div className="max-w-lg w-full bg-white border border-slate-200 rounded-2xl p-10 text-center shadow-md">
@@ -1403,37 +1099,27 @@ export default function FullMockAssessment() {
             <CheckCircle2 className="w-10 h-10 text-emerald-600" />
           </div>
           <h2 className="text-3xl font-bold text-slate-900 tracking-tight mb-2">Section {currentSectionIdx + 1} Complete</h2>
-          <p className="text-slate-500 font-medium mb-6">
-            {SKILL_LABEL[sections?.[currentSectionIdx]?.skill ?? ""] ?? ""} is done and locked. The next section's timer starts only when you click Continue below.
+          <p className="text-slate-500 font-medium mb-8">
+            {SKILL_LABEL[sections?.[currentSectionIdx]?.skill ?? ""] ?? ""} done. Take a breath — your overall test timer continues running.
           </p>
-
-          {/* Live 24h window reminder */}
-          <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl border mb-8 ${
-            windowUrgent ? "bg-rose-50 border-rose-200" : "bg-indigo-50 border-indigo-200"
-          }`}>
-            <Hourglass className={`w-4 h-4 ${windowUrgent ? "text-rose-500" : "text-indigo-600"}`} />
-            <span className={`text-xs font-semibold uppercase tracking-wider ${windowUrgent ? "text-rose-600" : "text-indigo-600"}`}>24h window</span>
-            <span className={`text-sm font-bold tabular-nums ${windowUrgent ? "text-rose-600" : "text-slate-900"}`}>{formatHMS(windowSec)}</span>
-          </div>
-
-          <div className={`${accent(nextSec.skill).bg} border ${accent(nextSec.skill).border} rounded-xl p-5 mb-8 text-left shadow-sm`}>
-            <p className={`text-xs font-semibold uppercase tracking-wider mb-2 ${accent(nextSec.skill).text}`}>Up Next</p>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">{SKILL_ICON[nextSec.skill] ?? "📝"}</span>
-                <div>
-                  <h3 className="text-xl font-semibold text-slate-900 uppercase">{SKILL_LABEL[nextSec.skill] ?? nextSec.skill}</h3>
-                  <p className="text-sm text-slate-500">{nextSec.questions.length} questions · {nextDurMin} min timer</p>
+          {nextSec && (
+            <div className={`${accent(nextSec.skill).bg} border ${accent(nextSec.skill).border} rounded-xl p-5 mb-8 text-left shadow-sm`}>
+              <p className={`text-xs font-semibold uppercase tracking-wider mb-2 ${accent(nextSec.skill).text}`}>Up Next</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">{SKILL_ICON[nextSec.skill] ?? "📝"}</span>
+                  <div>
+                    <h3 className="text-xl font-semibold text-slate-900 uppercase">{SKILL_LABEL[nextSec.skill] ?? nextSec.skill}</h3>
+                    <p className="text-sm text-slate-500">{nextSec.questions.length} questions</p>
+                  </div>
                 </div>
+                <span className="bg-white border border-slate-200 rounded-lg px-3 py-1 text-xs font-semibold text-slate-500 uppercase">{nextSec.questions.length} Q</span>
               </div>
-              <span className="bg-white border border-slate-200 rounded-lg px-3 py-1 text-xs font-semibold text-slate-500 uppercase flex items-center gap-1"><Clock className="w-3 h-3" /> {nextDurMin}m</span>
             </div>
-          </div>
-
+          )}
           <button onClick={advanceToNextSection} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-none font-semibold text-lg py-4 rounded-xl shadow-sm hover:shadow-md transition-all">
-            Start {SKILL_LABEL[nextSec.skill] ?? "Next Section"} <ArrowRight className="w-5 h-5 inline ml-1" />
+            Continue to Section {currentSectionIdx + 2} <ArrowRight className="w-5 h-5 inline ml-1" />
           </button>
-          <p className="text-[11px] text-slate-400 font-medium mt-3">The {nextDurMin}-minute timer begins the instant you click.</p>
         </div>
       </div>
     );
@@ -1465,13 +1151,13 @@ export default function FullMockAssessment() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Mock Complete</h2>
-          <button onClick={() => { localStorage.removeItem(STORAGE_KEY); if (sessionIdRef.current) clearTimerState(sessionIdRef.current); navigate("/student/dashboard", { state: { drillCompleted: true } }); }}
+          <button onClick={() => { localStorage.removeItem(STORAGE_KEY); navigate("/student/dashboard", { state: { drillCompleted: true } }); }}
             className="px-6 py-3 bg-indigo-600 text-white border-none rounded-xl font-semibold text-sm uppercase hover:bg-indigo-700 shadow-sm hover:shadow-md transition-all">
             Dashboard
           </button>
         </div>
 
-        {/* Real Band Score */}
+        {/* Real Band Score — the headline result */}
         <div className="bg-indigo-600 rounded-2xl p-8 mb-6 text-center shadow-md relative overflow-hidden">
           <div className="absolute -top-8 -right-8 text-[140px] opacity-10 pointer-events-none select-none">🏆</div>
           <p className="text-indigo-200 font-semibold uppercase tracking-wider mb-1">Real Band Score</p>
@@ -1506,7 +1192,7 @@ export default function FullMockAssessment() {
           )}
         </div>
 
-        {/* 4 Skill cards */}
+        {/* 4 Skill cards — insight-first, collapsible AI feedback below */}
         {skillScores.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
             {skillScores.map((s, i) => {
@@ -1519,6 +1205,8 @@ export default function FullMockAssessment() {
               const diagDelta   = s.delta_from_diag;
               const diagUp      = diagDelta !== null && diagDelta !== undefined && diagDelta > 0;
 
+              // Sub-skills: use backend data; else fall back to a single OVERALL tile
+              // for pure-MCQ skills (Listening, Reading) so the layout stays consistent.
               const subSkills: MockSubSkillScore[] = (s.sub_skill_scores && s.sub_skill_scores.length > 0)
                 ? s.sub_skill_scores
                 : (s.total > 0
@@ -1538,42 +1226,63 @@ export default function FullMockAssessment() {
 
               return (
                 <div key={i} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col">
+
+                  {/* Skill header */}
                   <div className="flex items-center gap-3 mb-4">
                     <span className={`w-10 h-10 rounded-lg ${a.bg} border ${a.border} flex items-center justify-center text-2xl`}>
                       {SKILL_ICON[s.skill] ?? "📝"}
                     </span>
                     <div>
-                      <p className="font-semibold text-slate-900 text-sm uppercase tracking-wide">{SKILL_LABEL[s.skill] ?? s.skill}</p>
-                      <p className="text-slate-400 text-[10px] font-medium uppercase">{s.ai_graded ? "MCQ + AI Graded" : "Pure MCQ"}</p>
+                      <p className="font-semibold text-slate-900 text-sm uppercase tracking-wide">
+                        {SKILL_LABEL[s.skill] ?? s.skill}
+                      </p>
+                      <p className="text-slate-400 text-[10px] font-medium uppercase">
+                        {s.ai_graded ? "MCQ + AI Graded" : "Pure MCQ"}
+                      </p>
                     </div>
                   </div>
 
+                  {/* Mock score headline */}
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-0.5">Mock Score</p>
-                  <p className="text-5xl font-bold text-slate-900 leading-none mb-1">{s.band > 0 ? s.band.toFixed(1) : "—"}</p>
+                  <p className="text-5xl font-bold text-slate-900 leading-none mb-1">
+                    {s.band > 0 ? s.band.toFixed(1) : "—"}
+                  </p>
                   {s.total > 0 && (
-                    <p className="text-xs text-slate-400 font-medium mb-3">{s.correct} / {s.total} MCQ correct</p>
+                    <p className="text-xs text-slate-400 font-medium mb-3">
+                      {s.correct} / {s.total} MCQ correct
+                    </p>
                   )}
 
+                  {/* Plain-English insight — always visible, leads the card */}
                   <div className={`${a.bg} border ${a.border} rounded-xl p-3 mb-4`}>
                     <p className={`text-[10px] font-semibold uppercase tracking-wider ${a.text} mb-1`}>Insight</p>
                     <p className="text-xs text-slate-700 font-medium leading-relaxed">{insight}</p>
                   </div>
 
+                  {/* Sub-skill breakdown — pure score tiles */}
                   {subSkills.length > 0 && (
                     <div className="mb-4">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-2">Sub-skill Breakdown</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                        Sub-skill Breakdown
+                      </p>
                       <div className="grid grid-cols-2 gap-1.5">
                         {subSkills.map((ss, j) => (
                           <div key={j} className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
-                            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{SUBSKILL_LABEL[ss.sub_skill] ?? ss.sub_skill}</p>
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                              {SUBSKILL_LABEL[ss.sub_skill] ?? ss.sub_skill}
+                            </p>
                             <div className="flex items-baseline gap-1.5 mt-0.5">
                               <span className="text-lg font-bold text-slate-900">{ss.band.toFixed(1)}</span>
                               {ss.ai_band !== null && ss.ai_band !== undefined && (
-                                <span className="text-[9px] text-slate-400 font-medium">AI: {ss.ai_band.toFixed(1)}</span>
+                                <span className="text-[9px] text-slate-400 font-medium">
+                                  AI: {ss.ai_band.toFixed(1)}
+                                </span>
                               )}
                             </div>
                             {ss.total_mcq > 0 && (
-                              <p className="text-[9px] text-slate-400 font-medium mt-0.5">{ss.correct}/{ss.total_mcq} MCQ</p>
+                              <p className="text-[9px] text-slate-400 font-medium mt-0.5">
+                                {ss.correct}/{ss.total_mcq} MCQ
+                              </p>
                             )}
                           </div>
                         ))}
@@ -1581,6 +1290,7 @@ export default function FullMockAssessment() {
                     </div>
                   )}
 
+                  {/* Collapsible detailed AI feedback — only rendered if any subskill has feedback */}
                   {hasAnyFeedback && (
                     <div className="mb-4">
                       <button
@@ -1594,23 +1304,32 @@ export default function FullMockAssessment() {
                           </svg>
                           Detailed AI Feedback ({feedbackItems.length})
                         </span>
-                        <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${isFeedbackOpen ? "rotate-180" : ""}`} />
+                        <ChevronDown
+                          className={`w-4 h-4 text-slate-500 transition-transform ${isFeedbackOpen ? "rotate-180" : ""}`}
+                        />
                       </button>
+
                       {isFeedbackOpen && (
                         <div className="mt-3 flex flex-col gap-3">
                           {feedbackItems.map((ss, j) => (
                             <div key={j} className="bg-white border border-indigo-200 rounded-xl overflow-hidden shadow-sm">
                               <div className="px-4 py-2.5 bg-indigo-50 border-b border-indigo-100 flex items-center gap-2">
                                 <div className="w-1.5 h-4 bg-indigo-600 rounded-full" />
-                                <p className="text-[10px] font-semibold uppercase tracking-wider text-indigo-700">{SUBSKILL_LABEL[ss.sub_skill] ?? ss.sub_skill}</p>
+                                <p className="text-[10px] font-semibold uppercase tracking-wider text-indigo-700">
+                                  {SUBSKILL_LABEL[ss.sub_skill] ?? ss.sub_skill}
+                                </p>
                               </div>
                               <div className="px-4 pt-3 pb-2">
                                 <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Summary</p>
-                                <p className="text-xs text-slate-600 font-medium leading-relaxed italic">&ldquo;{ss.ai_feedback!.rationale}&rdquo;</p>
+                                <p className="text-xs text-slate-600 font-medium leading-relaxed italic">
+                                  &ldquo;{ss.ai_feedback!.rationale}&rdquo;
+                                </p>
                               </div>
                               {(ss.ai_feedback!.key_observations?.length ?? 0) > 0 && (
                                 <div className="px-4 pb-3">
-                                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mt-1 mb-2">Key Observations</p>
+                                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mt-1 mb-2">
+                                    Key Observations
+                                  </p>
                                   <ul className="flex flex-col gap-2">
                                     {ss.ai_feedback!.key_observations.map((obs, k) => (
                                       <li key={k} className="flex items-start gap-2">
@@ -1628,12 +1347,19 @@ export default function FullMockAssessment() {
                     </div>
                   )}
 
+                  {/* Real Band impact — pinned to bottom of the card */}
                   <div className="border-t border-slate-100 pt-3 mt-auto">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Real Band (Updated)</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                      Real Band (Updated)
+                    </p>
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm font-semibold text-slate-400">{s.prev_matrix_band !== null ? s.prev_matrix_band.toFixed(1) : "—"}</span>
+                      <span className="text-sm font-semibold text-slate-400">
+                        {s.prev_matrix_band !== null ? s.prev_matrix_band.toFixed(1) : "—"}
+                      </span>
                       <span className="text-slate-300 text-xs">→</span>
-                      <span className={`text-xl font-bold ${matrixUp ? "text-emerald-600" : "text-slate-700"}`}>{displayNewBand.toFixed(1)}</span>
+                      <span className={`text-xl font-bold ${matrixUp ? "text-emerald-600" : "text-slate-700"}`}>
+                        {displayNewBand.toFixed(1)}
+                      </span>
                       {matrixDelta !== null && (
                         <span className={`text-xs font-semibold ${matrixUp ? "text-emerald-600" : "text-rose-600"}`}>
                           {matrixUp ? `+${matrixDelta.toFixed(1)}` : matrixDelta.toFixed(1)}
@@ -1664,6 +1390,7 @@ export default function FullMockAssessment() {
       </div>
     );
   };
+
   // ═══════════════════════════════════════════════════════════════════════════
   // RENDER
   // ═══════════════════════════════════════════════════════════════════════════
@@ -1675,17 +1402,6 @@ export default function FullMockAssessment() {
         phase={phase}
         onBack={() => navigate("/student/dashboard")}
       />
-
-      {/* "Time's up" modal — shown on section expiry, auto-dismiss after 1s */}
-      {showTimeUpModal && expiredSkill && (
-        <TimeUpModal
-          skill={expiredSkill}
-          answeredNote="Your answers so far have been saved and submitted for scoring."
-          isLastSection={!sessionIdRef.current || !sections || findNextPlayable(sessionIdRef.current, sections, currentSectionIdx + 1) === -1}
-          onContinue={handleTimeUpContinue}
-        />
-      )}
-
       <div className="pt-16">
         {phase === "gate"            && renderGate()}
         {phase === "listening_intro" && renderListeningIntro()}
