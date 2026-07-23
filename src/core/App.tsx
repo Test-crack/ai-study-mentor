@@ -4,7 +4,7 @@ import { Toaster } from "@/shared/components/ui/toaster";
 import { ThemeProvider } from "@/features/theme/ThemeProvider";
 import { Toaster as Sonner } from "@/shared/components/ui/sonner";
 import { TooltipProvider } from "@/shared/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from "@tanstack/react-query"; // ← CHANGED
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/features/auth/hooks/useAuth";
 import { callBackend } from "@/features/auth/services/authClient";
@@ -12,6 +12,8 @@ import { RoleProtectedRoute } from "@/shared/components/auth/ProtectedRoute";
 import { RequireActiveInstitute } from "@/features/auth/components/RequireActiveInstitute";
 import { WebSocketProvider } from "@/shared/context/WebSocketContext";
 import { MomentumProvider } from "@/features/student/Context/MomentumContext";
+import { NetworkStatusBanner } from "@/shared/components/NetworkStatusBanner"; // ← NEW
+import { toast } from "sonner"; // ← NEW
 
 // Landing page stays EAGER — this is the route we're optimizing.
 import LandingPage from "@/features/home/components/LandingPage";
@@ -77,7 +79,6 @@ const InstituteInstructorsPage = lazy(() => import("@/features/InstituteOwner/da
 const InstituteBatchDetailPage = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteBatchDetailPage"));
 const InstituteOwnerStudentProgressPage = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteOwnerStudentProgressPage"));
 
-// Named exports need the .then(...) mapping for React.lazy
 const RoiAnalyticsPage = lazy(() => import("@/features/InstituteOwner/dashboard/ComingSoonPages").then(m => ({ default: m.RoiAnalyticsPage })));
 const StrategicReportPage = lazy(() => import("@/features/InstituteOwner/dashboard/ComingSoonPages").then(m => ({ default: m.StrategicReportPage })));
 const AiCalibrationPage = lazy(() => import("@/features/InstituteOwner/dashboard/ComingSoonPages").then(m => ({ default: m.AiCalibrationPage })));
@@ -116,15 +117,42 @@ const TrapSpotterGame = lazy(() => import("@/features/B-C/games/Trapspottergame"
 import { NotificationsProvider } from "@/features/student/Context/NotificationsContext";
 import { InstructorNotificationsProvider } from "@/features/instructor/Context/InstructorNotificationsContext";
 
-// import QuestionBankManager from "@/features/TestCrackSuperAdmin/dashboard/Questionbankmanager";
 
 const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error: any) => {
+      // callBackend already toasted — skip if flagged
+      if (error?._toasted || error?.isOffline || !navigator.onLine) return;
+      // Catch-all for any raw fetch calls NOT going through callBackend
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        toast.error('Unable to reach the server — please try again');
+      }
+    },
+  }),
+  mutationCache: new MutationCache({
+    onError: (error: any) => {
+      if (error?._toasted || error?.isOffline || !navigator.onLine) return;
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        toast.error('Unable to reach the server — please try again');
+      }
+    },
+  }),
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
+      retry: (failureCount, error: any) => {
+        if (!navigator.onLine || error?.isOffline) return false;
+        if (error?.statusCode === 401 || error?.statusCode === 403) return false;
+        if (error instanceof TypeError && error.message === 'Failed to fetch') return failureCount < 1;
+        return failureCount < 2;
+      },
+    },
+    mutations: {
+      retry: false,
     },
   },
 });
+
 const RouteFallback = () => (
   <div className="min-h-screen flex items-center justify-center bg-white">
     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-700" />
@@ -296,8 +324,6 @@ const AppRoutes = () => {
 
       <Route path="/login" element={user ? <LoginRedirect /> : <LoginPage />} />
       <Route path="/auth" element={<Navigate to="/login" replace />} />
-      {/* Supabase invite/recovery action links land here — must render regardless of
-          session state so the set-password flow runs before any role redirect. */}
       <Route path="/auth/callback" element={<AuthCallbackPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/pricing" element={<PricingPage />} />
@@ -381,8 +407,10 @@ const AppRoutes = () => {
   );
 };
 
+// ← CHANGED: Added NetworkStatusBanner as first child inside ThemeProvider
 const App = () => (
   <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+    <NetworkStatusBanner />
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />

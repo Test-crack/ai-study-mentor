@@ -1,12 +1,40 @@
-/**
- * Simple auth utilities for making authenticated API calls
- */
+// src/features/auth/services/authClient.ts
 
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
-/**
- * Get the current access token from Supabase session
- */
+// ─── Human-friendly messages per HTTP status ────────────────────────
+const HTTP_MESSAGES: Record<number, string> = {
+  400: 'Something went wrong with that request',
+  401: 'Your session has expired — please log in again',
+  403: "You don't have permission to do that",
+  404: "That resource wasn't found",
+  408: 'The request timed out — please try again',
+  409: 'There was a conflict — please refresh and try again',
+  422: 'Invalid data — please check your input and try again',
+  429: 'Too many requests — please wait a moment and retry',
+  500: 'Something went wrong on our end — please try again',
+  502: 'Server is temporarily unavailable — try again shortly',
+  503: 'Server is temporarily unavailable — try again shortly',
+  504: 'Server took too long to respond — please try again',
+};
+
+function friendlyMessage(status: number, serverMsg?: string): string {
+  if (HTTP_MESSAGES[status]) return HTTP_MESSAGES[status];
+  if (status >= 500) return 'Something went wrong on our end — please try again';
+  return serverMsg || 'Something went wrong — please try again';
+}
+
+// Simple dedup: don't fire the same toast message within 2 seconds
+let lastToast = { msg: '', at: 0 };
+function dedupeToast(msg: string) {
+  const now = Date.now();
+  if (msg === lastToast.msg && now - lastToast.at < 2000) return;
+  lastToast = { msg, at: now };
+  toast.error(msg);
+}
+
+// ─── Token ──────────────────────────────────────────────────────────
 async function getAccessToken(): Promise<string> {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
@@ -14,77 +42,106 @@ async function getAccessToken(): Promise<string> {
   return token;
 }
 
-/**
- * Make an authenticated API call to your backend
- * Automatically includes the JWT token in the Authorization header
- * 
- * @param path - API path (e.g., '/api/reading/modules')
- * @param options - Fetch options (method, body, etc.)
- * @returns Response JSON
- * 
- * @example
- * // GET request
- * const data = await callBackend('/api/reading/modules');
- * 
- * @example
- * // POST request
- * const result = await callBackend('/api/reading/submit', {
- *   method: 'POST',
- *   body: JSON.stringify({ data })
- * });
- */
+// ─── Core fetch wrapper with global error interception ──────────────
+
+function handleNetworkError(err: unknown): never {
+  if (!navigator.onLine) {
+    // Banner already visible — don't toast, just throw
+    const offlineErr = new Error("You're offline — please check your internet connection");
+    (offlineErr as any).isOffline = true;
+    (offlineErr as any)._toasted = true; // signal QueryCache to skip
+    throw offlineErr;
+  }
+  dedupeToast('Unable to reach the server — please try again');
+  const netErr = err instanceof Error ? err : new Error('Network error');
+  (netErr as any)._toasted = true;
+  throw netErr;
+}
+
+async function handleHttpError(res: Response): Promise<never> {
+  if (res.status === 401) {
+    window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+  }
+
+  const errorData = await res.json().catch(() => ({}));
+  const msg = friendlyMessage(res.status, errorData?.error);
+
+  // Don't toast 401 if we're dispatching the auth event (redirect handles it)
+  // Still toast for 403+ so user knows what happened
+  if (res.status !== 401) {
+    dedupeToast(msg);
+  }
+
+  const err = new Error(errorData?.error || `API error: ${res.status}`);
+  (err as any).statusCode = res.status;
+  (err as any).responseData = errorData;
+  (err as any)._toasted = true;
+  throw err;
+}
+
+// ─── Public API (unchanged signatures) ──────────────────────────────
+
 export async function callBackend(path: string, options: RequestInit = {}): Promise<any> {
+  // Pre-flight: if already offline, fail fast
+  if (!navigator.onLine) {
+    const err = new Error("You're offline — please check your internet connection");
+    (err as any).isOffline = true;
+    (err as any)._toasted = true;
+    throw err;
+  }
+
   const token = await getAccessToken();
 
-  const res = await fetch(path, {
-    ...options,
-    headers: {
-      ...(options.headers || {}),
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  let res: Response;
+  try {
+    res = await fetch(path, {
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  } catch (err) {
+    handleNetworkError(err);
+  }
 
   if (!res.ok) {
-    if (res.status === 401) {
-      window.dispatchEvent(new CustomEvent('auth:unauthorized'));
-    }
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.error || `API error: ${res.status}`);
+    await handleHttpError(res);
   }
 
   return res.json();
 }
 
-/**
- * Upload a file to the backend
- *
- * @param path - API path
- * @param formData - FormData object containing the file
- * @param method - HTTP method (default PUT)
- */
-export async function uploadFileToBackend(path: string, formData: FormData, method: string = 'PUT'): Promise<any> {
+export async function uploadFileToBackend(
+  path: string,
+  formData: FormData,
+  method: string = 'PUT'
+): Promise<any> {
+  if (!navigator.onLine) {
+    const err = new Error("You're offline — please check your internet connection");
+    (err as any).isOffline = true;
+    (err as any)._toasted = true;
+    throw err;
+  }
+
   const token = await getAccessToken();
 
-  const res = await fetch(path, {
-    method,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      // Note: Content-Type is NOT set here so the browser can set it with the boundary for FormData
-    },
-    body: formData,
-  });
+  let res: Response;
+  try {
+    res = await fetch(path, {
+      method,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+  } catch (err) {
+    handleNetworkError(err);
+  }
 
   if (!res.ok) {
-    if (res.status === 401) {
-      window.dispatchEvent(new CustomEvent('auth:unauthorized'));
-    }
-    const errorData = await res.json().catch(() => ({}));
-    const err = new Error(errorData.error || `API error: ${res.status}`);
-    // Attach full body so callers can inspect fields like can_retry, message etc.
-    (err as any).statusCode   = res.status;
-    (err as any).responseData = errorData;
-    throw err;
+    await handleHttpError(res);
   }
 
   return res.json();
