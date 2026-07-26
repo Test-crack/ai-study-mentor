@@ -1,8 +1,8 @@
-name: Deploy Frontend Production
+name: Deploy Frontend Development
 
 on:
   push:
-    branches: [main]
+    branches: [dev]
 
 jobs:
   deploy:
@@ -15,8 +15,8 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            cd /var/www/testcrack/frontend-main
+            cd /var/www/testcrack/frontend-dev
             git fetch origin
-            git reset --hard origin/main
+            git reset --hard origin/dev
             npm ci
             npm run build
