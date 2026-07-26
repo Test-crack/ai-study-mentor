@@ -1,135 +1,172 @@
 // src/core/App.tsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Toaster } from "@/shared/components/ui/toaster";
 import { ThemeProvider } from "@/features/theme/ThemeProvider";
 import { Toaster as Sonner } from "@/shared/components/ui/sonner";
 import { TooltipProvider } from "@/shared/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from "@tanstack/react-query"; // ← CHANGED
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/features/auth/hooks/useAuth";
 import { callBackend } from "@/features/auth/services/authClient";
-import LandingPage from "@/features/home/components/LandingPage";
-import DashboardPage from "@/features/home/components/DashboardPage";
-import LoginPage from "@/features/auth/components/LoginPage";
-import ResetPasswordPage from "@/features/auth/components/ResetPasswordPage";
-import AuthCallbackPage from "@/features/auth/components/AuthCallbackPage";
-import NotFoundPage from "@/shared/components/layout/NotFoundPage";
-import SpeedAssessmentPage from "@/features/speed-assessment/components/SpeedAssessmentPage";
-import ReadingAssessmentPage from "@/features/reading-assessment/components/ReadingAssessmentPage";
-import NotesPage from "@/features/notes/components/NotesPage";
-import ProfilePage from "@/features/profile/components/ProfilePage";
-import PricingPage from "@/features/payment/components/PricingPage";
-import PaymentSuccess from "@/features/payment/components/PaymentSuccess";
-import CoursesPage from "@/features/courses/components/CoursesPage";
-import CourseDetailPage from "@/features/courses/components/CourseDetailPage";
-import LearningPage from "@/features/courses/components/learning/LearningPage";
-import AdminDashboardPage from "@/features/courses/components/admin/AdminDashboardPage";
-import CourseManagementPage from "@/features/courses/components/admin/CourseManagementPage";
-import StudentDashboardPage from "@/features/student/components/StudentDashboardPage";
-import StudentProfilePage from "@/features/student/components/StudentProfilePage";
-import StudentCoursesPage from "@/features/student/components/StudentCoursesPage";
-import StudentSchedulePage from "@/features/student/components/StudentSchedulePage";
-import StudentReadingAssessmentPage from "@/features/student/components/StudentReadingAssessmentPage";
-import StudentAssessmentHistoryPage from "@/features/student/components/StudentAssessmentHistoryPage";
-import StudentSpeakingHistoryPage from "@/features/student/components/StudentSpeakingHistoryPage";
-import ReadingHistoryPage from "@/features/student/components/ReadingHistoryPage";
-import StudentBatchView from "@/features/student/components/StudentBatchView";
-import InstructorDashboardPage from "@/features/instructor/components/InstructorDashboardPage";
-import InstructorAssessmentPage from "@/features/instructor/components/assessments/InstructorAssessmentPage";
-import InstructorBatchView from "@/features/instructor/components/InstructorBatchView";
-import InstructorStudentProgressPage from "@/features/instructor/components/InstructorStudentProgressPage";
 import { RoleProtectedRoute } from "@/shared/components/auth/ProtectedRoute";
-import SpeakingPractice from "@/features/student/components/SpeakingPractice";
-import MyCurriculum from "@/features/student/components/MyCurriculum";
-import InstructorCourseManagementPage from "@/features/instructor/components/InstructorCourseManagementPage";
-import TechPrepPage from "@/features/instructor/components/TechPrepPage";
-import AlignmentPage from "@/features/instructor/components/Alignment";
-import MicTest from "@/features/student/components/MicTest";
-import { WebSocketProvider } from "@/shared/context/WebSocketContext";
 import { RequireActiveInstitute } from "@/features/auth/components/RequireActiveInstitute";
 
-import InstituteDashboard from "@/features/Institute/dashboard/InstituteDashboard";
-import InstituteBatches from "@/features/Institute/dashboard/BatchAllocation";
-import InstituteTutor from "@/features/Institute/dashboard/InstituteTutor";
-import InstituteStudents from "@/features/Institute/dashboard/InstituteStudents";
-import InstituteBillings from "@/features/Institute/dashboard/InstituteBillings";
-import InstituteReports from "@/features/Institute/dashboard/InstituteReports";
-import StudentOnboarding from "@/features/Institute/dashboard/StudentOnboarding";
-import TutorOnboarding from "@/features/Institute/dashboard/TutorOnboarding";
-import InstituteSettings from "@/features/Institute/dashboard/InstituteSetting";
-import SuperAdminDashboard from "@/features/TestCrackSuperAdmin/dashboard/SuperAdminDashboard";
-import SuperAdminInstitutes from "@/features/TestCrackSuperAdmin/dashboard/SuperAdminInstitutes";
-import Subscription from "@/features/TestCrackSuperAdmin/dashboard/Subscription";
-import PricingConfig from "@/features/TestCrackSuperAdmin/dashboard/PricingConfig";
-import SupportTicket from "@/features/TestCrackSuperAdmin/dashboard/SupportTicket";
-import PlatformAnalytics from "@/features/TestCrackSuperAdmin/dashboard/PlatformAnalytics";
-import AllUsers from "@/features/TestCrackSuperAdmin/dashboard/AllUsers";
-import InstituteOwnerDashboard from "@/features/InstituteOwner/dashboard/InstituteOwnerDashboard";
-import Performance from "@/features/InstituteOwner/dashboard/Performance";
-import BatchInsight from "@/features/InstituteOwner/dashboard/BatchInsight";
-import InstituteAdmins from "@/features/InstituteOwner/dashboard/InstituteAdmins";
-import BatchAnalyticsView from "@/features/InstituteOwner/dashboard/BatchAnalyticsView";
-import InstituteStudentsPage from "@/features/InstituteOwner/dashboard/InstituteStudentsPage";
-import InstituteInstructorsPage from "@/features/InstituteOwner/dashboard/InstituteInstructorsPage";
-import InstituteBatchDetailPage from "@/features/InstituteOwner/dashboard/InstituteBatchDetailPage";
-import { RoiAnalyticsPage, StrategicReportPage, AiCalibrationPage } from "@/features/InstituteOwner/dashboard/ComingSoonPages";
-import VoiceLab from "@/features/student/components/VoiceLab";
-import SpeedReading from "@/features/student/components/SpeedReading";
-import { InstructorReportPage } from "@/features/instructor/components/InstructorReportPage";
-import Workflow from "@/features/instructor/components/Workflow";
-import IeltsWriting from "@/features/student/components/IeltsWriting";
-import ListeningPractice from "@/features/student/components/ListeningPractice";
-import ReadingPractice from "@/features/student/components/ReadingPractice";
-import Dashdemo from "@/features/home/components/Dashdemo";
-import Contactpage from "@/features/home/components/ContactPage";
-import CourseSection from "@/features/student/components/CourseSection";
-import InstituteOwnerStudentProgressPage from "@/features/InstituteOwner/dashboard/InstituteOwnerStudentProgressPage";
-import InstituteAdminStudentProgressPage from "@/features/Institute/dashboard/InstituteAdminStudentProgressPage";
-import Suggestion from "@/features/student/components/Suggestions";
-import SpeakingAssessment from "@/features/student/components/SpeakingAssessment";
-import Diagnosis from "@/features/student/components/Diagnosis/Diagnosis";
-import OnboardingWalkthrough from "@/features/student/components/Onboarding/OnboardingWalkthrough";
-import HowItWorks from "@/features/student/components/HowItWorks";
-import AssessmentHistoryPage from "@/features/student/components/AssessmentHistoryPage";
-import SuggestionsPage from "@/features/student/components/SuggestionsPage";
-import Report from "@/features/student/components/Report";
-import DrillScreen from "@/features/student/components/Drills/DrillScreen";
+
+import { WebSocketProvider } from "@/shared/context/WebSocketContext";
 import { MomentumProvider } from "@/features/student/Context/MomentumContext";
+import { NetworkStatusBanner } from "@/shared/components/NetworkStatusBanner"; // ← NEW
+import { toast } from "sonner"; // ← NEW
+
+// Landing page stays EAGER — this is the route we're optimizing.
+import LandingPage from "@/features/home/components/LandingPage";
+import AuthCallbackPage from "@/features/auth/components/AuthCallbackPage";
+
+// Everything else becomes its own chunk, downloaded only when its route is visited.
+const DashboardPage = lazy(() => import("@/features/home/components/DashboardPage"));
+const LoginPage = lazy(() => import("@/features/auth/components/LoginPage"));
+const ResetPasswordPage = lazy(() => import("@/features/auth/components/ResetPasswordPage"));
+const NotFoundPage = lazy(() => import("@/shared/components/layout/NotFoundPage"));
+const SpeedAssessmentPage = lazy(() => import("@/features/speed-assessment/components/SpeedAssessmentPage"));
+const ReadingAssessmentPage = lazy(() => import("@/features/reading-assessment/components/ReadingAssessmentPage"));
+const NotesPage = lazy(() => import("@/features/notes/components/NotesPage"));
+const ProfilePage = lazy(() => import("@/features/profile/components/ProfilePage"));
+const PricingPage = lazy(() => import("@/features/payment/components/PricingPage"));
+const PaymentSuccess = lazy(() => import("@/features/payment/components/PaymentSuccess"));
+const CoursesPage = lazy(() => import("@/features/courses/components/CoursesPage"));
+const CourseDetailPage = lazy(() => import("@/features/courses/components/CourseDetailPage"));
+const LearningPage = lazy(() => import("@/features/courses/components/learning/LearningPage"));
+const AdminDashboardPage = lazy(() => import("@/features/courses/components/admin/AdminDashboardPage"));
+const CourseManagementPage = lazy(() => import("@/features/courses/components/admin/CourseManagementPage"));
+const StudentDashboardPage = lazy(() => import("@/features/student/components/StudentDashboardPage"));
+const StudentProfilePage = lazy(() => import("@/features/student/components/StudentProfilePage"));
+const StudentCoursesPage = lazy(() => import("@/features/student/components/StudentCoursesPage"));
+const StudentSchedulePage = lazy(() => import("@/features/student/components/StudentSchedulePage"));
+const StudentReadingAssessmentPage = lazy(() => import("@/features/student/components/StudentReadingAssessmentPage"));
+const StudentAssessmentHistoryPage = lazy(() => import("@/features/student/components/StudentAssessmentHistoryPage"));
+const StudentSpeakingHistoryPage = lazy(() => import("@/features/student/components/StudentSpeakingHistoryPage"));
+const ReadingHistoryPage = lazy(() => import("@/features/student/components/ReadingHistoryPage"));
+const StudentBatchView = lazy(() => import("@/features/student/components/StudentBatchView"));
+const InstructorDashboardPage = lazy(() => import("@/features/instructor/components/InstructorDashboardPage"));
+const InstructorAssessmentPage = lazy(() => import("@/features/instructor/components/assessments/InstructorAssessmentPage"));
+const InstructorBatchView = lazy(() => import("@/features/instructor/components/InstructorBatchView"));
+const InstructorStudentProgressPage = lazy(() => import("@/features/instructor/components/InstructorStudentProgressPage"));
+const SpeakingPractice = lazy(() => import("@/features/student/components/SpeakingPractice"));
+const MyCurriculum = lazy(() => import("@/features/student/components/MyCurriculum"));
+const InstructorCourseManagementPage = lazy(() => import("@/features/instructor/components/InstructorCourseManagementPage"));
+const TechPrepPage = lazy(() => import("@/features/instructor/components/TechPrepPage"));
+const AlignmentPage = lazy(() => import("@/features/instructor/components/Alignment"));
+
+const InstituteDashboard = lazy(() => import("@/features/Institute/dashboard/InstituteDashboard"));
+const InstituteBatches = lazy(() => import("@/features/Institute/dashboard/BatchAllocation"));
+const InstituteTutor = lazy(() => import("@/features/Institute/dashboard/InstituteTutor"));
+const InstituteStudents = lazy(() => import("@/features/Institute/dashboard/InstituteStudents"));
+const InstituteBillings = lazy(() => import("@/features/Institute/dashboard/InstituteBillings"));
+const InstituteReports = lazy(() => import("@/features/Institute/dashboard/InstituteReports"));
+const StudentOnboarding = lazy(() => import("@/features/Institute/dashboard/StudentOnboarding"));
+const TutorOnboarding = lazy(() => import("@/features/Institute/dashboard/TutorOnboarding"));
+const InstituteSettings = lazy(() => import("@/features/Institute/dashboard/InstituteSetting"));
+const SuperAdminDashboard = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/SuperAdminDashboard"));
+const SuperAdminInstitutes = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/SuperAdminInstitutes"));
+const Subscription = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/Subscription"));
+const PricingConfig = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/PricingConfig"));
+const SupportTicket = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/SupportTicket"));
+const PlatformAnalytics = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/PlatformAnalytics"));
+const AllUsers = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/AllUsers"));
+const InstituteOwnerDashboard = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteOwnerDashboard"));
+const Performance = lazy(() => import("@/features/InstituteOwner/dashboard/Performance"));
+const BatchInsight = lazy(() => import("@/features/InstituteOwner/dashboard/BatchInsight"));
+const InstituteAdmins = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteAdmins"));
+const InstituteStudentsPage = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteStudentsPage"));
+const InstituteInstructorsPage = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteInstructorsPage"));
+const InstituteBatchDetailPage = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteBatchDetailPage"));
+const InstituteOwnerStudentProgressPage = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteOwnerStudentProgressPage"));
+const InstituteAdminStudentProgressPage = lazy(() => import("@/features/Institute/dashboard/InstituteAdminStudentProgressPage"));
+
+const RoiAnalyticsPage = lazy(() => import("@/features/InstituteOwner/dashboard/ComingSoonPages").then(m => ({ default: m.RoiAnalyticsPage })));
+const StrategicReportPage = lazy(() => import("@/features/InstituteOwner/dashboard/ComingSoonPages").then(m => ({ default: m.StrategicReportPage })));
+const AiCalibrationPage = lazy(() => import("@/features/InstituteOwner/dashboard/ComingSoonPages").then(m => ({ default: m.AiCalibrationPage })));
+const InstructorReportPage = lazy(() => import("@/features/instructor/components/InstructorReportPage").then(m => ({ default: m.InstructorReportPage })));
+
+const VoiceLab = lazy(() => import("@/features/student/components/VoiceLab"));
+const SpeedReading = lazy(() => import("@/features/student/components/SpeedReading"));
+const Workflow = lazy(() => import("@/features/instructor/components/Workflow"));
+const IeltsWriting = lazy(() => import("@/features/student/components/IeltsWriting"));
+const ListeningPractice = lazy(() => import("@/features/student/components/ListeningPractice"));
+const ReadingPractice = lazy(() => import("@/features/student/components/ReadingPractice"));
+const Dashdemo = lazy(() => import("@/features/home/components/Dashdemo"));
+const Contactpage = lazy(() => import("@/features/home/components/ContactPage"));
+const CourseSection = lazy(() => import("@/features/student/components/CourseSection"));
+const Suggestion = lazy(() => import("@/features/student/components/Suggestions"));
+const SpeakingAssessment = lazy(() => import("@/features/student/components/SpeakingAssessment"));
+const Diagnosis = lazy(() => import("@/features/student/components/Diagnosis/Diagnosis"));
+const OnboardingWalkthrough = lazy(() => import("@/features/student/components/Onboarding/OnboardingWalkthrough"));
+const HowItWorks = lazy(() => import("@/features/student/components/HowItWorks"));
+const AssessmentHistoryPage = lazy(() => import("@/features/student/components/AssessmentHistoryPage"));
+const SuggestionsPage = lazy(() => import("@/features/student/components/SuggestionsPage"));
+const Report = lazy(() => import("@/features/student/components/Report"));
+const DrillScreen = lazy(() => import("@/features/student/components/Drills/DrillScreen"));
+const LexiGrid = lazy(() => import("@/features/student/components/LexiGrid"));
+const InternalAssessmentPage = lazy(() => import("@/features/student/components/Assessment"));
+const FullMockAssessment = lazy(() => import("@/features/student/components/FullMockAssessment"));
+const StudentNotEnrolledPage = lazy(() => import("@/features/student/components/StudentNotEnrolledPage"));
+const B2CLoginPage = lazy(() => import("@/features/B-C/pages/B2cloginpage"));
+const B2CStudentDashboard = lazy(() => import("@/features/B-C/pages/B2cstudentdashboard"));
+const BandLadderGame = lazy(() => import("@/features/B-C/games/Bandladdergame"));
+const ConnectorChainGame = lazy(() => import("@/features/B-C/games/Connectorchaingame"));
+const InferenceSprintGame = lazy(() => import("@/features/B-C/games/Inferencesprintgame"));
+const LexiGridGame = lazy(() => import("@/features/B-C/games/Lexigridgame"));
+const SentenceSurgeryGame = lazy(() => import("@/features/B-C/games/Sentencesurgerygame"));
+const TrapSpotterGame = lazy(() => import("@/features/B-C/games/Trapspottergame"));
 import { NotificationsProvider } from "@/features/student/Context/NotificationsContext";
 import { InstructorNotificationsProvider } from "@/features/instructor/Context/InstructorNotificationsContext";
-import LexiGrid from "@/features/student/components/LexiGrid";
-import InternalAssessmentPage from "@/features/student/components/Assessment";
-import FullMockAssessment from "@/features/student/components/FullMockAssessment";
-import StudentNotEnrolledPage from "@/features/student/components/StudentNotEnrolledPage";
-import B2CLoginPage from "@/features/B-C/pages/B2cloginpage";
-import B2CStudentDashboard from "@/features/B-C/pages/B2cstudentdashboard";
-import BandLadderGame from "@/features/B-C/games/Bandladdergame";
-import ConnectorChainGame from "@/features/B-C/games/Connectorchaingame";
-import InferenceSprintGame from "@/features/B-C/games/Inferencesprintgame";
-import LexiGridGame from "@/features/B-C/games/Lexigridgame";
-import SentenceSurgeryGame from "@/features/B-C/games/Sentencesurgerygame";
-import TrapSpotterGame from "@/features/B-C/games/Trapspottergame";
-// import QuestionBankManager from "@/features/TestCrackSuperAdmin/dashboard/Questionbankmanager";
+
 
 const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error: any) => {
+      // callBackend already toasted — skip if flagged
+      if (error?._toasted || error?.isOffline || !navigator.onLine) return;
+      // Catch-all for any raw fetch calls NOT going through callBackend
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        toast.error('Unable to reach the server — please try again');
+      }
+    },
+  }),
+  mutationCache: new MutationCache({
+    onError: (error: any) => {
+      if (error?._toasted || error?.isOffline || !navigator.onLine) return;
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        toast.error('Unable to reach the server — please try again');
+      }
+    },
+  }),
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
+      retry: (failureCount, error: any) => {
+        if (!navigator.onLine || error?.isOffline) return false;
+        if (error?.statusCode === 401 || error?.statusCode === 403) return false;
+        if (error instanceof TypeError && error.message === 'Failed to fetch') return failureCount < 1;
+        return failureCount < 2;
+      },
+    },
+    mutations: {
+      retry: false,
     },
   },
 });
 
-// ─── B2C auth guard ───────────────────────────────────────────────────────────
-// Checks sessionStorage for b2c_email.
-// Replace with real B2C auth check once backend is wired.
+const RouteFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-white">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-700" />
+  </div>
+);
+
 const B2CProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const email = sessionStorage.getItem('b2c_email');
   return email ? <>{children}</> : <Navigate to="/b2c/login" replace />;
 };
 
-/**
- * 1. Initial Login Redirector
- */
 const LoginRedirect = () => {
   const { profile, loading, profileLoading } = useAuth();
 
@@ -140,7 +177,6 @@ const LoginRedirect = () => {
   if (profile?.role === 'INSTITUTE_ADMIN') return <Navigate to="/institute-admin/dashboard" replace />;
   if (profile?.role === 'INSTRUCTOR') return <Navigate to="/instructor/dashboard" replace />;
 
-  // Default: STUDENT
   if (profile?.role === 'STUDENT') {
     if (profile.isEnrolled === false) {
       return <Navigate to="/student/not-enrolled" replace />;
@@ -152,9 +188,6 @@ const LoginRedirect = () => {
   return <Navigate to="/student/dashboard" replace />;
 };
 
-/**
- * 2. Manual URL Entry Redirector
- */
 const ManualDashboardAccess = () => {
   const { profile, loading, profileLoading } = useAuth();
 
@@ -169,7 +202,6 @@ const ManualDashboardAccess = () => {
   if (profile.role === 'INSTITUTE_OWNER') return <Navigate to="/institute-owner/dashboard" replace />;
   if (profile.role === 'INSTITUTE_ADMIN') return <Navigate to="/institute-admin/dashboard" replace />;
 
-  // Students
   if (profile.role === 'STUDENT') {
     if (profile.isEnrolled === false) return <Navigate to="/student/not-enrolled" replace />;
     if (!profile.isDiagnosed)        return <Navigate to="/student/onboarding" replace />;
@@ -177,9 +209,6 @@ const ManualDashboardAccess = () => {
   return <Navigate to="/student/dashboard" replace />;
 };
 
-/**
- * 3. Student Diagnosis Guard
- */
 const StudentDiagnosisGuard = ({ children }: { children: React.ReactNode }) => {
   const { profile, loading, profileLoading } = useAuth();
 
@@ -197,28 +226,6 @@ const StudentDiagnosisGuard = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-/**
- * 4. Student Drill-Lock Guard
- *
- * Blocks direct navigation into locked /student/* sections (typed URL,
- * bookmark, sidebar click, back/forward) until today's drill/lexigrid gate
- * clears. Evaluated at the ROUTE level — StudentDashboardPage's local
- * `isLocked` only runs when that page is the mounted one, which is the exact
- * gap this closes.
- *
- * Locked → redirect to /student/dashboard (where the unlock UI lives).
- * Fails CLOSED on fetch error — same default StudentDashboardPage uses
- * (`!dailyDrillState` counts as locked).
- *
- * Deliberately NOT applied to: /student/dashboard, /student/settings,
- * /student/drill, /student/lexigrid, /student/onboarding, /student/diagnosis,
- * /student/not-enrolled.
- *
- * NOTE: the `missedData.misses >= 2` half of the dashboard's isLocked is
- * intentionally omitted — it's driven by MOCK_MISSED_STATE (a hardcoded test
- * constant), not backend data. Wire in the real misses field here if/when it
- * exists.
- */
 const StudentDrillLockGuard = ({ children }: { children: React.ReactNode }) => {
   const { profile, loading, profileLoading } = useAuth();
   const [dashboardUnlocked, setDashboardUnlocked] = useState<boolean | null>(null);
@@ -234,11 +241,10 @@ const StudentDrillLockGuard = ({ children }: { children: React.ReactNode }) => {
     callBackend(`${backendUrl}/api/student/daily-drill-state`)
       .then((res: any) => {
         if (cancelled) return;
-        // Match the dashboard: only an explicit unlocked=true counts as unlocked.
         setDashboardUnlocked(res?.success ? Boolean(res.dashboard_unlocked) : false);
       })
       .catch(() => {
-        if (!cancelled) setDashboardUnlocked(false); // fail closed
+        if (!cancelled) setDashboardUnlocked(false);
       })
       .finally(() => {
         if (!cancelled) setChecking(false);
@@ -250,7 +256,7 @@ const StudentDrillLockGuard = ({ children }: { children: React.ReactNode }) => {
   if (!profile) return <Navigate to="/login" replace />;
 
   if (profile.role === 'STUDENT') {
-    if (checking) return null; // avoid a flash-then-redirect while status resolves
+    if (checking) return null;
     if (!dashboardUnlocked) return <Navigate to="/student/dashboard" replace />;
   }
 
@@ -261,16 +267,14 @@ const AppRoutes = () => {
   const { user } = useAuth();
 
   return (
+    <Suspense fallback={<RouteFallback />}>
     <Routes>
-      {/* ── Public routes ────────────────────────────────────────────────── */}
       <Route path="/" element={<LandingPage />} />
-      {/* Login-protected (STUDENT only) — pre-diagnosis flow, no DiagnosisGuard to avoid redirect loop */}
       <Route path="/student/onboarding" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><OnboardingWalkthrough /></RoleProtectedRoute>} />
       <Route path="/student/diagnosis" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><Diagnosis /></RoleProtectedRoute>} />
       <Route path="/dashdemo" element={<Dashdemo />} />
       <Route path="/Contact" element={<Contactpage />} />
 
-      {/* ── B2C routes (no B2B auth required) ────────────────────────────── */}
       <Route path="/b2c/login" element={<B2CLoginPage />} />
       <Route
         path="/b2c/dashboard"
@@ -282,7 +286,6 @@ const AppRoutes = () => {
       />
       <Route path="/b2c/leaderboard" element={<B2CProtectedRoute><B2CStudentDashboard /></B2CProtectedRoute>} />
 
-      {/* ── B2C game routes — all fully functional ───────────────────────── */}
       <Route path="/b2c/game/lexigrid"         element={<B2CProtectedRoute><LexiGridGame        /></B2CProtectedRoute>} />
       <Route path="/b2c/game/trap-spotter"     element={<B2CProtectedRoute><TrapSpotterGame     /></B2CProtectedRoute>} />
       <Route path="/b2c/game/band-ladder"      element={<B2CProtectedRoute><BandLadderGame      /></B2CProtectedRoute>} />
@@ -290,9 +293,7 @@ const AppRoutes = () => {
       <Route path="/b2c/game/inference-sprint" element={<B2CProtectedRoute><InferenceSprintGame /></B2CProtectedRoute>} />
       <Route path="/b2c/game/connector-chain"  element={<B2CProtectedRoute><ConnectorChainGame  /></B2CProtectedRoute>} />
 
-      {/* ── Routes that require the institute to be active ─────────────── */}
       <Route element={<RequireActiveInstitute />}>
-        {/* Institute Owner Routes */}
         <Route path="/institute-owner/dashboard"    element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteOwnerDashboard /></RoleProtectedRoute>} />
         <Route path="/institute-owner/insight"      element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><BatchInsight /></RoleProtectedRoute>} />
         <Route path="/institute-owner/students"     element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteStudentsPage /></RoleProtectedRoute>} />
@@ -305,7 +306,6 @@ const AppRoutes = () => {
         <Route path="/institute-owner/batches/:batchSlug/analytics" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER', 'INSTRUCTOR']}><InstituteBatchDetailPage /></RoleProtectedRoute>} />
         <Route path="/institute-owner/students/:studentSlug/progress" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER', 'INSTRUCTOR']}><InstituteOwnerStudentProgressPage /></RoleProtectedRoute>} />
 
-        {/* Institute Admin routes */}
         <Route path="/institute-admin/dashboard" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteDashboard /></RoleProtectedRoute>} />
         <Route path="/institute-admin/batches" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteBatches /></RoleProtectedRoute>} />
         <Route path="/institute-admin/tutor" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteTutor /></RoleProtectedRoute>} />
@@ -318,21 +318,16 @@ const AppRoutes = () => {
         <Route path="/institute-admin/Setting" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteSettings /></RoleProtectedRoute>} />
       </Route>
 
-      {/* ── TestCrack SuperAdmin ──────────────────────────────────────────── */}
       <Route path="/superadmin/dashboard" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SuperAdminDashboard /></RoleProtectedRoute>} />
       <Route path="/superadmin/institutes" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SuperAdminInstitutes /></RoleProtectedRoute>} />
       <Route path="/superadmin/subscription" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><Subscription /></RoleProtectedRoute>} />
       <Route path="/superadmin/priceconfig" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><PricingConfig /></RoleProtectedRoute>} />
       <Route path="/superadmin/supportickets" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SupportTicket /></RoleProtectedRoute>} />
       <Route path="/superadmin/platform" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><PlatformAnalytics /></RoleProtectedRoute>} />
-      {/* <Route path="/superadmin/question" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><QuestionBankManager /></RoleProtectedRoute>} /> */}
       <Route path="/superadmin/allusers" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><AllUsers /></RoleProtectedRoute>} />
 
-      {/* ── Auth & misc ───────────────────────────────────────────────────── */}
       <Route path="/login" element={user ? <LoginRedirect /> : <LoginPage />} />
       <Route path="/auth" element={<Navigate to="/login" replace />} />
-      {/* Supabase invite/recovery action links land here — must render regardless of
-          session state so the set-password flow runs before any role redirect. */}
       <Route path="/auth/callback" element={<AuthCallbackPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/pricing" element={<PricingPage />} />
@@ -341,10 +336,8 @@ const AppRoutes = () => {
       <Route path="/dashboard" element={<ManualDashboardAccess />} />
       <Route path="/dashboard/:tab" element={<ManualDashboardAccess />} />
 
-      {/* Not-enrolled screen — role-protected but no enrollment guard (would loop) */}
       <Route path="/student/not-enrolled" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentNotEnrolledPage /></RoleProtectedRoute>} />
 
-      {/* Student Dashboard & Routes */}
       <Route
         path="/student/dashboard"
         element={
@@ -355,10 +348,8 @@ const AppRoutes = () => {
           </RoleProtectedRoute>
         }
       />
-      {/* Settings stays reachable while locked (per spec). */}
       <Route path="/student/settings" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentProfilePage /></RoleProtectedRoute>} />
 
-      {/* ── Drill-locked sections: blocked until today's drill/lexigrid gate clears ── */}
       <Route path="/student/courses" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><StudentCoursesPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
       <Route path="/student/schedule" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><StudentSchedulePage /></StudentDrillLockGuard></RoleProtectedRoute>} />
       <Route path="/student/voice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><VoiceLab /></StudentDrillLockGuard></RoleProtectedRoute>} />
@@ -380,7 +371,6 @@ const AppRoutes = () => {
       <Route path="/student/suggestion" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><Suggestion /></StudentDrillLockGuard></RoleProtectedRoute>} />
       <Route path="/student/speaking-practice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><SpeakingPractice /></StudentDrillLockGuard></RoleProtectedRoute>} />
 
-      {/* Unlock mechanism — deliberately NOT wrapped (gating these would prevent unlocking). */}
       <Route path="/student/drill" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><DrillScreen /></RoleProtectedRoute>} />
       <Route path="/student/lexigrid" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><LexiGrid /></RoleProtectedRoute>} />
 
@@ -389,7 +379,6 @@ const AppRoutes = () => {
       <Route path="/student/mock" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><FullMockAssessment /></StudentDrillLockGuard></RoleProtectedRoute>} />
       <Route path="/student/how-it-works" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><HowItWorks /></StudentDrillLockGuard></RoleProtectedRoute>} />
 
-      {/* ── Instructor Dashboard & Routes ─────────────────────────────────── */}
       <Route
         path="/instructor/dashboard"
         element={
@@ -407,7 +396,6 @@ const AppRoutes = () => {
       <Route path="/instructor/reports" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><InstructorReportPage /></RoleProtectedRoute>} />
       <Route path="/instructor/workflow" element={<RoleProtectedRoute allowedRoles={['INSTRUCTOR']}><Workflow /></RoleProtectedRoute>} />
 
-      {/* ── Shared protected routes ───────────────────────────────────────── */}
       <Route path="/learn/:slug" element={<RoleProtectedRoute><LearningPage /></RoleProtectedRoute>} />
       <Route path="/notes" element={<RoleProtectedRoute><NotesPage /></RoleProtectedRoute>} />
       <Route path="/profile" element={<RoleProtectedRoute><ProfilePage /></RoleProtectedRoute>} />
@@ -419,11 +407,14 @@ const AppRoutes = () => {
 
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
+    </Suspense>
   );
 };
 
+// ← CHANGED: Added NetworkStatusBanner as first child inside ThemeProvider
 const App = () => (
   <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+    <NetworkStatusBanner />
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
