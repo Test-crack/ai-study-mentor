@@ -32,7 +32,7 @@ export const SuperAdminSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
   { id: 'superadmin-dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/superadmin/dashboard' },
   { id: 'institutes', icon: Building2, label: 'Institutes', path: '/superadmin/institutes' },
   { id: 'superadmin-subscription', icon: CreditCard, label: 'Subscription', path: '/superadmin/subscription' },
-  { id: 'question-bank', icon: CreditCard, label: 'Question Bank', path: '/superadmin/question' },
+  // { id: 'question-bank', icon: CreditCard, label: 'Question Bank', path: '/superadmin/question' },
   { id: 'pricing-config', icon: Coins, label: 'Pricing-Config', path: '/superadmin/priceconfig' },
   { id: 'support-tickets', icon: LifeBuoy, label: 'Support Tickets', path: '/superadmin/supportickets' },
   { id: 'platform-analytics', icon: Activity, label: 'Platform Analytics', path: '/superadmin/platform' },
