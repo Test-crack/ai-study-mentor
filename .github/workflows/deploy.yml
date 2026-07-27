@@ -1,0 +1,58 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches: [main, dev]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine target app
+        id: vars
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "app_name=frontend-main" >> "$GITHUB_OUTPUT"
+          else
+            echo "app_name=frontend-dev" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy to VPS (atomic swap)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            cd /var/www/testcrack/${{ steps.vars.outputs.app_name }}
+            git fetch origin
+            git reset --hard origin/${{ github.ref_name }}
+            npm ci
+            npm run build -- --outDir dist-new
+
+            # Verify the new build actually produced a valid index.html before touching anything live
+            if [ ! -f dist-new/index.html ]; then
+              echo "Build did not produce index.html — aborting, live site untouched"
+              exit 1
+            fi
+
+            # Keep one previous build around for instant rollback
+            rm -rf dist-previous
+            [ -d dist ] && mv dist dist-previous
+
+            # Atomic swap — instant, no partial-file window
+            mv dist-new dist
