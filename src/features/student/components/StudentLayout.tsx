@@ -35,7 +35,7 @@ interface StudentLayoutProps {
 export const StudentLayout = ({
   children,
   activeTab = "dashboard",
-  isLocked = false,
+  isLocked,
   isNewStudent = false,
   showTopbar = true,
   onUpgradeClick,
