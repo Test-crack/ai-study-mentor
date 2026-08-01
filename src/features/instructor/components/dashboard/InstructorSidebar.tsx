@@ -1,9 +1,10 @@
 // src/features/Instructor/dashboard/InstructorSidebar.tsx
 import {
-  LayoutDashboard, LogOut, GraduationCap, ClipboardCheck,
+  LayoutDashboard, LogOut, ClipboardCheck,
   ChevronLeft, ChevronRight, Laptop, Home, GitMerge, Workflow,
   Settings, BarChart3, Layers
 } from "lucide-react";
+import testcrackLogo from '@/assets/testcrack-logo.svg';
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -66,9 +67,7 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
     >
       {/* ── Brand ── */}
       <div className={cn("flex items-center gap-3 mb-10", isCollapsed ? "justify-center" : "px-1")}>
-        <div className="shrink-0 bg-indigo-600 p-2 rounded-xl shadow-md shadow-indigo-500/25">
-          <GraduationCap className="h-5 w-5 text-white" />
-        </div>
+        <img src={testcrackLogo} alt="TestCrack" className="h-9 w-9 object-contain shrink-0" />
         {!isCollapsed && (
           <div className="animate-in fade-in duration-200">
             <span className="text-base font-black tracking-tight text-slate-900 dark:text-white">

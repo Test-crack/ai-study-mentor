@@ -1,17 +1,17 @@
-import { 
-  LayoutDashboard, 
-  Coins, 
+import {
+  LayoutDashboard,
+  Coins,
   LifeBuoy,
-  Users, 
+  Users,
   Building2,
-  LogOut, 
-  GraduationCap,
+  LogOut,
   ChevronLeft,
   ChevronRight,
   Home,
   Activity,
   CreditCard
 } from "lucide-react";
+import testcrackLogo from '@/assets/testcrack-logo.svg';
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -32,7 +32,7 @@ export const SuperAdminSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
   { id: 'superadmin-dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/superadmin/dashboard' },
   { id: 'institutes', icon: Building2, label: 'Institutes', path: '/superadmin/institutes' },
   { id: 'superadmin-subscription', icon: CreditCard, label: 'Subscription', path: '/superadmin/subscription' },
-  { id: 'question-bank', icon: CreditCard, label: 'Question Bank', path: '/superadmin/question' },
+  // { id: 'question-bank', icon: CreditCard, label: 'Question Bank', path: '/superadmin/question' },
   { id: 'pricing-config', icon: Coins, label: 'Pricing-Config', path: '/superadmin/priceconfig' },
   { id: 'support-tickets', icon: LifeBuoy, label: 'Support Tickets', path: '/superadmin/supportickets' },
   { id: 'platform-analytics', icon: Activity, label: 'Platform Analytics', path: '/superadmin/platform' },
@@ -69,12 +69,10 @@ export const SuperAdminSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
     >
       {/* Brand */}
       <div className={cn("flex items-center gap-3 mb-10", isCollapsed ? "justify-center px-0" : "px-2")}>
-        <div className="bg-indigo-600 p-2 rounded-lg shrink-0 shadow-md shadow-indigo-500/20">
-          <GraduationCap className="h-6 w-6 text-white" />
-        </div>
+        <img src={testcrackLogo} alt="TestCrack" className="h-9 w-9 object-contain shrink-0" />
         {!isCollapsed && (
           <span className="text-xl font-bold text-slate-900 dark:text-white tracking-wide animate-in fade-in duration-300">
-            TestCrack Super Admin 
+            TestCrack Super Admin
           </span>
         )}
       </div>
