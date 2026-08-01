@@ -274,6 +274,10 @@ export default function FullMockAssessment() {
   const [sectionTimerSec, setSectionTimerSec] = useState(-1);
   const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // CONTRACT-4: AI grading failed on submit (502 can_retry). Section is SUBMITTED server-side;
+  // show a retry banner in session rather than silently looping the student back in.
+  const [gradingRetryPending, setGradingRetryPending] = useState(false);
+
   // Audio / Passage
   const audioRef                            = useRef<HTMLAudioElement>(null);
   const [audioState, setAudioState]         = useState<"idle" | "playing" | "played">("idle");
@@ -319,9 +323,9 @@ export default function FullMockAssessment() {
     return () => clearInterval(t);
   }, [phase]);
 
-  // ── Section timer ─────────────────────────────────────────────────────────────
+  // ── Section timer — runs for section_intro too so timer is visible during Listening briefing ───
   useEffect(() => {
-    if (phase !== "session" || !sessionIdRef.current || !activeSectionName) return;
+    if ((phase !== "session" && phase !== "section_intro") || !sessionIdRef.current || !activeSectionName) return;
     const durationSec = (SECTION_DURATION_MIN[activeSectionName] ?? 30) * 60;
 
     const tick = () => {
@@ -336,7 +340,7 @@ export default function FullMockAssessment() {
 
   // ── Timer expiry → auto-submit section ───────────────────────────────────────
   useEffect(() => {
-    if (phase === "session" && sectionTimerSec === 0 && activeSectionName) {
+    if ((phase === "session" || phase === "section_intro") && sectionTimerSec === 0 && activeSectionName) {
       setIsRecording(false);
       void handleSectionComplete();
     }
@@ -493,6 +497,7 @@ export default function FullMockAssessment() {
     setAudioState("idle");
     setShowPassage(false);
     setIsRecording(false);
+    setGradingRetryPending(false);
   }
 
   // ─── Section completion ──────────────────────────────────────────────────────
@@ -516,9 +521,15 @@ export default function FullMockAssessment() {
       });
 
       if (!res.success) {
-        // Retry-able (AI grading down, etc.) — keep in session
-        console.error("[Mock] section submit failed:", res.error);
-        setPhase("session");
+        if (res.can_retry) {
+          // Section IS submitted server-side; only AI grading failed.
+          // Show retry banner in the session screen — student taps "Submit" again to retry grading.
+          setGradingRetryPending(true);
+          setPhase("session");
+        } else {
+          console.error("[Mock] section submit failed:", res.error);
+          setPhase("session");
+        }
         return;
       }
 
@@ -894,35 +905,51 @@ export default function FullMockAssessment() {
   // LISTENING INTRO GATE
   // ═══════════════════════════════════════════════════════════════════════════
 
-  const renderSectionIntro = () => (
-    <div className="max-w-2xl mx-auto animate-fade-in pt-12 px-4">
-      <div className="bg-white border border-slate-200 rounded-2xl p-8 sm:p-10 shadow-md">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-teal-600 text-white text-xs font-semibold tracking-wider uppercase mb-6 shadow-sm">
-          <span className="text-base leading-none">🎧</span> Section 1 · Listening
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight mb-2">Before you begin</h1>
-        <p className="text-slate-500 font-medium text-sm mb-8 leading-relaxed">Complete each set of questions as you listen. There's no separate transfer time.</p>
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-5 flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="font-semibold text-amber-800 text-sm mb-1">Audio plays once, like the real exam.</p>
-            <p className="text-amber-700 text-xs font-medium leading-relaxed">You cannot pause, rewind, or replay any recording. Scan the questions before the audio starts.</p>
+  const renderSectionIntro = () => {
+    const durationSec = (SECTION_DURATION_MIN["LISTENING"] ?? 30) * 60;
+    const isUrgent    = sectionTimerSec >= 0 && sectionTimerSec < 300;
+    return (
+      <div className="max-w-2xl mx-auto animate-fade-in pt-12 px-4">
+        <div className="bg-white border border-slate-200 rounded-2xl p-8 sm:p-10 shadow-md">
+          <div className="flex items-center justify-between mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-teal-600 text-white text-xs font-semibold tracking-wider uppercase shadow-sm">
+              <span className="text-base leading-none">🎧</span> Section 1 · Listening
+            </div>
+            {/* Live timer — visible so student knows time is running */}
+            {sectionTimerSec >= 0 && (
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border ${isUrgent ? "bg-rose-50 border-rose-200" : "bg-slate-50 border-slate-200"}`}>
+                <CircleTimer timeLeft={sectionTimerSec} total={durationSec} size={36} />
+                <div>
+                  <p className={`text-[9px] font-semibold uppercase tracking-wider ${isUrgent ? "text-rose-600" : "text-slate-500"}`}>Time left</p>
+                  <p className={`text-sm font-bold font-mono leading-none ${isUrgent ? "text-rose-700" : "text-slate-800"}`}>{formatTime(sectionTimerSec)}</p>
+                </div>
+              </div>
+            )}
           </div>
+          <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight mb-2">Before you begin</h1>
+          <p className="text-slate-500 font-medium text-sm mb-8 leading-relaxed">Complete each set of questions as you listen. There's no separate transfer time.</p>
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-5 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold text-amber-800 text-sm mb-1">Audio plays once, like the real exam.</p>
+              <p className="text-amber-700 text-xs font-medium leading-relaxed">You cannot pause, rewind, or replay any recording. Scan the questions before the audio starts.</p>
+            </div>
+          </div>
+          <ul className="flex flex-col gap-2.5 mb-8">
+            {["Use a quiet environment and headphones if possible.", "Your 30-minute section timer is already counting down.", "Answer as you listen — audio will not repeat."].map((tip, i) => (
+              <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600 font-medium">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" /><span>{tip}</span>
+              </li>
+            ))}
+          </ul>
+          <button onClick={() => setPhase("session")}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-none font-semibold text-base uppercase tracking-wide py-4 rounded-xl flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all">
+            Start Listening Section <ArrowRight className="w-5 h-5" />
+          </button>
         </div>
-        <ul className="flex flex-col gap-2.5 mb-8">
-          {["Use a quiet environment and headphones if possible.", "The section timer has already started.", "Answer as you listen — audio will not repeat."].map((tip, i) => (
-            <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600 font-medium">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" /><span>{tip}</span>
-            </li>
-          ))}
-        </ul>
-        <button onClick={() => setPhase("session")}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-none font-semibold text-base uppercase tracking-wide py-4 rounded-xl flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all">
-          Start Listening Section <ArrowRight className="w-5 h-5" />
-        </button>
       </div>
-    </div>
-  );
+    );
+  };
 
   // ═══════════════════════════════════════════════════════════════════════════
   // SESSION SCREEN
@@ -950,6 +977,16 @@ export default function FullMockAssessment() {
 
     return (
       <div className="max-w-6xl mx-auto pt-6 pb-16 px-4 animate-fade-in">
+        {/* AI grading retry banner — shown when grading failed but answers are saved server-side */}
+        {gradingRetryPending && (
+          <div className="flex items-start gap-3 bg-amber-50 border border-amber-300 rounded-xl p-4 mb-4 shadow-sm">
+            <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-semibold text-amber-800 text-sm">AI grading temporarily unavailable</p>
+              <p className="text-amber-700 text-xs mt-0.5">Your answers are saved. Click "Submit Section" again to retry grading — you don't need to re-answer anything.</p>
+            </div>
+          </div>
+        )}
         {/* Section badge + timer */}
         <div className="flex items-center justify-between bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 mb-6 gap-4 shadow-sm">
           <div className="flex items-center gap-4">
