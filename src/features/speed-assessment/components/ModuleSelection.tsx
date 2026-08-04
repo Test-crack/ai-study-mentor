@@ -42,7 +42,7 @@ export const ModuleSelection = ({
   return (
     <Card className="max-w-2xl mx-auto">
       <CardHeader className="text-center">
-        <CardTitle className="text-3xl bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+        <CardTitle className="text-3xl bg-gradient-to-r from-brand-blue-600 to-blue-600 bg-clip-text text-transparent">
           Reading Speed Assessment
         </CardTitle>
         <CardDescription className="text-lg">
@@ -89,7 +89,7 @@ export const ModuleSelection = ({
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-6">
           <div className="text-center space-y-2">
-            <BookOpen className="h-8 w-8 mx-auto text-purple-600" />
+            <BookOpen className="h-8 w-8 mx-auto text-brand-blue-600" />
             <h3 className="font-semibold">Read</h3>
             <p className="text-sm text-muted-foreground">Self-paced reading</p>
           </div>
@@ -108,7 +108,7 @@ export const ModuleSelection = ({
         <Button 
           onClick={onStartAssessment} 
           disabled={!selectedModule || !selectedDifficulty || loading}
-          className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+          className="w-full bg-gradient-to-r from-brand-blue-500 to-blue-500 hover:from-brand-blue-600 hover:to-blue-600"
         >
           {loading ? (
             <>

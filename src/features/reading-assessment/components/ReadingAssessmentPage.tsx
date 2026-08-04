@@ -11,7 +11,7 @@ const ReadingAssessment = () => {
   const [activeTab, setActiveTab] = useState("profile");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-brand-blue-50 via-blue-50 to-brand-teal-100">
       {/* Navbar */}
       <Navbar showNavItems={true} />
 
@@ -19,11 +19,11 @@ const ReadingAssessment = () => {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
-            <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-3 rounded-xl">
+            <div className="bg-gradient-to-r from-brand-blue-500 to-blue-500 p-3 rounded-xl">
               <BookOpen className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-brand-blue-600 to-blue-600 bg-clip-text text-transparent">
                 Reading Assessment
               </h1>
               <p className="text-gray-600 mt-1">
@@ -38,21 +38,21 @@ const ReadingAssessment = () => {
           <TabsList className="grid w-full grid-cols-3 mb-8 bg-white/80 backdrop-blur-sm p-1 h-auto">
             <TabsTrigger 
               value="profile" 
-              className="flex items-center gap-2 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-blue-500 data-[state=active]:text-white"
+              className="flex items-center gap-2 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-brand-blue-500 data-[state=active]:to-blue-500 data-[state=active]:text-white"
             >
               <User className="h-4 w-4" />
               <span className="hidden sm:inline">Profile</span>
             </TabsTrigger>
             <TabsTrigger 
               value="assessment" 
-              className="flex items-center gap-2 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-blue-500 data-[state=active]:text-white"
+              className="flex items-center gap-2 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-brand-blue-500 data-[state=active]:to-blue-500 data-[state=active]:text-white"
             >
               <TrendingUp className="h-4 w-4" />
               <span className="hidden sm:inline">Take Assessment</span>
             </TabsTrigger>
             <TabsTrigger 
               value="history" 
-              className="flex items-center gap-2 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-blue-500 data-[state=active]:text-white"
+              className="flex items-center gap-2 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-brand-blue-500 data-[state=active]:to-blue-500 data-[state=active]:text-white"
             >
               <History className="h-4 w-4" />
               <span className="hidden sm:inline">History</span>

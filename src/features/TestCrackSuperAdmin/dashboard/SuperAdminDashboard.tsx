@@ -15,8 +15,8 @@ import { fetchInstitutes, InstituteRecord } from '../services/superadminService'
 
 // --- Static Data ---
 const COLORS = [
-  'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-400',
-  'bg-purple-50 text-purple-700 dark:bg-purple-900/50 dark:text-purple-400',
+  'bg-brand-teal-50 text-brand-teal-700 dark:bg-brand-teal-900/50 dark:text-brand-teal-400',
+  'bg-brand-blue-50 text-brand-blue-700 dark:bg-brand-blue-900/50 dark:text-brand-blue-400',
   'bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400',
   'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400',
   'bg-rose-50 text-rose-700 dark:bg-rose-900/50 dark:text-rose-400',
@@ -33,12 +33,12 @@ const activities = [
   {
     text: <><span className="font-semibold text-slate-900 dark:text-white">Subscription upgraded</span> — SpeakWell — Institute Pro</>,
     time: 'Yesterday',
-    dotColor: 'bg-indigo-500'
+    dotColor: 'bg-brand-teal-500'
   },
   {
     text: <><span className="font-semibold text-slate-900 dark:text-white">Support ticket resolved</span> — Prestige University — API rate limit</>,
     time: 'Yesterday',
-    dotColor: 'bg-indigo-500'
+    dotColor: 'bg-brand-teal-500'
   },
   {
     text: <><span className="font-semibold text-slate-900 dark:text-white">Invoice paid</span> — ₹4,50,000 — Prestige University</>,
@@ -69,7 +69,7 @@ const tickets = [
     priority: 'MEDIUM',
     status: 'in-progress',
     priorityColor: 'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-500 dark:bg-amber-500/10 dark:border-amber-500/20',
-    statusColor: 'text-purple-600 bg-purple-50 border-purple-200 dark:text-purple-400 dark:bg-purple-500/10 dark:border-purple-500/20'
+    statusColor: 'text-brand-blue-600 bg-brand-blue-50 border-brand-blue-200 dark:text-brand-blue-400 dark:bg-brand-blue-500/10 dark:border-brand-blue-500/20'
   },
   {
     title: 'Trial extension request — 7 more days',
@@ -121,7 +121,7 @@ export default function SuperAdminDashboard() {
           <div className="max-w-[1400px] mx-auto space-y-6">
             
             {/* Header Banner */}
-            <div className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-800 p-6 sm:p-8 shadow-sm">
+            <div className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-brand-teal-600 to-brand-blue-800 p-6 sm:p-8 shadow-sm">
               <div className="relative z-10 flex flex-col gap-2">
                 <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
                   Super Admin Console
@@ -140,8 +140,8 @@ export default function SuperAdminDashboard() {
                   <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{loading ? '...' : institutes.length}</h3>
                   <p className="text-[10px] text-slate-500 mt-1">1 on trial</p>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center shrink-0">
-                  <Building2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                <div className="w-10 h-10 rounded-full bg-brand-teal-50 dark:bg-brand-teal-500/10 flex items-center justify-center shrink-0">
+                  <Building2 className="w-5 h-5 text-brand-teal-600 dark:text-brand-teal-400" />
                 </div>
               </div>
               
@@ -151,8 +151,8 @@ export default function SuperAdminDashboard() {
                   <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{loading ? '...' : totalStudents.toLocaleString()}</h3>
                   <p className="text-[10px] text-slate-500 mt-1">{totalTutors.toLocaleString()} tutors</p>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-purple-50 dark:bg-purple-500/10 flex items-center justify-center shrink-0">
-                  <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                <div className="w-10 h-10 rounded-full bg-brand-blue-50 dark:bg-brand-blue-500/10 flex items-center justify-center shrink-0">
+                  <Users className="w-5 h-5 text-brand-blue-600 dark:text-brand-blue-400" />
                 </div>
               </div>
 
@@ -185,7 +185,7 @@ export default function SuperAdminDashboard() {
               {/* Left Column - Institutes */}
               <div className="lg:col-span-2 space-y-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <Building2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                  <Building2 className="w-5 h-5 text-brand-teal-600 dark:text-brand-teal-400" />
                   <div>
                     <h2 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">Institutes</h2>
                     <p className="text-xs text-slate-500 dark:text-slate-400">All onboarded organizations</p>
@@ -195,7 +195,7 @@ export default function SuperAdminDashboard() {
                 <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-[#26252D] transition-colors">
                   {loading ? (
                     <div className="flex justify-center p-8">
-                      <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+                      <Loader2 className="w-6 h-6 animate-spin text-brand-teal-500" />
                     </div>
                   ) : institutes.length === 0 ? (
                     <div className="p-8 text-center text-slate-500 text-sm">No institutes found</div>

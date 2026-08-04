@@ -57,7 +57,7 @@ interface KpiCardProps {
   accent?: string;
 }
 
-function KpiCard({ icon, label, value, sub, accent = 'text-indigo-600 dark:text-indigo-400' }: KpiCardProps) {
+function KpiCard({ icon, label, value, sub, accent = 'text-brand-teal-600 dark:text-brand-teal-400' }: KpiCardProps) {
   return (
     <div className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl shadow-sm p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between">
@@ -142,8 +142,8 @@ function BandTable({ rows, onRowClick }: { rows: BandOverviewRow[]; onRowClick: 
             >
               <td className="px-4 py-3 whitespace-nowrap">
                 <div className="flex items-center gap-3">
-                  <div className="h-7 w-7 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">{row.name.charAt(0).toUpperCase()}</span>
+                  <div className="h-7 w-7 rounded-full bg-brand-teal-100 dark:bg-brand-teal-900/30 flex items-center justify-center flex-shrink-0">
+                    <span className="text-xs font-bold text-brand-teal-600 dark:text-brand-teal-400">{row.name.charAt(0).toUpperCase()}</span>
                   </div>
                   <span className="font-medium text-slate-800 dark:text-white truncate max-w-[120px]">{row.name}</span>
                   {row.is_at_risk && <AlertTriangle className="h-3.5 w-3.5 text-rose-500 flex-shrink-0" />}
@@ -240,7 +240,7 @@ export default function InstituteBatchDetailPage() {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => navigate(-1)}
-                className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-gray-400 hover:text-brand-teal-600 dark:hover:text-brand-teal-400 transition-colors"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Back
@@ -262,7 +262,7 @@ export default function InstituteBatchDetailPage() {
                     label="Active Students"
                     value={data.engagement_today.active_students}
                     sub={`${delta(data.engagement_today.active_students, data.engagement_today.active_yesterday)} vs yesterday`}
-                    accent="text-indigo-600 dark:text-indigo-400"
+                    accent="text-brand-teal-600 dark:text-brand-teal-400"
                   />
                   <KpiCard
                     icon={<Activity className="h-5 w-5" />}
@@ -288,8 +288,8 @@ export default function InstituteBatchDetailPage() {
                 {/* Period Summary */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl shadow-sm p-5 flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0">
-                      <ClipboardList className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                    <div className="h-10 w-10 rounded-xl bg-brand-teal-100 dark:bg-brand-teal-900/30 flex items-center justify-center flex-shrink-0">
+                      <ClipboardList className="h-5 w-5 text-brand-teal-600 dark:text-brand-teal-400" />
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wider">IA Completed (7 days)</p>
@@ -300,8 +300,8 @@ export default function InstituteBatchDetailPage() {
                     </div>
                   </div>
                   <div className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl shadow-sm p-5 flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center flex-shrink-0">
-                      <BookOpen className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                    <div className="h-10 w-10 rounded-xl bg-brand-blue-100 dark:bg-brand-blue-900/30 flex items-center justify-center flex-shrink-0">
+                      <BookOpen className="h-5 w-5 text-brand-blue-600 dark:text-brand-blue-400" />
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wider">Mock Completed (month)</p>
@@ -332,7 +332,7 @@ export default function InstituteBatchDetailPage() {
                   {/* Band Overview */}
                   <div className="lg:col-span-2 bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl shadow-sm overflow-hidden">
                     <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 dark:border-[#27272a]">
-                      <TrendingUp className="h-4 w-4 text-indigo-500" />
+                      <TrendingUp className="h-4 w-4 text-brand-teal-500" />
                       <h2 className="font-semibold text-sm text-slate-800 dark:text-white">Band Overview</h2>
                       <span className="ml-auto text-xs text-slate-500 dark:text-gray-400">Click a row to view full progress</span>
                     </div>

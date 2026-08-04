@@ -40,7 +40,7 @@ export const MarkdownRenderer = ({
   return (
     <Card className={`bg-white shadow-lg border-0 ${className}`}>
       {showTitle && (
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 px-6 py-4 border-b">
+        <div className="bg-gradient-to-r from-blue-50 to-brand-blue-50 px-6 py-4 border-b">
           <div className="flex items-center space-x-2">
             <div className="p-2 bg-blue-500 rounded-lg">
               <BookOpen className="w-5 h-5 text-white" />
@@ -122,7 +122,7 @@ export const MarkdownRenderer = ({
               
               // Enhanced blockquote
               blockquote: ({ children }) => (
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-400 p-4 my-4 rounded-r-lg">
+                <div className="bg-gradient-to-r from-blue-50 to-brand-teal-50 border-l-4 border-blue-400 p-4 my-4 rounded-r-lg">
                   <div className="flex items-start space-x-2">
                     <Lightbulb className="w-5 h-5 text-blue-500 mt-1 flex-shrink-0" />
                     <div className="text-blue-800 italic">
@@ -141,7 +141,7 @@ export const MarkdownRenderer = ({
               
               // Enhanced emphasis/italic
               em: ({ children }) => (
-                <em className="italic text-purple-700 font-medium">
+                <em className="italic text-brand-blue-700 font-medium">
                   {children}
                 </em>
               ),

@@ -46,7 +46,7 @@ export default function AlignmentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#09090E] font-sans text-slate-900 dark:text-slate-200 transition-colors duration-300 selection:bg-indigo-500/30">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#09090E] font-sans text-slate-900 dark:text-slate-200 transition-colors duration-300 selection:bg-brand-teal-500/30">
       
       <InstructorSidebar
         activeTab="alignment" 
@@ -81,7 +81,7 @@ export default function AlignmentPage() {
                     </button>
                     <button 
                       onClick={() => setShowReport(false)} 
-                      className="flex items-center gap-2 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-lg shadow-purple-900/20"
+                      className="flex items-center gap-2 bg-[#256B8B] hover:bg-[#185A78] text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-lg shadow-brand-blue-900/20"
                     >
                       <ArrowLeft className="w-4 h-4" /> Back to Analysis
                     </button>
@@ -96,7 +96,7 @@ export default function AlignmentPage() {
               {/* Stats & Summary */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#1E1E2A] rounded-xl p-8 flex flex-col items-center text-center shadow-sm dark:shadow-none">
-                  <Users className="w-8 h-8 text-purple-600 dark:text-purple-500 mb-4" />
+                  <Users className="w-8 h-8 text-brand-blue-600 dark:text-brand-blue-500 mb-4" />
                   <div className="text-3xl font-bold text-slate-900 dark:text-white mb-1">64</div>
                   <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Students</div>
                 </div>
@@ -127,10 +127,10 @@ export default function AlignmentPage() {
               <div className="bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#1E1E2A] rounded-xl p-6 sm:p-8 shadow-sm dark:shadow-none">
                 <div className="flex justify-between items-end mb-4">
                   <h2 className="text-lg font-bold text-slate-900 dark:text-white">Grading Alignment Quality</h2>
-                  <span className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">42%</span>
+                  <span className="text-2xl font-bold text-brand-teal-600 dark:text-brand-teal-400">42%</span>
                 </div>
                 <div className="w-full bg-slate-100 dark:bg-[#1A1A24] h-4 rounded-full mb-4 overflow-hidden border border-slate-200 dark:border-[#2A2A3A]">
-                  <div className="bg-indigo-600 h-full rounded-full shadow-[0_0_12px_rgba(79,70,229,0.5)]" style={{ width: '42%' }}></div>
+                  <div className="bg-brand-teal-600 h-full rounded-full shadow-[0_0_12px_rgba(79,70,229,0.5)]" style={{ width: '42%' }}></div>
                 </div>
               </div>
 
@@ -144,7 +144,7 @@ export default function AlignmentPage() {
               <div className="flex justify-end mb-4">
                 <button 
                   onClick={() => setShowReport(true)}
-                  className="flex items-center gap-2 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-lg shadow-purple-900/20 shrink-0"
+                  className="flex items-center gap-2 bg-[#256B8B] hover:bg-[#185A78] text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-lg shadow-brand-blue-900/20 shrink-0"
                 >
                   <Download className="w-5 h-5" /> Dean's Report
                 </button>
@@ -153,7 +153,7 @@ export default function AlignmentPage() {
               {/* Teacher-AI Calibration Header */}
               <div className="pt-2 mb-2">
                 <h2 className="text-xl font-bold flex items-center mb-2 text-slate-900 dark:text-white">
-                  <Eye className="w-5 h-5 mr-2 text-indigo-600 dark:text-indigo-400" /> Teacher-AI Calibration
+                  <Eye className="w-5 h-5 mr-2 text-brand-teal-600 dark:text-brand-teal-400" /> Teacher-AI Calibration
                 </h2>
                 <p className="text-xs text-slate-600 dark:text-slate-400 max-w-5xl leading-relaxed font-medium">
                   When teacher grades and AI assessments diverge, students receive inconsistent signals about their readiness. Over-grading creates false confidence, under-grading buries hidden talent.
@@ -162,7 +162,7 @@ export default function AlignmentPage() {
 
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-0 bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#1E1E2A] rounded-xl p-5 divide-x divide-slate-100 dark:divide-[#1E1E2A] shadow-sm dark:shadow-none">
                 <div className="text-center px-4">
-                  <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mb-1">42%</div>
+                  <div className="text-2xl font-bold text-brand-teal-600 dark:text-brand-teal-400 mb-1">42%</div>
                   <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Alignment Rate</div>
                 </div>
                 <div className="text-center px-4">
@@ -202,7 +202,7 @@ export default function AlignmentPage() {
                         </div>
                         <button 
                           onClick={() => handleReassess(student.name)}
-                          className="flex items-center text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-colors bg-slate-50 dark:bg-[#1A1A24] border border-slate-200 dark:border-transparent px-3 py-1.5 rounded-md"
+                          className="flex items-center text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-brand-teal-600 dark:hover:text-white transition-colors bg-slate-50 dark:bg-[#1A1A24] border border-slate-200 dark:border-transparent px-3 py-1.5 rounded-md"
                         >
                           Re-assess <ChevronRight className="w-3.5 h-3.5 ml-1" />
                         </button>

@@ -45,7 +45,7 @@ function SubSkillRow({ ss }: { ss: MockSubSkillScore }) {
       >
         <div className="flex items-center gap-1.5 min-w-0">
           <span className="text-slate-500 dark:text-slate-400 truncate">{titleCase(ss.sub_skill)}</span>
-          {ss.ai_feedback && <Cpu className="h-2.5 w-2.5 text-indigo-400 shrink-0" />}
+          {ss.ai_feedback && <Cpu className="h-2.5 w-2.5 text-brand-teal-400 shrink-0" />}
         </div>
         <div className="flex items-center gap-2 shrink-0 ml-2">
           <div className="w-16 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
@@ -72,7 +72,7 @@ function SubSkillRow({ ss }: { ss: MockSubSkillScore }) {
       </div>
 
       {open && ss.ai_feedback && (
-        <div className="rounded-lg border border-indigo-100 dark:border-indigo-500/20 bg-indigo-50/50 dark:bg-indigo-500/5 p-2.5 space-y-1.5 mb-1">
+        <div className="rounded-lg border border-brand-teal-100 dark:border-brand-teal-500/20 bg-brand-teal-50/50 dark:bg-brand-teal-500/5 p-2.5 space-y-1.5 mb-1">
           {ss.ai_feedback.rationale && (
             <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
               {ss.ai_feedback.rationale}
@@ -82,7 +82,7 @@ function SubSkillRow({ ss }: { ss: MockSubSkillScore }) {
             <ul className="space-y-1">
               {ss.ai_feedback.key_observations.map((obs, i) => (
                 <li key={i} className="flex items-start gap-1.5 text-[11px] text-slate-600 dark:text-slate-400">
-                  <CheckCircle2 className="h-2.5 w-2.5 text-indigo-400 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="h-2.5 w-2.5 text-brand-teal-400 shrink-0 mt-0.5" />
                   {obs}
                 </li>
               ))}
@@ -105,7 +105,7 @@ function SkillCard({ sk }: { sk: MockSkillScore }) {
           {titleCase(sk.skill)}
         </span>
         <div className="flex items-center gap-1.5">
-          {sk.ai_graded && <Cpu className="h-3 w-3 text-indigo-400" />}
+          {sk.ai_graded && <Cpu className="h-3 w-3 text-brand-teal-400" />}
           <span className={cn('text-lg font-black', bandColorText(band))}>
             {band !== null ? band.toFixed(1) : '—'}
           </span>
@@ -232,7 +232,7 @@ export function MockSessionsTab({ sessions }: Props) {
         {[
           { label: 'Total Mocks',   value: sessions.length,  cls: 'text-slate-800 dark:text-white' },
           { label: 'Completed',     value: completed.length,  cls: 'text-emerald-600 dark:text-emerald-400' },
-          { label: 'Avg Real Band', value: avgBand ?? '—',    cls: 'text-indigo-600 dark:text-indigo-400' },
+          { label: 'Avg Real Band', value: avgBand ?? '—',    cls: 'text-brand-teal-600 dark:text-brand-teal-400' },
         ].map(c => (
           <div key={c.label} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-3 text-center">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{c.label}</p>

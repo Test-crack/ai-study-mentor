@@ -98,10 +98,10 @@ function AddAdminModal({ onClose, onAdded }: AddModalProps) {
 
         {/* Header */}
         <div className="relative flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-white/[0.06] bg-gradient-to-r from-[#eff4ff] to-[#f3f0ff] dark:from-[#111827] dark:to-[#1e1b4b]">
-          <div aria-hidden className="pointer-events-none absolute -top-10 -right-8 w-32 h-32 rounded-full bg-indigo-300/25 dark:bg-indigo-500/15 blur-2xl" />
+          <div aria-hidden className="pointer-events-none absolute -top-10 -right-8 w-32 h-32 rounded-full bg-brand-teal-300/25 dark:bg-brand-teal-500/15 blur-2xl" />
           <div className="relative flex items-center gap-3">
             <div className="p-2 bg-white/70 dark:bg-white/[0.08] backdrop-blur rounded-xl shadow-sm">
-              <ShieldCheck className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              <ShieldCheck className="w-5 h-5 text-brand-teal-600 dark:text-brand-teal-400" />
             </div>
             <div>
               <h2 className="font-bold tracking-tight text-slate-900 dark:text-white text-base">Add Institute Admin</h2>
@@ -122,7 +122,7 @@ function AddAdminModal({ onClose, onAdded }: AddModalProps) {
               <input
                 type="text" required value={form.adminName} onChange={set('adminName')}
                 placeholder="Admin full name"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-white/[0.04] border border-slate-200/70 dark:border-white/[0.08] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 dark:focus:border-indigo-500/40 dark:text-white placeholder-slate-400 transition-colors"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-white/[0.04] border border-slate-200/70 dark:border-white/[0.08] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal-500/30 focus:border-brand-teal-400 dark:focus:border-brand-teal-500/40 dark:text-white placeholder-slate-400 transition-colors"
               />
             </div>
           </div>
@@ -134,14 +134,14 @@ function AddAdminModal({ onClose, onAdded }: AddModalProps) {
               <input
                 type="email" required value={form.adminEmail} onChange={set('adminEmail')}
                 placeholder="admin@institute.com"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-white/[0.04] border border-slate-200/70 dark:border-white/[0.08] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 dark:focus:border-indigo-500/40 dark:text-white placeholder-slate-400 transition-colors"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-white/[0.04] border border-slate-200/70 dark:border-white/[0.08] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal-500/30 focus:border-brand-teal-400 dark:focus:border-brand-teal-500/40 dark:text-white placeholder-slate-400 transition-colors"
               />
             </div>
           </div>
 
-          <div className="flex items-start gap-2 bg-indigo-50/80 dark:bg-indigo-500/[0.07] ring-1 ring-inset ring-indigo-600/10 dark:ring-indigo-400/15 rounded-xl p-3.5">
-            <CheckCircle2 className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
-            <p className="text-xs text-indigo-700 dark:text-indigo-300 leading-relaxed">
+          <div className="flex items-start gap-2 bg-brand-teal-50/80 dark:bg-brand-teal-500/[0.07] ring-1 ring-inset ring-brand-teal-600/10 dark:ring-brand-teal-400/15 rounded-xl p-3.5">
+            <CheckCircle2 className="w-4 h-4 text-brand-teal-500 mt-0.5 shrink-0" />
+            <p className="text-xs text-brand-teal-700 dark:text-brand-teal-300 leading-relaxed">
               The admin will receive a Supabase invite email. Once they accept and set a password, they'll have access to the Institute Admin dashboard.
             </p>
           </div>
@@ -152,7 +152,7 @@ function AddAdminModal({ onClose, onAdded }: AddModalProps) {
               Cancel
             </button>
             <button type="submit" disabled={loading}
-              className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white text-sm font-semibold transition-all shadow-sm hover:shadow flex items-center justify-center gap-2 disabled:opacity-60">
+              className="flex-1 py-2.5 rounded-xl bg-brand-teal-600 hover:bg-brand-teal-700 dark:bg-brand-teal-500 dark:hover:bg-brand-teal-600 text-white text-sm font-semibold transition-all shadow-sm hover:shadow flex items-center justify-center gap-2 disabled:opacity-60">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
               {loading ? 'Adding...' : 'Add & Send Invite'}
             </button>
@@ -278,19 +278,19 @@ export default function InstituteAdmins() {
           <div className="max-w-[1200px] mx-auto">
 
             {/* ── Hero Banner ─────────────────────────────────────────────── */}
-            <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-indigo-100/80 dark:border-white/[0.06] bg-gradient-to-r from-[#eff4ff] via-[#f4f1ff] to-[#f3f0ff] dark:from-[#111827] dark:via-[#161a38] dark:to-[#1e1b4b] px-5 sm:px-8 pt-6 sm:pt-8 pb-16 sm:pb-20 shadow-sm">
+            <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-brand-teal-100/80 dark:border-white/[0.06] bg-gradient-to-r from-[#eff4ff] via-[#f4f1ff] to-[#f3f0ff] dark:from-[#111827] dark:via-[#161a38] dark:to-[#1e1b4b] px-5 sm:px-8 pt-6 sm:pt-8 pb-16 sm:pb-20 shadow-sm">
               <div aria-hidden className="pointer-events-none select-none absolute inset-0">
-                <div className="absolute -top-20 -right-12 w-64 h-64 rounded-full bg-indigo-300/25 dark:bg-indigo-500/15 blur-3xl" />
-                <div className="absolute -bottom-28 left-1/3 w-72 h-72 rounded-full bg-violet-300/20 dark:bg-violet-500/10 blur-3xl" />
+                <div className="absolute -top-20 -right-12 w-64 h-64 rounded-full bg-brand-teal-300/25 dark:bg-brand-teal-500/15 blur-3xl" />
+                <div className="absolute -bottom-28 left-1/3 w-72 h-72 rounded-full bg-brand-blue-300/20 dark:bg-brand-blue-500/10 blur-3xl" />
               </div>
 
               <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div>
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-300 bg-white/60 dark:bg-white/[0.06] border border-white/70 dark:border-white/[0.08] backdrop-blur px-2.5 py-1 rounded-full">
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-brand-teal-600 dark:text-brand-teal-300 bg-white/60 dark:bg-white/[0.06] border border-white/70 dark:border-white/[0.08] backdrop-blur px-2.5 py-1 rounded-full">
                     <Sparkles className="w-3 h-3" /> Owner Portal
                   </span>
                   <h1 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                    Institute <span className="text-indigo-600 dark:text-indigo-400">Admins</span>
+                    Institute <span className="text-brand-teal-600 dark:text-brand-teal-400">Admins</span>
                   </h1>
                   <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
                     {loading ? '...' : `${admins.length} admin${admins.length !== 1 ? 's' : ''} managing your institute`}
@@ -316,12 +316,12 @@ export default function InstituteAdmins() {
                   placeholder="Search admins..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-white/[0.04] border border-slate-200/70 dark:border-white/[0.08] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300 dark:focus:border-indigo-500/40 transition-colors dark:text-white placeholder-slate-400"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-white/[0.04] border border-slate-200/70 dark:border-white/[0.08] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal-500/30 focus:border-brand-teal-300 dark:focus:border-brand-teal-500/40 transition-colors dark:text-white placeholder-slate-400"
                 />
               </div>
               <button
                 onClick={() => setShowAddModal(true)}
-                className="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white rounded-xl text-sm font-semibold transition-all shadow-sm hover:shadow"
+                className="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2.5 bg-brand-teal-600 hover:bg-brand-teal-700 dark:bg-brand-teal-500 dark:hover:bg-brand-teal-600 text-white rounded-xl text-sm font-semibold transition-all shadow-sm hover:shadow"
               >
                 <Plus className="w-4 h-4" />
                 Add Admin
@@ -332,7 +332,7 @@ export default function InstituteAdmins() {
             <div className="mt-6 rounded-2xl bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] shadow-sm overflow-hidden">
               {loading ? (
                 <div className="py-16 flex justify-center">
-                  <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+                  <Loader2 className="w-6 h-6 animate-spin text-brand-teal-500" />
                 </div>
               ) : filteredAdmins.length === 0 ? (
                 <div className="py-14 text-center">
@@ -365,7 +365,7 @@ export default function InstituteAdmins() {
                               {admin.profileImage ? (
                                 <img src={admin.profileImage} alt="" className="w-9 h-9 rounded-full object-cover shrink-0 ring-1 ring-slate-200/70 dark:ring-white/10" />
                               ) : (
-                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-500/20 dark:to-violet-500/20 ring-1 ring-indigo-200/60 dark:ring-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-sm font-bold shrink-0">
+                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand-teal-100 to-brand-blue-100 dark:from-brand-teal-500/20 dark:to-brand-blue-500/20 ring-1 ring-brand-teal-200/60 dark:ring-brand-teal-500/20 text-brand-teal-600 dark:text-brand-teal-400 flex items-center justify-center text-sm font-bold shrink-0">
                                   {getInitials(admin.name, admin.email)}
                                 </div>
                               )}
@@ -389,7 +389,7 @@ export default function InstituteAdmins() {
 
                           {/* Role Badge */}
                           <td className="px-4 py-3 text-center">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400 ring-1 ring-inset ring-indigo-600/20 dark:ring-indigo-400/25">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider bg-brand-teal-50 text-brand-teal-700 dark:bg-brand-teal-500/10 dark:text-brand-teal-400 ring-1 ring-inset ring-brand-teal-600/20 dark:ring-brand-teal-400/25">
                               <ShieldCheck className="w-3 h-3" /> ADMIN
                             </span>
                           </td>

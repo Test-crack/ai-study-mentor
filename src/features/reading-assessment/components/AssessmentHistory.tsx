@@ -111,10 +111,10 @@ export const AssessmentHistory = () => {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.3 }}
       >
-      <Card className="bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200">
+      <Card className="bg-gradient-to-br from-brand-blue-50 to-blue-50 border-brand-blue-200">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-6 rounded-full">
+            <div className="bg-gradient-to-r from-brand-blue-500 to-blue-500 p-6 rounded-full">
               <History className="h-12 w-12 text-white" />
             </div>
           </div>
@@ -141,7 +141,7 @@ export const AssessmentHistory = () => {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <CardTitle className="text-2xl flex items-center gap-2">
-                <History className="h-6 w-6 text-purple-600" />
+                <History className="h-6 w-6 text-brand-blue-600" />
                 Assessment History
               </CardTitle>
               <CardDescription>
@@ -191,18 +191,18 @@ export const AssessmentHistory = () => {
       {/* Stats Overview */}
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+          <Card className="bg-gradient-to-br from-brand-blue-50 to-brand-blue-100 border-brand-blue-200">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm text-purple-700 flex items-center gap-2">
+              <CardTitle className="text-sm text-brand-blue-700 flex items-center gap-2">
                 <Zap className="h-4 w-4" />
                 Avg Speed
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-purple-900">
+              <div className="text-2xl font-bold text-brand-blue-900">
                 {stats.avgWPM} <span className="text-sm">WPM</span>
               </div>
-              <p className="text-xs text-purple-600 mt-1">
+              <p className="text-xs text-brand-blue-600 mt-1">
                 Peak: {stats.maxWPM} WPM
               </p>
             </CardContent>

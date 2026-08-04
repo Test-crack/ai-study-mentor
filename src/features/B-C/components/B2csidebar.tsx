@@ -61,7 +61,7 @@ export default function B2CSidebar({
       {isCollapsed && (
         <button
           onClick={toggleCollapse}
-          className="md:hidden fixed top-1/2 left-0 -translate-y-1/2 z-40 py-3 px-1.5 bg-indigo-500/90 hover:bg-indigo-600 text-white rounded-r-xl shadow-lg border border-l-0 border-indigo-400 backdrop-blur-sm transition-transform flex items-center"
+          className="md:hidden fixed top-1/2 left-0 -translate-y-1/2 z-40 py-3 px-1.5 bg-brand-teal-500/90 hover:bg-brand-teal-600 text-white rounded-r-xl shadow-lg border border-l-0 border-brand-teal-400 backdrop-blur-sm transition-transform flex items-center"
           aria-label="Open navigation"
         >
           <Menu className="w-5 h-5" />
@@ -84,13 +84,13 @@ export default function B2CSidebar({
       >
         {/* ── Logo ── */}
         <div className="flex items-center gap-3 px-4 py-5 border-b border-slate-100 dark:border-slate-800">
-          <div className="flex-shrink-0 w-9 h-9 bg-indigo-500 rounded-xl flex items-center justify-center shadow-sm">
+          <div className="flex-shrink-0 w-9 h-9 bg-brand-teal-500 rounded-xl flex items-center justify-center shadow-sm">
             <Gamepad2 className="w-4.5 h-4.5 text-white" />
           </div>
           {!isCollapsed && (
             <div className="overflow-hidden">
               <p className="text-slate-800 dark:text-white font-black text-sm leading-none">TestCrack</p>
-              <p className="text-indigo-400 text-[10px] font-bold tracking-widest uppercase mt-0.5">Games</p>
+              <p className="text-brand-teal-400 text-[10px] font-bold tracking-widest uppercase mt-0.5">Games</p>
             </div>
           )}
         </div>
@@ -105,11 +105,11 @@ export default function B2CSidebar({
                 <p className="text-sm font-black text-orange-600 dark:text-orange-400 leading-none">{streak}d</p>
               </div>
             </div>
-            <div className="flex-1 flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-500/10 rounded-lg px-2.5 py-2">
-              <Zap className="w-3.5 h-3.5 text-indigo-500 flex-shrink-0" />
+            <div className="flex-1 flex items-center gap-1.5 bg-brand-teal-50 dark:bg-brand-teal-500/10 rounded-lg px-2.5 py-2">
+              <Zap className="w-3.5 h-3.5 text-brand-teal-500 flex-shrink-0" />
               <div>
-                <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-wider leading-none">Pts</p>
-                <p className="text-sm font-black text-indigo-600 dark:text-indigo-400 leading-none">{momentum}</p>
+                <p className="text-[9px] font-bold text-brand-teal-400 uppercase tracking-wider leading-none">Pts</p>
+                <p className="text-sm font-black text-brand-teal-600 dark:text-brand-teal-400 leading-none">{momentum}</p>
               </div>
             </div>
           </div>
@@ -123,7 +123,7 @@ export default function B2CSidebar({
             className={cn(
               'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left group',
               isActive('/b2c/dashboard')
-                ? 'bg-indigo-500 text-white shadow-sm'
+                ? 'bg-brand-teal-500 text-white shadow-sm'
                 : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
             )}
           >
@@ -137,7 +137,7 @@ export default function B2CSidebar({
             className={cn(
               'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left',
               isActive('/b2c/leaderboard')
-                ? 'bg-indigo-500 text-white shadow-sm'
+                ? 'bg-brand-teal-500 text-white shadow-sm'
                 : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
             )}
           >
@@ -159,7 +159,7 @@ export default function B2CSidebar({
               className={cn(
                 'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left group',
                 isActive(game.path)
-                  ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'
+                  ? 'bg-brand-teal-50 dark:bg-brand-teal-500/10 text-brand-teal-600 dark:text-brand-teal-400'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
               )}
             >
@@ -168,7 +168,7 @@ export default function B2CSidebar({
                 <div className="flex items-center justify-between flex-1 min-w-0">
                   <span className="text-sm font-medium truncate">{game.label}</span>
                   {game.badge && (
-                    <span className="text-[9px] font-black bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded-full uppercase tracking-wider flex-shrink-0">
+                    <span className="text-[9px] font-black bg-brand-teal-100 dark:bg-brand-teal-500/20 text-brand-teal-600 dark:text-brand-teal-400 px-1.5 py-0.5 rounded-full uppercase tracking-wider flex-shrink-0">
                       {game.badge}
                     </span>
                   )}

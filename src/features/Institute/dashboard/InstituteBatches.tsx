@@ -156,7 +156,7 @@ export default function InstituteBatches() {
 
   // Dynamic Metrics
   const dynamicMetrics = [
-    { title: "Active Batches", value: batches.length.toString(), icon: BookOpen, color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-500/10", border: "border-indigo-100 dark:border-indigo-500/20" },
+    { title: "Active Batches", value: batches.length.toString(), icon: BookOpen, color: "text-brand-teal-600", bg: "bg-brand-teal-50 dark:bg-brand-teal-500/10", border: "border-brand-teal-100 dark:border-brand-teal-500/20" },
     { title: "Total Enrolled", value: batches.reduce((acc, batch) => acc + batch.students, 0).toString(), icon: Users, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-500/10", border: "border-blue-100 dark:border-blue-500/20" },
     { title: "Avg Improvement", value: "+15%", icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-500/10", border: "border-emerald-100 dark:border-emerald-500/20", isPositive: true },
     { title: "At-Risk Students", value: batches.reduce((acc, batch) => acc + batch.atRiskCount, 0).toString(), icon: AlertTriangle, color: "text-rose-600", bg: "bg-rose-50 dark:bg-rose-500/10", border: "border-rose-100 dark:border-rose-500/20" },
@@ -252,7 +252,7 @@ export default function InstituteBatches() {
   const getCategoryColor = (category) => {
     switch (category) {
       case 'IELTS': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 border-blue-200 dark:border-blue-800';
-      case 'Spoken English': return 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400 border-purple-200 dark:border-purple-800';
+      case 'Spoken English': return 'bg-brand-blue-100 text-brand-blue-700 dark:bg-brand-blue-900/40 dark:text-brand-blue-400 border-brand-blue-200 dark:border-brand-blue-800';
       case 'Tech Prep': return 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-400 border-teal-200 dark:border-teal-800';
       default: return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700';
     }
@@ -285,7 +285,7 @@ export default function InstituteBatches() {
               <div className="flex items-center gap-3">
                 <button 
                   onClick={openCreateModal}
-                  className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
+                  className="flex items-center justify-center gap-2 px-4 py-2 bg-brand-teal-600 hover:bg-brand-teal-700 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
                 >
                   <Plus className="w-4 h-4" />
                   Create Batch
@@ -321,7 +321,7 @@ export default function InstituteBatches() {
                     onClick={() => setActiveCategory(cat)}
                     className={`px-4 py-2 rounded-full text-sm font-semibold transition-all whitespace-nowrap ${
                       activeCategory === cat 
-                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20 border border-indigo-600' 
+                        ? 'bg-brand-teal-600 text-white shadow-md shadow-brand-teal-600/20 border border-brand-teal-600' 
                         : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
                     }`}
                   >
@@ -337,7 +337,7 @@ export default function InstituteBatches() {
                   placeholder="Search batches or tutors..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm font-medium text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 transition-all text-sm font-medium text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
                 />
               </div>
             </div>
@@ -355,7 +355,7 @@ export default function InstituteBatches() {
                           {batch.category}
                         </span>
                         {batch.status && (
-                          <span className={`px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold rounded border ${batch.status === 'New' ? 'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:border-indigo-800' : 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800'}`}>
+                          <span className={`px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold rounded border ${batch.status === 'New' ? 'bg-brand-teal-100 text-brand-teal-700 border-brand-teal-200 dark:bg-brand-teal-900/30 dark:text-brand-teal-400 dark:border-brand-teal-800' : 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800'}`}>
                             {batch.status}
                           </span>
                         )}
@@ -412,7 +412,7 @@ export default function InstituteBatches() {
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
                       {/* Tutor */}
                       <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/50 py-1.5 px-3 rounded-lg border border-slate-100 dark:border-slate-800">
-                        <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-700 dark:text-indigo-400 font-bold text-xs shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-brand-teal-100 dark:bg-brand-teal-900/50 flex items-center justify-center text-brand-teal-700 dark:text-brand-teal-400 font-bold text-xs shrink-0">
                           {batch.tutor ? batch.tutor.split(' ').map(n => n[0]).join('') : '?'}
                         </div>
                         <span className="text-sm font-semibold text-slate-900 dark:text-slate-200">{batch.tutor || 'Unassigned'}</span>
@@ -458,7 +458,7 @@ export default function InstituteBatches() {
                       </p>
                       <h4 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{batch.progress}%</h4>
                       <div className="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
-                        <div className="bg-indigo-600 dark:bg-indigo-500 h-full rounded-full" style={{ width: `${batch.progress}%` }} />
+                        <div className="bg-brand-teal-600 dark:bg-brand-teal-500 h-full rounded-full" style={{ width: `${batch.progress}%` }} />
                       </div>
                     </div>
 
@@ -526,7 +526,7 @@ export default function InstituteBatches() {
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="e.g. IELTS Weekend Intensive"
-                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm dark:text-white"
+                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 text-sm dark:text-white"
                 />
               </div>
 
@@ -537,7 +537,7 @@ export default function InstituteBatches() {
                     name="category"
                     value={formData.category}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm dark:text-white"
+                    className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 text-sm dark:text-white"
                   >
                     <option value="IELTS">IELTS</option>
                     <option value="Spoken English">Spoken English</option>
@@ -554,7 +554,7 @@ export default function InstituteBatches() {
                     value={formData.capacity}
                     onChange={handleInputChange}
                     placeholder="e.g. 30"
-                    className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm dark:text-white"
+                    className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 text-sm dark:text-white"
                   />
                 </div>
               </div>
@@ -568,7 +568,7 @@ export default function InstituteBatches() {
                     required
                     value={formData.startDate}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm dark:text-white"
+                    className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 text-sm dark:text-white"
                   />
                 </div>
                 <div>
@@ -579,7 +579,7 @@ export default function InstituteBatches() {
                     required
                     value={formData.endDate}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm dark:text-white"
+                    className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 text-sm dark:text-white"
                   />
                 </div>
               </div>
@@ -591,7 +591,7 @@ export default function InstituteBatches() {
                   required
                   value={formData.tutor}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm dark:text-white"
+                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 text-sm dark:text-white"
                 >
                   <option value="" disabled>Select a tutor...</option>
                   {availableTutors.map((tutorName, idx) => (
@@ -612,7 +612,7 @@ export default function InstituteBatches() {
                 </button>
                 <button 
                   type="submit"
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
+                  className="px-4 py-2 bg-brand-teal-600 hover:bg-brand-teal-700 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
                 >
                   {editingBatchId ? 'Save Changes' : 'Create Batch'}
                 </button>
@@ -644,7 +644,7 @@ export default function InstituteBatches() {
                   required
                   value={selectedStudent}
                   onChange={(e) => setSelectedStudent(e.target.value)}
-                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm dark:text-white"
+                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 text-sm dark:text-white"
                 >
                   <option value="" disabled>Select from institute roster...</option>
                   {availableStudents.map((studentName, idx) => (
@@ -665,7 +665,7 @@ export default function InstituteBatches() {
                 </button>
                 <button 
                   type="submit"
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
+                  className="px-4 py-2 bg-brand-teal-600 hover:bg-brand-teal-700 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
                 >
                   Add to Batch
                 </button>

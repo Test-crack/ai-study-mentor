@@ -193,7 +193,7 @@ export function ModuleContent({
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin text-purple-600 mx-auto" />
+          <Loader2 className="h-8 w-8 animate-spin text-brand-blue-600 mx-auto" />
           <p className="text-gray-600">Loading module content...</p>
         </div>
       </div>
@@ -242,7 +242,7 @@ export function ModuleContent({
               </div>
               <div className="text-right">
                 <p className="text-sm text-gray-500">Progress</p>
-                <p className="text-lg font-semibold text-purple-600">
+                <p className="text-lg font-semibold text-brand-blue-600">
                   {completedCount}/{totalItems}
                 </p>
               </div>
@@ -265,7 +265,7 @@ export function ModuleContent({
                     className={cn(
                       'flex items-center gap-2 px-3 py-2 rounded-full text-sm whitespace-nowrap transition-all',
                       isActive
-                        ? 'bg-purple-600 text-white'
+                        ? 'bg-brand-blue-600 text-white'
                         : itemCompleted
                         ? 'bg-green-100 text-green-700 hover:bg-green-200'
                         : canAccess
@@ -302,7 +302,7 @@ export function ModuleContent({
                     'text-xs',
                     currentItem?.type === 'NOTES'
                       ? 'border-blue-200 text-blue-700 bg-blue-50'
-                      : 'border-purple-200 text-purple-700 bg-purple-50'
+                      : 'border-brand-blue-200 text-brand-blue-700 bg-brand-blue-50'
                   )}
                 >
                   {currentItem?.type === 'NOTES' ? (
@@ -406,7 +406,7 @@ export function ModuleContent({
               className={cn(
                 'gap-2 transition-all',
                 isCurrentCompleted
-                  ? 'bg-purple-600 hover:bg-purple-700 shadow-md hover:shadow-lg'
+                  ? 'bg-brand-blue-600 hover:bg-brand-blue-700 shadow-md hover:shadow-lg'
                   : 'bg-gray-300 cursor-not-allowed'
               )}
             >
@@ -434,7 +434,7 @@ export function ModuleContent({
               className={cn(
                 'gap-2 transition-all',
                 allCompleted
-                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-lg hover:shadow-xl'
+                  ? 'bg-gradient-to-r from-brand-blue-600 to-brand-teal-600 hover:from-brand-blue-700 hover:to-brand-teal-700 shadow-lg hover:shadow-xl'
                   : 'bg-gray-300 cursor-not-allowed'
               )}
             >

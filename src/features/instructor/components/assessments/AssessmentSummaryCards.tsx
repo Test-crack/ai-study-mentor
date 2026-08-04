@@ -90,7 +90,7 @@ export function AssessmentSummaryCards({ iaSummary, mockSummary, totalStudents }
       label:      'At / Above Target',
       value:      mockSummary.at_or_above_target,
       sub:        `${mockSummary.no_mock_yet} students haven't done a mock yet`,
-      valueClass: 'text-indigo-600 dark:text-indigo-400',
+      valueClass: 'text-brand-teal-600 dark:text-brand-teal-400',
       accent:     'border-slate-200 dark:border-slate-800',
     },
   ];

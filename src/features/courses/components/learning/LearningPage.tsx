@@ -155,7 +155,7 @@ const LearningPage = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto" />
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue-600 mx-auto" />
           <p className="text-gray-600">Loading course...</p>
         </div>
       </div>
@@ -183,7 +183,7 @@ const LearningPage = () => {
         <div className="text-center space-y-4 max-w-md px-4">
           <p className="text-gray-900 font-semibold">Access Denied</p>
           <p className="text-gray-600 text-sm">You need to enroll in this course to access the content.</p>
-          <Button onClick={() => navigate(`/courses/${slug}`)} className="bg-purple-600 hover:bg-purple-700">
+          <Button onClick={() => navigate(`/courses/${slug}`)} className="bg-brand-blue-600 hover:bg-brand-blue-700">
             View Course Details
           </Button>
         </div>
@@ -227,7 +227,7 @@ const LearningPage = () => {
         
         {/* Visual Cue for Focus Mode in Header */}
         {isFocusMode && (
-          <div className="flex items-center gap-2 text-purple-600 font-bold text-xs animate-pulse">
+          <div className="flex items-center gap-2 text-brand-blue-600 font-bold text-xs animate-pulse">
             <Target className="h-4 w-4" /> FOCUS ACTIVE
           </div>
         )}

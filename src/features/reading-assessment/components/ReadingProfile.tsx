@@ -87,14 +87,14 @@ export const ReadingProfile = ({ onStartAssessment }: ReadingProfileProps) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-      <Card className="bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200">
+      <Card className="bg-gradient-to-br from-brand-blue-50 to-blue-50 border-brand-blue-200">
         <CardHeader className="text-center pb-4">
           <div className="flex justify-center mb-4">
-            <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-6 rounded-full">
+            <div className="bg-gradient-to-r from-brand-blue-500 to-blue-500 p-6 rounded-full">
               <BookOpen className="h-12 w-12 text-white" />
             </div>
           </div>
-          <CardTitle className="text-3xl bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          <CardTitle className="text-3xl bg-gradient-to-r from-brand-blue-600 to-blue-600 bg-clip-text text-transparent">
             Welcome to Reading Assessment!
           </CardTitle>
           <CardDescription className="text-lg mt-2">
@@ -111,8 +111,8 @@ export const ReadingProfile = ({ onStartAssessment }: ReadingProfileProps) => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-center p-6 bg-white rounded-lg shadow-sm">
-              <div className="bg-purple-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Zap className="h-6 w-6 text-purple-600" />
+              <div className="bg-brand-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Zap className="h-6 w-6 text-brand-blue-600" />
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Track Speed</h3>
               <p className="text-sm text-gray-600">
@@ -141,9 +141,9 @@ export const ReadingProfile = ({ onStartAssessment }: ReadingProfileProps) => {
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-6 rounded-lg text-white">
+          <div className="bg-gradient-to-r from-brand-blue-500 to-blue-500 p-6 rounded-lg text-white">
             <h3 className="text-xl font-semibold mb-2">🎯 What You'll Get</h3>
-            <ul className="space-y-2 text-purple-50">
+            <ul className="space-y-2 text-brand-blue-50">
               <li className="flex items-start gap-2">
                 <span className="text-white mt-0.5">✓</span>
                 <span>Personalized reading speed metrics (WPM)</span>
@@ -166,7 +166,7 @@ export const ReadingProfile = ({ onStartAssessment }: ReadingProfileProps) => {
           <Button 
             onClick={onStartAssessment}
             size="lg"
-            className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-lg py-6"
+            className="w-full bg-gradient-to-r from-brand-blue-500 to-blue-500 hover:from-brand-blue-600 hover:to-blue-600 text-lg py-6"
           >
             Take Your First Assessment
             <ArrowRight className="ml-2 h-5 w-5" />
@@ -188,7 +188,7 @@ export const ReadingProfile = ({ onStartAssessment }: ReadingProfileProps) => {
   };
 
   const getSpeedLevel = (wpm: number) => {
-    if (wpm >= 300) return { level: "Expert", color: "bg-purple-500" };
+    if (wpm >= 300) return { level: "Expert", color: "bg-brand-blue-500" };
     if (wpm >= 250) return { level: "Advanced", color: "bg-blue-500" };
     if (wpm >= 200) return { level: "Intermediate", color: "bg-green-500" };
     if (wpm >= 150) return { level: "Developing", color: "bg-yellow-500" };
@@ -206,7 +206,7 @@ export const ReadingProfile = ({ onStartAssessment }: ReadingProfileProps) => {
       transition={{ duration: 0.5 }}
     >
       {/* Header Card */}
-      <Card className="bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0">
+      <Card className="bg-gradient-to-r from-brand-blue-500 to-blue-500 text-white border-0">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -215,7 +215,7 @@ export const ReadingProfile = ({ onStartAssessment }: ReadingProfileProps) => {
               </div>
               <div>
                 <CardTitle className="text-2xl text-white">Your Reading Profile</CardTitle>
-                <CardDescription className="text-purple-100">
+                <CardDescription className="text-brand-blue-100">
                   {profile.stats.totalAssessments} assessment{profile.stats.totalAssessments !== 1 ? 's' : ''} completed
                 </CardDescription>
               </div>
@@ -223,7 +223,7 @@ export const ReadingProfile = ({ onStartAssessment }: ReadingProfileProps) => {
             <Button 
               onClick={onStartAssessment}
               variant="secondary"
-              className="bg-white text-purple-600 hover:bg-purple-50"
+              className="bg-white text-brand-blue-600 hover:bg-brand-blue-50"
             >
               New Assessment
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -235,21 +235,21 @@ export const ReadingProfile = ({ onStartAssessment }: ReadingProfileProps) => {
       {/* Current Stats */}
       <div>
         <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-          <TrendingUp className="h-6 w-6 text-purple-600" />
+          <TrendingUp className="h-6 w-6 text-brand-blue-600" />
           Current Performance
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Reading Speed */}
-          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+          <Card className="bg-gradient-to-br from-brand-blue-50 to-brand-blue-100 border-brand-blue-200">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg text-purple-700">Reading Speed</CardTitle>
-                <Zap className="h-5 w-5 text-purple-600" />
+                <CardTitle className="text-lg text-brand-blue-700">Reading Speed</CardTitle>
+                <Zap className="h-5 w-5 text-brand-blue-600" />
               </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <div className="text-3xl font-bold text-purple-900">
+                <div className="text-3xl font-bold text-brand-blue-900">
                   {Math.round(profile.current.weightedWPM)} <span className="text-lg">WPM</span>
                 </div>
                 <Badge className={`${currentSpeedLevel.color} text-white`}>
@@ -257,7 +257,7 @@ export const ReadingProfile = ({ onStartAssessment }: ReadingProfileProps) => {
                 </Badge>
                 <Progress 
                   value={Math.min((profile.current.weightedWPM / 400) * 100, 100)} 
-                  className="h-2 bg-purple-200"
+                  className="h-2 bg-brand-blue-200"
                 />
               </div>
             </CardContent>
@@ -336,11 +336,11 @@ export const ReadingProfile = ({ onStartAssessment }: ReadingProfileProps) => {
           </Card>
 
           {/* Integrity Score */}
-          <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200">
+          <Card className="bg-gradient-to-br from-brand-teal-50 to-brand-teal-100 border-brand-teal-200">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg text-indigo-700">Integrity</CardTitle>
-                <Shield className="h-5 w-5 text-indigo-600" />
+                <CardTitle className="text-lg text-brand-teal-700">Integrity</CardTitle>
+                <Shield className="h-5 w-5 text-brand-teal-600" />
               </div>
             </CardHeader>
             <CardContent>
@@ -350,9 +350,9 @@ export const ReadingProfile = ({ onStartAssessment }: ReadingProfileProps) => {
                 </div>
                 <Progress 
                   value={profile.current.integrityScore} 
-                  className="h-2 bg-indigo-200"
+                  className="h-2 bg-brand-teal-200"
                 />
-                <p className="text-sm text-indigo-700">
+                <p className="text-sm text-brand-teal-700">
                   Assessment authenticity
                 </p>
               </div>

@@ -22,7 +22,7 @@ const formatDate = (iso: string) => {
 
 const getSpecBadgeStyle = (spec: string | null) => {
   if (!spec) return 'text-orange-700 bg-orange-50 border-orange-200 dark:text-orange-500 dark:bg-[#2A1A15] dark:border-orange-500/30';
-  return 'text-indigo-700 bg-indigo-50 border-indigo-200 dark:text-[#A78BFA] dark:bg-[#2E1A47] dark:border-[#A78BFA]/30';
+  return 'text-brand-teal-700 bg-brand-teal-50 border-brand-teal-200 dark:text-[#4E8CA6] dark:bg-[#142B3A] dark:border-[#4E8CA6]/30';
 };
 
 // ─── Row Actions ──────────────────────────────────────────────────────────────
@@ -105,8 +105,8 @@ function AddTutorModal({ onClose, onAdded }: { onClose: () => void; onAdded: () 
       <div className="bg-white dark:bg-[#15141B] rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-[#26252D]">
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-[#26252D]">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
-              <BookOpen className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+            <div className="p-2 bg-brand-blue-50 dark:bg-brand-blue-900/30 rounded-lg">
+              <BookOpen className="w-5 h-5 text-brand-blue-600 dark:text-brand-blue-400" />
             </div>
             <div>
               <h2 className="font-bold text-slate-900 dark:text-white text-base">Onboard New Tutor</h2>
@@ -126,7 +126,7 @@ function AddTutorModal({ onClose, onAdded }: { onClose: () => void; onAdded: () 
               <input
                 type="text" required value={form.tutorName} onChange={set('tutorName')}
                 placeholder="Tutor full name"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-indigo-500 dark:text-white placeholder-slate-400"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400"
               />
             </div>
           </div>
@@ -137,7 +137,7 @@ function AddTutorModal({ onClose, onAdded }: { onClose: () => void; onAdded: () 
               <input
                 type="email" required value={form.tutorEmail} onChange={set('tutorEmail')}
                 placeholder="tutor@institute.edu"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-indigo-500 dark:text-white placeholder-slate-400"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400"
               />
             </div>
           </div>
@@ -145,16 +145,16 @@ function AddTutorModal({ onClose, onAdded }: { onClose: () => void; onAdded: () 
             <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Specialization</label>
             <select
               value={form.specialization} onChange={set('specialization')}
-              className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 dark:text-white"
+              className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white"
             >
               <option value="">Select specialization (optional)</option>
               {SPECIALIZATIONS.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
 
-          <div className="flex items-start gap-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800/40 rounded-lg p-3">
-            <CheckCircle2 className="w-4 h-4 text-purple-500 mt-0.5 shrink-0" />
-            <p className="text-xs text-purple-700 dark:text-purple-300 leading-relaxed">
+          <div className="flex items-start gap-2 bg-brand-blue-50 dark:bg-brand-blue-900/20 border border-brand-blue-100 dark:border-brand-blue-800/40 rounded-lg p-3">
+            <CheckCircle2 className="w-4 h-4 text-brand-blue-500 mt-0.5 shrink-0" />
+            <p className="text-xs text-brand-blue-700 dark:text-brand-blue-300 leading-relaxed">
               The tutor will receive a Supabase invite email. Once they accept, they'll have access to the Instructor dashboard.
             </p>
           </div>
@@ -165,7 +165,7 @@ function AddTutorModal({ onClose, onAdded }: { onClose: () => void; onAdded: () 
               Cancel
             </button>
             <button type="submit" disabled={loading}
-              className="flex-1 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
+              className="flex-1 py-2.5 rounded-lg bg-brand-teal-600 hover:bg-brand-teal-700 text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
               {loading ? 'Onboarding...' : 'Onboard & Send Invite'}
             </button>
@@ -281,7 +281,7 @@ export default function TutorOnboarding() {
                   {loading ? '...' : `${tutors.length} tutor${tutors.length !== 1 ? 's' : ''} in your institute`}
                 </p>
               </div>
-              <button onClick={load} className="p-2 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors" title="Refresh">
+              <button onClick={load} className="p-2 rounded-lg text-slate-400 hover:text-brand-teal-600 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors" title="Refresh">
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               </button>
             </div>
@@ -295,12 +295,12 @@ export default function TutorOnboarding() {
                   placeholder="Search tutors..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-transparent border border-slate-200 dark:border-gray-800 rounded-lg text-sm focus:outline-none focus:border-indigo-500 dark:focus:border-[#8B5CF6] transition-all dark:text-white placeholder-slate-400 dark:placeholder-gray-500 shadow-sm"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-transparent border border-slate-200 dark:border-gray-800 rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:focus:border-[#256B8B] transition-all dark:text-white placeholder-slate-400 dark:placeholder-gray-500 shadow-sm"
                 />
               </div>
               <button
                 onClick={() => setShowAddModal(true)}
-                className="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 dark:bg-[#7C3AED] dark:hover:bg-[#6D28D9] text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
+                className="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2.5 bg-brand-teal-600 hover:bg-brand-teal-700 dark:bg-[#185A78] dark:hover:bg-[#185A78] text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
               >
                 <Plus className="w-4 h-4" /> Add Tutor
               </button>
@@ -310,7 +310,7 @@ export default function TutorOnboarding() {
             <div className="bg-white dark:bg-transparent border border-slate-200 dark:border-transparent rounded-xl shadow-sm dark:shadow-none overflow-hidden">
               {loading ? (
                 <div className="py-16 flex justify-center">
-                  <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+                  <Loader2 className="w-6 h-6 animate-spin text-brand-teal-500" />
                 </div>
               ) : (
                 <div className="w-full overflow-x-auto px-4 py-2">
@@ -332,7 +332,7 @@ export default function TutorOnboarding() {
                               {tutor.profileImage ? (
                                 <img src={tutor.profileImage} alt="" className="w-9 h-9 rounded-md object-cover shrink-0" />
                               ) : (
-                                <div className="w-9 h-9 rounded-md bg-purple-100 dark:bg-[#2D1F4D] text-purple-700 dark:text-[#D97CFF] flex items-center justify-center text-xs font-bold shrink-0">
+                                <div className="w-9 h-9 rounded-md bg-brand-blue-100 dark:bg-[#142B3A] text-brand-blue-700 dark:text-[#D97CFF] flex items-center justify-center text-xs font-bold shrink-0">
                                   {getInitials(tutor.name, tutor.email)}
                                 </div>
                               )}

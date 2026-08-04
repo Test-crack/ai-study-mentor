@@ -32,7 +32,7 @@ export function AssessmentHistoryWidget() {
     return (
       <Card className="border-none shadow-sm bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
         <CardContent className="p-6 flex justify-center items-center min-h-[200px]">
-          <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
+          <Loader2 className="h-6 w-6 animate-spin text-brand-teal-600" />
         </CardContent>
       </Card>
     );
@@ -94,7 +94,7 @@ export function AssessmentHistoryWidget() {
 
                     <div className="flex items-center gap-6">
                         <div className="text-center">
-                            <div className="text-lg font-bold text-indigo-600 dark:text-indigo-400 flex items-center justify-center gap-1">
+                            <div className="text-lg font-bold text-brand-teal-600 dark:text-brand-teal-400 flex items-center justify-center gap-1">
                                 <Zap className="h-4 w-4" />
                                 {Math.round(assessment.weightedWPM)}
                             </div>

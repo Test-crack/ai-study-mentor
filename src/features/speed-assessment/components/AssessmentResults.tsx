@@ -37,16 +37,16 @@ const AssessmentResults = ({ results, onRetakeAssessment, onContinueToDashboard 
   const comprehensionFeedback = getComprehensionFeedback(results.comprehensionScore);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-brand-blue-50 via-blue-50 to-brand-teal-100 p-4">
       <div className="container mx-auto py-8 max-w-4xl">
         <Card className="mb-8">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
-              <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-4 rounded-full">
+              <div className="bg-gradient-to-r from-brand-blue-500 to-blue-500 p-4 rounded-full">
                 <Trophy className="h-12 w-12 text-white" />
               </div>
             </div>
-            <CardTitle className="text-3xl bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            <CardTitle className="text-3xl bg-gradient-to-r from-brand-blue-600 to-blue-600 bg-clip-text text-transparent">
               Assessment Complete!
             </CardTitle>
             <CardDescription className="text-lg">
@@ -117,10 +117,10 @@ const AssessmentResults = ({ results, onRetakeAssessment, onContinueToDashboard 
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
-                <Star className="h-8 w-8 mx-auto text-purple-600 mb-2" />
-                <h3 className="font-semibold text-purple-700">Learning Style</h3>
-                <p className="text-sm text-purple-600">
+              <div className="text-center p-4 bg-brand-blue-50 rounded-lg">
+                <Star className="h-8 w-8 mx-auto text-brand-blue-600 mb-2" />
+                <h3 className="font-semibold text-brand-blue-700">Learning Style</h3>
+                <p className="text-sm text-brand-blue-600">
                   {results.readingSpeed > 200 ? "Fast Visual Learner" : "Detailed Analytical Learner"}
                 </p>
               </div>
@@ -142,9 +142,9 @@ const AssessmentResults = ({ results, onRetakeAssessment, onContinueToDashboard 
               </div>
             </div>
             
-            <div className="bg-gradient-to-r from-purple-500 to-blue-600 text-white p-6 rounded-lg">
+            <div className="bg-gradient-to-r from-brand-blue-500 to-blue-600 text-white p-6 rounded-lg">
               <h3 className="text-lg font-semibold mb-2">🎯 Your Personalized Study Plan</h3>
-              <p className="text-purple-100">
+              <p className="text-brand-blue-100">
                 Based on your assessment, we'll create customized study materials that match your 
                 {results.readingSpeed > 200 ? " fast-paced" : " methodical"} learning style and focus on 
                 {results.comprehensionScore < 70 ? " improving comprehension" : " maintaining excellence"}. 
@@ -165,7 +165,7 @@ const AssessmentResults = ({ results, onRetakeAssessment, onContinueToDashboard 
           </Button>
           <Button 
             onClick={onContinueToDashboard}
-            className="flex-1 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+            className="flex-1 bg-gradient-to-r from-brand-blue-500 to-blue-500 hover:from-brand-blue-600 hover:to-blue-600"
           >
             Continue to Dashboard
           </Button>

@@ -59,11 +59,11 @@ export default function B2CLoginPage() {
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 flex">
 
       {/* ── Left panel — branding ─────────────────────────────────────────── */}
-      <div className="hidden lg:flex lg:w-[52%] bg-gradient-to-br from-indigo-600 via-indigo-500 to-purple-600 relative overflow-hidden flex-col justify-between p-12">
+      <div className="hidden lg:flex lg:w-[52%] bg-gradient-to-br from-brand-teal-600 via-brand-teal-500 to-brand-blue-600 relative overflow-hidden flex-col justify-between p-12">
 
         {/* Background circles */}
         <div className="pointer-events-none absolute -top-20 -right-20 w-80 h-80 rounded-full bg-white/10 blur-3xl" />
-        <div className="pointer-events-none absolute bottom-10 -left-20 w-64 h-64 rounded-full bg-purple-400/20 blur-2xl" />
+        <div className="pointer-events-none absolute bottom-10 -left-20 w-64 h-64 rounded-full bg-brand-blue-400/20 blur-2xl" />
 
         {/* Logo */}
         <div className="relative z-10 flex items-center gap-3">
@@ -72,7 +72,7 @@ export default function B2CLoginPage() {
           </div>
           <div>
             <p className="text-white font-black text-lg tracking-tight leading-none">TestCrack</p>
-            <p className="text-indigo-200 text-xs font-medium tracking-widest uppercase">Play · Learn · Score</p>
+            <p className="text-brand-teal-200 text-xs font-medium tracking-widest uppercase">Play · Learn · Score</p>
           </div>
         </div>
 
@@ -80,10 +80,10 @@ export default function B2CLoginPage() {
         <div className="relative z-10">
           <h1 className="text-4xl xl:text-5xl font-black text-white leading-tight mb-4">
             Crack IELTS<br />
-            <span className="text-indigo-200">one game</span><br />
+            <span className="text-brand-teal-200">one game</span><br />
             at a time.
           </h1>
-          <p className="text-indigo-100 text-base leading-relaxed mb-8 max-w-sm">
+          <p className="text-brand-teal-100 text-base leading-relaxed mb-8 max-w-sm">
             Sharpen your vocabulary, reading, and grammar through fast, addictive games — each one designed around real IELTS exam patterns.
           </p>
 
@@ -103,7 +103,7 @@ export default function B2CLoginPage() {
 
         {/* Bottom game preview strips */}
         <div className="relative z-10">
-          <p className="text-indigo-200 text-xs font-bold uppercase tracking-widest mb-3">Games available</p>
+          <p className="text-brand-teal-200 text-xs font-bold uppercase tracking-widest mb-3">Games available</p>
           <div className="flex gap-2 flex-wrap">
             {['LexiGrid', 'Trap Spotter', 'Band Ladder', 'Sentence Surgery', 'Inference Sprint', 'Connector Chain'].map(g => (
               <span key={g} className="text-xs bg-white/10 border border-white/20 text-white rounded-lg px-3 py-1.5 font-semibold">
@@ -119,7 +119,7 @@ export default function B2CLoginPage() {
 
         {/* Mobile logo */}
         <div className="lg:hidden flex items-center gap-3 mb-10">
-          <div className="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
             <Gamepad2 className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -158,7 +158,7 @@ export default function B2CLoginPage() {
                       className={`w-full pl-10 pr-4 py-3 rounded-xl border text-sm font-medium bg-white dark:bg-slate-900 text-slate-800 dark:text-white placeholder:text-slate-400 outline-none transition-all
                         ${error
                           ? 'border-rose-400 ring-1 ring-rose-400'
-                          : 'border-slate-200 dark:border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'
+                          : 'border-slate-200 dark:border-slate-700 focus:border-brand-teal-500 focus:ring-1 focus:ring-brand-teal-500'
                         }`}
                     />
                   </div>
@@ -170,7 +170,7 @@ export default function B2CLoginPage() {
                 <button
                   type="submit"
                   disabled={loading || !email}
-                  className="w-full flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98] text-sm"
+                  className="w-full flex items-center justify-center gap-2 bg-brand-teal-500 hover:bg-brand-teal-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98] text-sm"
                 >
                   {loading ? (
                     <><Loader2 className="w-4 h-4 animate-spin" /> Signing in...</>
@@ -187,8 +187,8 @@ export default function B2CLoginPage() {
           ) : (
             /* Sent state */
             <div className="text-center">
-              <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto mb-5">
-                <Mail className="w-7 h-7 text-indigo-500" />
+              <div className="w-16 h-16 bg-brand-teal-50 dark:bg-brand-teal-500/10 rounded-full flex items-center justify-center mx-auto mb-5">
+                <Mail className="w-7 h-7 text-brand-teal-500" />
               </div>
               <h2 className="text-xl font-black text-slate-800 dark:text-white mb-2">Check your inbox</h2>
               <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
@@ -197,7 +197,7 @@ export default function B2CLoginPage() {
               </p>
               <button
                 onClick={() => setStep('enter')}
-                className="text-indigo-500 hover:text-indigo-600 text-sm font-bold transition-colors"
+                className="text-brand-teal-500 hover:text-brand-teal-600 text-sm font-bold transition-colors"
               >
                 Use a different email
               </button>

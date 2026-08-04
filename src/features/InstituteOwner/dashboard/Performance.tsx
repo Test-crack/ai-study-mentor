@@ -57,7 +57,7 @@ function CohortPanel({ data }: { data: CohortProgressData | null }) {
             <YAxis domain={[4, 9]} tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
             <Tooltip contentStyle={{ borderRadius: 12, fontSize: 12, border: '1px solid rgba(148,163,184,0.25)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
-            <Line type="monotone" dataKey="avg"  name="IA Avg Band"   stroke="#6366f1" strokeWidth={3} dot={{ r: 4 }} connectNulls />
+            <Line type="monotone" dataKey="avg"  name="IA Avg Band"   stroke="#12897C" strokeWidth={3} dot={{ r: 4 }} connectNulls />
             <Line type="monotone" dataKey="mock" name="Mock Avg Band" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} strokeDasharray="4 2" connectNulls />
           </LineChart>
         </ResponsiveContainer>
@@ -93,7 +93,7 @@ function BatchCompPanel({ rows }: { rows: BatchComparisonRow[] }) {
               <XAxis dataKey="name" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
               <YAxis domain={[4, 9]} tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={{ borderRadius: 12, fontSize: 12, border: '1px solid rgba(148,163,184,0.25)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }} />
-              <Bar dataKey="band" name="Avg Band" fill="#6366f1" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="band" name="Avg Band" fill="#12897C" radius={[4, 4, 0, 0]} />
               <Bar dataKey="imp" name="Improvement" fill="#10b981" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -131,7 +131,7 @@ function BatchCompPanel({ rows }: { rows: BatchComparisonRow[] }) {
                     </td>
                     <td className="px-4 py-2.5 text-center font-bold tabular-nums">{b.student_count}</td>
                     <td className="px-4 py-2.5 text-center">
-                      <span className="inline-flex items-center justify-center text-xs font-bold tabular-nums px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 ring-1 ring-inset ring-indigo-600/20 dark:ring-indigo-400/25">
+                      <span className="inline-flex items-center justify-center text-xs font-bold tabular-nums px-2.5 py-0.5 rounded-full bg-brand-teal-50 dark:bg-brand-teal-500/10 text-brand-teal-700 dark:text-brand-teal-400 ring-1 ring-inset ring-brand-teal-600/20 dark:ring-brand-teal-400/25">
                         {b.avg_band !== null ? b.avg_band.toFixed(1) : '—'}
                       </span>
                     </td>
@@ -192,7 +192,7 @@ function EngagementPanel({ weeks }: { weeks: EngagementWeek[] }) {
               <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={{ borderRadius: 12, fontSize: 12, border: '1px solid rgba(148,163,184,0.25)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }} formatter={(v) => `${v}%`} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Line type="monotone" dataKey="active" name="Active %" stroke="#6366f1" strokeWidth={2} dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="active" name="Active %" stroke="#12897C" strokeWidth={2} dot={{ r: 3 }} />
               <Line type="monotone" dataKey="dcs" name="DCS %" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
@@ -215,7 +215,7 @@ function GoalsPanel({ data }: { data: GoalAchievementData | null }) {
           { label: 'Below Target', value: data.below, pct: pct(data.below), color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-50/80 dark:bg-rose-500/[0.07]', ring: 'ring-rose-600/10 dark:ring-rose-400/15' },
           { label: 'Near Target (≤0.5)', value: data.near, pct: pct(data.near), color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50/80 dark:bg-amber-500/[0.07]', ring: 'ring-amber-600/10 dark:ring-amber-400/15' },
           { label: 'At / Above Target', value: data.at_or_above, pct: pct(data.at_or_above), color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50/80 dark:bg-emerald-500/[0.07]', ring: 'ring-emerald-600/10 dark:ring-emerald-400/15' },
-          { label: 'Exam Ready', value: data.exam_ready, pct: total > 0 ? Math.round(data.exam_ready / total * 100) : 0, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50/80 dark:bg-indigo-500/[0.07]', ring: 'ring-indigo-600/10 dark:ring-indigo-400/15' },
+          { label: 'Exam Ready', value: data.exam_ready, pct: total > 0 ? Math.round(data.exam_ready / total * 100) : 0, color: 'text-brand-teal-600 dark:text-brand-teal-400', bg: 'bg-brand-teal-50/80 dark:bg-brand-teal-500/[0.07]', ring: 'ring-brand-teal-600/10 dark:ring-brand-teal-400/15' },
         ].map(m => (
           <div key={m.label} className={`${m.bg} rounded-2xl p-4 sm:p-5 shadow-sm ring-1 ring-inset ${m.ring} hover:shadow-md hover:-translate-y-0.5 transition-all duration-300`}>
             <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">{m.label}</p>
@@ -351,20 +351,20 @@ export default function Performance() {
           <div className="max-w-[1400px] mx-auto">
 
             {/* ── Hero Banner ─────────────────────────────────────────────── */}
-            <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-indigo-100/80 dark:border-white/[0.06] bg-gradient-to-r from-[#eff4ff] via-[#f4f1ff] to-[#f3f0ff] dark:from-[#111827] dark:via-[#161a38] dark:to-[#1e1b4b] px-5 sm:px-8 pt-6 sm:pt-8 pb-14 sm:pb-16 shadow-sm">
+            <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-brand-teal-100/80 dark:border-white/[0.06] bg-gradient-to-r from-[#eff4ff] via-[#f4f1ff] to-[#f3f0ff] dark:from-[#111827] dark:via-[#161a38] dark:to-[#1e1b4b] px-5 sm:px-8 pt-6 sm:pt-8 pb-14 sm:pb-16 shadow-sm">
               <div aria-hidden className="pointer-events-none select-none absolute inset-0">
-                <div className="absolute -top-20 -right-12 w-64 h-64 rounded-full bg-indigo-300/25 dark:bg-indigo-500/15 blur-3xl" />
-                <div className="absolute -bottom-28 left-1/3 w-72 h-72 rounded-full bg-violet-300/20 dark:bg-violet-500/10 blur-3xl" />
+                <div className="absolute -top-20 -right-12 w-64 h-64 rounded-full bg-brand-teal-300/25 dark:bg-brand-teal-500/15 blur-3xl" />
+                <div className="absolute -bottom-28 left-1/3 w-72 h-72 rounded-full bg-brand-blue-300/20 dark:bg-brand-blue-500/10 blur-3xl" />
                 <div className="absolute top-8 -left-10 w-44 h-44 rounded-full bg-sky-300/20 dark:bg-sky-500/10 blur-3xl" />
               </div>
 
               <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div>
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-300 bg-white/60 dark:bg-white/[0.06] border border-white/70 dark:border-white/[0.08] backdrop-blur px-2.5 py-1 rounded-full">
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-brand-teal-600 dark:text-brand-teal-300 bg-white/60 dark:bg-white/[0.06] border border-white/70 dark:border-white/[0.08] backdrop-blur px-2.5 py-1 rounded-full">
                     <Sparkles className="w-3 h-3" /> Owner Portal
                   </span>
                   <h1 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                    Performance <span className="text-indigo-600 dark:text-indigo-400">Analytics</span>
+                    Performance <span className="text-brand-teal-600 dark:text-brand-teal-400">Analytics</span>
                   </h1>
                   <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
                     Cohort trends, batch comparison, and engagement insights
@@ -390,7 +390,7 @@ export default function Performance() {
                     onClick={() => setActiveTab(t.key)}
                     className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
                       activeTab === t.key
-                        ? 'bg-indigo-600 text-white shadow-sm dark:bg-indigo-500'
+                        ? 'bg-brand-teal-600 text-white shadow-sm dark:bg-brand-teal-500'
                         : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/[0.04]'
                     }`}
                   >
@@ -404,7 +404,7 @@ export default function Performance() {
             <div className="mt-6 pb-4">
               {loading ? (
                 <div className="flex items-center justify-center h-64 rounded-2xl bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] shadow-sm">
-                  <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+                  <Loader2 className="w-8 h-8 animate-spin text-brand-teal-500" />
                 </div>
               ) : (
                 <>

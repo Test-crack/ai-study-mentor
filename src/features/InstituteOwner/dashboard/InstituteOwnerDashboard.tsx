@@ -131,22 +131,22 @@ export default function InstituteOwnerDashboard() {
           <div className="max-w-[1400px] mx-auto">
 
             {/* ── Hero Banner ─────────────────────────────────────────────── */}
-            <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-indigo-100/80 dark:border-white/[0.06] bg-gradient-to-r from-[#eff4ff] via-[#f4f1ff] to-[#f3f0ff] dark:from-[#111827] dark:via-[#161a38] dark:to-[#1e1b4b] px-5 sm:px-8 pt-6 sm:pt-8 pb-20 sm:pb-24 shadow-sm">
+            <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-brand-teal-100/80 dark:border-white/[0.06] bg-gradient-to-r from-[#eff4ff] via-[#f4f1ff] to-[#f3f0ff] dark:from-[#111827] dark:via-[#161a38] dark:to-[#1e1b4b] px-5 sm:px-8 pt-6 sm:pt-8 pb-20 sm:pb-24 shadow-sm">
               {/* decorative glow blobs */}
               <div aria-hidden className="pointer-events-none select-none absolute inset-0">
-                <div className="absolute -top-20 -right-12 w-64 h-64 rounded-full bg-indigo-300/25 dark:bg-indigo-500/15 blur-3xl" />
-                <div className="absolute -bottom-28 left-1/3 w-72 h-72 rounded-full bg-violet-300/20 dark:bg-violet-500/10 blur-3xl" />
+                <div className="absolute -top-20 -right-12 w-64 h-64 rounded-full bg-brand-teal-300/25 dark:bg-brand-teal-500/15 blur-3xl" />
+                <div className="absolute -bottom-28 left-1/3 w-72 h-72 rounded-full bg-brand-blue-300/20 dark:bg-brand-blue-500/10 blur-3xl" />
                 <div className="absolute top-8 -left-10 w-44 h-44 rounded-full bg-sky-300/20 dark:bg-sky-500/10 blur-3xl" />
               </div>
 
               <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div>
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-300 bg-white/60 dark:bg-white/[0.06] border border-white/70 dark:border-white/[0.08] backdrop-blur px-2.5 py-1 rounded-full">
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-brand-teal-600 dark:text-brand-teal-300 bg-white/60 dark:bg-white/[0.06] border border-white/70 dark:border-white/[0.08] backdrop-blur px-2.5 py-1 rounded-full">
                     Owner Portal
                   </span>
                   <h1 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
                     {summary?.institute_name
-                      ? <>Great to see you, <span className="text-indigo-600 dark:text-indigo-400">{summary.institute_name}</span></>
+                      ? <>Great to see you, <span className="text-brand-teal-600 dark:text-brand-teal-400">{summary.institute_name}</span></>
                       : 'Institute Dashboard'}
                   </h1>
                   <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
@@ -172,7 +172,7 @@ export default function InstituteOwnerDashboard() {
                     label="Total Students" icon={Users}
                     value={summary?.total_students ?? 0}
                     sub={`${summary?.active_today ?? 0} active today`}
-                    accent="bg-indigo-100 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+                    accent="bg-brand-teal-100 dark:bg-brand-teal-500/10 text-brand-teal-600 dark:text-brand-teal-400"
                   />
                   <KpiCard
                     label="Total Batches" icon={BookOpen}
@@ -198,7 +198,7 @@ export default function InstituteOwnerDashboard() {
                 <div className="mt-6 rounded-2xl border border-slate-200/70 dark:border-white/[0.06] bg-gradient-to-r from-slate-50 to-slate-100/60 dark:from-white/[0.03] dark:to-transparent overflow-hidden">
                   <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-200/70 dark:divide-white/[0.06]">
                     <div className="flex items-center gap-4 px-5 sm:px-6 py-4">
-                      <div className="w-9 h-9 shrink-0 rounded-xl bg-violet-100/80 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center">
+                      <div className="w-9 h-9 shrink-0 rounded-xl bg-brand-blue-100/80 dark:bg-brand-blue-500/10 text-brand-blue-600 dark:text-brand-blue-400 flex items-center justify-center">
                         <Zap className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
@@ -246,7 +246,7 @@ export default function InstituteOwnerDashboard() {
                     </div>
                     <button
                       onClick={() => navigate('/institute-owner/insight')}
-                      className="text-xs font-medium text-indigo-600 dark:text-indigo-400 flex items-center gap-1 hover:underline underline-offset-2"
+                      className="text-xs font-medium text-brand-teal-600 dark:text-brand-teal-400 flex items-center gap-1 hover:underline underline-offset-2"
                     >
                       View all batches <ChevronRight className="w-3 h-3" />
                     </button>
@@ -286,7 +286,7 @@ export default function InstituteOwnerDashboard() {
                                   {s.avatar ? (
                                     <img src={s.avatar} className="w-7 h-7 rounded-full object-cover ring-1 ring-slate-200/70 dark:ring-white/10" alt="" />
                                   ) : (
-                                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-500/20 dark:to-violet-500/20 flex items-center justify-center text-xs font-bold text-indigo-600 dark:text-indigo-400 ring-1 ring-indigo-200/60 dark:ring-indigo-500/20">
+                                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-brand-teal-100 to-brand-blue-100 dark:from-brand-teal-500/20 dark:to-brand-blue-500/20 flex items-center justify-center text-xs font-bold text-brand-teal-600 dark:text-brand-teal-400 ring-1 ring-brand-teal-200/60 dark:ring-brand-teal-500/20">
                                       {s.name[0]}
                                     </div>
                                   )}
@@ -330,7 +330,7 @@ export default function InstituteOwnerDashboard() {
                             aria-label="Previous page"
                             className={`h-8 w-8 rounded-full flex items-center justify-center transition-all ${
                               riskHasPrev
-                                ? 'bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 hover:text-indigo-600 dark:hover:text-indigo-400'
+                                ? 'bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 hover:bg-brand-teal-100 dark:hover:bg-brand-teal-500/20 hover:text-brand-teal-600 dark:hover:text-brand-teal-400'
                                 : 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
                             }`}
                           >
@@ -346,7 +346,7 @@ export default function InstituteOwnerDashboard() {
                                   aria-label={`Page ${i + 1}`}
                                   className={`rounded-full transition-all ${
                                     i === riskPage
-                                      ? 'h-2 w-5 bg-indigo-500'
+                                      ? 'h-2 w-5 bg-brand-teal-500'
                                       : 'h-2 w-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600'
                                   }`}
                                 />
@@ -364,7 +364,7 @@ export default function InstituteOwnerDashboard() {
                             aria-label="Next page"
                             className={`h-8 w-8 rounded-full flex items-center justify-center transition-all ${
                               riskHasNext
-                                ? 'bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 hover:text-indigo-600 dark:hover:text-indigo-400'
+                                ? 'bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 hover:bg-brand-teal-100 dark:hover:bg-brand-teal-500/20 hover:text-brand-teal-600 dark:hover:text-brand-teal-400'
                                 : 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
                             }`}
                           >
@@ -388,15 +388,15 @@ export default function InstituteOwnerDashboard() {
                     <button
                       key={n.label}
                       onClick={() => navigate(n.path)}
-                      className="group relative rounded-2xl bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] p-4 shadow-sm text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-indigo-300/70 dark:hover:border-indigo-500/40"
+                      className="group relative rounded-2xl bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] p-4 shadow-sm text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-brand-teal-300/70 dark:hover:border-brand-teal-500/40"
                     >
                       <div className="flex items-start justify-between mb-3">
-                        <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                        <div className="w-9 h-9 rounded-xl bg-brand-teal-50 dark:bg-brand-teal-500/10 text-brand-teal-600 dark:text-brand-teal-400 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
                           <n.icon className="w-4 h-4" />
                         </div>
-                        <ArrowUpRight className="w-4 h-4 text-slate-300 dark:text-slate-600 opacity-0 -translate-x-1 translate-y-1 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:text-indigo-500" />
+                        <ArrowUpRight className="w-4 h-4 text-slate-300 dark:text-slate-600 opacity-0 -translate-x-1 translate-y-1 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:text-brand-teal-500" />
                       </div>
-                      <p className="font-semibold text-sm text-slate-800 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{n.label}</p>
+                      <p className="font-semibold text-sm text-slate-800 dark:text-white group-hover:text-brand-teal-600 dark:group-hover:text-brand-teal-400 transition-colors">{n.label}</p>
                       <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{n.sub}</p>
                     </button>
                   ))}

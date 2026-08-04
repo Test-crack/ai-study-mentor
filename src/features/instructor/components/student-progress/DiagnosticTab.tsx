@@ -137,10 +137,10 @@ function FeedbackBlock({ skill, data }: { skill: string; data: Record<string, an
   if (items.length === 0) return null;
 
   return (
-    <div className="rounded-xl border border-indigo-100 dark:border-indigo-500/20 bg-indigo-50/50 dark:bg-indigo-500/5 p-3 space-y-2.5">
+    <div className="rounded-xl border border-brand-teal-100 dark:border-brand-teal-500/20 bg-brand-teal-50/50 dark:bg-brand-teal-500/5 p-3 space-y-2.5">
       <div className="flex items-center gap-2">
-        <Cpu className="h-3.5 w-3.5 text-indigo-500 shrink-0" />
-        <p className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
+        <Cpu className="h-3.5 w-3.5 text-brand-teal-500 shrink-0" />
+        <p className="text-[10px] font-bold text-brand-teal-600 dark:text-brand-teal-400 uppercase tracking-wider">
           AI Feedback — {skill.charAt(0) + skill.slice(1).toLowerCase()}
         </p>
       </div>
@@ -268,7 +268,7 @@ export function DiagnosticTab({ results }: Props) {
           {
             label: 'Avg Baseline Band',
             value: avgBand ?? '—',
-            cls: 'text-indigo-600 dark:text-indigo-400',
+            cls: 'text-brand-teal-600 dark:text-brand-teal-400',
           },
           {
             label: 'Completed',

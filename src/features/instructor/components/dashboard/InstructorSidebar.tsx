@@ -95,16 +95,16 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
                 isActive
                   ? [
                       // Light active
-                      "bg-indigo-600 text-white",
+                      "bg-brand-teal-600 text-white",
                       "shadow-[0_4px_14px_-2px_rgba(99,102,241,0.5)]",
                       // Dark active
-                      "dark:bg-indigo-500/15 dark:text-indigo-300",
+                      "dark:bg-brand-teal-500/15 dark:text-brand-teal-300",
                       "dark:shadow-[0_0_20px_rgba(99,102,241,0.15)]",
-                      "dark:border dark:border-indigo-500/20",
+                      "dark:border dark:border-brand-teal-500/20",
                     ].join(" ")
                   : [
                       // Light inactive
-                      "text-slate-600 hover:bg-slate-50 hover:text-indigo-600",
+                      "text-slate-600 hover:bg-slate-50 hover:text-brand-teal-600",
                       // Dark inactive
                       "dark:text-slate-400 dark:hover:bg-white/[0.04] dark:hover:text-slate-100",
                     ].join(" ")
@@ -113,8 +113,8 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
               <item.icon className={cn(
                 "h-4.5 w-4.5 shrink-0 transition-transform duration-200 group-hover:scale-105",
                 isActive
-                  ? "text-white dark:text-indigo-300"
-                  : "text-slate-400 group-hover:text-indigo-500 dark:group-hover:text-slate-200"
+                  ? "text-white dark:text-brand-teal-300"
+                  : "text-slate-400 group-hover:text-brand-teal-500 dark:group-hover:text-slate-200"
               )} />
               {!isCollapsed && (
                 <span className="font-medium text-sm leading-none animate-in fade-in duration-200">
@@ -123,7 +123,7 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
               )}
               {/* Active pill indicator in dark mode */}
               {isActive && !isCollapsed && (
-                <span className="hidden dark:block absolute right-3 h-1.5 w-1.5 rounded-full bg-indigo-400" />
+                <span className="hidden dark:block absolute right-3 h-1.5 w-1.5 rounded-full bg-brand-teal-400" />
               )}
             </button>
           );
@@ -136,9 +136,9 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
         className={cn(
           "absolute -right-3 top-1/2 -translate-y-1/2 z-50",
           "h-6 w-6 grid place-items-center rounded-full",
-          "bg-indigo-600 text-white border-2",
+          "bg-brand-teal-600 text-white border-2",
           "border-white dark:border-[#0D0D14]",
-          "shadow-md hover:bg-indigo-700 transition-colors"
+          "shadow-md hover:bg-brand-teal-700 transition-colors"
         )}
       >
         {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}

@@ -133,7 +133,7 @@ export class RazorpayService {
         email: userEmail,
       },
       theme: {
-        color: '#6366f1'
+        color: '#12897C'
       },
       handler: async (response: any) => {
         // Verify payment on backend

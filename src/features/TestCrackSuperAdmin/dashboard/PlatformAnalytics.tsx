@@ -80,7 +80,7 @@ export default function PlatformAnalytics() {
                 <div key={idx} className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl p-5 shadow-sm transition-colors flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-2 mb-2">
-                      <metric.icon className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+                      <metric.icon className="w-4 h-4 text-brand-teal-500 dark:text-brand-teal-400" />
                       <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">{metric.title}</p>
                     </div>
                     <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{metric.value}</h3>
@@ -104,18 +104,18 @@ export default function PlatformAnalytics() {
                       
                       {/* Bar 1: Students */}
                       <div 
-                        className="w-full bg-slate-200 dark:bg-[#26252D] rounded-sm relative group-hover:bg-indigo-100 dark:group-hover:bg-[#2E2D38] transition-colors"
+                        className="w-full bg-slate-200 dark:bg-[#26252D] rounded-sm relative group-hover:bg-brand-teal-100 dark:group-hover:bg-[#2E2D38] transition-colors"
                         style={{ height: '4px' }}
                       ></div>
                       
                       <div className="text-center mt-1">
-                        <span className="text-lg font-bold text-indigo-600 dark:text-[#A78BFA] block">{week.sessions}</span>
-                        <span className="text-[10px] text-indigo-400 dark:text-indigo-400/50">sessions</span>
+                        <span className="text-lg font-bold text-brand-teal-600 dark:text-[#4E8CA6] block">{week.sessions}</span>
+                        <span className="text-[10px] text-brand-teal-400 dark:text-brand-teal-400/50">sessions</span>
                       </div>
                       
                       {/* Bar 2: Sessions */}
                       <div 
-                        className="w-full bg-indigo-500 dark:bg-[#7C3AED] rounded-sm"
+                        className="w-full bg-brand-teal-500 dark:bg-[#185A78] rounded-sm"
                         style={{ height: '4px' }}
                       ></div>
                       
@@ -137,14 +137,14 @@ export default function PlatformAnalytics() {
                     <div key={idx} className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-2 text-slate-900 dark:text-white font-medium">
-                          <feature.icon className="w-4 h-4 text-indigo-500 dark:text-[#A78BFA]" />
+                          <feature.icon className="w-4 h-4 text-brand-teal-500 dark:text-[#4E8CA6]" />
                           {feature.name}
                         </div>
                         <span className="text-slate-500 dark:text-slate-400 text-xs">{feature.sessions} sessions</span>
                       </div>
                       <div className="w-full h-1.5 bg-slate-100 dark:bg-[#26252D] rounded-full overflow-hidden">
                         <div 
-                          className="h-full bg-indigo-500 dark:bg-[#7C3AED] rounded-full"
+                          className="h-full bg-brand-teal-500 dark:bg-[#185A78] rounded-full"
                           style={{ width: `${feature.barPercent}%` }}
                         ></div>
                       </div>

@@ -58,15 +58,15 @@ export function BatchSelector({
           // Styles differ based on whether we're on a gradient or a white background
           const pill = onGradient
             ? isActive
-              ? 'bg-white text-indigo-700 border-transparent shadow-md'
+              ? 'bg-white text-brand-teal-700 border-transparent shadow-md'
               : 'bg-white/15 text-white border-white/25 hover:bg-white/25'
             : isActive
-              ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm shadow-indigo-500/20'
-              : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-indigo-400';
+              ? 'bg-brand-teal-600 text-white border-brand-teal-600 shadow-sm shadow-brand-teal-500/20'
+              : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-brand-teal-400';
 
           const count = onGradient
-            ? isActive ? 'text-indigo-400' : 'text-white/50'
-            : isActive ? 'text-indigo-200' : 'text-slate-400 dark:text-slate-500';
+            ? isActive ? 'text-brand-teal-400' : 'text-white/50'
+            : isActive ? 'text-brand-teal-200' : 'text-slate-400 dark:text-slate-500';
 
           return (
             <button

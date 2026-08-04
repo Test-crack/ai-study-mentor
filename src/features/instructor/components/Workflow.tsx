@@ -126,7 +126,7 @@ export default function Workflow() {
                     onClick={() => setSelectedBroadcast(broadcast)}
                     className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 ${
                       selectedBroadcast?.id === broadcast.id 
-                        ? 'bg-slate-50 dark:bg-[#1C1A24] border-indigo-500 dark:border-indigo-500/50 shadow-sm' 
+                        ? 'bg-slate-50 dark:bg-[#1C1A24] border-brand-teal-500 dark:border-brand-teal-500/50 shadow-sm' 
                         : 'bg-white dark:bg-[#121118] border-slate-200 dark:border-gray-800 hover:border-slate-300 dark:hover:border-gray-700'
                     }`}
                   >
@@ -141,7 +141,7 @@ export default function Workflow() {
                       
                       <div className="flex space-x-2">
                         <button 
-                          className="text-xs font-medium text-slate-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-white transition-colors px-3 py-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-gray-800"
+                          className="text-xs font-medium text-slate-600 dark:text-gray-300 hover:text-brand-teal-600 dark:hover:text-white transition-colors px-3 py-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-gray-800"
                         >
                           Preview
                         </button>
@@ -268,7 +268,7 @@ export default function Workflow() {
                     className={`w-full flex items-center justify-center space-x-2 py-3 rounded-lg font-bold transition-all duration-200 ${
                       copiedId === 'drawer' 
                         ? 'bg-emerald-500 text-white' 
-                        : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                        : 'bg-brand-teal-600 hover:bg-brand-teal-700 text-white'
                     }`}
                   >
                     {copiedId === 'drawer' ? (

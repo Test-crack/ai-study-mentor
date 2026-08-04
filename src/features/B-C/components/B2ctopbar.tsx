@@ -40,10 +40,10 @@ export default function B2CTopbar({
         </div>
 
         {/* Momentum pill */}
-        <div className="flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 rounded-full px-3 py-1.5">
-          <Zap className="w-3.5 h-3.5 text-indigo-500 fill-indigo-500" />
-          <span className="text-sm font-black text-indigo-600 dark:text-indigo-400">{momentum}</span>
-          <span className="text-xs text-indigo-400 font-medium hidden sm:inline">pts</span>
+        <div className="flex items-center gap-1.5 bg-brand-teal-50 dark:bg-brand-teal-500/10 border border-brand-teal-100 dark:border-brand-teal-500/20 rounded-full px-3 py-1.5">
+          <Zap className="w-3.5 h-3.5 text-brand-teal-500 fill-brand-teal-500" />
+          <span className="text-sm font-black text-brand-teal-600 dark:text-brand-teal-400">{momentum}</span>
+          <span className="text-xs text-brand-teal-400 font-medium hidden sm:inline">pts</span>
         </div>
 
         {/* Dark mode toggle */}
@@ -55,7 +55,7 @@ export default function B2CTopbar({
         </button>
 
         {/* Avatar */}
-        <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center flex-shrink-0">
+        <div className="w-8 h-8 rounded-full bg-brand-teal-500 flex items-center justify-center flex-shrink-0">
           <span className="text-white text-xs font-black">{initials}</span>
         </div>
       </div>

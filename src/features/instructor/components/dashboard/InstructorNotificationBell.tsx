@@ -107,7 +107,7 @@ export const InstructorNotificationBell = () => {
             {unreadCount > 0 ? (
               <button
                 onClick={markAllRead}
-                className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors"
+                className="text-xs font-semibold text-brand-teal-600 dark:text-brand-teal-400 hover:text-brand-teal-800 dark:hover:text-brand-teal-300 transition-colors"
               >
                 Mark all read
               </button>
@@ -140,7 +140,7 @@ export const InstructorNotificationBell = () => {
                         <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
                           {display.title(e.payload)}
                         </p>
-                        {!e.read_at && <span className="w-2 h-2 rounded-full bg-indigo-500 shrink-0" />}
+                        {!e.read_at && <span className="w-2 h-2 rounded-full bg-brand-teal-500 shrink-0" />}
                       </div>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">
                         {display.body(e.payload)}

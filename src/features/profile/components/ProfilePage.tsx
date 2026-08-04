@@ -160,7 +160,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#09090E] transition-colors duration-300 selection:bg-indigo-500/30 font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#09090E] transition-colors duration-300 selection:bg-brand-teal-500/30 font-sans">
       
       {/* Conditionally Render Sidebar Navigation */}
       {isSuperAdmin ? (
@@ -207,7 +207,7 @@ export default function ProfilePage() {
           
           {(loading || profileLoading) ? (
             <div className="flex items-center justify-center py-32">
-              <Loader2 className="h-10 w-10 animate-spin text-indigo-600 dark:text-indigo-400" />
+              <Loader2 className="h-10 w-10 animate-spin text-brand-teal-600 dark:text-brand-teal-400" />
             </div>
           ) : (
             <div className="space-y-6">
@@ -215,7 +215,7 @@ export default function ProfilePage() {
               {/* Main Header Card */}
               <Card className="border-slate-200 dark:border-[#1E1E2A] shadow-sm dark:shadow-none overflow-hidden bg-white dark:bg-[#12121A]">
                 <CardContent className="p-0">
-                  <div className="h-32 bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-900/80 dark:to-purple-900/80" />
+                  <div className="h-32 bg-gradient-to-r from-brand-teal-600 to-brand-blue-600 dark:from-brand-teal-900/80 dark:to-brand-blue-900/80" />
                   <div className="px-6 sm:px-8 pb-8">
                     <div className="flex flex-col sm:flex-row items-end -mt-12 gap-6">
                       <div className="relative group">
@@ -228,7 +228,7 @@ export default function ProfilePage() {
                           {profile?.profileImage ? (
                              <img src={profile.profileImage} alt="Profile" className="h-full w-full object-cover" />
                           ) : (
-                            <AvatarFallback className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 text-3xl font-bold border border-indigo-200 dark:border-indigo-800">
+                            <AvatarFallback className="bg-brand-teal-100 dark:bg-brand-teal-900/30 text-brand-teal-700 dark:text-brand-teal-400 text-3xl font-bold border border-brand-teal-200 dark:border-brand-teal-800">
                               {getInitials()}
                             </AvatarFallback>
                           )}
@@ -271,7 +271,7 @@ export default function ProfilePage() {
                         </p>
                       </div>
                       <div className="mb-2">
-                        <Badge className="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 px-4 py-1.5 rounded-md border border-indigo-200 dark:border-indigo-500/20 shadow-none font-bold tracking-wide">
+                        <Badge className="bg-brand-teal-50 dark:bg-brand-teal-500/10 text-brand-teal-700 dark:text-brand-teal-400 hover:bg-brand-teal-100 dark:hover:bg-brand-teal-500/20 px-4 py-1.5 rounded-md border border-brand-teal-200 dark:border-brand-teal-500/20 shadow-none font-bold tracking-wide">
                           {profile?.role || 'STUDENT'}
                         </Badge>
                       </div>
@@ -293,7 +293,7 @@ export default function ProfilePage() {
                           onClick={() => setActiveTab(tab.id as any)}
                           className={`py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
                             activeTab === tab.id 
-                              ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400' 
+                              ? 'border-brand-teal-600 text-brand-teal-600 dark:border-brand-teal-400 dark:text-brand-teal-400' 
                               : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                           }`}
                         >
@@ -414,7 +414,7 @@ export default function ProfilePage() {
                 <Button
                   onClick={handleSave}
                   disabled={saving}
-                  className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-8 py-6 font-bold shadow-md shadow-indigo-600/20 transition-all hover:-translate-y-0.5"
+                  className="w-full sm:w-auto bg-brand-teal-600 hover:bg-brand-teal-700 text-white rounded-xl px-8 py-6 font-bold shadow-md shadow-brand-teal-600/20 transition-all hover:-translate-y-0.5"
                 >
                   {saving ? (
                     <Loader2 className="h-5 w-5 mr-2 animate-spin" />

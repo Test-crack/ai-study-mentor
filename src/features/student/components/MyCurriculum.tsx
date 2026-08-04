@@ -142,13 +142,13 @@ const [activeTab, setActiveTab] = useState("my-curriculum");
         <BrainCircuit className="absolute -right-16 -top-16 w-80 h-80 text-slate-100 dark:text-slate-800/20 rotate-12 pointer-events-none" />
 
         <div className="relative z-10 flex flex-col items-center">
-          <div className="inline-flex items-center gap-2 bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400 px-3 py-1.5 rounded-full text-xs font-semibold border border-violet-100 dark:border-violet-500/20 mb-6">
+          <div className="inline-flex items-center gap-2 bg-brand-blue-50 dark:bg-brand-blue-500/10 text-brand-blue-600 dark:text-brand-blue-400 px-3 py-1.5 rounded-full text-xs font-semibold border border-brand-blue-100 dark:border-brand-blue-500/20 mb-6">
             <Sparkles className="w-3.5 h-3.5" />
             AI Personal Tutor
           </div>
 
           <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight text-slate-900 dark:text-white">
-            Your Syllabus, <span className="text-violet-600 dark:text-violet-500">Your Tutor</span>
+            Your Syllabus, <span className="text-brand-blue-600 dark:text-brand-blue-500">Your Tutor</span>
           </h1>
           <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto mb-10 text-[15px] leading-relaxed">
             Upload your university syllabus and we'll create a personalized AI tutor
@@ -158,10 +158,10 @@ const [activeTab, setActiveTab] = useState("my-curriculum");
 
           <div 
             onClick={handleUploadClick}
-            className="border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:border-violet-500 dark:hover:border-slate-500 transition-all rounded-2xl p-10 max-w-md w-full mx-auto mb-6 cursor-pointer group flex flex-col items-center"
+            className="border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:border-brand-blue-500 dark:hover:border-slate-500 transition-all rounded-2xl p-10 max-w-md w-full mx-auto mb-6 cursor-pointer group flex flex-col items-center"
           >
-            <div className="w-12 h-12 bg-white dark:bg-slate-800 group-hover:bg-violet-100 dark:group-hover:bg-violet-600/20 rounded-xl flex items-center justify-center mb-4 transition-colors shadow-sm dark:shadow-none">
-              <Upload className="w-5 h-5 text-slate-400 group-hover:text-violet-600 dark:group-hover:text-violet-400" />
+            <div className="w-12 h-12 bg-white dark:bg-slate-800 group-hover:bg-brand-blue-100 dark:group-hover:bg-brand-blue-600/20 rounded-xl flex items-center justify-center mb-4 transition-colors shadow-sm dark:shadow-none">
+              <Upload className="w-5 h-5 text-slate-400 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400" />
             </div>
             <h3 className="text-slate-800 dark:text-slate-200 font-semibold mb-1">Upload Your Syllabus</h3>
             <p className="text-slate-500 text-sm">PDF, DOCX, or plain text</p>
@@ -184,8 +184,8 @@ const [activeTab, setActiveTab] = useState("my-curriculum");
           { icon: GraduationCap, title: "Exam Prep", desc: "Mock tests aligned with your actual university exam pattern" }
         ].map((feat, i) => (
           <div key={i} className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-slate-800/80 rounded-2xl p-6 flex items-start gap-4 shadow-sm dark:shadow-none transition-colors">
-            <div className="w-10 h-10 rounded-xl bg-violet-50 dark:bg-violet-500/10 flex items-center justify-center shrink-0">
-              <feat.icon className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+            <div className="w-10 h-10 rounded-xl bg-brand-blue-50 dark:bg-brand-blue-500/10 flex items-center justify-center shrink-0">
+              <feat.icon className="w-5 h-5 text-brand-blue-600 dark:text-brand-blue-400" />
             </div>
             <div>
               <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-1">{feat.title}</h4>
@@ -201,16 +201,16 @@ const [activeTab, setActiveTab] = useState("my-curriculum");
     <div className="flex flex-col items-center justify-center h-[60vh] animate-in fade-in duration-300">
       {currentView === 'uploading' ? (
         <>
-          <div className="w-16 h-16 bg-violet-100 dark:bg-violet-900/20 rounded-2xl flex items-center justify-center mb-6 border border-violet-200 dark:border-violet-500/20">
-            <Loader2 className="w-8 h-8 text-violet-600 dark:text-violet-500 animate-spin" />
+          <div className="w-16 h-16 bg-brand-blue-100 dark:bg-brand-blue-900/20 rounded-2xl flex items-center justify-center mb-6 border border-brand-blue-200 dark:border-brand-blue-500/20">
+            <Loader2 className="w-8 h-8 text-brand-blue-600 dark:text-brand-blue-500 animate-spin" />
           </div>
           <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Uploading Syllabus...</h2>
           <p className="text-slate-500 text-sm">Processing CS301_DataStructures_Syllabus.pdf</p>
         </>
       ) : (
         <>
-          <div className="w-16 h-16 bg-violet-100 dark:bg-violet-900/20 rounded-2xl flex items-center justify-center mb-6 border border-violet-200 dark:border-violet-500/20 animate-pulse">
-            <BrainCircuit className="w-8 h-8 text-violet-600 dark:text-violet-500" />
+          <div className="w-16 h-16 bg-brand-blue-100 dark:bg-brand-blue-900/20 rounded-2xl flex items-center justify-center mb-6 border border-brand-blue-200 dark:border-brand-blue-500/20 animate-pulse">
+            <BrainCircuit className="w-8 h-8 text-brand-blue-600 dark:text-brand-blue-500" />
           </div>
           <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Creating Your AI Tutor...</h2>
           <p className="text-slate-500 text-sm">Mapping topics, generating study material</p>
@@ -231,7 +231,7 @@ const [activeTab, setActiveTab] = useState("my-curriculum");
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Based on CS301_DataStructures_Syllabus.pdf</p>
           </div>
         </div>
-        <button onClick={() => handleAskClick()} className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors shrink-0 shadow-sm">
+        <button onClick={() => handleAskClick()} className="flex items-center gap-2 bg-brand-blue-600 hover:bg-brand-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors shrink-0 shadow-sm">
           <Sparkles className="w-4 h-4" /> Ask Tutor
         </button>
       </div>
@@ -245,11 +245,11 @@ const [activeTab, setActiveTab] = useState("my-curriculum");
         {curriculumData.map((item, index) => (
           <div key={item.id} className={`group flex flex-col sm:flex-row sm:items-center justify-between p-5 hover:bg-slate-50 dark:hover:bg-[#18181B] transition-colors gap-4 ${index !== curriculumData.length - 1 ? 'border-b border-slate-100 dark:border-slate-800/80' : ''}`}>
             <div className="flex items-center gap-4 sm:gap-6">
-              <div className="bg-slate-100 dark:bg-slate-800/50 text-violet-600 dark:text-violet-400 px-3 py-1.5 rounded-lg text-xs font-bold tracking-wider min-w-[80px] text-center border border-slate-200 dark:border-slate-700/50">
+              <div className="bg-slate-100 dark:bg-slate-800/50 text-brand-blue-600 dark:text-brand-blue-400 px-3 py-1.5 rounded-lg text-xs font-bold tracking-wider min-w-[80px] text-center border border-slate-200 dark:border-slate-700/50">
                 {item.week}
               </div>
               <div>
-                <h3 className="text-[15px] font-semibold text-slate-900 dark:text-slate-100 group-hover:text-violet-600 dark:group-hover:text-violet-300 transition-colors">{item.title}</h3>
+                <h3 className="text-[15px] font-semibold text-slate-900 dark:text-slate-100 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-300 transition-colors">{item.title}</h3>
                 <p className="text-[13px] text-slate-500 mt-1">{item.subtitle}</p>
               </div>
             </div>
@@ -275,12 +275,12 @@ const [activeTab, setActiveTab] = useState("my-curriculum");
 
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div className="space-y-3">
-          <span className="inline-block bg-violet-100 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 px-3 py-1 rounded-md text-xs font-semibold border border-violet-200 dark:border-violet-500/20">
+          <span className="inline-block bg-brand-blue-100 dark:bg-brand-blue-500/10 text-brand-blue-700 dark:text-brand-blue-400 px-3 py-1 rounded-md text-xs font-semibold border border-brand-blue-200 dark:border-brand-blue-500/20">
             Week {selectedTopic.week.replace('WK ', '')}
           </span>
           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">{selectedTopic.title}</h1>
         </div>
-        <button onClick={() => handleAskClick()} className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-md shrink-0">
+        <button onClick={() => handleAskClick()} className="flex items-center gap-2 bg-brand-blue-600 hover:bg-brand-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-md shrink-0">
           <Sparkles className="w-4 h-4" /> Ask AI Tutor
         </button>
       </div>
@@ -291,7 +291,7 @@ const [activeTab, setActiveTab] = useState("my-curriculum");
         </div>
         <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800/80">
           <button onClick={() => handleAskClick()} className="w-full flex items-center justify-center gap-2 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 py-3.5 rounded-xl text-sm font-medium transition-colors border border-slate-200 dark:border-slate-700/50">
-            <Sparkles className="w-4 h-4 text-violet-600 dark:text-violet-400" /> Discuss with AI Tutor
+            <Sparkles className="w-4 h-4 text-brand-blue-600 dark:text-brand-blue-400" /> Discuss with AI Tutor
           </button>
         </div>
       </div>
@@ -315,7 +315,7 @@ const [activeTab, setActiveTab] = useState("my-curriculum");
         </button>
         <div>
           <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-violet-600 dark:text-violet-500" /> AI Tutor
+            <Sparkles className="w-4 h-4 text-brand-blue-600 dark:text-brand-blue-500" /> AI Tutor
           </h1>
           <p className="text-xs text-slate-500 font-medium">Socratic Method Â· Data Course</p>
         </div>
@@ -325,10 +325,10 @@ const [activeTab, setActiveTab] = useState("my-curriculum");
       <div className="flex-1 overflow-y-auto space-y-6 pr-2 pb-4">
         {chatMessages.map((msg, idx) => (
           <div key={idx} className={`flex gap-4 max-w-[85%] animate-in slide-in-from-bottom-2 fade-in ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1 ${msg.role === 'ai' ? 'bg-violet-100 dark:bg-violet-600/20 border border-violet-200 dark:border-violet-500/30' : 'bg-slate-200 dark:bg-slate-700'}`}>
-              {msg.role === 'ai' ? <Sparkles className="w-4 h-4 text-violet-600 dark:text-violet-400" /> : <span className="text-[10px] font-bold text-slate-500 dark:text-slate-300">ME</span>}
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1 ${msg.role === 'ai' ? 'bg-brand-blue-100 dark:bg-brand-blue-600/20 border border-brand-blue-200 dark:border-brand-blue-500/30' : 'bg-slate-200 dark:bg-slate-700'}`}>
+              {msg.role === 'ai' ? <Sparkles className="w-4 h-4 text-brand-blue-600 dark:text-brand-blue-400" /> : <span className="text-[10px] font-bold text-slate-500 dark:text-slate-300">ME</span>}
             </div>
-            <div className={`p-4 rounded-2xl text-[15px] leading-relaxed shadow-sm ${msg.role === 'ai' ? 'bg-white dark:bg-[#18181B] border border-slate-200 dark:border-slate-800/80 text-slate-700 dark:text-slate-300 rounded-tl-sm' : 'bg-violet-600 text-white rounded-tr-sm'}`}>
+            <div className={`p-4 rounded-2xl text-[15px] leading-relaxed shadow-sm ${msg.role === 'ai' ? 'bg-white dark:bg-[#18181B] border border-slate-200 dark:border-slate-800/80 text-slate-700 dark:text-slate-300 rounded-tl-sm' : 'bg-brand-blue-600 text-white rounded-tr-sm'}`}>
               {msg.text.includes('**') ? <span dangerouslySetInnerHTML={{ __html: msg.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} /> : msg.text}
             </div>
           </div>
@@ -343,12 +343,12 @@ const [activeTab, setActiveTab] = useState("my-curriculum");
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
             placeholder="Ask about any topic in your curriculum..." 
-            className="w-full bg-white dark:bg-[#18181B] border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-slate-100 rounded-xl px-5 py-4 pr-14 outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 shadow-sm"
+            className="w-full bg-white dark:bg-[#18181B] border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-slate-100 rounded-xl px-5 py-4 pr-14 outline-none focus:border-brand-blue-500 focus:ring-1 focus:ring-brand-blue-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 shadow-sm"
           />
           <button 
             type="submit"
             disabled={!chatInput.trim()}
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-violet-600 hover:bg-violet-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:text-slate-500 rounded-lg flex items-center justify-center transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-brand-blue-600 hover:bg-brand-blue-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:text-slate-500 rounded-lg flex items-center justify-center transition-colors"
           >
             <Send className="w-4 h-4 text-white ml-[-2px] mt-[2px]" />
           </button>

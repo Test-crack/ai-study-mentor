@@ -114,7 +114,7 @@ export default function DrillResultCard({
       <div className="flex justify-end">
         <button
           onClick={onUnlockNext}
-          className="flex items-center gap-2 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+          className="flex items-center gap-2 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-brand-teal-600 dark:hover:text-brand-teal-400 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Dashboard
@@ -152,12 +152,12 @@ export default function DrillResultCard({
       {feedback && feedback.length > 0 && (
         <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-white/[0.06] rounded-3xl p-6 shadow-sm">
           <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-widest mb-4 flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-indigo-500" /> Session Feedback
+            <MessageSquare className="w-5 h-5 text-brand-teal-500" /> Session Feedback
           </h3>
           <div className="space-y-3">
             {feedback.map((text, i) => (
               <div key={i} className="flex gap-3 text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-white/[0.03] p-3.5 rounded-xl">
-                <span className="font-bold text-indigo-500 shrink-0">Q{i + 1}.</span>
+                <span className="font-bold text-brand-teal-500 shrink-0">Q{i + 1}.</span>
                 <p>{text}</p>
               </div>
             ))}
@@ -171,14 +171,14 @@ export default function DrillResultCard({
           <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-4">No recommended lesson available for this topic right now.</p>
           <button
             onClick={onUnlockNext}
-            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors shadow-md"
+            className="px-6 py-3 bg-brand-teal-600 hover:bg-brand-teal-700 text-white font-bold rounded-xl transition-colors shadow-md"
           >
             Continue to Next Drill
           </button>
         </div>
       ) : (
-      <div className="bg-white dark:bg-slate-900/60 border border-indigo-100 dark:border-white/[0.06] rounded-3xl p-6 shadow-sm">
-        <h3 className="text-sm font-bold text-indigo-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+      <div className="bg-white dark:bg-slate-900/60 border border-brand-teal-100 dark:border-white/[0.06] rounded-3xl p-6 shadow-sm">
+        <h3 className="text-sm font-bold text-brand-teal-500 uppercase tracking-widest mb-4 flex items-center gap-2">
           <PlayCircle className="w-5 h-5" /> Recommended Lesson
         </h3>
 
@@ -197,7 +197,7 @@ export default function DrillResultCard({
                   className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity duration-300"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-indigo-900 via-slate-800 to-slate-900" />
+                <div className="w-full h-full bg-gradient-to-br from-brand-teal-900 via-slate-800 to-slate-900" />
               )}
               <div className="absolute inset-0 flex items-center justify-center">
                 <button
@@ -220,7 +220,7 @@ export default function DrillResultCard({
 
             <div className="flex flex-wrap items-center gap-1.5 mb-2">
               {targetTag && (
-                <span className="text-[10px] font-bold uppercase tracking-widest bg-indigo-100 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-bold uppercase tracking-widest bg-brand-teal-100 dark:bg-brand-teal-500/15 text-brand-teal-700 dark:text-brand-teal-300 px-2 py-0.5 rounded-full">
                   {targetTag}
                 </span>
               )}
@@ -253,7 +253,7 @@ export default function DrillResultCard({
               className={`px-6 py-2.5 text-white text-sm font-bold rounded-xl w-full sm:w-auto transition-all ${
                 !hasClicked || watchTimer > 0
                   ? 'bg-slate-300 dark:bg-white/[0.08] cursor-not-allowed text-slate-500'
-                  : 'bg-indigo-600 hover:bg-indigo-700 shadow-md'
+                  : 'bg-brand-teal-600 hover:bg-brand-teal-700 shadow-md'
               }`}
             >
               {!hasClicked ? 'Mark as Watched' : watchTimer > 0 ? `Wait ${watchTimer}s…` : 'Mark as Watched'}
@@ -275,14 +275,14 @@ export default function DrillResultCard({
               value={reflection}
               onChange={e => setReflection(e.target.value)}
               placeholder="E.g., I will focus on my syllable stress…"
-              className="w-full p-4 rounded-xl border border-slate-200 dark:border-white/[0.07] bg-transparent focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none resize-none text-slate-800 dark:text-slate-200 transition-all"
+              className="w-full p-4 rounded-xl border border-slate-200 dark:border-white/[0.07] bg-transparent focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none resize-none text-slate-800 dark:text-slate-200 transition-all"
               rows={3}
             />
             {error && <p className="text-rose-500 text-sm font-bold">{error}</p>}
             <button
               onClick={handleSubmitReflection}
               disabled={savingReflection}
-              className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2 shadow-md"
+              className="w-full py-4 bg-brand-teal-600 hover:bg-brand-teal-700 text-white font-bold rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2 shadow-md"
             >
               {savingReflection ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</>

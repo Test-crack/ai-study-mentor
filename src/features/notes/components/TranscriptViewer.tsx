@@ -85,11 +85,11 @@ export const TranscriptViewer = ({ segments, videoTitle, onClose }: TranscriptVi
     : "0:00";
 
   return (
-    <Card className={`${isExpanded ? 'fixed inset-4 z-50' : 'relative'} bg-white shadow-2xl border-2 border-purple-200 transition-all duration-300`}>
-      <CardHeader className="bg-gradient-to-r from-purple-50 to-blue-50 border-b p-4 sm:p-6">
+    <Card className={`${isExpanded ? 'fixed inset-4 z-50' : 'relative'} bg-white shadow-2xl border-2 border-brand-blue-200 transition-all duration-300`}>
+      <CardHeader className="bg-gradient-to-r from-brand-blue-50 to-blue-50 border-b p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="p-2 bg-purple-500 rounded-lg flex-shrink-0">
+            <div className="p-2 bg-brand-blue-500 rounded-lg flex-shrink-0">
               <FileText className="h-5 w-5 text-white" />
             </div>
             <div className="min-w-0 flex-1">
@@ -105,7 +105,7 @@ export const TranscriptViewer = ({ segments, videoTitle, onClose }: TranscriptVi
           </div>
           
           <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="bg-purple-100 text-purple-700 text-xs">
+            <Badge variant="secondary" className="bg-brand-blue-100 text-brand-blue-700 text-xs">
               <Clock className="h-3 w-3 mr-1" />
               {totalDuration}
             </Badge>
@@ -235,12 +235,12 @@ const TranscriptSegmentCard = ({ segment, index, searchQuery }: TranscriptSegmen
     : segment.text;
 
   return (
-    <div className="group bg-gradient-to-r from-gray-50 to-blue-50 hover:from-purple-50 hover:to-blue-100 rounded-lg p-4 border border-gray-200 hover:border-purple-300 transition-all duration-200">
+    <div className="group bg-gradient-to-r from-gray-50 to-blue-50 hover:from-brand-blue-50 hover:to-blue-100 rounded-lg p-4 border border-gray-200 hover:border-brand-blue-300 transition-all duration-200">
       <div className="flex items-start gap-3">
         <div className="flex-shrink-0">
           <Badge 
             variant="secondary" 
-            className="bg-purple-500 text-white hover:bg-purple-600 cursor-pointer text-xs"
+            className="bg-brand-blue-500 text-white hover:bg-brand-blue-600 cursor-pointer text-xs"
           >
             <Clock className="h-3 w-3 mr-1" />
             {formatTime(segment.offset)}
@@ -257,7 +257,7 @@ const TranscriptSegmentCard = ({ segment, index, searchQuery }: TranscriptSegmen
               variant="ghost"
               size="sm"
               onClick={() => setIsExpanded(!isExpanded)}
-              className="mt-2 text-xs text-purple-600 hover:text-purple-700 p-0 h-auto"
+              className="mt-2 text-xs text-brand-blue-600 hover:text-brand-blue-700 p-0 h-auto"
             >
               {isExpanded ? (
                 <>

@@ -74,10 +74,10 @@ export const StudentTopbar = ({ onUpgradeClick }: StudentTopbarProps) => {
           <span className="text-xs text-orange-400 font-medium hidden sm:inline">day streak</span>
         </div>
 
-        <div className="flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 rounded-full px-3 py-1.5">
-          <Zap className="w-3.5 h-3.5 text-indigo-500 fill-indigo-500" />
-          <span className="text-sm font-black text-indigo-600 dark:text-indigo-400">{totalMomentum}</span>
-          <span className="text-xs text-indigo-400 font-medium hidden sm:inline">pts</span>
+        <div className="flex items-center gap-1.5 bg-brand-teal-50 dark:bg-brand-teal-500/10 border border-brand-teal-100 dark:border-brand-teal-500/20 rounded-full px-3 py-1.5">
+          <Zap className="w-3.5 h-3.5 text-brand-teal-500 fill-brand-teal-500" />
+          <span className="text-sm font-black text-brand-teal-600 dark:text-brand-teal-400">{totalMomentum}</span>
+          <span className="text-xs text-brand-teal-400 font-medium hidden sm:inline">pts</span>
         </div>
 
         <ThemeToggle />
@@ -85,11 +85,11 @@ export const StudentTopbar = ({ onUpgradeClick }: StudentTopbarProps) => {
         <NotificationBell />
 
         <Avatar
-          className="h-8 w-8 ml-1 border border-slate-200 dark:border-slate-700 cursor-pointer hover:ring-2 hover:ring-indigo-100 transition-all shrink-0"
+          className="h-8 w-8 ml-1 border border-slate-200 dark:border-slate-700 cursor-pointer hover:ring-2 hover:ring-brand-teal-100 transition-all shrink-0"
           onClick={() => navigate('/student/settings')}
         >
           <AvatarImage src={profile?.profileImage || ""} />
-          <AvatarFallback className="bg-indigo-600 text-white font-bold text-xs">
+          <AvatarFallback className="bg-brand-teal-600 text-white font-bold text-xs">
             {initials}
           </AvatarFallback>
         </Avatar>

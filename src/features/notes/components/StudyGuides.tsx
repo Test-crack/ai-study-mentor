@@ -325,7 +325,7 @@ export const StudyGuides = () => {
               </div>
 
               {/* AI Recommendation */}
-              <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg">
+              <div className="bg-gradient-to-r from-blue-50 to-brand-blue-50 p-4 rounded-lg">
                 <div className="flex items-center space-x-2 mb-2">
                   <Star className="h-4 w-4 text-blue-600" />
                   <h4 className="font-medium text-blue-800">AI Recommendation</h4>

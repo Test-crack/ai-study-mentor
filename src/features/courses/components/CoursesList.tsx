@@ -138,11 +138,11 @@ export function CoursesList() {
         {courses.map((course) => (
           <Card
             key={course.id}
-            className="group cursor-pointer border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:shadow-xl dark:hover:shadow-indigo-900/10 transition-all duration-200 overflow-hidden flex flex-col"
+            className="group cursor-pointer border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:shadow-xl dark:hover:shadow-brand-teal-900/10 transition-all duration-200 overflow-hidden flex flex-col"
             onClick={() => handleCourseClick(course.slug, course.id)}
           >
             {/* Course Image Placeholder */}
-            <div className="h-40 bg-gradient-to-br from-purple-500 to-indigo-600 relative overflow-hidden">
+            <div className="h-40 bg-gradient-to-br from-brand-blue-500 to-brand-teal-600 relative overflow-hidden">
                {course.thumbnail ? (
                   <img 
                     src={course.thumbnail} 
@@ -150,7 +150,7 @@ export function CoursesList() {
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                ) : (
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-indigo-600" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-brand-blue-500 to-brand-teal-600" />
                )}
               <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
               {course.difficulty && (
@@ -178,7 +178,7 @@ export function CoursesList() {
               )}
 
               {/* Title */}
-              <h3 className="font-bold text-gray-900 dark:text-gray-100 line-clamp-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors min-h-[3rem]">
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors min-h-[3rem]">
                 {course.title}
               </h3>
 
@@ -223,7 +223,7 @@ export function CoursesList() {
                 </div>
                 <Button
                   size="sm"
-                  className="bg-indigo-700 hover:bg-purple-700 text-white dark:bg-indigo-600 dark:hover:bg-purple-600"
+                  className="bg-brand-teal-700 hover:bg-brand-blue-700 text-white dark:bg-brand-teal-600 dark:hover:bg-brand-blue-600"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleCourseClick(course.slug, course.id);

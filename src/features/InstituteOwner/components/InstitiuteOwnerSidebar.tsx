@@ -51,11 +51,11 @@ function NavItem({ id, icon: Icon, label, path, activeTab, isCollapsed, onClick 
         'w-full flex items-center gap-3 rounded-xl transition-all duration-200 group relative',
         isCollapsed ? 'justify-center p-3' : 'px-4 py-3',
         isActive
-          ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20 dark:shadow-indigo-900/20'
-          : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-[#1A1A24] hover:text-indigo-600 dark:hover:text-white',
+          ? 'bg-brand-teal-600 text-white shadow-md shadow-brand-teal-500/20 dark:shadow-brand-teal-900/20'
+          : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-[#1A1A24] hover:text-brand-teal-600 dark:hover:text-white',
       )}
     >
-      <Icon className={cn('h-5 w-5 transition-transform group-hover:scale-105 shrink-0', isActive ? 'text-white' : 'text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-white')} />
+      <Icon className={cn('h-5 w-5 transition-transform group-hover:scale-105 shrink-0', isActive ? 'text-white' : 'text-slate-400 group-hover:text-brand-teal-600 dark:group-hover:text-white')} />
       {!isCollapsed && <span className="font-medium text-sm animate-in fade-in duration-200">{label}</span>}
     </button>
   );
@@ -164,7 +164,7 @@ export const InstituteOwnerSidebar = ({
       {/* Collapse toggle */}
       <button
         onClick={toggleCollapse}
-        className="absolute -right-3 top-1/2 -translate-y-1/2 bg-indigo-600 text-white p-1.5 rounded-full shadow-lg hover:bg-indigo-700 transition-colors z-50 border-2 border-slate-50 dark:border-[#09090E]"
+        className="absolute -right-3 top-1/2 -translate-y-1/2 bg-brand-teal-600 text-white p-1.5 rounded-full shadow-lg hover:bg-brand-teal-700 transition-colors z-50 border-2 border-slate-50 dark:border-[#09090E]"
       >
         {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
       </button>

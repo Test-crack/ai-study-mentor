@@ -93,7 +93,7 @@ export default function InstituteReports() {
                     <YAxis domain={[4, 9]} tick={{ fontSize: 12 }} stroke="#94a3b8" />
                     <Tooltip contentStyle={{ borderRadius: 12, fontSize: 12 }} />
                     <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <Line type="monotone" dataKey="avg_ia_band" name="Avg IA band" stroke="#6366f1" strokeWidth={2.5} dot={{ r: 3 }} connectNulls />
+                    <Line type="monotone" dataKey="avg_ia_band" name="Avg IA band" stroke="#12897C" strokeWidth={2.5} dot={{ r: 3 }} connectNulls />
                     <Line type="monotone" dataKey="avg_real_band" name="Avg mock band" stroke="#10b981" strokeWidth={2.5} dot={{ r: 3 }} connectNulls />
                   </LineChart>
                 </ResponsiveContainer>
@@ -111,13 +111,13 @@ export default function InstituteReports() {
                   {goals.below > 0 && <div className="bg-rose-400" style={{ width: `${(goals.below / goalTotal) * 100}%` }} />}
                   {goals.near > 0 && <div className="bg-amber-400" style={{ width: `${(goals.near / goalTotal) * 100}%` }} />}
                   {goals.at_or_above > 0 && <div className="bg-emerald-400" style={{ width: `${(goals.at_or_above / goalTotal) * 100}%` }} />}
-                  {goals.exam_ready > 0 && <div className="bg-indigo-500" style={{ width: `${(goals.exam_ready / goalTotal) * 100}%` }} />}
+                  {goals.exam_ready > 0 && <div className="bg-brand-teal-500" style={{ width: `${(goals.exam_ready / goalTotal) * 100}%` }} />}
                 </div>
                 <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
                   <span><span className="inline-block w-2.5 h-2.5 rounded-full bg-rose-400 mr-1.5" />Below target: <strong>{goals.below}</strong></span>
                   <span><span className="inline-block w-2.5 h-2.5 rounded-full bg-amber-400 mr-1.5" />Near target: <strong>{goals.near}</strong></span>
                   <span><span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 mr-1.5" />At / above: <strong>{goals.at_or_above}</strong></span>
-                  <span><span className="inline-block w-2.5 h-2.5 rounded-full bg-indigo-500 mr-1.5" />Exam ready: <strong>{goals.exam_ready}</strong></span>
+                  <span><span className="inline-block w-2.5 h-2.5 rounded-full bg-brand-teal-500 mr-1.5" />Exam ready: <strong>{goals.exam_ready}</strong></span>
                 </div>
               </>
             )}

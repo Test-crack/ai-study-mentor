@@ -54,7 +54,7 @@ export function CoursesNavbar() {
                   className="relative h-9 w-9 rounded-full"
                 >
                   <Avatar className="h-9 w-9">
-                    <AvatarFallback className="bg-purple-600 text-white text-sm">
+                    <AvatarFallback className="bg-brand-blue-600 text-white text-sm">
                       {getUserInitials()}
                     </AvatarFallback>
                   </Avatar>
@@ -87,7 +87,7 @@ export function CoursesNavbar() {
           ) : (
             <Button
               onClick={() => navigate('/login')}
-              className="bg-purple-600 hover:bg-purple-700 text-white"
+              className="bg-brand-blue-600 hover:bg-brand-blue-700 text-white"
             >
               <LogIn className="h-4 w-4 mr-2" />
               Sign In

@@ -76,8 +76,8 @@ export default function MockStatusWidget() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center flex-shrink-0">
-            <Trophy className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+          <div className="w-8 h-8 rounded-xl bg-brand-blue-100 dark:bg-brand-blue-500/20 flex items-center justify-center flex-shrink-0">
+            <Trophy className="w-4 h-4 text-brand-blue-600 dark:text-brand-blue-400" />
           </div>
           <div>
             <p className="font-bold text-slate-800 dark:text-white text-sm leading-tight">Mock IELTS</p>
@@ -86,7 +86,7 @@ export default function MockStatusWidget() {
         </div>
         <button
           onClick={() => navigate("/student/mock")}
-          className="text-xs font-semibold text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-0.5"
+          className="text-xs font-semibold text-brand-blue-600 dark:text-brand-blue-400 hover:underline flex items-center gap-0.5"
         >
           View <ChevronRight className="w-3.5 h-3.5" />
         </button>
@@ -118,20 +118,20 @@ export default function MockStatusWidget() {
       {/* ── State: Available — start ──────────────────────────────────────── */}
       {!hasActive && canStart && (
         <>
-          <div className="rounded-xl px-4 py-3 mb-4 bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/30 flex items-center gap-3">
-            <CheckCircle2 className="w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0" />
+          <div className="rounded-xl px-4 py-3 mb-4 bg-brand-blue-50 dark:bg-brand-blue-500/10 border border-brand-blue-200 dark:border-brand-blue-500/30 flex items-center gap-3">
+            <CheckCircle2 className="w-5 h-5 text-brand-blue-600 dark:text-brand-blue-400 flex-shrink-0" />
             <div>
-              <p className="text-xs font-black uppercase tracking-widest text-purple-700 dark:text-purple-300 mb-0.5">
+              <p className="text-xs font-black uppercase tracking-widest text-brand-blue-700 dark:text-brand-blue-300 mb-0.5">
                 Available This Month
               </p>
-              <p className="text-xs font-medium text-purple-600 dark:text-purple-400">
+              <p className="text-xs font-medium text-brand-blue-600 dark:text-brand-blue-400">
                 All requirements met · 4 skills · 3 hours
               </p>
             </div>
           </div>
           <button
             onClick={() => navigate("/student/mock")}
-            className="mt-auto w-full py-2.5 rounded-xl bg-purple-700 hover:bg-purple-600 text-white font-bold text-xs uppercase tracking-wide transition-colors"
+            className="mt-auto w-full py-2.5 rounded-xl bg-brand-blue-700 hover:bg-brand-blue-600 text-white font-bold text-xs uppercase tracking-wide transition-colors"
           >
             Start Mock Test →
           </button>
@@ -223,20 +223,20 @@ export default function MockStatusWidget() {
       {/* ── State: Eligible but can_start_mock not yet true (edge / cooldown) ── */}
       {!hasActive && !canStart && !usedMonth && !notEligible && (
         <>
-          <div className="rounded-xl px-4 py-3 mb-4 bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/30 flex items-center gap-3">
-            <CheckCircle2 className="w-5 h-5 text-purple-500 dark:text-purple-400 flex-shrink-0" />
+          <div className="rounded-xl px-4 py-3 mb-4 bg-brand-blue-50 dark:bg-brand-blue-500/10 border border-brand-blue-200 dark:border-brand-blue-500/30 flex items-center gap-3">
+            <CheckCircle2 className="w-5 h-5 text-brand-blue-500 dark:text-brand-blue-400 flex-shrink-0" />
             <div>
-              <p className="text-xs font-black uppercase tracking-widest text-purple-700 dark:text-purple-300 mb-0.5">
+              <p className="text-xs font-black uppercase tracking-widest text-brand-blue-700 dark:text-brand-blue-300 mb-0.5">
                 Eligible
               </p>
-              <p className="text-xs font-medium text-purple-600 dark:text-purple-400">
+              <p className="text-xs font-medium text-brand-blue-600 dark:text-brand-blue-400">
                 Requirements met · mock opening soon
               </p>
             </div>
           </div>
           <button
             onClick={() => navigate("/student/mock")}
-            className="mt-auto w-full py-2.5 rounded-xl border border-purple-200 dark:border-purple-500/40 text-purple-600 dark:text-purple-400 font-bold text-xs uppercase tracking-wide hover:bg-purple-50 dark:hover:bg-purple-500/10 transition-colors"
+            className="mt-auto w-full py-2.5 rounded-xl border border-brand-blue-200 dark:border-brand-blue-500/40 text-brand-blue-600 dark:text-brand-blue-400 font-bold text-xs uppercase tracking-wide hover:bg-brand-blue-50 dark:hover:bg-brand-blue-500/10 transition-colors"
           >
             Go to Mock →
           </button>

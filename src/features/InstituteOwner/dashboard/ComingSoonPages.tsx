@@ -47,7 +47,7 @@ function ComingSoonTab({ config }: { config: ComingSoonConfig }) {
                 <div className={`h-20 w-20 rounded-3xl bg-gradient-to-br ${config.accentColor} flex items-center justify-center shadow-xl`}>
                   <Lock className="h-9 w-9 text-white" />
                 </div>
-                <span className="absolute -top-2 -right-3 text-xs font-bold bg-indigo-600 text-white px-2.5 py-1 rounded-full shadow-md whitespace-nowrap">
+                <span className="absolute -top-2 -right-3 text-xs font-bold bg-brand-teal-600 text-white px-2.5 py-1 rounded-full shadow-md whitespace-nowrap">
                   {config.phase}
                 </span>
               </div>
@@ -145,7 +145,7 @@ export function StrategicReportPage() {
     title: 'Strategic Reports',
     subtitle:
       'Downloadable PDF reports, board-level summaries, and trend narratives to share with stakeholders.',
-    accentColor: 'from-indigo-500 to-violet-600',
+    accentColor: 'from-brand-teal-500 to-brand-blue-600',
     features: [
       {
         title: 'Monthly Board Report',
@@ -177,7 +177,7 @@ export function AiCalibrationPage() {
     title: 'AI Calibration & Marketing',
     subtitle:
       'Tune the AI tutor for your teaching methodology, branding, and target student profiles.',
-    accentColor: 'from-violet-500 to-purple-700',
+    accentColor: 'from-brand-blue-500 to-brand-blue-700',
     features: [
       {
         title: 'Custom Drill Weighting',

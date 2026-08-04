@@ -45,11 +45,11 @@ export const SuperAdminTopbar = ({ onCreateCourse }: InstituteTopbarProps) => {
       {/* Search Input */}
       <div className="flex-1 max-w-xl hidden sm:block">
         <div className="relative group">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-brand-teal-600 transition-colors" />
           <input 
             type="text" 
             placeholder="Search students, courses, or resources..." 
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm font-medium text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 transition-all text-sm font-medium text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
           />
         </div>
       </div>
@@ -63,7 +63,7 @@ export const SuperAdminTopbar = ({ onCreateCourse }: InstituteTopbarProps) => {
         <ThemeToggle />
 
         {/* Notifications */}
-        <button className="relative p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-800 rounded-full transition-all">
+        <button className="relative p-2 text-slate-400 hover:text-brand-teal-600 hover:bg-brand-teal-50 dark:hover:bg-slate-800 rounded-full transition-all">
           <Bell className="h-5 w-5" />
           <span className="absolute top-2 right-2.5 h-2 w-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
         </button>
@@ -75,11 +75,11 @@ export const SuperAdminTopbar = ({ onCreateCourse }: InstituteTopbarProps) => {
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 uppercase tracking-wider">Testcrack Super Admin</p>
           </div>
           <Avatar 
-            className="h-9 w-9 border-2 border-white dark:border-slate-800 shadow-sm ring-1 ring-slate-100 dark:ring-slate-700 cursor-pointer hover:ring-indigo-100 transition-all"
+            className="h-9 w-9 border-2 border-white dark:border-slate-800 shadow-sm ring-1 ring-slate-100 dark:ring-slate-700 cursor-pointer hover:ring-brand-teal-100 transition-all"
             onClick={() => navigate('/profile')}
           >
             <AvatarImage src={profile?.profileImage || ""} />
-            <AvatarFallback className="bg-indigo-600 text-white font-bold">
+            <AvatarFallback className="bg-brand-teal-600 text-white font-bold">
               {displayName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>

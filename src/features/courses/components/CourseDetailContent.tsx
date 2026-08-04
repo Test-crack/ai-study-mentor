@@ -80,7 +80,7 @@ export function CourseDetailContent({ course }: CourseDetailContentProps) {
       {/* Course Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="flex items-center gap-3 p-4 bg-white rounded-lg border">
-          <Clock className="h-5 w-5 text-purple-600" />
+          <Clock className="h-5 w-5 text-brand-blue-600" />
           <div>
             <p className="text-xs text-gray-500">Duration</p>
             <p className="font-semibold text-gray-900">
@@ -89,7 +89,7 @@ export function CourseDetailContent({ course }: CourseDetailContentProps) {
           </div>
         </div>
         <div className="flex items-center gap-3 p-4 bg-white rounded-lg border">
-          <BarChart className="h-5 w-5 text-purple-600" />
+          <BarChart className="h-5 w-5 text-brand-blue-600" />
           <div>
             <p className="text-xs text-gray-500">Level</p>
             <p className="font-semibold text-gray-900">
@@ -98,7 +98,7 @@ export function CourseDetailContent({ course }: CourseDetailContentProps) {
           </div>
         </div>
         <div className="flex items-center gap-3 p-4 bg-white rounded-lg border">
-          <BookOpen className="h-5 w-5 text-purple-600" />
+          <BookOpen className="h-5 w-5 text-brand-blue-600" />
           <div>
             <p className="text-xs text-gray-500">Modules</p>
             <p className="font-semibold text-gray-900">
@@ -107,7 +107,7 @@ export function CourseDetailContent({ course }: CourseDetailContentProps) {
           </div>
         </div>
         <div className="flex items-center gap-3 p-4 bg-white rounded-lg border">
-          <Users className="h-5 w-5 text-purple-600" />
+          <Users className="h-5 w-5 text-brand-blue-600" />
           <div>
             <p className="text-xs text-gray-500">Enrolled</p>
             <p className="font-semibold text-gray-900">
@@ -134,7 +134,7 @@ export function CourseDetailContent({ course }: CourseDetailContentProps) {
               </div>
             ))}
             {course.modules.length > 6 && (
-              <div className="flex items-start gap-2 text-purple-600">
+              <div className="flex items-start gap-2 text-brand-blue-600">
                 <span className="text-sm font-medium">
                   +{course.modules.length - 6} more modules
                 </span>
@@ -164,7 +164,7 @@ export function CourseDetailContent({ course }: CourseDetailContentProps) {
               >
                 <AccordionTrigger className="px-6 py-4 hover:bg-gray-50 hover:no-underline">
                   <div className="flex items-center gap-4 text-left">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-100 text-purple-700 font-semibold text-sm">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-brand-blue-100 text-brand-blue-700 font-semibold text-sm">
                       {index + 1}
                     </div>
                     <div>

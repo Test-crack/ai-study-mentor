@@ -30,7 +30,7 @@ export const RecommendedInstructors = () => {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-bold text-slate-800 dark:text-slate-100">Top Instructors</CardTitle>
-          <Button variant="ghost" size="sm" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-xs font-semibold">
+          <Button variant="ghost" size="sm" className="text-brand-teal-600 dark:text-brand-teal-400 hover:text-brand-teal-700 hover:bg-brand-teal-50 dark:hover:bg-brand-teal-900/20 text-xs font-semibold">
             View All
           </Button>
         </div>
@@ -43,14 +43,14 @@ export const RecommendedInstructors = () => {
               <AvatarFallback className="bg-slate-200 dark:bg-slate-700 w-full h-full flex items-center justify-center text-slate-500 dark:text-slate-300">{instructor.name[0]}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <h4 className="font-semibold text-sm text-slate-900 dark:text-slate-100 truncate group-hover:text-indigo-700 dark:group-hover:text-indigo-400 transition-colors">
+              <h4 className="font-semibold text-sm text-slate-900 dark:text-slate-100 truncate group-hover:text-brand-teal-700 dark:group-hover:text-brand-teal-400 transition-colors">
                 {instructor.name}
               </h4>
               <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
                 {instructor.specialization}
               </p>
             </div>
-            <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-300 dark:text-slate-600 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+            <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-300 dark:text-slate-600 group-hover:text-brand-teal-600 dark:group-hover:text-brand-teal-400">
               <ArrowRight className="h-4 w-4" />
             </Button>
           </div>

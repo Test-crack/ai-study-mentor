@@ -34,15 +34,15 @@ const materialTypeConfig = {
   standard: {
     title: "Standard Notes",
     icon: BookOpen,
-    gradient: "from-purple-500 to-pink-500",
-    bgGradient: "from-purple-50 to-pink-50",
+    gradient: "from-brand-blue-500 to-pink-500",
+    bgGradient: "from-brand-blue-50 to-pink-50",
     badge: "Comprehensive"
   },
   detailed: {
     title: "Deep Dive",
     icon: Microscope,
-    gradient: "from-indigo-500 to-purple-500",
-    bgGradient: "from-indigo-50 to-purple-50",
+    gradient: "from-brand-teal-500 to-brand-blue-500",
+    bgGradient: "from-brand-teal-50 to-brand-blue-50",
     badge: "In-Depth"
   }
 };

@@ -57,7 +57,7 @@ export function StudentProfileHeader({ data }: Props) {
       icon: <Target className="h-4 w-4" />,
       label: 'Target Band',
       value: target_band !== null ? target_band.toFixed(1) : '—',
-      valueClass: 'text-indigo-600 dark:text-indigo-400',
+      valueClass: 'text-brand-teal-600 dark:text-brand-teal-400',
     },
     {
       icon: <Zap className="h-4 w-4" />,
@@ -88,11 +88,11 @@ export function StudentProfileHeader({ data }: Props) {
       {/* No overflow-hidden here — outer card clips the rounded corners.
           Keeping this open lets the avatar z-index stack above it correctly. */}
       {/* h-40 gives room; name is offset right by ml-[100px] to sit beside the avatar's footprint */}
-      <div className="relative h-40 bg-gradient-to-br from-indigo-700 via-indigo-600 to-violet-700 flex flex-col justify-end px-6 pb-6">
+      <div className="relative h-40 bg-gradient-to-br from-brand-teal-700 via-brand-teal-600 to-brand-blue-700 flex flex-col justify-end px-6 pb-6">
         {/* Decorative blobs */}
         <div className="absolute -top-10 -right-10 w-52 h-52 rounded-full bg-white/5 pointer-events-none" />
         <div className="absolute top-6 right-24 w-24 h-24 rounded-full bg-white/5 pointer-events-none" />
-        <div className="absolute -bottom-6 right-8 w-36 h-36 rounded-full bg-violet-600/30 pointer-events-none" />
+        <div className="absolute -bottom-6 right-8 w-36 h-36 rounded-full bg-brand-blue-600/30 pointer-events-none" />
 
         {/* Name — ml-[100px] clears the avatar (w-20=80px + 20px gap) */}
         <h2 className="relative z-10 text-2xl font-black text-white leading-tight tracking-tight ml-[100px]">
@@ -107,7 +107,7 @@ export function StudentProfileHeader({ data }: Props) {
         <div className="flex items-end justify-between -mt-14 mb-5">
           {/* Avatar — z-10 paints above gradient div; larger at h-20 w-20 */}
           <div className={cn(
-            'relative z-10 h-20 w-20 rounded-full ring-[3px] ring-white dark:ring-slate-900 shadow-2xl overflow-hidden bg-indigo-600 shrink-0',
+            'relative z-10 h-20 w-20 rounded-full ring-[3px] ring-white dark:ring-slate-900 shadow-2xl overflow-hidden bg-brand-teal-600 shrink-0',
             'flex items-center justify-center'
           )}>
             {student.avatar ? (

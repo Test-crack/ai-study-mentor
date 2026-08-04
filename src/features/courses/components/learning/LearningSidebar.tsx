@@ -59,8 +59,8 @@ export function LearningSidebar({
         {!isCollapsed && (
           <div className="flex-1 min-w-0 mr-2">
             <div className="flex items-center gap-2 mb-2">
-              <BookOpen className="h-4 w-4 text-purple-600" />
-              <span className="text-xs font-medium text-purple-600 uppercase tracking-wide">
+              <BookOpen className="h-4 w-4 text-brand-blue-600" />
+              <span className="text-xs font-medium text-brand-blue-600 uppercase tracking-wide">
                 Course
               </span>
             </div>
@@ -112,7 +112,7 @@ export function LearningSidebar({
                   'w-full text-left rounded-lg transition-all mb-1',
                   isCollapsed ? 'p-2 flex justify-center' : 'p-3',
                   isActive
-                    ? 'bg-purple-100 border border-purple-300'
+                    ? 'bg-brand-blue-100 border border-brand-blue-300'
                     : isCompleted
                     ? 'bg-green-50 border border-green-200 hover:bg-green-100'
                     : canAccess
@@ -125,7 +125,7 @@ export function LearningSidebar({
                     className={cn(
                       'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium',
                       isActive
-                        ? 'bg-purple-600 text-white'
+                        ? 'bg-brand-blue-600 text-white'
                         : isCompleted
                         ? 'bg-green-500 text-white'
                         : canAccess
@@ -147,7 +147,7 @@ export function LearningSidebar({
                       className={cn(
                         'w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5',
                         isActive
-                          ? 'bg-purple-600 text-white'
+                          ? 'bg-brand-blue-600 text-white'
                           : isCompleted
                           ? 'bg-green-500 text-white'
                           : canAccess
@@ -168,7 +168,7 @@ export function LearningSidebar({
                         className={cn(
                           'text-sm font-medium leading-tight',
                           isActive
-                            ? 'text-purple-700'
+                            ? 'text-brand-blue-700'
                             : isCompleted
                             ? 'text-green-700'
                             : canAccess
@@ -182,7 +182,7 @@ export function LearningSidebar({
                         className={cn(
                           'text-xs mt-1',
                           isActive
-                            ? 'text-purple-500'
+                            ? 'text-brand-blue-500'
                             : isCompleted
                             ? 'text-green-500'
                             : 'text-gray-500'

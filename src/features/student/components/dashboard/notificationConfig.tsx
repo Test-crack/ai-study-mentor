@@ -103,7 +103,7 @@ export const NOTIFICATION_CONFIG: Record<NotificationType, BannerConfig> = {
   // Light-blue gradient with white text — calm, low-pressure, and clearly a
   // "let's find your way back" moment rather than an alarm.
   IA_MISSED: {
-    bgColor:     "bg-gradient-to-r from-sky-800 to-indigo-600 dark:from-sky-800 dark:to-indigo-600",
+    bgColor:     "bg-gradient-to-r from-sky-800 to-brand-teal-600 dark:from-sky-800 dark:to-brand-teal-600",
     borderColor: "border-sky-300/40 dark:border-sky-400/30",
     iconBg:      "bg-white/20",
     icon:        <Compass className="w-6 h-6 text-white" />,

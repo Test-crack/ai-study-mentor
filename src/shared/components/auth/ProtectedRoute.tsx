@@ -22,9 +22,9 @@ export const RoleProtectedRoute = ({
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
-            <div className="h-12 w-12 rounded-full border-t-2 border-b-2 border-purple-600 animate-spin"></div>
+            <div className="h-12 w-12 rounded-full border-t-2 border-b-2 border-brand-blue-600 animate-spin"></div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="h-6 w-6 rounded-full bg-purple-100 animate-pulse"></div>
+              <div className="h-6 w-6 rounded-full bg-brand-blue-100 animate-pulse"></div>
             </div>
           </div>
           <p className="text-sm font-semibold text-gray-500 tracking-wide uppercase">Verifying credentials...</p>

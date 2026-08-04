@@ -76,13 +76,13 @@ export default function ApplyDrillScreen() {
 
         <main className="flex-1 p-6 max-w-3xl mx-auto w-full animate-in fade-in mt-10">
           {!isComplete ? (
-            <div className="bg-white dark:bg-slate-900/60 rounded-3xl p-8 shadow-sm border border-indigo-100 dark:border-white/[0.06]">
+            <div className="bg-white dark:bg-slate-900/60 rounded-3xl p-8 shadow-sm border border-brand-teal-100 dark:border-white/[0.06]">
               <div className="text-center mb-8">
-                <span className="bg-indigo-100 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-400 font-bold px-4 py-1.5 rounded-full text-sm tracking-wide uppercase">
+                <span className="bg-brand-teal-100 text-brand-teal-600 dark:bg-brand-teal-500/15 dark:text-brand-teal-400 font-bold px-4 py-1.5 rounded-full text-sm tracking-wide uppercase">
                   Final Step
                 </span>
                 <h1 className="text-2xl font-black text-slate-800 dark:text-white mt-6">
-                  Apply what you just learned: <span className="text-indigo-500">{subSkill}</span>
+                  Apply what you just learned: <span className="text-brand-teal-500">{subSkill}</span>
                 </h1>
                 <p className="text-slate-500 dark:text-slate-400 mt-2">One single prompt. Show us what you absorbed from the video.</p>
               </div>
@@ -100,7 +100,7 @@ export default function ApplyDrillScreen() {
                       value={textAnswer}
                       onChange={(e) => setTextAnswer(e.target.value)}
                       placeholder="Start typing your response here..."
-                      className="w-full h-48 p-4 rounded-2xl border border-slate-200 dark:border-white/[0.07] bg-transparent focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none resize-none transition-all text-slate-800 dark:text-slate-200"
+                      className="w-full h-48 p-4 rounded-2xl border border-slate-200 dark:border-white/[0.07] bg-transparent focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none resize-none transition-all text-slate-800 dark:text-slate-200"
                       onFocus={() => { if (!isRecording) setIsRecording(true) }}
                     />
                     <div className="absolute bottom-4 right-4 text-slate-400 font-mono text-sm tabular-nums">
@@ -108,7 +108,7 @@ export default function ApplyDrillScreen() {
                     </div>
                   </div>
                   <div className="flex justify-end">
-                    <button onClick={handleSubmit} disabled={textAnswer.length < 10} className="flex items-center px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-md">
+                    <button onClick={handleSubmit} disabled={textAnswer.length < 10} className="flex items-center px-6 py-3 bg-brand-teal-600 text-white font-bold rounded-xl hover:bg-brand-teal-700 disabled:opacity-50 transition-colors shadow-md">
                       Submit Apply Drill <Send className="w-4 h-4 ml-2" />
                     </button>
                   </div>
@@ -126,18 +126,18 @@ export default function ApplyDrillScreen() {
 
                   {isProcessing ? (
                      <div className="flex flex-col items-center text-slate-500 dark:text-slate-400 space-y-3 py-10">
-                       <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+                       <Loader2 className="w-8 h-8 animate-spin text-brand-teal-500" />
                        <span className="font-medium">Finalizing session...</span>
                      </div>
                   ) : !isRecording ? (
-                    <button onClick={() => setIsRecording(true)} className="relative group flex flex-col items-center justify-center w-32 h-32 rounded-full bg-indigo-600 text-white shadow-lg shadow-indigo-500/25 hover:scale-105 transition-all">
-                      <div className="absolute inset-0 rounded-full bg-indigo-400 opacity-30 group-hover:animate-ping" />
+                    <button onClick={() => setIsRecording(true)} className="relative group flex flex-col items-center justify-center w-32 h-32 rounded-full bg-brand-teal-600 text-white shadow-lg shadow-brand-teal-500/25 hover:scale-105 transition-all">
+                      <div className="absolute inset-0 rounded-full bg-brand-teal-400 opacity-30 group-hover:animate-ping" />
                       <Mic className="w-10 h-10 mb-2" />
                       <span className="font-bold text-xs tracking-wider">START</span>
                     </button>
                   ) : (
                     <div className="flex flex-col items-center animate-in zoom-in">
-                      <div className="text-4xl font-mono font-black text-indigo-500 mb-6 flex items-center gap-3 tabular-nums">
+                      <div className="text-4xl font-mono font-black text-brand-teal-500 mb-6 flex items-center gap-3 tabular-nums">
                         <span className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
                         {formatTime(timeLeft)}
                       </div>
@@ -151,7 +151,7 @@ export default function ApplyDrillScreen() {
             </div>
           ) : (
             // Final Summary Completion Card
-            <div className="bg-gradient-to-br from-indigo-500 to-violet-600 p-1 rounded-3xl shadow-xl shadow-indigo-500/20 animate-in zoom-in duration-500">
+            <div className="bg-gradient-to-br from-brand-teal-500 to-brand-blue-600 p-1 rounded-3xl shadow-xl shadow-brand-teal-500/20 animate-in zoom-in duration-500">
               <div className="bg-white dark:bg-slate-900 rounded-[22px] p-8 md:p-12 text-center">
                 <div className="h-20 w-20 rounded-2xl bg-emerald-50 dark:bg-emerald-500/15 flex items-center justify-center mx-auto mb-6 ring-4 ring-emerald-100/50 dark:ring-emerald-500/10">
                   <CheckCircle2 className="w-11 h-11 text-emerald-500" />
@@ -173,7 +173,7 @@ export default function ApplyDrillScreen() {
 
                 <button
                   onClick={() => navigate('/student/dashboard', { state: { drillCompleted: true } })}
-                  className="w-full sm:w-auto inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-xl font-bold hover:scale-[1.02] transition-all shadow-lg"
+                  className="w-full sm:w-auto inline-flex items-center justify-center bg-brand-teal-600 hover:bg-brand-teal-700 text-white px-8 py-4 rounded-xl font-bold hover:scale-[1.02] transition-all shadow-lg"
                 >
                   Back to Dashboard <ArrowRight className="w-5 h-5 ml-2" />
                 </button>

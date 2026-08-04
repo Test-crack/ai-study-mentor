@@ -92,10 +92,10 @@ function getLevelConfig(level: Level) {
     },
     B: {
       label: "Intermediate",
-      bg: "bg-indigo-50",
+      bg: "bg-brand-teal-50",
       border: "border-gray-900",
-      text: "text-indigo-700",
-      dot: "bg-indigo-700",
+      text: "text-brand-teal-700",
+      dot: "bg-brand-teal-700",
       ring: "ring-gray-900",
     },
     C: {
@@ -318,7 +318,7 @@ function TopNavBar() {
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-2.5">
-            <div className="p-2 bg-indigo-700 border-2 border-gray-900 rounded-lg" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+            <div className="p-2 bg-brand-teal-700 border-2 border-gray-900 rounded-lg" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
               <GraduationCap className="h-5 w-5 text-white" />
             </div>
             <span className="text-xl font-black text-gray-900 uppercase tracking-tight">
@@ -420,7 +420,7 @@ function ProgressSteps({
             <div
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded border-2 text-xs font-black uppercase tracking-wide select-none cursor-not-allowed transition-all ${
                 isDone
-                  ? "bg-indigo-700 text-white border-gray-900"
+                  ? "bg-brand-teal-700 text-white border-gray-900"
                   : isCurrent
                   ? "bg-white text-gray-900 border-gray-900"
                   : "bg-white text-gray-400 border-gray-300"
@@ -469,8 +469,8 @@ function DetailedFeedbackDisplay({ feedback }: { feedback: any }) {
         const sect = feedback?.[key];
         if (!sect) return null;
         return (
-          <div key={key} className="bg-white border-2 border-indigo-100 rounded p-3">
-             <p className="text-indigo-700 font-bold text-[10px] uppercase mb-1 tracking-wider">{key.replace('_', ' ')}</p>
+          <div key={key} className="bg-white border-2 border-brand-teal-100 rounded p-3">
+             <p className="text-brand-teal-700 font-bold text-[10px] uppercase mb-1 tracking-wider">{key.replace('_', ' ')}</p>
              <p className="text-gray-800 text-sm italic mb-2">"{sect.score_rationale}"</p>
              
              {sect.observed_issues && sect.observed_issues.length > 0 && (
@@ -492,7 +492,7 @@ function DetailedFeedbackDisplay({ feedback }: { feedback: any }) {
              )}
 
              {sect.next_step && (
-               <p className="text-indigo-900 text-xs mt-2 border-t border-indigo-50 pt-2"><span className="font-bold">Next Step:</span> {sect.next_step}</p>
+               <p className="text-brand-teal-900 text-xs mt-2 border-t border-brand-teal-50 pt-2"><span className="font-bold">Next Step:</span> {sect.next_step}</p>
              )}
           </div>
         )
@@ -536,7 +536,7 @@ function InterimResultCard({
 
   return (
     <div className="flex flex-col items-center text-center gap-6 py-8 animate-fade-in">
-      <div className="w-16 h-16 bg-indigo-700 border-2 border-gray-900 rounded-xl flex items-center justify-center text-3xl" style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>
+      <div className="w-16 h-16 bg-brand-teal-700 border-2 border-gray-900 rounded-xl flex items-center justify-center text-3xl" style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>
         {SKILL_ICONS[skill]}
       </div>
 
@@ -605,15 +605,15 @@ function InterimResultCard({
       )}
 
       {result.feedback && (
-        <div className="bg-indigo-50 border-2 border-gray-900 rounded-lg p-4 w-full max-w-lg text-left" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
-          <p className="text-indigo-700 text-xs uppercase tracking-wider mb-2 font-black">AI Feedback & Insights</p>
+        <div className="bg-brand-teal-50 border-2 border-gray-900 rounded-lg p-4 w-full max-w-lg text-left" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+          <p className="text-brand-teal-700 text-xs uppercase tracking-wider mb-2 font-black">AI Feedback & Insights</p>
           <DetailedFeedbackDisplay feedback={result.feedback} />
         </div>
       )}
 
       <button
         onClick={onContinue}
-        className="mt-2 px-8 py-3.5 bg-indigo-700 hover:bg-indigo-600 text-white font-black uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all neo-btn"
+        className="mt-2 px-8 py-3.5 bg-brand-teal-700 hover:bg-brand-teal-600 text-white font-black uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all neo-btn"
         style={{ boxShadow: '4px 4px 0 #0F0F0F' }}
       >
         Continue to {nextLabel} →
@@ -641,13 +641,13 @@ function DiagnosticGate({
   return (
     <div className="flex flex-col items-center text-center gap-8 max-w-xl mx-auto py-8">
       <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded border-2 border-gray-900 bg-indigo-700 text-white text-xs font-black tracking-widest uppercase" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded border-2 border-gray-900 bg-brand-teal-700 text-white text-xs font-black tracking-widest uppercase" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
           <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
           IELTS Baseline Diagnostic
         </div>
         <h1 className="text-4xl font-black text-gray-900 tracking-tight uppercase">
           {gateState === "in_progress" ? "Resume Your" : "Begin Your"}{" "}
-          <span className="text-indigo-700">
+          <span className="text-brand-teal-700">
             Diagnostic
           </span>
         </h1>
@@ -662,7 +662,7 @@ function DiagnosticGate({
         {steps.map((step) => (
           <div
             key={step.label}
-            className="bg-white border-2 border-gray-900 rounded-lg p-4 flex items-center gap-4 text-left hover:bg-indigo-50 transition-colors"
+            className="bg-white border-2 border-gray-900 rounded-lg p-4 flex items-center gap-4 text-left hover:bg-brand-teal-50 transition-colors"
             style={{ boxShadow: '4px 4px 0 #0F0F0F' }}
           >
             <span className="text-2xl">{step.icon}</span>
@@ -683,7 +683,7 @@ function DiagnosticGate({
 
       <button
         onClick={onStart}
-        className="w-full py-4 bg-indigo-700 hover:bg-indigo-600 text-white font-black text-base uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all neo-btn"
+        className="w-full py-4 bg-brand-teal-700 hover:bg-brand-teal-600 text-white font-black text-base uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all neo-btn"
         style={{ boxShadow: '5px 5px 0 #0F0F0F' }}
       >
         {gateState === "in_progress"
@@ -777,7 +777,7 @@ function ListeningPhase({
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-indigo-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>🎧</div>
+          <div className="w-10 h-10 bg-brand-teal-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>🎧</div>
           <div>
             <p className="text-gray-900 font-black uppercase tracking-wide">Listening Section</p>
             <p className="text-gray-500 text-sm">Loading your audio and questions…</p>
@@ -800,7 +800,7 @@ function ListeningPhase({
     return (
       <div className="flex flex-col items-center gap-6 py-16 text-center">
         <div className="relative">
-          <div className="w-16 h-16 rounded-full border-4 border-gray-200 border-t-indigo-700 animate-spin" />
+          <div className="w-16 h-16 rounded-full border-4 border-gray-200 border-t-brand-teal-700 animate-spin" />
           <span className="absolute inset-0 flex items-center justify-center text-2xl">🎧</span>
         </div>
         <div>
@@ -823,7 +823,7 @@ function ListeningPhase({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-indigo-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>🎧</div>
+          <div className="w-10 h-10 bg-brand-teal-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>🎧</div>
           <div>
             <p className="text-gray-900 font-black uppercase tracking-wide">Listening Section</p>
             <p className="text-gray-500 text-sm">{data?.questions?.length ?? 0} questions · Answer all to submit</p>
@@ -834,9 +834,9 @@ function ListeningPhase({
         </div>
       </div>
 
-      <div className="bg-indigo-50 border-2 border-gray-900 rounded-lg p-4" style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>
+      <div className="bg-brand-teal-50 border-2 border-gray-900 rounded-lg p-4" style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-indigo-700 border-2 border-gray-900 flex items-center justify-center text-white text-lg shrink-0 font-black" style={{ boxShadow: '2px 2px 0 #0F0F0F' }}>
+          <div className="w-10 h-10 rounded-lg bg-brand-teal-700 border-2 border-gray-900 flex items-center justify-center text-white text-lg shrink-0 font-black" style={{ boxShadow: '2px 2px 0 #0F0F0F' }}>
             ▶
           </div>
           <div className="flex-1">
@@ -866,7 +866,7 @@ function ListeningPhase({
             className={`px-4 py-2 rounded-lg text-sm font-black uppercase tracking-wide border-2 transition-all ${
               audioButtonDisabled
                 ? "bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed"
-                : "bg-indigo-700 hover:bg-indigo-600 text-white border-gray-900 neo-btn"
+                : "bg-brand-teal-700 hover:bg-brand-teal-600 text-white border-gray-900 neo-btn"
             }`}
             style={!audioButtonDisabled ? { boxShadow: '3px 3px 0 #0F0F0F' } : {}}
           >
@@ -883,7 +883,7 @@ function ListeningPhase({
             style={{ boxShadow: '4px 4px 0 #0F0F0F' }}
           >
             <p className="text-gray-700 text-sm font-bold mb-3">
-              <span className="text-indigo-700 font-black mr-2 uppercase">Q{qi + 1}.</span>
+              <span className="text-brand-teal-700 font-black mr-2 uppercase">Q{qi + 1}.</span>
               {q.text}
             </p>
             <div className={`${q.type === 'tfng' ? 'flex gap-2 flex-wrap mt-2' : 'grid grid-cols-1 gap-2'}`}>
@@ -926,12 +926,12 @@ function ListeningPhase({
                   >
                     <div
                       className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-all ${
-                        answers[q.id] === letter ? 'border-indigo-400 bg-indigo-500' : 'border-gray-400'
+                        answers[q.id] === letter ? 'border-brand-teal-400 bg-brand-teal-500' : 'border-gray-400'
                       }`}
                     >
                       {answers[q.id] === letter && <div className="w-1.5 h-1.5 rounded-sm bg-white" />}
                     </div>
-                    <span className={`font-black text-sm w-5 shrink-0 ${answers[q.id] === letter ? 'text-indigo-300' : 'text-indigo-700'}`}>
+                    <span className={`font-black text-sm w-5 shrink-0 ${answers[q.id] === letter ? 'text-brand-teal-300' : 'text-brand-teal-700'}`}>
                       {letter}
                     </span>
                     <span className="text-sm">{text}</span>
@@ -958,7 +958,7 @@ function ListeningPhase({
         disabled={!allAnswered || sectionState === "submitting"}
         className={`w-full py-3.5 rounded-lg font-black text-sm uppercase tracking-wide border-2 transition-all ${
           allAnswered
-            ? "bg-indigo-700 hover:bg-indigo-600 text-white border-gray-900 neo-btn"
+            ? "bg-brand-teal-700 hover:bg-brand-teal-600 text-white border-gray-900 neo-btn"
             : "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-300"
         }`}
         style={allAnswered ? { boxShadow: '4px 4px 0 #0F0F0F' } : {}}
@@ -1055,7 +1055,7 @@ function ReadingPhase({
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-indigo-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>📖</div>
+          <div className="w-10 h-10 bg-brand-teal-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>📖</div>
           <p className="text-gray-900 font-black uppercase tracking-wide">Loading Reading Section…</p>
         </div>
         <SkeletonLoader />
@@ -1075,7 +1075,7 @@ function ReadingPhase({
     return (
       <div className="flex flex-col items-center gap-6 py-16 text-center">
         <div className="relative">
-          <div className="w-16 h-16 rounded-full border-4 border-gray-200 border-t-indigo-700 animate-spin" />
+          <div className="w-16 h-16 rounded-full border-4 border-gray-200 border-t-brand-teal-700 animate-spin" />
           <span className="absolute inset-0 flex items-center justify-center text-2xl">📖</span>
         </div>
         <p className="text-gray-900 font-black uppercase tracking-wide">Scoring your answers…</p>
@@ -1087,7 +1087,7 @@ function ReadingPhase({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-indigo-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>📖</div>
+          <div className="w-10 h-10 bg-brand-teal-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>📖</div>
           <div>
             <p className="text-gray-900 font-black uppercase tracking-wide">Reading Section</p>
             <p className="text-gray-500 text-sm">Read the passage, then answer {data?.questions?.length ?? 0} questions</p>
@@ -1129,7 +1129,7 @@ function ReadingPhase({
             style={{ boxShadow: '4px 4px 0 #0F0F0F' }}
           >
             <p className="text-gray-700 text-sm mb-3">
-              <span className="text-indigo-700 font-black mr-2">{qi + 1}.</span>
+              <span className="text-brand-teal-700 font-black mr-2">{qi + 1}.</span>
               {q.text}
             </p>
             <div className="flex gap-2 flex-wrap">
@@ -1199,7 +1199,7 @@ function ReadingPhase({
         disabled={!allAnswered || sectionState === "submitting"}
         className={`w-full py-3.5 rounded-lg font-black text-sm uppercase tracking-wide border-2 transition-all ${
           allAnswered
-            ? "bg-indigo-700 hover:bg-indigo-600 text-white border-gray-900 neo-btn"
+            ? "bg-brand-teal-700 hover:bg-brand-teal-600 text-white border-gray-900 neo-btn"
             : "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-300"
         }`}
         style={allAnswered ? { boxShadow: '4px 4px 0 #0F0F0F' } : {}}
@@ -1285,7 +1285,7 @@ function WritingPhase({
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-indigo-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>✍️</div>
+          <div className="w-10 h-10 bg-brand-teal-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>✍️</div>
           <p className="text-gray-900 font-black uppercase tracking-wide">Loading Writing Task…</p>
         </div>
         <SkeletonLoader />
@@ -1305,7 +1305,7 @@ function WritingPhase({
     return (
       <div className="flex flex-col items-center gap-5 py-16 text-center">
         <div className="relative">
-          <div className="w-16 h-16 rounded-full border-4 border-gray-200 border-t-indigo-700 animate-spin" />
+          <div className="w-16 h-16 rounded-full border-4 border-gray-200 border-t-brand-teal-700 animate-spin" />
           <span className="absolute inset-0 flex items-center justify-center text-2xl">✍️</span>
         </div>
         <div>
@@ -1316,7 +1316,7 @@ function WritingPhase({
           {[0, 1, 2].map((i) => (
             <div
               key={i}
-              className="w-2 h-2 rounded-sm bg-indigo-700 animate-bounce"
+              className="w-2 h-2 rounded-sm bg-brand-teal-700 animate-bounce"
               style={{ animationDelay: `${i * 0.15}s` }}
             />
           ))}
@@ -1330,7 +1330,7 @@ function WritingPhase({
       {/* ── CHANGE 2: header row now has justify-between with word count on the right ── */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-indigo-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>✍️</div>
+          <div className="w-10 h-10 bg-brand-teal-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>✍️</div>
           <div>
             <p className="text-gray-900 font-black uppercase tracking-wide">Writing Section</p>
             <p className="text-gray-500 text-sm">Write your response in at least {MIN_WORDS} words</p>
@@ -1340,7 +1340,7 @@ function WritingPhase({
         <div
           className={`px-3 py-1.5 rounded border-2 text-xs font-black font-mono transition-colors ${
             wordCount >= MIN_WORDS
-              ? "bg-indigo-700 text-white border-gray-900"
+              ? "bg-brand-teal-700 text-white border-gray-900"
               : "bg-white text-gray-600 border-gray-300"
           }`}
           style={wordCount >= MIN_WORDS ? { boxShadow: '2px 2px 0 #0F0F0F' } : {}}
@@ -1359,7 +1359,7 @@ function WritingPhase({
         </div>
       )}
 
-      <div className="bg-indigo-50 border-2 border-gray-900 rounded-lg p-4" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+      <div className="bg-brand-teal-50 border-2 border-gray-900 rounded-lg p-4" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
         <p className="text-gray-700 text-sm leading-relaxed">{data?.topic}</p>
       </div>
 
@@ -1374,7 +1374,7 @@ function WritingPhase({
         disabled={sectionState === "submitting"}
         placeholder="Begin writing your response here…"
         rows={8}
-        className="w-full bg-white border-2 border-gray-900 rounded-lg p-4 text-gray-800 text-sm leading-7 resize-none focus:outline-none focus:border-indigo-700 focus:ring-2 focus:ring-indigo-100 placeholder-gray-300 transition-colors font-medium"
+        className="w-full bg-white border-2 border-gray-900 rounded-lg p-4 text-gray-800 text-sm leading-7 resize-none focus:outline-none focus:border-brand-teal-700 focus:ring-2 focus:ring-brand-teal-100 placeholder-gray-300 transition-colors font-medium"
         style={{ boxShadow: '4px 4px 0 #0F0F0F' }}
       />
 
@@ -1382,7 +1382,7 @@ function WritingPhase({
         <div className="h-2 bg-gray-100 rounded border border-gray-300 overflow-hidden">
           <div
             className={`h-full rounded transition-all duration-300 ${
-              wordCount >= MIN_WORDS ? "bg-indigo-700" : "bg-indigo-400"
+              wordCount >= MIN_WORDS ? "bg-brand-teal-700" : "bg-brand-teal-400"
             }`}
             style={{ width: `${Math.min((wordCount / MIN_WORDS) * 100, 100)}%` }}
           />
@@ -1405,7 +1405,7 @@ function WritingPhase({
         disabled={wordCount < MIN_WORDS || sectionState === "submitting"}
         className={`w-full py-3.5 rounded-lg font-black text-sm uppercase tracking-wide border-2 transition-all ${
           wordCount >= MIN_WORDS
-            ? "bg-indigo-700 hover:bg-indigo-600 text-white border-gray-900 neo-btn"
+            ? "bg-brand-teal-700 hover:bg-brand-teal-600 text-white border-gray-900 neo-btn"
             : "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-300"
         }`}
         style={wordCount >= MIN_WORDS ? { boxShadow: '4px 4px 0 #0F0F0F' } : {}}
@@ -1537,7 +1537,7 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-indigo-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>🎤</div>
+        <div className="w-10 h-10 bg-brand-teal-700 border-2 border-gray-900 rounded-lg flex items-center justify-center text-xl" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>🎤</div>
         <div>
           <p className="text-gray-900 font-black uppercase tracking-wide">Speaking Section</p>
           <p className="text-gray-500 text-sm">Up to 90 seconds · Speak clearly and naturally</p>
@@ -1550,17 +1550,17 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
         </p>
         <div className="text-gray-700 text-sm leading-7 space-y-2">
           {data?.prompts?.map((prompt: string, i: number) => (
-            <p key={i}><span className="font-black text-indigo-700 mr-2">{i+1}.</span>{prompt}</p>
+            <p key={i}><span className="font-black text-brand-teal-700 mr-2">{i+1}.</span>{prompt}</p>
           ))}
         </div>
       </div>
 
       {recordState === "idle" && (
-        <div className="bg-indigo-50 border-2 border-gray-900 rounded-lg p-4" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+        <div className="bg-brand-teal-50 border-2 border-gray-900 rounded-lg p-4" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
           <ul className="text-gray-700 text-sm space-y-1.5">
-            <li className="flex gap-2"><span className="text-indigo-700 font-black">→</span>Read the prompt carefully before recording</li>
-            <li className="flex gap-2"><span className="text-indigo-700 font-black">→</span>Tap the button below to start — you have 90 seconds</li>
-            <li className="flex gap-2"><span className="text-indigo-700 font-black">→</span>Speak naturally — your response will be transcribed and scored</li>
+            <li className="flex gap-2"><span className="text-brand-teal-700 font-black">→</span>Read the prompt carefully before recording</li>
+            <li className="flex gap-2"><span className="text-brand-teal-700 font-black">→</span>Tap the button below to start — you have 90 seconds</li>
+            <li className="flex gap-2"><span className="text-brand-teal-700 font-black">→</span>Speak naturally — your response will be transcribed and scored</li>
           </ul>
         </div>
       )}
@@ -1615,7 +1615,7 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
                 ? "bg-red-500 hover:bg-red-600 text-white border-gray-900 animate-pulse"
                 : recordState === "recorded"
                 ? "bg-gray-900 hover:bg-gray-800 text-white border-gray-900 neo-btn"
-                : "bg-indigo-700 hover:bg-indigo-600 text-white border-gray-900 neo-btn"
+                : "bg-brand-teal-700 hover:bg-brand-teal-600 text-white border-gray-900 neo-btn"
             }`}
             style={recordState !== "recording" ? { boxShadow: '4px 4px 0 #0F0F0F' } : { boxShadow: '4px 4px 0 #991b1b' }}
           >
@@ -1634,7 +1634,7 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
         {recordState === "recorded" && (
           <button
             onClick={handleSubmit}
-            className="px-8 py-3 bg-indigo-700 hover:bg-indigo-600 text-white font-black uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all neo-btn"
+            className="px-8 py-3 bg-brand-teal-700 hover:bg-brand-teal-600 text-white font-black uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all neo-btn"
             style={{ boxShadow: '4px 4px 0 #0F0F0F' }}
           >
             Submit Recording →
@@ -1645,7 +1645,7 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
       {(recordState === "uploading" || recordState === "processing") && (
         <div className="flex flex-col items-center gap-4 py-8 text-center">
           <div className="relative">
-            <div className="w-16 h-16 rounded-full border-4 border-gray-200 border-t-indigo-700 animate-spin" />
+            <div className="w-16 h-16 rounded-full border-4 border-gray-200 border-t-brand-teal-700 animate-spin" />
             <span className="absolute inset-0 flex items-center justify-center text-2xl">🎤</span>
           </div>
           <div>
@@ -1719,7 +1719,7 @@ function SpeakingResultCard({
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="text-center space-y-3">
-        <div className="w-16 h-16 bg-indigo-700 border-2 border-gray-900 rounded-xl flex items-center justify-center text-3xl mx-auto" style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>🎤</div>
+        <div className="w-16 h-16 bg-brand-teal-700 border-2 border-gray-900 rounded-xl flex items-center justify-center text-3xl mx-auto" style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>🎤</div>
         <div className="text-7xl font-black text-gray-900 tabular-nums">
           {band_score.toFixed(1)}
         </div>
@@ -1739,7 +1739,7 @@ function SpeakingResultCard({
                 <div
                   key={key}
                   className={`flex items-center justify-between px-5 py-3 ${
-                    isWeakest ? "bg-amber-50" : isStrongest ? "bg-indigo-50" : "bg-white"
+                    isWeakest ? "bg-amber-50" : isStrongest ? "bg-brand-teal-50" : "bg-white"
                   }`}
                 >
                   <span className="text-gray-700 text-sm font-bold">
@@ -1748,12 +1748,12 @@ function SpeakingResultCard({
                       <span className="ml-2 text-amber-700 text-xs font-black uppercase tracking-wide border border-amber-300 bg-amber-100 px-1.5 py-0.5 rounded">needs work</span>
                     )}
                     {isStrongest && (
-                      <span className="ml-2 text-indigo-700 text-xs font-black uppercase tracking-wide border border-indigo-300 bg-indigo-100 px-1.5 py-0.5 rounded">strongest</span>
+                      <span className="ml-2 text-brand-teal-700 text-xs font-black uppercase tracking-wide border border-brand-teal-300 bg-brand-teal-100 px-1.5 py-0.5 rounded">strongest</span>
                     )}
                   </span>
                   <span
                     className={`font-black tabular-nums text-lg ${
-                      isWeakest ? "text-amber-600" : isStrongest ? "text-indigo-700" : "text-gray-900"
+                      isWeakest ? "text-amber-600" : isStrongest ? "text-brand-teal-700" : "text-gray-900"
                     }`}
                   >
                     {Number(val).toFixed(1)}
@@ -1774,7 +1774,7 @@ function SpeakingResultCard({
 
       <button
         onClick={onContinue}
-        className="w-full py-3.5 bg-indigo-700 hover:bg-indigo-600 text-white font-black uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all neo-btn"
+        className="w-full py-3.5 bg-brand-teal-700 hover:bg-brand-teal-600 text-white font-black uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all neo-btn"
         style={{ boxShadow: '4px 4px 0 #0F0F0F' }}
       >
         View Full Results →
@@ -1807,7 +1807,7 @@ function DiagnosticSummaryScreen({
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="text-center space-y-3">
-        <div className="w-16 h-16 bg-indigo-700 border-2 border-gray-900 rounded-xl flex items-center justify-center text-3xl mx-auto" style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>🎓</div>
+        <div className="w-16 h-16 bg-brand-teal-700 border-2 border-gray-900 rounded-xl flex items-center justify-center text-3xl mx-auto" style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>🎓</div>
         <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tight">Diagnostic Complete</h2>
         <p className="text-gray-500 text-sm max-w-sm mx-auto leading-relaxed">
           Here's your IELTS baseline. Your personalised learning path has been generated.
@@ -1815,20 +1815,20 @@ function DiagnosticSummaryScreen({
       </div>
 
       <div
-        className="border-2 border-gray-900 bg-indigo-700 rounded-xl p-6 text-center space-y-2"
+        className="border-2 border-gray-900 bg-brand-teal-700 rounded-xl p-6 text-center space-y-2"
         style={{ boxShadow: '6px 6px 0 #0F0F0F' }}
       >
-        <p className="text-indigo-200 text-xs uppercase tracking-widest font-black">Overall Band Score</p>
+        <p className="text-brand-teal-200 text-xs uppercase tracking-widest font-black">Overall Band Score</p>
         <div className="text-6xl font-black tabular-nums text-white">
           {avgScore.toFixed(1)}
         </div>
         <div className="flex justify-center">
-          <span className="inline-flex items-center gap-1.5 rounded border-2 border-white font-black tracking-wider uppercase px-5 py-2 text-base bg-white text-indigo-700">
-            <span className="w-2 h-2 rounded-full bg-indigo-700" />
+          <span className="inline-flex items-center gap-1.5 rounded border-2 border-white font-black tracking-wider uppercase px-5 py-2 text-base bg-white text-brand-teal-700">
+            <span className="w-2 h-2 rounded-full bg-brand-teal-700" />
             Level {overallLevel} · {getLevelConfig(overallLevel).label}
           </span>
         </div>
-        <p className="text-indigo-200 text-sm mt-3 max-w-xs mx-auto leading-relaxed">
+        <p className="text-brand-teal-200 text-sm mt-3 max-w-xs mx-auto leading-relaxed">
           {readinessMessages[overallLevel]}
         </p>
       </div>
@@ -1862,7 +1862,7 @@ function DiagnosticSummaryScreen({
         type="button"
         onClick={onGoToDashboard}
         className="inline-block text-center w-full py-4 bg-gray-900 hover:bg-gray-800 text-white font-black text-base uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all neo-btn"
-        style={{ boxShadow: '5px 5px 0 #4338CA' }}
+        style={{ boxShadow: '5px 5px 0 #0A6E64' }}
       >
         Go to Dashboard →
       </button>
@@ -2101,7 +2101,7 @@ function DiagnosisInner() {
         <TopNavBar />
         <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="flex flex-col items-center gap-4 text-center">
-            <div className="w-12 h-12 rounded-full border-4 border-gray-200 border-t-indigo-700 animate-spin" />
+            <div className="w-12 h-12 rounded-full border-4 border-gray-200 border-t-brand-teal-700 animate-spin" />
             <p className="text-gray-600 text-sm font-bold uppercase tracking-wide">Checking diagnostic status…</p>
           </div>
         </div>
@@ -2308,14 +2308,14 @@ function OnboardingScreen({ onComplete }: { onComplete: () => void }) {
       
       <div className="bg-white p-8 md:p-10 rounded-xl w-full max-w-md relative z-10 border-2 border-gray-900 animate-fade-in" style={{ boxShadow: '8px 8px 0 #0F0F0F' }}>
         <div className="flex items-center gap-3 mb-8">
-          <div className="p-3 bg-indigo-700 border-2 border-gray-900 rounded-lg" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+          <div className="p-3 bg-brand-teal-700 border-2 border-gray-900 rounded-lg" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
             <GraduationCap className="h-6 w-6 text-white" />
           </div>
           <span className="text-2xl font-black text-gray-900 uppercase tracking-tight">TestCrack</span>
         </div>
         
         <div className="mb-2">
-          <span className="inline-block bg-indigo-700 text-white text-xs font-black uppercase tracking-widest px-3 py-1 rounded border-2 border-gray-900 mb-3" style={{ boxShadow: '2px 2px 0 #0F0F0F' }}>
+          <span className="inline-block bg-brand-teal-700 text-white text-xs font-black uppercase tracking-widest px-3 py-1 rounded border-2 border-gray-900 mb-3" style={{ boxShadow: '2px 2px 0 #0F0F0F' }}>
             Welcome
           </span>
         </div>
@@ -2331,7 +2331,7 @@ function OnboardingScreen({ onComplete }: { onComplete: () => void }) {
               onChange={(e) => setName(e.target.value)} 
               required 
               placeholder="E.g. John Doe" 
-              className="w-full border-2 border-gray-900 rounded-lg p-3.5 text-sm font-bold focus:border-indigo-700 focus:ring-2 focus:ring-indigo-100 outline-none transition-all bg-white placeholder:text-gray-300 text-gray-900"
+              className="w-full border-2 border-gray-900 rounded-lg p-3.5 text-sm font-bold focus:border-brand-teal-700 focus:ring-2 focus:ring-brand-teal-100 outline-none transition-all bg-white placeholder:text-gray-300 text-gray-900"
               style={{ boxShadow: '3px 3px 0 #0F0F0F' }}
             />
           </div>
@@ -2342,7 +2342,7 @@ function OnboardingScreen({ onComplete }: { onComplete: () => void }) {
               <select 
                 value={targetBand} 
                 onChange={(e) => setTargetBand(e.target.value)}
-                className="w-full border-2 border-gray-900 rounded-lg p-3.5 text-sm font-black focus:border-indigo-700 focus:ring-2 focus:ring-indigo-100 outline-none transition-all bg-white appearance-none text-indigo-700 cursor-pointer"
+                className="w-full border-2 border-gray-900 rounded-lg p-3.5 text-sm font-black focus:border-brand-teal-700 focus:ring-2 focus:ring-brand-teal-100 outline-none transition-all bg-white appearance-none text-brand-teal-700 cursor-pointer"
                 style={{ boxShadow: '3px 3px 0 #0F0F0F' }}
               >
                 {[4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0].map(band => (
@@ -2355,7 +2355,7 @@ function OnboardingScreen({ onComplete }: { onComplete: () => void }) {
 
           <button 
             type="submit" 
-            className="w-full mt-4 py-4 bg-indigo-700 hover:bg-indigo-600 text-white font-black text-base uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all neo-btn disabled:opacity-70 disabled:pointer-events-none" 
+            className="w-full mt-4 py-4 bg-brand-teal-700 hover:bg-brand-teal-600 text-white font-black text-base uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all neo-btn disabled:opacity-70 disabled:pointer-events-none" 
             style={{ boxShadow: '5px 5px 0 #0F0F0F' }}
             disabled={loading}
           >

@@ -38,10 +38,10 @@ export const EnhancedStudyNotes = ({ markdown, concept }: EnhancedStudyNotesProp
     <div className="mt-4 sm:mt-6 space-y-4">
       {/* Concept Metadata Card */}
       {concept && (
-        <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200">
+        <Card className="bg-gradient-to-r from-brand-blue-50 to-blue-50 border-2 border-brand-blue-200">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2 flex-wrap">
-              <div className="p-2 bg-purple-500 rounded-lg">
+              <div className="p-2 bg-brand-blue-500 rounded-lg">
                 <Target className="w-5 h-5 text-white" />
               </div>
               <h3 className="text-lg font-semibold text-gray-800">Learning Objective</h3>
@@ -54,7 +54,7 @@ export const EnhancedStudyNotes = ({ markdown, concept }: EnhancedStudyNotesProp
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-gray-700 leading-relaxed bg-white p-3 rounded-lg border border-purple-200">
+            <p className="text-sm text-gray-700 leading-relaxed bg-white p-3 rounded-lg border border-brand-blue-200">
               {concept.learningObjective}
             </p>
 
@@ -70,14 +70,14 @@ export const EnhancedStudyNotes = ({ markdown, concept }: EnhancedStudyNotesProp
                 </Badge>
               </div>
 
-              <div className="bg-white p-3 rounded-lg border border-purple-200">
+              <div className="bg-white p-3 rounded-lg border border-brand-blue-200">
                 <div className="flex items-center gap-2 mb-2">
-                  <Lightbulb className="w-4 h-4 text-purple-600" />
+                  <Lightbulb className="w-4 h-4 text-brand-blue-600" />
                   <span className="text-xs font-semibold text-gray-600">Key Topics</span>
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {concept.keywords?.slice(0, 3).map((keyword, idx) => (
-                    <Badge key={idx} variant="secondary" className="bg-purple-100 text-purple-700 text-xs">
+                    <Badge key={idx} variant="secondary" className="bg-brand-blue-100 text-brand-blue-700 text-xs">
                       {keyword}
                     </Badge>
                   ))}
@@ -137,7 +137,7 @@ export const EnhancedStudyNotes = ({ markdown, concept }: EnhancedStudyNotesProp
                 },
                 // Enhanced heading styles
                 h1: ({ children, ...props }) => (
-                  <h1 className="text-3xl font-bold text-gray-900 mt-8 mb-4 pb-2 border-b-4 border-purple-300" {...props}>
+                  <h1 className="text-3xl font-bold text-gray-900 mt-8 mb-4 pb-2 border-b-4 border-brand-blue-300" {...props}>
                     {children}
                   </h1>
                 ),
@@ -158,7 +158,7 @@ export const EnhancedStudyNotes = ({ markdown, concept }: EnhancedStudyNotesProp
                   </ul>
                 ),
                 li: ({ children, ...props }) => (
-                  <li className="ml-4 pl-2 border-l-2 border-purple-300" {...props}>
+                  <li className="ml-4 pl-2 border-l-2 border-brand-blue-300" {...props}>
                     {children}
                   </li>
                 ),
@@ -170,7 +170,7 @@ export const EnhancedStudyNotes = ({ markdown, concept }: EnhancedStudyNotesProp
                 ),
                 // Code blocks
                 code: ({ children, ...props }) => (
-                  <code className="bg-gray-100 text-purple-700 px-2 py-1 rounded text-sm font-mono" {...props}>
+                  <code className="bg-gray-100 text-brand-blue-700 px-2 py-1 rounded text-sm font-mono" {...props}>
                     {children}
                   </code>
                 ),

@@ -15,8 +15,8 @@ function InitialsAvatar({ name }: { name: string }) {
     .map(w => w.charAt(0).toUpperCase())
     .join('');
   const colors = [
-    'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400',
-    'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-400',
+    'bg-brand-teal-100 text-brand-teal-700 dark:bg-brand-teal-900/40 dark:text-brand-teal-400',
+    'bg-brand-blue-100 text-brand-blue-700 dark:bg-brand-blue-900/40 dark:text-brand-blue-400',
     'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-400',
     'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-400',
     'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400',
@@ -58,12 +58,12 @@ function InstructorCard({ instructor }: { instructor: InstructorRow }) {
   const extra = instructor.batches.length - MAX_BATCHES;
 
   return (
-    <div className="group bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] rounded-2xl shadow-sm p-5 flex flex-col gap-4 hover:shadow-md hover:-translate-y-1 hover:border-indigo-300/70 dark:hover:border-indigo-500/40 transition-all duration-300">
+    <div className="group bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] rounded-2xl shadow-sm p-5 flex flex-col gap-4 hover:shadow-md hover:-translate-y-1 hover:border-brand-teal-300/70 dark:hover:border-brand-teal-500/40 transition-all duration-300">
       {/* Header */}
       <div className="flex items-start gap-4">
         <InitialsAvatar name={instructor.name} />
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-slate-900 dark:text-white text-base leading-tight truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{instructor.name}</h3>
+          <h3 className="font-semibold text-slate-900 dark:text-white text-base leading-tight truncate group-hover:text-brand-teal-600 dark:group-hover:text-brand-teal-400 transition-colors">{instructor.name}</h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">{instructor.email}</p>
         </div>
       </div>
@@ -87,7 +87,7 @@ function InstructorCard({ instructor }: { instructor: InstructorRow }) {
               </span>
             ))}
             {extra > 0 && (
-              <span className="text-xs bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-lg ring-1 ring-inset ring-indigo-200/60 dark:ring-indigo-400/20">
+              <span className="text-xs bg-brand-teal-50 dark:bg-brand-teal-500/10 text-brand-teal-600 dark:text-brand-teal-400 px-2 py-0.5 rounded-lg ring-1 ring-inset ring-brand-teal-200/60 dark:ring-brand-teal-400/20">
                 +{extra} more
               </span>
             )}
@@ -97,8 +97,8 @@ function InstructorCard({ instructor }: { instructor: InstructorRow }) {
 
       {/* Footer stat */}
       <div className="mt-auto flex items-center gap-2 text-sm rounded-xl bg-slate-50 dark:bg-white/[0.03] px-3 py-2.5 text-slate-600 dark:text-slate-400">
-        <div className="w-7 h-7 rounded-lg bg-indigo-100/80 dark:bg-indigo-500/10 flex items-center justify-center">
-          <Users className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
+        <div className="w-7 h-7 rounded-lg bg-brand-teal-100/80 dark:bg-brand-teal-500/10 flex items-center justify-center">
+          <Users className="h-3.5 w-3.5 text-brand-teal-600 dark:text-brand-teal-400" />
         </div>
         <span className="font-bold tabular-nums text-slate-800 dark:text-white">{instructor.total_students}</span>
         <span>students</span>
@@ -145,14 +145,14 @@ export default function InstituteInstructorsPage() {
           <div className="max-w-[1400px] mx-auto">
 
             {/* ── Hero Banner ─────────────────────────────────────────────── */}
-            <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-indigo-100/80 dark:border-white/[0.06] bg-gradient-to-r from-[#eff4ff] via-[#f4f1ff] to-[#f3f0ff] dark:from-[#111827] dark:via-[#161a38] dark:to-[#1e1b4b] px-5 sm:px-8 pt-6 sm:pt-8 pb-16 sm:pb-20 shadow-sm">
+            <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-brand-teal-100/80 dark:border-white/[0.06] bg-gradient-to-r from-[#eff4ff] via-[#f4f1ff] to-[#f3f0ff] dark:from-[#111827] dark:via-[#161a38] dark:to-[#1e1b4b] px-5 sm:px-8 pt-6 sm:pt-8 pb-16 sm:pb-20 shadow-sm">
               <div aria-hidden className="pointer-events-none select-none absolute inset-0">
-                <div className="absolute -top-20 -right-12 w-64 h-64 rounded-full bg-indigo-300/25 dark:bg-indigo-500/15 blur-3xl" />
-                <div className="absolute -bottom-28 left-1/3 w-72 h-72 rounded-full bg-violet-300/20 dark:bg-violet-500/10 blur-3xl" />
+                <div className="absolute -top-20 -right-12 w-64 h-64 rounded-full bg-brand-teal-300/25 dark:bg-brand-teal-500/15 blur-3xl" />
+                <div className="absolute -bottom-28 left-1/3 w-72 h-72 rounded-full bg-brand-blue-300/20 dark:bg-brand-blue-500/10 blur-3xl" />
               </div>
 
               <div className="relative">
-                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-300 bg-white/60 dark:bg-white/[0.06] border border-white/70 dark:border-white/[0.08] backdrop-blur px-2.5 py-1 rounded-full">
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-brand-teal-600 dark:text-brand-teal-300 bg-white/60 dark:bg-white/[0.06] border border-white/70 dark:border-white/[0.08] backdrop-blur px-2.5 py-1 rounded-full">
                   Owner Portal
                 </span>
                 <h1 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">

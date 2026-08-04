@@ -40,7 +40,7 @@ export function CourseCompletionPage({ course, completedAt }: CourseCompletionPa
       particleCount: 100,
       spread: 70,
       origin: { y: 0.6 },
-      colors: ['#9333ea', '#6366f1', '#22c55e', '#f59e0b', '#ec4899'],
+      colors: ['#185A78', '#12897C', '#22c55e', '#f59e0b', '#ec4899'],
     });
 
     // Continuous side confetti
@@ -50,14 +50,14 @@ export function CourseCompletionPage({ course, completedAt }: CourseCompletionPa
         angle: 60,
         spread: 55,
         origin: { x: 0, y: 0.7 },
-        colors: ['#9333ea', '#6366f1', '#22c55e'],
+        colors: ['#185A78', '#12897C', '#22c55e'],
       });
       confetti({
         particleCount: 2,
         angle: 120,
         spread: 55,
         origin: { x: 1, y: 0.7 },
-        colors: ['#9333ea', '#6366f1', '#22c55e'],
+        colors: ['#185A78', '#12897C', '#22c55e'],
       });
 
       if (Date.now() < end) {
@@ -87,12 +87,12 @@ export function CourseCompletionPage({ course, completedAt }: CourseCompletionPa
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-800 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-brand-blue-900 via-brand-teal-900 to-brand-blue-800 overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-400/10 rounded-full blur-3xl" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-brand-blue-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-brand-teal-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-blue-400/10 rounded-full blur-3xl" />
       </div>
 
       {/* Header */}
@@ -104,7 +104,7 @@ export function CourseCompletionPage({ course, completedAt }: CourseCompletionPa
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
             Congratulations! 🎉
           </h1>
-          <p className="text-xl text-purple-200 max-w-md mx-auto">
+          <p className="text-xl text-brand-blue-200 max-w-md mx-auto">
             You've successfully completed the course
           </p>
         </div>
@@ -114,10 +114,10 @@ export function CourseCompletionPage({ course, completedAt }: CourseCompletionPa
       <div className={`max-w-3xl mx-auto px-4 pb-12 transition-all duration-1000 delay-300 ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
         <Card className="bg-white shadow-2xl border-0 overflow-hidden relative">
           {/* Decorative corner elements */}
-          <div className="absolute top-0 left-0 w-20 h-20 bg-gradient-to-br from-purple-500 to-transparent opacity-20" />
-          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-indigo-500 to-transparent opacity-20" />
-          <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-purple-500 to-transparent opacity-20" />
-          <div className="absolute bottom-0 right-0 w-20 h-20 bg-gradient-to-tl from-indigo-500 to-transparent opacity-20" />
+          <div className="absolute top-0 left-0 w-20 h-20 bg-gradient-to-br from-brand-blue-500 to-transparent opacity-20" />
+          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-brand-teal-500 to-transparent opacity-20" />
+          <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-brand-blue-500 to-transparent opacity-20" />
+          <div className="absolute bottom-0 right-0 w-20 h-20 bg-gradient-to-tl from-brand-teal-500 to-transparent opacity-20" />
 
           {/* Certificate Header */}
           <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white p-8 text-center relative overflow-hidden">
@@ -150,9 +150,9 @@ export function CourseCompletionPage({ course, completedAt }: CourseCompletionPa
 
             {/* Course Details */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-              <div className="text-center p-4 bg-purple-50 rounded-xl">
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-purple-100 rounded-full mb-2">
-                  <BookOpen className="h-5 w-5 text-purple-600" />
+              <div className="text-center p-4 bg-brand-blue-50 rounded-xl">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-brand-blue-100 rounded-full mb-2">
+                  <BookOpen className="h-5 w-5 text-brand-blue-600" />
                 </div>
                 <p className="text-sm text-gray-500">Modules</p>
                 <p className="font-bold text-gray-900 text-lg">{course.modules.length}</p>
@@ -173,9 +173,9 @@ export function CourseCompletionPage({ course, completedAt }: CourseCompletionPa
                 <p className="text-sm text-gray-500">Status</p>
                 <p className="font-bold text-green-600 text-lg">Completed</p>
               </div>
-              <div className="text-center p-4 bg-indigo-50 rounded-xl">
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-indigo-100 rounded-full mb-2">
-                  <Award className="h-5 w-5 text-indigo-600" />
+              <div className="text-center p-4 bg-brand-teal-50 rounded-xl">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-brand-teal-100 rounded-full mb-2">
+                  <Award className="h-5 w-5 text-brand-teal-600" />
                 </div>
                 <p className="text-sm text-gray-500">Completed On</p>
                 <p className="font-bold text-gray-900 text-lg">{formatDate(completedAt)}</p>
@@ -186,7 +186,7 @@ export function CourseCompletionPage({ course, completedAt }: CourseCompletionPa
             <div className="relative my-8">
               <div className="border-t border-dashed border-gray-200" />
               <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
+                <div className="w-16 h-16 bg-gradient-to-br from-brand-blue-600 to-brand-teal-600 rounded-full flex items-center justify-center shadow-lg">
                   <Award className="h-8 w-8 text-white" />
                 </div>
               </div>
@@ -241,11 +241,11 @@ export function CourseCompletionPage({ course, completedAt }: CourseCompletionPa
 
         {/* Continue Learning */}
         <div className="mt-8 text-center">
-          <p className="text-purple-200 mb-4">Ready for your next challenge?</p>
+          <p className="text-brand-blue-200 mb-4">Ready for your next challenge?</p>
           <Button
             size="lg"
             onClick={() => navigate('/courses')}
-            className="bg-white text-purple-700 hover:bg-purple-50 shadow-xl hover:shadow-2xl transition-all"
+            className="bg-white text-brand-blue-700 hover:bg-brand-blue-50 shadow-xl hover:shadow-2xl transition-all"
           >
             Explore More Courses
             <ArrowRight className="h-4 w-4 ml-2" />
