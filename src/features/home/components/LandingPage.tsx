@@ -598,7 +598,7 @@ const LandingPage = () => {
           </div>
           <div className="mt-20 text-center">
             <p className="font-jetbrains text-brand-text-mute text-[12px] uppercase tracking-[0.14em] flex items-center justify-center gap-2">
-              <Sparkles className="h-4 w-4 text-brand-teal" aria-hidden="true" />
+              <span className="h-4 w-4 text-brand-teal" aria-hidden="true" />
               Diagnostic → Daily Loop → IA → Mock → Real Band. Every step measured.
             </p>
           </div>

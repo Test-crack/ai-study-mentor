@@ -567,13 +567,30 @@ const StudentDashboardPage = () => {
             </div>
           </section>
 
-          {/* ── Main Dashboard Content (blurred when locked) ──────────────────── */}
-          <div className="relative mt-6">
+          {/* ── Main Dashboard Content (blurred + clipped when locked) ─────────── */}
+          {/*
+            While the platform is locked this section is clipped to a short
+            teaser instead of rendering full height. That removes the long
+            stretch of dead blurred space the student could otherwise scroll
+            through, while still hinting that more exists once drills are done.
+
+            Clipping the section's height is deliberate rather than disabling
+            page scroll outright: the actionable content above (drill CTA) can
+            still exceed a short viewport, and a hard scroll lock would leave
+            it unreachable on small phones.
+          */}
+          <div
+            className={cn(
+              "relative mt-6",
+              isLocked && "max-h-[180px] overflow-hidden"
+            )}
+          >
             {isLocked && (
               <div className="absolute inset-0 z-40 bg-slate-50/60 dark:bg-[#020617]/70 backdrop-blur-md rounded-3xl border border-white/10 flex flex-col items-center pt-24" />
             )}
 
             <div
+              aria-hidden={isLocked}
               className={cn(
                 "space-y-6 transition-all duration-500",
                 isLocked && "opacity-40 grayscale-[50%] pointer-events-none select-none blur-[3px]"
