@@ -47,14 +47,14 @@ const slides = [
 function WelcomeVisual() {
   return (
     <div className="flex flex-col items-center gap-3 py-6">
-      <div className="w-24 h-24 rounded-3xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center">
-        <GraduationCap className="w-12 h-12 text-indigo-600 dark:text-indigo-400" strokeWidth={1.5} />
+      <div className="w-24 h-24 rounded-3xl bg-brand-teal-50 dark:bg-brand-teal-500/10 flex items-center justify-center">
+        <GraduationCap className="w-12 h-12 text-brand-teal-600 dark:text-brand-teal-400" strokeWidth={1.5} />
       </div>
       <div className="flex gap-2 mt-2">
         {['Listening', 'Reading', 'Writing', 'Speaking'].map((skill) => (
           <span
             key={skill}
-            className="text-xs font-medium px-2.5 py-1 rounded-full bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300"
+            className="text-xs font-medium px-2.5 py-1 rounded-full bg-brand-teal-100 dark:bg-brand-teal-500/20 text-brand-teal-700 dark:text-brand-teal-300"
           >
             {skill}
           </span>
@@ -66,7 +66,7 @@ function WelcomeVisual() {
 
 function SessionVisual() {
   const steps = [
-    { icon: BookOpen, label: 'Practice', desc: 'Skill module at your level', color: 'text-violet-600', bg: 'bg-violet-50 dark:bg-violet-500/10' },
+    { icon: BookOpen, label: 'Practice', desc: 'Skill module at your level', color: 'text-brand-blue-600', bg: 'bg-brand-blue-50 dark:bg-brand-blue-500/10' },
     { icon: Gamepad2, label: 'Daily Challenge', desc: 'Vocab gate — earn momentum', color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-500/10' },
     { icon: Target, label: 'Drills', desc: '3 targeted sub-skill questions', color: 'text-rose-600', bg: 'bg-rose-50 dark:bg-rose-500/10' },
     { icon: ClipboardCheck, label: 'Assessments', desc: 'IA & Mock (unlocks after drills)', color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-500/10' },
@@ -102,7 +102,7 @@ function SessionVisual() {
 function DiagnosticVisual() {
   const skills = [
     { icon: Headphones, label: 'Listening', color: 'text-sky-600', bg: 'bg-sky-50 dark:bg-sky-500/10' },
-    { icon: BookOpen, label: 'Reading', color: 'text-violet-600', bg: 'bg-violet-50 dark:bg-violet-500/10' },
+    { icon: BookOpen, label: 'Reading', color: 'text-brand-blue-600', bg: 'bg-brand-blue-50 dark:bg-brand-blue-500/10' },
     { icon: PenLine, label: 'Writing', color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-500/10' },
     { icon: Mic, label: 'Speaking', color: 'text-rose-600', bg: 'bg-rose-50 dark:bg-rose-500/10' },
   ];
@@ -162,7 +162,7 @@ export default function OnboardingWalkthrough() {
     <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col">
       {/* Header — brand mark only */}
       <header className="px-6 pt-8 pb-2 flex items-center justify-between">
-        <span className="text-lg font-bold text-indigo-600 tracking-tight">TestCrack</span>
+        <span className="text-lg font-bold text-brand-teal-600 tracking-tight">TestCrack</span>
         <span className="text-sm text-slate-400 dark:text-slate-500 font-medium">
           {current + 1} / {slides.length}
         </span>
@@ -186,7 +186,7 @@ export default function OnboardingWalkthrough() {
 
               {/* Text */}
               <div className="mt-2">
-                <p className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wide mb-1">
+                <p className="text-sm font-semibold text-brand-teal-600 dark:text-brand-teal-400 uppercase tracking-wide mb-1">
                   {slide.subHeadline}
                 </p>
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
@@ -211,7 +211,7 @@ export default function OnboardingWalkthrough() {
               className={cn(
                 'rounded-full transition-all duration-300',
                 i === current
-                  ? 'w-6 h-2 bg-indigo-600'
+                  ? 'w-6 h-2 bg-brand-teal-600'
                   : 'w-2 h-2 bg-slate-200 dark:bg-slate-700'
               )}
             />
@@ -237,7 +237,7 @@ export default function OnboardingWalkthrough() {
               <Button
                 size="lg"
                 onClick={goNext}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center gap-2"
+                className="w-full bg-brand-teal-600 hover:bg-brand-teal-700 text-white flex items-center justify-center gap-2"
               >
                 Next
                 <ArrowRight className="w-4 h-4" />
@@ -246,7 +246,7 @@ export default function OnboardingWalkthrough() {
               <Button
                 size="lg"
                 onClick={startDiagnostic}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center gap-2"
+                className="w-full bg-brand-teal-600 hover:bg-brand-teal-700 text-white flex items-center justify-center gap-2"
               >
                 Start Your Diagnostic
                 <ArrowRight className="w-4 h-4" />

@@ -217,7 +217,7 @@ export function StudentAssessmentRunner({ onCancel, onComplete }: RunnerProps) {
                 <ArrowLeft className="h-4 w-4 mr-2" /> Back to Dashboard
             </Button>
             {isTimerRunning && (
-                <div className="flex items-center gap-2 text-indigo-600 font-mono font-bold bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-full">
+                <div className="flex items-center gap-2 text-brand-teal-600 font-mono font-bold bg-brand-teal-50 dark:bg-brand-teal-900/30 px-3 py-1 rounded-full">
                     <Clock className="h-4 w-4" />
                     {formatTime(currentTime)}
                 </div>

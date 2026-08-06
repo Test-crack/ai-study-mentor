@@ -115,7 +115,7 @@ export function CoursesFilters({ filters, onFiltersChange }: CoursesFiltersProps
               variant="ghost"
               size="sm"
               onClick={handleClearFilters}
-              className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 dark:hover:bg-slate-800 font-medium whitespace-nowrap"
+              className="text-brand-blue-600 hover:text-brand-blue-700 dark:text-brand-blue-400 dark:hover:text-brand-blue-300 dark:hover:bg-slate-800 font-medium whitespace-nowrap"
             >
               Clear All
             </Button>

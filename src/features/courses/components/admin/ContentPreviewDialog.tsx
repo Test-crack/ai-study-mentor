@@ -34,7 +34,7 @@ export const ContentPreviewDialog = ({
         {/* Header */}
         <div className="bg-white border-b border-slate-50 p-6 pb-4">
           <div className="flex items-center gap-3 mb-2">
-            <div className={`p-2 rounded-lg ${isNote ? "bg-indigo-50 text-indigo-600" : "bg-purple-50 text-purple-600"}`}>
+            <div className={`p-2 rounded-lg ${isNote ? "bg-brand-teal-50 text-brand-teal-600" : "bg-brand-blue-50 text-brand-blue-600"}`}>
               {isNote ? <FileText className="h-5 w-5" /> : <HelpCircle className="h-5 w-5" />}
             </div>
             <div>
@@ -68,7 +68,7 @@ export const ContentPreviewDialog = ({
                   ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-4 space-y-1 text-slate-600" {...props} />,
                   ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-4 space-y-1 text-slate-600" {...props} />,
                   li: ({node, ...props}) => <li className="pl-1" {...props} />,
-                  blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-indigo-200 pl-4 py-1 my-4 bg-slate-50 italic text-slate-600 rounded-r-lg" {...props} />,
+                  blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-brand-teal-200 pl-4 py-1 my-4 bg-slate-50 italic text-slate-600 rounded-r-lg" {...props} />,
                   code: ({node, className, children, ...props}: any) => {
                     const match = /language-(\w+)/.exec(className || '')
                     return match ? (
@@ -92,7 +92,7 @@ export const ContentPreviewDialog = ({
             <div className="space-y-8 max-w-xl mx-auto py-4">
               <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
                 <div className="flex gap-4">
-                  <div className="h-8 w-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold flex-shrink-0">
+                  <div className="h-8 w-8 rounded-full bg-brand-blue-100 text-brand-blue-600 flex items-center justify-center font-bold flex-shrink-0">
                     Q
                   </div>
                   <h3 className="text-lg font-bold text-slate-800 pt-0.5">

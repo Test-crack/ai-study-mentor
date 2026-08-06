@@ -48,7 +48,7 @@ export default function PricingConfig() {
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Subscription Plans</h1>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Configure pricing tiers for institutes</p>
               </div>
-              <button className="flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 dark:bg-[#7C3AED] dark:hover:bg-[#6D28D9] text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
+              <button className="flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-teal-600 hover:bg-brand-teal-700 dark:bg-[#185A78] dark:hover:bg-[#185A78] text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
                 <Plus className="w-4 h-4" />
                 Add Plan
               </button>
@@ -59,7 +59,7 @@ export default function PricingConfig() {
               
               {/* Plan 1: Per Student */}
               <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl p-6 shadow-sm relative transition-colors">
-                <button className="absolute top-6 right-6 text-slate-400 hover:text-indigo-600 dark:hover:text-[#A78BFA] transition-colors">
+                <button className="absolute top-6 right-6 text-slate-400 hover:text-brand-teal-600 dark:hover:text-[#4E8CA6] transition-colors">
                   <Pencil className="w-4 h-4" />
                 </button>
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Per Student</h3>
@@ -82,11 +82,11 @@ export default function PricingConfig() {
               </div>
 
               {/* Plan 2: Institute Pro (Popular) */}
-              <div className="bg-white dark:bg-[#15141B] border-2 border-indigo-500 dark:border-[#7C3AED] rounded-xl p-6 shadow-md relative transition-colors">
-                <div className="absolute -top-3 left-6 bg-indigo-600 dark:bg-[#7C3AED] text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
+              <div className="bg-white dark:bg-[#15141B] border-2 border-brand-teal-500 dark:border-[#185A78] rounded-xl p-6 shadow-md relative transition-colors">
+                <div className="absolute -top-3 left-6 bg-brand-teal-600 dark:bg-[#185A78] text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
                   Most Popular
                 </div>
-                <button className="absolute top-6 right-6 text-slate-400 hover:text-indigo-600 dark:hover:text-[#A78BFA] transition-colors">
+                <button className="absolute top-6 right-6 text-slate-400 hover:text-brand-teal-600 dark:hover:text-[#4E8CA6] transition-colors">
                   <Pencil className="w-4 h-4" />
                 </button>
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4 mt-2">Institute Pro</h3>
@@ -114,7 +114,7 @@ export default function PricingConfig() {
 
               {/* Plan 3: Enterprise */}
               <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl p-6 shadow-sm relative transition-colors">
-                <button className="absolute top-6 right-6 text-slate-400 hover:text-indigo-600 dark:hover:text-[#A78BFA] transition-colors">
+                <button className="absolute top-6 right-6 text-slate-400 hover:text-brand-teal-600 dark:hover:text-[#4E8CA6] transition-colors">
                   <Pencil className="w-4 h-4" />
                 </button>
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Enterprise</h3>
@@ -154,7 +154,7 @@ export default function PricingConfig() {
                       type="number" 
                       value={simPerStudentInst} 
                       onChange={(e) => setSimPerStudentInst(Number(e.target.value))}
-                      className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-4 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 dark:focus:border-[#8B5CF6] transition-colors"
+                      className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-4 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-brand-teal-500 dark:focus:border-[#256B8B] transition-colors"
                     />
                   </div>
                   <div className="space-y-2">
@@ -163,7 +163,7 @@ export default function PricingConfig() {
                       type="number" 
                       value={simAvgStudents} 
                       onChange={(e) => setSimAvgStudents(Number(e.target.value))}
-                      className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-4 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 dark:focus:border-[#8B5CF6] transition-colors"
+                      className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-4 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-brand-teal-500 dark:focus:border-[#256B8B] transition-colors"
                     />
                   </div>
                   <div className="space-y-2">
@@ -172,7 +172,7 @@ export default function PricingConfig() {
                       type="number" 
                       value={simProInst} 
                       onChange={(e) => setSimProInst(Number(e.target.value))}
-                      className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-4 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 dark:focus:border-[#8B5CF6] transition-colors"
+                      className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-4 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-brand-teal-500 dark:focus:border-[#256B8B] transition-colors"
                     />
                   </div>
                   <div className="space-y-2">
@@ -181,7 +181,7 @@ export default function PricingConfig() {
                       type="number" 
                       value={simEntInst} 
                       onChange={(e) => setSimEntInst(Number(e.target.value))}
-                      className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-4 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 dark:focus:border-[#8B5CF6] transition-colors"
+                      className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-4 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-brand-teal-500 dark:focus:border-[#256B8B] transition-colors"
                     />
                   </div>
                 </div>
@@ -197,7 +197,7 @@ export default function PricingConfig() {
                   </div>
                   <div>
                     <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Total Projected MRR</p>
-                    <h3 className="text-2xl font-bold text-indigo-600 dark:text-[#A78BFA]">₹{formatLakhs(totalRev)}L/mo</h3>
+                    <h3 className="text-2xl font-bold text-brand-teal-600 dark:text-[#4E8CA6]">₹{formatLakhs(totalRev)}L/mo</h3>
                   </div>
                 </div>
               </div>
@@ -217,7 +217,7 @@ export default function PricingConfig() {
                 {/* Code 1 */}
                 <div className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="bg-indigo-50 dark:bg-[#2D1F4D] border border-indigo-100 dark:border-[#3D1F4D] text-indigo-700 dark:text-[#D97CFF] px-3 py-1.5 rounded-md text-sm font-bold tracking-wider">
+                    <div className="bg-brand-teal-50 dark:bg-[#142B3A] border border-brand-teal-100 dark:border-[#3D1F4D] text-brand-teal-700 dark:text-[#D97CFF] px-3 py-1.5 rounded-md text-sm font-bold tracking-wider">
                       EARLY2025
                     </div>
                     <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">20%</span>
@@ -231,7 +231,7 @@ export default function PricingConfig() {
                 {/* Code 2 */}
                 <div className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="bg-indigo-50 dark:bg-[#2D1F4D] border border-indigo-100 dark:border-[#3D1F4D] text-indigo-700 dark:text-[#D97CFF] px-3 py-1.5 rounded-md text-sm font-bold tracking-wider">
+                    <div className="bg-brand-teal-50 dark:bg-[#142B3A] border border-brand-teal-100 dark:border-[#3D1F4D] text-brand-teal-700 dark:text-[#D97CFF] px-3 py-1.5 rounded-md text-sm font-bold tracking-wider">
                       LAUNCH100
                     </div>
                     <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">₹10,000 off</span>
@@ -245,7 +245,7 @@ export default function PricingConfig() {
                 {/* Code 3 */}
                 <div className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="bg-indigo-50 dark:bg-[#2D1F4D] border border-indigo-100 dark:border-[#3D1F4D] text-indigo-700 dark:text-[#D97CFF] px-3 py-1.5 rounded-md text-sm font-bold tracking-wider">
+                    <div className="bg-brand-teal-50 dark:bg-[#142B3A] border border-brand-teal-100 dark:border-[#3D1F4D] text-brand-teal-700 dark:text-[#D97CFF] px-3 py-1.5 rounded-md text-sm font-bold tracking-wider">
                       REFERRAL15
                     </div>
                     <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">15%</span>

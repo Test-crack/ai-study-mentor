@@ -121,9 +121,9 @@ export default function AuthCallbackPage() {
 
   if (phase === "processing") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-slate-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-brand-teal-50 via-brand-blue-50 to-slate-100 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <Loader2 className="h-10 w-10 text-indigo-600 animate-spin mx-auto" />
+          <Loader2 className="h-10 w-10 text-brand-teal-600 animate-spin mx-auto" />
           <p className="text-slate-500 text-sm font-medium">Verifying your invite…</p>
         </div>
       </div>
@@ -133,7 +133,7 @@ export default function AuthCallbackPage() {
   if (phase === "error") {
     const isInvite = linkType === "invite";
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-slate-100 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-brand-teal-50 via-brand-blue-50 to-slate-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full p-8 text-center space-y-4">
           <div className="h-12 w-12 rounded-full bg-rose-50 flex items-center justify-center mx-auto">
             <ShieldAlert className="h-6 w-6 text-rose-500" />
@@ -148,9 +148,9 @@ export default function AuthCallbackPage() {
           </p>
           {isInvite ? (
             <>
-              <div className="bg-indigo-50 rounded-xl p-4 text-left space-y-1">
-                <p className="text-sm font-semibold text-indigo-800">What to do next</p>
-                <p className="text-sm text-indigo-700">
+              <div className="bg-brand-teal-50 rounded-xl p-4 text-left space-y-1">
+                <p className="text-sm font-semibold text-brand-teal-800">What to do next</p>
+                <p className="text-sm text-brand-teal-700">
                   Contact your institute admin and ask them to resend your invite.
                   They can find the <span className="font-medium">Resend Invite</span> option
                   next to your name in the student list.
@@ -160,7 +160,7 @@ export default function AuthCallbackPage() {
                 Already set your password?{" "}
                 <button
                   onClick={() => navigate("/login", { replace: true })}
-                  className="text-indigo-600 hover:underline font-medium"
+                  className="text-brand-teal-600 hover:underline font-medium"
                 >
                   Go to login
                 </button>
@@ -169,7 +169,7 @@ export default function AuthCallbackPage() {
           ) : (
             <button
               onClick={() => navigate("/login", { replace: true })}
-              className="w-full py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors"
+              className="w-full py-2.5 rounded-lg bg-brand-teal-600 hover:bg-brand-teal-700 text-white text-sm font-semibold transition-colors"
             >
               Go to login
             </button>
@@ -181,11 +181,11 @@ export default function AuthCallbackPage() {
 
   // phase === "set-password"
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-slate-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-brand-teal-50 via-brand-blue-50 to-slate-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full p-8">
         <div className="text-center mb-6">
-          <div className="h-12 w-12 rounded-full bg-indigo-50 flex items-center justify-center mx-auto mb-3">
-            <CheckCircle2 className="h-6 w-6 text-indigo-600" />
+          <div className="h-12 w-12 rounded-full bg-brand-teal-50 flex items-center justify-center mx-auto mb-3">
+            <CheckCircle2 className="h-6 w-6 text-brand-teal-600" />
           </div>
           <h1 className="text-xl font-bold text-slate-900">Set your password</h1>
           <p className="text-sm text-slate-500 mt-1">Choose a password to finish setting up your account.</p>
@@ -201,7 +201,7 @@ export default function AuthCallbackPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="At least 8 characters"
                 autoFocus
-                className="w-full px-3 py-2.5 pr-10 rounded-lg border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                className="w-full px-3 py-2.5 pr-10 rounded-lg border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-brand-teal-500 focus:ring-1 focus:ring-brand-teal-500"
               />
               <button
                 type="button"
@@ -221,7 +221,7 @@ export default function AuthCallbackPage() {
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               placeholder="Re-enter password"
-              className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-brand-teal-500 focus:ring-1 focus:ring-brand-teal-500"
             />
           </div>
 
@@ -230,7 +230,7 @@ export default function AuthCallbackPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+            className="w-full py-2.5 rounded-lg bg-brand-teal-600 hover:bg-brand-teal-700 text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
           >
             {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
             Set password & continue

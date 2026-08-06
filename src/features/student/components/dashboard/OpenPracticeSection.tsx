@@ -2,11 +2,11 @@ import { useNavigate } from "react-router-dom";
 import { Headphones, BookOpen, PenLine, Mic, Zap, BookA, Target, Library, RotateCcw } from "lucide-react";
 
 const PRACTICE_CARDS = [
-  { title: "Reading", icon: BookOpen, route: "/student/reading?mode=standalone", color: "text-violet-500", bg: "bg-violet-500/10" },
+  { title: "Reading", icon: BookOpen, route: "/student/reading?mode=standalone", color: "text-brand-blue-500", bg: "bg-brand-blue-500/10" },
   { title: "Listening", icon: Headphones, route: "/student/listening?mode=standalone", color: "text-sky-500", bg: "bg-sky-500/10" },
   { title: "Writing", icon: PenLine, route: "/student/writing?mode=standalone", color: "text-amber-500", bg: "bg-amber-500/10" },
   { title: "Speaking", icon: Mic, route: "/student/speaking-assessment?mode=standalone", color: "text-rose-500", bg: "bg-rose-500/10" },
-  { title: "Replay Drills", icon: RotateCcw, route: "/student/drill?mode=replay", color: "text-indigo-500", bg: "bg-indigo-500/10" },
+  { title: "Replay Drills", icon: RotateCcw, route: "/student/drill?mode=replay", color: "text-brand-teal-500", bg: "bg-brand-teal-500/10" },
   { title: "Speed Reading", icon: Zap, route: "/student/speed", color: "text-yellow-500", bg: "bg-yellow-500/10" },
   { title: "Trap History", icon: Target, route: "/student/trap-history", color: "text-red-500", bg: "bg-red-500/10" },
   { title: "LexiGrid", icon: BookA, route: "/student/lexigrid?mode=standalone", color: "text-teal-500", bg: "bg-teal-500/10" },

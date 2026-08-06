@@ -121,7 +121,7 @@ const SUBSKILL_LABEL: Record<string, string> = {
 
 const SKILL_ACCENT: Record<string, { text: string; bg: string; border: string }> = {
   LISTENING: { text: "text-teal-600",   bg: "bg-teal-50",   border: "border-teal-200" },
-  READING:   { text: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200" },
+  READING:   { text: "text-brand-blue-600", bg: "bg-brand-blue-50", border: "border-brand-blue-200" },
   WRITING:   { text: "text-orange-500", bg: "bg-orange-50", border: "border-orange-200" },
   SPEAKING:  { text: "text-rose-500",   bg: "bg-rose-50",   border: "border-rose-200" },
 };
@@ -179,7 +179,7 @@ const CircleTimer: React.FC<{ timeLeft: number; total: number; size?: number }> 
   const circ  = 2 * Math.PI * r;
   const dash  = circ * pct;
   const isUrgent = pct < 0.2;
-  const color = isUrgent ? "#EF4444" : pct < 0.5 ? "#F59E0B" : "#4338CA";
+  const color = isUrgent ? "#EF4444" : pct < 0.5 ? "#F59E0B" : "#0A6E64";
   return (
     <svg width={size} height={size} style={{ transform: "rotate(-90deg)", flexShrink: 0 }}>
       <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#E5E7EB" strokeWidth={6} />
@@ -211,7 +211,7 @@ function TopNavBar({ totalMomentum, phase, onBack }: { totalMomentum: number; ph
               </button>
             )}
             <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
-              <div className="p-1.5 sm:p-2 bg-indigo-600 rounded-xl flex-shrink-0 shadow-sm">
+              <div className="p-1.5 sm:p-2 bg-brand-teal-600 rounded-xl flex-shrink-0 shadow-sm">
                 <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
               <span className="text-base sm:text-xl font-semibold text-slate-900 tracking-tight truncate">TestCrack</span>
@@ -226,7 +226,7 @@ function TopNavBar({ totalMomentum, phase, onBack }: { totalMomentum: number; ph
             <div className="flex items-center gap-1 sm:gap-2 bg-indigo-50 border border-indigo-200 px-2 sm:px-4 py-1 sm:py-1.5 rounded-full shadow-sm">
               <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 fill-amber-400 flex-shrink-0" />
               <span className="font-semibold text-slate-900 text-xs sm:text-sm">{totalMomentum}</span>
-              <span className="hidden md:inline text-xs text-indigo-400 font-medium">pts</span>
+              <span className="hidden md:inline text-xs text-brand-teal-400 font-medium">pts</span>
             </div>
           </div>
         </div>
@@ -337,16 +337,6 @@ export default function FullMockAssessment() {
     timerIntervalRef.current = setInterval(tick, 1000);
     return () => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); };
   }, [phase, activeSectionName]);
-
-  // ── Timer expiry → auto-submit section ───────────────────────────────────────
-  useEffect(() => {
-    if ((phase === "session" || phase === "section_intro") && sectionTimerSec === 0 && activeSectionName) {
-      setIsRecording(false);
-      void handleSectionComplete();
-    }
-  // handleSectionComplete must be in deps to avoid stale closure on timer expiry
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sectionTimerSec, phase, handleSectionComplete]);
 
   // ── Cleanup on question / section change ─────────────────────────────────────
   useEffect(() => {
@@ -959,7 +949,7 @@ export default function FullMockAssessment() {
     if (isLoading || !activeSection || !currentQ) {
       return (
         <div className="min-h-[70vh] flex flex-col items-center justify-center animate-fade-in">
-          <Loader2 className="w-12 h-12 text-indigo-600 animate-spin mb-4" />
+          <Loader2 className="w-12 h-12 text-brand-teal-600 animate-spin mb-4" />
           <p className="text-slate-500 font-semibold uppercase tracking-wider text-sm">Loading Questions…</p>
         </div>
       );
@@ -1028,7 +1018,7 @@ export default function FullMockAssessment() {
               <div className="bg-white border border-slate-200 rounded-2xl flex flex-col max-h-[700px] shadow-sm">
                 <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between rounded-t-2xl">
                   <span className="font-semibold text-sm uppercase tracking-wider text-slate-500">Reading Passage</span>
-                  <button onClick={() => setShowPassage(!showPassage)} className="lg:hidden font-semibold text-xs text-purple-600 uppercase">{showPassage ? "Hide" : "Show"}</button>
+                  <button onClick={() => setShowPassage(!showPassage)} className="lg:hidden font-semibold text-xs text-brand-blue-600 uppercase">{showPassage ? "Hide" : "Show"}</button>
                 </div>
                 <div className={`p-6 overflow-y-auto flex-1 ${!showPassage ? "hidden lg:block" : "block"}`}>
                   <p className="font-serif text-slate-800 text-base leading-loose whitespace-pre-wrap">{activeSection.passage_text}</p>
@@ -1047,7 +1037,7 @@ export default function FullMockAssessment() {
             <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm">
               <div className="flex justify-between items-center mb-6">
                 <span className="bg-slate-100 text-slate-500 text-xs font-semibold uppercase tracking-wider px-4 py-1.5 rounded-lg border border-slate-200">Q {currentIdx+1} / {totalQ}</span>
-                <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-semibold uppercase tracking-wider px-3 py-1.5 rounded-lg">{currentQ.question_type.replace("_", " ")}</span>
+                <span className="bg-brand-teal-50 text-brand-teal-700 border border-brand-teal-200 text-[10px] font-semibold uppercase tracking-wider px-3 py-1.5 rounded-lg">{currentQ.question_type.replace("_", " ")}</span>
               </div>
 
               <h3 className="text-xl font-semibold text-slate-900 mb-8 leading-snug">
@@ -1061,7 +1051,7 @@ export default function FullMockAssessment() {
                     const selected = answers[currentQ.id] === key;
                     return (
                       <button key={key} onClick={() => setAnswers(p => ({ ...p, [currentQ.id]: key }))}
-                        className={`text-left p-4 rounded-xl border font-medium text-sm transition-all flex items-start gap-3 ${selected ? "bg-indigo-600 border-indigo-600 text-white shadow-sm" : "bg-white border-slate-200 text-slate-700 hover:border-indigo-300 hover:bg-slate-50"}`}>
+                        className={`text-left p-4 rounded-xl border font-medium text-sm transition-all flex items-start gap-3 ${selected ? "bg-brand-teal-600 border-brand-teal-600 text-white shadow-sm" : "bg-white border-slate-200 text-slate-700 hover:border-brand-teal-300 hover:bg-slate-50"}`}>
                         <span className={`w-6 h-6 flex-shrink-0 rounded-lg border flex items-center justify-center font-semibold text-xs ${selected ? "border-white text-white" : "border-slate-300 text-slate-500"}`}>{key}</span>
                         <span>{optionsMap[key]}</span>
                       </button>
@@ -1092,7 +1082,7 @@ export default function FullMockAssessment() {
                   <textarea rows={8} placeholder="Write your response here (minimum 10 words)…"
                     value={answers[currentQ.id] || ""}
                     onChange={e => { const text = e.target.value; setAnswers(p => ({ ...p, [currentQ.id]: text })); persistWritingDebounced(currentQ.id, text); }}
-                    className="w-full p-5 border border-slate-200 rounded-xl text-base text-slate-900 font-medium outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 bg-slate-50 resize-none transition-all" />
+                    className="w-full p-5 border border-slate-200 rounded-xl text-base text-slate-900 font-medium outline-none focus:ring-2 focus:ring-brand-teal-200 focus:border-brand-teal-300 bg-slate-50 resize-none transition-all" />
                   <div className="flex justify-between mt-2">
                     <p className="text-xs text-slate-400 font-medium">{(answers[currentQ.id] ?? "").trim().split(/\s+/).filter(Boolean).length} words</p>
                     <p className="text-[10px] text-slate-300 font-medium">Auto-saved</p>
@@ -1154,7 +1144,7 @@ export default function FullMockAssessment() {
   const renderScoring = () => (
     <div className="flex flex-col items-center justify-center min-h-[70vh] animate-fade-in">
       <div className="relative mb-8">
-        <div className="w-24 h-24 rounded-full border-[6px] border-slate-200 border-t-indigo-600 animate-spin" />
+        <div className="w-24 h-24 rounded-full border-[6px] border-slate-200 border-t-brand-teal-600 animate-spin" />
         <span className="absolute inset-0 flex items-center justify-center text-4xl">🏆</span>
       </div>
       <h2 className="text-3xl font-bold text-slate-900 tracking-tight mb-3">Scoring Your Mock</h2>
@@ -1183,7 +1173,7 @@ export default function FullMockAssessment() {
 
         <div className="bg-indigo-600 rounded-2xl p-8 mb-6 text-center shadow-md relative overflow-hidden">
           <div className="absolute -top-8 -right-8 text-[140px] opacity-10 pointer-events-none select-none">🏆</div>
-          <p className="text-indigo-200 font-semibold uppercase tracking-wider mb-1">Real Band Score</p>
+          <p className="text-brand-teal-200 font-semibold uppercase tracking-wider mb-1">Real Band Score</p>
           <div className="text-8xl font-bold text-white leading-none mb-2">{mockResults?.real_band_score != null ? realBand.toFixed(1) : "—"}</div>
           {delta !== 0 && (
             <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-lg font-semibold uppercase text-sm mt-2 ${delta > 0 ? "bg-emerald-500 text-white" : "bg-rose-500 text-white"}`}>
@@ -1196,7 +1186,7 @@ export default function FullMockAssessment() {
 
         <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-6 text-center shadow-sm">
           <p className="text-slate-400 font-semibold uppercase tracking-wider mb-1">Momentum Earned</p>
-          <div className="text-6xl font-bold text-indigo-600">+{momentum}</div>
+          <div className="text-6xl font-bold text-brand-teal-600">+{momentum}</div>
           {breakdown.length > 0 && (
             <div className="flex flex-wrap justify-center gap-2 mt-4">
               {breakdown.map((b: any, i: number) => (

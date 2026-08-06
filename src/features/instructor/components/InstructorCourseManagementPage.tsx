@@ -196,12 +196,12 @@ export default function InstructorCourseManagement() {
                 <input 
                   type="text" 
                   placeholder="Search specific courses..." 
-                  className="w-full md:w-64 bg-white dark:bg-[#1A1A24] border border-slate-200 dark:border-[#2A2A3A] text-sm rounded-md pl-10 pr-4 py-2 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 dark:text-slate-200 transition-colors shadow-sm dark:shadow-none"
+                  className="w-full md:w-64 bg-white dark:bg-[#1A1A24] border border-slate-200 dark:border-[#2A2A3A] text-sm rounded-md pl-10 pr-4 py-2 focus:outline-none focus:border-brand-teal-500 focus:ring-1 focus:ring-brand-teal-500 text-slate-900 dark:text-slate-200 transition-colors shadow-sm dark:shadow-none"
                 />
               </div>
               <button 
                 onClick={() => setIsCreateModalOpen(true)}
-                className="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center transition-colors shadow-sm md:hidden lg:flex"
+                className="w-full md:w-auto bg-brand-teal-600 hover:bg-brand-teal-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center transition-colors shadow-sm md:hidden lg:flex"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Course
@@ -221,7 +221,7 @@ export default function InstructorCourseManagement() {
                   onClick={() => setSelectedCourseId(course.id)}
                   className={`bg-white dark:bg-[#12121A] border rounded-xl p-5 cursor-pointer transition-all duration-200 shadow-sm dark:shadow-none ${
                     selectedCourseId === course.id 
-                      ? 'border-indigo-500 ring-1 ring-indigo-500/50' 
+                      ? 'border-brand-teal-500 ring-1 ring-brand-teal-500/50' 
                       : 'border-slate-200 dark:border-[#1E1E2A] hover:border-slate-300 dark:hover:border-[#2A2A3A]'
                   }`}
                 >
@@ -235,7 +235,7 @@ export default function InstructorCourseManagement() {
                   <p className="text-slate-500 dark:text-slate-400 text-xs mb-4 line-clamp-2 h-8 leading-relaxed">{course.description}</p>
                   
                   <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-slate-400 mb-4 font-medium">
-                    <div className="flex items-center bg-slate-50 dark:bg-[#1A1A24] px-2 py-1 rounded-md border border-slate-100 dark:border-[#2A2A3A]"><Users className="w-3.5 h-3.5 mr-1.5 text-indigo-500"/> {course.students}</div>
+                    <div className="flex items-center bg-slate-50 dark:bg-[#1A1A24] px-2 py-1 rounded-md border border-slate-100 dark:border-[#2A2A3A]"><Users className="w-3.5 h-3.5 mr-1.5 text-brand-teal-500"/> {course.students}</div>
                     <div className="flex items-center bg-slate-50 dark:bg-[#1A1A24] px-2 py-1 rounded-md border border-slate-100 dark:border-[#2A2A3A]"><BookOpen className="w-3.5 h-3.5 mr-1.5 text-emerald-500"/> {course.modules} modules</div>
                   </div>
 
@@ -245,7 +245,7 @@ export default function InstructorCourseManagement() {
                       <span>{course.completionWidth}</span>
                     </div>
                     <div className="w-full bg-slate-100 dark:bg-[#1E1E2A] rounded-full h-1.5 overflow-hidden">
-                      <div className="bg-indigo-500 h-1.5 rounded-full" style={{ width: course.completionWidth }}></div>
+                      <div className="bg-brand-teal-500 h-1.5 rounded-full" style={{ width: course.completionWidth }}></div>
                     </div>
                   </div>
 
@@ -254,8 +254,8 @@ export default function InstructorCourseManagement() {
                       onClick={(e) => handleToggle(e, course.id, 'quiz')}
                       className={`text-xs px-3 py-1.5 rounded-md flex items-center transition-colors flex-1 sm:flex-none justify-center font-medium ${
                         isQuizActive 
-                          ? 'bg-indigo-600 text-white border border-indigo-600' 
-                          : 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/20'
+                          ? 'bg-brand-teal-600 text-white border border-brand-teal-600' 
+                          : 'bg-brand-teal-50 dark:bg-brand-teal-500/10 text-brand-teal-700 dark:text-brand-teal-400 border border-brand-teal-200 dark:border-brand-teal-500/20 hover:bg-brand-teal-100 dark:hover:bg-brand-teal-500/20'
                       }`}
                     >
                       <Target className="w-3.5 h-3.5 mr-1.5 flex-shrink-0"/> Quiz Avg {course.quizAvg}
@@ -279,7 +279,7 @@ export default function InstructorCourseManagement() {
           {/* Analytics Section */}
           <div className="bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#1E1E2A] rounded-xl p-4 sm:p-6 lg:p-8 shadow-sm dark:shadow-none">
             <h2 className="text-lg font-semibold mb-6 flex items-center text-slate-900 dark:text-white">
-              <BookOpenCheck className="w-5 h-5 mr-2 text-indigo-600 dark:text-indigo-400" />
+              <BookOpenCheck className="w-5 h-5 mr-2 text-brand-teal-600 dark:text-brand-teal-400" />
               {activeCourse.title} — Usage Analytics
             </h2>
 
@@ -376,8 +376,8 @@ export default function InstructorCourseManagement() {
                       </div>
                     ))}
                   </div>
-                  <div className="bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 p-4 rounded-xl">
-                    <p className="text-indigo-800 dark:text-indigo-200 text-xs flex items-start leading-relaxed">
+                  <div className="bg-brand-teal-50 dark:bg-brand-teal-500/10 border border-brand-teal-200 dark:border-brand-teal-500/20 p-4 rounded-xl">
+                    <p className="text-brand-teal-800 dark:text-brand-teal-200 text-xs flex items-start leading-relaxed">
                       <span className="mr-2 text-base">💡</span>
                       <span><strong>Peer Mentoring:</strong> Leverage top performers by pairing them with struggling students for targeted practice sessions.</span>
                     </p>
@@ -398,7 +398,7 @@ export default function InstructorCourseManagement() {
                   <div 
                     key={idx} 
                     onClick={() => handleResourceClick(res.url)}
-                    className="bg-white dark:bg-[#1A1A24] border border-slate-200 dark:border-[#2A2A3A] rounded-xl p-4 sm:p-5 hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-md cursor-pointer group transition-all duration-200 flex items-start space-x-4"
+                    className="bg-white dark:bg-[#1A1A24] border border-slate-200 dark:border-[#2A2A3A] rounded-xl p-4 sm:p-5 hover:border-brand-teal-300 dark:hover:border-brand-teal-500/50 hover:shadow-md cursor-pointer group transition-all duration-200 flex items-start space-x-4"
                   >
                     <div className="bg-slate-50 dark:bg-[#12121A] p-2.5 rounded-lg border border-slate-100 dark:border-[#2A2A3A] flex-shrink-0 group-hover:scale-110 transition-transform">
                       {res.type === 'video' ? (
@@ -410,12 +410,12 @@ export default function InstructorCourseManagement() {
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start mb-1.5 gap-2">
-                        <h4 className="font-semibold text-sm text-slate-900 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-1">{res.title}</h4>
-                        <ExternalLink className="w-4 h-4 text-slate-400 dark:text-slate-600 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 flex-shrink-0" />
+                        <h4 className="font-semibold text-sm text-slate-900 dark:text-slate-200 group-hover:text-brand-teal-600 dark:group-hover:text-brand-teal-400 transition-colors line-clamp-1">{res.title}</h4>
+                        <ExternalLink className="w-4 h-4 text-slate-400 dark:text-slate-600 group-hover:text-brand-teal-500 dark:group-hover:text-brand-teal-400 flex-shrink-0" />
                       </div>
                       <div className="text-[11px] font-medium text-slate-500 mb-3 bg-slate-100 dark:bg-[#2A2A3A] inline-block px-2 py-0.5 rounded uppercase tracking-wider">{res.source}</div>
                       <div className="text-xs text-slate-600 dark:text-slate-400 flex items-start sm:items-center">
-                        <BarChart2 className="w-3.5 h-3.5 mr-1.5 mt-0.5 sm:mt-0 text-indigo-500 flex-shrink-0" />
+                        <BarChart2 className="w-3.5 h-3.5 mr-1.5 mt-0.5 sm:mt-0 text-brand-teal-500 flex-shrink-0" />
                         <span className="line-clamp-2 sm:line-clamp-1">{res.insight}</span>
                       </div>
                     </div>
@@ -426,7 +426,7 @@ export default function InstructorCourseManagement() {
 
             {/* Your Published Content */}
             <div className="bg-white dark:bg-[#171722] border border-slate-200 dark:border-[#2A2A3A] rounded-xl p-5 sm:p-6 shadow-sm dark:shadow-none">
-              <div className="flex items-center text-indigo-600 dark:text-indigo-400 text-sm font-bold mb-2">
+              <div className="flex items-center text-brand-teal-600 dark:text-brand-teal-400 text-sm font-bold mb-2">
                 <BookOpen className="w-5 h-5 mr-2" /> Your Published Content
               </div>
               <p className="text-slate-500 dark:text-slate-400 text-xs mb-6 font-medium">Blogs and materials created for your students — track readership and impact.</p>
@@ -438,7 +438,7 @@ export default function InstructorCourseManagement() {
                     <div key={idx} className="bg-slate-50 dark:bg-[#1A1A24] border border-slate-200 dark:border-[#2A2A3A] rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row justify-between sm:items-center gap-4 cursor-pointer hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-sm transition-all duration-200">
                       <div className="flex items-center space-x-4">
                         <div className="p-2.5 bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#2A2A3A] rounded-lg flex-shrink-0">
-                          <IconComponent className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+                          <IconComponent className="w-5 h-5 text-brand-teal-500 dark:text-brand-teal-400" />
                         </div>
                         <div>
                           <h4 className="font-semibold text-sm text-slate-900 dark:text-slate-200">{item.title}</h4>
@@ -446,10 +446,10 @@ export default function InstructorCourseManagement() {
                         </div>
                       </div>
                       <div className="flex items-center justify-between sm:justify-end space-x-4 w-full sm:w-auto mt-2 sm:mt-0 pt-3 sm:pt-0 border-t border-slate-200 dark:border-transparent sm:border-0">
-                        <span className="bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 px-3 py-1.5 rounded-md text-xs font-bold text-indigo-700 dark:text-indigo-400 tracking-wide">
+                        <span className="bg-brand-teal-50 dark:bg-brand-teal-950/30 border border-brand-teal-100 dark:border-brand-teal-900/50 px-3 py-1.5 rounded-md text-xs font-bold text-brand-teal-700 dark:text-brand-teal-400 tracking-wide">
                           {item.reads} READS
                         </span>
-                        <Eye className="w-4 h-4 text-slate-400 hover:text-indigo-500 transition-colors" />
+                        <Eye className="w-4 h-4 text-slate-400 hover:text-brand-teal-500 transition-colors" />
                       </div>
                     </div>
                   );
@@ -469,7 +469,7 @@ export default function InstructorCourseManagement() {
           <div className="bg-white dark:bg-[#0A0A0F] border border-slate-200 dark:border-[#1E1E2A] rounded-2xl w-full max-w-4xl p-6 sm:p-8 my-auto sm:my-0 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6 sticky top-0 bg-white dark:bg-[#0A0A0F] pb-4 z-10 border-b border-slate-100 dark:border-[#1E1E2A]">
               <h2 className="text-xl font-bold flex items-center text-slate-900 dark:text-white">
-                <Plus className="w-5 h-5 mr-2 text-indigo-600 dark:text-indigo-500" /> New Course
+                <Plus className="w-5 h-5 mr-2 text-brand-teal-600 dark:text-brand-teal-500" /> New Course
               </h2>
               <button onClick={() => setIsCreateModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors bg-slate-100 dark:bg-[#1A1A24] p-2 rounded-full sm:p-0 sm:bg-transparent">
                 <X className="w-5 h-5" />
@@ -479,12 +479,12 @@ export default function InstructorCourseManagement() {
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Course Title</label>
-                <input type="text" placeholder="e.g. IELTS Writing Masterclass" className="w-full bg-slate-50 dark:bg-[#12121A] border border-slate-300 dark:border-[#2A2A3A] rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 dark:text-white transition-colors" />
+                <input type="text" placeholder="e.g. IELTS Writing Masterclass" className="w-full bg-slate-50 dark:bg-[#12121A] border border-slate-300 dark:border-[#2A2A3A] rounded-lg p-3 text-sm focus:outline-none focus:border-brand-teal-500 focus:ring-1 focus:ring-brand-teal-500 text-slate-900 dark:text-white transition-colors" />
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Description</label>
-                <textarea placeholder="What will students learn?" rows={3} className="w-full bg-slate-50 dark:bg-[#12121A] border border-slate-300 dark:border-[#2A2A3A] rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 dark:text-white resize-none transition-colors" />
+                <textarea placeholder="What will students learn?" rows={3} className="w-full bg-slate-50 dark:bg-[#12121A] border border-slate-300 dark:border-[#2A2A3A] rounded-lg p-3 text-sm focus:outline-none focus:border-brand-teal-500 focus:ring-1 focus:ring-brand-teal-500 text-slate-900 dark:text-white resize-none transition-colors" />
               </div>
 
               <div>
@@ -496,7 +496,7 @@ export default function InstructorCourseManagement() {
                       onClick={() => setSelectedCategory(cat)}
                       className={`px-4 py-2 rounded-full text-xs font-bold border transition-colors ${
                         selectedCategory === cat 
-                          ? 'bg-indigo-100 dark:bg-indigo-600/20 text-indigo-700 dark:text-indigo-400 border-indigo-300 dark:border-indigo-500/50' 
+                          ? 'bg-brand-teal-100 dark:bg-brand-teal-600/20 text-brand-teal-700 dark:text-brand-teal-400 border-brand-teal-300 dark:border-brand-teal-500/50' 
                           : 'bg-white dark:bg-[#12121A] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-[#2A2A3A] hover:border-slate-300 dark:hover:border-slate-600'
                       }`}
                     >
@@ -509,7 +509,7 @@ export default function InstructorCourseManagement() {
               <div className="pt-6 border-t border-slate-200 dark:border-[#1E1E2A]">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-300">Modules Configuration</h3>
-                  <button className="text-xs font-bold flex items-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 bg-indigo-50 dark:bg-transparent px-3 py-1.5 rounded-md sm:p-0 transition-colors">
+                  <button className="text-xs font-bold flex items-center text-brand-teal-600 dark:text-brand-teal-400 hover:text-brand-teal-700 dark:hover:text-brand-teal-300 bg-brand-teal-50 dark:bg-transparent px-3 py-1.5 rounded-md sm:p-0 transition-colors">
                     <Plus className="w-3.5 h-3.5 mr-1" /> Add Module
                   </button>
                 </div>
@@ -518,8 +518,8 @@ export default function InstructorCourseManagement() {
                   <div className="flex items-center justify-between">
                     <h4 className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Module 1</h4>
                   </div>
-                  <input type="text" placeholder="Module title" className="w-full bg-white dark:bg-[#1A1A24] border border-slate-300 dark:border-[#2A2A3A] rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 text-slate-900 dark:text-white transition-colors" />
-                  <textarea placeholder="Module content (supports Markdown formatting)" rows={4} className="w-full bg-white dark:bg-[#1A1A24] border border-slate-300 dark:border-[#2A2A3A] rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 text-slate-900 dark:text-white resize-none transition-colors" />
+                  <input type="text" placeholder="Module title" className="w-full bg-white dark:bg-[#1A1A24] border border-slate-300 dark:border-[#2A2A3A] rounded-lg p-3 text-sm focus:outline-none focus:border-brand-teal-500 text-slate-900 dark:text-white transition-colors" />
+                  <textarea placeholder="Module content (supports Markdown formatting)" rows={4} className="w-full bg-white dark:bg-[#1A1A24] border border-slate-300 dark:border-[#2A2A3A] rounded-lg p-3 text-sm focus:outline-none focus:border-brand-teal-500 text-slate-900 dark:text-white resize-none transition-colors" />
                   
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
                     <div className="flex items-center bg-white dark:bg-[#1A1A24] border border-slate-300 dark:border-[#2A2A3A] rounded-lg px-3 py-2 w-full sm:w-auto">
@@ -529,7 +529,7 @@ export default function InstructorCourseManagement() {
                     </div>
                     <button 
                       onClick={() => setIsQuizModalOpen(true)}
-                      className="flex-1 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 py-2.5 sm:py-2 rounded-lg text-sm font-bold flex items-center justify-center transition-colors"
+                      className="flex-1 bg-brand-teal-50 dark:bg-brand-teal-500/10 hover:bg-brand-teal-100 dark:hover:bg-brand-teal-500/20 text-brand-teal-700 dark:text-brand-teal-400 border border-brand-teal-200 dark:border-brand-teal-500/20 py-2.5 sm:py-2 rounded-lg text-sm font-bold flex items-center justify-center transition-colors"
                     >
                       <Target className="w-4 h-4 mr-2" /> Add Assessment (Quiz/Flashcards)
                     </button>
@@ -538,7 +538,7 @@ export default function InstructorCourseManagement() {
               </div>
 
               <div className="pt-4">
-                <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3.5 sm:py-3 rounded-xl font-bold flex items-center justify-center transition-colors shadow-md shadow-indigo-600/20">
+                <button className="w-full bg-brand-teal-600 hover:bg-brand-teal-700 text-white py-3.5 sm:py-3 rounded-xl font-bold flex items-center justify-center transition-colors shadow-md shadow-brand-teal-600/20">
                   Save & Publish Course
                 </button>
               </div>
@@ -555,7 +555,7 @@ export default function InstructorCourseManagement() {
             
             <div className="flex justify-between items-center p-4 sm:p-6 border-b border-slate-200 dark:border-[#1E1E2A] bg-slate-50 dark:bg-[#0A0A0F]">
               <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center">
-                <Target className="w-5 h-5 mr-2 text-indigo-600 dark:text-indigo-400" />
+                <Target className="w-5 h-5 mr-2 text-brand-teal-600 dark:text-brand-teal-400" />
                 Assessment Builder
               </h2>
               <button onClick={() => setIsQuizModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors bg-white dark:bg-[#1A1A24] border border-slate-200 dark:border-transparent p-2 rounded-full sm:p-0 sm:bg-transparent sm:border-none">
@@ -577,15 +577,15 @@ export default function InstructorCourseManagement() {
                       
                       <div>
                         <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Question Prompt</label>
-                        <input type="text" placeholder="Enter the question text here..." className="w-full pr-10 bg-white dark:bg-[#12121A] border border-slate-300 dark:border-[#2A2A3A] rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 dark:text-white transition-colors" />
+                        <input type="text" placeholder="Enter the question text here..." className="w-full pr-10 bg-white dark:bg-[#12121A] border border-slate-300 dark:border-[#2A2A3A] rounded-lg p-3 text-sm focus:outline-none focus:border-brand-teal-500 focus:ring-1 focus:ring-brand-teal-500 text-slate-900 dark:text-white transition-colors" />
                       </div>
                       
                       <div>
                         <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Answers (Select Correct)</label>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {['Option 1', 'Option 2', 'Option 3', 'Option 4'].map((opt, i) => (
-                            <div key={i} className="flex items-center space-x-3 bg-white dark:bg-[#12121A] border border-slate-300 dark:border-[#2A2A3A] rounded-lg p-2.5 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
-                              <input type="radio" name={`correctOption-${q.id}`} className="accent-indigo-600 dark:accent-indigo-500 w-4 h-4 cursor-pointer ml-1" />
+                            <div key={i} className="flex items-center space-x-3 bg-white dark:bg-[#12121A] border border-slate-300 dark:border-[#2A2A3A] rounded-lg p-2.5 focus-within:border-brand-teal-500 focus-within:ring-1 focus-within:ring-brand-teal-500 transition-all">
+                              <input type="radio" name={`correctOption-${q.id}`} className="accent-brand-teal-600 dark:accent-brand-teal-500 w-4 h-4 cursor-pointer ml-1" />
                               <input type="text" placeholder={opt} className="bg-transparent text-sm w-full focus:outline-none text-slate-900 dark:text-white" />
                             </div>
                           ))}
@@ -594,7 +594,7 @@ export default function InstructorCourseManagement() {
 
                       <div>
                         <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Explanation (Optional)</label>
-                        <input type="text" placeholder="Why is this answer correct?" className="w-full bg-white dark:bg-[#12121A] border border-slate-300 dark:border-[#2A2A3A] rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 text-slate-900 dark:text-white transition-colors text-slate-500 italic" />
+                        <input type="text" placeholder="Why is this answer correct?" className="w-full bg-white dark:bg-[#12121A] border border-slate-300 dark:border-[#2A2A3A] rounded-lg p-3 text-sm focus:outline-none focus:border-brand-teal-500 text-slate-900 dark:text-white transition-colors text-slate-500 italic" />
                       </div>
                     </div>
                   ))}
@@ -602,7 +602,7 @@ export default function InstructorCourseManagement() {
                 
                 <button 
                   onClick={handleAddQuestion}
-                  className="mt-4 text-xs text-indigo-600 dark:text-indigo-400 font-bold flex items-center justify-center w-full sm:w-auto hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors bg-indigo-50 dark:bg-indigo-900/20 border border-dashed border-indigo-200 dark:border-indigo-700/50 px-4 py-3 rounded-xl"
+                  className="mt-4 text-xs text-brand-teal-600 dark:text-brand-teal-400 font-bold flex items-center justify-center w-full sm:w-auto hover:text-brand-teal-700 dark:hover:text-brand-teal-300 transition-colors bg-brand-teal-50 dark:bg-brand-teal-900/20 border border-dashed border-brand-teal-200 dark:border-brand-teal-700/50 px-4 py-3 rounded-xl"
                 >
                   <Plus className="w-4 h-4 mr-1" /> Add Another Question
                 </button>
@@ -621,19 +621,19 @@ export default function InstructorCourseManagement() {
                       
                       <div className="w-full sm:w-1/2">
                         <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 sm:hidden">Front</label>
-                        <textarea placeholder="Front (Term/Question)" rows={3} className="w-full bg-white dark:bg-[#1A1A24] border border-slate-300 dark:border-[#2A2A3A] rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 dark:text-white resize-none transition-colors" />
+                        <textarea placeholder="Front (Term/Question)" rows={3} className="w-full bg-white dark:bg-[#1A1A24] border border-slate-300 dark:border-[#2A2A3A] rounded-lg p-3 text-sm focus:outline-none focus:border-brand-teal-500 focus:ring-1 focus:ring-brand-teal-500 text-slate-900 dark:text-white resize-none transition-colors" />
                       </div>
                       
                       <div className="w-full sm:w-1/2">
                         <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 sm:hidden">Back</label>
-                        <textarea placeholder="Back (Definition/Answer)" rows={3} className="w-full bg-white dark:bg-[#1A1A24] border border-slate-300 dark:border-[#2A2A3A] rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 dark:text-white resize-none transition-colors" />
+                        <textarea placeholder="Back (Definition/Answer)" rows={3} className="w-full bg-white dark:bg-[#1A1A24] border border-slate-300 dark:border-[#2A2A3A] rounded-lg p-3 text-sm focus:outline-none focus:border-brand-teal-500 focus:ring-1 focus:ring-brand-teal-500 text-slate-900 dark:text-white resize-none transition-colors" />
                       </div>
                     </div>
                   ))}
                 </div>
                 <button 
                   onClick={handleAddFlashcard}
-                  className="mt-6 sm:mt-4 text-xs text-indigo-600 dark:text-indigo-400 font-bold flex items-center justify-center w-full sm:w-auto hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors bg-indigo-50 dark:bg-indigo-900/20 border border-dashed border-indigo-200 dark:border-indigo-700/50 px-4 py-3 rounded-xl"
+                  className="mt-6 sm:mt-4 text-xs text-brand-teal-600 dark:text-brand-teal-400 font-bold flex items-center justify-center w-full sm:w-auto hover:text-brand-teal-700 dark:hover:text-brand-teal-300 transition-colors bg-brand-teal-50 dark:bg-brand-teal-900/20 border border-dashed border-brand-teal-200 dark:border-brand-teal-700/50 px-4 py-3 rounded-xl"
                 >
                   <Plus className="w-4 h-4 mr-1" /> Add Another Flashcard
                 </button>
@@ -644,7 +644,7 @@ export default function InstructorCourseManagement() {
             <div className="p-4 sm:p-6 border-t border-slate-200 dark:border-[#1E1E2A] bg-slate-50 dark:bg-[#0A0A0F]">
               <button 
                 onClick={() => setIsQuizModalOpen(false)}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3.5 sm:py-3 rounded-xl font-bold transition-colors shadow-md shadow-indigo-600/20"
+                className="w-full bg-brand-teal-600 hover:bg-brand-teal-700 text-white py-3.5 sm:py-3 rounded-xl font-bold transition-colors shadow-md shadow-brand-teal-600/20"
               >
                 Save Assessment Configuration
               </button>

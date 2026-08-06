@@ -95,13 +95,13 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
               "w-full flex items-center gap-3 rounded-xl transition-all duration-200 group relative",
               isCollapsed ? "justify-center p-3" : "px-4 py-3",
               activeTab === item.id 
-                ? "bg-indigo-600 text-white shadow-md dark:bg-indigo-500/15 dark:text-indigo-300 dark:border dark:border-indigo-500/20 dark:shadow-[0_0_20px_rgba(99,102,241,0.15)]" 
-                : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/[0.04] hover:text-indigo-600 dark:hover:text-white"
+                ? "bg-brand-teal-600 text-white shadow-md dark:bg-brand-teal-500/15 dark:text-brand-teal-300 dark:border dark:border-brand-teal-500/20 dark:shadow-[0_0_20px_rgba(99,102,241,0.15)]" 
+                : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/[0.04] hover:text-brand-teal-600 dark:hover:text-white"
             )}
           >
             <item.icon className={cn(
               "h-5 w-5 transition-transform group-hover:scale-105 shrink-0",
-              activeTab === item.id ? "text-white dark:text-indigo-300" : "text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-white"
+              activeTab === item.id ? "text-white dark:text-brand-teal-300" : "text-slate-400 group-hover:text-brand-teal-600 dark:group-hover:text-white"
             )} />
             {!isCollapsed && (
               <span className="font-medium text-sm animate-in fade-in duration-200">{item.label}</span>
@@ -119,8 +119,8 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
             className={cn(
               "w-full flex items-center gap-3 rounded-xl transition-all duration-200 group",
               isCollapsed ? "justify-center p-3" : "px-4 py-3",
-              "bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300",
-              "hover:bg-indigo-100 dark:hover:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-500/20"
+              "bg-brand-teal-50 dark:bg-brand-teal-500/15 text-brand-teal-700 dark:text-brand-teal-300",
+              "hover:bg-brand-teal-100 dark:hover:bg-brand-teal-500/20 border border-brand-teal-200 dark:border-brand-teal-500/20"
             )}
           >
             <ArrowLeftRight className="h-4 w-4 shrink-0" />
@@ -134,7 +134,7 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
       {/* Collapse Toggle */}
       <button
         onClick={toggleCollapse}
-        className="absolute -right-3 top-1/2 -translate-y-1/2 bg-indigo-600 text-white p-1.5 rounded-full shadow-lg hover:bg-indigo-700 transition-colors z-50 border-2 border-slate-50 dark:border-[#0A0A0F]"
+        className="absolute -right-3 top-1/2 -translate-y-1/2 bg-brand-teal-600 text-white p-1.5 rounded-full shadow-lg hover:bg-brand-teal-700 transition-colors z-50 border-2 border-slate-50 dark:border-[#0A0A0F]"
       >
         {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
       </button>

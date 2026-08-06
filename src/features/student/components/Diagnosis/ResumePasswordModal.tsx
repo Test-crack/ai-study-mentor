@@ -45,7 +45,7 @@ export default function ResumePasswordModal({ onVerified }: { onVerified: () => 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4 pt-20">
       <div className="bg-white p-8 md:p-10 rounded-xl border-2 border-gray-900 max-w-md w-full rpm-fade-in" style={{ boxShadow: "6px 6px 0 #0F0F0F" }}>
-        <div className="w-14 h-14 bg-indigo-700 border-2 border-gray-900 rounded-xl flex items-center justify-center mx-auto mb-5" style={{ boxShadow: "3px 3px 0 #0F0F0F" }}>
+        <div className="w-14 h-14 bg-brand-teal-700 border-2 border-gray-900 rounded-xl flex items-center justify-center mx-auto mb-5" style={{ boxShadow: "3px 3px 0 #0F0F0F" }}>
           <Lock className="h-6 w-6 text-white" />
         </div>
         <h2 className="text-xl font-black text-gray-900 uppercase tracking-wide text-center mb-2">
@@ -71,14 +71,14 @@ export default function ResumePasswordModal({ onVerified }: { onVerified: () => 
               placeholder="Enter your password"
               autoFocus
               autoComplete="current-password"
-              className="w-full border-2 border-gray-900 rounded-lg p-3.5 text-sm font-bold focus:border-indigo-700 focus:ring-2 focus:ring-indigo-100 outline-none transition-all bg-white placeholder:text-gray-300 text-gray-900"
+              className="w-full border-2 border-gray-900 rounded-lg p-3.5 text-sm font-bold focus:border-brand-teal-700 focus:ring-2 focus:ring-brand-teal-100 outline-none transition-all bg-white placeholder:text-gray-300 text-gray-900"
               style={{ boxShadow: "3px 3px 0 #0F0F0F" }}
             />
             {error && <p className="text-red-600 text-xs font-bold text-center">{error}</p>}
             <button
               type="submit"
               disabled={!password || verifying}
-              className="w-full py-3.5 bg-indigo-700 hover:bg-indigo-600 text-white font-black text-sm uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all rpm-btn disabled:opacity-60 disabled:pointer-events-none"
+              className="w-full py-3.5 bg-brand-teal-700 hover:bg-brand-teal-600 text-white font-black text-sm uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all rpm-btn disabled:opacity-60 disabled:pointer-events-none"
               style={{ boxShadow: "4px 4px 0 #0F0F0F" }}
             >
               {verifying ? "Verifying…" : "Resume Diagnostic →"}
@@ -87,7 +87,7 @@ export default function ResumePasswordModal({ onVerified }: { onVerified: () => 
         ) : (
           <button
             onClick={() => signOut()}
-            className="w-full py-3.5 bg-indigo-700 hover:bg-indigo-600 text-white font-black text-sm uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all rpm-btn"
+            className="w-full py-3.5 bg-brand-teal-700 hover:bg-brand-teal-600 text-white font-black text-sm uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all rpm-btn"
             style={{ boxShadow: "4px 4px 0 #0F0F0F" }}
           >
             Log In Again →

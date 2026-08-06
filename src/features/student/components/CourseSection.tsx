@@ -452,13 +452,13 @@ export default function CourseSection() {
           {/* VIEW 1: DASHBOARD */}
           {view === 'dashboard' && (
             <>
-              <div className="bg-[#7B61FF] rounded-2xl p-8 md:p-10 text-white shadow-md relative overflow-hidden mb-8">
+              <div className="bg-[#3E9E93] rounded-2xl p-8 md:p-10 text-white shadow-md relative overflow-hidden mb-8">
                 <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
                 <div className="relative z-10">
                   <h1 className="text-3xl font-bold mb-3 flex items-center gap-2">
                     My Learning <Sparkles className="h-6 w-6 text-yellow-300" fill="currentColor" />
                   </h1>
-                  <p className="text-indigo-50 max-w-2xl text-base md:text-lg leading-relaxed mb-6">
+                  <p className="text-brand-teal-50 max-w-2xl text-base md:text-lg leading-relaxed mb-6">
                     Track your IELTS progress, dive into expert modules, and test your knowledge. Complete lessons consistently to push for your target band score.
                   </p>
                 </div>
@@ -466,14 +466,14 @@ export default function CourseSection() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {IELTS_COURSES.map((course) => (
-                  <div key={course.id} onClick={() => openCourse(course)} className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-[#7B61FF]/50 transition-all cursor-pointer group flex flex-col h-full">
+                  <div key={course.id} onClick={() => openCourse(course)} className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-[#3E9E93]/50 transition-all cursor-pointer group flex flex-col h-full">
                     <div className="flex justify-between items-start mb-4">
-                      <span className="bg-indigo-50 dark:bg-[#7B61FF]/20 text-[#7B61FF] px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+                      <span className="bg-brand-teal-50 dark:bg-[#3E9E93]/20 text-[#3E9E93] px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5">
                         <BookMarked size={12} /> {course.level}
                       </span>
                       {course.progress > 0 && <span className="text-xs font-semibold text-slate-500">In Progress</span>}
                     </div>
-                    <h3 className="text-xl font-bold text-[#0b132b] dark:text-white mb-2 group-hover:text-[#7B61FF] transition-colors line-clamp-2">{course.title}</h3>
+                    <h3 className="text-xl font-bold text-[#0b132b] dark:text-white mb-2 group-hover:text-[#3E9E93] transition-colors line-clamp-2">{course.title}</h3>
                     <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 flex-1 line-clamp-3">{course.description}</p>
                     <div className="mt-auto">
                       <div className="flex justify-between text-xs font-medium text-slate-500 mb-2">
@@ -481,7 +481,7 @@ export default function CourseSection() {
                         <span>{course.progress}%</span>
                       </div>
                       <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-4">
-                        <div className="h-full bg-[#7B61FF] rounded-full" style={{ width: `${course.progress}%` }} />
+                        <div className="h-full bg-[#3E9E93] rounded-full" style={{ width: `${course.progress}%` }} />
                       </div>
                       <div className="flex items-center justify-between text-xs font-medium text-slate-400">
                         <span className="flex items-center gap-1.5"><Clock size={14}/> {course.duration}</span>
@@ -500,9 +500,9 @@ export default function CourseSection() {
               <button onClick={goBack} className="flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-[#0b132b] dark:hover:text-white mb-6 transition-colors">
                 <ArrowLeft size={16} /> Back to Courses
               </button>
-              <div className="bg-indigo-700 rounded-3xl p-8 md:p-10 text-white mb-8 shadow-lg relative overflow-hidden">
+              <div className="bg-brand-teal-700 rounded-3xl p-8 md:p-10 text-white mb-8 shadow-lg relative overflow-hidden">
                 <div className="relative z-10 max-w-2xl">
-                  <span className="inline-block px-3 py-1 bg-[#7B61FF] text-white rounded-md text-xs font-bold uppercase tracking-widest mb-4">Course</span>
+                  <span className="inline-block px-3 py-1 bg-[#3E9E93] text-white rounded-md text-xs font-bold uppercase tracking-widest mb-4">Course</span>
                   <h1 className="text-3xl md:text-4xl font-black mb-4 leading-tight">{selectedCourse.title}</h1>
                   <p className="text-slate-300 mb-6">{selectedCourse.description}</p>
                   <div className="flex items-center gap-6 text-sm font-medium text-slate-400">
@@ -510,22 +510,22 @@ export default function CourseSection() {
                     <span className="flex items-center gap-2"><Clock size={16}/> {selectedCourse.duration}</span>
                   </div>
                 </div>
-                <div className="absolute top-[-50%] right-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-[#7B61FF]/30 to-transparent blur-3xl" />
+                <div className="absolute top-[-50%] right-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-[#3E9E93]/30 to-transparent blur-3xl" />
               </div>
               <h3 className="text-xl font-bold text-[#0b132b] dark:text-white mb-4">Course Content</h3>
               <div className="space-y-4">
                 {selectedCourse.modules.map((mod, i) => (
-                  <div key={mod.id} onClick={() => openModule(mod)} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 md:p-6 flex items-center justify-between cursor-pointer hover:border-[#7B61FF]/50 hover:shadow-sm transition-all group">
+                  <div key={mod.id} onClick={() => openModule(mod)} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 md:p-6 flex items-center justify-between cursor-pointer hover:border-[#3E9E93]/50 hover:shadow-sm transition-all group">
                     <div className="flex items-center gap-4 md:gap-6">
-                      <div className="w-12 h-12 rounded-full bg-indigo-50 dark:bg-[#7B61FF]/10 text-[#7B61FF] flex items-center justify-center font-bold shrink-0">
+                      <div className="w-12 h-12 rounded-full bg-brand-teal-50 dark:bg-[#3E9E93]/10 text-[#3E9E93] flex items-center justify-center font-bold shrink-0">
                         {i + 1}
                       </div>
                       <div>
-                        <h4 className="text-base md:text-lg font-bold text-[#0b132b] dark:text-white group-hover:text-[#7B61FF] transition-colors">{mod.title}</h4>
+                        <h4 className="text-base md:text-lg font-bold text-[#0b132b] dark:text-white group-hover:text-[#3E9E93] transition-colors">{mod.title}</h4>
                         <span className="text-xs text-slate-500 mt-1 flex items-center gap-1.5"><Clock size={12}/> {mod.duration}</span>
                       </div>
                     </div>
-                    <button className="hidden sm:flex items-center gap-2 text-sm font-bold text-[#7B61FF] bg-indigo-50 dark:bg-[#7B61FF]/10 px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button className="hidden sm:flex items-center gap-2 text-sm font-bold text-[#3E9E93] bg-brand-teal-50 dark:bg-[#3E9E93]/10 px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
                       Start <Play size={14} fill="currentColor" />
                     </button>
                   </div>
@@ -542,14 +542,14 @@ export default function CourseSection() {
               </button>
               <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-10 border border-slate-200 dark:border-slate-800 shadow-sm">
                 <div className="mb-8 border-b border-slate-100 dark:border-slate-800 pb-8">
-                  <span className="text-[#7B61FF] text-xs font-bold uppercase tracking-widest mb-2 block">{selectedCourse.title}</span>
+                  <span className="text-[#3E9E93] text-xs font-bold uppercase tracking-widest mb-2 block">{selectedCourse.title}</span>
                   <h2 className="text-2xl md:text-3xl font-bold text-[#0b132b] dark:text-white leading-tight">{selectedModule.title}</h2>
                 </div>
                 <div className="prose prose-slate dark:prose-invert max-w-none text-base md:text-lg">
                   {selectedModule.content}
                 </div>
                 <div className="mt-12 pt-8 border-t border-slate-100 dark:border-slate-800">
-                  <button onClick={startQuiz} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#7B61FF] hover:bg-[#6a50e5] text-white px-8 py-4 rounded-xl font-bold transition-colors shadow-sm ml-auto">
+                  <button onClick={startQuiz} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#3E9E93] hover:bg-[#12897C] text-white px-8 py-4 rounded-xl font-bold transition-colors shadow-sm ml-auto">
                     <Brain size={18} /> Continue to Quiz <ChevronRight size={18} />
                   </button>
                 </div>
@@ -564,7 +564,7 @@ export default function CourseSection() {
                 <ArrowLeft size={16} /> Back to Reading
               </button>
               <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-10 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div className="flex items-center gap-2 mb-6 text-[#7B61FF]">
+                <div className="flex items-center gap-2 mb-6 text-[#3E9E93]">
                   <Target size={20} /> <span className="text-sm font-bold uppercase tracking-widest">Knowledge Check</span>
                 </div>
                 <h3 className="text-xl md:text-2xl font-bold text-[#0b132b] dark:text-white mb-8 leading-snug">
@@ -576,11 +576,11 @@ export default function CourseSection() {
                     const letter = String.fromCharCode(65 + idx);
                     return (
                       <button key={idx} onClick={() => setSelectedAnswer(option)}
-                        className={`w-full flex items-center gap-4 p-4 md:p-5 rounded-2xl border-2 text-left transition-all ${isSelected ? 'border-[#7B61FF] bg-indigo-50 dark:bg-[#7B61FF]/10' : 'border-slate-100 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-900'}`}>
-                        <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${isSelected ? 'bg-[#7B61FF] text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}>
+                        className={`w-full flex items-center gap-4 p-4 md:p-5 rounded-2xl border-2 text-left transition-all ${isSelected ? 'border-[#3E9E93] bg-brand-teal-50 dark:bg-[#3E9E93]/10' : 'border-slate-100 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-900'}`}>
+                        <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${isSelected ? 'bg-[#3E9E93] text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}>
                           {letter}
                         </span>
-                        <span className={`text-base font-semibold ${isSelected ? 'text-[#7B61FF] dark:text-indigo-200' : 'text-slate-700 dark:text-slate-300'}`}>
+                        <span className={`text-base font-semibold ${isSelected ? 'text-[#3E9E93] dark:text-brand-teal-200' : 'text-slate-700 dark:text-slate-300'}`}>
                           {option}
                         </span>
                       </button>
@@ -629,8 +629,8 @@ export default function CourseSection() {
                         <p className="text-slate-700 dark:text-slate-300 font-medium mt-1 p-3 bg-[#10b981]/10 rounded-xl">{selectedModule.quiz.correctAnswer}</p>
                       </div>
                     </div>
-                    <div className="bg-indigo-50 dark:bg-[#7B61FF]/10 rounded-2xl p-6 mb-8 border border-[#7B61FF]/20">
-                      <div className="flex items-center gap-2 mb-2 text-[#7B61FF]">
+                    <div className="bg-brand-teal-50 dark:bg-[#3E9E93]/10 rounded-2xl p-6 mb-8 border border-[#3E9E93]/20">
+                      <div className="flex items-center gap-2 mb-2 text-[#3E9E93]">
                         <Brain size={18} /> <span className="font-bold">Explanation</span>
                       </div>
                       <p className="text-[#0b132b] dark:text-slate-200 leading-relaxed">

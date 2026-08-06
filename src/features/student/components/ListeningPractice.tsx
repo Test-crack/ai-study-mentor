@@ -108,9 +108,9 @@ const LIBRARY_FLOOR_PLAN_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
   <text x="120" y="240" text-anchor="middle" font-size="22" fill="#be185d" font-weight="800">D</text>
 
   <!-- First Floor right: Lending (E) -->
-  <rect x="220" y="180" width="260" height="80" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
-  <text x="350" y="217" text-anchor="middle" font-size="13" fill="#4c1d95" font-weight="600">Main Lending Collection</text>
-  <text x="350" y="240" text-anchor="middle" font-size="22" fill="#6d28d9" font-weight="800">E</text>
+  <rect x="220" y="180" width="260" height="80" fill="#DCE9EE" stroke="#185A78" stroke-width="1.5"/>
+  <text x="350" y="217" text-anchor="middle" font-size="13" fill="#122F3F" font-weight="600">Main Lending Collection</text>
+  <text x="350" y="240" text-anchor="middle" font-size="22" fill="#185A78" font-weight="800">E</text>
 
   <!-- Second Floor: Study Centre (F) -->
   <rect x="20" y="260" width="460" height="80" fill="#ffedd5" stroke="#ea580c" stroke-width="1.5"/>
@@ -157,10 +157,10 @@ const WILDLIFE_PARK_MAP_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
   <text x="420" y="215" text-anchor="middle" font-size="20" fill="#be185d" font-weight="800">D</text>
 
   <!-- South: Petting Zoo (E) -->
-  <rect x="150" y="265" width="200" height="100" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
-  <text x="250" y="308" text-anchor="middle" font-size="13" fill="#4c1d95" font-weight="600">Petting Zoo &amp;</text>
-  <text x="250" y="324" text-anchor="middle" font-size="12" fill="#4c1d95">Animal Interaction</text>
-  <text x="250" y="350" text-anchor="middle" font-size="20" fill="#6d28d9" font-weight="800">E</text>
+  <rect x="150" y="265" width="200" height="100" fill="#DCE9EE" stroke="#185A78" stroke-width="1.5"/>
+  <text x="250" y="308" text-anchor="middle" font-size="13" fill="#122F3F" font-weight="600">Petting Zoo &amp;</text>
+  <text x="250" y="324" text-anchor="middle" font-size="12" fill="#122F3F">Animal Interaction</text>
+  <text x="250" y="350" text-anchor="middle" font-size="20" fill="#185A78" font-weight="800">E</text>
 
   <!-- Compass -->
   <text x="468" y="35" text-anchor="middle" font-size="14" fill="#166534" font-weight="700">N</text>
@@ -197,7 +197,7 @@ const ANGLERFISH_DIAGRAM_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
   <circle cx="165" cy="150" r="3" fill="white" opacity="0.8"/>
 
   <!-- Dorsal fin lure (modified fin) -->
-  <line x1="220" y1="100" x2="200" y2="55" stroke="#a78bfa" stroke-width="3"/>
+  <line x1="220" y1="100" x2="200" y2="55" stroke="#4E8CA6" stroke-width="3"/>
   <ellipse cx="193" cy="42" rx="16" ry="12" fill="#fbbf24" stroke="#f59e0b" stroke-width="2" opacity="0.9"/>
   <!-- Glow effect -->
   <ellipse cx="193" cy="42" rx="24" ry="18" fill="none" stroke="#fde68a" stroke-width="1" opacity="0.5"/>
@@ -208,23 +208,23 @@ const ANGLERFISH_DIAGRAM_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
 
   <!-- Hotspot labels -->
   <!-- 1: Lure (esca) -->
-  <circle cx="193" cy="42" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5" opacity="0.9"/>
+  <circle cx="193" cy="42" r="10" fill="#185A78" stroke="white" stroke-width="1.5" opacity="0.9"/>
   <text x="193" y="46" text-anchor="middle" font-size="11" fill="white" font-weight="700">1</text>
 
   <!-- 2: Eye -->
-  <circle cx="160" cy="155" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5" opacity="0.9"/>
+  <circle cx="160" cy="155" r="10" fill="#185A78" stroke="white" stroke-width="1.5" opacity="0.9"/>
   <text x="160" y="159" text-anchor="middle" font-size="11" fill="white" font-weight="700">2</text>
 
   <!-- 3: Modified dorsal fin (spine) -->
-  <circle cx="220" cy="100" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5" opacity="0.9"/>
+  <circle cx="220" cy="100" r="10" fill="#185A78" stroke="white" stroke-width="1.5" opacity="0.9"/>
   <text x="220" y="104" text-anchor="middle" font-size="11" fill="white" font-weight="700">3</text>
 
   <!-- 4: Tail -->
-  <circle cx="400" cy="185" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5" opacity="0.9"/>
+  <circle cx="400" cy="185" r="10" fill="#185A78" stroke="white" stroke-width="1.5" opacity="0.9"/>
   <text x="400" y="189" text-anchor="middle" font-size="11" fill="white" font-weight="700">4</text>
 
   <!-- 5: Pectoral fin -->
-  <circle cx="175" cy="235" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5" opacity="0.9"/>
+  <circle cx="175" cy="235" r="10" fill="#185A78" stroke="white" stroke-width="1.5" opacity="0.9"/>
   <text x="175" y="239" text-anchor="middle" font-size="11" fill="white" font-weight="700">5</text>
 
   <text x="260" y="305" text-anchor="middle" font-size="11" fill="#93c5fd">Fig 1 — Anatomy of a Deep-Sea Anglerfish</text>
@@ -256,7 +256,7 @@ const MAP_PROJECTIONS_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
   <text x="160" y="143" text-anchor="middle" font-size="9" fill="white" font-weight="600">Africa</text>
 
   <!-- Europe -->
-  <ellipse cx="110" cy="80" rx="22" ry="15" fill="#7c3aed" opacity="0.7"/>
+  <ellipse cx="110" cy="80" rx="22" ry="15" fill="#185A78" opacity="0.7"/>
   <text x="110" y="84" text-anchor="middle" font-size="8" fill="white">Europe</text>
 
   <!-- Distortion annotation -->
@@ -265,11 +265,11 @@ const MAP_PROJECTIONS_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
   <text x="25" y="54" font-size="9" fill="#ef4444">↑ larger</text>
 
   <!-- Hotspot 1 -->
-  <circle cx="80" cy="62" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5"/>
+  <circle cx="80" cy="62" r="10" fill="#185A78" stroke="white" stroke-width="1.5"/>
   <text x="80" y="66" text-anchor="middle" font-size="11" fill="white" font-weight="700">1</text>
 
   <!-- Hotspot 2 -->
-  <circle cx="160" cy="140" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5"/>
+  <circle cx="160" cy="140" r="10" fill="#185A78" stroke="white" stroke-width="1.5"/>
   <text x="160" y="144" text-anchor="middle" font-size="11" fill="white" font-weight="700">2</text>
 
   <text x="130" y="235" text-anchor="middle" font-size="12" fill="#1e40af" font-weight="700">Mercator Projection</text>
@@ -293,15 +293,15 @@ const MAP_PROJECTIONS_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
   <text x="420" y="137" text-anchor="middle" font-size="9" fill="white" font-weight="600">Africa</text>
 
   <!-- Europe -->
-  <ellipse cx="370" cy="82" rx="18" ry="10" fill="#7c3aed" opacity="0.7"/>
+  <ellipse cx="370" cy="82" rx="18" ry="10" fill="#185A78" opacity="0.7"/>
   <text x="370" y="86" text-anchor="middle" font-size="8" fill="white">Europe</text>
 
   <!-- Hotspot 3 -->
-  <circle cx="335" cy="65" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5"/>
+  <circle cx="335" cy="65" r="10" fill="#185A78" stroke="white" stroke-width="1.5"/>
   <text x="335" y="69" text-anchor="middle" font-size="11" fill="white" font-weight="700">3</text>
 
   <!-- Hotspot 4 -->
-  <circle cx="420" cy="135" r="10" fill="#7c3aed" stroke="white" stroke-width="1.5"/>
+  <circle cx="420" cy="135" r="10" fill="#185A78" stroke="white" stroke-width="1.5"/>
   <text x="420" y="139" text-anchor="middle" font-size="11" fill="white" font-weight="700">4</text>
 
   <text x="390" y="235" text-anchor="middle" font-size="12" fill="#166534" font-weight="700">Peters Projection</text>
@@ -1098,7 +1098,7 @@ function questionTypeBadge(type: QuestionType) {
   const map: Record<QuestionType, { label: string; color: string }> = {
     mcq:          { label: 'Multiple Choice',    color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
     form:         { label: 'Short Answer',       color: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400' },
-    image_label:  { label: 'Diagram Labelling',  color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
+    image_label:  { label: 'Diagram Labelling',  color: 'bg-brand-blue-100 text-brand-blue-700 dark:bg-brand-blue-900/30 dark:text-brand-blue-400' },
     image_map:    { label: 'Map / Plan',         color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
     image_match:  { label: 'Image Matching',     color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
   };
@@ -1141,12 +1141,12 @@ function ImageQuestionBlock({ question, answer, onAnswer }: ImageQuestionBlockPr
                 onClick={() => onAnswer(opt.id)}
                 className={`py-2.5 px-3 rounded-xl border-2 text-sm font-medium transition-all duration-150 text-left
                   ${selected
-                    ? 'border-[#7B61FF] bg-indigo-50 text-indigo-800 dark:border-[#7B61FF] dark:bg-[#7B61FF]/10 dark:text-indigo-200'
-                    : 'border-slate-200 bg-white text-slate-700 hover:border-[#7B61FF]/50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-[#7B61FF]/40'
+                    ? 'border-[#3E9E93] bg-brand-teal-50 text-brand-teal-800 dark:border-[#3E9E93] dark:bg-[#3E9E93]/10 dark:text-brand-teal-200'
+                    : 'border-slate-200 bg-white text-slate-700 hover:border-[#3E9E93]/50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-[#3E9E93]/40'
                   }`}
               >
                 <span className={`inline-block w-5 h-5 rounded-full border-2 mr-2 text-xs font-bold text-center leading-4
-                  ${selected ? 'border-[#7B61FF] bg-[#7B61FF] text-white' : 'border-slate-400 dark:border-slate-500'}`}>
+                  ${selected ? 'border-[#3E9E93] bg-[#3E9E93] text-white' : 'border-slate-400 dark:border-slate-500'}`}>
                   {opt.id}
                 </span>
                 {opt.text.replace(`Zone ${opt.id} — `, '')}
@@ -1187,8 +1187,8 @@ function ImageQuestionBlock({ question, answer, onAnswer }: ImageQuestionBlockPr
                     onClick={() => onAnswer(selected ? '' : word)}
                     className={`px-3 py-1.5 rounded-lg border-2 text-sm font-medium transition-all duration-150
                       ${selected
-                        ? 'border-[#7B61FF] bg-indigo-50 text-indigo-800 dark:border-[#7B61FF] dark:bg-[#7B61FF]/15 dark:text-indigo-200'
-                        : 'border-slate-200 bg-white text-slate-700 hover:border-[#7B61FF]/40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                        ? 'border-[#3E9E93] bg-brand-teal-50 text-brand-teal-800 dark:border-[#3E9E93] dark:bg-[#3E9E93]/15 dark:text-brand-teal-200'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-[#3E9E93]/40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
                       }`}
                   >
                     {word}
@@ -1209,7 +1209,7 @@ function ImageQuestionBlock({ question, answer, onAnswer }: ImageQuestionBlockPr
             className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-200 dark:border-slate-700
               bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm
               placeholder-slate-400 dark:placeholder-slate-500 outline-none
-              focus:border-[#7B61FF] dark:focus:border-[#7B61FF] transition-colors"
+              focus:border-[#3E9E93] dark:focus:border-[#3E9E93] transition-colors"
           />
         </div>
       </div>
@@ -1233,7 +1233,7 @@ function SharedImagePanel({ image, isPlaying }: { image: ImageQuestion; isPlayin
         </div>
         <button
           onClick={() => setExpanded(e => !e)}
-          className="text-xs text-[#7B61FF] dark:text-[#9b86ff] hover:underline"
+          className="text-xs text-[#3E9E93] dark:text-[#7FBFB6] hover:underline"
         >
           {expanded ? 'Collapse' : 'Expand'}
         </button>
@@ -1247,9 +1247,9 @@ function SharedImagePanel({ image, isPlaying }: { image: ImageQuestion; isPlayin
         />
       </div>
       {isPlaying && (
-        <div className="px-3 py-1.5 bg-indigo-50 dark:bg-[#7B61FF]/10 border-t border-indigo-100 dark:border-[#7B61FF]/20">
-          <p className="text-xs text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse inline-block" />
+        <div className="px-3 py-1.5 bg-brand-teal-50 dark:bg-[#3E9E93]/10 border-t border-brand-teal-100 dark:border-[#3E9E93]/20">
+          <p className="text-xs text-brand-teal-600 dark:text-brand-teal-400 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 bg-brand-teal-500 rounded-full animate-pulse inline-block" />
             Study this diagram while listening
           </p>
         </div>
@@ -1438,13 +1438,13 @@ export default function ListeningPractice() {
 
   const renderHome = () => (
     <div className="space-y-8">
-      <div className="bg-[#7B61FF] rounded-2xl p-8 md:p-10 text-white shadow-md relative overflow-hidden">
+      <div className="bg-[#3E9E93] rounded-2xl p-8 md:p-10 text-white shadow-md relative overflow-hidden">
         <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl" />
         <div className="relative z-10">
           <h1 className="text-3xl font-bold mb-3 flex items-center gap-2">
             IELTS Listening Practice <Sparkles className="h-6 w-6 text-yellow-300" fill="currentColor" />
           </h1>
-          <p className="text-indigo-50 max-w-2xl text-base md:text-lg leading-relaxed">
+          <p className="text-brand-teal-50 max-w-2xl text-base md:text-lg leading-relaxed">
             Improve your listening skills with authentic voice scripts. Sections now include
             <strong className="text-yellow-200"> diagram labelling and map / plan tasks</strong> — just like the real IELTS Academic exam.
           </p>
@@ -1461,16 +1461,16 @@ export default function ListeningPractice() {
               key={task.id}
               onClick={() => openTask(task)}
               className="border border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900
-                hover:shadow-md hover:border-[#7B61FF] dark:hover:border-[#7B61FF] transition-all cursor-pointer group"
+                hover:shadow-md hover:border-[#3E9E93] dark:hover:border-[#3E9E93] transition-all cursor-pointer group"
             >
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start gap-4">
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs font-bold uppercase tracking-widest text-[#7B61FF] dark:text-[#9b86ff]">
+                    <span className="text-xs font-bold uppercase tracking-widest text-[#3E9E93] dark:text-[#7FBFB6]">
                       {task.title}
                     </span>
                     <CardTitle className="text-lg font-bold text-slate-800 dark:text-slate-100
-                      group-hover:text-[#7B61FF] dark:group-hover:text-[#9b86ff] transition-colors leading-tight">
+                      group-hover:text-[#3E9E93] dark:group-hover:text-[#7FBFB6] transition-colors leading-tight">
                       {task.topic}
                     </CardTitle>
                   </div>
@@ -1480,12 +1480,12 @@ export default function ListeningPractice() {
                         {score}/{task.questions.length} ✓
                       </Badge>
                     ) : (
-                      <Badge className="bg-indigo-50 text-[#7B61FF] hover:bg-indigo-100 dark:bg-[#7B61FF]/20 dark:text-[#9b86ff]">
+                      <Badge className="bg-brand-teal-50 text-[#3E9E93] hover:bg-brand-teal-100 dark:bg-[#3E9E93]/20 dark:text-[#7FBFB6]">
                         New
                       </Badge>
                     )}
                     {imgQs > 0 && (
-                      <Badge className="bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400 flex items-center gap-1">
+                      <Badge className="bg-brand-blue-50 text-brand-blue-700 dark:bg-brand-blue-900/20 dark:text-brand-blue-400 flex items-center gap-1">
                         <ImageIcon className="w-3 h-3" /> {imgQs} Image Q{imgQs > 1 ? 's' : ''}
                       </Badge>
                     )}
@@ -1502,7 +1502,7 @@ export default function ListeningPractice() {
                   <span className="flex items-center gap-1">
                     <Headphones className="w-3 h-3" /> {task.questions.length} Questions
                   </span>
-                  <span className="text-[#7B61FF] dark:text-[#9b86ff] flex items-center group-hover:translate-x-1 transition-transform">
+                  <span className="text-[#3E9E93] dark:text-[#7FBFB6] flex items-center group-hover:translate-x-1 transition-transform">
                     {done ? 'Retry' : 'Start Listening'} <ArrowLeft className="h-3 w-3 ml-1 rotate-180" />
                   </span>
                 </div>
@@ -1514,12 +1514,12 @@ export default function ListeningPractice() {
 
       {allResults.length > 0 && (
         <Card
-          className="border border-[#7B61FF]/30 bg-indigo-50/50 dark:bg-[#7B61FF]/10 dark:border-[#7B61FF]/30 cursor-pointer hover:bg-indigo-100/50 transition-all"
+          className="border border-[#3E9E93]/30 bg-brand-teal-50/50 dark:bg-[#3E9E93]/10 dark:border-[#3E9E93]/30 cursor-pointer hover:bg-brand-teal-100/50 transition-all"
           onClick={() => setScreen('results')}
         >
           <CardContent className="p-5 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Trophy className="w-6 h-6 text-[#7B61FF] dark:text-[#9b86ff]" />
+              <Trophy className="w-6 h-6 text-[#3E9E93] dark:text-[#7FBFB6]" />
               <div>
                 <p className="font-semibold text-slate-800 dark:text-slate-100">Overall Progress</p>
                 <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -1527,7 +1527,7 @@ export default function ListeningPractice() {
                 </p>
               </div>
             </div>
-            <span className="text-[#7B61FF] dark:text-[#9b86ff] font-medium text-sm">View Results →</span>
+            <span className="text-[#3E9E93] dark:text-[#7FBFB6] font-medium text-sm">View Results →</span>
           </CardContent>
         </Card>
       )}
@@ -1564,7 +1564,7 @@ export default function ListeningPractice() {
             <Button
               onClick={handleSubmit}
               disabled={submitting}
-              className="bg-[#7B61FF] hover:bg-[#6a50e5] text-white shadow-sm w-full sm:w-auto"
+              className="bg-[#3E9E93] hover:bg-[#12897C] text-white shadow-sm w-full sm:w-auto"
             >
               {submitting ? (
                 <span className="flex items-center gap-2">
@@ -1585,7 +1585,7 @@ export default function ListeningPractice() {
           <div className="w-full lg:w-[40%] flex flex-col gap-5">
             <Card className="border-none shadow-sm bg-white dark:bg-slate-900 flex-shrink-0">
               <CardHeader className="pb-4">
-                <div className="flex items-center gap-2 text-[#7B61FF] dark:text-[#9b86ff] mb-2">
+                <div className="flex items-center gap-2 text-[#3E9E93] dark:text-[#7FBFB6] mb-2">
                   <Headphones className="h-5 w-5" />
                   <span className="text-sm font-bold uppercase tracking-wider">Audio Player</span>
                 </div>
@@ -1601,7 +1601,7 @@ export default function ListeningPractice() {
                   <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
                     <Badge variant="secondary" className="text-xs">{selectedTask.questions.length} Qs</Badge>
                     {imageQCount(selectedTask) > 0 && (
-                      <Badge className="bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400 text-xs flex items-center gap-1">
+                      <Badge className="bg-brand-blue-50 text-brand-blue-700 dark:bg-brand-blue-900/20 dark:text-brand-blue-400 text-xs flex items-center gap-1">
                         <ImageIcon className="w-2.5 h-2.5" /> Image Tasks
                       </Badge>
                     )}
@@ -1613,12 +1613,12 @@ export default function ListeningPractice() {
                 <div className="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-3 flex-wrap">
                     {!isPlaying && !hasPlayed && (
-                      <Button onClick={speak} className="bg-[#7B61FF] hover:bg-[#6a50e5] text-white gap-2 flex-1 sm:flex-none">
+                      <Button onClick={speak} className="bg-[#3E9E93] hover:bg-[#12897C] text-white gap-2 flex-1 sm:flex-none">
                         <Play className="w-4 h-4" /> Play Audio
                       </Button>
                     )}
                     {isPlaying && (
-                      <Button disabled className="bg-[#7B61FF]/60 text-white gap-2 flex-1 sm:flex-none cursor-not-allowed">
+                      <Button disabled className="bg-[#3E9E93]/60 text-white gap-2 flex-1 sm:flex-none cursor-not-allowed">
                         <span className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                         Playing Audio...
                       </Button>
@@ -1657,7 +1657,7 @@ export default function ListeningPractice() {
                           return (
                             <React.Fragment key={j}>
                               {isHighlighted ? (
-                                <mark className="bg-[#7B61FF]/30 text-indigo-900 dark:bg-[#7B61FF]/50 dark:text-white rounded px-1 transition-colors">
+                                <mark className="bg-[#3E9E93]/30 text-brand-teal-900 dark:bg-[#3E9E93]/50 dark:text-white rounded px-1 transition-colors">
                                   {wordObj.text}
                                 </mark>
                               ) : wordObj.text}
@@ -1738,15 +1738,15 @@ export default function ListeningPractice() {
                             onClick={() => handleOptionSelect(question.id, option.id)}
                             className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 flex items-center
                               ${isSelected
-                                ? 'border-[#7B61FF] bg-indigo-50 dark:border-[#7B61FF] dark:bg-[#7B61FF]/10'
-                                : 'border-slate-200 bg-white hover:border-[#7B61FF]/50 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-[#7B61FF]/50'
+                                ? 'border-[#3E9E93] bg-brand-teal-50 dark:border-[#3E9E93] dark:bg-[#3E9E93]/10'
+                                : 'border-slate-200 bg-white hover:border-[#3E9E93]/50 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-[#3E9E93]/50'
                               }`}
                           >
                             <div className={`w-5 h-5 rounded-full border-2 mr-4 flex items-center justify-center flex-shrink-0 transition-colors
-                              ${isSelected ? 'border-[#7B61FF]' : 'border-slate-300 dark:border-slate-600'}`}>
-                              {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-[#7B61FF]" />}
+                              ${isSelected ? 'border-[#3E9E93]' : 'border-slate-300 dark:border-slate-600'}`}>
+                              {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-[#3E9E93]" />}
                             </div>
-                            <span className={`text-sm ${isSelected ? 'text-indigo-900 font-medium dark:text-indigo-200' : 'text-slate-700 dark:text-slate-300'}`}>
+                            <span className={`text-sm ${isSelected ? 'text-brand-teal-900 font-medium dark:text-brand-teal-200' : 'text-slate-700 dark:text-slate-300'}`}>
                               {option.text}
                             </span>
                           </div>
@@ -1769,7 +1769,7 @@ export default function ListeningPractice() {
                         className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700
                           bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm
                           placeholder-slate-400 dark:placeholder-slate-500 outline-none
-                          focus:border-[#7B61FF] dark:focus:border-[#7B61FF] transition-colors"
+                          focus:border-[#3E9E93] dark:focus:border-[#3E9E93] transition-colors"
                       />
                     </div>
                   )}
@@ -1804,18 +1804,18 @@ export default function ListeningPractice() {
         </Button>
       </div>
 
-      <div className="bg-[#7B61FF] rounded-2xl p-8 text-white shadow-md relative overflow-hidden">
+      <div className="bg-[#3E9E93] rounded-2xl p-8 text-white shadow-md relative overflow-hidden">
         <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl" />
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div>
-            <p className="text-indigo-200 text-sm font-medium uppercase tracking-widest mb-2">Overall Results</p>
+            <p className="text-brand-teal-200 text-sm font-medium uppercase tracking-widest mb-2">Overall Results</p>
             <h2 className="text-3xl font-bold">{totalCorrect} / {totalQ} Correct</h2>
-            <p className="text-indigo-100 mt-1 text-sm">
+            <p className="text-brand-teal-100 mt-1 text-sm">
               Across {allResults.length} section{allResults.length !== 1 ? 's' : ''} completed
             </p>
           </div>
           <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-5 text-center min-w-[110px]">
-            <p className="text-indigo-200 text-xs uppercase tracking-widest mb-1">Est. Band</p>
+            <p className="text-brand-teal-200 text-xs uppercase tracking-widest mb-1">Est. Band</p>
             <p className="text-5xl font-black">{band}</p>
           </div>
         </div>
@@ -1830,7 +1830,7 @@ export default function ListeningPractice() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-xs font-bold uppercase tracking-widest text-[#7B61FF] dark:text-[#9b86ff]">{task.title}</span>
+                  <span className="text-xs font-bold uppercase tracking-widest text-[#3E9E93] dark:text-[#7FBFB6]">{task.title}</span>
                   <CardTitle className="text-lg text-slate-800 dark:text-slate-100 mt-0.5">{task.topic}</CardTitle>
                 </div>
                 <div className="text-right">
@@ -1839,7 +1839,7 @@ export default function ListeningPractice() {
                   </p>
                   <button
                     onClick={() => openTask(task)}
-                    className="flex items-center gap-1 text-xs text-[#7B61FF] dark:text-[#9b86ff] mt-1 hover:underline"
+                    className="flex items-center gap-1 text-xs text-[#3E9E93] dark:text-[#7FBFB6] mt-1 hover:underline"
                   >
                     <RotateCcw className="w-3 h-3" /> Retry
                   </button>
@@ -1890,12 +1890,12 @@ export default function ListeningPractice() {
       })}
 
       {allResults.length < IELTS_TASKS.length && (
-        <Card className="border border-dashed border-[#7B61FF]/40 bg-indigo-50/30 dark:bg-[#7B61FF]/5 dark:border-[#7B61FF]/20">
+        <Card className="border border-dashed border-[#3E9E93]/40 bg-brand-teal-50/30 dark:bg-[#3E9E93]/5 dark:border-[#3E9E93]/20">
           <CardContent className="p-6 text-center">
             <p className="text-slate-500 dark:text-slate-400 text-sm mb-3">
               Complete all {IELTS_TASKS.length} sections for a full band score estimate.
             </p>
-            <Button onClick={() => setScreen('home')} className="bg-[#7B61FF] hover:bg-[#6a50e5] text-white">
+            <Button onClick={() => setScreen('home')} className="bg-[#3E9E93] hover:bg-[#12897C] text-white">
               Continue Practising →
             </Button>
           </CardContent>

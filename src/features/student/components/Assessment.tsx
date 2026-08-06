@@ -126,7 +126,7 @@ const SKILL_ICON: Record<string, string> = {
 // Per-skill SaaS accent colorways — keyed on parent skill (icons / pills / tiles).
 const SKILL_ACCENT: Record<string, { text: string; bg: string; border: string }> = {
   LISTENING: { text: "text-teal-600",   bg: "bg-teal-50",   border: "border-teal-200" },
-  READING:   { text: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200" },
+  READING:   { text: "text-brand-blue-600", bg: "bg-brand-blue-50", border: "border-brand-blue-200" },
   WRITING:   { text: "text-orange-500", bg: "bg-orange-50", border: "border-orange-200" },
   SPEAKING:  { text: "text-rose-500",   bg: "bg-rose-50",   border: "border-rose-200" },
 };
@@ -174,7 +174,7 @@ function TopNavBar({ hideMomentum, totalMomentum }: { hideMomentum: boolean, tot
               </button>
             )}
             <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
-              <div className="p-1.5 sm:p-2 bg-indigo-600 rounded-xl flex-shrink-0 shadow-sm">
+              <div className="p-1.5 sm:p-2 bg-brand-teal-600 rounded-xl flex-shrink-0 shadow-sm">
                 <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
               <span className="text-base sm:text-xl font-semibold text-slate-900 tracking-tight truncate">
@@ -195,10 +195,10 @@ function TopNavBar({ hideMomentum, totalMomentum }: { hideMomentum: boolean, tot
               </div>
 
               {/* Momentum */}
-              <div className="flex items-center gap-1 sm:gap-2 bg-indigo-50 border border-indigo-200 px-2 sm:px-4 py-1 sm:py-1.5 rounded-full shadow-sm">
+              <div className="flex items-center gap-1 sm:gap-2 bg-brand-teal-50 border border-brand-teal-200 px-2 sm:px-4 py-1 sm:py-1.5 rounded-full shadow-sm">
                 <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 fill-amber-400 flex-shrink-0" />
                 <span className="font-semibold text-slate-900 text-xs sm:text-sm">{totalMomentum}</span>
-                <span className="hidden md:inline text-xs text-indigo-400 font-medium">pts</span>
+                <span className="hidden md:inline text-xs text-brand-teal-400 font-medium">pts</span>
               </div>
 
             </div>
@@ -217,7 +217,7 @@ const CircleTimer: React.FC<{ timeLeft: number; total: number; size?: number }> 
   const circ = 2 * Math.PI * r;
   const dash = circ * pct;
   const isUrgent = pct < 0.2;
-  const color = isUrgent ? "#EF4444" : pct < 0.5 ? "#F59E0B" : "#4338CA";
+  const color = isUrgent ? "#EF4444" : pct < 0.5 ? "#F59E0B" : "#0A6E64";
   return (
     <svg width={size} height={size} style={{ transform: "rotate(-90deg)", flexShrink: 0 }}>
       <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#E5E7EB" strokeWidth={6} />
@@ -552,7 +552,7 @@ export default function Assessment() {
   if (eligibilityLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
+        <Loader2 className="w-10 h-10 text-brand-teal-600 animate-spin" />
       </div>
     );
   }
@@ -590,7 +590,7 @@ export default function Assessment() {
                   <span className={`font-semibold text-sm tabular-nums ${c.met ? "text-emerald-700" : "text-slate-500"}`}>{c.value}</span>
                 </div>
                 <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-                  <div className={`h-full rounded-full transition-all duration-500 ${c.met ? "bg-emerald-500" : "bg-indigo-500"}`} style={{ width: `${c.pct}%` }} />
+                  <div className={`h-full rounded-full transition-all duration-500 ${c.met ? "bg-emerald-500" : "bg-brand-teal-500"}`} style={{ width: `${c.pct}%` }} />
                 </div>
               </div>
             ))}
@@ -605,7 +605,7 @@ export default function Assessment() {
               </ul>
             </div>
           )}
-          <button onClick={() => navigate('/student/dashboard')} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-none font-semibold text-sm uppercase tracking-wide py-4 rounded-xl transition-all shadow-sm hover:shadow-md">
+          <button onClick={() => navigate('/student/dashboard')} className="w-full bg-brand-teal-600 hover:bg-brand-teal-700 text-white border-none font-semibold text-sm uppercase tracking-wide py-4 rounded-xl transition-all shadow-sm hover:shadow-md">
             Back to Dashboard
           </button>
         </div>
@@ -623,17 +623,17 @@ export default function Assessment() {
         <div className="bg-white border border-slate-200 rounded-2xl p-8 sm:p-10 shadow-md">
           {/* Header */}
           <div className="flex flex-col items-center text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center mb-4">
-              <CalendarClock className="w-8 h-8 text-indigo-600" />
+            <div className="w-16 h-16 rounded-2xl bg-brand-teal-50 border border-brand-teal-200 flex items-center justify-center mb-4">
+              <CalendarClock className="w-8 h-8 text-brand-teal-600" />
             </div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-indigo-600 text-white text-xs font-semibold tracking-wider uppercase mb-3 shadow-sm">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-brand-teal-600 text-white text-xs font-semibold tracking-wider uppercase mb-3 shadow-sm">
               <Zap className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> Internal Assessment
             </div>
             <h1 className="text-3xl font-bold text-slate-900 tracking-tight mb-2">Next Assessment Scheduled</h1>
             {next ? (
               <p className="text-slate-500 font-medium">
                 Your next Internal Assessment opens on{" "}
-                <span className="font-semibold text-indigo-600">{next.date_formatted}</span>
+                <span className="font-semibold text-brand-teal-600">{next.date_formatted}</span>
                 {next.days_away === 1 ? " — tomorrow!" : next.days_away === 0 ? " — today!" : ` — in ${next.days_away} days`}
               </p>
             ) : (
@@ -663,9 +663,9 @@ export default function Assessment() {
           {/* Next date callout */}
           {next && (
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-6 flex items-center gap-4">
-              <div className="bg-indigo-600 rounded-xl w-14 h-14 flex flex-col items-center justify-center flex-shrink-0 shadow-sm">
+              <div className="bg-brand-teal-600 rounded-xl w-14 h-14 flex flex-col items-center justify-center flex-shrink-0 shadow-sm">
                 <span className="text-white font-bold text-xl leading-none">{next.date.split('-')[2]}</span>
-                <span className="text-indigo-200 text-[9px] font-semibold uppercase tracking-wider">{next.date_formatted.split(' ').slice(-1)[0]}</span>
+                <span className="text-brand-teal-200 text-[9px] font-semibold uppercase tracking-wider">{next.date_formatted.split(' ').slice(-1)[0]}</span>
               </div>
               <div>
                 <p className="font-semibold text-slate-900 text-sm uppercase tracking-wide">IA #{next.number} Window Opens</p>
@@ -674,7 +674,7 @@ export default function Assessment() {
             </div>
           )}
 
-          <button onClick={() => navigate('/student/dashboard')} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-none font-semibold text-sm uppercase tracking-wide py-4 rounded-xl transition-all shadow-sm hover:shadow-md">
+          <button onClick={() => navigate('/student/dashboard')} className="w-full bg-brand-teal-600 hover:bg-brand-teal-700 text-white border-none font-semibold text-sm uppercase tracking-wide py-4 rounded-xl transition-all shadow-sm hover:shadow-md">
             Back to Dashboard
           </button>
         </div>
@@ -714,7 +714,7 @@ export default function Assessment() {
             <button onClick={() => navigate('/student/dashboard')} className="flex-1 px-6 py-4 rounded-xl border border-slate-200 font-medium text-slate-500 hover:bg-slate-50 uppercase tracking-wide transition-colors">
               Dashboard
             </button>
-            <button onClick={() => navigate('/student/drill')} className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white border-none font-semibold text-sm uppercase tracking-wide py-4 rounded-xl transition-all shadow-sm hover:shadow-md">
+            <button onClick={() => navigate('/student/drill')} className="flex-1 bg-brand-teal-600 hover:bg-brand-teal-700 text-white border-none font-semibold text-sm uppercase tracking-wide py-4 rounded-xl transition-all shadow-sm hover:shadow-md">
               Do a Drill Now →
             </button>
           </div>
@@ -740,7 +740,7 @@ export default function Assessment() {
           <h2 className="text-3xl font-bold text-slate-900 tracking-tight">IA #{iaNumber} Complete</h2>
           <button
             onClick={() => navigate('/student/dashboard')}
-            className="px-6 py-3 bg-indigo-600 text-white border-none rounded-xl font-semibold text-sm uppercase tracking-wide hover:bg-indigo-700 shadow-sm hover:shadow-md transition-all">
+            className="px-6 py-3 bg-brand-teal-600 text-white border-none rounded-xl font-semibold text-sm uppercase tracking-wide hover:bg-brand-teal-700 shadow-sm hover:shadow-md transition-all">
             Dashboard
           </button>
         </div>
@@ -763,7 +763,7 @@ export default function Assessment() {
         {momentumAwarded > 0 && (
           <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-6 text-center shadow-sm">
             <p className="text-slate-400 font-semibold uppercase tracking-wider mb-1 text-sm">Momentum Earned</p>
-            <div className="text-5xl font-bold text-indigo-600">+{momentumAwarded}</div>
+            <div className="text-5xl font-bold text-brand-teal-600">+{momentumAwarded}</div>
           </div>
         )}
 
@@ -853,21 +853,21 @@ export default function Assessment() {
   const renderGate = () => (
     <div className="max-w-2xl mx-auto animate-fade-in pt-12 px-4">
       <div className="bg-white border border-slate-200 rounded-2xl p-8 sm:p-12 text-center shadow-md">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold tracking-wider uppercase mb-8 shadow-sm">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-brand-teal-600 text-white text-xs font-semibold tracking-wider uppercase mb-8 shadow-sm">
           <Zap className="w-4 h-4 fill-amber-400 text-amber-400" /> Internal Assessment #{iaStatus?.current_ia_number ?? ""}
         </div>
         {/* DCS badge */}
         {iaStatus && (
           <div className="flex justify-end -mt-4 mb-2">
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-              Avg DCS <span className="text-indigo-600">{iaStatus.avg_dcs}%</span>
+              Avg DCS <span className="text-brand-teal-600">{iaStatus.avg_dcs}%</span>
             </span>
           </div>
         )}
         {/* Target sub-skills preview */}
         {iaStatus?.suggested_subskills && iaStatus.suggested_subskills.length === 2 && (
-          <div className="mb-8 bg-indigo-50 border border-indigo-200 rounded-xl p-4 text-left">
-            <p className="text-[10px] font-semibold text-indigo-700 uppercase tracking-wider mb-3">Today's Focus Areas</p>
+          <div className="mb-8 bg-brand-teal-50 border border-brand-teal-200 rounded-xl p-4 text-left">
+            <p className="text-[10px] font-semibold text-brand-teal-700 uppercase tracking-wider mb-3">Today's Focus Areas</p>
             <div className="grid grid-cols-2 gap-3">
               {iaStatus.suggested_subskills.map((s, i) => {
                 const a = accent(s.skill);
@@ -886,7 +886,7 @@ export default function Assessment() {
         )}
         
         <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 tracking-tight mb-6">
-          Ready to test your <span className="text-indigo-600">Limits?</span>
+          Ready to test your <span className="text-brand-teal-600">Limits?</span>
         </h1>
         
         <p className="text-slate-600 leading-relaxed font-medium mb-10 max-w-lg mx-auto">
@@ -923,7 +923,7 @@ export default function Assessment() {
           <button
             onClick={() => { setGateError(null); void beginFullTest(); }}
             disabled={isLoadingQuestions}
-            className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white border-none font-semibold text-base uppercase tracking-wide rounded-xl transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+            className="flex-1 bg-brand-teal-600 hover:bg-brand-teal-700 disabled:opacity-60 text-white border-none font-semibold text-base uppercase tracking-wide rounded-xl transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
           >
             {isLoadingQuestions
             ? <><Loader2 className="w-4 h-4 animate-spin" /> Loading…</>
@@ -962,7 +962,7 @@ export default function Assessment() {
               </div>
             </div>
           )}
-          <button onClick={advanceToNextSection} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-none font-semibold text-lg py-4 rounded-xl transition-all shadow-sm hover:shadow-md">
+          <button onClick={advanceToNextSection} className="w-full bg-brand-teal-600 hover:bg-brand-teal-700 text-white border-none font-semibold text-lg py-4 rounded-xl transition-all shadow-sm hover:shadow-md">
             Continue to Section {currentSectionIdx + 2} <ArrowRight className="w-5 h-5 inline ml-1" />
           </button>
         </div>
@@ -973,7 +973,7 @@ export default function Assessment() {
   const renderScoring = () => (
     <div className="flex flex-col items-center justify-center min-h-[70vh] animate-fade-in">
       <div className="relative mb-8">
-        <div className="w-24 h-24 rounded-full border-[6px] border-slate-200 border-t-indigo-600 animate-spin" />
+        <div className="w-24 h-24 rounded-full border-[6px] border-slate-200 border-t-brand-teal-600 animate-spin" />
         <span className="absolute inset-0 flex items-center justify-center text-4xl">🧠</span>
       </div>
       <h2 className="text-3xl font-bold text-slate-900 tracking-tight mb-3">Scoring Your Assessment</h2>
@@ -1005,24 +1005,24 @@ export default function Assessment() {
           <h2 className="text-3xl font-bold text-slate-900 tracking-tight">IA Complete</h2>
           <button
             onClick={() => { localStorage.removeItem(STORAGE_KEY); navigate('/student/dashboard', { state: { drillCompleted: true } }); }}
-            className="px-6 py-3 bg-indigo-600 text-white border-none rounded-xl font-semibold text-sm uppercase tracking-wide hover:bg-indigo-700 shadow-sm hover:shadow-md transition-all">
+            className="px-6 py-3 bg-brand-teal-600 text-white border-none rounded-xl font-semibold text-sm uppercase tracking-wide hover:bg-brand-teal-700 shadow-sm hover:shadow-md transition-all">
             Dashboard
           </button>
         </div>
 
         {/* Momentum banner */}
-        <div className="bg-indigo-600 rounded-2xl p-8 mb-6 text-center shadow-md relative overflow-hidden">
+        <div className="bg-brand-teal-600 rounded-2xl p-8 mb-6 text-center shadow-md relative overflow-hidden">
           <div className="absolute -top-8 -right-8 text-[140px] opacity-10 pointer-events-none select-none">⚡</div>
-          <p className="text-indigo-200 font-semibold uppercase tracking-wider mb-1">Momentum Earned</p>
+          <p className="text-brand-teal-200 font-semibold uppercase tracking-wider mb-1">Momentum Earned</p>
           <div className="text-7xl font-bold text-white">+{momentumEarned}</div>
-          <div className="mt-4 inline-flex items-center gap-2 bg-white text-indigo-900 px-5 py-2 rounded-lg font-semibold uppercase shadow-sm">
+          <div className="mt-4 inline-flex items-center gap-2 bg-white text-brand-teal-900 px-5 py-2 rounded-lg font-semibold uppercase shadow-sm">
             <CheckCircle2 className="w-5 h-5 text-emerald-500" /> Assessment Submitted
           </div>
           {/* Breakdown pills */}
           {breakdown.length > 0 && (
             <div className="flex flex-wrap justify-center gap-2 mt-5">
               {breakdown.map((b, i) => (
-                <span key={i} className="bg-indigo-500 text-indigo-100 text-[10px] font-semibold uppercase tracking-wider px-3 py-1 rounded-full border border-indigo-400">
+                <span key={i} className="bg-brand-teal-500 text-brand-teal-100 text-[10px] font-semibold uppercase tracking-wider px-3 py-1 rounded-full border border-brand-teal-400">
                   +{b.points} {b.reason}
                 </span>
               ))}
@@ -1100,8 +1100,8 @@ export default function Assessment() {
                             onClick={() => setExpandedFeedbackIdx(prev => prev === i ? null : i)}
                             className={`inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1.5 rounded-lg border transition-all ${
                               expandedFeedbackIdx === i
-                                ? 'bg-indigo-600 text-white border-indigo-600'
-                                : 'bg-white text-indigo-600 border-indigo-200 hover:bg-indigo-50'
+                                ? 'bg-brand-teal-600 text-white border-brand-teal-600'
+                                : 'bg-white text-brand-teal-600 border-brand-teal-200 hover:bg-brand-teal-50'
                             }`}
                           >
                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -1115,18 +1115,18 @@ export default function Assessment() {
 
                           {/* Popover panel — appears inline below the button */}
                           {expandedFeedbackIdx === i && (
-                            <div className="mt-2 bg-white border border-indigo-200 rounded-xl shadow-sm overflow-hidden">
+                            <div className="mt-2 bg-white border border-brand-teal-200 rounded-xl shadow-sm overflow-hidden">
                               {/* Panel header */}
-                              <div className="flex items-center justify-between px-4 py-2.5 bg-indigo-50 border-b border-indigo-100">
+                              <div className="flex items-center justify-between px-4 py-2.5 bg-brand-teal-50 border-b border-brand-teal-100">
                                 <div className="flex items-center gap-2">
-                                  <div className="w-1.5 h-4 bg-indigo-600 rounded-full" />
-                                  <p className="text-[10px] font-semibold uppercase tracking-wider text-indigo-700">
+                                  <div className="w-1.5 h-4 bg-brand-teal-600 rounded-full" />
+                                  <p className="text-[10px] font-semibold uppercase tracking-wider text-brand-teal-700">
                                     Key Observations
                                   </p>
                                 </div>
                                 <button
                                   onClick={() => setExpandedFeedbackIdx(null)}
-                                  className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-indigo-100 text-indigo-500 transition-colors text-xs font-semibold"
+                                  className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-brand-teal-100 text-brand-teal-500 transition-colors text-xs font-semibold"
                                 >
                                   ✕
                                 </button>
@@ -1135,7 +1135,7 @@ export default function Assessment() {
                               <ul className="px-4 py-3 flex flex-col gap-2.5">
                                 {s.ai_feedback.key_observations.map((obs, j) => (
                                   <li key={j} className="flex items-start gap-2.5">
-                                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-indigo-500 flex-shrink-0" />
+                                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-brand-teal-500 flex-shrink-0" />
                                     <span className="text-xs text-slate-700 font-medium leading-relaxed">{obs}</span>
                                   </li>
                                 ))}
@@ -1200,7 +1200,7 @@ export default function Assessment() {
     if (isLoadingQuestions || !currentSection) {
       return (
         <div className="min-h-[70vh] flex flex-col items-center justify-center animate-fade-in">
-          <Loader2 className="w-12 h-12 text-indigo-600 animate-spin mb-4" />
+          <Loader2 className="w-12 h-12 text-brand-teal-600 animate-spin mb-4" />
           <p className="text-slate-500 font-semibold uppercase tracking-wider text-sm">Loading Questions…</p>
         </div>
       );
@@ -1309,7 +1309,7 @@ export default function Assessment() {
               <div className="bg-white border border-slate-200 rounded-2xl flex flex-col max-h-[700px] shadow-sm">
                 <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between rounded-t-2xl">
                   <span className="font-semibold text-sm uppercase tracking-wider text-slate-500">Reading Passage</span>
-                  <button onClick={() => setShowPassage(!showPassage)} className="lg:hidden font-semibold text-xs text-purple-600 uppercase">{showPassage ? 'Hide' : 'Show'}</button>
+                  <button onClick={() => setShowPassage(!showPassage)} className="lg:hidden font-semibold text-xs text-brand-blue-600 uppercase">{showPassage ? 'Hide' : 'Show'}</button>
                 </div>
                 <div className={`p-6 overflow-y-auto flex-1 ${!showPassage ? 'hidden lg:block' : 'block'}`}>
                   <p className="font-serif text-slate-800 text-base leading-loose whitespace-pre-wrap">{currentSection.passage_text}</p>
@@ -1334,7 +1334,7 @@ export default function Assessment() {
                 <span className="bg-slate-100 text-slate-500 text-xs font-semibold uppercase tracking-wider px-4 py-1.5 rounded-lg border border-slate-200">
                   Q {currentIdx + 1} / {totalQ}
                 </span>
-                <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-semibold uppercase tracking-wider px-3 py-1.5 rounded-lg">
+                <span className="bg-brand-teal-50 text-brand-teal-700 border border-brand-teal-200 text-[10px] font-semibold uppercase tracking-wider px-3 py-1.5 rounded-lg">
                   {currentQ.question_type.replace('_', ' ')}
                 </span>
               </div>
@@ -1351,7 +1351,7 @@ export default function Assessment() {
                     return (
                       <button key={key}
                         onClick={() => setAnswers(p => ({ ...p, [currentQ.id]: key }))}
-                        className={`text-left p-4 rounded-xl border font-medium text-sm transition-all flex items-start gap-3 ${selected ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300 hover:bg-slate-50'}`}>
+                        className={`text-left p-4 rounded-xl border font-medium text-sm transition-all flex items-start gap-3 ${selected ? 'bg-brand-teal-600 border-brand-teal-600 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-700 hover:border-brand-teal-300 hover:bg-slate-50'}`}>
                         <span className={`w-6 h-6 flex-shrink-0 rounded-lg border flex items-center justify-center font-semibold text-xs ${selected ? 'border-white text-white' : 'border-slate-300 text-slate-500'}`}>{key}</span>
                         <span>{optionsMap[key]}</span>
                       </button>
@@ -1399,7 +1399,7 @@ export default function Assessment() {
                     onCut={(e) => e.preventDefault()}
                     onDrop={(e) => e.preventDefault()}
                     // --- NEW LINES END HERE ---
-                    className="w-full p-5 border border-slate-200 rounded-xl text-base text-slate-900 font-medium outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 bg-slate-50 resize-none transition-all"
+                    className="w-full p-5 border border-slate-200 rounded-xl text-base text-slate-900 font-medium outline-none focus:ring-2 focus:ring-brand-teal-200 focus:border-brand-teal-300 bg-slate-50 resize-none transition-all"
                   />
                   <div className="flex justify-between items-center mt-2">
                     <p className="text-xs text-slate-400 font-medium">
@@ -1461,7 +1461,7 @@ export default function Assessment() {
                           Tap the button and speak your answer. Your response will be transcribed automatically.
                         </p>
                         <button onClick={() => startSpeakingRecording(currentQ.id)}
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white border-none font-semibold text-sm uppercase tracking-wide px-8 py-4 rounded-xl shadow-sm hover:shadow-md transition-all">
+                          className="bg-brand-teal-600 hover:bg-brand-teal-700 text-white border-none font-semibold text-sm uppercase tracking-wide px-8 py-4 rounded-xl shadow-sm hover:shadow-md transition-all">
                           Start Speaking
                         </button>
                         {!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) && (
@@ -1482,7 +1482,7 @@ export default function Assessment() {
                 <button
                   onClick={handleNextQuestion}
                   disabled={!canProceed || (currentQ.question_type === 'SPEAKING_PROMPT' && isRecording)}
-                  className={`flex-1 font-semibold text-sm uppercase tracking-wide border-none rounded-xl py-4 transition-all ${!canProceed ? 'bg-slate-100 text-slate-400 opacity-60 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm hover:shadow-md'}`}>
+                  className={`flex-1 font-semibold text-sm uppercase tracking-wide border-none rounded-xl py-4 transition-all ${!canProceed ? 'bg-slate-100 text-slate-400 opacity-60 cursor-not-allowed' : 'bg-brand-teal-600 text-white hover:bg-brand-teal-700 shadow-sm hover:shadow-md'}`}>
                   {currentIdx === totalQ - 1
                     ? (currentSectionIdx < (iaSections?.length ?? 1) - 1 ? 'Complete Section →' : 'Submit IA →')
                     : 'Next Question →'}
@@ -1497,7 +1497,7 @@ export default function Assessment() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-indigo-200">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-brand-teal-200">
       <TopNavBar hideMomentum={phase === 'session'} totalMomentum={totalMomentum} />
       <div className="fixed inset-0 pointer-events-none z-0" style={{ backgroundImage: 'radial-gradient(circle, #e2e8f0 1px, transparent 1px)', backgroundSize: '24px 24px', opacity: 0.4 }} />
       

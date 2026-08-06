@@ -211,7 +211,7 @@ export default function InstructorReport() {
                     <polygon 
                       points="50,15 82,30 75,70 50,85 28,65 18,32" 
                       fill="rgba(139, 92, 246, 0.2)" 
-                      stroke="#8b5cf6" 
+                      stroke="#256B8B" 
                       strokeWidth="1.5" 
                       style={{ 
                         transformOrigin: '50px 50px',
@@ -252,7 +252,7 @@ export default function InstructorReport() {
                     <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible" preserveAspectRatio="none">
                       <path 
                         d={`M ${trendData.map((d, i) => `${i*20},${100 - ((d.acc - 30)*2)}`).join(' L ')}`} 
-                        fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                        fill="none" stroke="#256B8B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
                         strokeDasharray="300" strokeDashoffset={isLoaded ? 0 : 300} style={{ transition: 'stroke-dashoffset 1.5s ease-in-out' }}
                       />
                       <path 
@@ -284,7 +284,7 @@ export default function InstructorReport() {
                         <div key={i} className="absolute top-0 bottom-0 w-8 -ml-4 group cursor-pointer" style={{ left: `${leftPercent}%` }}>
                           <div className="absolute inset-y-0 left-1/2 w-px bg-slate-200 dark:bg-[#333] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
 
-                          <div className="absolute left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-white dark:bg-[#141414] border-2 border-[#8b5cf6] transition-all duration-300 group-hover:scale-[1.3] pointer-events-none" style={{ top: `calc(${yAcc}% - 5px)`, opacity: isLoaded ? 1 : 0, transitionDelay: isLoaded ? animDelay : '0ms' }}></div>
+                          <div className="absolute left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-white dark:bg-[#141414] border-2 border-[#256B8B] transition-all duration-300 group-hover:scale-[1.3] pointer-events-none" style={{ top: `calc(${yAcc}% - 5px)`, opacity: isLoaded ? 1 : 0, transitionDelay: isLoaded ? animDelay : '0ms' }}></div>
                           <div className="absolute left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-white dark:bg-[#141414] border-2 border-[#10b981] transition-all duration-300 group-hover:scale-[1.3] pointer-events-none" style={{ top: `calc(${yFlu}% - 5px)`, opacity: isLoaded ? 1 : 0, transitionDelay: isLoaded ? animDelay : '0ms' }}></div>
                           <div className="absolute left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-white dark:bg-[#141414] border-2 border-[#f59e0b] transition-all duration-300 group-hover:scale-[1.3] pointer-events-none" style={{ top: `calc(${yConf}% - 5px)`, opacity: isLoaded ? 1 : 0, transitionDelay: isLoaded ? animDelay : '0ms' }}></div>
 
@@ -300,7 +300,7 @@ export default function InstructorReport() {
                           >
                             <p className="font-bold text-slate-900 dark:text-white mb-2 pb-1.5 border-b border-slate-100 dark:border-[#333] text-xs">{d.w}</p>
                             <div className="space-y-1.5 text-xs">
-                              <div className="flex justify-between items-center"><span className="text-[#8b5cf6] font-medium">Accuracy</span><span className="font-semibold text-slate-700 dark:text-gray-300"> : {d.acc}</span></div>
+                              <div className="flex justify-between items-center"><span className="text-[#256B8B] font-medium">Accuracy</span><span className="font-semibold text-slate-700 dark:text-gray-300"> : {d.acc}</span></div>
                               <div className="flex justify-between items-center"><span className="text-[#10b981] font-medium">Fluency</span><span className="font-semibold text-slate-700 dark:text-gray-300"> : {d.flu}</span></div>
                               <div className="flex justify-between items-center"><span className="text-[#f59e0b] font-medium">Confidence</span><span className="font-semibold text-slate-700 dark:text-gray-300"> : {d.conf}</span></div>
                             </div>
@@ -317,7 +317,7 @@ export default function InstructorReport() {
 
                 <div className="flex justify-center gap-6 mt-6 text-xs font-medium text-slate-600 dark:text-gray-400">
                   <span className="flex items-center gap-1.5">
-                    <svg width="18" height="10" viewBox="0 0 18 10" className="overflow-visible"><line x1="0" y1="5" x2="18" y2="5" stroke="#8b5cf6" strokeWidth="1.5"/><circle cx="9" cy="5" r="3" stroke="#8b5cf6" strokeWidth="1.5" className="fill-white dark:fill-[#141414]"/></svg>
+                    <svg width="18" height="10" viewBox="0 0 18 10" className="overflow-visible"><line x1="0" y1="5" x2="18" y2="5" stroke="#256B8B" strokeWidth="1.5"/><circle cx="9" cy="5" r="3" stroke="#256B8B" strokeWidth="1.5" className="fill-white dark:fill-[#141414]"/></svg>
                     Accuracy
                   </span>
                   <span className="flex items-center gap-1.5">
@@ -350,7 +350,7 @@ export default function InstructorReport() {
                 {batchPerformance.map((batch, idx) => (
                   <div key={idx} className="relative group w-16 sm:w-24 h-full flex items-end justify-center gap-1 z-10">
                     <div 
-                      className="w-1/2 bg-purple-600 rounded-t-sm hover:opacity-90 transition-opacity" 
+                      className="w-1/2 bg-brand-blue-600 rounded-t-sm hover:opacity-90 transition-opacity" 
                       style={{ 
                         height: isLoaded ? `${batch.acc}%` : '0%', 
                         transition: 'height 1s cubic-bezier(0.16, 1, 0.3, 1)' 
@@ -368,7 +368,7 @@ export default function InstructorReport() {
                       <p className="font-bold text-slate-900 dark:text-white mb-2 pb-1 border-b border-slate-100 dark:border-[#333]">{batch.name}</p>
                       <div className="flex justify-between mb-1">
                         <span className="text-slate-500 dark:text-gray-400">Accuracy %</span>
-                        <span className="font-bold text-purple-600 dark:text-purple-500">{batch.acc}</span>
+                        <span className="font-bold text-brand-blue-600 dark:text-brand-blue-500">{batch.acc}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-slate-500 dark:text-gray-400">Improvement %</span>
@@ -382,7 +382,7 @@ export default function InstructorReport() {
                 {batchPerformance.map(b => <span key={b.name} className="w-16 sm:w-24 truncate">{b.name}</span>)}
               </div>
               <div className="flex justify-center gap-6 mt-6 text-[11px] font-medium text-slate-600 dark:text-gray-400">
-                <span className="flex items-center gap-1.5"><div className="w-3 h-3 bg-purple-600 rounded-sm"></div> Accuracy %</span>
+                <span className="flex items-center gap-1.5"><div className="w-3 h-3 bg-brand-blue-600 rounded-sm"></div> Accuracy %</span>
                 <span className="flex items-center gap-1.5"><div className="w-3 h-3 bg-emerald-500 rounded-sm"></div> Improvement %</span>
               </div>
             </div>

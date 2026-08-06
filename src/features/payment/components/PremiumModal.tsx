@@ -25,7 +25,7 @@ export const PremiumModal = ({ isOpen, onClose }: PremiumModalProps) => {
       ],
       popular: false,
       buttonText: "Start Basic",
-      gradient: "from-blue-500 to-purple-500"
+      gradient: "from-blue-500 to-brand-blue-500"
     },
     {
       name: "Premium",
@@ -43,7 +43,7 @@ export const PremiumModal = ({ isOpen, onClose }: PremiumModalProps) => {
       ],
       popular: true,
       buttonText: "Go Premium",
-      gradient: "from-purple-500 to-pink-500"
+      gradient: "from-brand-blue-500 to-pink-500"
     },
     {
       name: "Pro",
@@ -69,7 +69,7 @@ export const PremiumModal = ({ isOpen, onClose }: PremiumModalProps) => {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader className="text-center space-y-3">
-          <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-brand-blue-600 to-pink-600 bg-clip-text text-transparent">
             Unlock Your Learning Potential
           </DialogTitle>
           <DialogDescription className="text-lg">
@@ -83,13 +83,13 @@ export const PremiumModal = ({ isOpen, onClose }: PremiumModalProps) => {
               key={index}
               className={`relative p-6 rounded-xl border-2 transition-all duration-300 hover:shadow-xl ${
                 plan.popular 
-                  ? 'border-purple-500 bg-gradient-to-br from-purple-50 to-pink-50 scale-105' 
-                  : 'border-gray-200 bg-white hover:border-purple-300'
+                  ? 'border-brand-blue-500 bg-gradient-to-br from-brand-blue-50 to-pink-50 scale-105' 
+                  : 'border-gray-200 bg-white hover:border-brand-blue-300'
               }`}
             >
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-1">
+                  <Badge className="bg-gradient-to-r from-brand-blue-500 to-pink-500 px-4 py-1">
                     <Star className="h-3 w-3 mr-1" />
                     Most Popular
                   </Badge>
@@ -127,7 +127,7 @@ export const PremiumModal = ({ isOpen, onClose }: PremiumModalProps) => {
         </div>
 
         {/* Premium Features Highlight */}
-        <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl">
+        <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-brand-blue-50 rounded-xl">
           <h3 className="text-xl font-bold text-center mb-4">Why Go Premium?</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
             <div className="text-center">
@@ -138,8 +138,8 @@ export const PremiumModal = ({ isOpen, onClose }: PremiumModalProps) => {
               <p className="text-muted-foreground">One-on-one sessions with adaptive AI</p>
             </div>
             <div className="text-center">
-              <div className="p-3 bg-purple-100 rounded-full w-fit mx-auto mb-2">
-                <Zap className="h-6 w-6 text-purple-600" />
+              <div className="p-3 bg-brand-blue-100 rounded-full w-fit mx-auto mb-2">
+                <Zap className="h-6 w-6 text-brand-blue-600" />
               </div>
               <h4 className="font-semibold mb-1">Unlimited Access</h4>
               <p className="text-muted-foreground">No limits on uploads or analysis</p>

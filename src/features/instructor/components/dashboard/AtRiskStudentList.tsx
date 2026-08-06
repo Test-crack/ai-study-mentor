@@ -79,8 +79,8 @@ function initials(name: string) {
 }
 
 const AVATAR_PALETTES = [
-  'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400',
-  'bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-400',
+  'bg-brand-teal-100 dark:bg-brand-teal-500/20 text-brand-teal-700 dark:text-brand-teal-400',
+  'bg-brand-blue-100 dark:bg-brand-blue-500/20 text-brand-blue-700 dark:text-brand-blue-400',
   'bg-sky-100 dark:bg-sky-500/20 text-sky-700 dark:text-sky-400',
   'bg-teal-100 dark:bg-teal-500/20 text-teal-700 dark:text-teal-400',
   'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400',
@@ -210,9 +210,9 @@ function RiskCard({ student, severity, batchId }: { student: AtRiskStudent; seve
             'bg-slate-50 dark:bg-white/[0.04]',
             'border border-slate-200 dark:border-white/[0.07]',
             'text-slate-600 dark:text-slate-300',
-            'hover:bg-indigo-50 dark:hover:bg-indigo-500/10',
-            'hover:text-indigo-600 dark:hover:text-indigo-300',
-            'hover:border-indigo-200 dark:hover:border-indigo-500/30',
+            'hover:bg-brand-teal-50 dark:hover:bg-brand-teal-500/10',
+            'hover:text-brand-teal-600 dark:hover:text-brand-teal-300',
+            'hover:border-brand-teal-200 dark:hover:border-brand-teal-500/30',
             'hover:shadow-[0_0_12px_rgba(99,102,241,0.12)]',
           )}
         >
@@ -381,7 +381,7 @@ export function AtRiskStudentList({ students, batchId, loading }: AtRiskStudentL
             className={cn(
               'h-8 w-8 rounded-full flex items-center justify-center transition-all',
               hasPrev
-                ? 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 hover:text-indigo-600 dark:hover:text-indigo-400'
+                ? 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-brand-teal-100 dark:hover:bg-brand-teal-500/20 hover:text-brand-teal-600 dark:hover:text-brand-teal-400'
                 : 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
             )}
             aria-label="Previous page"
@@ -397,7 +397,7 @@ export function AtRiskStudentList({ students, batchId, loading }: AtRiskStudentL
                   className={cn(
                     'rounded-full transition-all',
                     i === page
-                      ? 'h-2 w-5 bg-indigo-500 dark:bg-indigo-400'
+                      ? 'h-2 w-5 bg-brand-teal-500 dark:bg-brand-teal-400'
                       : 'h-2 w-2 bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20'
                   )}
                   aria-label={`Page ${i + 1}`}
@@ -413,7 +413,7 @@ export function AtRiskStudentList({ students, batchId, loading }: AtRiskStudentL
             className={cn(
               'h-8 w-8 rounded-full flex items-center justify-center transition-all',
               hasNext
-                ? 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 hover:text-indigo-600 dark:hover:text-indigo-400'
+                ? 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-brand-teal-100 dark:hover:bg-brand-teal-500/20 hover:text-brand-teal-600 dark:hover:text-brand-teal-400'
                 : 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
             )}
             aria-label="Next page"

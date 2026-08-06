@@ -422,7 +422,7 @@ const CourseManagementPage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-12 w-12 rounded-full border-t-2 border-b-2 border-indigo-600 animate-spin"></div>
+          <div className="h-12 w-12 rounded-full border-t-2 border-b-2 border-brand-teal-600 animate-spin"></div>
           <p className="text-slate-500 font-medium">Loading course data...</p>
         </div>
       </div>
@@ -563,7 +563,7 @@ const CourseManagementPage = () => {
           <div className="space-y-2">
             <Button 
               variant="ghost" 
-              className="pl-0 text-slate-500 hover:text-indigo-600 font-medium transition-colors"
+              className="pl-0 text-slate-500 hover:text-brand-teal-600 font-medium transition-colors"
                 onClick={() => navigate("/courses/admin/dashboard")}
             >
               <ChevronLeft className="mr-1 h-4 w-4" /> Back to Dashboard
@@ -591,7 +591,7 @@ const CourseManagementPage = () => {
             {!isCreationMode && (
                 <Button 
                     variant="outline" 
-                    className="rounded-xl font-bold border-slate-200 hover:bg-white hover:text-indigo-600 transition-all"
+                    className="rounded-xl font-bold border-slate-200 hover:bg-white hover:text-brand-teal-600 transition-all"
                     onClick={() => navigate(`/courses/${course.slug}`, { state: { courseId: course.id } })}
                 >
                   <Eye className="mr-2 h-4 w-4" /> Preview
@@ -605,20 +605,20 @@ const CourseManagementPage = () => {
           <TabsList className="bg-white/50 backdrop-blur-sm border border-slate-100 p-1.5 rounded-2xl h-14 w-full flex justify-start gap-2 max-w-2xl overflow-x-auto shadow-sm">
             <TabsTrigger 
               value="general" 
-              className="rounded-xl px-6 font-bold data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-md transition-all h-full"
+              className="rounded-xl px-6 font-bold data-[state=active]:bg-white data-[state=active]:text-brand-teal-600 data-[state=active]:shadow-md transition-all h-full"
             >
               <Layout className="mr-2 h-4 w-4" /> General Details
             </TabsTrigger>
             <TabsTrigger 
               value="curriculum" 
-              className="rounded-xl px-6 font-bold data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-md transition-all h-full"
+              className="rounded-xl px-6 font-bold data-[state=active]:bg-white data-[state=active]:text-brand-teal-600 data-[state=active]:shadow-md transition-all h-full"
               disabled={isCreationMode}
             >
               <BookOpen className="mr-2 h-4 w-4" /> Curriculum
             </TabsTrigger>
             <TabsTrigger 
               value="settings" 
-              className="rounded-xl px-6 font-bold data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-md transition-all h-full"
+              className="rounded-xl px-6 font-bold data-[state=active]:bg-white data-[state=active]:text-brand-teal-600 data-[state=active]:shadow-md transition-all h-full"
               disabled={isCreationMode}
             >
               <Settings className="mr-2 h-4 w-4" /> Advanced Settings
@@ -639,7 +639,7 @@ const CourseManagementPage = () => {
                         id="title" 
                         value={course.title} 
                         onChange={(e) => setCourse({...course, title: e.target.value})}
-                        className="h-12 rounded-xl bg-white border-slate-100 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
+                        className="h-12 rounded-xl bg-white border-slate-100 focus:ring-4 focus:ring-brand-teal-500/10 focus:border-brand-teal-500 transition-all"
                     />
                   </div>
                   
@@ -650,7 +650,7 @@ const CourseManagementPage = () => {
                         value={course.description} 
                         rows={6}
                         onChange={(e) => setCourse({...course, description: e.target.value})}
-                        className="rounded-xl bg-white border-slate-100 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all resize-none"
+                        className="rounded-xl bg-white border-slate-100 focus:ring-4 focus:ring-brand-teal-500/10 focus:border-brand-teal-500 transition-all resize-none"
                     />
                   </div>
 
@@ -661,7 +661,7 @@ const CourseManagementPage = () => {
                         value={course.difficulty} 
                         onValueChange={(val: any) => setCourse({...course, difficulty: val})}
                       >
-                        <SelectTrigger className="h-12 rounded-xl bg-white border-slate-100 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all">
+                        <SelectTrigger className="h-12 rounded-xl bg-white border-slate-100 focus:ring-4 focus:ring-brand-teal-500/10 focus:border-brand-teal-500 transition-all">
                           <SelectValue placeholder="Select level" />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl border-slate-100 shadow-xl p-1">
@@ -678,7 +678,7 @@ const CourseManagementPage = () => {
                             value={course.domainId} 
                             onValueChange={(val) => setCourse({...course, domainId: val})}
                         >
-                            <SelectTrigger className="h-12 rounded-xl bg-white border-slate-100 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all">
+                            <SelectTrigger className="h-12 rounded-xl bg-white border-slate-100 focus:ring-4 focus:ring-brand-teal-500/10 focus:border-brand-teal-500 transition-all">
                                 <SelectValue placeholder="Select domain" />
                             </SelectTrigger>
                             <SelectContent className="rounded-xl border-slate-100 shadow-xl p-1">
@@ -699,7 +699,7 @@ const CourseManagementPage = () => {
                         min="0"
                         value={course.duration_minutes === 0 ? '' : course.duration_minutes} 
                         onChange={(e) => setCourse({...course, duration_minutes: e.target.value === '' ? 0 : parseInt(e.target.value) || 0})}
-                        className="h-12 rounded-xl bg-white border-slate-100 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
+                        className="h-12 rounded-xl bg-white border-slate-100 focus:ring-4 focus:ring-brand-teal-500/10 focus:border-brand-teal-500 transition-all"
                       />
                     </div>
                     
@@ -713,7 +713,7 @@ const CourseManagementPage = () => {
                              min="0"
                              value={course.price === 0 ? '' : course.price} 
                              onChange={(e) => setCourse({...course, price: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0})}
-                             className="pl-8 h-12 rounded-xl bg-white border-slate-100 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
+                             className="pl-8 h-12 rounded-xl bg-white border-slate-100 focus:ring-4 focus:ring-brand-teal-500/10 focus:border-brand-teal-500 transition-all"
                          />
                        </div>
                     </div>
@@ -721,10 +721,10 @@ const CourseManagementPage = () => {
 
                   {/* Publish Toggle in General Tab */}
                   {!isCreationMode && (
-                    <div className="flex items-center justify-between p-5 rounded-2xl bg-gradient-to-r from-indigo-50/50 to-purple-50/50 border border-indigo-100/50">
+                    <div className="flex items-center justify-between p-5 rounded-2xl bg-gradient-to-r from-brand-teal-50/50 to-brand-blue-50/50 border border-brand-teal-100/50">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-indigo-100 flex items-center justify-center">
-                          <Globe className="h-5 w-5 text-indigo-600" />
+                        <div className="h-10 w-10 rounded-xl bg-brand-teal-100 flex items-center justify-center">
+                          <Globe className="h-5 w-5 text-brand-teal-600" />
                         </div>
                         <div className="space-y-0.5">
                           <h4 className="font-bold text-slate-900">Course Visibility</h4>
@@ -747,7 +747,7 @@ const CourseManagementPage = () => {
                 <CardContent className="p-6 space-y-4">
                   <div className="aspect-video rounded-2xl overflow-hidden bg-slate-100 border-2 border-dashed border-slate-200 group relative flex items-center justify-center">
                     {uploadingImage ? (
-                      <div className="flex flex-col items-center gap-2 text-indigo-600">
+                      <div className="flex flex-col items-center gap-2 text-brand-teal-600">
                         <Loader2 className="h-6 w-6 animate-spin" />
                         <span className="text-sm font-medium">Uploading...</span>
                       </div>
@@ -762,7 +762,7 @@ const CourseManagementPage = () => {
                              <Button 
                                 variant="secondary" 
                                 size="sm" 
-                                className="rounded-xl font-bold bg-white text-indigo-600 shadow-xl"
+                                className="rounded-xl font-bold bg-white text-brand-teal-600 shadow-xl"
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 Change
@@ -779,12 +779,12 @@ const CourseManagementPage = () => {
                       </>
                     ) : (
                       <div className="text-center p-6 space-y-2 group-hover:opacity-100">
-                        <div className="h-12 w-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <div className="h-12 w-12 bg-brand-teal-50 text-brand-teal-600 rounded-full flex items-center justify-center mx-auto mb-2">
                           <Upload className="h-6 w-6" />
                         </div>
                          <Button 
                               variant="ghost" 
-                              className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 font-bold"
+                              className="text-brand-teal-600 hover:text-brand-teal-700 hover:bg-brand-teal-50 font-bold"
                               onClick={() => fileInputRef.current?.click()}
                           >
                             Upload Image
@@ -811,7 +811,7 @@ const CourseManagementPage = () => {
             {/* Save Button for General Tab */}
             <div className="flex justify-end">
               <Button 
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-100 rounded-xl px-8 font-bold transition-all hover:-translate-y-0.5"
+                  className="bg-brand-teal-600 hover:bg-brand-teal-700 text-white shadow-lg shadow-brand-teal-100 rounded-xl px-8 font-bold transition-all hover:-translate-y-0.5"
                   onClick={handleSaveGeneral}
                   disabled={isSaving}
               >
@@ -838,7 +838,7 @@ const CourseManagementPage = () => {
                     <CardDescription>Manage your course modules and content.</CardDescription>
                   </div>
                   <Button 
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md rounded-xl font-bold"
+                    className="bg-brand-teal-600 hover:bg-brand-teal-700 text-white shadow-md rounded-xl font-bold"
                     onClick={handleAddModule}
                   >
                     <Plus className="mr-2 h-4 w-4" /> Add Module
@@ -851,7 +851,7 @@ const CourseManagementPage = () => {
                         <Card key={module.id} className="border border-slate-100 shadow-sm hover:shadow-md transition-all overflow-hidden group">
                            {/* Module Header */}
                            <div className="flex items-center gap-4 bg-white p-5 border-b border-slate-50">
-                             <GripVertical className="h-5 w-5 text-slate-300 cursor-grab active:cursor-grabbing hover:text-indigo-400 transition-colors" />
+                             <GripVertical className="h-5 w-5 text-slate-300 cursor-grab active:cursor-grabbing hover:text-brand-teal-400 transition-colors" />
                              <div className="flex-grow">
                                <h4 className="font-bold text-slate-800 text-lg">
                                    {module.order_index !== -1 ? `Module ${module.order_index}: ` : ''}{module.title}
@@ -869,7 +869,7 @@ const CourseManagementPage = () => {
                              <div className="flex items-center gap-2">
                                <Button 
                                    variant="ghost" 
-                                   className="text-indigo-600 bg-indigo-50 hover:bg-indigo-100 font-bold rounded-xl h-9 text-xs"
+                                   className="text-brand-teal-600 bg-brand-teal-50 hover:bg-brand-teal-100 font-bold rounded-xl h-9 text-xs"
                                    onClick={() => handleAddContent(module.id)}
                                >
                                  <Plus className="mr-1.5 h-3.5 w-3.5" /> Add Content
@@ -878,7 +878,7 @@ const CourseManagementPage = () => {
                                <Button 
                                    variant="ghost" 
                                    size="icon" 
-                                   className="h-9 w-9 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl"
+                                   className="h-9 w-9 text-slate-400 hover:text-brand-teal-600 hover:bg-brand-teal-50 rounded-xl"
                                    onClick={() => handleEditModule(module)}
                                >
                                  <Pencil className="h-4 w-4" />
@@ -918,7 +918,7 @@ const CourseManagementPage = () => {
                        </div>
                        <Button 
                         variant="outline" 
-                        className="rounded-xl border-slate-200 font-bold hover:text-indigo-600 group"
+                        className="rounded-xl border-slate-200 font-bold hover:text-brand-teal-600 group"
                         onClick={handleAddModule}
                        >
                          <Plus className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" /> Create First Module
@@ -936,7 +936,7 @@ const CourseManagementPage = () => {
                 <CardDescription>Control who can see and enroll in your course.</CardDescription>
               </CardHeader>
               <CardContent className="p-8 space-y-8">
-                <div className="flex items-center justify-between p-6 rounded-2xl bg-indigo-50/30 border border-indigo-100/50">
+                <div className="flex items-center justify-between p-6 rounded-2xl bg-brand-teal-50/30 border border-brand-teal-100/50">
                   <div className="space-y-1">
                     <h4 className="font-bold text-slate-900">Publish Course</h4>
                     <p className="text-sm text-slate-500 font-medium">Make this course visible to students on the marketplace.</p>
@@ -950,16 +950,16 @@ const CourseManagementPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-4 text-slate-600">
                     <h4 className="font-bold text-slate-900 flex items-center">
-                      <AlertCircle className="mr-2 h-4 w-4 text-indigo-500" /> 
+                      <AlertCircle className="mr-2 h-4 w-4 text-brand-teal-500" /> 
                       Things to keep in mind
                     </h4>
                     <ul className="space-y-3 text-sm font-medium">
                       <li className="flex items-start gap-3">
-                        <div className="h-1.5 w-1.5 rounded-full bg-indigo-500 mt-1.5 flex-shrink-0" />
+                        <div className="h-1.5 w-1.5 rounded-full bg-brand-teal-500 mt-1.5 flex-shrink-0" />
                         Once published, you should avoid breaking changes to the curriculum.
                       </li>
                       <li className="flex items-start gap-3">
-                        <div className="h-1.5 w-1.5 rounded-full bg-indigo-500 mt-1.5 flex-shrink-0" />
+                        <div className="h-1.5 w-1.5 rounded-full bg-brand-teal-500 mt-1.5 flex-shrink-0" />
                         Students who enrolled while it was free will keep access if you change the price.
                       </li>
                     </ul>

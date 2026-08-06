@@ -9,7 +9,7 @@ interface ReadingPassageProps {
 export const ReadingPassage = ({ passage }: ReadingPassageProps) => {
   return (
     <Card className="bg-white shadow-lg">
-      <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50 border-b">
+      <CardHeader className="bg-gradient-to-r from-blue-50 to-brand-blue-50 border-b">
         <div className="flex justify-between items-start">
           <div>
             <CardTitle className="text-2xl font-bold text-gray-800 mb-2">
@@ -19,7 +19,7 @@ export const ReadingPassage = ({ passage }: ReadingPassageProps) => {
               <Badge variant="secondary" className="bg-blue-100 text-blue-700">
                 {passage.category}
               </Badge>
-              <Badge variant="outline" className="border-purple-200 text-purple-700">
+              <Badge variant="outline" className="border-brand-blue-200 text-brand-blue-700">
                 {passage.difficulty} Level
               </Badge>
               <Badge variant="outline" className="border-green-200 text-green-700">

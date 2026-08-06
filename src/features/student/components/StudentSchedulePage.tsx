@@ -40,7 +40,7 @@ export default function StudentSchedulePage() {
             {/* Header - Visible */}
             <div className="mb-8 relative z-10">
                 <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
-                    <CalendarIcon className="h-8 w-8 text-indigo-600" />
+                    <CalendarIcon className="h-8 w-8 text-brand-teal-600" />
                     My Schedule
                 </h1>
                 <p className="text-slate-500 dark:text-slate-400 mt-1">Manage your upcoming classes and learning sessions.</p>
@@ -64,7 +64,7 @@ export default function StudentSchedulePage() {
                                 <div className="w-px h-10 bg-slate-100 dark:bg-slate-800 mx-6"></div>
                                 <div className="flex-1">
                                     <h3 className="font-semibold text-lg text-slate-900 dark:text-white">{item.event}</h3>
-                                    <span className="inline-block mt-1 px-3 py-1 rounded-full text-xs bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">{item.type}</span>
+                                    <span className="inline-block mt-1 px-3 py-1 rounded-full text-xs bg-brand-teal-50 text-brand-teal-700 dark:bg-brand-teal-900/30 dark:text-brand-teal-300">{item.type}</span>
                                 </div>
                                 <ChevronRight className="h-5 w-5 text-slate-400" />
                             </div>
@@ -81,7 +81,7 @@ export default function StudentSchedulePage() {
                                 <div className="w-px h-10 bg-slate-100 dark:bg-slate-800 mx-6"></div>
                                 <div className="flex-1">
                                     <h3 className="font-semibold text-lg text-slate-900 dark:text-white">{item.event}</h3>
-                                    <span className="inline-block mt-1 px-3 py-1 rounded-full text-xs bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">{item.type}</span>
+                                    <span className="inline-block mt-1 px-3 py-1 rounded-full text-xs bg-brand-blue-50 text-brand-blue-700 dark:bg-brand-blue-900/30 dark:text-brand-blue-300">{item.type}</span>
                                 </div>
                                 <ChevronRight className="h-5 w-5 text-slate-400" />
                             </div>
@@ -93,10 +93,10 @@ export default function StudentSchedulePage() {
                 <div className="absolute inset-0 z-20 flex flex-col items-center justify-center -mt-20">
                     <div className="relative group cursor-pointer" onClick={() => setShowPremiumModal(true)}>
                         {/* Glow Effect */}
-                        <div className="absolute -inset-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-30 rounded-full blur-xl group-hover:opacity-50 transition-opacity duration-1000 animate-pulse"></div>
+                        <div className="absolute -inset-4 bg-gradient-to-r from-brand-teal-500 via-brand-blue-500 to-pink-500 opacity-30 rounded-full blur-xl group-hover:opacity-50 transition-opacity duration-1000 animate-pulse"></div>
                         
                         <div className="relative bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 text-center max-w-md mx-auto transform transition-transform group-hover:scale-105">
-                            <div className="h-16 w-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-500/30">
+                            <div className="h-16 w-16 bg-gradient-to-br from-brand-teal-500 to-brand-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-brand-teal-500/30">
                                 <Lock className="h-8 w-8 text-white" />
                             </div>
                             
@@ -109,7 +109,7 @@ export default function StudentSchedulePage() {
                             
                             <Button 
                                 size="lg" 
-                                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg shadow-indigo-500/20"
+                                className="w-full bg-gradient-to-r from-brand-teal-600 to-brand-blue-600 hover:from-brand-teal-700 hover:to-brand-blue-700 text-white shadow-lg shadow-brand-teal-500/20"
                             >
                                 <Star className="h-4 w-4 mr-2 fill-current" />
                                 Upgrade to Premium

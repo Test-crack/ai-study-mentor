@@ -30,9 +30,9 @@ const SKILL_ACCENT: Record<string, {
   },
   READING: {
     icon: <BookOpen className="w-5 h-5" />,
-    chipBg: 'bg-violet-100 dark:bg-violet-500/15',
-    chipText: 'text-violet-600 dark:text-violet-400',
-    fill: 'bg-violet-500',
+    chipBg: 'bg-brand-blue-100 dark:bg-brand-blue-500/15',
+    chipText: 'text-brand-blue-600 dark:text-brand-blue-400',
+    fill: 'bg-brand-blue-500',
     glow: 'dark:shadow-[0_0_18px_rgba(139,92,246,0.18)]',
   },
   WRITING: {
@@ -309,7 +309,7 @@ export default function DrillScreen() {
 
           {loading || isSubmitting ? (
             <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-              <Loader2 className="w-10 h-10 animate-spin mb-4 text-indigo-500" />
+              <Loader2 className="w-10 h-10 animate-spin mb-4 text-brand-teal-500" />
               <p className="font-medium text-slate-500 dark:text-slate-400">
                 {isSubmitting ? 'Saving session results...' : 'Loading your customized drills...'}
               </p>
@@ -334,7 +334,7 @@ export default function DrillScreen() {
                   const pending = pendingCompleteRef.current;
                   if (pending) completeSession(pending.answers, pending.correctCount);
                 }}
-                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl transition-colors shadow-md"
+                className="px-6 py-3 bg-brand-teal-600 hover:bg-brand-teal-700 text-white font-semibold rounded-2xl transition-colors shadow-md"
               >
                 Retry
               </button>

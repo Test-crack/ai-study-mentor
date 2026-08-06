@@ -62,7 +62,7 @@ export function TranscriptPermissionModal({
           <Button
             onClick={onImport}
             disabled={isImporting}
-            className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
+            className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-brand-teal-600 hover:from-blue-600 hover:to-brand-teal-700"
           >
             {isImporting ? (
               <>

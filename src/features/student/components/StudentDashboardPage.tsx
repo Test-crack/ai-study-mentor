@@ -13,7 +13,7 @@ import { useMomentum } from "@/features/student/Context/MomentumContext";
 import { cn } from "@/shared/utils";
 import { bandFillPct } from "@/shared/utils/bandScale";
 import {
-  Flame, Trophy, Target, Zap, BookOpen, Mic, PenLine,
+  Flame, Target, Zap, BookOpen, Mic, PenLine,
   Headphones, CalendarClock, CheckCircle2, ArrowRight, Puzzle,
   Lock, AlertTriangle, ChevronDown, Lightbulb, TrendingUp, Compass,
 } from "lucide-react";
@@ -35,16 +35,10 @@ interface SkillBand {
 
 const SKILL_BANDS: SkillBand[] = [
   { skill: "Listening", score: 0.0, target: 0.0, delta: 0.0, route: "/student/listening", icon: <Headphones className="h-5 w-5" />, color: "text-sky-600", bg: "bg-sky-50 dark:bg-sky-500/10", border: "border-sky-200 dark:border-sky-500/30" },
-  { skill: "Reading", score: 0.0, target: 0.0, delta: 0.0, route: "/student/reading", icon: <BookOpen className="h-5 w-5" />, color: "text-violet-600", bg: "bg-violet-50 dark:bg-violet-500/10", border: "border-violet-200 dark:border-violet-500/30" },
+  { skill: "Reading", score: 0.0, target: 0.0, delta: 0.0, route: "/student/reading", icon: <BookOpen className="h-5 w-5" />, color: "text-brand-blue-600", bg: "bg-brand-blue-50 dark:bg-brand-blue-500/10", border: "border-brand-blue-200 dark:border-brand-blue-500/30" },
   { skill: "Writing", score: 0.0, target: 0.0, delta: 0.0, route: "/student/writing", icon: <PenLine className="h-5 w-5" />, color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-500/10", border: "border-amber-200 dark:border-amber-500/30" },
   { skill: "Speaking", score: 0.0, target: 0.0, delta: 0.0, route: "/student/speaking-assessment", icon: <Mic className="h-5 w-5" />, color: "text-rose-600", bg: "bg-rose-50 dark:bg-rose-500/10", border: "border-rose-200 dark:border-rose-500/30" },
 ];
-
-const LEVEL = {
-  label: "Intermediate",
-  tier: "B2",
-  color: "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300",
-};
 
 // ─── PREDICTED READINESS (frontend-only model) ────────────────────────────────
 // Base improvement pace: ≈ 0.5 band per 4 weeks of consistent practice.
@@ -355,8 +349,6 @@ const StudentDashboardPage = () => {
           {/* ── Hero Banner — "The Climb" ─────────────────────────────────────── */}
           <ClimbHero
             displayName={displayName}
-            levelTier={LEVEL.tier}
-            levelLabel={LEVEL.label}
             streak={dailyDrillState?.daily_streak ?? 0}
             overall={overall}
             milestone={milestone}
@@ -367,7 +359,7 @@ const StudentDashboardPage = () => {
 
           {/* ── Daily Notices ────────────────────────────────────────────────── */}
           <div className={cn("transition-all duration-500", isLocked && "relative z-50")}>
-            <DailyNotices />
+            <DailyNotices isLocked={isLocked} />
           </div>
 
           {/* ── Gentle Catch-Up Banner (2+ misses) — Option 1 neutral slate ───── */}
@@ -388,7 +380,7 @@ const StudentDashboardPage = () => {
               </div>
               <button
                 onClick={() => navigate("/student/drill")}
-                className="flex-shrink-0 inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm py-3 px-5 rounded-xl transition-colors active:scale-[0.98]"
+                className="flex-shrink-0 inline-flex items-center justify-center gap-2 bg-brand-teal-600 hover:bg-brand-teal-700 text-white font-bold text-sm py-3 px-5 rounded-xl transition-colors active:scale-[0.98]"
               >
                 Get back on track <ArrowRight className="w-4 h-4" />
               </button>
@@ -399,8 +391,8 @@ const StudentDashboardPage = () => {
           {isLocked && missedData.misses < 2 && dailyDrillState && (
             <div className="relative z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-xl flex items-center justify-between animate-in slide-in-from-top-4">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-500/20 rounded-full flex items-center justify-center">
-                  <Lock className="w-6 h-6 text-indigo-500" />
+                <div className="w-12 h-12 bg-brand-teal-100 dark:bg-brand-teal-500/20 rounded-full flex items-center justify-center">
+                  <Lock className="w-6 h-6 text-brand-teal-500" />
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase">
@@ -408,10 +400,10 @@ const StudentDashboardPage = () => {
                   </h3>
                   <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
                     {dailyDrillState.next_action === 'DRILL_1'
-                      ? <>Finish <strong className="text-indigo-500">2 drills</strong> today to unlock the full platform.</>
+                      ? <>Finish <strong className="text-brand-teal-500">2 drills</strong> today to unlock the full platform.</>
                       : dailyDrillState.next_action === 'LEXIGRID'
                         ? <>Complete <strong className="text-teal-500">LexiGrid</strong> (5 words) to unlock your second drill.</>
-                        : <>LexiGrid done — complete <strong className="text-indigo-500">1 more drill</strong> to unlock full access.</>
+                        : <>LexiGrid done — complete <strong className="text-brand-teal-500">1 more drill</strong> to unlock full access.</>
                     }
                   </p>
                 </div>
@@ -575,13 +567,30 @@ const StudentDashboardPage = () => {
             </div>
           </section>
 
-          {/* ── Main Dashboard Content (blurred when locked) ──────────────────── */}
-          <div className="relative mt-6">
+          {/* ── Main Dashboard Content (blurred + clipped when locked) ─────────── */}
+          {/*
+            While the platform is locked this section is clipped to a short
+            teaser instead of rendering full height. That removes the long
+            stretch of dead blurred space the student could otherwise scroll
+            through, while still hinting that more exists once drills are done.
+
+            Clipping the section's height is deliberate rather than disabling
+            page scroll outright: the actionable content above (drill CTA) can
+            still exceed a short viewport, and a hard scroll lock would leave
+            it unreachable on small phones.
+          */}
+          <div
+            className={cn(
+              "relative mt-6",
+              isLocked && "max-h-[180px] overflow-hidden"
+            )}
+          >
             {isLocked && (
               <div className="absolute inset-0 z-40 bg-slate-50/60 dark:bg-[#020617]/70 backdrop-blur-md rounded-3xl border border-white/10 flex flex-col items-center pt-24" />
             )}
 
             <div
+              aria-hidden={isLocked}
               className={cn(
                 "space-y-6 transition-all duration-500",
                 isLocked && "opacity-40 grayscale-[50%] pointer-events-none select-none blur-[3px]"
@@ -827,8 +836,6 @@ const useParticleField = (
 
 interface ClimbHeroProps {
   displayName: string;
-  levelTier: string;
-  levelLabel: string;
   streak: number;
   overall: number;
   milestone: { next: number; reachedTarget: boolean; pctToNext: number };
@@ -839,12 +846,12 @@ interface ClimbHeroProps {
 
 /**
  * ClimbHero — Option 1 "Soft Indigo" (light) / deep-blue oceanic vibe (dark).
- * Light mode: pale indigo surface (bg-indigo-50) tying into the sidebar/brand.
+ * Light mode: pale indigo surface (bg-brand-teal-50) tying into the sidebar/brand.
  * Dark mode:  rich deep blue (dark:bg-blue-950) with a glowing star-dust field.
  * Inner stat cards stay light/translucent so they pop off either surface.
  */
 const ClimbHero = ({
-  displayName, levelTier, levelLabel, streak,
+  displayName, streak,
   overall, milestone, target, momentum, isLocked,
 }: ClimbHeroProps) => {
   const reduced = usePrefersReducedMotion();
@@ -890,7 +897,7 @@ const ClimbHero = ({
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-3xl bg-indigo-50 text-indigo-950 dark:bg-blue-950 dark:text-white border border-indigo-100 dark:border-blue-800/60 p-6 sm:p-8 shadow-sm",
+        "relative overflow-hidden rounded-3xl bg-brand-teal-50 text-brand-teal-950 dark:bg-blue-950 dark:text-white border border-brand-teal-100 dark:border-blue-800/60 p-6 sm:p-8 shadow-sm",
         isLocked && "z-50"
       )}
     >
@@ -902,20 +909,15 @@ const ClimbHero = ({
         />
       )}
       {/* Soft ambient glow — indigo in light, deep-blue bloom in dark */}
-      <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-indigo-200/40 dark:bg-blue-500/20 blur-2xl" />
+      <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-brand-teal-200/40 dark:bg-blue-500/20 blur-2xl" />
 
       <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              Great to see you, {displayName}
-            </h1>
-            <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-indigo-100 dark:bg-blue-900/70 px-3 py-1 text-xs font-bold text-indigo-700 dark:text-blue-200 border border-indigo-200 dark:border-blue-700/60">
-              <Trophy className="h-3.5 w-3.5" /> {levelTier} · {levelLabel}
-            </span>
-          </div>
-          <p className="text-indigo-700 dark:text-blue-200/90 max-w-xl text-sm sm:text-base">
-            <span className="font-bold text-indigo-950 dark:text-white">{streak}-day streak</span>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-1">
+            Great to see you, {displayName}
+          </h1>
+          <p className="text-brand-teal-700 dark:text-blue-200/90 max-w-xl text-sm sm:text-base">
+            <span className="font-bold text-brand-teal-950 dark:text-white">{streak}-day streak</span>
             {" "}— every climb starts with one step.
           </p>
 
@@ -924,7 +926,7 @@ const ClimbHero = ({
               <TrendingUp className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
               <p
                 className={cn(
-                  "text-sm font-semibold text-indigo-900 dark:text-white transition-all duration-500",
+                  "text-sm font-semibold text-brand-teal-900 dark:text-white transition-all duration-500",
                   justLeveled && !reduced && "scale-[1.03]"
                 )}
                 aria-live="polite"
@@ -942,7 +944,7 @@ const ClimbHero = ({
                   role="img"
                   aria-label={`Current band ${overall.toFixed(1)} of goal ${target.toFixed(1)}`}
                 >
-                  <div className="relative h-3 rounded-full bg-indigo-100 dark:bg-blue-900/60 overflow-visible">
+                  <div className="relative h-3 rounded-full bg-brand-teal-100 dark:bg-blue-900/60 overflow-visible">
                     <div
                       className={cn(
                         "absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500",
@@ -964,7 +966,7 @@ const ClimbHero = ({
                               ? "h-3.5 w-1 bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.9)] animate-pulse"
                               : reached
                                 ? "h-2 w-0.5 bg-white/80"
-                                : "h-2 w-0.5 bg-indigo-300/70 dark:bg-blue-200/40"
+                                : "h-2 w-0.5 bg-brand-teal-300/70 dark:bg-blue-200/40"
                           )}
                           style={{ left: `${leftPct}%` }}
                           title={`Band ${rung.toFixed(1)}`}
@@ -987,7 +989,7 @@ const ClimbHero = ({
               );
             })()}
 
-            <div className="flex items-center justify-between mt-3 text-[11px] font-medium text-indigo-500 dark:text-blue-300/80">
+            <div className="flex items-center justify-between mt-3 text-[11px] font-medium text-brand-teal-500 dark:text-blue-300/80">
               <span>now · band {overall.toFixed(1)}</span>
               <span>
                 {milestone.reachedTarget
@@ -1002,10 +1004,10 @@ const ClimbHero = ({
             still pop against the deep blue while keeping the oceanic depth. */}
         <div className="flex-shrink-0 flex flex-col sm:flex-row gap-3">
           <div className="text-center bg-white dark:bg-slate-800/80 dark:border dark:border-blue-700/40 rounded-2xl px-6 py-3 shadow-sm">
-            <p className="text-xs font-bold text-indigo-400 dark:text-blue-300 uppercase tracking-widest mb-0.5">
+            <p className="text-xs font-bold text-brand-teal-400 dark:text-blue-300 uppercase tracking-widest mb-0.5">
               Current Band
             </p>
-            <p className="text-4xl font-black text-indigo-950 dark:text-white leading-none tabular-nums">
+            <p className="text-4xl font-black text-brand-teal-950 dark:text-white leading-none tabular-nums">
               {animatedBand.toFixed(1)}
             </p>
             <p className="text-xs text-slate-400 dark:text-blue-300/70 mt-0.5">
@@ -1013,19 +1015,19 @@ const ClimbHero = ({
             </p>
           </div>
           <div className="text-center bg-white dark:bg-slate-800/80 dark:border dark:border-blue-700/40 rounded-2xl px-6 py-3 shadow-sm">
-            <p className="text-xs font-bold text-indigo-400 dark:text-blue-300 uppercase tracking-widest mb-0.5 flex items-center justify-center gap-1">
+            <p className="text-xs font-bold text-brand-teal-400 dark:text-blue-300 uppercase tracking-widest mb-0.5 flex items-center justify-center gap-1">
               <Target className="h-3 w-3" /> Target
             </p>
-            <p className="text-4xl font-black text-indigo-950 dark:text-white leading-none tabular-nums">
+            <p className="text-4xl font-black text-brand-teal-950 dark:text-white leading-none tabular-nums">
               {target.toFixed(1)}
             </p>
             <p className="text-xs text-slate-400 dark:text-blue-300/70 mt-0.5">goal band</p>
           </div>
           <div className="text-center bg-white dark:bg-slate-800/80 dark:border dark:border-blue-700/40 rounded-2xl px-6 py-3 shadow-sm">
-            <p className="text-xs font-bold text-indigo-400 dark:text-blue-300 uppercase tracking-widest mb-0.5 flex items-center justify-center gap-1">
+            <p className="text-xs font-bold text-brand-teal-400 dark:text-blue-300 uppercase tracking-widest mb-0.5 flex items-center justify-center gap-1">
               <Zap className="h-3 w-3" /> Momentum
             </p>
-            <p className="text-4xl font-black text-indigo-950 dark:text-white leading-none tabular-nums">
+            <p className="text-4xl font-black text-brand-teal-950 dark:text-white leading-none tabular-nums">
               {Math.round(animatedPts).toLocaleString()}
             </p>
             <p className="text-xs text-slate-400 dark:text-blue-300/70 mt-0.5">pts</p>
@@ -1067,36 +1069,34 @@ const FocusAreaCard = ({
   const guide = getSubSkillGuide(sub_skill);
 
   const cardBg = isLocked
-    ? "bg-white dark:bg-slate-900 border-indigo-200 dark:border-indigo-500/30 ring-1 ring-indigo-500/20"
+    ? "bg-white dark:bg-slate-900 border-brand-teal-200 dark:border-brand-teal-500/30 ring-1 ring-brand-teal-500/20"
     : isExtraLocked
       ? "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
-      : "bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/25";
+      : "bg-brand-teal-50 dark:bg-brand-teal-500/10 border-brand-teal-200 dark:border-brand-teal-500/25";
 
   return (
     <div className={cn("h-full rounded-3xl border p-6 flex flex-col transition-all duration-500 shadow-sm", cardBg)}>
 
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-2">
-          <Zap className="h-5 w-5 text-indigo-500" />
-          <h2 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">
-            Next Best Action
-          </h2>
+      {/* Status row renders only when there's a badge — avoids a stray margin
+          now that the "Next Best Action" heading has been removed. */}
+      {((isLocked && drillsLeft > 0) || isExtraLocked) && (
+        <div className="flex items-center justify-end mb-5">
+          {isLocked && drillsLeft > 0 && (
+            <span className="text-[10px] font-bold uppercase tracking-wider bg-brand-teal-100 text-brand-teal-600 dark:bg-brand-teal-500/20 dark:text-brand-teal-400 px-3 py-1 rounded-full animate-pulse">
+              Required: {drillsLeft} Left
+            </span>
+          )}
+          {isExtraLocked && (
+            <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 px-3 py-1 rounded-full">
+              3 / 3 Done
+            </span>
+          )}
         </div>
-        {isLocked && drillsLeft > 0 && (
-          <span className="text-[10px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 px-3 py-1 rounded-full animate-pulse">
-            Required: {drillsLeft} Left
-          </span>
-        )}
-        {isExtraLocked && (
-          <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 px-3 py-1 rounded-full">
-            3 / 3 Done
-          </span>
-        )}
-      </div>
+      )}
 
       <div className="flex items-center gap-5 mb-4">
-        <div className="flex-shrink-0 h-16 w-16 rounded-2xl bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center border border-indigo-200 dark:border-indigo-500/30">
-          <Target className="h-8 w-8 text-indigo-500" />
+        <div className="flex-shrink-0 h-16 w-16 rounded-2xl bg-brand-teal-100 dark:bg-brand-teal-500/20 flex items-center justify-center border border-brand-teal-200 dark:border-brand-teal-500/30">
+          <Target className="h-8 w-8 text-brand-teal-500" />
         </div>
         <div>
           <p className="text-xl font-bold text-slate-800 dark:text-white leading-snug tracking-tight mb-1">
@@ -1105,7 +1105,7 @@ const FocusAreaCard = ({
           <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
             <span>{toTitleCase(skill)}</span>
             <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
-            <span>Sub-score: <strong className="text-indigo-600 dark:text-indigo-400">{band.toFixed(1)}</strong></span>
+            <span>Sub-score: <strong className="text-brand-teal-600 dark:text-brand-teal-400">{band.toFixed(1)}</strong></span>
           </div>
         </div>
       </div>
@@ -1204,7 +1204,7 @@ const FocusAreaCard = ({
         {isFreeDrill && (
           <button
             onClick={onStartDrill}
-            className="w-full flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold text-sm py-3.5 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
+            className="w-full flex items-center justify-center gap-2 bg-brand-teal-500 hover:bg-brand-teal-600 text-white font-semibold text-sm py-3.5 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
           >
             Start Priority Drill <ArrowRight className="h-4 w-4" />
           </button>
@@ -1292,7 +1292,7 @@ const SkillBandCard = ({
 
           <button
             onClick={() => setExpanded((e) => !e)}
-            className="mt-3 w-full flex items-center justify-center gap-1 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+            className="mt-3 w-full flex items-center justify-center gap-1 text-[11px] font-semibold text-brand-teal-600 dark:text-brand-teal-400 hover:text-brand-teal-700 dark:hover:text-brand-teal-300 transition-colors"
             aria-expanded={expanded}
           >
             {expanded ? "Hide tips" : "What do these mean?"}
@@ -1351,10 +1351,10 @@ const PredictedReadinessCard = ({ readiness }: { readiness: Readiness }) => {
       border: "border-amber-200 dark:border-amber-500/20",
     },
     "no-date": {
-      icon: <CalendarClock className="h-5 w-5 text-indigo-500" />,
-      color: "text-indigo-600",
-      bg: "bg-indigo-50 dark:bg-indigo-500/5",
-      border: "border-indigo-200 dark:border-indigo-500/20",
+      icon: <CalendarClock className="h-5 w-5 text-brand-teal-500" />,
+      color: "text-brand-teal-600",
+      bg: "bg-brand-teal-50 dark:bg-brand-teal-500/5",
+      border: "border-brand-teal-200 dark:border-brand-teal-500/20",
     },
     "exam-passed": {
       icon: <AlertTriangle className="h-5 w-5 text-slate-400" />,
@@ -1377,7 +1377,7 @@ const PredictedReadinessCard = ({ readiness }: { readiness: Readiness }) => {
         <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">{readiness.trajectory}</p>
         <button
           onClick={() => navigate("/student/settings")}
-          className="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2 px-4 rounded-xl transition-colors"
+          className="inline-flex items-center gap-1.5 bg-brand-teal-600 hover:bg-brand-teal-700 text-white text-xs font-bold py-2 px-4 rounded-xl transition-colors"
         >
           {readiness.status === "no-date" ? "Set exam date" : "Update exam date"}
           <ArrowRight className="h-3.5 w-3.5" />
@@ -1491,7 +1491,7 @@ const WEEKLY_RHYTHM = [
 
 const colorConfig: Record<string, any> = {
   blue: { bg: "bg-blue-500", border: "border-blue-500", text: "text-blue-600 dark:text-blue-400", ring: "ring-blue-500/30" },
-  purple: { bg: "bg-purple-500", border: "border-purple-500", text: "text-purple-600 dark:text-purple-400", ring: "ring-purple-500/30" },
+  purple: { bg: "bg-brand-blue-500", border: "border-brand-blue-500", text: "text-brand-blue-600 dark:text-brand-blue-400", ring: "ring-brand-blue-500/30" },
   teal: { bg: "bg-teal-500", border: "border-teal-500", text: "text-teal-600 dark:text-teal-400", ring: "ring-teal-500/30" },
   amber: { bg: "bg-amber-500", border: "border-amber-500", text: "text-amber-600 dark:text-amber-400", ring: "ring-amber-500/30" },
   slate: { bg: "bg-slate-400", border: "border-slate-300 dark:border-slate-600", text: "text-slate-500 dark:text-slate-400", ring: "ring-slate-400/30" },

@@ -78,7 +78,7 @@ const  PaymentSuccess: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-indigo-600 mx-auto mb-4" />
+          <Loader2 className="w-12 h-12 animate-spin text-brand-teal-600 mx-auto mb-4" />
           <p className="text-lg text-muted-foreground">Verifying your payment...</p>
         </div>
       </div>
@@ -86,7 +86,7 @@ const  PaymentSuccess: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-brand-teal-50 via-white to-brand-blue-50 flex items-center justify-center px-4">
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -111,10 +111,10 @@ const  PaymentSuccess: React.FC = () => {
           </CardHeader>
 
           <CardContent className="space-y-6">
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg p-6">
+            <div className="bg-gradient-to-r from-brand-teal-500 to-brand-blue-600 text-white rounded-lg p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-semibold">Your Pro Plan is Active</h3>
-                <Badge className="bg-white text-indigo-600">ACTIVE</Badge>
+                <Badge className="bg-white text-brand-teal-600">ACTIVE</Badge>
               </div>
               <p className="text-sm opacity-90">
                 You now have unlimited access to all Pro features. Start your learning journey with AI-powered study tools!
@@ -124,7 +124,7 @@ const  PaymentSuccess: React.FC = () => {
             {planDetails && (
               <div>
                 <h4 className="font-semibold mb-3 flex items-center">
-                  <Sparkles className="w-5 h-5 mr-2 text-indigo-600" />
+                  <Sparkles className="w-5 h-5 mr-2 text-brand-teal-600" />
                   Your Pro Features:
                 </h4>
                 <ul className="space-y-2">
@@ -144,7 +144,7 @@ const  PaymentSuccess: React.FC = () => {
               </div>
             )}
 
-            <div className="bg-indigo-50 rounded-lg p-4">
+            <div className="bg-brand-teal-50 rounded-lg p-4">
               <h4 className="font-semibold mb-2">What's Next?</h4>
               <ul className="space-y-1 text-sm text-muted-foreground">
                 <li>• Upload your first study document</li>
@@ -182,7 +182,7 @@ const  PaymentSuccess: React.FC = () => {
         >
           <p className="text-sm text-muted-foreground">
             Need help? Contact us at{' '}
-            <a href="mailto:support@aistudymentor.com" className="text-indigo-600 hover:underline">
+            <a href="mailto:support@aistudymentor.com" className="text-brand-teal-600 hover:underline">
               support@aistudymentor.com
             </a>
           </p>

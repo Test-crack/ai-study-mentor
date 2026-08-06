@@ -40,7 +40,7 @@ export function CoursesSearchBar({ onSearch, initialValue = '' }: CoursesSearchB
           placeholder="Search for courses by title or description..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 pr-10 h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+          className="pl-10 pr-10 h-12 text-base border-gray-300 focus:border-brand-blue-500 focus:ring-brand-blue-500"
         />
         {searchQuery && (
           <Button

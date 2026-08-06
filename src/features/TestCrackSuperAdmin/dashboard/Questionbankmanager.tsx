@@ -155,19 +155,19 @@ const StepDot = ({ n, current, label }: { n: number; current: number; label: str
   return (
     <div className="flex flex-col items-center gap-1.5">
       <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-black border-2 transition-all duration-300 ${
-        done   ? 'bg-indigo-600 border-indigo-600 text-white' :
-        active ? 'bg-white dark:bg-[#15141B] border-indigo-600 text-indigo-600' :
+        done   ? 'bg-brand-teal-600 border-brand-teal-600 text-white' :
+        active ? 'bg-white dark:bg-[#15141B] border-brand-teal-600 text-brand-teal-600' :
                  'bg-white dark:bg-[#15141B] border-slate-200 dark:border-[#26252D] text-slate-400'
       }`}>
         {done ? <CheckCircle2 className="w-4 h-4" /> : n}
       </div>
-      <span className={`text-[10px] font-bold uppercase tracking-widest whitespace-nowrap ${active ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'}`}>{label}</span>
+      <span className={`text-[10px] font-bold uppercase tracking-widest whitespace-nowrap ${active ? 'text-brand-teal-600 dark:text-brand-teal-400' : 'text-slate-400'}`}>{label}</span>
     </div>
   );
 };
 
 const StepConnector = ({ active }: { active: boolean }) => (
-  <div className={`flex-1 h-0.5 mb-6 transition-all duration-500 ${active ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-[#26252D]'}`} />
+  <div className={`flex-1 h-0.5 mb-6 transition-all duration-500 ${active ? 'bg-brand-teal-600' : 'bg-slate-200 dark:bg-[#26252D]'}`} />
 );
 
 // ─── Preview Drawer ───────────────────────────────────────────────────────────
@@ -207,7 +207,7 @@ function PreviewDrawer({ bank, onClose }: { bank: BankRecord | null; onClose: ()
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Modules</p>
             <div className="flex flex-wrap gap-1.5">
               {bank.modules.map(m => (
-                <span key={m} className="text-xs font-bold px-2 py-1 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20">
+                <span key={m} className="text-xs font-bold px-2 py-1 rounded-full bg-brand-teal-50 dark:bg-brand-teal-500/10 text-brand-teal-700 dark:text-brand-teal-400 border border-brand-teal-200 dark:border-brand-teal-500/20">
                   {MODULE_META[m].label}
                 </span>
               ))}
@@ -366,27 +366,27 @@ export default function QuestionBankManager() {
           <div className="max-w-[1400px] mx-auto space-y-6">
 
             {/* Header Banner */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-700 via-indigo-700 to-blue-700 p-6 sm:p-8 shadow-sm">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-brand-blue-700 via-brand-teal-700 to-blue-700 p-6 sm:p-8 shadow-sm">
               <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
               <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <Database className="w-5 h-5 text-violet-300" />
-                    <span className="text-xs font-black text-violet-300 uppercase tracking-[0.2em]">Super Admin</span>
+                    <Database className="w-5 h-5 text-brand-blue-300" />
+                    <span className="text-xs font-black text-brand-blue-300 uppercase tracking-[0.2em]">Super Admin</span>
                   </div>
                   <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Question Bank Manager</h1>
-                  <p className="text-indigo-200 text-sm mt-1">Upload and assign question banks to specific institutes, batches, and modules.</p>
+                  <p className="text-brand-teal-200 text-sm mt-1">Upload and assign question banks to specific institutes, batches, and modules.</p>
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => { setActiveView('upload'); resetFlow(); }}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeView === 'upload' ? 'bg-white text-indigo-700 shadow-md' : 'bg-white/10 text-white hover:bg-white/20 border border-white/20'}`}
+                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeView === 'upload' ? 'bg-white text-brand-teal-700 shadow-md' : 'bg-white/10 text-white hover:bg-white/20 border border-white/20'}`}
                   >
                     <Upload className="w-4 h-4 inline mr-1.5 -mt-0.5" /> Upload New
                   </button>
                   <button
                     onClick={() => setActiveView('history')}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeView === 'history' ? 'bg-white text-indigo-700 shadow-md' : 'bg-white/10 text-white hover:bg-white/20 border border-white/20'}`}
+                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeView === 'history' ? 'bg-white text-brand-teal-700 shadow-md' : 'bg-white/10 text-white hover:bg-white/20 border border-white/20'}`}
                   >
                     <BarChart3 className="w-4 h-4 inline mr-1.5 -mt-0.5" /> History ({history.length})
                   </button>
@@ -427,7 +427,7 @@ export default function QuestionBankManager() {
                       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                         {(['IELTS','GMAT','SPOKEN_ENGLISH','PTE','TOEFL'] as ExamType[]).map(exam => (
                           <button key={exam} onClick={() => { setSelectedExam(exam); setSelectedSkill(''); }}
-                            className={`py-3 px-4 rounded-xl border-2 text-sm font-bold transition-all ${selectedExam === exam ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300' : 'border-slate-200 dark:border-[#26252D] text-slate-600 dark:text-slate-400 hover:border-indigo-300 dark:hover:border-indigo-700'}`}>
+                            className={`py-3 px-4 rounded-xl border-2 text-sm font-bold transition-all ${selectedExam === exam ? 'border-brand-teal-600 bg-brand-teal-50 dark:bg-brand-teal-500/10 text-brand-teal-700 dark:text-brand-teal-300' : 'border-slate-200 dark:border-[#26252D] text-slate-600 dark:text-slate-400 hover:border-brand-teal-300 dark:hover:border-brand-teal-700'}`}>
                             {exam.replace('_',' ')}
                           </button>
                         ))}
@@ -443,16 +443,16 @@ export default function QuestionBankManager() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {institutes.map(inst => (
                             <button key={inst.id} onClick={() => setSelectedInstitute(inst)}
-                              className={`p-4 rounded-xl border-2 text-left transition-all ${selectedInstitute?.id === inst.id ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-500/10' : 'border-slate-200 dark:border-[#26252D] hover:border-indigo-300 dark:hover:border-indigo-700'}`}>
+                              className={`p-4 rounded-xl border-2 text-left transition-all ${selectedInstitute?.id === inst.id ? 'border-brand-teal-600 bg-brand-teal-50 dark:bg-brand-teal-500/10' : 'border-slate-200 dark:border-[#26252D] hover:border-brand-teal-300 dark:hover:border-brand-teal-700'}`}>
                               <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-lg bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center text-xs font-black text-indigo-700 dark:text-indigo-300">
+                                <div className="w-9 h-9 rounded-lg bg-brand-teal-100 dark:bg-brand-teal-500/20 flex items-center justify-center text-xs font-black text-brand-teal-700 dark:text-brand-teal-300">
                                   {inst.name.split(' ').map(w=>w[0]).slice(0,2).join('')}
                                 </div>
                                 <div>
-                                  <p className={`text-sm font-bold ${selectedInstitute?.id === inst.id ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-800 dark:text-white'}`}>{inst.name}</p>
+                                  <p className={`text-sm font-bold ${selectedInstitute?.id === inst.id ? 'text-brand-teal-700 dark:text-brand-teal-300' : 'text-slate-800 dark:text-white'}`}>{inst.name}</p>
                                   <p className="text-xs text-slate-500">{inst.studentCount} students</p>
                                 </div>
-                                {selectedInstitute?.id === inst.id && <CheckCircle2 className="w-4 h-4 text-indigo-600 ml-auto" />}
+                                {selectedInstitute?.id === inst.id && <CheckCircle2 className="w-4 h-4 text-brand-teal-600 ml-auto" />}
                               </div>
                             </button>
                           ))}
@@ -472,10 +472,10 @@ export default function QuestionBankManager() {
                               const mismatch = selectedExam && batch.examType !== selectedExam;
                               return (
                                 <button key={batch.id} onClick={() => !mismatch && setSelectedBatch(batch)}
-                                  className={`p-4 rounded-xl border-2 text-left transition-all ${selectedBatch?.id === batch.id ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-500/10' : mismatch ? 'border-slate-200 dark:border-[#26252D] opacity-40 cursor-not-allowed' : 'border-slate-200 dark:border-[#26252D] hover:border-indigo-300 dark:hover:border-indigo-700'}`}>
+                                  className={`p-4 rounded-xl border-2 text-left transition-all ${selectedBatch?.id === batch.id ? 'border-brand-teal-600 bg-brand-teal-50 dark:bg-brand-teal-500/10' : mismatch ? 'border-slate-200 dark:border-[#26252D] opacity-40 cursor-not-allowed' : 'border-slate-200 dark:border-[#26252D] hover:border-brand-teal-300 dark:hover:border-brand-teal-700'}`}>
                                   <div className="flex items-start justify-between gap-2">
                                     <div>
-                                      <p className={`text-sm font-bold ${selectedBatch?.id === batch.id ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-800 dark:text-white'}`}>{batch.name}</p>
+                                      <p className={`text-sm font-bold ${selectedBatch?.id === batch.id ? 'text-brand-teal-700 dark:text-brand-teal-300' : 'text-slate-800 dark:text-white'}`}>{batch.name}</p>
                                       <p className="text-xs text-slate-500 mt-0.5">{batch.studentCount} students</p>
                                     </div>
                                     <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${mismatch ? 'bg-rose-50 text-rose-500 dark:bg-rose-500/10' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'}`}>
@@ -493,7 +493,7 @@ export default function QuestionBankManager() {
 
                     <div className="flex justify-end pt-2">
                       <button disabled={!step1Valid} onClick={() => setStep(2)}
-                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm transition-all shadow-sm">
+                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-teal-600 hover:bg-brand-teal-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm transition-all shadow-sm">
                         Continue <ChevronRight className="w-4 h-4" />
                       </button>
                     </div>
@@ -511,7 +511,7 @@ export default function QuestionBankManager() {
                     {/* Summary pill */}
                     <div className="flex flex-wrap gap-2">
                       {[selectedExam, selectedInstitute?.name, selectedBatch?.name].map((v, i) => v && (
-                        <span key={i} className="text-xs font-bold px-3 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 rounded-full">
+                        <span key={i} className="text-xs font-bold px-3 py-1.5 bg-brand-teal-50 dark:bg-brand-teal-500/10 text-brand-teal-700 dark:text-brand-teal-400 border border-brand-teal-200 dark:border-brand-teal-500/20 rounded-full">
                           {v.replace('_',' ')}
                         </span>
                       ))}
@@ -526,10 +526,10 @@ export default function QuestionBankManager() {
                           return (
                             <button key={key}
                               onClick={() => setSelectedModules(prev => selected ? prev.filter(m => m !== key) : [...prev, key])}
-                              className={`p-4 rounded-xl border-2 text-left transition-all ${selected ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-500/10' : 'border-slate-200 dark:border-[#26252D] hover:border-indigo-300 dark:hover:border-indigo-700'}`}>
-                              <div className={`flex items-center gap-2 mb-1.5 ${selected ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'}`}>{meta.icon}<span className="text-xs font-black uppercase tracking-wider">{meta.label}</span></div>
+                              className={`p-4 rounded-xl border-2 text-left transition-all ${selected ? 'border-brand-teal-600 bg-brand-teal-50 dark:bg-brand-teal-500/10' : 'border-slate-200 dark:border-[#26252D] hover:border-brand-teal-300 dark:hover:border-brand-teal-700'}`}>
+                              <div className={`flex items-center gap-2 mb-1.5 ${selected ? 'text-brand-teal-600 dark:text-brand-teal-400' : 'text-slate-400'}`}>{meta.icon}<span className="text-xs font-black uppercase tracking-wider">{meta.label}</span></div>
                               <p className="text-xs text-slate-500">{meta.desc}</p>
-                              {selected && <div className="mt-2 flex items-center gap-1 text-indigo-600 dark:text-indigo-400"><CheckCircle2 className="w-3 h-3" /><span className="text-[10px] font-black">Selected</span></div>}
+                              {selected && <div className="mt-2 flex items-center gap-1 text-brand-teal-600 dark:text-brand-teal-400"><CheckCircle2 className="w-3 h-3" /><span className="text-[10px] font-black">Selected</span></div>}
                             </button>
                           );
                         })}
@@ -542,7 +542,7 @@ export default function QuestionBankManager() {
                       <div className="flex flex-wrap gap-2">
                         {(selectedExam ? EXAM_SKILLS[selectedExam] : []).map(skill => (
                           <button key={skill} onClick={() => setSelectedSkill(skill)}
-                            className={`px-4 py-2 rounded-xl border-2 text-sm font-bold transition-all ${selectedSkill === skill ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300' : 'border-slate-200 dark:border-[#26252D] text-slate-600 dark:text-slate-400 hover:border-indigo-300'}`}>
+                            className={`px-4 py-2 rounded-xl border-2 text-sm font-bold transition-all ${selectedSkill === skill ? 'border-brand-teal-600 bg-brand-teal-50 dark:bg-brand-teal-500/10 text-brand-teal-700 dark:text-brand-teal-300' : 'border-slate-200 dark:border-[#26252D] text-slate-600 dark:text-slate-400 hover:border-brand-teal-300'}`}>
                             {skill}
                           </button>
                         ))}
@@ -571,7 +571,7 @@ export default function QuestionBankManager() {
                         <ChevronLeft className="w-4 h-4" /> Back
                       </button>
                       <button disabled={!step2Valid} onClick={() => setStep(3)}
-                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm transition-all shadow-sm">
+                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-teal-600 hover:bg-brand-teal-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm transition-all shadow-sm">
                         Continue <ChevronRight className="w-4 h-4" />
                       </button>
                     </div>
@@ -612,18 +612,18 @@ export default function QuestionBankManager() {
                       onDragOver={e => e.preventDefault()}
                       onDrop={handleDrop}
                       onClick={() => fileRef.current?.click()}
-                      className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all ${file ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-500/10' : 'border-slate-300 dark:border-[#26252D] hover:border-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/5'}`}
+                      className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all ${file ? 'border-brand-teal-400 bg-brand-teal-50 dark:bg-brand-teal-500/10' : 'border-slate-300 dark:border-[#26252D] hover:border-brand-teal-400 hover:bg-brand-teal-50/50 dark:hover:bg-brand-teal-500/5'}`}
                     >
                       <input ref={fileRef} type="file" accept=".json" className="hidden" onChange={e => e.target.files?.[0] && handleFileChange(e.target.files[0])} />
                       {validating ? (
                         <div className="flex flex-col items-center gap-3">
-                          <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
+                          <Loader2 className="w-10 h-10 text-brand-teal-500 animate-spin" />
                           <p className="text-sm font-bold text-slate-600 dark:text-slate-400">Validating questions…</p>
                         </div>
                       ) : file ? (
                         <div className="flex flex-col items-center gap-2">
-                          <FileJson className="w-10 h-10 text-indigo-500" />
-                          <p className="text-sm font-bold text-indigo-700 dark:text-indigo-300">{file.name}</p>
+                          <FileJson className="w-10 h-10 text-brand-teal-500" />
+                          <p className="text-sm font-bold text-brand-teal-700 dark:text-brand-teal-300">{file.name}</p>
                           <p className="text-xs text-slate-500">{(file.size / 1024).toFixed(1)} KB · Click to replace</p>
                         </div>
                       ) : (
@@ -699,7 +699,7 @@ export default function QuestionBankManager() {
                         <ChevronLeft className="w-4 h-4" /> Back
                       </button>
                       <button disabled={!step3Valid} onClick={() => setStep(4)}
-                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm transition-all shadow-sm">
+                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-teal-600 hover:bg-brand-teal-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm transition-all shadow-sm">
                         Review & Confirm <ChevronRight className="w-4 h-4" />
                       </button>
                     </div>
@@ -734,7 +734,7 @@ export default function QuestionBankManager() {
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Modules</p>
                       <div className="flex flex-wrap gap-2">
                         {selectedModules.map(m => (
-                          <span key={m} className="text-xs font-bold px-3 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 rounded-full">
+                          <span key={m} className="text-xs font-bold px-3 py-1.5 bg-brand-teal-50 dark:bg-brand-teal-500/10 text-brand-teal-700 dark:text-brand-teal-400 border border-brand-teal-200 dark:border-brand-teal-500/20 rounded-full">
                             {MODULE_META[m].label}
                           </span>
                         ))}
@@ -755,7 +755,7 @@ export default function QuestionBankManager() {
                         <ChevronLeft className="w-4 h-4" /> Back
                       </button>
                       <button onClick={handleUpload} disabled={uploading}
-                        className="flex items-center gap-2 px-8 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-black text-sm transition-all shadow-md">
+                        className="flex items-center gap-2 px-8 py-3 rounded-xl bg-brand-teal-600 hover:bg-brand-teal-700 disabled:opacity-60 text-white font-black text-sm transition-all shadow-md">
                         {uploading ? <><Loader2 className="w-4 h-4 animate-spin" /> Uploading…</> : <><ShieldCheck className="w-4 h-4" /> Confirm Upload</>}
                       </button>
                     </div>
@@ -777,7 +777,7 @@ export default function QuestionBankManager() {
                     </div>
                     <div className="flex gap-3 mt-2">
                       <button onClick={resetFlow}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition-all shadow-sm">
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-teal-600 hover:bg-brand-teal-700 text-white font-bold text-sm transition-all shadow-sm">
                         <Upload className="w-4 h-4" /> Upload Another
                       </button>
                       <button onClick={() => setActiveView('history')}
@@ -800,11 +800,11 @@ export default function QuestionBankManager() {
                     <input
                       value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
                       placeholder="Search by institute or batch…"
-                      className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-[#26252D] bg-white dark:bg-[#15141B] text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 outline-none focus:border-indigo-500 transition-colors"
+                      className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-[#26252D] bg-white dark:bg-[#15141B] text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 outline-none focus:border-brand-teal-500 transition-colors"
                     />
                   </div>
                   <select value={filterExam} onChange={e => setFilterExam(e.target.value as ExamType | '')}
-                    className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-[#26252D] bg-white dark:bg-[#15141B] text-sm text-slate-700 dark:text-slate-300 outline-none focus:border-indigo-500 transition-colors">
+                    className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-[#26252D] bg-white dark:bg-[#15141B] text-sm text-slate-700 dark:text-slate-300 outline-none focus:border-brand-teal-500 transition-colors">
                     <option value="">All Exams</option>
                     {(['IELTS','GMAT','SPOKEN_ENGLISH','PTE','TOEFL'] as ExamType[]).map(e => <option key={e} value={e}>{e.replace('_',' ')}</option>)}
                   </select>
@@ -827,7 +827,7 @@ export default function QuestionBankManager() {
                         ) : filteredHistory.map(bank => (
                           <tr key={bank.id} className="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
                             <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">{new Date(bank.uploadedAt).toLocaleDateString()}</td>
-                            <td className="px-4 py-3"><span className="text-xs font-black text-indigo-600 dark:text-indigo-400">{bank.examType.replace('_',' ')}</span></td>
+                            <td className="px-4 py-3"><span className="text-xs font-black text-brand-teal-600 dark:text-brand-teal-400">{bank.examType.replace('_',' ')}</span></td>
                             <td className="px-4 py-3">
                               <p className="font-semibold text-slate-900 dark:text-white text-xs">{bank.instituteName}</p>
                               <p className="text-[11px] text-slate-400 mt-0.5">{bank.batchName}</p>
@@ -843,7 +843,7 @@ export default function QuestionBankManager() {
                             <td className="px-4 py-3">
                               <div className="flex flex-wrap gap-1">
                                 {bank.modules.map(m => (
-                                  <span key={m} className="text-[9px] font-black px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20">{m === 'DRILLS' ? 'Drills' : m === 'INTERNAL_ASSESSMENT' ? 'IA' : 'Mock'}</span>
+                                  <span key={m} className="text-[9px] font-black px-1.5 py-0.5 rounded bg-brand-teal-50 dark:bg-brand-teal-500/10 text-brand-teal-600 dark:text-brand-teal-400 border border-brand-teal-100 dark:border-brand-teal-500/20">{m === 'DRILLS' ? 'Drills' : m === 'INTERNAL_ASSESSMENT' ? 'IA' : 'Mock'}</span>
                                 ))}
                               </div>
                             </td>
@@ -854,7 +854,7 @@ export default function QuestionBankManager() {
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-1">
                                 <button onClick={() => setPreviewBank(bank)}
-                                  className="p-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-500/10 text-slate-400 hover:text-indigo-600 transition-colors" title="Preview">
+                                  className="p-1.5 rounded-lg hover:bg-brand-teal-50 dark:hover:bg-brand-teal-500/10 text-slate-400 hover:text-brand-teal-600 transition-colors" title="Preview">
                                   <Eye className="w-4 h-4" />
                                 </button>
                                 <button className="p-1.5 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-500/10 text-slate-400 hover:text-amber-600 transition-colors" title="Replace">

@@ -68,7 +68,7 @@ function StatCard({
         </div>
         <button
           onClick={onCta}
-          className="flex items-center gap-1 text-xs font-semibold text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 transition-colors shrink-0 whitespace-nowrap"
+          className="flex items-center gap-1 text-xs font-semibold text-brand-teal-500 hover:text-brand-teal-600 dark:text-brand-teal-400 transition-colors shrink-0 whitespace-nowrap"
         >
           {ctaLabel} <ArrowRight className="h-3 w-3" />
         </button>
@@ -92,8 +92,8 @@ export function PeriodSummaryRow({ data, loading }: PeriodSummaryRowProps) {
     <div className="flex gap-3 sm:gap-4 flex-col sm:flex-row">
       <StatCard
         icon={<ClipboardCheck className="h-4 w-4" />}
-        iconBg="bg-indigo-100 dark:bg-indigo-500/20"
-        iconColor="text-indigo-600 dark:text-indigo-400"
+        iconBg="bg-brand-teal-100 dark:bg-brand-teal-500/20"
+        iconColor="text-brand-teal-600 dark:text-brand-teal-400"
         title="Internal Assessments — Last 7 Days"
         value={data?.ia_completed_last_7_days ?? 0}
         total={data?.ia_total_students ?? 0}
@@ -104,8 +104,8 @@ export function PeriodSummaryRow({ data, loading }: PeriodSummaryRowProps) {
       />
       <StatCard
         icon={<BarChart2 className="h-4 w-4" />}
-        iconBg="bg-purple-100 dark:bg-purple-500/20"
-        iconColor="text-purple-600 dark:text-purple-400"
+        iconBg="bg-brand-blue-100 dark:bg-brand-blue-500/20"
+        iconColor="text-brand-blue-600 dark:text-brand-blue-400"
         title="Mock Tests — This Month"
         value={data?.mock_completed_this_month ?? 0}
         total={data?.mock_total_students ?? 0}

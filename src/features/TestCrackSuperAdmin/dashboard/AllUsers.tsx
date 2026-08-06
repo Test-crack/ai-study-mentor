@@ -20,8 +20,8 @@ const TABS: { label: string; value: TabKey }[] = [
 
 const getRoleConfig = (role: string) => {
   switch (role) {
-    case 'SUPERADMIN':      return { icon: ShieldCheck, color: 'text-violet-600', label: 'Super Admin' };
-    case 'INSTITUTE_OWNER': return { icon: Shield,      color: 'text-purple-600', label: 'Owner' };
+    case 'SUPERADMIN':      return { icon: ShieldCheck, color: 'text-brand-blue-600', label: 'Super Admin' };
+    case 'INSTITUTE_OWNER': return { icon: Shield,      color: 'text-brand-blue-600', label: 'Owner' };
     case 'INSTITUTE_ADMIN': return { icon: UserCog,     color: 'text-amber-600',  label: 'Institute Admin' };
     case 'INSTRUCTOR':      return { icon: BookOpen,    color: 'text-blue-600',   label: 'Instructor' };
     case 'STUDENT':         return { icon: GraduationCap, color: 'text-emerald-600', label: 'Student' };
@@ -122,7 +122,7 @@ export default function AllUsers() {
               </div>
               <button
                 onClick={loadUsers}
-                className="flex items-center gap-2 text-sm text-slate-500 hover:text-indigo-600 dark:hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5"
+                className="flex items-center gap-2 text-sm text-slate-500 hover:text-brand-teal-600 dark:hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5"
               >
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                 Refresh
@@ -137,13 +137,13 @@ export default function AllUsers() {
                   onClick={() => setActiveTab(tab.value)}
                   className={`pb-3 px-1 text-sm font-medium transition-all relative ${
                     activeTab === tab.value
-                      ? 'text-indigo-600 dark:text-white'
+                      ? 'text-brand-teal-600 dark:text-white'
                       : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                   }`}
                 >
                   {tab.label}
                   {activeTab === tab.value && (
-                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 dark:bg-white rounded-t-full" />
+                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-brand-teal-600 dark:bg-white rounded-t-full" />
                   )}
                 </button>
               ))}
@@ -163,7 +163,7 @@ export default function AllUsers() {
                     placeholder="Search name or email..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-indigo-500 dark:focus:border-[#8B5CF6] transition-all text-slate-900 dark:text-white placeholder-slate-400"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:focus:border-[#256B8B] transition-all text-slate-900 dark:text-white placeholder-slate-400"
                   />
                 </div>
               </div>
@@ -187,7 +187,7 @@ export default function AllUsers() {
                     {loading && (
                       <tr>
                         <td colSpan={4} className="py-16 text-center">
-                          <Loader2 className="w-6 h-6 animate-spin text-indigo-500 mx-auto" />
+                          <Loader2 className="w-6 h-6 animate-spin text-brand-teal-500 mx-auto" />
                         </td>
                       </tr>
                     )}
@@ -212,7 +212,7 @@ export default function AllUsers() {
                               {user.profileImage ? (
                                 <img src={user.profileImage} alt="" className="w-9 h-9 rounded object-cover" />
                               ) : (
-                                <div className="w-9 h-9 rounded bg-indigo-50 dark:bg-[#2D1F4D] text-indigo-700 dark:text-[#A67CFF] flex items-center justify-center text-xs font-bold shrink-0">
+                                <div className="w-9 h-9 rounded bg-brand-teal-50 dark:bg-[#142B3A] text-brand-teal-700 dark:text-[#4E8CA6] flex items-center justify-center text-xs font-bold shrink-0">
                                   {getInitials(user.name, user.email)}
                                 </div>
                               )}
@@ -237,7 +237,7 @@ export default function AllUsers() {
                           {activeTab !== 'SUPERADMIN' && (
                             <td className="py-3">
                               {user.instituteName ? (
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800/40 max-w-[180px] truncate">
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-brand-teal-50 dark:bg-brand-teal-900/20 text-brand-teal-700 dark:text-brand-teal-300 border border-brand-teal-100 dark:border-brand-teal-800/40 max-w-[180px] truncate">
                                   {user.instituteName}
                                 </span>
                               ) : (

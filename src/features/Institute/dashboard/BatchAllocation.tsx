@@ -81,8 +81,8 @@ function BatchFormModal({ initial, onClose, onSaved }: BatchFormModalProps) {
       <div className="bg-white dark:bg-[#15141B] rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-[#26252D]">
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-[#26252D]">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-              <Layers className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <div className="p-2 bg-brand-teal-50 dark:bg-brand-teal-900/30 rounded-lg">
+              <Layers className="w-5 h-5 text-brand-teal-600 dark:text-brand-teal-400" />
             </div>
             <div>
               <h2 className="font-bold text-slate-900 dark:text-white">{isEdit ? 'Edit Batch' : 'New Batch'}</h2>
@@ -103,7 +103,7 @@ function BatchFormModal({ initial, onClose, onSaved }: BatchFormModalProps) {
               type="text" required value={form.name}
               onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
               placeholder="e.g. IELTS Morning Batch 12"
-              className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 dark:text-white placeholder-slate-400"
+              className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400"
             />
           </div>
           <div className="space-y-1.5">
@@ -113,14 +113,14 @@ function BatchFormModal({ initial, onClose, onSaved }: BatchFormModalProps) {
               onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
               placeholder="Optional details about this batch…"
               rows={2}
-              className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 dark:text-white placeholder-slate-400 resize-none"
+              className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400 resize-none"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</label>
               <select value={form.status} onChange={e => setForm(p => ({ ...p, status: e.target.value as BatchStatus }))}
-                className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 dark:text-white">
+                className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white">
                 <option value="ACTIVE">Active</option>
                 <option value="INACTIVE">Inactive</option>
                 <option value="COMPLETED">Completed</option>
@@ -131,7 +131,7 @@ function BatchFormModal({ initial, onClose, onSaved }: BatchFormModalProps) {
               <input type="number" min={1} value={form.maxStudents}
                 onChange={e => setForm(p => ({ ...p, maxStudents: e.target.value }))}
                 placeholder="Unlimited"
-                className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 dark:text-white placeholder-slate-400"
+                className="w-full bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400"
               />
             </div>
           </div>
@@ -141,7 +141,7 @@ function BatchFormModal({ initial, onClose, onSaved }: BatchFormModalProps) {
               Cancel
             </button>
             <button type="submit" disabled={loading}
-              className="flex-1 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
+              className="flex-1 py-2.5 rounded-lg bg-brand-teal-600 hover:bg-brand-teal-700 text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
               {loading ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Batch'}
             </button>
@@ -171,7 +171,7 @@ function BatchRowMenu({ onEdit, onDelete }: { onEdit: () => void; onDelete: () =
       {open && (
         <div className="absolute right-0 top-full mt-1 z-30 w-36 bg-white dark:bg-[#1E1D27] border border-slate-200 dark:border-[#2E2D3A] rounded-xl shadow-xl py-1">
           <button onClick={() => { setOpen(false); onEdit(); }}
-            className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors">
+            className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm font-medium text-brand-teal-600 dark:text-brand-teal-400 hover:bg-brand-teal-50 dark:hover:bg-brand-teal-900/20 transition-colors">
             <Edit2 className="w-3.5 h-3.5" /> Edit
           </button>
           <button onClick={() => { setOpen(false); onDelete(); }}
@@ -197,8 +197,8 @@ interface MemberRowProps {
 
 function MemberRow({ member, accentColor, onRemove, removing }: MemberRowProps) {
   const bg = accentColor === 'purple'
-    ? 'bg-purple-100 dark:bg-[#2D1F4D] text-purple-700 dark:text-[#D97CFF]'
-    : 'bg-indigo-100 dark:bg-[#1C1A2F] text-indigo-700 dark:text-[#8B5CF6]';
+    ? 'bg-brand-blue-100 dark:bg-[#142B3A] text-brand-blue-700 dark:text-[#D97CFF]'
+    : 'bg-brand-teal-100 dark:bg-[#1C1A2F] text-brand-teal-700 dark:text-[#256B8B]';
   return (
     <div className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors group">
       {member.profileImage ? (
@@ -235,7 +235,7 @@ function AddMemberModal({ label, candidates, onAdd, adding }: AddMemberModalProp
   return (
     <>
       <button onClick={() => setOpen(true)} disabled={adding}
-        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800/50 disabled:opacity-50">
+        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-brand-teal-700 dark:text-brand-teal-300 bg-brand-teal-50 dark:bg-brand-teal-900/30 hover:bg-brand-teal-100 dark:hover:bg-brand-teal-900/50 rounded-lg transition-colors border border-brand-teal-200 dark:border-brand-teal-800/50 disabled:opacity-50">
         {adding ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UserPlus className="w-3.5 h-3.5" />}
         {label}
       </button>
@@ -244,8 +244,8 @@ function AddMemberModal({ label, candidates, onAdd, adding }: AddMemberModalProp
           <div className="bg-white dark:bg-[#15141B] rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-[#26252D] flex flex-col max-h-[80vh]">
             <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-[#26252D]">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-                  <UserPlus className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                <div className="p-2 bg-brand-teal-50 dark:bg-brand-teal-900/30 rounded-lg">
+                  <UserPlus className="w-5 h-5 text-brand-teal-600 dark:text-brand-teal-400" />
                 </div>
                 <h2 className="font-bold text-slate-900 dark:text-white">{label}</h2>
               </div>
@@ -273,7 +273,7 @@ function AddMemberModal({ label, candidates, onAdd, adding }: AddMemberModalProp
                         <div className="text-sm font-semibold text-slate-900 dark:text-gray-200 truncate">{c.name ?? '—'}</div>
                         <div className="text-xs text-slate-500 dark:text-slate-400 truncate">{c.email}</div>
                       </div>
-                      <div className="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="w-8 h-8 rounded-full bg-brand-teal-50 dark:bg-brand-teal-900/30 text-brand-teal-600 dark:text-brand-teal-400 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <Plus className="w-4 h-4" />
                       </div>
                     </button>
@@ -400,7 +400,7 @@ function BatchDetailPanel({ batchId, batchName, onClose, allTutors, allStudents 
             onClick={() => setActiveTab(tab.key)}
             className={`pb-3 px-3 text-sm font-medium flex items-center gap-2 relative transition-colors ${
               activeTab === tab.key
-                ? 'text-indigo-600 dark:text-white'
+                ? 'text-brand-teal-600 dark:text-white'
                 : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
             }`}
           >
@@ -408,11 +408,11 @@ function BatchDetailPanel({ batchId, batchName, onClose, allTutors, allStudents 
             {tab.label}
             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
               activeTab === tab.key
-                ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300'
+                ? 'bg-brand-teal-100 dark:bg-brand-teal-900/40 text-brand-teal-600 dark:text-brand-teal-300'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
             }`}>{tab.count}</span>
             {activeTab === tab.key && (
-              <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 dark:bg-white rounded-t-full" />
+              <div className="absolute bottom-0 left-0 w-full h-0.5 bg-brand-teal-600 dark:bg-white rounded-t-full" />
             )}
           </button>
         ))}
@@ -422,7 +422,7 @@ function BatchDetailPanel({ batchId, batchName, onClose, allTutors, allStudents 
       <div className="flex-1 overflow-y-auto">
         {loading ? (
           <div className="flex justify-center py-16">
-            <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+            <Loader2 className="w-6 h-6 animate-spin text-brand-teal-500" />
           </div>
         ) : (
           <div className="p-4 space-y-1">
@@ -611,11 +611,11 @@ export default function BatchAllocation() {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={load} className="p-2 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors" title="Refresh">
+                <button onClick={load} className="p-2 rounded-lg text-slate-400 hover:text-brand-teal-600 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors" title="Refresh">
                   <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                 </button>
                 <button onClick={() => setShowForm(true)}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 dark:bg-[#7C3AED] dark:hover:bg-[#6D28D9] text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
+                  className="flex items-center gap-2 px-4 py-2.5 bg-brand-teal-600 hover:bg-brand-teal-700 dark:bg-[#185A78] dark:hover:bg-[#185A78] text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
                   <Plus className="w-4 h-4" /> New Batch
                 </button>
               </div>
@@ -641,14 +641,14 @@ export default function BatchAllocation() {
             <div className="bg-white dark:bg-transparent border border-slate-200 dark:border-transparent rounded-xl shadow-sm dark:shadow-none overflow-hidden">
               {loading ? (
                 <div className="py-16 flex justify-center">
-                  <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+                  <Loader2 className="w-6 h-6 animate-spin text-brand-teal-500" />
                 </div>
               ) : batches.length === 0 ? (
                 <div className="py-16 text-center">
                   <Layers className="w-14 h-14 text-slate-200 dark:text-slate-700 mx-auto mb-3" />
                   <p className="text-slate-700 dark:text-slate-300 font-semibold">No batches yet</p>
                   <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">Create your first batch to start allocating students.</p>
-                  <button onClick={() => setShowForm(true)} className="mt-4 flex items-center gap-2 mx-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors">
+                  <button onClick={() => setShowForm(true)} className="mt-4 flex items-center gap-2 mx-auto px-4 py-2 bg-brand-teal-600 hover:bg-brand-teal-700 text-white rounded-lg text-sm font-medium transition-colors">
                     <Plus className="w-4 h-4" /> Create Batch
                   </button>
                 </div>
@@ -673,11 +673,11 @@ export default function BatchAllocation() {
                           <tr
                             key={batch.id}
                             onClick={() => setSelectedBatchId(isSelected ? null : batch.id)}
-                            className={`hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors cursor-pointer ${isSelected ? 'bg-indigo-50/50 dark:bg-indigo-900/10' : ''}`}
+                            className={`hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors cursor-pointer ${isSelected ? 'bg-brand-teal-50/50 dark:bg-brand-teal-900/10' : ''}`}
                           >
                             <td className="py-4 pl-2">
                               <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-[#1C1A2F] text-indigo-700 dark:text-[#8B5CF6] flex items-center justify-center shrink-0">
+                                <div className="w-8 h-8 rounded-lg bg-brand-teal-100 dark:bg-[#1C1A2F] text-brand-teal-700 dark:text-[#256B8B] flex items-center justify-center shrink-0">
                                   <Layers className="w-4 h-4" />
                                 </div>
                                 <div>
@@ -699,7 +699,7 @@ export default function BatchAllocation() {
                                 {/* Instructor avatar stack */}
                                 <div className="flex -space-x-2">
                                   {batch.instructors.slice(0, 3).map(i => (
-                                    <div key={i.userId} className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/40 border-2 border-white dark:border-[#0B0A10] text-purple-700 dark:text-purple-300 text-[8px] font-bold flex items-center justify-center">
+                                    <div key={i.userId} className="w-6 h-6 rounded-full bg-brand-blue-100 dark:bg-brand-blue-900/40 border-2 border-white dark:border-[#0B0A10] text-brand-blue-700 dark:text-brand-blue-300 text-[8px] font-bold flex items-center justify-center">
                                       {getInitials(i.name, i.email)}
                                     </div>
                                   ))}
@@ -708,14 +708,14 @@ export default function BatchAllocation() {
                               </div>
                             </td>
                             <td className="py-4">
-                              <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">{batch.studentCount}</span>
+                              <span className="text-sm font-semibold text-brand-teal-600 dark:text-brand-teal-400">{batch.studentCount}</span>
                             </td>
                             <td className="py-4">
                               {batch.maxStudents ? (
                                 <div className="flex items-center gap-2">
                                   <div className="w-20 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                                     <div
-                                      className="h-full bg-indigo-500 rounded-full"
+                                      className="h-full bg-brand-teal-500 rounded-full"
                                       style={{ width: `${Math.min(100, (batch.studentCount / batch.maxStudents) * 100)}%` }}
                                     />
                                   </div>
@@ -731,7 +731,7 @@ export default function BatchAllocation() {
                               <div className="flex items-center justify-end gap-1">
                                 <button
                                   onClick={() => setSelectedBatchId(isSelected ? null : batch.id)}
-                                  className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors"
+                                  className="p-1.5 rounded-lg text-slate-400 hover:text-brand-teal-600 hover:bg-brand-teal-50 dark:hover:bg-brand-teal-900/20 transition-colors"
                                   title="Manage members"
                                 >
                                   <ChevronRight className={`w-4 h-4 transition-transform ${isSelected ? 'rotate-90' : ''}`} />
@@ -753,9 +753,9 @@ export default function BatchAllocation() {
 
             {/* Tip */}
             {!loading && batches.length > 0 && (
-              <div className="flex items-start gap-2 bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30 rounded-xl p-4">
-                <CheckCircle2 className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
-                <p className="text-xs text-indigo-700 dark:text-indigo-300">
+              <div className="flex items-start gap-2 bg-brand-teal-50 dark:bg-brand-teal-900/10 border border-brand-teal-100 dark:border-brand-teal-800/30 rounded-xl p-4">
+                <CheckCircle2 className="w-4 h-4 text-brand-teal-500 mt-0.5 shrink-0" />
+                <p className="text-xs text-brand-teal-700 dark:text-brand-teal-300">
                   Click any batch row or the <ChevronRight className="w-3 h-3 inline" /> button to open the member panel. The same instructor can be assigned to multiple batches.
                 </p>
               </div>

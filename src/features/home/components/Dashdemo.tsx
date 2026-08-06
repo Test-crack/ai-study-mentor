@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserRound } from 'lucide-react';
+import testcrackLogo from '@/assets/testcrack-logo.svg';
 
 const Dashdemo: React.FC = () => {
   const handleGoBack = () => {
@@ -7,97 +7,43 @@ const Dashdemo: React.FC = () => {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#f4f7f9',
-      padding: '100px 20px 40px',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
-    }}>
-      <style>
-        {`
-          @keyframes subtleFadeIn {
-            from { opacity: 0; transform: scale(0.99); }
-            to { opacity: 1; transform: scale(1); }
-          }
-          .video-transition {
-            animation: subtleFadeIn 0.4s ease-out forwards;
-          }
-        `}
-      </style>
+    <div className="min-h-screen bg-brand-bg font-plex text-brand-text antialiased">
 
-      <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-
-        {/* Navigation */}
-        <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 transform-gpu">
-          <div className="w-full px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center space-x-2">
-                <div className="p-2 bg-indigo-700 rounded-xl">
-                  <UserRound className="h-6 w-6 text-white" />
-                </div>
-                <span className="text-xl font-bold text-indigo-700">
-                  TestCrack
-                </span>
-              </div>
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-brand-ink border-b border-brand-line-12 transform-gpu">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-2">
+              <img src={testcrackLogo} alt="TestCrack" className="h-9 w-9 object-contain" />
+              <span className="font-manrope text-xl font-extrabold tracking-[-0.03em] text-brand-bg">TestCrack</span>
             </div>
           </div>
-        </nav>
+        </div>
+      </nav>
+
+      <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
 
         {/* BACK BUTTON */}
-        <div style={{ marginBottom: '20px' }}>
+        <div className="mb-8">
           <button
             onClick={handleGoBack}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '10px 16px',
-              backgroundColor: '#4338ca',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: '600',
-              color: '#f2f3f6',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-              transition: 'all 0.2s ease'
-            }}
+            className="inline-flex items-center gap-2 px-5 py-[11px] rounded-md border border-brand-line bg-white text-[14.5px] font-semibold text-brand-ink hover:border-brand-teal hover:text-brand-teal transition-colors duration-150"
           >
-            <span>←</span> Back to Landing Page
+            <span aria-hidden="true">←</span> Back to Landing Page
           </button>
         </div>
 
         {/* HEADING */}
-        <h2 style={{
-          textAlign: 'center',
-          fontSize: '2.5rem',
-          color: '#1e293b',
-          marginBottom: '40px',
-          fontWeight: '800',
-          letterSpacing: '-1px'
-        }}>
+        <h2 className="font-manrope text-4xl sm:text-5xl font-extrabold text-brand-ink text-center leading-[1.1] tracking-[-0.04em] mb-10">
           How We Work
         </h2>
 
         {/* VIDEO */}
-        <div style={{
-          backgroundColor: '#ffffff',
-          borderRadius: '16px',
-          padding: '20px',
-          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)',
-          border: '1px solid #f1f5f9'
-        }}>
-          <div
-            className="video-transition"
-            style={{ borderRadius: '8px', overflow: 'hidden', backgroundColor: '#000' }}
-          >
+        <div className="bg-white border border-brand-line p-5">
+          <div className="overflow-hidden bg-black animate-in fade-in duration-500">
             <iframe
               width="100%"
-              style={{
-                display: 'block',
-                borderRadius: '8px',
-                aspectRatio: '16/9',
-                border: 'none'
-              }}
+              className="block aspect-video border-none"
               src="https://www.youtube.com/embed/AHnEKvZN0-o?si=-yNT4tjtsByUt__v&autoplay=1&mute=1"
               title="TestCrack Demo"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

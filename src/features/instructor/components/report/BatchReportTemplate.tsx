@@ -138,7 +138,7 @@ export function BatchReportTemplate({ data, onClose }: Props) {
         <div className="flex items-center gap-3">
           <button
             onClick={() => window.print()}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-teal-600 text-white text-sm font-medium hover:bg-brand-teal-700 transition-colors"
           >
             Save as PDF
           </button>
@@ -154,9 +154,9 @@ export function BatchReportTemplate({ data, onClose }: Props) {
       {/* ===== PAGE 1 ===== */}
       <div className="max-w-[800px] mx-auto bg-white shadow-lg my-8 p-12 print:shadow-none print:my-0 print:p-[1.5cm]">
         {/* Header */}
-        <div className="flex items-start justify-between pb-4 border-b-2 border-indigo-600 mb-8">
+        <div className="flex items-start justify-between pb-4 border-b-2 border-brand-teal-600 mb-8">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-md bg-indigo-600 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-md bg-brand-teal-600 flex items-center justify-center flex-shrink-0">
               <span className="text-white font-black text-sm">TC</span>
             </div>
             <div>
@@ -165,7 +165,7 @@ export function BatchReportTemplate({ data, onClose }: Props) {
             </div>
           </div>
           <div className="text-right">
-            <div className="text-[10px] font-black uppercase tracking-widest text-indigo-600 mb-0.5">Batch Performance Report</div>
+            <div className="text-[10px] font-black uppercase tracking-widest text-brand-teal-600 mb-0.5">Batch Performance Report</div>
             <div className="text-xs text-slate-500">{data.generatedAt}</div>
             <div className="text-[10px] text-slate-400 font-mono">{data.reportId}</div>
           </div>
@@ -199,7 +199,7 @@ export function BatchReportTemplate({ data, onClose }: Props) {
           <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3">Executive Summary</h2>
           <div className="grid grid-cols-4 gap-4">
             {[
-              { label: 'Total Students', value: data.batch.studentCount, accent: 'bg-indigo-500' },
+              { label: 'Total Students', value: data.batch.studentCount, accent: 'bg-brand-teal-500' },
               { label: 'Avg IA Band', value: data.ia_summary.avg_band.toFixed(1), accent: 'bg-emerald-500' },
               { label: 'IA Completion Rate', value: `${data.ia_summary.completion_rate}%`, accent: 'bg-amber-500' },
               { label: 'At-Risk Students', value: data.at_risk.length, accent: 'bg-rose-500' },
@@ -238,7 +238,7 @@ export function BatchReportTemplate({ data, onClose }: Props) {
           <div className="grid grid-cols-2 gap-4">
             {/* IA Summary */}
             <div className="bg-white border border-slate-200 rounded-xl p-5">
-              <div className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-3">IA Summary</div>
+              <div className="text-xs font-bold text-brand-teal-600 uppercase tracking-wider mb-3">IA Summary</div>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-500">Avg Band</span>
@@ -256,7 +256,7 @@ export function BatchReportTemplate({ data, onClose }: Props) {
             </div>
             {/* Mock Summary */}
             <div className="bg-white border border-slate-200 rounded-xl p-5">
-              <div className="text-xs font-bold text-violet-600 uppercase tracking-wider mb-3">Mock Summary</div>
+              <div className="text-xs font-bold text-brand-blue-600 uppercase tracking-wider mb-3">Mock Summary</div>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-500">Avg Real Band</span>

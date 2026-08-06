@@ -50,14 +50,14 @@ export const FeaturesGrid = () => {
               <feature.icon className="h-6 w-6" />
             </div>
             
-            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2 group-hover:text-brand-teal-600 dark:group-hover:text-brand-teal-400 transition-colors">
               {feature.title}
             </h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">
               {feature.description}
             </p>
 
-            <div className="flex items-center text-xs font-semibold text-slate-400 dark:text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+            <div className="flex items-center text-xs font-semibold text-slate-400 dark:text-slate-500 group-hover:text-brand-teal-600 dark:group-hover:text-brand-teal-400 transition-colors">
               Launch Tool <ArrowRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-1" />
             </div>
           </CardContent>

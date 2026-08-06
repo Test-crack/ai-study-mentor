@@ -144,7 +144,7 @@ export const HistoryChart = ({ history }: HistoryChartProps) => {
           onClick={() => setChartType("line")}
           className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
             chartType === "line" 
-              ? "bg-purple-500 text-white" 
+              ? "bg-brand-blue-500 text-white" 
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}
         >
@@ -154,7 +154,7 @@ export const HistoryChart = ({ history }: HistoryChartProps) => {
           onClick={() => setChartType("area")}
           className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
             chartType === "area" 
-              ? "bg-purple-500 text-white" 
+              ? "bg-brand-blue-500 text-white" 
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}
         >
@@ -164,7 +164,7 @@ export const HistoryChart = ({ history }: HistoryChartProps) => {
           onClick={() => setChartType("bar")}
           className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
             chartType === "bar" 
-              ? "bg-purple-500 text-white" 
+              ? "bg-brand-blue-500 text-white" 
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}
         >
@@ -182,13 +182,13 @@ export const HistoryChart = ({ history }: HistoryChartProps) => {
         </TabsList>
 
         <TabsContent value="overview" className="mt-6">
-          <Card className="p-6 bg-gradient-to-br from-purple-50 to-blue-50">
+          <Card className="p-6 bg-gradient-to-br from-brand-blue-50 to-blue-50">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-purple-600" />
+              <TrendingUp className="h-5 w-5 text-brand-blue-600" />
               Overall Performance Trends
             </h3>
             {renderChart([
-              { key: "wpm", name: "Reading Speed (WPM)", color: "#8b5cf6" },
+              { key: "wpm", name: "Reading Speed (WPM)", color: "#256B8B" },
               { key: "accuracy", name: "Accuracy", color: "#3b82f6" },
               { key: "speedLearning", name: "Speed Learning", color: "#10b981" }
             ])}
@@ -196,13 +196,13 @@ export const HistoryChart = ({ history }: HistoryChartProps) => {
         </TabsContent>
 
         <TabsContent value="speed" className="mt-6">
-          <Card className="p-6 bg-gradient-to-br from-purple-50 to-purple-100">
+          <Card className="p-6 bg-gradient-to-br from-brand-blue-50 to-brand-blue-100">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <Zap className="h-5 w-5 text-purple-600" />
+              <Zap className="h-5 w-5 text-brand-blue-600" />
               Reading Speed Progress
             </h3>
             {renderChart([
-              { key: "wpm", name: "Words Per Minute", color: "#8b5cf6" }
+              { key: "wpm", name: "Words Per Minute", color: "#256B8B" }
             ])}
             <div className="mt-4 p-4 bg-white rounded-lg">
               <p className="text-sm text-gray-600">

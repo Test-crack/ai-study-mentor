@@ -47,7 +47,7 @@ export const AdminStats = () => {
       icon: Users,
       trend: "+12.5%",
       trendUp: true,
-      color: "from-blue-600 to-indigo-500",
+      color: "from-blue-600 to-brand-teal-500",
     },
     {
       title: "Active Courses",
@@ -55,7 +55,7 @@ export const AdminStats = () => {
       icon: BookOpen,
       trend: "+2.4%",
       trendUp: true,
-      color: "from-purple-600 to-fuchsia-500",
+      color: "from-brand-blue-600 to-brand-blue-500",
     },
     {
       title: "Total Revenue",

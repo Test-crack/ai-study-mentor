@@ -112,10 +112,10 @@ const Auth = () => {
       <div className="flex w-full max-w-5xl bg-white rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.1)] min-h-[650px] flex-col md:flex-row border border-slate-100">
         
         {/* LEFT SIDE: Visual Branding (The Cover) */}
-        <div className="w-full md:w-[45%] bg-gradient-to-br from-indigo-900 to-blue-800 p-10 md:p-14 flex flex-col justify-between relative overflow-hidden text-white">
+        <div className="w-full md:w-[45%] bg-gradient-to-br from-brand-teal-900 to-blue-800 p-10 md:p-14 flex flex-col justify-between relative overflow-hidden text-white">
           {/* Decorative Blur Elements - Enhanced for Depth */}
           <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-32 -mt-32 blur-[100px] pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/20 rounded-full -ml-20 -mb-20 blur-[80px] pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-blue-500/20 rounded-full -ml-20 -mb-20 blur-[80px] pointer-events-none" />
           
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-10">
@@ -127,20 +127,20 @@ const Auth = () => {
                 <h2 style={{fontFamily:"sans-serif",fontWeight:"bold"}} className="text-4xl lg:text-5xl font-extrabold leading-[1.15]">
                   {isForgotPassword ? "Protect Your Progress." : isSignUp ? "Start Your AI Journey." : "Welcome Back to TestCrack."}
                 </h2>
-                <p className="text-purple-100/80 text-lg leading-relaxed max-w-xs">
+                <p className="text-brand-blue-100/80 text-lg leading-relaxed max-w-xs">
                   Access your personalized study companion and master your exams with ease.
                 </p>
             </div>
           </div>
 
-          {/* <div className="relative z-10 p-6 bg-gradient-to-r from-white/10 to-indigo-500/10 backdrop-blur-md border border-white/10 rounded-2xl shadow-sm hover:bg-white/15 transition-colors duration-300">
+          {/* <div className="relative z-10 p-6 bg-gradient-to-r from-white/10 to-brand-teal-500/10 backdrop-blur-md border border-white/10 rounded-2xl shadow-sm hover:bg-white/15 transition-colors duration-300">
             <div className="flex items-center gap-3 mb-2">
               <div className="bg-amber-400/20 p-1.5 rounded-lg">
                   <Rocket className="h-4 w-4 text-amber-300" />
               </div>
-              <span className="font-bold text-xs uppercase tracking-widest text-indigo-100">Ready to Demo</span>
+              <span className="font-bold text-xs uppercase tracking-widest text-brand-teal-100">Ready to Demo</span>
             </div>
-            <p className="text-sm text-indigo-50/90 leading-relaxed">
+            <p className="text-sm text-brand-teal-50/90 leading-relaxed">
               Sign up to test real AI-powered note analysis and YouTube learning features.
             </p>
           </div> */}
@@ -208,7 +208,7 @@ const Auth = () => {
               <Input
                 id="email"
                 type="email"
-                className="h-12 bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 rounded-2xl transition-all"
+                className="h-12 bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-brand-blue-500/20 focus:border-brand-blue-500 rounded-2xl transition-all"
                 placeholder="name@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -224,7 +224,7 @@ const Auth = () => {
                     <button
                       type="button"
                       onClick={() => setIsForgotPassword(true)}
-                      className="text-xs font-bold text-purple-600 hover:text-purple-800 transition-colors"
+                      className="text-xs font-bold text-brand-blue-600 hover:text-brand-blue-800 transition-colors"
                     >
                       Forgot password?
                     </button>
@@ -234,7 +234,7 @@ const Auth = () => {
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    className="h-12 bg-slate-50 border-slate-200 pr-12 focus:bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 rounded-2xl transition-all"
+                    className="h-12 bg-slate-50 border-slate-200 pr-12 focus:bg-white focus:ring-2 focus:ring-brand-blue-500/20 focus:border-brand-blue-500 rounded-2xl transition-all"
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -272,7 +272,7 @@ const Auth = () => {
             {isForgotPassword ? (
               <button
                 onClick={() => setIsForgotPassword(false)}
-                className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-purple-600 transition-colors"
+                className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-brand-blue-600 transition-colors"
               >
                 <ChevronLeft className="h-4 w-4" />
                 Back to sign in
@@ -286,7 +286,7 @@ const Auth = () => {
                     setEmail("");
                     setPassword("");
                   }}
-                  className="ml-2 font-bold text-purple-600 hover:text-purple-800 transition-colors"
+                  className="ml-2 font-bold text-brand-blue-600 hover:text-brand-blue-800 transition-colors"
                 >
                   {isSignUp ? "Sign in instead" : "Create account"}
                 </button>

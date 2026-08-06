@@ -125,7 +125,7 @@ export default function ReadingHistoryPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard icon={<TrendingUp />} label="Avg Overall Score" value={`${stats.avgScore}/100`} color="text-emerald-500" bg="bg-emerald-50 dark:bg-emerald-500/10" />
                 <StatCard icon={<Zap />} label="Peak Reading Speed" value={`${stats.peakWpm} WPM`} color="text-[#0ea5e9]" bg="bg-[#0ea5e9]/10" />
-                <StatCard icon={<Award />} label="Practice Sessions" value={stats.totalAssessments} color="text-[#8a42f5]" bg="bg-[#8a42f5]/10" />
+                <StatCard icon={<Award />} label="Practice Sessions" value={stats.totalAssessments} color="text-[#256B8B]" bg="bg-[#256B8B]/10" />
                 <StatCard icon={<Target />} label="Avg Accuracy" value={`${stats.avgAccuracy}%`} color="text-amber-500" bg="bg-amber-50 dark:bg-amber-500/10" />
               </div>
 
@@ -150,7 +150,7 @@ export default function ReadingHistoryPage() {
                             labelStyle={{ color: '#0b132b', fontWeight: 'bold' }}
                         />
                         <Area type="monotone" dataKey="score" stroke="#0ea5e9" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" name="Overall Score" />
-                        <Line type="monotone" dataKey="wpm" stroke="#8a42f5" strokeWidth={3} dot={false} name="WPM" />
+                        <Line type="monotone" dataKey="wpm" stroke="#256B8B" strokeWidth={3} dot={false} name="WPM" />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>

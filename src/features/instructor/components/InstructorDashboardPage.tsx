@@ -57,7 +57,7 @@ export default function InstructorDashboardPage() {
 
       {/* ── Ambient Background Glows ── */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden dark:block hidden transition-opacity duration-500">
-        <div className="absolute -top-60 left-1/4 w-[40rem] h-[40rem] rounded-full bg-indigo-900/10 blur-[120px]" />
+        <div className="absolute -top-60 left-1/4 w-[40rem] h-[40rem] rounded-full bg-brand-teal-900/10 blur-[120px]" />
         <div className="absolute top-1/2 -right-32 w-[30rem] h-[30rem] rounded-full bg-blue-900/10 blur-[100px]" />
       </div>
 
@@ -83,14 +83,14 @@ export default function InstructorDashboardPage() {
           ">
 
             {/* Ambient Background Orbs */}
-            <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-indigo-200/30 dark:bg-indigo-600/10 blur-[80px] transition-colors duration-500" />
+            <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-brand-teal-200/30 dark:bg-brand-teal-600/10 blur-[80px] transition-colors duration-500" />
             <div className="pointer-events-none absolute -bottom-32 -left-20 w-80 h-80 rounded-full bg-blue-200/30 dark:bg-blue-600/10 blur-[90px] transition-colors duration-500" />
 
             {/* Scattered Floating Particles (Mimicking the Video) */}
             <div className="pointer-events-none absolute inset-0 opacity-70">
               <div className="absolute top-8 left-[30%] w-2 h-2 rounded-full bg-blue-400/50 dark:bg-blue-400/80 blur-[1px]" />
-              <div className="absolute top-1/4 left-[45%] w-1.5 h-1.5 rounded-full bg-indigo-400/60 dark:bg-indigo-400/90" />
-              <div className="absolute bottom-12 left-[35%] w-3 h-3 rounded-full bg-purple-400/40 dark:bg-purple-400/60 blur-[2px]" />
+              <div className="absolute top-1/4 left-[45%] w-1.5 h-1.5 rounded-full bg-brand-teal-400/60 dark:bg-brand-teal-400/90" />
+              <div className="absolute bottom-12 left-[35%] w-3 h-3 rounded-full bg-brand-blue-400/40 dark:bg-brand-blue-400/60 blur-[2px]" />
               <div className="absolute top-1/3 right-[35%] w-2.5 h-2.5 rounded-full bg-teal-400/50 dark:bg-teal-400/70" />
               <div className="absolute bottom-1/4 right-[40%] w-1.5 h-1.5 rounded-full bg-blue-500/50 dark:bg-blue-400/80 blur-[1px]" />
             </div>
@@ -145,8 +145,8 @@ export default function InstructorDashboardPage() {
                         }
                       </div>
 
-                      <div className="flex items-center gap-2 h-9 pl-3 pr-4 rounded-full text-xs font-bold bg-blue-100/50 border border-blue-200/60 text-blue-700 dark:bg-indigo-500/10 dark:border-indigo-500/20 dark:text-indigo-300 backdrop-blur-md transition-colors duration-500">
-                        <span className="grid place-items-center h-5 w-5 rounded-full bg-blue-200/60 dark:bg-indigo-500/20">
+                      <div className="flex items-center gap-2 h-9 pl-3 pr-4 rounded-full text-xs font-bold bg-blue-100/50 border border-blue-200/60 text-blue-700 dark:bg-brand-teal-500/10 dark:border-brand-teal-500/20 dark:text-brand-teal-300 backdrop-blur-md transition-colors duration-500">
+                        <span className="grid place-items-center h-5 w-5 rounded-full bg-blue-200/60 dark:bg-brand-teal-500/20">
                           <Users className="h-3 w-3 shrink-0" />
                         </span>
                         {activeToday} / {totalStudents} active today

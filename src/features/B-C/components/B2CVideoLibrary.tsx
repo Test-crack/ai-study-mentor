@@ -117,12 +117,12 @@ const MOCK_VIDEOS: VideoEntry[] = [
 ];
 
 const SKILL_COLORS: Record<string, { bg: string; text: string; border: string; dot: string }> = {
-  Reading:    { bg: 'bg-violet-50 dark:bg-violet-500/10',  text: 'text-violet-600 dark:text-violet-400',  border: 'border-violet-200 dark:border-violet-500/30',  dot: 'bg-violet-500'  },
+  Reading:    { bg: 'bg-brand-blue-50 dark:bg-brand-blue-500/10',  text: 'text-brand-blue-600 dark:text-brand-blue-400',  border: 'border-brand-blue-200 dark:border-brand-blue-500/30',  dot: 'bg-brand-blue-500'  },
   Writing:    { bg: 'bg-amber-50 dark:bg-amber-500/10',    text: 'text-amber-600 dark:text-amber-400',    border: 'border-amber-200 dark:border-amber-500/30',    dot: 'bg-amber-500'   },
   Listening:  { bg: 'bg-sky-50 dark:bg-sky-500/10',        text: 'text-sky-600 dark:text-sky-400',        border: 'border-sky-200 dark:border-sky-500/30',        dot: 'bg-sky-500'     },
   Speaking:   { bg: 'bg-rose-50 dark:bg-rose-500/10',      text: 'text-rose-600 dark:text-rose-400',      border: 'border-rose-200 dark:border-rose-500/30',      dot: 'bg-rose-500'    },
   Vocabulary: { bg: 'bg-teal-50 dark:bg-teal-500/10',      text: 'text-teal-600 dark:text-teal-400',      border: 'border-teal-200 dark:border-teal-500/30',      dot: 'bg-teal-500'    },
-  Grammar:    { bg: 'bg-indigo-50 dark:bg-indigo-500/10',  text: 'text-indigo-600 dark:text-indigo-400',  border: 'border-indigo-200 dark:border-indigo-500/30',  dot: 'bg-indigo-500'  },
+  Grammar:    { bg: 'bg-brand-teal-50 dark:bg-brand-teal-500/10',  text: 'text-brand-teal-600 dark:text-brand-teal-400',  border: 'border-brand-teal-200 dark:border-brand-teal-500/30',  dot: 'bg-brand-teal-500'  },
 };
 
 const ALL_SKILLS = ['All', 'Reading', 'Writing', 'Listening', 'Speaking', 'Vocabulary', 'Grammar'] as const;
@@ -209,7 +209,7 @@ const VideoModal = ({ video, onClose, onWatch }: VideoModalProps) => {
           {/* Keyword highlights */}
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Tag className="w-3.5 h-3.5 text-indigo-400" />
+              <Tag className="w-3.5 h-3.5 text-brand-teal-400" />
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                 Key concepts in this video
               </p>
@@ -235,7 +235,7 @@ const VideoModal = ({ video, onClose, onWatch }: VideoModalProps) => {
             href={`https://www.youtube.com/watch?v=${video.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-indigo-500 transition-colors"
+            className="inline-flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-brand-teal-500 transition-colors"
           >
             <ExternalLink className="w-3.5 h-3.5" />
             Open in YouTube
@@ -305,7 +305,7 @@ const VideoCard = ({ video, onPlay }: VideoCardProps) => {
       {/* Card body */}
       <div className="p-4">
         <p className="text-xs text-slate-400 font-medium mb-1">{video.channel} · Band {video.band_target}</p>
-        <h3 className="text-sm font-bold text-slate-800 dark:text-white leading-snug line-clamp-2 mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+        <h3 className="text-sm font-bold text-slate-800 dark:text-white leading-snug line-clamp-2 mb-2 group-hover:text-brand-teal-600 dark:group-hover:text-brand-teal-400 transition-colors">
           {video.title}
         </h3>
         <p className="text-xs text-slate-400 dark:text-slate-500 line-clamp-2 leading-relaxed mb-3">
@@ -395,7 +395,7 @@ export default function B2CVideoLibrary({ className }: B2CVideoLibraryProps) {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h2 className="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight flex items-center gap-2">
-            <Play className="w-5 h-5 text-indigo-500 fill-indigo-500" />
+            <Play className="w-5 h-5 text-brand-teal-500 fill-brand-teal-500" />
             Video Library
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
@@ -423,7 +423,7 @@ export default function B2CVideoLibrary({ className }: B2CVideoLibraryProps) {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search by skill, keyword, or topic..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-brand-teal-400 focus:ring-1 focus:ring-brand-teal-400 transition-all"
           />
           {searchQuery && (
             <button
@@ -452,7 +452,7 @@ export default function B2CVideoLibrary({ className }: B2CVideoLibraryProps) {
                   isActive
                     ? colors
                       ? cn(colors.bg, colors.text, colors.border, 'shadow-sm')
-                      : 'bg-indigo-500 text-white border-indigo-500 shadow-sm'
+                      : 'bg-brand-teal-500 text-white border-brand-teal-500 shadow-sm'
                     : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-300'
                 )}
               >
@@ -486,7 +486,7 @@ export default function B2CVideoLibrary({ className }: B2CVideoLibraryProps) {
           <p className="text-sm font-bold text-slate-500 dark:text-slate-400">No videos match your search.</p>
           <button
             onClick={() => { setSearchQuery(''); setActiveSkill('All'); }}
-            className="mt-3 text-xs font-bold text-indigo-500 hover:text-indigo-600 transition-colors"
+            className="mt-3 text-xs font-bold text-brand-teal-500 hover:text-brand-teal-600 transition-colors"
           >
             Clear filters
           </button>

@@ -42,7 +42,7 @@ export const RequireActiveInstitute = ({ children }: { children?: React.ReactNod
               </p>
               <a 
                 href="mailto:blinkgrid@gmail.com" 
-                className="flex items-center justify-center gap-2 text-indigo-600 dark:text-indigo-400 font-semibold hover:underline"
+                className="flex items-center justify-center gap-2 text-brand-teal-600 dark:text-brand-teal-400 font-semibold hover:underline"
               >
                 <Mail className="w-4 h-4" />
                 blinkgrid@gmail.com

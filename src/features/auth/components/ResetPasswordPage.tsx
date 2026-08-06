@@ -80,7 +80,7 @@ const ResetPasswordPage = () => {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
         <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue-600 mx-auto"></div>
           <p className="text-slate-500 font-medium">Verifying your reset link...</p>
         </div>
       </div>
@@ -92,9 +92,9 @@ const ResetPasswordPage = () => {
       <div className="flex w-full max-w-5xl bg-white rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.1)] min-h-[650px] flex-col md:flex-row border border-slate-100">
         
         {/* LEFT SIDE: Visual Branding */}
-        <div className="w-full md:w-[45%] bg-indigo-700 p-10 md:p-14 flex flex-col justify-between relative overflow-hidden text-white">
+        <div className="w-full md:w-[45%] bg-brand-teal-700 p-10 md:p-14 flex flex-col justify-between relative overflow-hidden text-white">
           <div className="absolute top-0 right-0 w-72 h-72 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-400/20 rounded-full -ml-12 -mb-12 blur-2xl" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-brand-blue-400/20 rounded-full -ml-12 -mb-12 blur-2xl" />
           
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-12">
@@ -106,7 +106,7 @@ const ResetPasswordPage = () => {
               <h2 className="text-4xl lg:text-5xl font-extrabold leading-[1.15]">
                 {validSession ? "Secure Your Account." : "Link Expired."}
               </h2>
-              <p className="text-purple-100/80 text-lg leading-relaxed max-w-xs">
+              <p className="text-brand-blue-100/80 text-lg leading-relaxed max-w-xs">
                 {validSession 
                   ? "Choose a strong password to protect your learning progress and data."
                   : "For your security, reset links are only valid for a limited time."}
@@ -120,7 +120,7 @@ const ResetPasswordPage = () => {
                 <ShieldCheck className="h-5 w-5 text-green-300" />
                 <span className="font-bold text-sm uppercase tracking-wider">Security First</span>
               </div>
-              <p className="text-sm text-indigo-100/80">
+              <p className="text-sm text-brand-teal-100/80">
                 Update your password to regain access to your AI-powered dashboard.
               </p>
             </div>
@@ -159,7 +159,7 @@ const ResetPasswordPage = () => {
                     <Input
                       id="newPassword"
                       type={showPassword ? "text" : "password"}
-                      className="h-12 bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 rounded-2xl transition-all"
+                      className="h-12 bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-brand-blue-500/20 focus:border-brand-blue-500 rounded-2xl transition-all"
                       placeholder="••••••••"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
@@ -181,7 +181,7 @@ const ResetPasswordPage = () => {
                     <Input
                       id="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
-                      className="h-12 bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 rounded-2xl transition-all"
+                      className="h-12 bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-brand-blue-500/20 focus:border-brand-blue-500 rounded-2xl transition-all"
                       placeholder="••••••••"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
@@ -216,7 +216,7 @@ const ResetPasswordPage = () => {
               <div className="mt-10 text-center">
                 <button
                   onClick={() => navigate("/login")}
-                  className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-purple-600 transition-colors"
+                  className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-brand-blue-600 transition-colors"
                 >
                   <ChevronLeft className="h-4 w-4" />
                   Back to sign in

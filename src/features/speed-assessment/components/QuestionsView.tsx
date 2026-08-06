@@ -75,7 +75,7 @@ export const QuestionsView = ({
           ))}
         </div>
         
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg">
+        <div className="bg-gradient-to-r from-blue-50 to-brand-blue-50 p-4 rounded-lg">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-700">Progress</span>
             <span className="text-sm font-medium text-gray-700">

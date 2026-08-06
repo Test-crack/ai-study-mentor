@@ -358,7 +358,7 @@ export default function StudentProfilePage() {
       {/* Header Section */}
       <div className="relative rounded-3xl overflow-hidden bg-white dark:bg-slate-900 shadow-xl border border-slate-100 dark:border-slate-800">
         {/* Cover / Banner Gradient */}
-        <div className="h-32 bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-600 dark:from-indigo-900 dark:to-slate-900"></div>
+        <div className="h-32 bg-gradient-to-r from-brand-teal-600 via-brand-blue-600 to-brand-blue-600 dark:from-brand-teal-900 dark:to-slate-900"></div>
 
         <div className="px-8 pb-8">
           <div className="flex flex-col md:flex-row items-end -mt-12 gap-6">
@@ -374,7 +374,7 @@ export default function StudentProfilePage() {
                 {profile?.profileImage ? (
                   <img src={profile.profileImage} alt="Profile" className="h-full w-full object-cover" />
                 ) : (
-                  <span className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{getInitials()}</span>
+                  <span className="text-3xl font-bold text-brand-teal-600 dark:text-brand-teal-400">{getInitials()}</span>
                 )}
 
                 {/* Upload Overlay */}
@@ -403,7 +403,7 @@ export default function StudentProfilePage() {
               </h1>
               <div className="flex items-center justify-center md:justify-start gap-4 text-sm text-slate-500 dark:text-slate-400">
                 <span className="flex items-center gap-1"><Mail className="h-3 w-3" /> {profile?.email}</span>
-                <Badge variant="secondary" className="bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border-indigo-100 dark:border-indigo-800">
+                <Badge variant="secondary" className="bg-brand-teal-50 text-brand-teal-700 dark:bg-brand-teal-900/30 dark:text-brand-teal-300 border-brand-teal-100 dark:border-brand-teal-800">
                   {profile?.role || 'STUDENT'}
                 </Badge>
               </div>
@@ -435,7 +435,7 @@ export default function StudentProfilePage() {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`py-4 text-sm font-semibold flex items-center gap-2 border-b-2 transition-all ${
                   activeTab === tab.id
-                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                    ? 'border-brand-teal-600 text-brand-teal-600 dark:text-brand-teal-400'
                     : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                 }`}
               >
@@ -465,7 +465,7 @@ export default function StudentProfilePage() {
                       id="name"
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
-                      className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:ring-indigo-500"
+                      className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:ring-brand-teal-500"
                     />
                   </div>
                   <div className="space-y-2">
@@ -475,7 +475,7 @@ export default function StudentProfilePage() {
                       value={formData.phoneNo}
                       onChange={(e) => handleInputChange('phoneNo', e.target.value)}
                       placeholder="+1 234 567 890"
-                      className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:ring-indigo-500"
+                      className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:ring-brand-teal-500"
                     />
                   </div>
                   <div className="space-y-2 md:col-span-2">
@@ -492,7 +492,7 @@ export default function StudentProfilePage() {
                   <Button
                     onClick={handleSave}
                     disabled={saving}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white min-w-[140px]"
+                    className="bg-brand-teal-600 hover:bg-brand-teal-700 text-white min-w-[140px]"
                   >
                     {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
                     Save Changes
@@ -534,7 +534,7 @@ export default function StudentProfilePage() {
           <Card className="border-none shadow-sm bg-white dark:bg-slate-900">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
               <CardTitle className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                <Target className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                <Target className="h-4 w-4 text-brand-teal-600 dark:text-brand-teal-400" />
                 Goal Tracking
               </CardTitle>
               <Button
@@ -563,7 +563,7 @@ export default function StudentProfilePage() {
               </div>
               <div className="flex justify-between items-center border-t border-slate-100 dark:border-slate-800 pt-3">
                 <span className="text-sm text-slate-500 dark:text-slate-400">Target band</span>
-                <span className="font-bold text-indigo-600 dark:text-indigo-400">
+                <span className="font-bold text-brand-teal-600 dark:text-brand-teal-400">
                   {bandsLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
                   ) : targetBand != null ? (
@@ -598,10 +598,10 @@ export default function StudentProfilePage() {
                           ${examDateDraft
                             ? 'border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100'
                             : 'border-dashed border-slate-300 dark:border-slate-600 text-slate-400 dark:text-slate-500'}
-                          bg-slate-50 dark:bg-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500
-                          focus:outline-none focus:ring-2 focus:ring-indigo-500/40 disabled:opacity-60 disabled:cursor-not-allowed`}
+                          bg-slate-50 dark:bg-slate-800 hover:border-brand-teal-400 dark:hover:border-brand-teal-500
+                          focus:outline-none focus:ring-2 focus:ring-brand-teal-500/40 disabled:opacity-60 disabled:cursor-not-allowed`}
                       >
-                        <Calendar className="h-4 w-4 shrink-0 text-indigo-500 dark:text-indigo-400" />
+                        <Calendar className="h-4 w-4 shrink-0 text-brand-teal-500 dark:text-brand-teal-400" />
                         <span className="truncate">
                           {examDateDraft ? format(parseYMD(examDateDraft), 'EEE, d MMM yyyy') : 'Pick a date'}
                         </span>
@@ -619,8 +619,8 @@ export default function StudentProfilePage() {
                         disabled={{ before: MIN_EXAM_DATE_OBJ, after: MAX_EXAM_DATE_OBJ }}
                         classNames={{
                           day_selected:
-                            'bg-indigo-600 text-white hover:bg-indigo-600 hover:text-white focus:bg-indigo-600 focus:text-white rounded-lg',
-                          day_today: 'text-indigo-600 dark:text-indigo-400 font-semibold',
+                            'bg-brand-teal-600 text-white hover:bg-brand-teal-600 hover:text-white focus:bg-brand-teal-600 focus:text-white rounded-lg',
+                          day_today: 'text-brand-teal-600 dark:text-brand-teal-400 font-semibold',
                         }}
                       />
                     </PopoverContent>
@@ -629,7 +629,7 @@ export default function StudentProfilePage() {
                     size="sm"
                     onClick={handleExamDateSave}
                     disabled={savingExamDate || bandsLoading || !examDateDraft || examDateDraft === examDate}
-                    className="h-9 bg-indigo-600 hover:bg-indigo-700 text-white shrink-0"
+                    className="h-9 bg-brand-teal-600 hover:bg-brand-teal-700 text-white shrink-0"
                   >
                     {savingExamDate ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Save'}
                   </Button>
@@ -649,7 +649,7 @@ export default function StudentProfilePage() {
                   </span>
                   <button
                     onClick={fetchBandData}
-                    className="inline-flex items-center gap-1 font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 shrink-0"
+                    className="inline-flex items-center gap-1 font-semibold text-brand-teal-600 dark:text-brand-teal-400 hover:text-brand-teal-700 shrink-0"
                   >
                     <RefreshCw className="h-3.5 w-3.5" /> Retry
                   </button>
@@ -674,7 +674,7 @@ export default function StudentProfilePage() {
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-sm bg-indigo-600 dark:bg-indigo-900 text-white overflow-hidden relative">
+          <Card className="border-none shadow-sm bg-brand-teal-600 dark:bg-brand-teal-900 text-white overflow-hidden relative">
             <div className="absolute top-0 right-0 p-8 opacity-10">
               <Shield className="h-32 w-32 rotate-12" />
             </div>
@@ -682,12 +682,12 @@ export default function StudentProfilePage() {
               <CardTitle className="relative z-10">Account Status</CardTitle>
             </CardHeader>
             <CardContent className="relative z-10 space-y-4">
-              <div className="flex justify-between items-center border-b border-indigo-500/30 pb-3">
-                <span className="text-indigo-100">Plan</span>
+              <div className="flex justify-between items-center border-b border-brand-teal-500/30 pb-3">
+                <span className="text-brand-teal-100">Plan</span>
                 <span className="font-bold bg-white/20 px-2 py-1 rounded text-xs select-none">FREE TIER</span>
               </div>
-              <div className="flex justify-between items-center border-b border-indigo-500/30 pb-3">
-                <span className="text-indigo-100">Member Since</span>
+              <div className="flex justify-between items-center border-b border-brand-teal-500/30 pb-3">
+                <span className="text-brand-teal-100">Member Since</span>
                 <span className="font-medium">{profile?.createdAt ? new Date(profile.createdAt).getFullYear() : '2024'}</span>
               </div>
             </CardContent>
@@ -702,10 +702,10 @@ export default function StudentProfilePage() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm font-medium">
                     <span className="text-slate-700 dark:text-slate-200">Profile Details</span>
-                    <span className="text-indigo-600 dark:text-indigo-400">80%</span>
+                    <span className="text-brand-teal-600 dark:text-brand-teal-400">80%</span>
                   </div>
                   <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-indigo-600 w-[80%] rounded-full"></div>
+                    <div className="h-full bg-brand-teal-600 w-[80%] rounded-full"></div>
                   </div>
                 </div>
               </div>
@@ -751,10 +751,10 @@ export default function StudentProfilePage() {
                   }
                   className={`py-2.5 rounded-lg text-sm font-semibold border transition-all ${
                     isSelected
-                      ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
+                      ? 'bg-brand-teal-600 border-brand-teal-600 text-white shadow-sm'
                       : locked
                         ? 'bg-slate-50 dark:bg-slate-800/40 border-slate-100 dark:border-slate-800 text-slate-300 dark:text-slate-600 cursor-not-allowed line-through'
-                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-indigo-400 dark:hover:border-indigo-500'
+                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-brand-teal-400 dark:hover:border-brand-teal-500'
                   }`}
                 >
                   {band.toFixed(1)}
@@ -782,7 +782,7 @@ export default function StudentProfilePage() {
                 selectedBand === targetBand ||
                 targetTooLow
               }
-              className="bg-indigo-600 hover:bg-indigo-700 text-white min-w-[120px]"
+              className="bg-brand-teal-600 hover:bg-brand-teal-700 text-white min-w-[120px]"
             >
               {savingBand ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
               Save Target

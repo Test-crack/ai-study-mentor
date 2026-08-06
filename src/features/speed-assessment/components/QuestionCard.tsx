@@ -20,7 +20,7 @@ export const QuestionCard = ({
     <Card className="p-6 bg-gradient-to-br from-white to-gray-50 border-l-4 border-l-blue-500 shadow-md hover:shadow-lg transition-shadow">
       <div className="space-y-4">
         <div className="flex items-start space-x-3">
-          <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+          <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-blue-500 to-brand-blue-600 rounded-full flex items-center justify-center">
             <span className="text-white font-bold text-sm">{index + 1}</span>
           </div>
           <div className="flex-1">

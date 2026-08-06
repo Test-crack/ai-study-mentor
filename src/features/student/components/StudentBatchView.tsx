@@ -50,12 +50,12 @@ const STATUS_CONFIG = {
 
 function InstructorCard({ instructor }: { instructor: BatchInstructor }) {
   return (
-    <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/10 dark:to-indigo-900/10 border border-purple-100 dark:border-purple-800/30">
+    <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-brand-blue-50 to-brand-teal-50 dark:from-brand-blue-900/10 dark:to-brand-teal-900/10 border border-brand-blue-100 dark:border-brand-blue-800/30">
       {instructor.profileImage ? (
         <img src={instructor.profileImage} alt=""
           className="w-12 h-12 rounded-xl object-cover ring-2 ring-white dark:ring-[#26252D] shadow-md" />
       ) : (
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 text-white font-bold text-sm flex items-center justify-center shadow-md shadow-purple-500/20">
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-blue-500 to-brand-teal-500 text-white font-bold text-sm flex items-center justify-center shadow-md shadow-brand-blue-500/20">
           {getInitials(instructor.name, instructor.email)}
         </div>
       )}
@@ -67,7 +67,7 @@ function InstructorCard({ instructor }: { instructor: BatchInstructor }) {
           <Mail className="w-3 h-3 text-slate-400" />
           <span className="text-xs text-slate-500 dark:text-slate-400 truncate">{instructor.email}</span>
         </div>
-        <span className="mt-1 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+        <span className="mt-1 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-700 dark:text-brand-blue-300">
           Instructor
         </span>
       </div>
@@ -83,13 +83,13 @@ function StudentBatchCard({ batch }: { batch: StudentBatch }) {
   return (
     <div className="group bg-white dark:bg-[#15141B] rounded-2xl border border-slate-200 dark:border-[#26252D] shadow-sm hover:shadow-md dark:hover:shadow-black/20 transition-all duration-200 overflow-hidden">
       {/* Top accent bar */}
-      <div className={`h-1 w-full ${batch.status === 'ACTIVE' ? 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500' : batch.status === 'COMPLETED' ? 'bg-slate-300 dark:bg-slate-700' : 'bg-amber-400'}`} />
+      <div className={`h-1 w-full ${batch.status === 'ACTIVE' ? 'bg-gradient-to-r from-brand-teal-500 via-brand-blue-500 to-pink-500' : batch.status === 'COMPLETED' ? 'bg-slate-300 dark:bg-slate-700' : 'bg-amber-400'}`} />
 
       <div className="p-5">
         {/* Header */}
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/20">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-teal-500 to-brand-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-brand-teal-500/20">
               <Layers className="w-5 h-5 text-white" />
             </div>
             <div className="min-w-0">
@@ -195,7 +195,7 @@ export default function StudentBatchView() {
                   }
                 </p>
               </div>
-              <button onClick={load} className="p-2 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
+              <button onClick={load} className="p-2 rounded-lg text-slate-400 hover:text-brand-teal-600 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               </button>
             </div>
@@ -203,7 +203,7 @@ export default function StudentBatchView() {
             {/* Enrolled summary banner */}
             {!loading && batches.length > 0 && (
               <div className="relative overflow-hidden rounded-2xl p-5 text-white">
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500" />
+                <div className="absolute inset-0 bg-gradient-to-br from-brand-teal-600 via-brand-blue-600 to-pink-500" />
                 <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 80% 20%, white 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
                 <div className="relative z-10 flex items-center justify-between gap-4">
                   <div>
@@ -228,12 +228,12 @@ export default function StudentBatchView() {
             {/* Batch cards */}
             {loading ? (
               <div className="py-24 flex justify-center">
-                <Loader2 className="w-7 h-7 animate-spin text-indigo-500" />
+                <Loader2 className="w-7 h-7 animate-spin text-brand-teal-500" />
               </div>
             ) : batches.length === 0 ? (
               <div className="py-24 text-center bg-white dark:bg-[#15141B] rounded-2xl border border-slate-200 dark:border-[#26252D]">
-                <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center mx-auto mb-4">
-                  <Layers className="w-8 h-8 text-indigo-400" />
+                <div className="w-16 h-16 rounded-2xl bg-brand-teal-50 dark:bg-brand-teal-900/20 flex items-center justify-center mx-auto mb-4">
+                  <Layers className="w-8 h-8 text-brand-teal-400" />
                 </div>
                 <h3 className="font-bold text-slate-900 dark:text-white">Not in any batch yet</h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-xs mx-auto">

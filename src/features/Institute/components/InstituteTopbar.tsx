@@ -47,11 +47,11 @@ export const InstituteTopbar = ({ onCreateCourse }: InstituteTopbarProps) => {
       {/* Search Input */}
       <div className="flex-1 max-w-xl hidden sm:block">
         <div className="relative group">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-brand-teal-600 transition-colors" />
           <input 
             type="text" 
             placeholder="Search students, courses, or resources..." 
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-white/[0.04] border border-slate-200/70 dark:border-white/[0.06] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm font-medium text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-white/[0.04] border border-slate-200/70 dark:border-white/[0.06] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 transition-all text-sm font-medium text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
           />
         </div>
       </div>
@@ -74,11 +74,11 @@ export const InstituteTopbar = ({ onCreateCourse }: InstituteTopbarProps) => {
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 uppercase tracking-wider">Institute</p>
           </div>
           <Avatar 
-            className="h-9 w-9 border-2 border-white dark:border-white/[0.06] shadow-sm ring-1 ring-slate-100 dark:ring-white/[0.06] cursor-pointer hover:ring-indigo-100 transition-all"
+            className="h-9 w-9 border-2 border-white dark:border-white/[0.06] shadow-sm ring-1 ring-slate-100 dark:ring-white/[0.06] cursor-pointer hover:ring-brand-teal-100 transition-all"
             onClick={() => navigate('/profile')}
           >
             <AvatarImage src={profile?.profileImage || ""} />
-            <AvatarFallback className="bg-indigo-600 text-white font-bold">
+            <AvatarFallback className="bg-brand-teal-600 text-white font-bold">
               {displayName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>

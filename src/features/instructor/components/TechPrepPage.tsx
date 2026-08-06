@@ -106,7 +106,7 @@ export default function TechPrepPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#09090E] font-sans text-slate-900 dark:text-slate-200 transition-colors duration-300 selection:bg-indigo-500/30">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#09090E] font-sans text-slate-900 dark:text-slate-200 transition-colors duration-300 selection:bg-brand-teal-500/30">
       
       <InstructorSidebar
         activeTab="techprep"
@@ -126,8 +126,8 @@ export default function TechPrepPage() {
               {/* Profile Header & Actions */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 border-b border-slate-200 dark:border-[#1E1E2A] mb-8 gap-4">
                 <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => setShowProfile(false)}>
-                  <div className="bg-indigo-50 dark:bg-indigo-500/10 p-2 rounded-lg group-hover:bg-indigo-100 dark:group-hover:bg-indigo-500/20 transition-colors">
-                    <ChevronLeft className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                  <div className="bg-brand-teal-50 dark:bg-brand-teal-500/10 p-2 rounded-lg group-hover:bg-brand-teal-100 dark:group-hover:bg-brand-teal-500/20 transition-colors">
+                    <ChevronLeft className="w-5 h-5 text-brand-teal-600 dark:text-brand-teal-400" />
                   </div>
                   <div>
                     <h2 className="font-bold text-lg text-slate-900 dark:text-white leading-tight">Hireability Certificate</h2>
@@ -139,10 +139,10 @@ export default function TechPrepPage() {
                   <button className="flex items-center text-xs font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-2 rounded-md border border-emerald-200 dark:border-emerald-500/20 shadow-sm dark:shadow-none">
                     <CheckCircle2 className="w-4 h-4 mr-1.5" /> Interview Ready
                   </button>
-                  <button onClick={copyToClipboard} className="flex items-center text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-colors bg-white dark:bg-[#1A1A24] border border-slate-200 dark:border-[#2A2A3A] px-3 py-1.5 rounded-md shadow-sm dark:shadow-none">
+                  <button onClick={copyToClipboard} className="flex items-center text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-brand-teal-600 dark:hover:text-white transition-colors bg-white dark:bg-[#1A1A24] border border-slate-200 dark:border-[#2A2A3A] px-3 py-1.5 rounded-md shadow-sm dark:shadow-none">
                     <Share2 className="w-4 h-4 mr-2" /> Share
                   </button>
-                  <button onClick={handleDownloadProfile} className="flex items-center text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-colors bg-white dark:bg-[#1A1A24] border border-slate-200 dark:border-[#2A2A3A] px-3 py-1.5 rounded-md shadow-sm dark:shadow-none">
+                  <button onClick={handleDownloadProfile} className="flex items-center text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-brand-teal-600 dark:hover:text-white transition-colors bg-white dark:bg-[#1A1A24] border border-slate-200 dark:border-[#2A2A3A] px-3 py-1.5 rounded-md shadow-sm dark:shadow-none">
                     <Download className="w-4 h-4 mr-2" /> PDF
                   </button>
                 </div>
@@ -163,8 +163,8 @@ export default function TechPrepPage() {
                     <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600 dark:text-slate-400 font-medium">
                       <span className="flex items-center"><Mail className="w-3.5 h-3.5 mr-1 text-slate-400" /> kavya-nair@testcrack.io</span>
                       <span className="flex items-center"><MapPin className="w-3.5 h-3.5 mr-1 text-slate-400" /> Bangalore, India</span>
-                      <span className="flex items-center hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors"><Github className="w-3.5 h-3.5 mr-1" /> GitHub</span>
-                      <span className="flex items-center hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors"><Linkedin className="w-3.5 h-3.5 mr-1" /> LinkedIn</span>
+                      <span className="flex items-center hover:text-brand-teal-600 dark:hover:text-brand-teal-400 cursor-pointer transition-colors"><Github className="w-3.5 h-3.5 mr-1" /> GitHub</span>
+                      <span className="flex items-center hover:text-brand-teal-600 dark:hover:text-brand-teal-400 cursor-pointer transition-colors"><Linkedin className="w-3.5 h-3.5 mr-1" /> LinkedIn</span>
                     </div>
                   </div>
                 </div>
@@ -183,7 +183,7 @@ export default function TechPrepPage() {
               {/* Key Metrics */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
                 <div className="bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#1E1E2A] rounded-xl p-5 sm:p-6 text-center shadow-sm dark:shadow-none">
-                  <div className="text-2xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-400 mb-1">81%</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-brand-teal-600 dark:text-brand-teal-400 mb-1">81%</div>
                   <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Avg Logic Score</div>
                 </div>
                 <div className="bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#1E1E2A] rounded-xl p-5 sm:p-6 text-center shadow-sm dark:shadow-none">
@@ -203,7 +203,7 @@ export default function TechPrepPage() {
               {/* Technical Skills */}
               <div className="bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#1E1E2A] rounded-xl p-6 shadow-sm dark:shadow-none">
                 <h3 className="text-sm font-bold mb-4 flex items-center text-slate-800 dark:text-slate-200">
-                  <span className="text-indigo-600 dark:text-indigo-400 mr-2 font-mono font-black">&lt;/&gt;</span> Technical Skills
+                  <span className="text-brand-teal-600 dark:text-brand-teal-400 mr-2 font-mono font-black">&lt;/&gt;</span> Technical Skills
                 </h3>
                 <div className="flex flex-wrap gap-2.5">
                   {['JavaScript', 'TypeScript', 'React', 'Node.js', 'PostgreSQL', 'Git', 'REST APIs', 'Data Structures', 'Algorithms'].map((skill) => (
@@ -245,7 +245,7 @@ export default function TechPrepPage() {
               {/* 12-Week Progress Chart */}
               <div className="bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#1E1E2A] rounded-xl p-6 shadow-sm dark:shadow-none">
                 <h3 className="text-sm font-bold mb-6 flex items-center text-slate-800 dark:text-slate-200">
-                  <TrendingUp className="w-4 h-4 mr-2 text-indigo-500 dark:text-indigo-400" /> 12-Week Progress Chart
+                  <TrendingUp className="w-4 h-4 mr-2 text-brand-teal-500 dark:text-brand-teal-400" /> 12-Week Progress Chart
                 </h3>
                 <div className="h-48 w-full relative">
                   <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible" preserveAspectRatio="none">
@@ -257,7 +257,7 @@ export default function TechPrepPage() {
                     {/* Logic Line (Indigo) */}
                     <path 
                       d={`M ${profileChartData.map((d, i) => `${(i / 11) * 100},${100 - d.logic}`).join(' L ')}`} 
-                      fill="none" className="stroke-indigo-500" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
+                      fill="none" className="stroke-brand-teal-500" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
                     />
                     
                     {/* Confidence Line (Emerald) */}
@@ -278,14 +278,14 @@ export default function TechPrepPage() {
                         onMouseLeave={() => setProfileHoverPoint(null)}
                       >
                         {/* Dots */}
-                        <div className="absolute w-2.5 h-2.5 rounded-full bg-white dark:bg-[#1A1A24] border-2 border-indigo-500 z-10 transition-transform group-hover:scale-150" style={{ top: `calc(${100 - d.logic}% - 5px)` }} />
+                        <div className="absolute w-2.5 h-2.5 rounded-full bg-white dark:bg-[#1A1A24] border-2 border-brand-teal-500 z-10 transition-transform group-hover:scale-150" style={{ top: `calc(${100 - d.logic}% - 5px)` }} />
                         <div className="absolute w-2.5 h-2.5 rounded-full bg-white dark:bg-[#1A1A24] border-2 border-emerald-500 z-10 transition-transform group-hover:scale-150" style={{ top: `calc(${100 - d.conf}% - 5px)` }} />
                         
                         {/* Tooltip */}
                         {profileHoverPoint === i && (
                           <div className="absolute bottom-full mb-4 bg-slate-800 dark:bg-[#2A2A3A] text-white text-[11px] p-2.5 rounded-lg shadow-xl z-20 whitespace-nowrap min-w-[120px] pointer-events-none transform -translate-x-1/2 left-1/2">
                             <div className="font-bold border-b border-slate-600 dark:border-[#3A3A4A] pb-1.5 mb-1.5 text-center">{d.week}</div>
-                            <div className="flex justify-between items-center text-indigo-300 font-semibold mb-1">
+                            <div className="flex justify-between items-center text-brand-teal-300 font-semibold mb-1">
                               <span>Logic Score:</span> <span>{d.logic}</span>
                             </div>
                             <div className="flex justify-between items-center text-emerald-400 font-semibold">
@@ -319,7 +319,7 @@ export default function TechPrepPage() {
                     <div key={i} className="bg-slate-50 dark:bg-[#1A1A24] border border-slate-200 dark:border-[#2A2A3A] rounded-xl p-4 sm:p-5 transition-colors hover:border-slate-300 dark:hover:border-slate-700">
                       <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Best Technical Standup #{i + 1}</div>
                       <h4 className="text-sm font-bold text-slate-900 dark:text-slate-200 mb-1">{item.title}</h4>
-                      <div className="text-xs text-indigo-600 dark:text-indigo-400 font-bold mb-2">Logic Score: {item.score}</div>
+                      <div className="text-xs text-brand-teal-600 dark:text-brand-teal-400 font-bold mb-2">Logic Score: {item.score}</div>
                       <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">AI Summary: "{item.text}"</p>
                     </div>
                   ))}
@@ -351,7 +351,7 @@ export default function TechPrepPage() {
               {/* Header Section */}
               <div className="mb-8">
                 <h1 className="text-2xl sm:text-3xl font-bold mb-2 flex items-center text-slate-900 dark:text-white">
-                  <Target className="w-6 h-6 mr-3 text-indigo-600 dark:text-indigo-500" /> Placement Readiness Command
+                  <Target className="w-6 h-6 mr-3 text-brand-teal-600 dark:text-brand-teal-500" /> Placement Readiness Command
                 </h1>
                 <p className="text-slate-500 dark:text-slate-400 text-sm max-w-4xl leading-relaxed">Know exactly which students are interview-ready, who needs targeted interventions, and deploy verified profiles to hiring partners — all backed by AI analysis.</p>
               </div>
@@ -416,13 +416,13 @@ export default function TechPrepPage() {
                   <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                     <button 
                       onClick={handleDownloadProfile}
-                      className="flex-1 sm:flex-none flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white px-4 py-2.5 rounded-lg transition-colors bg-slate-50 dark:bg-[#1A1A24] border border-slate-200 dark:border-[#2A2A3A]"
+                      className="flex-1 sm:flex-none flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-brand-teal-600 dark:hover:text-white px-4 py-2.5 rounded-lg transition-colors bg-slate-50 dark:bg-[#1A1A24] border border-slate-200 dark:border-[#2A2A3A]"
                     >
                       <Download className="w-4 h-4 mr-2" /> Download
                     </button>
                     <button 
                       onClick={() => setIsShareModalOpen(true)}
-                      className="flex-1 sm:flex-none flex items-center justify-center text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2.5 rounded-lg transition-colors shadow-md shadow-indigo-600/20"
+                      className="flex-1 sm:flex-none flex items-center justify-center text-xs font-bold text-white bg-brand-teal-600 hover:bg-brand-teal-700 px-4 py-2.5 rounded-lg transition-colors shadow-md shadow-brand-teal-600/20"
                     >
                       <Share2 className="w-4 h-4 mr-2" /> Share Link
                     </button>
@@ -452,7 +452,7 @@ export default function TechPrepPage() {
                             {student.severity}
                           </span>
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider whitespace-nowrap ${
-                            student.type === 'Conceptual' ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-900/50' : 
+                            student.type === 'Conceptual' ? 'bg-brand-teal-50 dark:bg-brand-teal-950/30 text-brand-teal-600 dark:text-brand-teal-400 border-brand-teal-200 dark:border-brand-teal-900/50' : 
                             student.type === 'Psychological' ? 'bg-pink-50 dark:bg-pink-950/30 text-pink-600 dark:text-pink-400 border-pink-200 dark:border-pink-900/50' : 
                             'bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900/50'
                           }`}>
@@ -473,7 +473,7 @@ export default function TechPrepPage() {
                         <span className="text-[11px] text-slate-500 font-bold tracking-wider uppercase whitespace-nowrap">{student.sessions} sessions</span>
                         <button 
                           onClick={() => toast.success(`Intervention scheduled for ${student.name}`)}
-                          className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors px-4 py-2 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700/50 whitespace-nowrap"
+                          className="text-xs font-bold text-brand-teal-600 dark:text-brand-teal-400 hover:text-brand-teal-700 dark:hover:text-brand-teal-300 transition-colors px-4 py-2 rounded-lg bg-brand-teal-50 dark:bg-brand-teal-900/20 border border-brand-teal-200 dark:border-brand-teal-700/50 whitespace-nowrap"
                         >
                           Schedule
                         </button>
@@ -488,7 +488,7 @@ export default function TechPrepPage() {
                 {/* Batch-over-batch Comparison */}
                 <div className="bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#1E1E2A] rounded-xl p-5 sm:p-6 shadow-sm dark:shadow-none w-full overflow-hidden flex flex-col">
                   <h3 className="text-sm font-bold mb-1 flex items-center text-slate-900 dark:text-white">
-                    <Users className="w-4 h-4 mr-2 text-indigo-600 dark:text-indigo-400" /> Batch-over-batch Comparison
+                    <Users className="w-4 h-4 mr-2 text-brand-teal-600 dark:text-brand-teal-400" /> Batch-over-batch Comparison
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 font-medium">Is your teaching approach improving outcomes across batches?</p>
                   
@@ -523,7 +523,7 @@ export default function TechPrepPage() {
                     </div>
                   </div>
                   
-                  <div className="mt-2 bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-900/30 p-4 rounded-xl flex items-start text-xs text-indigo-800 dark:text-indigo-300 font-medium leading-relaxed">
+                  <div className="mt-2 bg-brand-teal-50 dark:bg-brand-teal-950/20 border border-brand-teal-200 dark:border-brand-teal-900/30 p-4 rounded-xl flex items-start text-xs text-brand-teal-800 dark:text-brand-teal-300 font-medium leading-relaxed">
                     <span className="mr-2 text-base">💡</span> 
                     <span>Current batch is <strong>+13% higher</strong> readiness rate vs Batch 4 — Socratic questioning approach is working.</span>
                   </div>
@@ -532,7 +532,7 @@ export default function TechPrepPage() {
                 {/* 8-Week Progress Trajectory */}
                 <div className="bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#1E1E2A] rounded-xl p-5 sm:p-6 flex flex-col shadow-sm dark:shadow-none w-full overflow-hidden">
                   <h3 className="text-sm font-bold mb-1 flex items-center text-slate-900 dark:text-white">
-                    <BarChart2 className="w-4 h-4 mr-2 text-indigo-600 dark:text-indigo-400" /> 8-Week Progress Trajectory
+                    <BarChart2 className="w-4 h-4 mr-2 text-brand-teal-600 dark:text-brand-teal-400" /> 8-Week Progress Trajectory
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 font-medium">Track how your batch is improving over time across all key metrics.</p>
                   
@@ -559,8 +559,8 @@ export default function TechPrepPage() {
                           >
                             {/* The three bars for Logic, Comm, Ready */}
                             <div className="flex items-end space-x-0.5 sm:space-x-1 h-full w-full justify-center px-0.5 sm:px-1">
-                              <div className="w-1/3 bg-indigo-400 dark:bg-indigo-500/80 hover:bg-indigo-500 dark:hover:bg-indigo-400 transition-colors rounded-t-sm" style={{ height: `${data.logic}%` }}></div>
-                              <div className="w-1/3 bg-purple-400 dark:bg-purple-500/80 hover:bg-purple-500 dark:hover:bg-purple-400 transition-colors rounded-t-sm" style={{ height: `${data.comm}%` }}></div>
+                              <div className="w-1/3 bg-brand-teal-400 dark:bg-brand-teal-500/80 hover:bg-brand-teal-500 dark:hover:bg-brand-teal-400 transition-colors rounded-t-sm" style={{ height: `${data.logic}%` }}></div>
+                              <div className="w-1/3 bg-brand-blue-400 dark:bg-brand-blue-500/80 hover:bg-brand-blue-500 dark:hover:bg-brand-blue-400 transition-colors rounded-t-sm" style={{ height: `${data.comm}%` }}></div>
                               <div className="w-1/3 bg-emerald-400 dark:bg-emerald-500/80 hover:bg-emerald-500 dark:hover:bg-emerald-400 transition-colors rounded-t-sm" style={{ height: `${data.ready}%` }}></div>
                             </div>
 
@@ -568,8 +568,8 @@ export default function TechPrepPage() {
                             {hoveredBar === idx && (
                               <div className="absolute bottom-full mb-3 bg-slate-800 dark:bg-[#2A2A3A] text-white text-[11px] p-3 rounded-lg shadow-xl z-20 whitespace-nowrap pointer-events-none min-w-[140px] transform -translate-x-1/2 left-1/2">
                                 <div className="font-bold border-b border-slate-600 dark:border-[#3A3A4A] pb-1.5 mb-1.5 text-center">{data.week}</div>
-                                <div className="flex justify-between items-center mb-1"><span className="flex items-center text-slate-300"><span className="w-1.5 h-1.5 rounded-full bg-indigo-400 mr-2"/>Logic %</span> <span className="font-bold">{data.logic}</span></div>
-                                <div className="flex justify-between items-center mb-1"><span className="flex items-center text-slate-300"><span className="w-1.5 h-1.5 rounded-full bg-purple-400 mr-2"/>Comm %</span> <span className="font-bold">{data.comm}</span></div>
+                                <div className="flex justify-between items-center mb-1"><span className="flex items-center text-slate-300"><span className="w-1.5 h-1.5 rounded-full bg-brand-teal-400 mr-2"/>Logic %</span> <span className="font-bold">{data.logic}</span></div>
+                                <div className="flex justify-between items-center mb-1"><span className="flex items-center text-slate-300"><span className="w-1.5 h-1.5 rounded-full bg-brand-blue-400 mr-2"/>Comm %</span> <span className="font-bold">{data.comm}</span></div>
                                 <div className="flex justify-between items-center"><span className="flex items-center text-slate-300"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-2"/>Readiness %</span> <span className="font-bold">{data.ready}</span></div>
                                 {/* Tooltip caret */}
                                 <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2.5 h-2.5 bg-slate-800 dark:bg-[#2A2A3A] rotate-45" />
@@ -599,7 +599,7 @@ export default function TechPrepPage() {
           <div className="bg-white dark:bg-[#12121A] border border-slate-200 dark:border-[#2A2A3A] rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center p-5 border-b border-slate-200 dark:border-[#1E1E2A] bg-slate-50 dark:bg-[#0A0A0F]">
               <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center">
-                <Briefcase className="w-5 h-5 mr-2 text-indigo-600 dark:text-indigo-400" />
+                <Briefcase className="w-5 h-5 mr-2 text-brand-teal-600 dark:text-brand-teal-400" />
                 Deploy Hireability Profile
               </h2>
               <button onClick={() => setIsShareModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors bg-white dark:bg-[#1A1A24] border border-slate-200 dark:border-transparent p-2 rounded-full sm:p-0 sm:bg-transparent sm:border-none">
@@ -616,7 +616,7 @@ export default function TechPrepPage() {
                 <button 
                   onClick={handleGenerateProfile}
                   disabled={isGenerating}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 dark:disabled:bg-indigo-600/50 text-white py-3 rounded-xl font-bold flex items-center justify-center transition-colors shadow-md shadow-indigo-600/20"
+                  className="w-full bg-brand-teal-600 hover:bg-brand-teal-700 disabled:bg-brand-teal-400 dark:disabled:bg-brand-teal-600/50 text-white py-3 rounded-xl font-bold flex items-center justify-center transition-colors shadow-md shadow-brand-teal-600/20"
                 >
                   {isGenerating ? (
                     <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Generating Secure Link...</>
@@ -650,7 +650,7 @@ export default function TechPrepPage() {
                         setIsShareModalOpen(false);
                         setShowProfile(true);
                       }}
-                      className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 sm:py-3 rounded-xl font-bold flex items-center justify-center transition-colors text-sm shadow-md shadow-indigo-600/20"
+                      className="flex-1 bg-brand-teal-600 hover:bg-brand-teal-700 text-white py-2.5 sm:py-3 rounded-xl font-bold flex items-center justify-center transition-colors text-sm shadow-md shadow-brand-teal-600/20"
                     >
                       <Eye className="w-4 h-4 mr-2" /> Preview Profile
                     </button>

@@ -122,7 +122,7 @@ export default function AiCalibration() {
                   <h2 className="text-xl font-bold text-slate-900 dark:text-white">AI vs Human Scoring Alignment</h2>
                   <p className="text-sm text-slate-500 dark:text-gray-400 mt-1">Comparison across assessment dimensions</p>
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2 bg-purple-50 dark:bg-transparent border border-purple-200 dark:border-purple-500/50 text-purple-700 dark:text-purple-400 rounded-lg text-sm font-medium hover:bg-purple-100 dark:hover:bg-purple-500/10 transition-colors shadow-sm dark:shadow-none">
+                <button className="flex items-center gap-2 px-4 py-2 bg-brand-blue-50 dark:bg-transparent border border-brand-blue-200 dark:border-brand-blue-500/50 text-brand-blue-700 dark:text-brand-blue-400 rounded-lg text-sm font-medium hover:bg-brand-blue-100 dark:hover:bg-brand-blue-500/10 transition-colors shadow-sm dark:shadow-none">
                   <Sliders size={16} /> Run Calibration
                 </button>
               </div>
@@ -148,7 +148,7 @@ export default function AiCalibration() {
                         <div className="flex items-center gap-3 w-full sm:w-1/2">
                           <span className="text-xs text-slate-500 dark:text-gray-400 w-16 whitespace-nowrap">AI Score</span>
                           <div className="flex-1 h-1.5 bg-slate-100 dark:bg-gray-800 rounded-full">
-                            <div className="h-full bg-purple-600 dark:bg-[#8b5cf6] rounded-full" style={{ width: `${item.aiScore}%` }}></div>
+                            <div className="h-full bg-brand-blue-600 dark:bg-[#256B8B] rounded-full" style={{ width: `${item.aiScore}%` }}></div>
                           </div>
                           <span className="text-xs font-bold w-8 text-right text-slate-900 dark:text-white">{item.aiScore}%</span>
                         </div>
@@ -157,7 +157,7 @@ export default function AiCalibration() {
                         <div className="flex items-center gap-3 w-full sm:w-1/2">
                           <span className="text-xs text-slate-500 dark:text-gray-400 w-20 whitespace-nowrap">Human Score</span>
                           <div className="flex-1 h-1.5 bg-slate-100 dark:bg-gray-800 rounded-full">
-                            <div className="h-full bg-purple-400 dark:bg-[#8b5cf6] dark:opacity-70 rounded-full" style={{ width: `${item.humanScore}%` }}></div>
+                            <div className="h-full bg-brand-blue-400 dark:bg-[#256B8B] dark:opacity-70 rounded-full" style={{ width: `${item.humanScore}%` }}></div>
                           </div>
                           <span className="text-xs font-bold w-8 text-right text-slate-900 dark:text-white">{item.humanScore}%</span>
                         </div>

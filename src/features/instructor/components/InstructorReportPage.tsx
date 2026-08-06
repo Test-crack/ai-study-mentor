@@ -315,7 +315,7 @@ export function InstructorReportPage() {
               </div>
             ) : summaryLoading ? (
               <div className="flex items-center justify-center py-24">
-                <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+                <Loader2 className="w-6 h-6 animate-spin text-brand-teal-500" />
               </div>
             ) : summary ? (
               <>
@@ -323,7 +323,7 @@ export function InstructorReportPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                   {[
                     { label: 'Active Today', value: summary.engagement_today.active_students,
-                      sub: `of ${selectedBatch?.studentCount ?? '?'}`, accent: 'bg-indigo-500' },
+                      sub: `of ${selectedBatch?.studentCount ?? '?'}`, accent: 'bg-brand-teal-500' },
                     { label: 'Avg DCS', value: `${summary.engagement_today.avg_dcs.toFixed(1)}%`,
                       sub: 'daily challenge score', accent: 'bg-emerald-500' },
                     { label: 'Streaks Alive', value: summary.engagement_today.streaks_alive,
@@ -347,13 +347,13 @@ export function InstructorReportPage() {
                   <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs uppercase tracking-wider">Period</span>
                   <span className="text-slate-300 dark:text-slate-700">·</span>
                   <span className="text-sm">
-                    IA last 7 days: <strong className="text-indigo-600 dark:text-indigo-400">
+                    IA last 7 days: <strong className="text-brand-teal-600 dark:text-brand-teal-400">
                       {summary.period_summary.ia_completed_last_7_days}/{summary.period_summary.ia_total_students}
                     </strong> completed
                   </span>
                   <span className="text-slate-300 dark:text-slate-700">·</span>
                   <span className="text-sm">
-                    Mock this month: <strong className="text-violet-600 dark:text-violet-400">
+                    Mock this month: <strong className="text-brand-blue-600 dark:text-brand-blue-400">
                       {summary.period_summary.mock_completed_this_month}/{summary.period_summary.mock_total_students}
                     </strong> completed
                   </span>
@@ -361,8 +361,8 @@ export function InstructorReportPage() {
 
                 {/* ── Batch Report bar (above table) ── */}
                 <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 px-4 sm:px-5 py-4 flex items-center gap-4">
-                  <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center shrink-0">
-                    <FileText className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                  <div className="w-9 h-9 rounded-xl bg-brand-teal-50 dark:bg-brand-teal-500/10 flex items-center justify-center shrink-0">
+                    <FileText className="w-4 h-4 text-brand-teal-600 dark:text-brand-teal-400" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-slate-800 dark:text-white leading-tight">Batch Performance Report</p>
@@ -377,7 +377,7 @@ export function InstructorReportPage() {
                       'shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition-all',
                       batchReportLoading
                         ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
-                        : 'bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[0.98]'
+                        : 'bg-brand-teal-600 text-white hover:bg-brand-teal-700 active:scale-[0.98]'
                     )}
                   >
                     {batchReportLoading
@@ -406,7 +406,7 @@ export function InstructorReportPage() {
                         value={studentSearch}
                         onChange={e => setStudentSearch(e.target.value)}
                         placeholder="Search students…"
-                        className="w-full pl-8 pr-3 py-1.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/30 placeholder:text-slate-400 text-slate-800 dark:text-slate-200"
+                        className="w-full pl-8 pr-3 py-1.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal-500/30 placeholder:text-slate-400 text-slate-800 dark:text-slate-200"
                       />
                     </div>
                   </div>
@@ -474,7 +474,7 @@ export function InstructorReportPage() {
                                   'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all',
                                   studentReportLoadingId === row.student_id
                                     ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
-                                    : 'bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 border border-violet-200 dark:border-violet-500/20 hover:bg-violet-100 dark:hover:bg-violet-500/20'
+                                    : 'bg-brand-blue-50 dark:bg-brand-blue-500/10 text-brand-blue-700 dark:text-brand-blue-400 border border-brand-blue-200 dark:border-brand-blue-500/20 hover:bg-brand-blue-100 dark:hover:bg-brand-blue-500/20'
                                 )}
                               >
                                 {studentReportLoadingId === row.student_id

@@ -43,9 +43,9 @@ const GAMES: GameCard[] = [
     description: 'Crack vocabulary clues to fill the grid. Tests the lexical range examiners look for in IELTS.',
     path:        '/b2c/game/lexigrid',
     maxPts:      15,
-    color:       'text-indigo-600 dark:text-indigo-400',
-    bg:          'bg-indigo-50 dark:bg-indigo-500/10',
-    border:      'border-indigo-200 dark:border-indigo-500/30',
+    color:       'text-brand-teal-600 dark:text-brand-teal-400',
+    bg:          'bg-brand-teal-50 dark:bg-brand-teal-500/10',
+    border:      'border-brand-teal-200 dark:border-brand-teal-500/30',
     badge:       'Fan fav',
     difficulty:  'Medium',
   },
@@ -95,9 +95,9 @@ const GAMES: GameCard[] = [
     description: 'True / False / Not Given at speed. Score on accuracy AND reaction time. Most addictive game.',
     path:        '/b2c/game/inference-sprint',
     maxPts:      25,
-    color:       'text-violet-600 dark:text-violet-400',
-    bg:          'bg-violet-50 dark:bg-violet-500/10',
-    border:      'border-violet-200 dark:border-violet-500/30',
+    color:       'text-brand-blue-600 dark:text-brand-blue-400',
+    bg:          'bg-brand-blue-50 dark:bg-brand-blue-500/10',
+    border:      'border-brand-blue-200 dark:border-brand-blue-500/30',
     badge:       'Hot 🔥',
     difficulty:  'Hard',
   },
@@ -178,16 +178,16 @@ export default function B2CStudentDashboard() {
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6">
 
           {/* ── Hero banner ────────────────────────────────────────────────── */}
-          <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 p-7 text-white shadow-lg">
+          <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-brand-teal-600 via-brand-teal-500 to-brand-blue-600 p-7 text-white shadow-lg">
             <div className="pointer-events-none absolute -right-8 -top-8 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
-            <div className="pointer-events-none absolute right-20 bottom-0 h-24 w-24 rounded-full bg-purple-400/30 blur-xl" />
+            <div className="pointer-events-none absolute right-20 bottom-0 h-24 w-24 rounded-full bg-brand-blue-400/30 blur-xl" />
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <p className="text-indigo-200 text-sm font-bold mb-1">Welcome back 👋</p>
+                <p className="text-brand-teal-200 text-sm font-bold mb-1">Welcome back 👋</p>
                 <h1 className="text-2xl sm:text-3xl font-black tracking-tight mb-1">
                   {displayName}
                 </h1>
-                <p className="text-indigo-100 text-sm">
+                <p className="text-brand-teal-100 text-sm">
                   You're on a <strong className="text-white">{streak}-day streak</strong> — keep it going!
                 </p>
               </div>
@@ -195,14 +195,14 @@ export default function B2CStudentDashboard() {
               {/* Stats */}
               <div className="flex gap-3 flex-shrink-0">
                 <div className="bg-white/15 border border-white/25 backdrop-blur-sm rounded-2xl px-5 py-3 text-center">
-                  <p className="text-indigo-200 text-[10px] font-black uppercase tracking-widest mb-0.5">Momentum</p>
+                  <p className="text-brand-teal-200 text-[10px] font-black uppercase tracking-widest mb-0.5">Momentum</p>
                   <p className="text-3xl font-black text-white leading-none">{momentum}</p>
-                  <p className="text-indigo-200 text-[10px] mt-0.5">pts</p>
+                  <p className="text-brand-teal-200 text-[10px] mt-0.5">pts</p>
                 </div>
                 <div className="bg-white/15 border border-white/25 backdrop-blur-sm rounded-2xl px-5 py-3 text-center">
-                  <p className="text-indigo-200 text-[10px] font-black uppercase tracking-widest mb-0.5">Games</p>
+                  <p className="text-brand-teal-200 text-[10px] font-black uppercase tracking-widest mb-0.5">Games</p>
                   <p className="text-3xl font-black text-white leading-none">{gamesPlayed}</p>
-                  <p className="text-indigo-200 text-[10px] mt-0.5">played</p>
+                  <p className="text-brand-teal-200 text-[10px] mt-0.5">played</p>
                 </div>
               </div>
             </div>
@@ -212,9 +212,9 @@ export default function B2CStudentDashboard() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
               { label: 'Day Streak',   value: `${streak} days`,  icon: <Flame  className="w-5 h-5 text-orange-500" />, bg: 'bg-orange-50 dark:bg-orange-500/10', border: 'border-orange-100 dark:border-orange-500/20' },
-              { label: 'Momentum',     value: `${momentum} pts`, icon: <Zap    className="w-5 h-5 text-indigo-500" />, bg: 'bg-indigo-50 dark:bg-indigo-500/10', border: 'border-indigo-100 dark:border-indigo-500/20' },
+              { label: 'Momentum',     value: `${momentum} pts`, icon: <Zap    className="w-5 h-5 text-brand-teal-500" />, bg: 'bg-brand-teal-50 dark:bg-brand-teal-500/10', border: 'border-brand-teal-100 dark:border-brand-teal-500/20' },
               { label: 'Top Game',     value: topGame,           icon: <Star   className="w-5 h-5 text-amber-500"  />, bg: 'bg-amber-50 dark:bg-amber-500/10',   border: 'border-amber-100 dark:border-amber-500/20'  },
-              { label: 'Games Played', value: `${gamesPlayed}`,  icon: <Trophy className="w-5 h-5 text-violet-500" />, bg: 'bg-violet-50 dark:bg-violet-500/10', border: 'border-violet-100 dark:border-violet-500/20' },
+              { label: 'Games Played', value: `${gamesPlayed}`,  icon: <Trophy className="w-5 h-5 text-brand-blue-500" />, bg: 'bg-brand-blue-50 dark:bg-brand-blue-500/10', border: 'border-brand-blue-100 dark:border-brand-blue-500/20' },
             ].map((stat, i) => (
               <div key={i} className={cn('rounded-2xl border p-4 flex items-center gap-3 bg-white dark:bg-slate-900 shadow-sm', stat.border)}>
                 <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0', stat.bg)}>
@@ -235,7 +235,7 @@ export default function B2CStudentDashboard() {
                 <h2 className="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight">All Games</h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">Play as many as you like — each one trains a real IELTS skill</p>
               </div>
-              <span className="text-xs font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1.5 rounded-full">
+              <span className="text-xs font-bold text-brand-teal-500 bg-brand-teal-50 dark:bg-brand-teal-500/10 px-3 py-1.5 rounded-full">
                 {GAMES.length} games
               </span>
             </div>
@@ -282,9 +282,9 @@ export default function B2CStudentDashboard() {
                     {/* Footer */}
                     <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-100 dark:border-slate-800">
                       <div className="flex items-center gap-1.5">
-                        <Zap className="w-3.5 h-3.5 text-indigo-400" />
+                        <Zap className="w-3.5 h-3.5 text-brand-teal-400" />
                         <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
-                          Up to <span className="text-indigo-500">{game.maxPts} pts</span>
+                          Up to <span className="text-brand-teal-500">{game.maxPts} pts</span>
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -308,7 +308,7 @@ export default function B2CStudentDashboard() {
           {Object.keys(recentScores).length > 0 && (
             <section className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
               <h2 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-indigo-500" /> Recent Scores
+                <TrendingUp className="w-4 h-4 text-brand-teal-500" /> Recent Scores
               </h2>
               <div className="space-y-3">
                 {Object.entries(recentScores).map(([gameId, score]) => {
@@ -321,7 +321,7 @@ export default function B2CStudentDashboard() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
                           <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">{game.label}</p>
-                          <p className="text-xs font-black text-indigo-500">{score} / {game.maxPts} pts</p>
+                          <p className="text-xs font-black text-brand-teal-500">{score} / {game.maxPts} pts</p>
                         </div>
                         <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                           <div

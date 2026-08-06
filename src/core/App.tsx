@@ -158,7 +158,7 @@ const queryClient = new QueryClient({
 
 const RouteFallback = () => (
   <div className="min-h-screen flex items-center justify-center bg-white">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-700" />
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-teal-700" />
   </div>
 );
 
@@ -377,7 +377,9 @@ const AppRoutes = () => {
       <Route path="/student/internal" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><InternalAssessmentPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
       <Route path="/student/assessment" element={<Navigate to="/student/internal" replace />} />
       <Route path="/student/mock" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><FullMockAssessment /></StudentDrillLockGuard></RoleProtectedRoute>} />
-      <Route path="/student/how-it-works" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><HowItWorks /></StudentDrillLockGuard></RoleProtectedRoute>} />
+      {/* Deliberately NOT wrapped in StudentDrillLockGuard: How It Works must stay
+          reachable even while the platform is drill-locked. */}
+      <Route path="/student/how-it-works" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><HowItWorks /></RoleProtectedRoute>} />
 
       <Route
         path="/instructor/dashboard"

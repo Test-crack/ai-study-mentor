@@ -45,7 +45,7 @@ export function StepIndicator({
                     isStepCompleted(index) &&
                       "bg-green-500 text-white shadow-lg",
                     isStepCurrent(index) &&
-                      "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg ring-4 ring-purple-200",
+                      "bg-gradient-to-r from-brand-blue-600 to-blue-600 text-white shadow-lg ring-4 ring-brand-blue-200",
                     !isStepCompleted(index) &&
                       !isStepCurrent(index) &&
                       "bg-gray-200 text-gray-500",
@@ -64,7 +64,7 @@ export function StepIndicator({
                 <span
                   className={cn(
                     "mt-2 text-xs sm:text-sm font-medium text-center whitespace-nowrap",
-                    isStepCurrent(index) && "text-purple-700 font-semibold",
+                    isStepCurrent(index) && "text-brand-blue-700 font-semibold",
                     isStepCompleted(index) && "text-green-700",
                     !isStepCompleted(index) &&
                       !isStepCurrent(index) &&

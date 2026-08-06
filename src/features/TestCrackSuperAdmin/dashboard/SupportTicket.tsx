@@ -69,7 +69,7 @@ export default function SupportTicket() {
   const getStatusStyle = (status: TicketStatus) => {
     switch(status) {
       case 'open': return 'text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-500/10 dark:border-blue-500/20';
-      case 'in-progress': return 'text-purple-600 bg-purple-50 border-purple-200 dark:text-purple-400 dark:bg-purple-500/10 dark:border-purple-500/20';
+      case 'in-progress': return 'text-brand-blue-600 bg-brand-blue-50 border-brand-blue-200 dark:text-brand-blue-400 dark:bg-brand-blue-500/10 dark:border-brand-blue-500/20';
       case 'resolved': return 'text-emerald-600 bg-emerald-50 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-500/10 dark:border-emerald-500/20';
     }
   };
@@ -102,7 +102,7 @@ export default function SupportTicket() {
               </div>
               <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl p-5 shadow-sm transition-colors">
                 <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">In Progress</p>
-                <h3 className="text-3xl font-bold text-indigo-500 dark:text-indigo-400">{inProgressCount}</h3>
+                <h3 className="text-3xl font-bold text-brand-teal-500 dark:text-brand-teal-400">{inProgressCount}</h3>
               </div>
               <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl p-5 shadow-sm transition-colors">
                 <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Resolved</p>
@@ -123,7 +123,7 @@ export default function SupportTicket() {
                   placeholder="Search tickets..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-indigo-500 dark:focus:border-[#8B5CF6] transition-all text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 shadow-sm"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:focus:border-[#256B8B] transition-all text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 shadow-sm"
                 />
               </div>
 
@@ -135,7 +135,7 @@ export default function SupportTicket() {
                     onClick={() => setActiveFilter(filter)}
                     className={`px-4 py-1.5 text-sm font-medium rounded-lg capitalize whitespace-nowrap transition-colors flex-1 md:flex-none ${
                       activeFilter === filter 
-                        ? 'bg-indigo-600 dark:bg-[#7C3AED] text-white' 
+                        ? 'bg-brand-teal-600 dark:bg-[#185A78] text-white' 
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
@@ -164,7 +164,7 @@ export default function SupportTicket() {
                         {ticket.status}
                       </span>
                     </div>
-                    <h4 className="font-semibold text-base text-slate-900 dark:text-white mb-1 group-hover:text-indigo-600 dark:group-hover:text-[#A78BFA] transition-colors">
+                    <h4 className="font-semibold text-base text-slate-900 dark:text-white mb-1 group-hover:text-brand-teal-600 dark:group-hover:text-[#4E8CA6] transition-colors">
                       {ticket.title}
                     </h4>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -180,7 +180,7 @@ export default function SupportTicket() {
                           e.stopPropagation();
                           handleAssign(ticket.id);
                         }}
-                        className="px-4 py-2 text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 dark:text-[#A78BFA] dark:bg-[#7C3AED]/10 dark:border-[#7C3AED]/30 dark:hover:bg-[#7C3AED]/20 rounded-lg transition-colors"
+                        className="px-4 py-2 text-xs font-semibold text-brand-teal-700 bg-brand-teal-50 border border-brand-teal-200 hover:bg-brand-teal-100 dark:text-[#4E8CA6] dark:bg-[#185A78]/10 dark:border-[#185A78]/30 dark:hover:bg-[#185A78]/20 rounded-lg transition-colors"
                       >
                         Assign
                       </button>

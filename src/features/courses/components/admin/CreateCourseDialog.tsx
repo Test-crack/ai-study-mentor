@@ -173,16 +173,16 @@ export function CreateCourseDialog({ open, onOpenChange }: CreateCourseDialogPro
         onOpenChange(val);
     }}>
       <DialogContent className="sm:max-w-[600px] border-slate-100 rounded-3xl p-0 overflow-hidden bg-white max-h-[90vh] overflow-y-auto">
-        <div className="bg-indigo-600 p-8 text-white relative overflow-hidden">
+        <div className="bg-brand-teal-600 p-8 text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 -tr-y-1/2 translate-x-1/4 opacity-10">
               <Sparkles className="h-48 w-48" />
           </div>
           <DialogHeader className="relative z-10">
             <DialogTitle className="text-2xl font-extrabold flex items-center gap-3">
-              <BookOpen className="h-6 w-6 text-indigo-200" />
+              <BookOpen className="h-6 w-6 text-brand-teal-200" />
               {isAddingDomain ? "Add New Domain" : "Create New Course"}
             </DialogTitle>
-            <DialogDescription className="text-indigo-100 font-medium">
+            <DialogDescription className="text-brand-teal-100 font-medium">
               {isAddingDomain 
                 ? "Organize your courses by creating a new specialized domain." 
                 : "Start building your next educational masterpiece."}
@@ -228,7 +228,7 @@ export function CreateCourseDialog({ open, onOpenChange }: CreateCourseDialogPro
                         <Button
                             onClick={handleCreateDomain}
                             disabled={isCreatingDomain}
-                            className="flex-grow bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg h-11 transition-all"
+                            className="flex-grow bg-brand-teal-600 hover:bg-brand-teal-700 text-white rounded-xl font-bold shadow-lg h-11 transition-all"
                         >
                             {isCreatingDomain ? <Loader2 className="animate-spin" /> : "Create Domain"}
                         </Button>
@@ -247,13 +247,13 @@ export function CreateCourseDialog({ open, onOpenChange }: CreateCourseDialogPro
                                 placeholder="e.g. Master Advanced Frontend Architecture"
                                 value={formData.title}
                                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                className="h-12 rounded-xl border-slate-100 bg-slate-50/50 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all font-medium"
+                                className="h-12 rounded-xl border-slate-100 bg-slate-50/50 focus:bg-white focus:ring-4 focus:ring-brand-teal-500/10 transition-all font-medium"
                             />
                         </div>
 
                         <div className="space-y-2">
                             <Label htmlFor="description" className="text-slate-700 font-bold flex items-center gap-2">
-                                <FileText className="h-4 w-4 text-indigo-500" />
+                                <FileText className="h-4 w-4 text-brand-teal-500" />
                                 Description
                             </Label>
                             <Textarea
@@ -270,13 +270,13 @@ export function CreateCourseDialog({ open, onOpenChange }: CreateCourseDialogPro
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between mb-2">
                                     <Label htmlFor="domain" className="text-slate-700 font-bold flex items-center gap-2">
-                                        <GraduationCap className="h-4 w-4 text-indigo-500" />
+                                        <GraduationCap className="h-4 w-4 text-brand-teal-500" />
                                         Domain *
                                     </Label>
                                     <button 
                                         type="button"
                                         onClick={() => setIsAddingDomain(true)}
-                                        className="text-[10px] font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 uppercase tracking-wider"
+                                        className="text-[10px] font-bold text-brand-teal-600 hover:text-brand-teal-700 flex items-center gap-1 uppercase tracking-wider"
                                     >
                                         <Plus className="h-3 w-3" /> New
                                     </button>
@@ -319,7 +319,7 @@ export function CreateCourseDialog({ open, onOpenChange }: CreateCourseDialogPro
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="duration" className="text-slate-700 font-bold flex items-center gap-2">
-                                    <Clock className="h-4 w-4 text-indigo-500" />
+                                    <Clock className="h-4 w-4 text-brand-teal-500" />
                                     Duration (min)
                                 </Label>
                                 <Input
@@ -335,11 +335,11 @@ export function CreateCourseDialog({ open, onOpenChange }: CreateCourseDialogPro
 
                             <div className="space-y-2">
                                 <Label htmlFor="price" className="text-slate-700 font-bold flex items-center gap-2">
-                                    <IndianRupee className="h-4 w-4 text-indigo-500" />
+                                    <IndianRupee className="h-4 w-4 text-brand-teal-500" />
                                     Price (INR)
                                 </Label>
                                 <div className="relative">
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold group-focus-within:text-indigo-600">₹</span>
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold group-focus-within:text-brand-teal-600">₹</span>
                                     <Input
                                         id="price"
                                         type="number"
@@ -366,7 +366,7 @@ export function CreateCourseDialog({ open, onOpenChange }: CreateCourseDialogPro
                         <Button
                             type="submit"
                             disabled={isSubmitting}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold px-8 shadow-lg shadow-indigo-100 h-11 transition-all active:scale-95 disabled:opacity-50"
+                            className="bg-brand-teal-600 hover:bg-brand-teal-700 text-white rounded-xl font-bold px-8 shadow-lg shadow-brand-teal-100 h-11 transition-all active:scale-95 disabled:opacity-50"
                         >
                             {isSubmitting ? (
                                 <>

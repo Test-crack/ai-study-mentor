@@ -53,7 +53,7 @@ const PricingPage: React.FC = () => {
       period: billingPeriod,
       credits: billingPeriod === 'monthly' ? 100 : 1200,
       popular: true,
-      color: 'from-indigo-500 to-purple-600',
+      color: 'from-brand-teal-500 to-brand-blue-600',
       features: [
         'Unlimited AI Notes Upload',
         'Advanced YouTube Learning',
@@ -74,7 +74,7 @@ const PricingPage: React.FC = () => {
       price_usd: 19.99,
       period: 'monthly',
       credits: -1,
-      color: 'from-purple-600 to-pink-600',
+      color: 'from-brand-blue-600 to-pink-600',
       features: [
         'Everything in Pro',
         'Personal AI Tutor',
@@ -186,7 +186,7 @@ const PricingPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-indigo-50/20 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-brand-teal-50/20 py-12 px-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -197,7 +197,7 @@ const PricingPage: React.FC = () => {
           <Badge className="mb-4" variant="secondary">
             LIMITED TIME: 50% OFF on Yearly Plans 🎉
           </Badge>
-          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-brand-teal-600 to-brand-blue-600 bg-clip-text text-transparent">
             Choose Your Learning Journey
           </h1>
           <p className="text-xl text-muted-foreground mb-8">
@@ -229,10 +229,10 @@ const PricingPage: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <Card className={`relative h-full ${plan.popular ? 'border-indigo-500 shadow-2xl scale-105' : ''}`}>
+              <Card className={`relative h-full ${plan.popular ? 'border-brand-teal-500 shadow-2xl scale-105' : ''}`}>
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-gradient-to-r from-indigo-500 to-purple-600">
+                    <Badge className="bg-gradient-to-r from-brand-teal-500 to-brand-blue-600">
                       MOST POPULAR
                     </Badge>
                   </div>
@@ -307,7 +307,7 @@ const PricingPage: React.FC = () => {
           <Button
             variant="link"
             onClick={() => setShowComparison(true)}
-            className="text-indigo-600"
+            className="text-brand-teal-600"
           >
             View Detailed Comparison →
           </Button>

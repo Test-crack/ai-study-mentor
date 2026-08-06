@@ -1,7 +1,7 @@
 // src/features/student/drills/McqDrill.tsx
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/shared/components/ui/button';
-import { CheckCircle2, XCircle, ChevronRight, HelpCircle, Eye, AlertTriangle, Search } from 'lucide-react';
+import { CheckCircle2, XCircle, ChevronRight, Eye, AlertTriangle, Search, Lightbulb } from 'lucide-react';
 
 // ─── TRAP WORD DETECTION ─────────────────────────────────────────────────────
 
@@ -45,6 +45,18 @@ const detectTrapWords = (text: string): TrapWordResult => {
   };
 };
 
+/** Renders a list of trap words as bolded, comma/and-joined inline text. */
+const TrapWordList = ({ words }: { words: string[] }) => (
+  <>
+    {words.map((w, i) => (
+      <span key={w}>
+        <strong className="font-bold">{w}</strong>
+        {i < words.length - 1 ? (i === words.length - 2 ? ' and ' : ', ') : ''}
+      </span>
+    ))}
+  </>
+);
+
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
 export interface McqPrompt {
@@ -52,8 +64,8 @@ export interface McqPrompt {
   prompt_text: string;
   options: Record<string, string>;
   correct_answer: string;
+  /** The single explanation stored in drill_questions.explanation. */
   explanation: string | null;
-  option_explanations?: Record<string, string>;
 }
 
 export interface McqDrillResult {
@@ -121,19 +133,18 @@ export default function McqDrill({ prompt, onComplete }: McqDrillProps) {
     onComplete({ points, questionId: prompt.id, selectedAnswer: answer });
   };
 
-  const getOptionExplanation = (key: string): string | null => {
-    if (prompt.option_explanations && prompt.option_explanations[key]) {
-      return prompt.option_explanations[key];
-    }
-    return null;
-  };
+  /**
+   * The one explanation we actually store (drill_questions.explanation).
+   * There is no per-option explanation column, so this is the single source
+   * shown for both correct and incorrect answers.
+   */
+  const explanation = prompt.explanation ?? null;
 
-  const wrongAnswerExplanation = selectedOption
-    ? getOptionExplanation(selectedOption) ?? `Option ${selectedOption} is incorrect.`
-    : null;
-
-  const correctAnswerExplanation =
-    getOptionExplanation(correctAnswerKey) ?? prompt.explanation ?? null;
+  // Shared shells — keep both phases visually consistent and responsive.
+  const cardBase =
+    'rounded-2xl border bg-white dark:bg-white/[0.03] border-slate-200 dark:border-white/[0.07]';
+  const chip =
+    'inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wider';
 
   // ─────────────────────────────────────────────────────────────────────────
   // PHASE 1 — QUESTION PREVIEW
@@ -141,53 +152,37 @@ export default function McqDrill({ prompt, onComplete }: McqDrillProps) {
 
   if (phase === 'question') {
     return (
-      <div className="flex flex-col h-full animate-in fade-in duration-300">
+      <div className="flex flex-col animate-in fade-in duration-300">
 
-        <div className="flex items-center gap-2 mb-5">
-          <div className="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 px-3 py-1.5 rounded-full">
-            <Search className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-            <span className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-widest">
-              Step 1 — Read the Question
-            </span>
-          </div>
+        <div className="mb-4 sm:mb-5">
+          <span className={`${chip} bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400`}>
+            <Search className="w-3.5 h-3.5 shrink-0" />
+            <span>Step 1 — Read the question</span>
+          </span>
         </div>
 
-        <div className="bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] rounded-2xl p-6 mb-5">
-          <p className="text-xl sm:text-2xl font-semibold text-slate-800 dark:text-white leading-relaxed">
+        <div className={`${cardBase} p-4 sm:p-6 mb-4 sm:mb-5`}>
+          <p className="text-lg sm:text-xl md:text-2xl font-semibold text-slate-800 dark:text-white leading-relaxed break-words">
             {trapResult.highlighted}
           </p>
         </div>
 
         {trapResult.hasTrapWords ? (
-          <div className="flex items-start gap-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-2xl p-4 mb-5 animate-in fade-in duration-300">
+          <div className="flex items-start gap-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-2xl p-4 mb-4 sm:mb-5 animate-in fade-in duration-300">
             <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-bold text-amber-800 dark:text-amber-300 mb-1">
                 Trap word{trapResult.foundWords.length > 1 ? 's' : ''} detected
               </p>
-              <p className="text-sm text-amber-700/80 dark:text-amber-400/80 leading-relaxed">
-                This question contains the trap word{trapResult.foundWords.length > 1 ? 's' : ''}{' '}
-                {trapResult.foundWords.map((w, i) => (
-                  <span key={w}>
-                    <strong className="font-bold">{w}</strong>
-                    {i < trapResult.foundWords.length - 1 ? ' and ' : ''}
-                  </span>
-                ))}.{' '}
-                Trap words like these invert or restrict the meaning of a question.
-                Students who miss them almost always choose the wrong option even when they know the content.
-                Re-read the question with{' '}
-                {trapResult.foundWords.map((w, i) => (
-                  <span key={w}>
-                    <strong className="font-bold">{w}</strong>
-                    {i < trapResult.foundWords.length - 1 ? ' and ' : ''}
-                  </span>
-                ))}{' '}
-                in mind before selecting your answer.
+              <p className="text-sm text-amber-700/90 dark:text-amber-400/80 leading-relaxed">
+                This question contains <TrapWordList words={trapResult.foundWords} />. Trap words invert or
+                restrict what is being asked — students who miss them often pick the wrong option even when
+                they know the content. Re-read the question with them in mind before answering.
               </p>
             </div>
           </div>
         ) : (
-          <div className="flex items-start gap-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-2xl p-4 mb-5">
+          <div className="flex items-start gap-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-2xl p-4 mb-4 sm:mb-5">
             <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
             <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300">
               No trap words detected. Read carefully and proceed when ready.
@@ -195,17 +190,17 @@ export default function McqDrill({ prompt, onComplete }: McqDrillProps) {
           </div>
         )}
 
-        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mb-6">
-          Understand what the question is asking before looking at the options. What is the key thing you are looking for?
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+          Work out what the question is actually asking before you look at the options.
         </p>
 
-        <div className="mt-auto pt-4 border-t border-slate-100 dark:border-white/[0.05] flex justify-end">
+        <div className="pt-4 border-t border-slate-100 dark:border-white/[0.05] flex sm:justify-end">
           <Button
             onClick={handleConfirmQuestion}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-6 rounded-xl font-bold text-base shadow-md transition-all"
+            className="w-full sm:w-auto bg-brand-teal-600 hover:bg-brand-teal-700 text-white px-6 sm:px-8 h-12 sm:h-14 rounded-xl font-bold text-sm sm:text-base shadow-sm transition-colors"
           >
-            <Eye className="w-5 h-5 mr-2" />
-            I understand — Show Options
+            <Eye className="w-5 h-5 mr-2 shrink-0" />
+            I understand — show options
           </Button>
         </div>
       </div>
@@ -217,164 +212,150 @@ export default function McqDrill({ prompt, onComplete }: McqDrillProps) {
   // ─────────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col h-full animate-in fade-in duration-300">
+    <div className="flex flex-col animate-in fade-in duration-300">
 
       {/* Phase indicator + trap word reminder */}
-      <div className="flex items-center gap-2 mb-5 flex-wrap">
-        <div className="flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 px-3 py-1.5 rounded-full">
-          <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-          <span className="text-xs font-bold text-indigo-700 dark:text-indigo-400 uppercase tracking-widest">
-            Step 2 — Select Your Answer
-          </span>
-        </div>
+      <div className="flex flex-wrap items-center gap-2 mb-4 sm:mb-5">
+        <span className={`${chip} bg-brand-teal-50 dark:bg-brand-teal-500/10 border border-brand-teal-200 dark:border-brand-teal-500/20 text-brand-teal-700 dark:text-brand-teal-400`}>
+          <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+          <span>Step 2 — Select your answer</span>
+        </span>
         {trapResult.hasTrapWords && (
-          <div className="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 px-3 py-1.5 rounded-full">
-            <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
-            <span className="text-xs font-bold text-amber-700 dark:text-amber-400">
+          <span className={`${chip} bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400`}>
+            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+            <span className="normal-case tracking-normal font-semibold">
               Trap: {trapResult.foundWords.join(', ')}
             </span>
-          </div>
+          </span>
         )}
       </div>
 
-      {/* Question — with trap word highlights as a reminder */}
-      <div className="mb-6">
-        <h2 className="text-xl sm:text-2xl font-semibold text-slate-800 dark:text-white leading-relaxed">
-          {trapResult.highlighted}
-        </h2>
-      </div>
+      {/* Question — trap highlights retained as a reminder */}
+      <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-slate-800 dark:text-white leading-relaxed break-words mb-5 sm:mb-6">
+        {trapResult.highlighted}
+      </h2>
 
       {/* Options */}
-      <div className="flex-1 overflow-y-auto space-y-3 mb-8">
+      <div
+        role="radiogroup"
+        aria-label="Answer options"
+        className="space-y-2.5 sm:space-y-3 mb-6"
+      >
         {Object.entries(prompt.options || {}).map(([key, text]) => {
 
-          let stateStyles = 'border-slate-200 dark:border-white/[0.07] bg-white dark:bg-white/[0.03] hover:border-indigo-400 dark:hover:border-indigo-500/40 hover:bg-slate-50 dark:hover:bg-white/[0.05]';
-          let icon = null;
+          const isThisSelected = key === selectedOption;
+          const isThisCorrect  = key === correctAnswerKey;
+
+          let stateStyles =
+            'border-slate-200 dark:border-white/[0.07] bg-white dark:bg-white/[0.03] hover:border-brand-teal-400 dark:hover:border-brand-teal-500/40 hover:bg-slate-50 dark:hover:bg-white/[0.05] active:scale-[0.995]';
+          let badgeStyles = 'bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400';
+          let icon: React.ReactNode = null;
 
           if (hasChecked) {
-            if (key === correctAnswerKey) {
-              stateStyles = 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-200 dark:shadow-[0_0_16px_rgba(16,185,129,0.15)]';
-              icon = <CheckCircle2 className="w-5 h-5 text-emerald-500" />;
-            } else if (key === selectedOption) {
-              stateStyles = 'border-rose-500 bg-rose-50 dark:bg-rose-500/10 text-rose-800 dark:text-rose-200 opacity-70';
-              icon = <XCircle className="w-5 h-5 text-rose-500" />;
+            if (isThisCorrect) {
+              stateStyles = 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-900 dark:text-emerald-200';
+              badgeStyles = 'bg-emerald-500 text-white';
+              icon = <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />;
+            } else if (isThisSelected) {
+              stateStyles = 'border-rose-400 bg-rose-50 dark:bg-rose-500/10 text-rose-900 dark:text-rose-200';
+              badgeStyles = 'bg-rose-500 text-white';
+              icon = <XCircle className="w-5 h-5 text-rose-500 shrink-0" />;
             } else {
-              stateStyles = 'border-slate-200 dark:border-white/[0.05] bg-slate-50 dark:bg-white/[0.01] opacity-50';
+              stateStyles = 'border-slate-200 dark:border-white/[0.05] bg-slate-50/60 dark:bg-white/[0.01] opacity-55';
             }
-          } else if (key === selectedOption) {
-            stateStyles = 'border-indigo-500 ring-1 ring-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-200 dark:shadow-[0_0_16px_rgba(99,102,241,0.18)]';
+          } else if (isThisSelected) {
+            stateStyles = 'border-brand-teal-500 ring-2 ring-brand-teal-500/25 bg-brand-teal-50 dark:bg-brand-teal-500/10 text-brand-teal-800 dark:text-brand-teal-200';
+            badgeStyles = 'bg-brand-teal-600 text-white';
           }
 
           return (
             <button
               key={key}
+              type="button"
+              role="radio"
+              aria-checked={isThisSelected}
               onClick={() => !hasChecked && setSelectedOption(key)}
               disabled={hasChecked}
-              className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-between ${stateStyles}`}
+              className={`w-full text-left min-h-[60px] sm:min-h-[64px] p-3.5 sm:p-4 rounded-xl border-2 transition-all duration-150 flex items-center gap-3 sm:gap-4 disabled:cursor-default ${stateStyles}`}
             >
-              <div className="flex items-center gap-4">
-                <span className={`w-8 h-8 flex items-center justify-center rounded-lg font-bold text-sm shrink-0 ${
-                  key === selectedOption && !hasChecked
-                    ? 'bg-indigo-600 text-white'
-                    : hasChecked && key === correctAnswerKey
-                    ? 'bg-emerald-500 text-white'
-                    : hasChecked && key === selectedOption
-                    ? 'bg-rose-500 text-white'
-                    : 'bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400'
-                }`}>
-                  {key}
-                </span>
-                <span className="font-medium text-base sm:text-lg">{text}</span>
-              </div>
+              <span className={`w-8 h-8 sm:w-9 sm:h-9 grid place-items-center rounded-lg font-bold text-sm shrink-0 transition-colors ${badgeStyles}`}>
+                {key}
+              </span>
+              <span className="flex-1 font-medium text-[15px] sm:text-base md:text-lg leading-snug break-words">
+                {text}
+              </span>
               {icon}
             </button>
           );
         })}
       </div>
 
-      {/* ── FEEDBACK SECTION ── */}
+      {/* ── FEEDBACK — one explanation only (the single stored value) ── */}
       {hasChecked && (
-        <div className="mb-6 space-y-3 animate-in fade-in slide-in-from-bottom-2">
+        <div
+          role="status"
+          aria-live="polite"
+          className={`rounded-2xl border p-4 sm:p-5 mb-6 animate-in fade-in slide-in-from-bottom-2 ${
+            isCorrect
+              ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20'
+              : 'bg-slate-50 dark:bg-white/[0.04] border-slate-200 dark:border-white/[0.07]'
+          }`}
+        >
+          <div className="flex items-start gap-3">
+            {isCorrect
+              ? <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500 shrink-0 mt-0.5" />
+              : <Lightbulb className="w-5 h-5 sm:w-6 sm:h-6 text-brand-teal-500 shrink-0 mt-0.5" />}
 
-          {isCorrect ? (
-            <div className="p-4 rounded-xl flex gap-3 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-200 border border-emerald-100 dark:border-emerald-500/20">
-              <HelpCircle className="w-6 h-6 shrink-0 mt-0.5 text-emerald-500" />
-              <div>
-                <span className="font-bold block mb-1">Excellent!</span>
-                {correctAnswerExplanation && (
-                  <span className="text-sm opacity-90">{correctAnswerExplanation}</span>
-                )}
-              </div>
-            </div>
-          ) : (
-            <>
-              {/* Block 1 — Why the selected answer is WRONG */}
-              <div className="p-4 rounded-xl flex gap-3 bg-rose-50 dark:bg-rose-500/10 text-rose-800 dark:text-rose-200 border border-rose-100 dark:border-rose-500/20">
-                <XCircle className="w-6 h-6 shrink-0 mt-0.5 text-rose-500" />
-                <div>
-                  <span className="font-bold block mb-1">
-                    Why option {selectedOption} is wrong
-                  </span>
-                  <span className="text-sm opacity-90">
-                    {wrongAnswerExplanation}
-                  </span>
-                  {trapResult.hasTrapWords && (
-                    <p className="text-sm font-bold mt-2 opacity-90">
-                      This question contained the trap word{trapResult.foundWords.length > 1 ? 's' : ''}{' '}
-                      <strong>
-                        {trapResult.foundWords.map((w, i) => (
-                          <span key={w}>
-                            {w}{i < trapResult.foundWords.length - 1 ? ' and ' : ''}
-                          </span>
-                        ))}
-                      </strong>
-                      {'. '}
-                      Trap words like{' '}
-                      {trapResult.foundWords.map((w, i) => (
-                        <span key={w}>
-                          <strong>{w}</strong>
-                          {i < trapResult.foundWords.length - 1 ? ' and ' : ''}
-                        </span>
-                      ))}{' '}
-                      change what the question is asking. Always re-read the question with the trap word in focus before selecting your answer.
-                    </p>
-                  )}
-                </div>
-              </div>
+            <div className="min-w-0 flex-1">
+              <p className={`font-bold text-sm sm:text-base mb-1 ${
+                isCorrect
+                  ? 'text-emerald-800 dark:text-emerald-200'
+                  : 'text-slate-800 dark:text-white'
+              }`}>
+                {isCorrect ? 'Correct' : `Not quite — the answer is ${correctAnswerKey}`}
+              </p>
 
-              {/* Block 2 — Why the correct answer is RIGHT */}
-              {correctAnswerExplanation && (
-                <div className="p-4 rounded-xl flex gap-3 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-200 border border-emerald-100 dark:border-emerald-500/20">
-                  <CheckCircle2 className="w-6 h-6 shrink-0 mt-0.5 text-emerald-500" />
-                  <div>
-                    <span className="font-bold block mb-1">
-                      Why option {correctAnswerKey} is correct
-                    </span>
-                    <span className="text-sm opacity-90">{correctAnswerExplanation}</span>
-                  </div>
+              {explanation && (
+                <p className={`text-sm leading-relaxed break-words ${
+                  isCorrect
+                    ? 'text-emerald-800/90 dark:text-emerald-200/90'
+                    : 'text-slate-600 dark:text-slate-300'
+                }`}>
+                  {explanation}
+                </p>
+              )}
+
+              {/* Trap-word coaching, folded into the single feedback card */}
+              {trapResult.hasTrapWords && (
+                <div className="mt-3 pt-3 border-t border-amber-200/70 dark:border-amber-500/20 flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                  <p className="text-sm text-amber-800 dark:text-amber-300/90 leading-relaxed">
+                    This question contained <TrapWordList words={trapResult.foundWords} />. Trap words change
+                    what the question is asking — always re-read with them in focus before selecting.
+                  </p>
                 </div>
               )}
-            </>
-          )}
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Action buttons */}
-      <div className="pt-4 border-t border-slate-100 dark:border-white/[0.05] flex justify-end">
+      {/* Action bar — sticks to the bottom of the viewport on small screens */}
+      <div className="sticky bottom-0 -mx-6 sm:mx-0 px-6 sm:px-0 py-3 sm:py-0 sm:pt-4 bg-[#F8FAFC]/95 dark:bg-[#020617]/95 sm:bg-transparent sm:dark:bg-transparent backdrop-blur-sm sm:backdrop-blur-none border-t border-slate-200 dark:border-white/[0.06] sm:border-slate-100 dark:sm:border-white/[0.05] flex sm:justify-end">
         {!hasChecked ? (
           <Button
             onClick={handleCheck}
             disabled={!selectedOption}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-6 rounded-xl font-bold text-base shadow-md transition-all disabled:opacity-50"
+            className="w-full sm:w-auto bg-brand-teal-600 hover:bg-brand-teal-700 text-white px-6 sm:px-8 h-12 sm:h-14 rounded-xl font-bold text-sm sm:text-base shadow-sm transition-colors disabled:opacity-50"
           >
-            Check Answer
+            Check answer
           </Button>
         ) : (
           <Button
             onClick={handleNext}
-            className="bg-slate-800 hover:bg-slate-900 dark:bg-white dark:hover:bg-slate-100 dark:text-slate-900 text-white px-8 py-6 rounded-xl font-bold text-base shadow-md transition-all"
+            className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 dark:text-slate-900 text-white px-6 sm:px-8 h-12 sm:h-14 rounded-xl font-bold text-sm sm:text-base shadow-sm transition-colors"
           >
-            Next <ChevronRight className="w-5 h-5 ml-1" />
+            Next <ChevronRight className="w-5 h-5 ml-1 shrink-0" />
           </Button>
         )}
       </div>

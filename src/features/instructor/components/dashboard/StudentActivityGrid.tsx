@@ -32,8 +32,8 @@ function initials(name: string) {
 }
 
 const AVATAR_PALETTES = [
-  'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400',
-  'bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-400',
+  'bg-brand-teal-100 dark:bg-brand-teal-500/20 text-brand-teal-700 dark:text-brand-teal-400',
+  'bg-brand-blue-100 dark:bg-brand-blue-500/20 text-brand-blue-700 dark:text-brand-blue-400',
   'bg-sky-100 dark:bg-sky-500/20 text-sky-700 dark:text-sky-400',
   'bg-teal-100 dark:bg-teal-500/20 text-teal-700 dark:text-teal-400',
   'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400',
@@ -120,7 +120,7 @@ function StudentCard({ row, batchId }: { row: BandOverviewRow; batchId: string |
       }}
       className={cn(
         'group w-full text-left bg-white dark:bg-slate-900 rounded-2xl border-2 shadow-sm',
-        'hover:shadow-md hover:border-indigo-400 dark:hover:border-indigo-500/60 transition-all duration-200',
+        'hover:shadow-md hover:border-brand-teal-400 dark:hover:border-brand-teal-500/60 transition-all duration-200',
         borderColor
       )}
     >
@@ -159,7 +159,7 @@ function StudentCard({ row, batchId }: { row: BandOverviewRow; batchId: string |
           </p>
         </div>
 
-        <ChevronRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-slate-300 dark:text-slate-600 group-hover:text-indigo-500 transition-colors shrink-0 mt-0.5" />
+        <ChevronRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-slate-300 dark:text-slate-600 group-hover:text-brand-teal-500 transition-colors shrink-0 mt-0.5" />
       </div>
 
       {/* Card footer — drill dots + streak + lexigrid */}
@@ -296,7 +296,7 @@ export function StudentActivityGrid({ rows, batchId, loading }: StudentActivityG
             className={cn(
               'h-8 w-8 rounded-full flex items-center justify-center transition-all',
               hasPrev
-                ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 hover:text-indigo-600 dark:hover:text-indigo-400'
+                ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-brand-teal-100 dark:hover:bg-brand-teal-500/20 hover:text-brand-teal-600 dark:hover:text-brand-teal-400'
                 : 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
             )}
             aria-label="Previous page"
@@ -313,7 +313,7 @@ export function StudentActivityGrid({ rows, batchId, loading }: StudentActivityG
                   className={cn(
                     'rounded-full transition-all',
                     i === page
-                      ? 'h-2 w-5 bg-indigo-500'
+                      ? 'h-2 w-5 bg-brand-teal-500'
                       : 'h-2 w-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600'
                   )}
                   aria-label={`Page ${i + 1}`}
@@ -332,7 +332,7 @@ export function StudentActivityGrid({ rows, batchId, loading }: StudentActivityG
             className={cn(
               'h-8 w-8 rounded-full flex items-center justify-center transition-all',
               hasNext
-                ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 hover:text-indigo-600 dark:hover:text-indigo-400'
+                ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-brand-teal-100 dark:hover:bg-brand-teal-500/20 hover:text-brand-teal-600 dark:hover:text-brand-teal-400'
                 : 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
             )}
             aria-label="Next page"

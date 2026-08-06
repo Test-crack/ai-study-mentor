@@ -88,8 +88,8 @@ export default function IAScheduleWidget() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center flex-shrink-0">
-            <CalendarClock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+          <div className="w-8 h-8 rounded-xl bg-brand-teal-100 dark:bg-brand-teal-500/20 flex items-center justify-center flex-shrink-0">
+            <CalendarClock className="w-4 h-4 text-brand-teal-600 dark:text-brand-teal-400" />
           </div>
           <div>
             <p className="font-bold text-slate-800 dark:text-white text-sm leading-tight">IA Schedule</p>
@@ -98,7 +98,7 @@ export default function IAScheduleWidget() {
         </div>
         <button
           onClick={() => navigate("/student/internal")}
-          className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-0.5"
+          className="text-xs font-semibold text-brand-teal-600 dark:text-brand-teal-400 hover:underline flex items-center gap-0.5"
         >
           View <ChevronRight className="w-3.5 h-3.5" />
         </button>
@@ -108,19 +108,19 @@ export default function IAScheduleWidget() {
       {isIADay && (
         <div className={`rounded-xl px-4 py-3 mb-4 flex items-center justify-between border ${
           canStart
-            ? "bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/30"
+            ? "bg-brand-teal-50 dark:bg-brand-teal-500/10 border-brand-teal-200 dark:border-brand-teal-500/30"
             : "bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/30"
         }`}>
           <div>
-            <p className={`text-xs font-black uppercase tracking-widest mb-0.5 ${canStart ? "text-indigo-700 dark:text-indigo-300" : "text-rose-700 dark:text-rose-300"}`}>
+            <p className={`text-xs font-black uppercase tracking-widest mb-0.5 ${canStart ? "text-brand-teal-700 dark:text-brand-teal-300" : "text-rose-700 dark:text-rose-300"}`}>
               IA #{status.current_ia_number} — Today
             </p>
-            <p className={`text-xs font-medium ${canStart ? "text-indigo-600 dark:text-indigo-400" : "text-rose-600 dark:text-rose-400"}`}>
+            <p className={`text-xs font-medium ${canStart ? "text-brand-teal-600 dark:text-brand-teal-400" : "text-rose-600 dark:text-rose-400"}`}>
               {canStart ? "You're eligible — start your assessment" : `DCS ${status.avg_dcs}% — need 40% to start`}
             </p>
           </div>
           {canStart
-            ? <CheckCircle2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+            ? <CheckCircle2 className="w-5 h-5 text-brand-teal-600 dark:text-brand-teal-400 flex-shrink-0" />
             : <Zap         className="w-5 h-5 text-rose-500 flex-shrink-0" />
           }
         </div>
@@ -139,18 +139,18 @@ export default function IAScheduleWidget() {
                 key={slot.number}
                 className={`flex items-center gap-3 p-3 rounded-xl border transition-colors ${
                   i === 0
-                    ? "border-indigo-200 dark:border-indigo-500/30 bg-indigo-50/60 dark:bg-indigo-500/5"
+                    ? "border-brand-teal-200 dark:border-brand-teal-500/30 bg-brand-teal-50/60 dark:bg-brand-teal-500/5"
                     : "border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/30"
                 }`}
               >
                 {/* Date pill */}
                 <div className={`flex flex-col items-center justify-center rounded-xl w-12 h-12 flex-shrink-0 border-2 ${
                   i === 0
-                    ? "bg-indigo-600 border-indigo-700 dark:border-indigo-500"
+                    ? "bg-brand-teal-600 border-brand-teal-700 dark:border-brand-teal-500"
                     : "bg-slate-200 dark:bg-slate-700 border-slate-300 dark:border-slate-600"
                 }`}>
                   <span className={`font-black text-base leading-none ${i === 0 ? "text-white" : "text-slate-700 dark:text-slate-200"}`}>{day}</span>
-                  <span className={`text-[9px] font-bold uppercase tracking-wide leading-none mt-0.5 ${i === 0 ? "text-indigo-200" : "text-slate-500 dark:text-slate-400"}`}>{month}</span>
+                  <span className={`text-[9px] font-bold uppercase tracking-wide leading-none mt-0.5 ${i === 0 ? "text-brand-teal-200" : "text-slate-500 dark:text-slate-400"}`}>{month}</span>
                 </div>
 
                 {/* Details */}
@@ -158,7 +158,7 @@ export default function IAScheduleWidget() {
                   <p className={`font-bold text-sm truncate ${i === 0 ? "text-slate-800 dark:text-white" : "text-slate-600 dark:text-slate-300"}`}>
                     Internal Assessment #{slot.number}
                   </p>
-                  <p className={`text-xs font-medium ${i === 0 ? "text-indigo-600 dark:text-indigo-400" : "text-slate-400 dark:text-slate-500"}`}>
+                  <p className={`text-xs font-medium ${i === 0 ? "text-brand-teal-600 dark:text-brand-teal-400" : "text-slate-400 dark:text-slate-500"}`}>
                     {slot.date_formatted}
                   </p>
                 </div>
@@ -166,7 +166,7 @@ export default function IAScheduleWidget() {
                 {/* Days badge */}
                 <span className={`text-xs font-black px-2 py-1 rounded-lg whitespace-nowrap ${
                   i === 0
-                    ? "bg-indigo-600 text-white"
+                    ? "bg-brand-teal-600 text-white"
                     : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
                 }`}>
                   {label}
@@ -182,7 +182,7 @@ export default function IAScheduleWidget() {
       {/* CTA */}
       <button
         onClick={() => navigate("/student/internal")}
-        className="mt-4 w-full py-2.5 rounded-xl border border-indigo-200 dark:border-indigo-500/30 text-indigo-600 dark:text-indigo-400 font-bold text-xs uppercase tracking-wide hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-colors"
+        className="mt-4 w-full py-2.5 rounded-xl border border-brand-teal-200 dark:border-brand-teal-500/30 text-brand-teal-600 dark:text-brand-teal-400 font-bold text-xs uppercase tracking-wide hover:bg-brand-teal-50 dark:hover:bg-brand-teal-500/10 transition-colors"
       >
         {isIADay && canStart ? "Start Today's Assessment →" : "View Full Schedule →"}
       </button>

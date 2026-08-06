@@ -74,7 +74,7 @@ const PERFORMANCE_TABLE = [
 
 const SKILL_COLORS: Record<string, string> = {
   Listening: "#0ea5e9",
-  Reading:   "#7c3aed",
+  Reading:   "#185A78",
   Writing:   "#f59e0b",
   Speaking:  "#f43f5e",
 };
@@ -101,7 +101,7 @@ const Report = () => {
         {/* Header */}
         <div>
           <div className="flex items-center gap-2">
-            <BarChart2 className="h-6 w-6 text-indigo-500" />
+            <BarChart2 className="h-6 w-6 text-brand-teal-500" />
             <h1 className="text-2xl font-black text-slate-800 dark:text-white">Reports</h1>
           </div>
           <p className="text-sm text-slate-500 mt-0.5">
@@ -121,7 +121,7 @@ const Report = () => {
               onClick={() => setReportTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 ${
                 reportTab === tab.id
-                  ? "bg-indigo-600 text-white shadow-sm"
+                  ? "bg-brand-teal-600 text-white shadow-sm"
                   : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
               }`}
             >
@@ -151,7 +151,7 @@ const BandArcTab = () => (
   <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6 shadow-sm">
     <div className="mb-5">
       <h2 className="text-base font-black text-slate-800 dark:text-white flex items-center gap-2">
-        <TrendingUp className="h-5 w-5 text-indigo-500" /> Band Score Arc — All 4 Skills
+        <TrendingUp className="h-5 w-5 text-brand-teal-500" /> Band Score Arc — All 4 Skills
       </h2>
       <p className="text-xs text-slate-500 mt-1">
         Line chart showing band score progression over time · Mock data Mar 10 – Mar 24
@@ -180,8 +180,8 @@ const BandArcTab = () => (
           formatter={(value: number, name: string) => [`${value.toFixed(1)}`, name]}
         />
         <Legend wrapperStyle={{ fontSize: "12px", fontWeight: "700", paddingTop: "12px" }} />
-        <ReferenceLine y={7.5} stroke="#6366f1" strokeDasharray="5 3" strokeWidth={1.5}
-          label={{ value: "Target 7.5", position: "right", fontSize: 10, fill: "#6366f1" }} />
+        <ReferenceLine y={7.5} stroke="#12897C" strokeDasharray="5 3" strokeWidth={1.5}
+          label={{ value: "Target 7.5", position: "right", fontSize: 10, fill: "#12897C" }} />
         {Object.entries(SKILL_COLORS).map(([skill, color]) => (
           <Line key={skill} type="monotone" dataKey={skill} stroke={color} strokeWidth={2.5}
             dot={{ r: 4, strokeWidth: 2, fill: "#fff", stroke: color }} activeDot={{ r: 6 }} />
@@ -197,7 +197,7 @@ const RadarTab = () => (
   <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6 shadow-sm">
     <div className="mb-5">
       <h2 className="text-base font-black text-slate-800 dark:text-white flex items-center gap-2">
-        <Target className="h-5 w-5 text-indigo-500" /> Competency Radar — Current vs Target
+        <Target className="h-5 w-5 text-brand-teal-500" /> Competency Radar — Current vs Target
       </h2>
       <p className="text-xs text-slate-500 mt-1">
         Spider chart overlaying your current band per skill against your target band
@@ -205,8 +205,8 @@ const RadarTab = () => (
     </div>
 
     <div className="flex gap-4 mb-5">
-      <span className="inline-flex items-center gap-2 text-xs font-bold text-indigo-600 dark:text-indigo-400">
-        <span className="h-2.5 w-2.5 rounded-full bg-indigo-500" /> Current Band
+      <span className="inline-flex items-center gap-2 text-xs font-bold text-brand-teal-600 dark:text-brand-teal-400">
+        <span className="h-2.5 w-2.5 rounded-full bg-brand-teal-500" /> Current Band
       </span>
       <span className="inline-flex items-center gap-2 text-xs font-bold text-slate-400">
         <span className="h-2.5 w-2.5 rounded-full border-2 border-slate-400" /> Target Band
@@ -219,7 +219,7 @@ const RadarTab = () => (
         <PolarAngleAxis dataKey="skill" tick={{ fontSize: 12, fontWeight: "700", fill: "#64748b" }} />
         <PolarRadiusAxis angle={90} domain={[4, 9]} tick={{ fontSize: 10, fill: "#94a3b8" }} tickCount={4} />
         <Radar name="Target Band" dataKey="target" stroke="#cbd5e1" fill="#cbd5e1" fillOpacity={0.15} strokeDasharray="5 3" strokeWidth={2} />
-        <Radar name="Current Band" dataKey="current" stroke="#6366f1" fill="#6366f1" fillOpacity={0.25} strokeWidth={2.5} />
+        <Radar name="Current Band" dataKey="current" stroke="#12897C" fill="#12897C" fillOpacity={0.25} strokeWidth={2.5} />
         <Tooltip
           contentStyle={{ borderRadius: "12px", border: "1px solid #e2e8f0", fontSize: "12px", fontWeight: "600" }}
           formatter={(value: number, name: string) => [`${value.toFixed(1)}`, name]}
@@ -265,7 +265,7 @@ const ReadinessTab = () => {
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6 shadow-sm">
         <div className="mb-5">
           <h2 className="text-base font-black text-slate-800 dark:text-white flex items-center gap-2">
-            <CalendarClock className="h-5 w-5 text-indigo-500" /> Predicted Readiness — Overall Band Trajectory
+            <CalendarClock className="h-5 w-5 text-brand-teal-500" /> Predicted Readiness — Overall Band Trajectory
           </h2>
           <p className="text-xs text-slate-500 mt-1">
             Current trajectory vs target band vs exam date (Jun 15) · Arithmetic projection from mock data
@@ -273,8 +273,8 @@ const ReadinessTab = () => {
         </div>
 
         <div className="flex flex-wrap gap-4 mb-5">
-          <span className="inline-flex items-center gap-2 text-xs font-bold text-indigo-600">
-            <span className="h-2.5 w-8 rounded bg-indigo-500 inline-block" /> Projected
+          <span className="inline-flex items-center gap-2 text-xs font-bold text-brand-teal-600">
+            <span className="h-2.5 w-8 rounded bg-brand-teal-500 inline-block" /> Projected
           </span>
           <span className="inline-flex items-center gap-2 text-xs font-bold text-rose-500">
             <span className="h-2.5 w-8 rounded bg-rose-400 inline-block" /> Target 7.5
@@ -292,11 +292,11 @@ const ReadinessTab = () => {
                 value !== null ? [`${value.toFixed(1)}`, name] : ["—", name]
               }
             />
-            <ReferenceLine x="Jun 15" stroke="#6366f1" strokeDasharray="4 3"
-              label={{ value: "Exam Date", position: "top", fontSize: 10, fill: "#6366f1" }} />
+            <ReferenceLine x="Jun 15" stroke="#12897C" strokeDasharray="4 3"
+              label={{ value: "Exam Date", position: "top", fontSize: 10, fill: "#12897C" }} />
             <Line type="monotone" dataKey="target" name="Target Band" stroke="#f43f5e" strokeWidth={2} strokeDasharray="5 4" dot={false} />
-            <Line type="monotone" dataKey="projected" name="Projected Band" stroke="#6366f1" strokeWidth={2.5}
-              dot={{ r: 4, strokeWidth: 2, fill: "#fff", stroke: "#6366f1" }} activeDot={{ r: 6 }} connectNulls />
+            <Line type="monotone" dataKey="projected" name="Projected Band" stroke="#12897C" strokeWidth={2.5}
+              dot={{ r: 4, strokeWidth: 2, fill: "#fff", stroke: "#12897C" }} activeDot={{ r: 6 }} connectNulls />
           </LineChart>
         </ResponsiveContainer>
       </div>

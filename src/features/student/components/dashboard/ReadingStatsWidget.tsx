@@ -15,18 +15,18 @@ export function ReadingStatsWidget({ wpm, accuracy, assessmentsCompleted, bestWp
       {/* Current Speed */}
       <Card className="bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 shadow-sm relative overflow-hidden group">
         <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-            <Zap className="h-12 w-12 text-indigo-600" />
+            <Zap className="h-12 w-12 text-brand-teal-600" />
         </div>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-slate-500 dark:text-slate-400">
             Avg. Speed
           </CardTitle>
-          <Zap className="h-4 w-4 text-indigo-600" />
+          <Zap className="h-4 w-4 text-brand-teal-600" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-slate-900 dark:text-white">{wpm} <span className="text-xs font-normal text-slate-500">WPM</span></div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Best: <span className="text-indigo-600 dark:text-indigo-400 font-medium">{bestWpm} WPM</span>
+            Best: <span className="text-brand-teal-600 dark:text-brand-teal-400 font-medium">{bestWpm} WPM</span>
           </p>
         </CardContent>
       </Card>
@@ -68,12 +68,12 @@ export function ReadingStatsWidget({ wpm, accuracy, assessmentsCompleted, bestWp
       </Card>
 
       {/* Rank/Level */}
-      <Card className="bg-gradient-to-br from-indigo-600 to-violet-700 text-white border-none shadow-md relative overflow-hidden">
+      <Card className="bg-gradient-to-br from-brand-teal-600 to-brand-blue-700 text-white border-none shadow-md relative overflow-hidden">
         <div className="absolute top-0 right-0 p-3 opacity-20">
             <Award className="h-12 w-12 text-white" />
         </div>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-indigo-100">
+          <CardTitle className="text-sm font-medium text-brand-teal-100">
             Reading Level
           </CardTitle>
           <Award className="h-4 w-4 text-white" />
@@ -82,7 +82,7 @@ export function ReadingStatsWidget({ wpm, accuracy, assessmentsCompleted, bestWp
           <div className="text-2xl font-bold text-white">
             {wpm > 300 ? "Expert" : wpm > 200 ? "Advanced" : wpm > 100 ? "Intermediate" : "Beginner"}
           </div>
-          <p className="text-xs text-indigo-200 mt-1">
+          <p className="text-xs text-brand-teal-200 mt-1">
             Top {wpm > 300 ? "5%" : wpm > 200 ? "15%" : "50%"} of students
           </p>
         </CardContent>

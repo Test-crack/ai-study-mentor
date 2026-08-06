@@ -272,14 +272,14 @@ export default function Notes() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-brand-blue-50 via-blue-50 to-brand-teal-100">
   
       
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         <div className="space-y-4 sm:space-y-6 md:space-y-8">
           {/* Header */}
           <div className="text-center space-y-2 sm:space-y-3 md:space-y-4 px-2">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-brand-blue-600 to-blue-600 bg-clip-text text-transparent">
               Notes Management
             </h1>
             <p className="text-sm sm:text-base md:text-xl text-muted-foreground">
@@ -289,16 +289,16 @@ export default function Notes() {
 
           {/* Upload Section */}
           <Card 
-            className="border-2 border-dashed border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50"
+            className="border-2 border-dashed border-brand-blue-200 bg-gradient-to-br from-brand-blue-50 to-blue-50"
             onDrop={handleDrop}
             onDragOver={handleDragOver}
           >
             <CardContent className="flex flex-col items-center justify-center py-8 sm:py-10 md:py-12 px-4">
-              <div className="p-3 sm:p-4 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full mb-3 sm:mb-4">
+              <div className="p-3 sm:p-4 bg-gradient-to-br from-brand-blue-100 to-blue-100 rounded-full mb-3 sm:mb-4">
                 {loading ? (
-                  <Upload className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-purple-600 animate-pulse" />
+                  <Upload className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-brand-blue-600 animate-pulse" />
                 ) : (
-                  <Plus className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-purple-600" />
+                  <Plus className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-brand-blue-600" />
                 )}
               </div>
               <h3 className="text-lg sm:text-xl font-semibold mb-2 text-center">Upload Your Study Material</h3>
@@ -311,7 +311,7 @@ export default function Notes() {
               <Button 
                 onClick={handleChooseFiles} 
                 disabled={loading}
-                className="bg-gradient-to-r from-purple-500 to-blue-500 w-full sm:w-auto"
+                className="bg-gradient-to-r from-brand-blue-500 to-blue-500 w-full sm:w-auto"
               >
                 {loading ? (
                   <>
@@ -338,7 +338,7 @@ export default function Notes() {
 
           {/* Upload Status */}
           {uploadingFiles.size > 0 && (
-            <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+            <Card className="bg-gradient-to-r from-blue-50 to-brand-blue-50 border-blue-200">
               <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="text-sm sm:text-base">Uploading Files</CardTitle>
               </CardHeader>
@@ -357,7 +357,7 @@ export default function Notes() {
 
           {/* Generating Status */}
           {generatingNotes.size > 0 && (
-            <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+            <Card className="bg-gradient-to-r from-brand-blue-50 to-pink-50 border-brand-blue-200">
               <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="text-sm sm:text-base flex items-center space-x-2">
                   <Loader2 className="h-4 w-4 animate-spin flex-shrink-0" />
@@ -370,7 +370,7 @@ export default function Notes() {
                     const materialType = key.split('-').pop();
                     return (
                       <div key={key} className="flex items-center space-x-2 text-xs sm:text-sm">
-                        <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin text-purple-600 flex-shrink-0" />
+                        <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin text-brand-blue-600 flex-shrink-0" />
                         <span className="text-muted-foreground truncate">
                           {materialType} notes for {fileName}
                         </span>

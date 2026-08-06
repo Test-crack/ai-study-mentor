@@ -321,7 +321,7 @@ export const YouTubeAnalyzer = () => {
        
             
       <div className="text-center space-y-2 sm:space-y-4 px-2">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-red-500 to-purple-600 bg-clip-text text-transparent">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-red-500 to-brand-blue-600 bg-clip-text text-transparent">
           YouTube Learning Assistant
         </h2>
         <p className="text-sm sm:text-base text-muted-foreground">
@@ -330,7 +330,7 @@ export const YouTubeAnalyzer = () => {
       </div>
 
       {/* Video URL Input */}
-      <Card className="bg-gradient-to-br from-red-50 to-purple-50 border-red-200">
+      <Card className="bg-gradient-to-br from-red-50 to-brand-blue-50 border-red-200">
         <CardHeader className="p-4 sm:p-6">
           <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
             <Youtube className="h-5 w-5 sm:h-6 sm:w-6 text-red-500 flex-shrink-0" />
@@ -350,7 +350,7 @@ export const YouTubeAnalyzer = () => {
             />
             <Button 
               onClick={handleAnalyzeVideo}
-              className="bg-gradient-to-r from-red-500 to-purple-500 text-white hover:text-white w-full sm:w-auto whitespace-nowrap"
+              className="bg-gradient-to-r from-red-500 to-brand-blue-500 text-white hover:text-white w-full sm:w-auto whitespace-nowrap"
               disabled={!videoUrl || isAnalyzing}
             >
               {isAnalyzing ? (
@@ -385,7 +385,7 @@ export const YouTubeAnalyzer = () => {
         ) : (
           analyzedVideos.map((video) => (
           <Card key={video.id} className="hover:shadow-xl transition-all duration-300 border-l-4 border-l-red-500 bg-gradient-to-r from-white to-red-50">
-            <CardHeader className="bg-gradient-to-r from-red-50 to-purple-50 p-4 sm:p-6">
+            <CardHeader className="bg-gradient-to-r from-red-50 to-brand-blue-50 p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
                 <div className="flex-1 min-w-0">
                   <CardTitle className="flex items-start sm:items-center gap-2 flex-wrap text-base sm:text-lg">
@@ -394,7 +394,7 @@ export const YouTubeAnalyzer = () => {
                     </div>
                     <span className="text-gray-800 break-words">{video.title}</span>
                     {video.processing && (
-                      <Loader2 className="h-4 w-4 animate-spin text-purple-600 flex-shrink-0" />
+                      <Loader2 className="h-4 w-4 animate-spin text-brand-blue-600 flex-shrink-0" />
                     )}
                   </CardTitle>
                   <CardDescription className="mt-2 sm:mt-3 text-xs sm:text-sm text-gray-600 leading-relaxed">
@@ -421,8 +421,8 @@ export const YouTubeAnalyzer = () => {
               {video.keyTopics.length > 0 && (
                 <div className="bg-white rounded-lg p-3 sm:p-4 border">
                   <div className="flex items-center space-x-2 mb-2 sm:mb-3">
-                    <div className="p-1 bg-purple-100 rounded flex-shrink-0">
-                      <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-600" />
+                    <div className="p-1 bg-brand-blue-100 rounded flex-shrink-0">
+                      <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-brand-blue-600" />
                     </div>
                     <h4 className="font-semibold text-sm sm:text-base text-gray-800">Key Topics Covered</h4>
                   </div>
@@ -447,7 +447,7 @@ export const YouTubeAnalyzer = () => {
                   : video.transcript === "Extracting..." 
                     ? "bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200"
                   : video.transcript === "Permission Required"
-                    ? "bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200"
+                    ? "bg-gradient-to-r from-blue-50 to-brand-teal-50 border-blue-200"
                     : "bg-gradient-to-r from-red-50 to-pink-50 border-red-200"
               }`}>
                 <div className="flex items-center space-x-2 min-w-0">
@@ -498,14 +498,14 @@ export const YouTubeAnalyzer = () => {
               </div>
 
               {/* AI Insights */}
-              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-3 sm:p-5 rounded-lg border border-purple-200">
+              <div className="bg-gradient-to-r from-brand-teal-50 to-brand-blue-50 p-3 sm:p-5 rounded-lg border border-brand-blue-200">
                 <div className="flex items-center space-x-2 mb-2 sm:mb-3">
-                  <div className="p-1.5 sm:p-2 bg-purple-500 rounded-lg flex-shrink-0">
+                  <div className="p-1.5 sm:p-2 bg-brand-blue-500 rounded-lg flex-shrink-0">
                     <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
                   </div>
-                  <h4 className="font-semibold text-sm sm:text-base text-purple-900">AI Learning Recommendation</h4>
+                  <h4 className="font-semibold text-sm sm:text-base text-brand-blue-900">AI Learning Recommendation</h4>
                 </div>
-                <p className="text-xs sm:text-sm text-purple-800 leading-relaxed">{video.aiInsights}</p>
+                <p className="text-xs sm:text-sm text-brand-blue-800 leading-relaxed">{video.aiInsights}</p>
               </div>
 
               {/* Study Notes (Enhanced) */}
@@ -563,7 +563,7 @@ export const YouTubeAnalyzer = () => {
                   <Button 
                     size="sm" 
                     disabled={video.processing}
-                    className="bg-gradient-to-r from-red-500 to-purple-600 hover:from-red-600 hover:to-purple-700 text-white hover:text-white shadow-lg transform hover:scale-105 transition-all w-full sm:col-span-2 lg:col-span-1 text-xs sm:text-sm"
+                    className="bg-gradient-to-r from-red-500 to-brand-blue-600 hover:from-red-600 hover:to-brand-blue-700 text-white hover:text-white shadow-lg transform hover:scale-105 transition-all w-full sm:col-span-2 lg:col-span-1 text-xs sm:text-sm"
                   >
                     <Play className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
                     Start Learning
@@ -577,7 +577,7 @@ export const YouTubeAnalyzer = () => {
       </div>
 
       {/* Feature Highlights */}
-      <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+      <Card className="bg-gradient-to-r from-blue-500 to-brand-blue-600 text-white">
         <CardContent className="p-4 sm:p-6">
           <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">AI-Powered Video Analysis</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 text-xs sm:text-sm">

@@ -104,7 +104,7 @@ export const ReadingTimeError = ({
       </Card>
 
       {/* Why This Matters */}
-      <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200">
+      <Card className="bg-gradient-to-br from-blue-50 to-brand-teal-50 border-2 border-blue-200">
         <CardHeader>
           <CardTitle className="flex items-center text-blue-800">
             <div className="p-2 bg-blue-500 rounded-lg mr-3">
@@ -174,7 +174,7 @@ export const ReadingTimeError = ({
       </Card>
 
       {/* Action Buttons */}
-      <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+      <Card className="bg-gradient-to-r from-blue-500 to-brand-blue-600 text-white">
         <CardContent className="p-8 text-center">
           <h3 className="text-xl font-semibold mb-4">Ready to try again?</h3>
           <div className="flex flex-col sm:flex-row justify-center items-center space-y-3 sm:space-y-0 sm:space-x-4">

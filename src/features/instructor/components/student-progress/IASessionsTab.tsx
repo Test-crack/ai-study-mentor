@@ -70,7 +70,7 @@ function ScoreDetailPanel({ scores }: { scores: SectionScore[] }) {
                   </td>
                   <td className="py-2 pr-3 text-center">
                     {s.ai_graded
-                      ? <Cpu className="h-3.5 w-3.5 text-indigo-500 mx-auto" />
+                      ? <Cpu className="h-3.5 w-3.5 text-brand-teal-500 mx-auto" />
                       : <span className="text-slate-300 dark:text-slate-600 text-xs">—</span>}
                   </td>
                 </tr>
@@ -82,10 +82,10 @@ function ScoreDetailPanel({ scores }: { scores: SectionScore[] }) {
 
       {/* AI Feedback panels — one per sub-skill that has it */}
       {validScores.filter(s => s.ai_feedback).map((s, i) => (
-        <div key={i} className="rounded-xl border border-indigo-100 dark:border-indigo-500/20 bg-indigo-50/50 dark:bg-indigo-500/5 p-3 space-y-2">
+        <div key={i} className="rounded-xl border border-brand-teal-100 dark:border-brand-teal-500/20 bg-brand-teal-50/50 dark:bg-brand-teal-500/5 p-3 space-y-2">
           <div className="flex items-center gap-2">
-            <Cpu className="h-3.5 w-3.5 text-indigo-500 shrink-0" />
-            <p className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
+            <Cpu className="h-3.5 w-3.5 text-brand-teal-500 shrink-0" />
+            <p className="text-[10px] font-bold text-brand-teal-600 dark:text-brand-teal-400 uppercase tracking-wider">
               AI Feedback — {skillLabel(s.skill, s.sub_skill)}
             </p>
           </div>
@@ -98,7 +98,7 @@ function ScoreDetailPanel({ scores }: { scores: SectionScore[] }) {
             <ul className="space-y-1">
               {s.ai_feedback!.key_observations.map((obs, j) => (
                 <li key={j} className="flex items-start gap-1.5 text-xs text-slate-600 dark:text-slate-400">
-                  <CheckCircle2 className="h-3 w-3 text-indigo-400 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="h-3 w-3 text-brand-teal-400 shrink-0 mt-0.5" />
                   {obs}
                 </li>
               ))}

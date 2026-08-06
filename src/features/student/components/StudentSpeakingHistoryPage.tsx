@@ -182,7 +182,7 @@ export default function StudentSpeakingHistoryPage() {
                 <ChevronLeft className="w-4 h-4 mr-1" /> Back to Practice
               </Button>
               <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
-                <Activity className="w-8 h-8 text-[#8a42f5]" />
+                <Activity className="w-8 h-8 text-[#256B8B]" />
                 Analytics & History
               </h1>
               <p className="text-slate-500 dark:text-slate-400 mt-1">Track your speaking progression over time.</p>
@@ -198,14 +198,14 @@ export default function StudentSpeakingHistoryPage() {
                 </div>
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">No Practice History Yet</h2>
                 <p className="text-slate-500 mb-6">Complete your first speaking practice to see your analytics dashboard here.</p>
-                <Button onClick={() => navigate('/student/speaking-assessment')} className="bg-[#8a42f5] hover:bg-[#7b3be6] text-white">Start Practicing</Button>
+                <Button onClick={() => navigate('/student/speaking-assessment')} className="bg-[#256B8B] hover:bg-[#185A78] text-white">Start Practicing</Button>
             </div>
           ) : (
             <div className="space-y-8">
               {/* Stat Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard icon={<TrendingUp />} label="Avg Fluency Score" value={`${stats.avgScore}/100`} color="text-emerald-500" bg="bg-emerald-50 dark:bg-emerald-500/10" />
-                <StatCard icon={<Zap />} label="Peak Speaking Speed" value={`${stats.peakWpm} WPM`} color="text-[#8a42f5]" bg="bg-[#8a42f5]/10" />
+                <StatCard icon={<Zap />} label="Peak Speaking Speed" value={`${stats.peakWpm} WPM`} color="text-[#256B8B]" bg="bg-[#256B8B]/10" />
                 <StatCard icon={<Award />} label="Practice Sessions" value={stats.totalAssessments} color="text-blue-500" bg="bg-blue-50 dark:bg-blue-500/10" />
                 <StatCard icon={<Target />} label="Keyword Hit Rate" value={`${stats.avgKeywords}%`} color="text-amber-500" bg="bg-amber-50 dark:bg-amber-500/10" />
               </div>
@@ -219,8 +219,8 @@ export default function StudentSpeakingHistoryPage() {
                       <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <defs>
                           <linearGradient id="colorFluency" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#8a42f5" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#8a42f5" stopOpacity={0}/>
+                            <stop offset="5%" stopColor="#256B8B" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#256B8B" stopOpacity={0}/>
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
@@ -230,7 +230,7 @@ export default function StudentSpeakingHistoryPage() {
                             contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                             labelStyle={{ color: '#0b132b', fontWeight: 'bold' }}
                         />
-                        <Area type="monotone" dataKey="fluency" stroke="#8a42f5" strokeWidth={3} fillOpacity={1} fill="url(#colorFluency)" name="Fluency Score" />
+                        <Area type="monotone" dataKey="fluency" stroke="#256B8B" strokeWidth={3} fillOpacity={1} fill="url(#colorFluency)" name="Fluency Score" />
                         <Line type="monotone" dataKey="wpm" stroke="#10b981" strokeWidth={3} dot={false} name="WPM" />
                       </AreaChart>
                     </ResponsiveContainer>
@@ -286,7 +286,7 @@ export default function StudentSpeakingHistoryPage() {
                              </span>
                            </td>
                            <td className="py-4 text-center font-mono text-slate-600 dark:text-slate-400">{h.weightedWpm}</td>
-                           <td className="py-4 text-right pr-4 font-bold text-[#8a42f5] dark:text-[#a874f7]">
+                           <td className="py-4 text-right pr-4 font-bold text-[#256B8B] dark:text-[#4E8CA6]">
                              {h.keywordsHit}/{h.totalKeywords}
                            </td>
                          </tr>
