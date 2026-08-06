@@ -1,5 +1,6 @@
 "use client";
-import { GraduationCap, LogOut } from "lucide-react";
+import { GraduationCap, LogOut, Target, ChevronDown, MessageSquareWarning, Trophy, TrendingDown } from "lucide-react";
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Legend } from "recharts";
 import { Link, useNavigate } from 'react-router-dom';
 import ResumePasswordModal from "../Diagnosis/ResumePasswordModal";
 import React, {
@@ -79,6 +80,19 @@ function getBandLevel(score: number): Level {
   if (score < 7.0) return "B";
   return "C";
 }
+
+// Same red/amber/green thresholds as getBandLevel, expressed as bar-fill classes
+// for the criterion progress bars: red <5.5, amber 5.5–6.5(→<7.0), green ≥7.0.
+function getScoreBarColor(score: number): string {
+  if (score < 5.5) return "bg-rose-500";
+  if (score < 7.0) return "bg-amber-500";
+  return "bg-emerald-500";
+}
+
+const QUESTION_TYPE_LABELS: Record<string, string> = {
+  mcq: "MCQ",
+  tfng: "TFNG",
+};
 
 function getLevelConfig(level: Level) {
   const configs = {
@@ -460,7 +474,9 @@ function DetailedFeedbackDisplay({ feedback }: { feedback: any }) {
     <div className="space-y-3">
       {feedback?.priority_action && (
         <div className="bg-red-50 border-2 border-red-200 p-3 rounded">
-          <p className="text-red-700 font-bold text-[10px] uppercase tracking-wider">Priority Action</p>
+          <p className="text-red-700 font-bold text-[10px] uppercase tracking-wider flex items-center gap-1.5">
+            <Target className="w-3 h-3" /> Priority Action
+          </p>
           <p className="text-red-900 text-sm mt-1 font-medium">{feedback.priority_action}</p>
         </div>
       )}
@@ -514,6 +530,26 @@ function DetailedFeedbackDisplay({ feedback }: { feedback: any }) {
   );
 }
 
+// Collapsible wrapper for the "AI Feedback & Insights" block — defaults open since
+// the feedback is the core value of the diagnostic, but collapsible so a student
+// can tuck it away once read.
+function FeedbackAccordion({ title, children }: { title: string; children: React.ReactNode }) {
+  const [open, setOpen] = useState(true);
+  return (
+    <div className="bg-brand-teal-50 border-2 border-gray-900 rounded-lg w-full max-w-lg" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between px-4 py-3 text-left"
+      >
+        <span className="text-brand-teal-700 text-xs uppercase tracking-wider font-black">{title}</span>
+        <ChevronDown className={`w-4 h-4 text-brand-teal-700 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && <div className="px-4 pb-4 text-left">{children}</div>}
+    </div>
+  );
+}
+
 function InterimResultCard({
   skill,
   result,
@@ -557,33 +593,78 @@ function InterimResultCard({
       </p>
 
       {/* Sub-Scores Stats Board (Listening & Reading) */}
-      {result.sub_scores && result.sub_scores.total_questions !== undefined && (
-        <div className="grid grid-cols-2 gap-4 w-full max-w-sm mt-2">
-          <div className="bg-white border-2 border-gray-900 rounded-lg p-4 flex flex-col items-center justify-center" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
-            <p className="text-gray-500 text-[10px] uppercase font-black tracking-widest mb-1">Accuracy</p>
-            <p className="text-gray-900 text-2xl font-black">{result.sub_scores.accuracy_percentage}%</p>
+      {result.sub_scores && result.sub_scores.total_questions !== undefined && (() => {
+        const accuracyPct = Number(result.sub_scores.accuracy_percentage) || 0;
+        const ringColor = accuracyPct >= 70 ? '#10B981' : accuracyPct >= 50 ? '#F59E0B' : '#F43F5E';
+        const RADIUS = 42;
+        const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+        const byType = result.sub_scores.by_question_type as Record<string, { correct: number; total: number }> | undefined;
+        return (
+          <div className="w-full max-w-lg mt-2 mx-auto flex flex-col sm:flex-row items-center gap-4 text-left">
+            <div className="relative w-28 h-28 shrink-0">
+              <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+                <circle cx="50" cy="50" r={RADIUS} fill="none" stroke="#E5E7EB" strokeWidth="10" />
+                <circle
+                  cx="50" cy="50" r={RADIUS} fill="none"
+                  stroke={ringColor} strokeWidth="10" strokeLinecap="round"
+                  strokeDasharray={`${(accuracyPct / 100) * CIRCUMFERENCE} ${CIRCUMFERENCE}`}
+                  className="transition-all duration-700"
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-2xl font-black text-gray-900 tabular-nums">{accuracyPct}%</span>
+                <span className="text-[9px] uppercase font-black text-gray-500 tracking-widest">Accuracy</span>
+              </div>
+            </div>
+
+            <div className="flex-1 w-full space-y-2">
+              <div className="bg-white border-2 border-gray-900 rounded-lg p-3 flex items-center justify-between" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+                <span className="text-gray-500 text-[10px] uppercase font-black tracking-widest">Correct</span>
+                <span className="text-gray-900 text-xl font-black tabular-nums">
+                  {result.sub_scores.correct_answers} <span className="text-sm font-bold text-gray-400">/ {result.sub_scores.total_questions}</span>
+                </span>
+              </div>
+
+              {byType && Object.keys(byType).length > 0 && (
+                <div className="bg-white border-2 border-gray-900 rounded-lg p-3 space-y-1.5" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+                  <p className="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1">By Question Type</p>
+                  {Object.entries(byType).map(([type, stats]) => (
+                    <div key={type} className="flex items-center justify-between text-xs">
+                      <span className="text-gray-700 font-bold uppercase">{QUESTION_TYPE_LABELS[type] ?? type}</span>
+                      <span className="text-gray-900 font-black tabular-nums">{stats.correct}/{stats.total}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-          <div className="bg-white border-2 border-gray-900 rounded-lg p-4 flex flex-col items-center justify-center" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
-            <p className="text-gray-500 text-[10px] uppercase font-black tracking-widest mb-1">Correct</p>
-            <p className="text-gray-900 text-2xl font-black">{result.sub_scores.correct_answers} <span className="text-sm font-bold text-gray-400">/ {result.sub_scores.total_questions}</span></p>
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Sub-Scores Stats Board (Writing) */}
       {result.sub_scores && result.sub_scores.word_count !== undefined && result.sub_scores.grammarScore !== undefined && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-lg mt-2 mx-auto">
+        <div className="w-full max-w-lg mt-2 mx-auto bg-white border-2 border-gray-900 rounded-lg p-4 space-y-3 text-left" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+          <p className="text-gray-500 text-[10px] uppercase font-black tracking-widest">Criterion Breakdown</p>
           {[
-            { key: 'taskResponseScore', label: 'Response' },
+            { key: 'taskResponseScore', label: 'Task Achievement' },
             { key: 'coherenceScore', label: 'Coherence' },
-            { key: 'vocabularyScore', label: 'Lexical' },
+            { key: 'vocabularyScore', label: 'Vocabulary' },
             { key: 'grammarScore', label: 'Grammar' }
-          ].map(({ key, label }) => (
-            <div key={key} className="bg-white border-2 border-gray-900 rounded-lg p-3 flex flex-col items-center justify-center" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
-              <p className="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1">{label}</p>
-              <p className="text-gray-900 text-xl font-black">{result.sub_scores[key]}</p>
-            </div>
-          ))}
+          ].map(({ key, label }) => {
+            const score = Number(result.sub_scores[key]) || 0;
+            const pct = Math.min(100, Math.max(0, (score / 9) * 100));
+            return (
+              <div key={key}>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-gray-700 text-xs font-bold">{label}</span>
+                  <span className="text-gray-900 text-sm font-black tabular-nums">{score.toFixed(1)}</span>
+                </div>
+                <div className="h-2.5 w-full bg-gray-100 rounded-full border border-gray-200 overflow-hidden">
+                  <div className={`h-full ${getScoreBarColor(score)} rounded-full transition-all duration-700`} style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -605,10 +686,9 @@ function InterimResultCard({
       )}
 
       {result.feedback && (
-        <div className="bg-brand-teal-50 border-2 border-gray-900 rounded-lg p-4 w-full max-w-lg text-left" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
-          <p className="text-brand-teal-700 text-xs uppercase tracking-wider mb-2 font-black">AI Feedback & Insights</p>
+        <FeedbackAccordion title="AI Feedback & Insights">
           <DetailedFeedbackDisplay feedback={result.feedback} />
-        </div>
+        </FeedbackAccordion>
       )}
 
       <button
@@ -1714,7 +1794,16 @@ function SpeakingResultCard({
     coherenceScore: "Coherence & Cohesion",
   };
 
+  // Distinct only if the criteria actually differ — a single sub-score, or an all-tied
+  // set, makes maxSub/minSub collapse onto the same entry via the reduce above.
+  // Showing "Strongest: X" and "Weakest: X" for the same criterion would be nonsense.
+  const hasDistinctStrongestWeakest = subScoreEntries.length > 1 && maxSub[0] !== minSub[0];
+
   const level = getBandLevel(band_score);
+  const feedbackSource = result.feedback ?? result.sub_scores?.feedback;
+  const fillerWordCount = Array.isArray(feedbackSource?.filler_words_detected)
+    ? feedbackSource.filler_words_detected.length
+    : 0;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -1726,6 +1815,26 @@ function SpeakingResultCard({
         <LevelBadge level={level} size="lg" />
       </div>
 
+      {(hasDistinctStrongestWeakest || fillerWordCount > 0) && (
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          {hasDistinctStrongestWeakest && (
+            <>
+              <span className="inline-flex items-center gap-1.5 bg-brand-teal-100 border border-brand-teal-300 text-brand-teal-800 text-[10px] font-black uppercase tracking-wide px-2.5 py-1.5 rounded-full">
+                <Trophy className="w-3 h-3" /> Strongest: {subScoreLabels[maxSub[0]] ?? maxSub[0]}
+              </span>
+              <span className="inline-flex items-center gap-1.5 bg-amber-100 border border-amber-300 text-amber-800 text-[10px] font-black uppercase tracking-wide px-2.5 py-1.5 rounded-full">
+                <TrendingDown className="w-3 h-3" /> Weakest: {subScoreLabels[minSub[0]] ?? minSub[0]}
+              </span>
+            </>
+          )}
+          {fillerWordCount > 0 && (
+            <span className="inline-flex items-center gap-1.5 bg-orange-100 border border-orange-300 text-orange-800 text-[10px] font-black uppercase tracking-wide px-2.5 py-1.5 rounded-full">
+              <MessageSquareWarning className="w-3 h-3" /> {fillerWordCount} Filler Word{fillerWordCount === 1 ? '' : 's'}
+            </span>
+          )}
+        </div>
+      )}
+
       {subScoreEntries.length > 0 && (
         <div className="bg-white border-2 border-gray-900 rounded-lg overflow-hidden" style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>
           <p className="px-5 py-3 text-gray-500 text-xs uppercase tracking-widest border-b-2 border-gray-900 font-black">
@@ -1733,8 +1842,8 @@ function SpeakingResultCard({
           </p>
           <div className="divide-y-2 divide-gray-100">
             {subScoreEntries.map(([key, val]) => {
-              const isWeakest = key === minSub[0];
-              const isStrongest = key === maxSub[0];
+              const isWeakest = hasDistinctStrongestWeakest && key === minSub[0];
+              const isStrongest = hasDistinctStrongestWeakest && key === maxSub[0];
               return (
                 <div
                   key={key}
@@ -1765,11 +1874,10 @@ function SpeakingResultCard({
         </div>
       )}
 
-      {(result.feedback ?? result.sub_scores?.feedback) && (
-        <div className="bg-white border-2 border-gray-900 rounded-lg p-6" style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>
-          <p className="text-gray-900 font-black uppercase tracking-wide mb-4 text-center">AI Detailed Feedback</p>
-          <DetailedFeedbackDisplay feedback={result.feedback ?? result.sub_scores?.feedback} />
-        </div>
+      {feedbackSource && (
+        <FeedbackAccordion title="AI Detailed Feedback">
+          <DetailedFeedbackDisplay feedback={feedbackSource} />
+        </FeedbackAccordion>
       )}
 
       <button
@@ -1790,13 +1898,23 @@ function SpeakingResultCard({
 function DiagnosticSummaryScreen({
   results,
   onGoToDashboard,
+  targetBand,
 }: {
   results: AllResults;
   onGoToDashboard: () => void;
+  targetBand?: number | null;
 }) {
   const skills: Skill[] = ["listening", "reading", "writing", "speaking"];
   const avgScore = getAverageScore(results);
   const overallLevel = getBandLevel(avgScore);
+  const target = Number(targetBand) || 7.0;
+  const [breakdownOpen, setBreakdownOpen] = useState(false);
+
+  const radarData = skills.map((skill) => ({
+    skill: SKILL_LABELS[skill],
+    band: Number(results[skill]?.band_score) || 4,
+    target,
+  }));
 
   const readinessMessages: Record<Level, string> = {
     A: "You're at the foundation stage. Our personalised plan will fast-track you toward your target band.",
@@ -1833,29 +1951,140 @@ function DiagnosticSummaryScreen({
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="border-2 border-gray-900 bg-white rounded-xl p-2 sm:p-4" style={{ boxShadow: '4px 4px 0 #0F0F0F' }}>
+        <div style={{ width: '100%', height: 300 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <RadarChart data={radarData} margin={{ top: 8, right: 24, bottom: 8, left: 24 }}>
+              <PolarGrid stroke="#D1D5DB" />
+              <PolarAngleAxis dataKey="skill" tick={{ fill: '#374151', fontSize: 11, fontWeight: 700 }} />
+              <PolarRadiusAxis domain={[4, 9]} tickCount={6} tick={{ fill: '#9CA3AF', fontSize: 9 }} />
+              <Radar name={`Target (${target.toFixed(1)})`} dataKey="target" stroke="#9CA3AF" strokeDasharray="4 4" fill="#9CA3AF" fillOpacity={0.04} isAnimationActive={false} />
+              <Radar name="Your Band" dataKey="band" stroke="#0A6E64" fill="#0A6E64" fillOpacity={0.35} strokeWidth={2} />
+              <Legend wrapperStyle={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }} />
+            </RadarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap justify-center gap-2">
         {skills.map((skill) => {
           const result = results[skill];
           if (!result) return null;
-          const level = getBandLevel(result.band_score);
-          const cfg = getLevelConfig(level);
+          const score = Number(result.band_score) || 0;
+          const chipColor = score < 5.5
+            ? { bg: '#FEE2E2', border: '#FCA5A5', text: '#991B1B' }
+            : score < 7.0
+            ? { bg: '#FEF3C7', border: '#FCD34D', text: '#92400E' }
+            : { bg: '#D1FAE5', border: '#6EE7B7', text: '#065F46' };
           return (
-            <div
+            <span
               key={skill}
-              className={`border-2 border-gray-900 rounded-xl p-4 text-center ${cfg.bg}`}
-              style={{ boxShadow: '4px 4px 0 #0F0F0F' }}
+              className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wide px-3 py-1.5 rounded-full border-2"
+              style={{ background: chipColor.bg, borderColor: chipColor.border, color: chipColor.text }}
             >
-              <span className="text-2xl">{SKILL_ICONS[skill]}</span>
-              <p className="text-gray-500 text-xs mt-2 uppercase tracking-widest font-black">
-                {SKILL_LABELS[skill]}
-              </p>
-              <div className="text-3xl font-black mt-1 tabular-nums text-gray-900">
-                {result.band_score.toFixed(1)}
-              </div>
-              <LevelBadge level={level} size="sm" />
-            </div>
+              {SKILL_ICONS[skill]} {SKILL_LABELS[skill]} · {score.toFixed(1)}
+            </span>
           );
         })}
+      </div>
+
+      <div className="border-2 border-gray-900 rounded-xl overflow-hidden" style={{ boxShadow: '3px 3px 0 #0F0F0F' }}>
+        <button
+          type="button"
+          onClick={() => setBreakdownOpen(o => !o)}
+          className="w-full flex items-center justify-between px-4 py-3 bg-white text-left"
+        >
+          <span className="text-gray-900 text-xs uppercase tracking-widest font-black">Skill Breakdown</span>
+          <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${breakdownOpen ? 'rotate-180' : ''}`} />
+        </button>
+        {breakdownOpen && (
+          <div className="px-4 pb-4 pt-1 bg-white space-y-4">
+            {skills.map((skill) => {
+              const result = results[skill];
+              if (!result || !result.sub_scores) return null;
+              const sub = result.sub_scores;
+
+              if (skill === 'writing' && sub.grammarScore !== undefined) {
+                const bars = [
+                  { label: 'Task Achievement', key: 'taskResponseScore' },
+                  { label: 'Coherence', key: 'coherenceScore' },
+                  { label: 'Vocabulary', key: 'vocabularyScore' },
+                  { label: 'Grammar', key: 'grammarScore' },
+                ];
+                return (
+                  <div key={skill}>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Writing</p>
+                    <div className="space-y-1.5">
+                      {bars.map(({ label, key }) => {
+                        const score = Number(sub[key]) || 0;
+                        return (
+                          <div key={key} className="flex items-center gap-2">
+                            <span className="text-[11px] font-bold text-gray-600 w-28 shrink-0">{label}</span>
+                            <div className="flex-1 h-2 bg-gray-100 rounded-full border border-gray-200 overflow-hidden">
+                              <div className={`h-full ${getScoreBarColor(score)} rounded-full`} style={{ width: `${Math.min(100, (score / 9) * 100)}%` }} />
+                            </div>
+                            <span className="text-[11px] font-black text-gray-900 w-8 text-right">{score.toFixed(1)}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              }
+
+              if (skill === 'speaking' && sub.fluencyScore !== undefined) {
+                const bars = [
+                  { label: 'Fluency', key: 'fluencyScore' },
+                  { label: 'Vocabulary', key: 'vocabularyScore' },
+                  { label: 'Grammar', key: 'grammarScore' },
+                  { label: 'Pronunciation', key: 'pronunciationScore' },
+                ];
+                return (
+                  <div key={skill}>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Speaking</p>
+                    <div className="space-y-1.5">
+                      {bars.map(({ label, key }) => {
+                        const score = Number(sub[key]) || 0;
+                        return (
+                          <div key={key} className="flex items-center gap-2">
+                            <span className="text-[11px] font-bold text-gray-600 w-28 shrink-0">{label}</span>
+                            <div className="flex-1 h-2 bg-gray-100 rounded-full border border-gray-200 overflow-hidden">
+                              <div className={`h-full ${getScoreBarColor(score)} rounded-full`} style={{ width: `${Math.min(100, (score / 9) * 100)}%` }} />
+                            </div>
+                            <span className="text-[11px] font-black text-gray-900 w-8 text-right">{score.toFixed(1)}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              }
+
+              if ((skill === 'listening' || skill === 'reading') && sub.total_questions !== undefined) {
+                const byType = sub.by_question_type as Record<string, { correct: number; total: number }> | undefined;
+                return (
+                  <div key={skill}>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">{SKILL_LABELS[skill]}</p>
+                    <div className="flex items-center justify-between text-xs mb-1.5">
+                      <span className="font-bold text-gray-600">Accuracy</span>
+                      <span className="font-black text-gray-900">{sub.accuracy_percentage}% ({sub.correct_answers}/{sub.total_questions})</span>
+                    </div>
+                    {byType && Object.keys(byType).length > 0 && (
+                      <div className="flex gap-3">
+                        {Object.entries(byType).map(([type, stats]) => (
+                          <span key={type} className="text-[11px] font-bold text-gray-600">
+                            {QUESTION_TYPE_LABELS[type] ?? type}: <span className="text-gray-900 font-black">{stats.correct}/{stats.total}</span>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+              return null;
+            })}
+          </div>
+        )}
       </div>
 
       <button
@@ -2234,6 +2463,7 @@ function DiagnosisInner() {
             <DiagnosticSummaryScreen
               results={results}
               onGoToDashboard={handleGoToDashboard}
+              targetBand={profile?.targetBand}
             />
           )}
         </div>

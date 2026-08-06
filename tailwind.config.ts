@@ -88,6 +88,7 @@ export default {
 					ink: {
 						DEFAULT: '#142B3A',   // headings, CTA block
 						deep: '#0E1F2B',      // footer
+						nav: '#1C3D4D',       // nav bar — lighter than ink so the logo's dark squares stay visible
 					},
 					warm: {
 						DEFAULT: '#E8753D',   // risk / attention
