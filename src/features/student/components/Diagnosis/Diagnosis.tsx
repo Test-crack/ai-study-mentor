@@ -1,7 +1,8 @@
 "use client";
-import { GraduationCap, LogOut, Target, ChevronDown, MessageSquareWarning, Trophy, TrendingDown } from "lucide-react";
+import { GraduationCap, LogOut, Target, ChevronDown, MessageSquareWarning, Trophy, TrendingDown, Download } from "lucide-react";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Legend } from "recharts";
 import { Link, useNavigate } from 'react-router-dom';
+import { createPortal } from "react-dom";
 import ResumePasswordModal from "../Diagnosis/ResumePasswordModal";
 import React, {
   useState,
@@ -1904,11 +1905,13 @@ function DiagnosticSummaryScreen({
   onGoToDashboard: () => void;
   targetBand?: number | null;
 }) {
+  const { profile } = useAuth();
   const skills: Skill[] = ["listening", "reading", "writing", "speaking"];
   const avgScore = getAverageScore(results);
   const overallLevel = getBandLevel(avgScore);
   const target = Number(targetBand) || 7.0;
   const [breakdownOpen, setBreakdownOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
 
   const radarData = skills.map((skill) => ({
     skill: SKILL_LABELS[skill],
@@ -2087,15 +2090,217 @@ function DiagnosticSummaryScreen({
         )}
       </div>
 
-      <button
-        type="button"
-        onClick={onGoToDashboard}
-        className="inline-block text-center w-full py-4 bg-gray-900 hover:bg-gray-800 text-white font-black text-base uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all neo-btn"
-        style={{ boxShadow: '5px 5px 0 #0A6E64' }}
-      >
-        Go to Dashboard →
-      </button>
+      <div className="flex flex-col sm:flex-row gap-3">
+        <button
+          type="button"
+          onClick={() => setReportOpen(true)}
+          className="inline-flex items-center justify-center gap-2 sm:w-56 py-4 bg-white hover:bg-gray-50 text-gray-900 font-black text-sm uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all neo-btn"
+          style={{ boxShadow: '5px 5px 0 #0F0F0F' }}
+        >
+          <Download className="w-4 h-4" /> Download Report
+        </button>
+        <button
+          type="button"
+          onClick={onGoToDashboard}
+          className="inline-block text-center flex-1 py-4 bg-gray-900 hover:bg-gray-800 text-white font-black text-base uppercase tracking-wide rounded-lg border-2 border-gray-900 transition-all neo-btn"
+          style={{ boxShadow: '5px 5px 0 #0A6E64' }}
+        >
+          Go to Dashboard →
+        </button>
+      </div>
+
+      {reportOpen && (
+        <DiagnosticReportModal
+          results={results}
+          targetBand={target}
+          avgScore={avgScore}
+          overallLevel={overallLevel}
+          studentName={profile?.name || "Student"}
+          onClose={() => setReportOpen(false)}
+        />
+      )}
     </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DIAGNOSTIC REPORT — PRINTABLE VIEW (G-D4)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function DiagnosticReportModal({
+  results,
+  targetBand,
+  avgScore,
+  overallLevel,
+  studentName,
+  onClose,
+}: {
+  results: AllResults;
+  targetBand: number;
+  avgScore: number;
+  overallLevel: Level;
+  studentName: string;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.id = 'tc-diagnostic-print-style';
+    style.textContent = `
+      @media print {
+        * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        body > *:not(#tc-diagnostic-report) { display: none !important; }
+        #tc-diagnostic-report { display: block !important; position: static !important; overflow: visible !important; background: white !important; }
+        @page { size: A4; margin: 1.5cm; }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.getElementById('tc-diagnostic-print-style')?.remove();
+    };
+  }, []);
+
+  const skills: Skill[] = ["listening", "reading", "writing", "speaking"];
+  const attempted = skills.filter((s) => results[s]);
+  const generatedAt = new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+
+  const radarData = skills.map((skill) => ({
+    skill: SKILL_LABELS[skill],
+    band: Number(results[skill]?.band_score) || 4,
+    target: targetBand,
+  }));
+
+  const weakest = attempted.length > 0
+    ? attempted.reduce((min, s) => (Number(results[s]!.band_score) < Number(results[min]!.band_score) ? s : min), attempted[0])
+    : null;
+
+  return createPortal(
+    <div id="tc-diagnostic-report" className="fixed inset-0 z-[200] bg-gray-100 overflow-y-auto">
+      <div className="print:hidden sticky top-0 z-10 bg-white border-b-2 border-gray-900 px-6 py-3 flex items-center justify-between">
+        <span className="font-black text-gray-900 text-sm uppercase tracking-wide">Diagnostic Report Preview</span>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => window.print()}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-teal-700 text-white text-xs font-black uppercase tracking-wide border-2 border-gray-900"
+            style={{ boxShadow: '3px 3px 0 #0F0F0F' }}
+          >
+            <Download className="w-3.5 h-3.5" /> Save as PDF
+          </button>
+          <button
+            onClick={onClose}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-gray-700 text-xs font-black uppercase tracking-wide border-2 border-gray-900"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+
+      <div className="max-w-[800px] mx-auto bg-white shadow-lg my-8 p-10 print:shadow-none print:my-0 print:p-[1.5cm]">
+        <div className="flex items-start justify-between pb-4 border-b-2 border-gray-900 mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-md bg-brand-teal-700 border-2 border-gray-900 flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-black text-sm">TC</span>
+            </div>
+            <div>
+              <div className="font-black text-gray-900 text-base leading-tight">TestCrack</div>
+              <div className="text-gray-500 text-xs">IELTS Preparation Platform</div>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-[10px] font-black uppercase tracking-widest text-brand-teal-700 mb-0.5">Diagnostic Baseline Report</div>
+            <div className="text-xs text-gray-500">{generatedAt}</div>
+          </div>
+        </div>
+
+        <div className="mb-8">
+          <h1 className="text-xl font-black text-gray-900">{studentName}</h1>
+          <p className="text-sm text-gray-500">IELTS Diagnostic Baseline Assessment</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mb-8">
+          <div className="border-2 border-gray-900 rounded-xl p-4 text-center">
+            <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1">Overall Band</p>
+            <p className="text-4xl font-black text-gray-900 tabular-nums">{avgScore.toFixed(1)}</p>
+            <p className="text-xs text-gray-500 mt-1">Level {overallLevel} · {getLevelConfig(overallLevel).label}</p>
+          </div>
+          <div className="border-2 border-gray-900 rounded-xl p-4 text-center">
+            <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1">Target Band</p>
+            <p className="text-4xl font-black text-gray-900 tabular-nums">{targetBand.toFixed(1)}</p>
+            <p className="text-xs text-gray-500 mt-1">
+              {avgScore >= targetBand ? "Target reached" : `Gap: ${(targetBand - avgScore).toFixed(1)}`}
+            </p>
+          </div>
+        </div>
+
+        <div className="border-2 border-gray-900 rounded-xl p-4 mb-8">
+          <div style={{ width: '100%', height: 280 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <RadarChart data={radarData} margin={{ top: 8, right: 24, bottom: 8, left: 24 }}>
+                <PolarGrid stroke="#D1D5DB" />
+                <PolarAngleAxis dataKey="skill" tick={{ fill: '#374151', fontSize: 11, fontWeight: 700 }} />
+                <PolarRadiusAxis domain={[4, 9]} tickCount={6} tick={{ fill: '#9CA3AF', fontSize: 9 }} />
+                <Radar name={`Target (${targetBand.toFixed(1)})`} dataKey="target" stroke="#9CA3AF" strokeDasharray="4 4" fill="#9CA3AF" fillOpacity={0.04} isAnimationActive={false} />
+                <Radar name="Your Band" dataKey="band" stroke="#0A6E64" fill="#0A6E64" fillOpacity={0.35} strokeWidth={2} isAnimationActive={false} />
+                <Legend wrapperStyle={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }} />
+              </RadarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="mb-8">
+          <h2 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Skill-by-Skill Breakdown</h2>
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="border-b-2 border-gray-900">
+                {['Skill', 'Band', 'Level', 'Feedback Summary'].map((h) => (
+                  <th key={h} className="text-left text-[10px] font-black uppercase tracking-widest text-gray-400 px-2 py-2 first:pl-0">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {skills.map((skill) => {
+                const result = results[skill];
+                if (!result) {
+                  return (
+                    <tr key={skill} className="border-b border-gray-100">
+                      <td className="px-2 py-3 pl-0 font-bold text-gray-400">{SKILL_LABELS[skill]}</td>
+                      <td colSpan={3} className="px-2 py-3 text-gray-400">Not attempted</td>
+                    </tr>
+                  );
+                }
+                const level = getBandLevel(result.band_score);
+                const feedbackSource = result.feedback ?? result.sub_scores?.feedback;
+                const summary = typeof feedbackSource === 'string'
+                  ? feedbackSource
+                  : feedbackSource?.priority_action ?? '—';
+                return (
+                  <tr key={skill} className="border-b border-gray-100">
+                    <td className="px-2 py-3 pl-0 font-bold text-gray-900">{SKILL_LABELS[skill]}</td>
+                    <td className="px-2 py-3 font-black text-gray-900 tabular-nums">{result.band_score.toFixed(1)}</td>
+                    <td className="px-2 py-3 text-gray-600">{getLevelConfig(level).label}</td>
+                    <td className="px-2 py-3 text-gray-600">{summary}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {weakest && (
+          <div className="border-2 border-brand-teal-700 bg-brand-teal-50 rounded-xl p-5">
+            <p className="text-[10px] font-black uppercase tracking-widest text-brand-teal-700 mb-2">Recommended Next Steps</p>
+            <p className="text-sm text-gray-800 leading-relaxed">
+              Focus first on <strong>{SKILL_LABELS[weakest]}</strong> — it's currently the lowest-scoring skill at band {results[weakest]!.band_score.toFixed(1)}.
+              Consistent daily practice targeting this area will have the fastest impact on the overall band, before moving to a broader review across all four skills.
+            </p>
+          </div>
+        )}
+
+        <div className="border-t border-gray-200 pt-6 mt-8">
+          <p className="text-xs text-gray-400">Generated by TestCrack · Diagnostic Engine v1</p>
+        </div>
+      </div>
+    </div>,
+    document.body
   );
 }
 
