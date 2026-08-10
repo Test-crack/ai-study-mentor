@@ -22,6 +22,7 @@ export default function AuthCallbackPage() {
 
   const [phase, setPhase] = useState<Phase>("processing");
   const [errorMsg, setErrorMsg] = useState("");
+  const [linkType, setLinkType] = useState(""); // "invite" | "recovery" | "" — used to tailor error messaging
   const ran = useRef(false); // StrictMode / re-mount guard — process the hash once
 
   // Set-password form state
@@ -44,10 +45,13 @@ export default function AuthCallbackPage() {
       }
 
       const params = new URLSearchParams(hash.substring(1));
-      const type = params.get("type");
+      const type = params.get("type") ?? "";
       const accessToken = params.get("access_token");
       const refreshToken = params.get("refresh_token") ?? "";
       const linkError = params.get("error_description") ?? params.get("error");
+
+      // Persist type so the error phase can tailor its messaging.
+      setLinkType(type);
 
       if (linkError) {
         setErrorMsg(decodeURIComponent(linkError).replace(/\+/g, " "));
@@ -55,7 +59,7 @@ export default function AuthCallbackPage() {
         return;
       }
       if (!accessToken) {
-        setErrorMsg("Invalid or expired link. Please request a new invite.");
+        setErrorMsg("Invalid or expired link.");
         setPhase("error");
         return;
       }
@@ -65,7 +69,6 @@ export default function AuthCallbackPage() {
         refresh_token: refreshToken,
       });
       if (error) {
-        setErrorMsg("This link has expired or was already used. Please request a new one.");
         setPhase("error");
         return;
       }
@@ -128,20 +131,49 @@ export default function AuthCallbackPage() {
   }
 
   if (phase === "error") {
+    const isInvite = linkType === "invite";
     return (
       <div className="min-h-screen bg-gradient-to-br from-brand-teal-50 via-brand-blue-50 to-slate-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full p-8 text-center space-y-4">
           <div className="h-12 w-12 rounded-full bg-rose-50 flex items-center justify-center mx-auto">
             <ShieldAlert className="h-6 w-6 text-rose-500" />
           </div>
-          <h1 className="text-lg font-bold text-slate-900">Link not valid</h1>
-          <p className="text-sm text-slate-500">{errorMsg}</p>
-          <button
-            onClick={() => navigate("/login", { replace: true })}
-            className="w-full py-2.5 rounded-lg bg-brand-teal-600 hover:bg-brand-teal-700 text-white text-sm font-semibold transition-colors"
-          >
-            Go to login
-          </button>
+          <h1 className="text-lg font-bold text-slate-900">
+            {isInvite ? "Invite link expired" : "Link not valid"}
+          </h1>
+          <p className="text-sm text-slate-500">
+            {isInvite
+              ? "This invite link has expired or has already been used."
+              : errorMsg || "This link has expired or was already used."}
+          </p>
+          {isInvite ? (
+            <>
+              <div className="bg-brand-teal-50 rounded-xl p-4 text-left space-y-1">
+                <p className="text-sm font-semibold text-brand-teal-800">What to do next</p>
+                <p className="text-sm text-brand-teal-700">
+                  Contact your institute admin and ask them to resend your invite.
+                  They can find the <span className="font-medium">Resend Invite</span> option
+                  next to your name in the student list.
+                </p>
+              </div>
+              <p className="text-xs text-slate-400">
+                Already set your password?{" "}
+                <button
+                  onClick={() => navigate("/login", { replace: true })}
+                  className="text-brand-teal-600 hover:underline font-medium"
+                >
+                  Go to login
+                </button>
+              </p>
+            </>
+          ) : (
+            <button
+              onClick={() => navigate("/login", { replace: true })}
+              className="w-full py-2.5 rounded-lg bg-brand-teal-600 hover:bg-brand-teal-700 text-white text-sm font-semibold transition-colors"
+            >
+              Go to login
+            </button>
+          )}
         </div>
       </div>
     );

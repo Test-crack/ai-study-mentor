@@ -9,6 +9,7 @@ const HTTP_MESSAGES: Record<number, string> = {
   401: 'Your session has expired — please log in again',
   403: "You don't have permission to do that",
   404: "That resource wasn't found",
+  405: 'This action is not supported — please refresh and try again',
   408: 'The request timed out — please try again',
   409: 'There was a conflict — please refresh and try again',
   422: 'Invalid data — please check your input and try again',
