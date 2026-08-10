@@ -3,6 +3,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ChevronLeft, BarChart3, ClipboardList, BookOpen, Activity, FileSearch } from 'lucide-react';
 import { InstructorSidebar } from '../components/dashboard/InstructorSidebar';
 import { cn } from '@/shared/utils';
+import { callBackend } from '@/features/auth/services/authClient';
 import { useStudentFullProgress } from '../hooks/useStudentFullProgress';
 import { StudentProfileHeader } from './student-progress/StudentProfileHeader';
 import { OverviewTab }          from './student-progress/OverviewTab';
@@ -50,7 +51,20 @@ export default function InstructorStudentProgressPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
 
-  const { data, loading, error } = useStudentFullProgress(resolvedBatchId, resolvedStudentId);
+  const { data, loading, error, refetch } = useStudentFullProgress(resolvedBatchId, resolvedStudentId);
+
+  const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+  // Calls Shalom's retake endpoint (S-D3) — contract unconfirmed, same caveat as
+  // the batch-level Retake button in DiagnosticOverviewTab.
+  const handleRequestRetake = async () => {
+    if (!resolvedBatchId || !resolvedStudentId) return;
+    const res = await callBackend(
+      `${BACKEND}/api/instructor/batches/${resolvedBatchId}/students/${resolvedStudentId}/diagnostic/retake`,
+      { method: 'POST' }
+    );
+    if (!res?.success) throw new Error(res?.error ?? 'Failed to request retake.');
+    refetch();
+  };
 
   const goBack = () => {
     if (resolvedBatchId) {
@@ -140,7 +154,11 @@ export default function InstructorStudentProgressPage() {
                 />
               )}
               {activeTab === 'diagnostic' && (
-                <DiagnosticTab results={data.diagnostic_results ?? []} />
+                <DiagnosticTab
+                  results={data.diagnostic_results ?? []}
+                  studentName={data.student?.name}
+                  onRequestRetake={handleRequestRetake}
+                />
               )}
             </div>
           )}

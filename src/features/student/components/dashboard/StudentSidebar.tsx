@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   GraduationCap, LayoutDashboard, Mic, PenTool, Headphones,
   ClipboardCheck, History, Sparkles, Settings, LogOut,
-  Timer, FileText, BookOpen, Target, Gamepad2, Lock, HelpCircle
+  Timer, FileText, BookOpen, Target, Gamepad2, Lock, HelpCircle, Compass
 } from "lucide-react";
 import testcrackLogo from '@/assets/testcrack-logo.svg';
 import { cn } from "@/shared/utils";
@@ -110,6 +110,7 @@ export const StudentSidebar = ({
     {
       title: "Resources",
       items: [
+        { id: 'roadmap', icon: Compass, label: 'My Roadmap', path: '/student/diagnostic/roadmap' },
         { id: 'suggestion', icon: Sparkles, label: 'Recommendations', path: '/student/suggestion' },
         { id: 'courses-section', icon: GraduationCap, label: 'My Courses', path: '/student/courses-section' },
         { id: 'Report', icon: FileText, label: 'Report', path: '/student/report' },
@@ -122,7 +123,7 @@ export const StudentSidebar = ({
     if (isNewStudent) {
       return {
         ...group,
-        items: group.items.filter(item => !['games', 'suggestion', 'Report'].includes(item.id))
+        items: group.items.filter(item => !['games', 'suggestion', 'Report', 'roadmap'].includes(item.id))
       };
     }
     return group;

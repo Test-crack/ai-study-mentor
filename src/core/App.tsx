@@ -99,6 +99,7 @@ const CourseSection = lazy(() => import("@/features/student/components/CourseSec
 const Suggestion = lazy(() => import("@/features/student/components/Suggestions"));
 const SpeakingAssessment = lazy(() => import("@/features/student/components/SpeakingAssessment"));
 const Diagnosis = lazy(() => import("@/features/student/components/Diagnosis/Diagnosis"));
+const DiagnosticRoadmap = lazy(() => import("@/features/student/components/Diagnosis/DiagnosticRoadmap"));
 const OnboardingWalkthrough = lazy(() => import("@/features/student/components/Onboarding/OnboardingWalkthrough"));
 const HowItWorks = lazy(() => import("@/features/student/components/HowItWorks"));
 const AssessmentHistoryPage = lazy(() => import("@/features/student/components/AssessmentHistoryPage"));
@@ -272,6 +273,7 @@ const AppRoutes = () => {
       <Route path="/" element={<LandingPage />} />
       <Route path="/student/onboarding" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><OnboardingWalkthrough /></RoleProtectedRoute>} />
       <Route path="/student/diagnosis" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><Diagnosis /></RoleProtectedRoute>} />
+      <Route path="/student/diagnostic/roadmap" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDiagnosisGuard><DiagnosticRoadmap /></StudentDiagnosisGuard></RoleProtectedRoute>} />
       <Route path="/dashdemo" element={<Dashdemo />} />
       <Route path="/Contact" element={<Contactpage />} />
 

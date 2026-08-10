@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  GraduationCap,
   BookOpen,
   Gamepad2,
   Target,
@@ -10,125 +9,129 @@ import {
   Headphones,
   PenLine,
   Mic,
+  HelpCircle,
   ArrowRight,
   ArrowLeft,
 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { cn } from '@/shared/utils';
+import testcrackLogo from '@/assets/testcrack-logo.svg';
 
 // ─── SLIDE DEFINITIONS ────────────────────────────────────────────────────────
 
 const slides = [
   {
     id: 0,
-    headline: 'Welcome to TestCrack',
-    subHeadline: 'Your IELTS preparation, structured for real results',
-    body: 'TestCrack is built around one idea: consistent daily practice beats cramming. Every day you open the app, a fresh 20–30 minute session is ready for you — no planning required. The system knows exactly what you need to work on and serves it up automatically.',
-    visual: 'welcome',
+    eyebrow: 'Diagnostic-First IELTS Prep',
+    headline: 'Daily practice, not cramming.',
+    body: 'Every day you open TestCrack, a 20–30 minute session is already waiting. No planning, no deciding what to study. The system knows what you need next and serves it up.',
+    cta: 'Next',
   },
   {
     id: 1,
-    headline: 'What Happens Every Day',
-    subHeadline: 'A focused loop designed to build your band score steadily',
-    body: 'Each session follows the same proven four-step structure, every single day.',
-    visual: 'session',
+    eyebrow: 'The Same Loop, Every Day',
+    headline: 'Four steps. Twenty minutes.',
+    body: 'Practice, a vocabulary gate, three targeted drills, then assessments once you have earned them. The structure never changes, so the habit sticks.',
+    cta: 'Next',
   },
   {
     id: 2,
-    headline: "First, Let's Find Your Level",
-    subHeadline: 'A one-time diagnostic across all four IELTS skills',
-    body: 'Before your daily sessions begin, TestCrack needs to understand where you are right now. The diagnostic covers all four skills and takes about 15–20 minutes. Your answers set your baseline band score and determine the difficulty of every question going forward. You only do this once.',
-    visual: 'diagnostic',
+    eyebrow: 'One Thing First',
+    headline: 'We need to know where you stand.',
+    body: 'The diagnostic runs once, covers all four skills, and takes about fifteen minutes. Everything after it is calibrated to the result.',
+    cta: 'Set up my diagnostic',
   },
 ];
 
 // ─── VISUALS ──────────────────────────────────────────────────────────────────
 
-function WelcomeVisual() {
-  return (
-    <div className="flex flex-col items-center gap-3 py-6">
-      <div className="w-24 h-24 rounded-3xl bg-brand-teal-50 dark:bg-brand-teal-500/10 flex items-center justify-center">
-        <GraduationCap className="w-12 h-12 text-brand-teal-600 dark:text-brand-teal-400" strokeWidth={1.5} />
-      </div>
-      <div className="flex gap-2 mt-2">
-        {['Listening', 'Reading', 'Writing', 'Speaking'].map((skill) => (
-          <span
-            key={skill}
-            className="text-xs font-medium px-2.5 py-1 rounded-full bg-brand-teal-100 dark:bg-brand-teal-500/20 text-brand-teal-700 dark:text-brand-teal-300"
-          >
-            {skill}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function SessionVisual() {
-  const steps = [
-    { icon: BookOpen, label: 'Practice', desc: 'Skill module at your level', color: 'text-brand-blue-600', bg: 'bg-brand-blue-50 dark:bg-brand-blue-500/10' },
-    { icon: Gamepad2, label: 'Daily Challenge', desc: 'Vocab gate — earn momentum', color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-500/10' },
-    { icon: Target, label: 'Drills', desc: '3 targeted sub-skill questions', color: 'text-rose-600', bg: 'bg-rose-50 dark:bg-rose-500/10' },
-    { icon: ClipboardCheck, label: 'Assessments', desc: 'IA & Mock (unlocks after drills)', color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-500/10' },
-  ];
-
-  return (
-    <div className="w-full py-4 space-y-2">
-      {steps.map((step, i) => (
-        <div key={step.label} className="flex items-center gap-3">
-          {/* Step number + connector */}
-          <div className="flex flex-col items-center w-8 shrink-0">
-            <div className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-500 dark:text-slate-400">
-              {i + 1}
-            </div>
-            {i < steps.length - 1 && (
-              <div className="w-px h-4 bg-slate-200 dark:bg-slate-700 mt-1" />
-            )}
-          </div>
-          {/* Card */}
-          <div className={cn('flex-1 flex items-center gap-3 rounded-xl px-3 py-2.5', step.bg)}>
-            <step.icon className={cn('w-5 h-5 shrink-0', step.color)} />
-            <div>
-              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{step.label}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">{step.desc}</p>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function DiagnosticVisual() {
+function SkillGridVisual() {
   const skills = [
-    { icon: Headphones, label: 'Listening', color: 'text-sky-600', bg: 'bg-sky-50 dark:bg-sky-500/10' },
-    { icon: BookOpen, label: 'Reading', color: 'text-brand-blue-600', bg: 'bg-brand-blue-50 dark:bg-brand-blue-500/10' },
-    { icon: PenLine, label: 'Writing', color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-500/10' },
-    { icon: Mic, label: 'Speaking', color: 'text-rose-600', bg: 'bg-rose-50 dark:bg-rose-500/10' },
+    { icon: Headphones, label: 'Listening', tag: 'Auto Scored', tagColor: 'text-amber-400' },
+    { icon: BookOpen, label: 'Reading', tag: 'Auto Scored', tagColor: 'text-brand-mint' },
+    { icon: PenLine, label: 'Writing', tag: 'AI Scored', tagColor: 'text-violet-400' },
+    { icon: Mic, label: 'Speaking', tag: 'AI Scored', tagColor: 'text-rose-400' },
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 py-4 w-full">
+    <div className="grid grid-cols-2 gap-3 w-full max-w-sm">
       {skills.map((skill) => (
         <div
           key={skill.label}
-          className={cn(
-            'flex flex-col items-center gap-2 rounded-2xl px-4 py-5',
-            skill.bg
-          )}
+          className="rounded-2xl border border-brand-line-12 bg-white/[0.03] px-4 py-4"
         >
-          <skill.icon className={cn('w-7 h-7', skill.color)} strokeWidth={1.5} />
-          <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{skill.label}</span>
+          <skill.icon className="w-5 h-5 text-white/70 mb-6" strokeWidth={1.5} />
+          <p className="font-manrope text-[14px] font-bold text-white">{skill.label}</p>
+          <p className={cn('font-jetbrains text-[9.5px] uppercase tracking-[0.14em] mt-0.5', skill.tagColor)}>
+            {skill.tag}
+          </p>
         </div>
       ))}
+    </div>
+  );
+}
+
+function SessionLoopVisual() {
+  const steps = [
+    { icon: BookOpen, label: 'Practice', desc: 'Skill module at your level' },
+    { icon: Gamepad2, label: 'Daily challenge', desc: 'Vocabulary gate — earn momentum' },
+    { icon: Target, label: 'Drills', desc: 'Three targeted sub-skill questions' },
+    { icon: ClipboardCheck, label: 'Assessments', desc: 'Unlock once the drills are done' },
+  ];
+
+  return (
+    <div className="w-full max-w-sm space-y-2">
+      {steps.map((step, i) => (
+        <div
+          key={step.label}
+          className="flex items-center gap-4 rounded-2xl border border-brand-line-12 bg-white/[0.03] px-4 py-3.5"
+        >
+          <span className="font-jetbrains text-[10px] text-brand-mint shrink-0 w-4">
+            B{i + 1}
+          </span>
+          <div className="flex-1 min-w-0">
+            <p className="font-manrope text-[14px] font-bold text-white leading-tight">{step.label}</p>
+            <p className="text-[12px] text-brand-on-ink leading-tight mt-0.5">{step.desc}</p>
+          </div>
+          <step.icon className="w-4 h-4 text-white/40 shrink-0" strokeWidth={1.5} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function DiagnosticInfoVisual() {
+  const points = [
+    'The difficulty of every drill you get',
+    'Which skill becomes your daily priority',
+    'The plan your tutor sees on day one',
+  ];
+
+  return (
+    <div className="w-full max-w-sm rounded-2xl border border-brand-line-12 bg-white/[0.03] p-5">
+      <p className="font-jetbrains text-[10px] text-brand-on-ink uppercase tracking-[0.16em] mb-3">
+        What the diagnostic sets
+      </p>
+      <div className="flex items-center gap-3 pb-4 mb-4 border-b border-brand-line-12">
+        <HelpCircle className="w-6 h-6 text-white shrink-0" strokeWidth={1.5} />
+        <span className="font-manrope text-[14px] font-bold text-white">Your baseline band</span>
+      </div>
+      <ul className="space-y-2.5">
+        {points.map((point) => (
+          <li key={point} className="flex items-start gap-2 text-[13px] text-brand-on-ink leading-snug">
+            <span className="text-brand-mint shrink-0">→</span>
+            <span>{point}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
 
 function SlideVisual({ id }: { id: number }) {
-  if (id === 0) return <WelcomeVisual />;
-  if (id === 1) return <SessionVisual />;
-  return <DiagnosticVisual />;
+  if (id === 0) return <SkillGridVisual />;
+  if (id === 1) return <SessionLoopVisual />;
+  return <DiagnosticInfoVisual />;
 }
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
@@ -151,6 +154,7 @@ export default function OnboardingWalkthrough() {
   const startDiagnostic = () => navigate('/student/diagnosis');
 
   const slide = slides[current];
+  const isLast = current === slides.length - 1;
 
   const variants = {
     enter: (dir: number) => ({ x: dir > 0 ? 40 : -40, opacity: 0 }),
@@ -159,18 +163,31 @@ export default function OnboardingWalkthrough() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col">
-      {/* Header — brand mark only */}
-      <header className="px-6 pt-8 pb-2 flex items-center justify-between">
-        <span className="text-lg font-bold text-brand-teal-600 tracking-tight">TestCrack</span>
-        <span className="text-sm text-slate-400 dark:text-slate-500 font-medium">
+    <div className="min-h-screen bg-brand-ink-deep font-plex antialiased flex flex-col relative overflow-hidden">
+      {/* Faint blueprint grid */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-[0.06]"
+        style={{
+          backgroundImage:
+            'linear-gradient(to right, #2EE8A6 1px, transparent 1px), linear-gradient(to bottom, #2EE8A6 1px, transparent 1px)',
+          backgroundSize: '56px 56px',
+        }}
+      />
+
+      {/* Header — brand mark + slide counter */}
+      <header className="relative z-10 px-6 pt-8 pb-2 sm:px-10 lg:px-16 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-2.5">
+          <img src={testcrackLogo} alt="TestCrack" className="h-7 w-7 object-contain shrink-0" />
+          <span className="font-manrope text-base font-extrabold text-white tracking-[-0.02em]">TestCrack</span>
+        </div>
+        <span className="font-jetbrains text-[12px] text-brand-on-ink">
           {current + 1} / {slides.length}
         </span>
       </header>
 
       {/* Slide area */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 overflow-hidden">
-        <div className="w-full max-w-md">
+      <main className="relative z-10 flex-1 flex items-center px-6 sm:px-10 lg:px-16 py-10">
+        <div className="w-full max-w-5xl mx-auto flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={slide.id}
@@ -180,21 +197,27 @@ export default function OnboardingWalkthrough() {
               animate="center"
               exit="exit"
               transition={{ duration: 0.25, ease: 'easeInOut' }}
+              className="w-full flex flex-col lg:flex-row items-center gap-10 lg:gap-16"
             >
-              {/* Visual */}
-              <SlideVisual id={slide.id} />
-
               {/* Text */}
-              <div className="mt-2">
-                <p className="text-sm font-semibold text-brand-teal-600 dark:text-brand-teal-400 uppercase tracking-wide mb-1">
-                  {slide.subHeadline}
-                </p>
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
+              <div className="w-full lg:w-1/2 lg:max-w-md">
+                <div className="mb-4 flex items-center gap-3">
+                  <span className="h-px w-6 shrink-0 bg-brand-mint" aria-hidden="true" />
+                  <span className="font-jetbrains text-[10.5px] uppercase tracking-[0.2em] text-brand-mint">
+                    {slide.eyebrow}
+                  </span>
+                </div>
+                <h1 className="font-manrope text-[32px] sm:text-[42px] font-extrabold text-white leading-[1.08] tracking-[-0.03em] mb-4">
                   {slide.headline}
                 </h1>
-                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                <p className="text-brand-on-ink text-[15px] leading-[1.75]">
                   {slide.body}
                 </p>
+              </div>
+
+              {/* Visual */}
+              <div className="w-full lg:w-1/2 flex justify-center lg:justify-end">
+                <SlideVisual id={slide.id} />
               </div>
             </motion.div>
           </AnimatePresence>
@@ -202,58 +225,42 @@ export default function OnboardingWalkthrough() {
       </main>
 
       {/* Footer — progress dots + buttons */}
-      <footer className="px-6 pb-10 pt-4 flex flex-col items-center gap-6 w-full max-w-md mx-auto">
+      <footer className="relative z-10 px-6 pb-8 pt-4 sm:px-10 lg:px-16 flex items-center justify-between shrink-0">
+        {current > 0 ? (
+          <Button
+            variant="ghost"
+            onClick={goBack}
+            className="flex items-center gap-1.5 text-brand-on-ink hover:text-white hover:bg-white/5"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </Button>
+        ) : (
+          <span />
+        )}
+
         {/* Progress dots */}
-        <div className="flex gap-2">
+        <div className="hidden sm:flex gap-2">
           {slides.map((_, i) => (
             <div
               key={i}
               className={cn(
                 'rounded-full transition-all duration-300',
                 i === current
-                  ? 'w-6 h-2 bg-brand-teal-600'
-                  : 'w-2 h-2 bg-slate-200 dark:bg-slate-700'
+                  ? 'w-6 h-2 bg-brand-mint'
+                  : 'w-2 h-2 bg-white/15'
               )}
             />
           ))}
         </div>
 
-        {/* Buttons */}
-        <div className="flex items-center gap-3 w-full">
-          {current > 0 && (
-            <Button
-              variant="ghost"
-              size="lg"
-              onClick={goBack}
-              className="flex items-center gap-1 text-slate-500"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back
-            </Button>
-          )}
-
-          <div className={cn('flex-1', current === 0 && 'w-full')}>
-            {current < slides.length - 1 ? (
-              <Button
-                size="lg"
-                onClick={goNext}
-                className="w-full bg-brand-teal-600 hover:bg-brand-teal-700 text-white flex items-center justify-center gap-2"
-              >
-                Next
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            ) : (
-              <Button
-                size="lg"
-                onClick={startDiagnostic}
-                className="w-full bg-brand-teal-600 hover:bg-brand-teal-700 text-white flex items-center justify-center gap-2"
-              >
-                Start Your Diagnostic
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
-        </div>
+        <Button
+          onClick={isLast ? startDiagnostic : goNext}
+          className="bg-brand-teal-700 hover:bg-brand-teal-600 text-white flex items-center gap-2 px-5"
+        >
+          {slide.cta}
+          <ArrowRight className="w-4 h-4" />
+        </Button>
       </footer>
     </div>
   );
