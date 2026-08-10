@@ -178,7 +178,7 @@ const BandScoreArc = ({ score }: { score: number }) => {
   const radius = 80;
   const circumference = Math.PI * radius;
   const offset = circumference * (1 - pct);
-  const color = score >= 7 ? '#10b981' : score >= 5.5 ? '#7B61FF' : '#f59e0b';
+  const color = score >= 7 ? '#10b981' : score >= 5.5 ? '#3E9E93' : '#f59e0b';
 
   return (
     <div className="relative flex flex-col items-center">
@@ -226,7 +226,7 @@ const WaveformVisualizer = ({ isActive }: { isActive: boolean }) => (
     {Array.from({ length: 20 }).map((_, i) => (
       <div
         key={i}
-        className={`w-1.5 rounded-full transition-all ${isActive ? 'bg-[#7B61FF]' : 'bg-slate-200 dark:bg-slate-700'}`}
+        className={`w-1.5 rounded-full transition-all ${isActive ? 'bg-[#3E9E93]' : 'bg-slate-200 dark:bg-slate-700'}`}
         style={{
           height: isActive ? `${20 + Math.random() * 28}px` : '8px',
           animation: isActive ? `wave ${0.5 + Math.random() * 0.5}s ease-in-out infinite alternate` : 'none',
@@ -248,7 +248,7 @@ const TimerDisplay = ({ seconds }: { seconds: number }) => {
   const s = (seconds % 60).toString().padStart(2, '0');
   return (
     <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
-      <Clock size={14} className="text-[#7B61FF]" />
+      <Clock size={14} className="text-[#3E9E93]" />
       <span className="font-mono font-bold text-sm text-slate-700 dark:text-white">{m}:{s}</span>
     </div>
   );
@@ -269,8 +269,8 @@ const ApiKeyModal = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 md:p-8 max-w-md w-full shadow-2xl border border-slate-200 dark:border-slate-700">
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-xl bg-[#7B61FF]/10 flex items-center justify-center">
-            <Sparkles size={20} className="text-[#7B61FF]" />
+          <div className="w-10 h-10 rounded-xl bg-[#3E9E93]/10 flex items-center justify-center">
+            <Sparkles size={20} className="text-[#3E9E93]" />
           </div>
           <div>
             <h2 className="font-bold text-lg text-slate-900 dark:text-white">API Configuration</h2>
@@ -288,7 +288,7 @@ const ApiKeyModal = ({
               value={elKey}
               onChange={(e) => setElKey(e.target.value)}
               placeholder="sk-..."
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#7B61FF]/50 placeholder-slate-400"
+              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#3E9E93]/50 placeholder-slate-400"
             />
             <p className="text-[10px] text-slate-400 mt-1">Used for AI voice questions</p>
           </div>
@@ -301,7 +301,7 @@ const ApiKeyModal = ({
               value={oaKey}
               onChange={(e) => setOaKey(e.target.value)}
               placeholder="sk-..."
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#7B61FF]/50 placeholder-slate-400"
+              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#3E9E93]/50 placeholder-slate-400"
             />
             <p className="text-[10px] text-slate-400 mt-1">Used for IELTS rubric evaluation</p>
           </div>
@@ -316,7 +316,7 @@ const ApiKeyModal = ({
         <button
           onClick={() => onConfirm(elKey, oaKey)}
           disabled={!elKey || !oaKey}
-          className="w-full bg-[#7B61FF] hover:bg-[#6a50e5] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-colors shadow-sm"
+          className="w-full bg-[#3E9E93] hover:bg-[#12897C] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-colors shadow-sm"
         >
           Start Assessment
         </button>
@@ -545,23 +545,23 @@ export default function SpeakingAssessment() {
             {view === 'intro' && (
               <>
                 {/* Hero Banner */}
-                <div className="bg-gradient-to-br from-[#7B61FF] to-[#9B5DE5] rounded-2xl p-8 md:p-10 text-white shadow-lg relative overflow-hidden mb-8">
+                <div className="bg-gradient-to-br from-[#3E9E93] to-[#256B8B] rounded-2xl p-8 md:p-10 text-white shadow-lg relative overflow-hidden mb-8">
                   <div className="absolute -top-6 -right-6 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
                   <div className="absolute bottom-0 left-1/2 w-64 h-32 bg-white/5 rounded-full blur-3xl" />
                   <div className="relative z-10">
                     <div className="flex items-center gap-2 mb-3">
                       <Radio size={20} className="text-yellow-300 animate-pulse" />
-                      <span className="text-xs font-bold uppercase tracking-widest text-purple-200">IELTS Speaking Assessment</span>
+                      <span className="text-xs font-bold uppercase tracking-widest text-brand-blue-200">IELTS Speaking Assessment</span>
                     </div>
                     <h1 className="text-3xl md:text-4xl font-black mb-3 leading-tight">
                       AI Speaking Test <Sparkles className="inline h-7 w-7 text-yellow-300 ml-1" fill="currentColor" />
                     </h1>
-                    <p className="text-purple-100 max-w-xl text-base leading-relaxed mb-6">
+                    <p className="text-brand-blue-100 max-w-xl text-base leading-relaxed mb-6">
                       Experience a real IELTS-style speaking test powered by AI. Get instant band scores, personalized feedback, and a clear path to your target score.
                     </p>
                     <button
                       onClick={() => setShowApiModal(true)}
-                      className="flex items-center gap-2 bg-white text-[#7B61FF] hover:bg-purple-50 font-bold rounded-xl px-7 py-3 shadow-md text-sm transition-all"
+                      className="flex items-center gap-2 bg-white text-[#3E9E93] hover:bg-brand-blue-50 font-bold rounded-xl px-7 py-3 shadow-md text-sm transition-all"
                     >
                       <Mic size={18} /> Start Speaking Test
                     </button>
@@ -571,7 +571,7 @@ export default function SpeakingAssessment() {
                 {/* Info Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                   {[
-                    { icon: <MessageSquare size={22} className="text-[#7B61FF]" />, title: 'AI Examiner', desc: 'ElevenLabs voice asks you IELTS Part 1, 2 & 3 questions in real time.' },
+                    { icon: <MessageSquare size={22} className="text-[#3E9E93]" />, title: 'AI Examiner', desc: 'ElevenLabs voice asks you IELTS Part 1, 2 & 3 questions in real time.' },
                     { icon: <Waves size={22} className="text-[#10b981]" />, title: 'Live Transcription', desc: 'Your speech is transcribed live using Web Speech API for accurate analysis.' },
                     { icon: <BarChart3 size={22} className="text-[#f59e0b]" />, title: 'Band Score + Report', desc: 'GPT-4 evaluates against official IELTS rubrics and gives band scores & improvement cards.' },
                   ].map((card, i) => (
@@ -586,11 +586,11 @@ export default function SpeakingAssessment() {
                 {/* Test Structure */}
                 <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
                   <h2 className="font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                    <BookOpen size={18} className="text-[#7B61FF]" /> Test Structure
+                    <BookOpen size={18} className="text-[#3E9E93]" /> Test Structure
                   </h2>
                   <div className="space-y-3">
                     {[
-                      { part: 'Part 1', label: 'Introduction & Interview', desc: '2 questions about yourself and familiar topics', time: '~4 min', color: 'bg-[#7B61FF]/10 text-[#7B61FF]' },
+                      { part: 'Part 1', label: 'Introduction & Interview', desc: '2 questions about yourself and familiar topics', time: '~4 min', color: 'bg-[#3E9E93]/10 text-[#3E9E93]' },
                       { part: 'Part 2', label: 'Individual Long Turn', desc: '1 cue card topic with 1-min prep time', time: '~3 min', color: 'bg-[#10b981]/10 text-[#10b981]' },
                       { part: 'Part 3', label: 'Two-way Discussion', desc: '2 abstract discussion questions', time: '~5 min', color: 'bg-[#f59e0b]/10 text-[#f59e0b]' },
                     ].map((p, i) => (
@@ -640,19 +640,19 @@ export default function SpeakingAssessment() {
                 <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-800">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Progress</span>
-                    <span className="text-xs font-bold text-[#7B61FF]">{Math.round(((currentQIdx) / totalQuestions) * 100)}%</span>
+                    <span className="text-xs font-bold text-[#3E9E93]">{Math.round(((currentQIdx) / totalQuestions) * 100)}%</span>
                   </div>
                   <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-[#7B61FF] to-[#9B5DE5] rounded-full transition-all duration-500"
+                      className="h-full bg-gradient-to-r from-[#3E9E93] to-[#256B8B] rounded-full transition-all duration-500"
                       style={{ width: `${((currentQIdx) / totalQuestions) * 100}%` }}
                     />
                   </div>
                   <div className="flex justify-between mt-2">
                     {IELTS_QUESTIONS.map((q, i) => (
                       <div key={q.id} className="flex flex-col items-center gap-1">
-                        <div className={`w-2.5 h-2.5 rounded-full transition-all ${i < currentQIdx ? 'bg-[#10b981]' : i === currentQIdx ? 'bg-[#7B61FF] ring-2 ring-[#7B61FF]/30' : 'bg-slate-200 dark:bg-slate-700'}`} />
-                        <span className={`text-[8px] font-bold uppercase ${i === currentQIdx ? 'text-[#7B61FF]' : 'text-slate-400'}`}>
+                        <div className={`w-2.5 h-2.5 rounded-full transition-all ${i < currentQIdx ? 'bg-[#10b981]' : i === currentQIdx ? 'bg-[#3E9E93] ring-2 ring-[#3E9E93]/30' : 'bg-slate-200 dark:bg-slate-700'}`} />
+                        <span className={`text-[8px] font-bold uppercase ${i === currentQIdx ? 'text-[#3E9E93]' : 'text-slate-400'}`}>
                           P{q.part}
                         </span>
                       </div>
@@ -664,7 +664,7 @@ export default function SpeakingAssessment() {
                 <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 md:p-8 shadow-sm border border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-2 mb-4">
                     <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest
-                      ${currentQuestion.part === 1 ? 'bg-[#7B61FF]/10 text-[#7B61FF]' :
+                      ${currentQuestion.part === 1 ? 'bg-[#3E9E93]/10 text-[#3E9E93]' :
                         currentQuestion.part === 2 ? 'bg-[#10b981]/10 text-[#10b981]' :
                         'bg-[#f59e0b]/10 text-[#f59e0b]'}`}>
                       Part {currentQuestion.part}
@@ -687,7 +687,7 @@ export default function SpeakingAssessment() {
 
                   {currentQuestion.hint && (
                     <div className="flex items-start gap-2 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                      <Target size={14} className="text-[#7B61FF] mt-0.5 shrink-0" />
+                      <Target size={14} className="text-[#3E9E93] mt-0.5 shrink-0" />
                       <p className="text-xs text-slate-500 dark:text-slate-400">{currentQuestion.hint}</p>
                     </div>
                   )}
@@ -752,7 +752,7 @@ export default function SpeakingAssessment() {
                       {transcripts.find((t) => t.questionId === currentQuestion.id) && (
                         <button
                           onClick={handleNextQuestion}
-                          className="flex items-center gap-2 bg-[#7B61FF] hover:bg-[#6a50e5] text-white font-bold px-5 py-3 rounded-xl transition-colors shadow-sm"
+                          className="flex items-center gap-2 bg-[#3E9E93] hover:bg-[#12897C] text-white font-bold px-5 py-3 rounded-xl transition-colors shadow-sm"
                         >
                           {currentQIdx < totalQuestions - 1 ? (
                             <><span className="hidden sm:inline">Next</span> <ChevronRight size={18} /></>
@@ -798,7 +798,7 @@ export default function SpeakingAssessment() {
                     <svg className="w-24 h-24 -rotate-90" viewBox="0 0 96 96">
                       <circle cx="48" cy="48" r="40" fill="none" stroke="#e2e8f0" strokeWidth="8" className="dark:stroke-slate-700" />
                       <circle
-                        cx="48" cy="48" r="40" fill="none" stroke="#7B61FF" strokeWidth="8"
+                        cx="48" cy="48" r="40" fill="none" stroke="#3E9E93" strokeWidth="8"
                         strokeLinecap="round"
                         strokeDasharray={251}
                         strokeDashoffset={251 - (251 * analysisProgress) / 100}
@@ -806,7 +806,7 @@ export default function SpeakingAssessment() {
                       />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-xl font-black text-[#7B61FF]">{analysisProgress}%</span>
+                      <span className="text-xl font-black text-[#3E9E93]">{analysisProgress}%</span>
                     </div>
                   </div>
                   <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2">Analyzing Your Test</h2>
@@ -852,20 +852,20 @@ export default function SpeakingAssessment() {
                 </div>
 
                 {/* Band Score Card */}
-                <div className="bg-gradient-to-br from-[#7B61FF] to-[#9B5DE5] rounded-2xl p-6 md:p-8 text-white shadow-lg">
+                <div className="bg-gradient-to-br from-[#3E9E93] to-[#256B8B] rounded-2xl p-6 md:p-8 text-white shadow-lg">
                   <div className="flex flex-col md:flex-row items-center gap-6">
                     <div className="flex flex-col items-center">
                       <BandScoreArc score={result.bandScore} />
                     </div>
                     <div className="flex-1 text-center md:text-left">
-                      <p className="text-purple-200 text-sm font-semibold uppercase tracking-wider mb-2">Overall Band Score</p>
+                      <p className="text-brand-blue-200 text-sm font-semibold uppercase tracking-wider mb-2">Overall Band Score</p>
                       <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
                         <span className="text-5xl font-black">{result.bandScore}</span>
                         <div className="bg-white/20 rounded-xl px-3 py-1.5">
-                          <p className="text-xs font-bold text-purple-100 whitespace-nowrap">{result.projectedBand}</p>
+                          <p className="text-xs font-bold text-brand-blue-100 whitespace-nowrap">{result.projectedBand}</p>
                         </div>
                       </div>
-                      <p className="text-purple-100 text-sm leading-relaxed max-w-sm">{result.overallFeedback}</p>
+                      <p className="text-brand-blue-100 text-sm leading-relaxed max-w-sm">{result.overallFeedback}</p>
                     </div>
                   </div>
                 </div>
@@ -873,10 +873,10 @@ export default function SpeakingAssessment() {
                 {/* Sub Scores */}
                 <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
                   <h2 className="font-bold text-slate-900 dark:text-white mb-5 flex items-center gap-2">
-                    <BarChart3 size={18} className="text-[#7B61FF]" /> Score Breakdown
+                    <BarChart3 size={18} className="text-[#3E9E93]" /> Score Breakdown
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <SubScoreBar label="Fluency & Coherence" score={result.subScores.fluency} color="#7B61FF" />
+                    <SubScoreBar label="Fluency & Coherence" score={result.subScores.fluency} color="#3E9E93" />
                     <SubScoreBar label="Lexical Resource" score={result.subScores.vocabulary} color="#10b981" />
                     <SubScoreBar label="Grammar & Accuracy" score={result.subScores.grammar} color="#f59e0b" />
                     <SubScoreBar label="Pronunciation" score={result.subScores.pronunciation} color="#3b82f6" />
@@ -943,7 +943,7 @@ export default function SpeakingAssessment() {
                 <div className="flex flex-col sm:flex-row gap-3 pb-8">
                   <button
                     onClick={handleReset}
-                    className="flex-1 flex items-center justify-center gap-2 bg-[#7B61FF] hover:bg-[#6a50e5] text-white font-bold py-3.5 rounded-xl transition-colors shadow-sm"
+                    className="flex-1 flex items-center justify-center gap-2 bg-[#3E9E93] hover:bg-[#12897C] text-white font-bold py-3.5 rounded-xl transition-colors shadow-sm"
                   >
                     <RotateCcw size={18} /> Take Another Test
                   </button>

@@ -35,7 +35,7 @@ export const ProgressDashboard = () => {
    
             
       <div className="text-center space-y-4">
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-brand-blue-600 bg-clip-text text-transparent">
           Learning Analytics
         </h2>
         <p className="text-muted-foreground">
@@ -74,7 +74,7 @@ export const ProgressDashboard = () => {
             <CardTitle className="text-lg">Average</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-purple-600">
+            <div className="text-3xl font-bold text-brand-blue-600">
               {Math.round(weeklyStats.reduce((sum, day) => sum + day.studyTime, 0) / 7)} min
             </div>
             <p className="text-sm text-muted-foreground">Per day</p>
@@ -100,7 +100,7 @@ export const ProgressDashboard = () => {
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
-                      className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
+                      className="bg-gradient-to-r from-blue-500 to-brand-blue-500 h-2 rounded-full transition-all duration-300"
                       style={{ width: `${(stat.studyTime / maxStudyTime) * 100}%` }}
                     ></div>
                   </div>
@@ -165,25 +165,25 @@ export const ProgressDashboard = () => {
       </Card>
 
       {/* AI Insights */}
-      <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+      <Card className="bg-gradient-to-r from-brand-blue-50 to-blue-50 border-brand-blue-200">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Star className="h-5 w-5 text-purple-600" />
+            <Star className="h-5 w-5 text-brand-blue-600" />
             <span>AI Learning Insights</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="p-3 bg-white rounded-lg">
-            <h4 className="font-medium text-purple-800 mb-1">Peak Performance Time</h4>
-            <p className="text-sm text-purple-700">You study most effectively between 2-4 PM. Consider scheduling challenging topics during this time.</p>
+            <h4 className="font-medium text-brand-blue-800 mb-1">Peak Performance Time</h4>
+            <p className="text-sm text-brand-blue-700">You study most effectively between 2-4 PM. Consider scheduling challenging topics during this time.</p>
           </div>
           <div className="p-3 bg-white rounded-lg">
-            <h4 className="font-medium text-purple-800 mb-1">Learning Pattern</h4>
-            <p className="text-sm text-purple-700">You prefer visual content over text. Try more video-based learning for better retention.</p>
+            <h4 className="font-medium text-brand-blue-800 mb-1">Learning Pattern</h4>
+            <p className="text-sm text-brand-blue-700">You prefer visual content over text. Try more video-based learning for better retention.</p>
           </div>
           <div className="p-3 bg-white rounded-lg">
-            <h4 className="font-medium text-purple-800 mb-1">Recommendation</h4>
-            <p className="text-sm text-purple-700">Focus on Physics this week - it's been neglected and other subjects show strong progress.</p>
+            <h4 className="font-medium text-brand-blue-800 mb-1">Recommendation</h4>
+            <p className="text-sm text-brand-blue-700">Focus on Physics this week - it's been neglected and other subjects show strong progress.</p>
           </div>
         </CardContent>
       </Card>

@@ -26,9 +26,9 @@ import { useToast } from "@/shared/hooks/use-toast";
 function HeroBanner({ summary }: { summary: InstituteSummary }) {
   const navigate = useNavigate();
   return (
-    <div className="w-full relative overflow-hidden rounded-2xl bg-indigo-50 dark:bg-blue-950 border border-indigo-100 dark:border-blue-800/60 p-6 sm:p-8 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.08)] dark:shadow-none transition-colors duration-500">
-      <div className="pointer-events-none absolute -top-10 -right-10 w-48 h-48 rounded-full bg-indigo-200/40 dark:bg-blue-500/20 blur-2xl"></div>
-      <div className="pointer-events-none absolute -bottom-12 left-1/4 w-40 h-40 rounded-full bg-indigo-200/40 dark:bg-blue-500/20 blur-2xl"></div>
+    <div className="w-full relative overflow-hidden rounded-2xl bg-brand-teal-50 dark:bg-blue-950 border border-brand-teal-100 dark:border-blue-800/60 p-6 sm:p-8 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.08)] dark:shadow-none transition-colors duration-500">
+      <div className="pointer-events-none absolute -top-10 -right-10 w-48 h-48 rounded-full bg-brand-teal-200/40 dark:bg-blue-500/20 blur-2xl"></div>
+      <div className="pointer-events-none absolute -bottom-12 left-1/4 w-40 h-40 rounded-full bg-brand-teal-200/40 dark:bg-blue-500/20 blur-2xl"></div>
       <div className="relative z-10 flex flex-col gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-1">
@@ -45,13 +45,13 @@ function HeroBanner({ summary }: { summary: InstituteSummary }) {
         <div className="flex flex-wrap gap-3">
           <button
             onClick={() => navigate("/institute-admin/studentOnboarding")}
-            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 bg-brand-teal-600 hover:bg-brand-teal-700 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition-colors shadow-sm"
           >
             <UserPlus className="h-4 w-4" /> Onboard Students
           </button>
           <button
             onClick={() => navigate("/institute-admin/tutorOnboarding")}
-            className="inline-flex items-center gap-2 bg-white dark:bg-white/10 hover:bg-indigo-50 dark:hover:bg-white/20 text-indigo-700 dark:text-white text-sm font-bold px-4 py-2.5 rounded-xl border border-indigo-200 dark:border-white/20 transition-colors"
+            className="inline-flex items-center gap-2 bg-white dark:bg-white/10 hover:bg-brand-teal-50 dark:hover:bg-white/20 text-brand-teal-700 dark:text-white text-sm font-bold px-4 py-2.5 rounded-xl border border-brand-teal-200 dark:border-white/20 transition-colors"
           >
             <GraduationCap className="h-4 w-4" /> Onboard Tutors
           </button>
@@ -109,7 +109,7 @@ function NeedsAttentionPanel({
             <div key={p.userId} className="flex items-center gap-3 py-2.5 border-b border-slate-50 dark:border-white/[0.04] last:border-0">
               <Avatar className="h-9 w-9 shrink-0">
                 <AvatarImage src={p.profileImage ?? ""} />
-                <AvatarFallback className="bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-bold">
+                <AvatarFallback className="bg-brand-teal-100 dark:bg-brand-teal-500/20 text-brand-teal-700 dark:text-brand-teal-300 text-xs font-bold">
                   {(p.name ?? p.email).slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
@@ -120,7 +120,7 @@ function NeedsAttentionPanel({
               <button
                 onClick={() => resend(p)}
                 disabled={sending === p.userId}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 shrink-0"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-teal-600 dark:text-brand-teal-400 hover:bg-brand-teal-50 dark:hover:bg-brand-teal-500/10 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 shrink-0"
               >
                 <Mail className="h-3.5 w-3.5" /> {sending === p.userId ? "Sending…" : "Resend invite"}
               </button>
@@ -160,7 +160,7 @@ function BatchesOverview({ batches }: { batches: BatchSummary[] }) {
     <SectionCard title="Batches" icon={Layers}
       actions={
         <button onClick={() => navigate("/institute-admin/batches")}
-          className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+          className="inline-flex items-center gap-1 text-xs font-bold text-brand-teal-600 dark:text-brand-teal-400 hover:underline">
           Manage <ChevronRight className="h-3.5 w-3.5" />
         </button>
       }>
@@ -187,7 +187,7 @@ function BatchesOverview({ batches }: { batches: BatchSummary[] }) {
                   <div className="w-28 shrink-0">
                     <div className="h-2 rounded-full bg-slate-100 dark:bg-white/[0.06] overflow-hidden">
                       <div
-                        className={`h-full rounded-full ${pct >= 90 ? "bg-rose-500" : pct >= 70 ? "bg-amber-500" : "bg-indigo-500"}`}
+                        className={`h-full rounded-full ${pct >= 90 ? "bg-rose-500" : pct >= 70 ? "bg-amber-500" : "bg-brand-teal-500"}`}
                         style={{ width: `${pct}%` }}
                       />
                     </div>
@@ -212,7 +212,7 @@ function TutorSnapshot({ tutors }: { tutors: InstructorRow[] }) {
     <SectionCard title="Tutors" icon={UserCheck}
       actions={
         <button onClick={() => navigate("/institute-admin/tutor")}
-          className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+          className="inline-flex items-center gap-1 text-xs font-bold text-brand-teal-600 dark:text-brand-teal-400 hover:underline">
           View all <ChevronRight className="h-3.5 w-3.5" />
         </button>
       }>
@@ -224,7 +224,7 @@ function TutorSnapshot({ tutors }: { tutors: InstructorRow[] }) {
             <div key={t.user_id} className="flex items-center gap-3 py-2.5 border-b border-slate-50 dark:border-white/[0.04] last:border-0">
               <Avatar className="h-9 w-9 shrink-0">
                 <AvatarImage src={t.avatar ?? ""} />
-                <AvatarFallback className="bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-bold">
+                <AvatarFallback className="bg-brand-teal-100 dark:bg-brand-teal-500/20 text-brand-teal-700 dark:text-brand-teal-300 text-xs font-bold">
                   {(t.name ?? t.email).slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>

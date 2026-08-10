@@ -173,17 +173,17 @@ export const HistoryTable = ({ history }: HistoryTableProps) => {
 
               {/* Metrics Grid */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-purple-50 rounded-lg">
+                <div className="p-4 bg-brand-blue-50 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <Zap className="h-4 w-4 text-purple-600" />
-                    <span className="text-sm font-medium text-purple-700">Reading Speed</span>
+                    <Zap className="h-4 w-4 text-brand-blue-600" />
+                    <span className="text-sm font-medium text-brand-blue-700">Reading Speed</span>
                   </div>
-                  <div className="text-2xl font-bold text-purple-900">
+                  <div className="text-2xl font-bold text-brand-blue-900">
                     {Math.round(selectedItem.weightedWPM)} <span className="text-sm">WPM</span>
                   </div>
                   <Progress 
                     value={Math.min((selectedItem.weightedWPM / 400) * 100, 100)} 
-                    className="h-2 mt-2 bg-purple-200"
+                    className="h-2 mt-2 bg-brand-blue-200"
                   />
                 </div>
 
@@ -257,9 +257,9 @@ export const HistoryTable = ({ history }: HistoryTableProps) => {
               </div>
 
               {/* Performance Summary */}
-              <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-4 rounded-lg text-white">
+              <div className="bg-gradient-to-r from-brand-blue-500 to-blue-500 p-4 rounded-lg text-white">
                 <h4 className="font-semibold mb-2">Performance Summary</h4>
-                <p className="text-sm text-purple-50">
+                <p className="text-sm text-brand-blue-50">
                   {formatScore(selectedItem.accuracy) >= 80 && selectedItem.weightedWPM >= 200
                     ? "Excellent performance! You demonstrated both speed and comprehension."
                     : formatScore(selectedItem.accuracy) >= 80

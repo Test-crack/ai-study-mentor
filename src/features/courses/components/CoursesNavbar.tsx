@@ -6,7 +6,8 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
-import { GraduationCap, User, LogOut, Home, LogIn } from 'lucide-react';
+import { User, LogOut, Home, LogIn } from 'lucide-react';
+import testcrackLogo from '@/assets/testcrack-logo.svg';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
@@ -40,7 +41,7 @@ export function CoursesNavbar() {
             onClick={handleLogoClick}
             className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
           >
-            <GraduationCap className="h-7 w-7 text-purple-600" />
+            <img src={testcrackLogo} alt="TestCrack" className="h-9 w-9 object-contain" />
             <span className="text-xl font-bold text-gray-900">TestCrack</span>
           </button>
 
@@ -53,7 +54,7 @@ export function CoursesNavbar() {
                   className="relative h-9 w-9 rounded-full"
                 >
                   <Avatar className="h-9 w-9">
-                    <AvatarFallback className="bg-purple-600 text-white text-sm">
+                    <AvatarFallback className="bg-brand-blue-600 text-white text-sm">
                       {getUserInitials()}
                     </AvatarFallback>
                   </Avatar>
@@ -86,7 +87,7 @@ export function CoursesNavbar() {
           ) : (
             <Button
               onClick={() => navigate('/login')}
-              className="bg-purple-600 hover:bg-purple-700 text-white"
+              className="bg-brand-blue-600 hover:bg-brand-blue-700 text-white"
             >
               <LogIn className="h-4 w-4 mr-2" />
               Sign In

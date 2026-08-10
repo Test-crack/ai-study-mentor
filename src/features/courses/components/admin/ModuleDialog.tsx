@@ -80,12 +80,12 @@ export const ModuleDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[520px] rounded-3xl border-slate-100 shadow-2xl bg-white/95 backdrop-blur-xl p-0 overflow-hidden">
         {/* Header with gradient accent */}
-        <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 h-1.5" />
+        <div className="bg-gradient-to-r from-brand-teal-500 via-brand-blue-500 to-pink-500 h-1.5" />
         
         <DialogHeader className="px-8 pt-8 pb-2">
           <div className="flex items-center gap-3 mb-2">
-            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center shadow-sm">
-              <Sparkles className="h-6 w-6 text-indigo-600" />
+            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-brand-teal-100 to-brand-blue-100 flex items-center justify-center shadow-sm">
+              <Sparkles className="h-6 w-6 text-brand-teal-600" />
             </div>
             <div>
               <DialogTitle className="text-2xl font-extrabold text-slate-900 tracking-tight">
@@ -116,7 +116,7 @@ export const ModuleDialog = ({
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 placeholder="e.g., Introduction to Machine Learning"
-                className={`h-12 rounded-xl bg-slate-50/50 border-slate-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white transition-all font-medium ${
+                className={`h-12 rounded-xl bg-slate-50/50 border-slate-200 focus:ring-4 focus:ring-brand-teal-500/10 focus:border-brand-teal-500 focus:bg-white transition-all font-medium ${
                   errors.title ? "border-rose-300 focus:border-rose-500 focus:ring-rose-500/10" : ""
                 }`}
                 disabled={isLoading}
@@ -143,7 +143,7 @@ export const ModuleDialog = ({
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Describe what students will learn in this module..."
                 rows={4}
-                className="rounded-xl bg-slate-50/50 border-slate-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white transition-all resize-none font-medium"
+                className="rounded-xl bg-slate-50/50 border-slate-200 focus:ring-4 focus:ring-brand-teal-500/10 focus:border-brand-teal-500 focus:bg-white transition-all resize-none font-medium"
                 disabled={isLoading}
               />
             </div>
@@ -161,7 +161,7 @@ export const ModuleDialog = ({
                 value={formData.domain}
                 onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
                 placeholder="e.g., Computer Science, Mathematics"
-                className="h-12 rounded-xl bg-slate-50/50 border-slate-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white transition-all font-medium"
+                className="h-12 rounded-xl bg-slate-50/50 border-slate-200 focus:ring-4 focus:ring-brand-teal-500/10 focus:border-brand-teal-500 focus:bg-white transition-all font-medium"
                 disabled={isLoading}
               />
             </div>
@@ -180,7 +180,7 @@ export const ModuleDialog = ({
             <Button
               type="submit"
               disabled={isLoading}
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg shadow-indigo-200 rounded-xl px-8 font-bold transition-all hover:-translate-y-0.5 disabled:opacity-70 disabled:hover:translate-y-0"
+              className="bg-gradient-to-r from-brand-teal-600 to-brand-blue-600 hover:from-brand-teal-700 hover:to-brand-blue-700 text-white shadow-lg shadow-brand-teal-200 rounded-xl px-8 font-bold transition-all hover:-translate-y-0.5 disabled:opacity-70 disabled:hover:translate-y-0"
             >
               {isLoading ? (
                 <>

@@ -89,7 +89,7 @@ export default function TrapSpotterGame() {
       <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-10 text-center shadow-sm">
         <Trophy className="w-16 h-16 text-amber-500 mx-auto mb-4" />
         <h2 className="text-3xl font-black text-slate-800 dark:text-white mb-2">Session Complete!</h2>
-        <p className="text-slate-500 mb-6">You spotted <strong className="text-rose-500">{score / 4}</strong> of {ROUNDS.length} traps · <strong className="text-indigo-500">+{score} pts</strong></p>
+        <p className="text-slate-500 mb-6">You spotted <strong className="text-rose-500">{score / 4}</strong> of {ROUNDS.length} traps · <strong className="text-brand-teal-500">+{score} pts</strong></p>
         <button onClick={handleRestart} className="flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-bold px-8 py-3 rounded-xl mx-auto transition-all">
           <RotateCcw className="w-4 h-4" /> Play Again
         </button>

@@ -222,7 +222,7 @@ export default function BatchAnalyticsView() {
 
             <button
               onClick={() => navigate(-1)}
-              className="flex items-center gap-2 text-sm text-slate-500 hover:text-indigo-600 transition-colors"
+              className="flex items-center gap-2 text-sm text-slate-500 hover:text-brand-teal-600 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" /> Back to Insights
             </button>
@@ -251,7 +251,7 @@ export default function BatchAnalyticsView() {
                         className={cn(
                           "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 capitalize whitespace-nowrap",
                           activeTab === tab
-                            ? "bg-indigo-600 text-white shadow-sm"
+                            ? "bg-brand-teal-600 text-white shadow-sm"
                             : "text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5"
                         )}
                       >
@@ -272,9 +272,9 @@ export default function BatchAnalyticsView() {
                   <div className="space-y-6 animate-in fade-in duration-300">
                     {/* Top Metrics */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                      <MetricCard label="Avg Speaking Score" value={data.summary.avgSpeaking != null ? Number(data.summary.avgSpeaking).toFixed(1) : '—'} icon={<Mic className="w-5 h-5 text-indigo-500" />} />
+                      <MetricCard label="Avg Speaking Score" value={data.summary.avgSpeaking != null ? Number(data.summary.avgSpeaking).toFixed(1) : '—'} icon={<Mic className="w-5 h-5 text-brand-teal-500" />} />
                       <MetricCard label="Avg Reading Speed" value={data.summary.avgReading != null ? Math.round(Number(data.summary.avgReading)) + ' WPM' : '—'} icon={<BookOpen className="w-5 h-5 text-emerald-500" />} />
-                      <MetricCard label="Avg Writing Score" value={data.summary.avgWriting != null ? Number(data.summary.avgWriting).toFixed(1) : '—'} icon={<PenTool className="w-5 h-5 text-purple-500" />} />
+                      <MetricCard label="Avg Writing Score" value={data.summary.avgWriting != null ? Number(data.summary.avgWriting).toFixed(1) : '—'} icon={<PenTool className="w-5 h-5 text-brand-blue-500" />} />
                       <MetricCard label="Avg Listening Score" value={data.summary.avgListening != null ? Number(data.summary.avgListening).toFixed(1) : '—'} icon={<Zap className="w-5 h-5 text-amber-500" />} />
                     </div>
 
@@ -288,7 +288,7 @@ export default function BatchAnalyticsView() {
                             <YAxis stroke="#888" fontSize={12} />
                             <RechartsTooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px', color: '#fff' }} />
                             <Legend />
-                            <Line type="monotone" dataKey="fluency" stroke="#6366f1" strokeWidth={3} dot={{ r: 4, fill: '#6366f1' }} name="Fluency" />
+                            <Line type="monotone" dataKey="fluency" stroke="#12897C" strokeWidth={3} dot={{ r: 4, fill: '#12897C' }} name="Fluency" />
                             <Line type="monotone" dataKey="confidence" stroke="#ec4899" strokeWidth={3} dot={{ r: 4, fill: '#ec4899' }} name="Confidence" />
                           </LineChart>
                         </ResponsiveContainer>
@@ -317,7 +317,7 @@ export default function BatchAnalyticsView() {
                             <YAxis stroke="#888" fontSize={12} domain={[4, 9]} ticks={[4,5,6,7,8,9]} />
                             <RechartsTooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px', color: '#fff' }} />
                             <Legend />
-                            <Line type="monotone" dataKey="score" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4, fill: '#8b5cf6' }} name="Writing AI Band" />
+                            <Line type="monotone" dataKey="score" stroke="#256B8B" strokeWidth={3} dot={{ r: 4, fill: '#256B8B' }} name="Writing AI Band" />
                           </LineChart>
                         </ResponsiveContainer>
                       </ChartCard>
@@ -355,7 +355,7 @@ export default function BatchAnalyticsView() {
                                       {student.avatar ? (
                                         <img src={student.avatar} alt="" className="w-8 h-8 rounded-full bg-slate-200" />
                                       ) : (
-                                        <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 flex items-center justify-center font-bold text-xs">
+                                        <div className="w-8 h-8 rounded-full bg-brand-teal-100 dark:bg-brand-teal-900/40 text-brand-teal-700 dark:text-brand-teal-400 flex items-center justify-center font-bold text-xs">
                                           {student.name?.charAt(0)}
                                         </div>
                                       )}
@@ -375,7 +375,7 @@ export default function BatchAnalyticsView() {
                                   <td className="px-6 py-4 text-right">
                                     <button 
                                       // onClick={() => handleAnalyzeProgress(student)}
-                                      className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#6366f1] hover:bg-[#4f46e5] text-white text-sm font-medium rounded-md transition-colors shadow-sm"
+                                      className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#12897C] hover:bg-[#087F73] text-white text-sm font-medium rounded-md transition-colors shadow-sm"
                                     >
                                       <BarChart2 className="w-4 h-4" />
                                       Analyze Progress
@@ -397,7 +397,7 @@ export default function BatchAnalyticsView() {
                 {activeTab === 'speaking' && (
                   <div className="space-y-6 animate-in fade-in duration-300">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <MetricCard label="Avg Fluency Score" value={data.summary.avgSpeaking != null ? Number(data.summary.avgSpeaking).toFixed(1) : '—'} icon={<Mic className="w-5 h-5 text-indigo-500" />} />
+                      <MetricCard label="Avg Fluency Score" value={data.summary.avgSpeaking != null ? Number(data.summary.avgSpeaking).toFixed(1) : '—'} icon={<Mic className="w-5 h-5 text-brand-teal-500" />} />
                       <MetricCard label="Total Students" value={data.summary.totalStudents} icon={<Users className="w-5 h-5 text-slate-500" />} />
                     </div>
                     <ChartCard title="Speaking Fluency Trend">
@@ -405,8 +405,8 @@ export default function BatchAnalyticsView() {
                         <AreaChart data={data.speakingTrends}>
                           <defs>
                             <linearGradient id="gradSpeaking" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4} />
-                              <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                              <stop offset="5%" stopColor="#12897C" stopOpacity={0.4} />
+                              <stop offset="95%" stopColor="#12897C" stopOpacity={0} />
                             </linearGradient>
                           </defs>
                           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
@@ -414,7 +414,7 @@ export default function BatchAnalyticsView() {
                           <YAxis stroke="#888" fontSize={12} />
                           <RechartsTooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
                           <Legend />
-                          <Area type="monotone" dataKey="fluency" stroke="#6366f1" strokeWidth={3} fill="url(#gradSpeaking)" name="Fluency" />
+                          <Area type="monotone" dataKey="fluency" stroke="#12897C" strokeWidth={3} fill="url(#gradSpeaking)" name="Fluency" />
                           <Line type="monotone" dataKey="confidence" stroke="#ec4899" strokeWidth={2} dot={false} name="Confidence" />
                         </AreaChart>
                       </ResponsiveContainer>
@@ -455,7 +455,7 @@ export default function BatchAnalyticsView() {
                                     {student.avatar ? (
                                       <img src={student.avatar} alt="" className="w-8 h-8 rounded-full" />
                                     ) : (
-                                      <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 flex items-center justify-center font-bold text-xs">
+                                      <div className="w-8 h-8 rounded-full bg-brand-teal-100 dark:bg-brand-teal-900/40 text-brand-teal-700 dark:text-brand-teal-400 flex items-center justify-center font-bold text-xs">
                                         {student.name?.charAt(0)}
                                       </div>
                                     )}
@@ -463,7 +463,7 @@ export default function BatchAnalyticsView() {
                                   </div>
                                 </td>
                                 <td className="px-5 py-4 text-center">
-                                  <span className="font-bold font-mono text-indigo-600 dark:text-indigo-400">
+                                  <span className="font-bold font-mono text-brand-teal-600 dark:text-brand-teal-400">
                                     {Math.round(student.avgFluency)}
                                   </span>
                                 </td>
@@ -495,12 +495,12 @@ export default function BatchAnalyticsView() {
                 {activeTab === 'reading' && (
                   readingLoading ? (
                     <div className="flex items-center justify-center py-24">
-                      <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+                      <Loader2 className="w-8 h-8 animate-spin text-brand-teal-500" />
                     </div>
                   ) : !readingData ? (
                     <div className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl p-16 text-center space-y-3">
-                      <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/20 rounded-full flex items-center justify-center mx-auto">
-                        <BookOpen className="w-8 h-8 text-indigo-400" />
+                      <div className="w-16 h-16 bg-brand-teal-50 dark:bg-brand-teal-900/20 rounded-full flex items-center justify-center mx-auto">
+                        <BookOpen className="w-8 h-8 text-brand-teal-400" />
                       </div>
                       <h3 className="font-bold text-slate-700 dark:text-slate-200">Reading Analytics Coming Soon</h3>
                       <p className="text-slate-500 text-sm max-w-sm mx-auto">
@@ -524,8 +524,8 @@ export default function BatchAnalyticsView() {
                           <AreaChart data={readingData.wpmTrends}>
                             <defs>
                               <linearGradient id="gradWpm" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.35} />
-                                <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                                <stop offset="5%" stopColor="#12897C" stopOpacity={0.35} />
+                                <stop offset="95%" stopColor="#12897C" stopOpacity={0} />
                               </linearGradient>
                               <linearGradient id="gradAcc" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#10b981" stopOpacity={0.35} />
@@ -541,7 +541,7 @@ export default function BatchAnalyticsView() {
                               formatter={(v: any, name: string) => [`${Math.round(v)}${name === 'avgAccuracy' ? '%' : ' WPM'}`, name === 'avgWpm' ? 'Avg WPM' : 'Avg Accuracy']}
                             />
                             <Legend formatter={(v) => v === 'avgWpm' ? 'Avg WPM' : 'Avg Accuracy %'} />
-                            <Area yAxisId="left" type="monotone" dataKey="avgWpm" stroke="#6366f1" strokeWidth={3} fill="url(#gradWpm)" name="avgWpm" />
+                            <Area yAxisId="left" type="monotone" dataKey="avgWpm" stroke="#12897C" strokeWidth={3} fill="url(#gradWpm)" name="avgWpm" />
                             <Area yAxisId="right" type="monotone" dataKey="avgAccuracy" stroke="#10b981" strokeWidth={3} fill="url(#gradAcc)" name="avgAccuracy" />
                           </AreaChart>
                         </ResponsiveContainer>
@@ -581,7 +581,7 @@ export default function BatchAnalyticsView() {
                                       {student.avatar ? (
                                         <img src={student.avatar} alt="" className="w-8 h-8 rounded-full" />
                                       ) : (
-                                        <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 flex items-center justify-center font-bold text-xs">
+                                        <div className="w-8 h-8 rounded-full bg-brand-teal-100 dark:bg-brand-teal-900/40 text-brand-teal-700 dark:text-brand-teal-400 flex items-center justify-center font-bold text-xs">
                                           {student.name?.charAt(0)}
                                         </div>
                                       )}
@@ -589,7 +589,7 @@ export default function BatchAnalyticsView() {
                                     </div>
                                   </td>
                                   <td className="px-5 py-4 text-center">
-                                    <span className="font-bold font-mono text-indigo-600 dark:text-indigo-400">
+                                    <span className="font-bold font-mono text-brand-teal-600 dark:text-brand-teal-400">
                                       {Math.round(student.avgWPM)}
                                     </span>
                                   </td>
@@ -622,7 +622,7 @@ export default function BatchAnalyticsView() {
                 {activeTab === 'writing' && (
                   <div className="space-y-6 animate-in fade-in duration-300">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <MetricCard label="Avg Writing AI Band" value={data.summary.avgWriting != null ? Number(data.summary.avgWriting).toFixed(1) : '—'} icon={<PenTool className="w-5 h-5 text-purple-500" />} />
+                      <MetricCard label="Avg Writing AI Band" value={data.summary.avgWriting != null ? Number(data.summary.avgWriting).toFixed(1) : '—'} icon={<PenTool className="w-5 h-5 text-brand-blue-500" />} />
                       <MetricCard label="Total Students" value={data.summary.totalStudents} icon={<Users className="w-5 h-5 text-slate-500" />} />
                     </div>
                     <ChartCard title="Writing Band Score Growth">
@@ -630,8 +630,8 @@ export default function BatchAnalyticsView() {
                         <AreaChart data={data.writingTrends}>
                           <defs>
                             <linearGradient id="gradWriting" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4} />
-                              <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                              <stop offset="5%" stopColor="#256B8B" stopOpacity={0.4} />
+                              <stop offset="95%" stopColor="#256B8B" stopOpacity={0} />
                             </linearGradient>
                           </defs>
                           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
@@ -639,7 +639,7 @@ export default function BatchAnalyticsView() {
                           <YAxis stroke="#888" fontSize={12} domain={[4, 9]} ticks={[4, 5, 6, 7, 8, 9]} />
                           <RechartsTooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
                           <Legend />
-                          <Area type="monotone" dataKey="score" stroke="#8b5cf6" strokeWidth={3} fill="url(#gradWriting)" name="Writing Score" />
+                          <Area type="monotone" dataKey="score" stroke="#256B8B" strokeWidth={3} fill="url(#gradWriting)" name="Writing Score" />
                         </AreaChart>
                       </ResponsiveContainer>
                     </ChartCard>
@@ -679,7 +679,7 @@ export default function BatchAnalyticsView() {
                                     {student.avatar ? (
                                       <img src={student.avatar} alt="" className="w-8 h-8 rounded-full" />
                                     ) : (
-                                      <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 flex items-center justify-center font-bold text-xs">
+                                      <div className="w-8 h-8 rounded-full bg-brand-teal-100 dark:bg-brand-teal-900/40 text-brand-teal-700 dark:text-brand-teal-400 flex items-center justify-center font-bold text-xs">
                                         {student.name?.charAt(0)}
                                       </div>
                                     )}
@@ -687,7 +687,7 @@ export default function BatchAnalyticsView() {
                                   </div>
                                 </td>
                                 <td className="px-5 py-4 text-center">
-                                  <span className="inline-flex px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-900/30 font-bold text-xs text-indigo-700 dark:text-indigo-400">
+                                  <span className="inline-flex px-2 py-0.5 rounded-full bg-brand-teal-50 dark:bg-brand-teal-900/30 font-bold text-xs text-brand-teal-700 dark:text-brand-teal-400">
                                     {student.avgBand}
                                   </span>
                                 </td>
@@ -736,7 +736,7 @@ const MetricCard = ({ label, value, icon }: { label: string; value: any; icon?: 
 );
 
 const colorMap: Record<string, string> = {
-  indigo: 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20',
+  indigo: 'text-brand-teal-600 dark:text-brand-teal-400 bg-brand-teal-50 dark:bg-brand-teal-900/20',
   emerald: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20',
   amber: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20',
   slate: 'text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800',

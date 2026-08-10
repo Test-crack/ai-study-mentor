@@ -1,9 +1,10 @@
 // src/features/Instructor/dashboard/InstructorSidebar.tsx
 import {
-  LayoutDashboard, LogOut, GraduationCap, ClipboardCheck,
+  LayoutDashboard, LogOut, ClipboardCheck,
   ChevronLeft, ChevronRight, Laptop, Home, GitMerge, Workflow,
   Settings, BarChart3, Layers
 } from "lucide-react";
+import testcrackLogo from '@/assets/testcrack-logo.svg';
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -66,9 +67,7 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
     >
       {/* ── Brand ── */}
       <div className={cn("flex items-center gap-3 mb-10", isCollapsed ? "justify-center" : "px-1")}>
-        <div className="shrink-0 bg-indigo-600 p-2 rounded-xl shadow-md shadow-indigo-500/25">
-          <GraduationCap className="h-5 w-5 text-white" />
-        </div>
+        <img src={testcrackLogo} alt="TestCrack" className="h-9 w-9 object-contain shrink-0" />
         {!isCollapsed && (
           <div className="animate-in fade-in duration-200">
             <span className="text-base font-black tracking-tight text-slate-900 dark:text-white">
@@ -96,16 +95,16 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
                 isActive
                   ? [
                       // Light active
-                      "bg-indigo-600 text-white",
+                      "bg-brand-teal-600 text-white",
                       "shadow-[0_4px_14px_-2px_rgba(99,102,241,0.5)]",
                       // Dark active
-                      "dark:bg-indigo-500/15 dark:text-indigo-300",
+                      "dark:bg-brand-teal-500/15 dark:text-brand-teal-300",
                       "dark:shadow-[0_0_20px_rgba(99,102,241,0.15)]",
-                      "dark:border dark:border-indigo-500/20",
+                      "dark:border dark:border-brand-teal-500/20",
                     ].join(" ")
                   : [
                       // Light inactive
-                      "text-slate-600 hover:bg-slate-50 hover:text-indigo-600",
+                      "text-slate-600 hover:bg-slate-50 hover:text-brand-teal-600",
                       // Dark inactive
                       "dark:text-slate-400 dark:hover:bg-white/[0.04] dark:hover:text-slate-100",
                     ].join(" ")
@@ -114,8 +113,8 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
               <item.icon className={cn(
                 "h-4.5 w-4.5 shrink-0 transition-transform duration-200 group-hover:scale-105",
                 isActive
-                  ? "text-white dark:text-indigo-300"
-                  : "text-slate-400 group-hover:text-indigo-500 dark:group-hover:text-slate-200"
+                  ? "text-white dark:text-brand-teal-300"
+                  : "text-slate-400 group-hover:text-brand-teal-500 dark:group-hover:text-slate-200"
               )} />
               {!isCollapsed && (
                 <span className="font-medium text-sm leading-none animate-in fade-in duration-200">
@@ -124,7 +123,7 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
               )}
               {/* Active pill indicator in dark mode */}
               {isActive && !isCollapsed && (
-                <span className="hidden dark:block absolute right-3 h-1.5 w-1.5 rounded-full bg-indigo-400" />
+                <span className="hidden dark:block absolute right-3 h-1.5 w-1.5 rounded-full bg-brand-teal-400" />
               )}
             </button>
           );
@@ -137,9 +136,9 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
         className={cn(
           "absolute -right-3 top-1/2 -translate-y-1/2 z-50",
           "h-6 w-6 grid place-items-center rounded-full",
-          "bg-indigo-600 text-white border-2",
+          "bg-brand-teal-600 text-white border-2",
           "border-white dark:border-[#0D0D14]",
-          "shadow-md hover:bg-indigo-700 transition-colors"
+          "shadow-md hover:bg-brand-teal-700 transition-colors"
         )}
       >
         {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}

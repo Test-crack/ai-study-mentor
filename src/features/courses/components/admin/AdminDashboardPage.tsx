@@ -64,7 +64,7 @@ const AdminDashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
-      <div className="fixed inset-0 bg-gradient-to-tr from-indigo-50/20 via-white to-purple-50/20 pointer-events-none" />
+      <div className="fixed inset-0 bg-gradient-to-tr from-brand-teal-50/20 via-white to-brand-blue-50/20 pointer-events-none" />
       
       <AdminNavbar />
       
@@ -81,7 +81,7 @@ const AdminDashboardPage = () => {
           </div>
             <Button 
             size="lg" 
-            className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-xl shadow-indigo-200 h-14 px-8 rounded-2xl font-bold text-base transition-all hover:-translate-y-1 active:translate-y-0 active:shadow-md"
+            className="bg-brand-teal-600 hover:bg-brand-teal-700 text-white shadow-xl shadow-brand-teal-200 h-14 px-8 rounded-2xl font-bold text-base transition-all hover:-translate-y-1 active:translate-y-0 active:shadow-md"
             onClick={() => setIsDialogOpen(true)}
           >
             <Plus className="mr-2 h-5 w-5 stroke-[3px]" /> Create New Course
@@ -106,17 +106,17 @@ const AdminDashboardPage = () => {
 
                 <div className="flex items-center space-x-3 w-full sm:w-auto">
                     <div className="relative w-full sm:w-72 group">
-                        <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                        <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-brand-teal-500 transition-colors" />
                         <Input 
                             placeholder="Search projects..." 
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-11 h-11 bg-slate-50/50 border-slate-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl text-sm font-medium transition-all"
+                            className="pl-11 h-11 bg-slate-50/50 border-slate-100 focus:border-brand-teal-500 focus:ring-4 focus:ring-brand-teal-500/10 rounded-xl text-sm font-medium transition-all"
                         />
                     </div>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-xl bg-slate-50/50 border border-slate-100 text-slate-500 hover:bg-white hover:text-indigo-600 transition-all">
+                            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-xl bg-slate-50/50 border border-slate-100 text-slate-500 hover:bg-white hover:text-brand-teal-600 transition-all">
                                 <Filter className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
@@ -124,26 +124,26 @@ const AdminDashboardPage = () => {
                             <div className="px-3 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Sort By</div>
                             <DropdownMenuItem 
                                 onClick={() => setSortConfig({ sortBy: 'created_at', sortOrder: 'desc' })}
-                                className={`rounded-xl px-3 py-2.5 font-medium transition-colors ${sortConfig.sortBy === 'created_at' && sortConfig.sortOrder === 'desc' ? 'bg-indigo-50 text-indigo-600' : 'focus:bg-indigo-50 focus:text-indigo-600'}`}
+                                className={`rounded-xl px-3 py-2.5 font-medium transition-colors ${sortConfig.sortBy === 'created_at' && sortConfig.sortOrder === 'desc' ? 'bg-brand-teal-50 text-brand-teal-600' : 'focus:bg-brand-teal-50 focus:text-brand-teal-600'}`}
                             >
                                 Newest First
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                                 onClick={() => setSortConfig({ sortBy: 'created_at', sortOrder: 'asc' })}
-                                className={`rounded-xl px-3 py-2.5 font-medium transition-colors ${sortConfig.sortBy === 'created_at' && sortConfig.sortOrder === 'asc' ? 'bg-indigo-50 text-indigo-600' : 'focus:bg-indigo-50 focus:text-indigo-600'}`}
+                                className={`rounded-xl px-3 py-2.5 font-medium transition-colors ${sortConfig.sortBy === 'created_at' && sortConfig.sortOrder === 'asc' ? 'bg-brand-teal-50 text-brand-teal-600' : 'focus:bg-brand-teal-50 focus:text-brand-teal-600'}`}
                             >
                                 Oldest First
                             </DropdownMenuItem>
                             <div className="h-px bg-slate-100 my-1 mx-1" />
                             <DropdownMenuItem 
                                 onClick={() => setSortConfig({ sortBy: 'price', sortOrder: 'asc' })}
-                                className={`rounded-xl px-3 py-2.5 font-medium transition-colors ${sortConfig.sortBy === 'price' && sortConfig.sortOrder === 'asc' ? 'bg-indigo-50 text-indigo-600' : 'focus:bg-indigo-50 focus:text-indigo-600'}`}
+                                className={`rounded-xl px-3 py-2.5 font-medium transition-colors ${sortConfig.sortBy === 'price' && sortConfig.sortOrder === 'asc' ? 'bg-brand-teal-50 text-brand-teal-600' : 'focus:bg-brand-teal-50 focus:text-brand-teal-600'}`}
                             >
                                 Price: Low to High
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                                 onClick={() => setSortConfig({ sortBy: 'price', sortOrder: 'desc' })}
-                                className={`rounded-xl px-3 py-2.5 font-medium transition-colors ${sortConfig.sortBy === 'price' && sortConfig.sortOrder === 'desc' ? 'bg-indigo-50 text-indigo-600' : 'focus:bg-indigo-50 focus:text-indigo-600'}`}
+                                className={`rounded-xl px-3 py-2.5 font-medium transition-colors ${sortConfig.sortBy === 'price' && sortConfig.sortOrder === 'desc' ? 'bg-brand-teal-50 text-brand-teal-600' : 'focus:bg-brand-teal-50 focus:text-brand-teal-600'}`}
                             >
                                 Price: High to Low
                             </DropdownMenuItem>
@@ -154,9 +154,9 @@ const AdminDashboardPage = () => {
             
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full lg:w-auto">
               <TabsList className="grid w-full grid-cols-3 lg:w-[320px] h-11 p-1 bg-slate-100/50 rounded-xl border border-slate-100">
-                <TabsTrigger value="all" className="rounded-lg text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">All</TabsTrigger>
-                <TabsTrigger value="published" className="rounded-lg text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">Published</TabsTrigger>
-                <TabsTrigger value="draft" className="rounded-lg text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">Drafts</TabsTrigger>
+                <TabsTrigger value="all" className="rounded-lg text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-brand-teal-600 data-[state=active]:shadow-sm">All</TabsTrigger>
+                <TabsTrigger value="published" className="rounded-lg text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-brand-teal-600 data-[state=active]:shadow-sm">Published</TabsTrigger>
+                <TabsTrigger value="draft" className="rounded-lg text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-brand-teal-600 data-[state=active]:shadow-sm">Drafts</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>

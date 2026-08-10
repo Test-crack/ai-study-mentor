@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { 
-  User, Mail, Phone, MessageSquare, 
-  CheckCircle, X, GraduationCap,UserRound, ArrowLeft, AlertCircle 
+import {
+  User, Mail, Phone, MessageSquare,
+  CheckCircle, X, UserRound, ArrowLeft, AlertCircle
 } from 'lucide-react';
+import testcrackLogo from '@/assets/testcrack-logo.svg';
 
 interface FormData {
   name: string;
@@ -101,7 +102,7 @@ const Contactpage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 pt-28 pb-12 px-4 sm:px-6 lg:px-8 font-sans flex flex-col items-center">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-brand-teal-50 pt-28 pb-12 px-4 sm:px-6 lg:px-8 font-sans flex flex-col items-center">
       
      {/* Navigation */}
 <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 transform-gpu">
@@ -111,11 +112,8 @@ const Contactpage: React.FC = () => {
       
       {/* Logo Section - Now stays at the far left */}
       <div className="flex items-center space-x-2">
-        <div className="p-2 bg-indigo-700 rounded-xl">
-          {/* Replaced GraduationCap with UserRound */}
-          <UserRound className="h-6 w-6 text-white" />
-        </div>
-        <span className="text-xl font-bold text-indigo-700">
+        <img src={testcrackLogo} alt="TestCrack" className="h-9 w-9 object-contain" />
+        <span className="text-xl font-bold text-brand-teal-700">
           TestCrack
         </span>
       </div>
@@ -132,7 +130,7 @@ const Contactpage: React.FC = () => {
         <div className="mb-6">
           <button 
             onClick={handleGoBack}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-700 border border-slate-200 text-white text-sm font-semibold rounded-xl shadow-sm hover:bg-indigo-800  hover:text-white transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-teal-700 border border-slate-200 text-white text-sm font-semibold rounded-xl shadow-sm hover:bg-brand-teal-800  hover:text-white transition-all focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:ring-offset-2"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Landing Page
@@ -140,15 +138,15 @@ const Contactpage: React.FC = () => {
         </div>
 
         {/* MAIN FORM CARD */}
-        <div className="w-full bg-white rounded-3xl shadow-2xl shadow-indigo-500/10 overflow-hidden border border-slate-100/50">
-          <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 px-8 py-10 text-center relative overflow-hidden">
+        <div className="w-full bg-white rounded-3xl shadow-2xl shadow-brand-teal-500/10 overflow-hidden border border-slate-100/50">
+          <div className="bg-gradient-to-br from-brand-teal-600 to-brand-teal-800 px-8 py-10 text-center relative overflow-hidden">
             <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
             <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
             
             <h2 className="text-3xl font-extrabold text-white tracking-tight relative z-10">
               Get in Touch
             </h2>
-            <p className="mt-3 text-indigo-100 text-sm max-w-xs mx-auto relative z-10">
+            <p className="mt-3 text-brand-teal-100 text-sm max-w-xs mx-auto relative z-10">
               Fill out the form below and our team will get back to you shortly.
             </p>
           </div>
@@ -172,7 +170,7 @@ const Contactpage: React.FC = () => {
                   className={`block w-full pl-11 pr-3 py-3 border bg-slate-50 rounded-xl outline-none transition-all sm:text-sm ${
                     errors.name 
                       ? 'border-red-400 focus:bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500' 
-                      : 'border-slate-200 focus:bg-white focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600'
+                      : 'border-slate-200 focus:bg-white focus:ring-2 focus:ring-brand-teal-600 focus:border-brand-teal-600'
                   }`}
                   placeholder="John Doe"
                 />
@@ -202,7 +200,7 @@ const Contactpage: React.FC = () => {
                   className={`block w-full pl-11 pr-3 py-3 border bg-slate-50 rounded-xl outline-none transition-all sm:text-sm ${
                     errors.email 
                       ? 'border-red-400 focus:bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500' 
-                      : 'border-slate-200 focus:bg-white focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600'
+                      : 'border-slate-200 focus:bg-white focus:ring-2 focus:ring-brand-teal-600 focus:border-brand-teal-600'
                   }`}
                   placeholder="john@example.com"
                 />
@@ -232,7 +230,7 @@ const Contactpage: React.FC = () => {
                   className={`block w-full pl-11 pr-3 py-3 border bg-slate-50 rounded-xl outline-none transition-all sm:text-sm ${
                     errors.whatsapp 
                       ? 'border-red-400 focus:bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500' 
-                      : 'border-slate-200 focus:bg-white focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600'
+                      : 'border-slate-200 focus:bg-white focus:ring-2 focus:ring-brand-teal-600 focus:border-brand-teal-600'
                   }`}
                   placeholder="+1 (555) 000-0000"
                 />
@@ -262,7 +260,7 @@ const Contactpage: React.FC = () => {
                   className={`block w-full pl-11 pr-3 py-3 border bg-slate-50 rounded-xl outline-none transition-all sm:text-sm resize-none ${
                     errors.enquiry 
                       ? 'border-red-400 focus:bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500' 
-                      : 'border-slate-200 focus:bg-white focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600'
+                      : 'border-slate-200 focus:bg-white focus:ring-2 focus:ring-brand-teal-600 focus:border-brand-teal-600'
                   }`}
                   placeholder="How can we help you?"
                 />
@@ -277,7 +275,7 @@ const Contactpage: React.FC = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-md shadow-indigo-200 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 hover:shadow-lg hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"
+              className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-md shadow-brand-teal-200 text-sm font-bold text-white bg-brand-teal-600 hover:bg-brand-teal-700 hover:shadow-lg hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-teal-500 transition-all duration-200"
             >
               Send Message
             </button>

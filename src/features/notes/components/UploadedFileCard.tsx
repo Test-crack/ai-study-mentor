@@ -101,7 +101,7 @@ export default function UploadedFileCard({
             <Button
               onClick={onGenerateStandardNotes}
               disabled={isGeneratingStandard}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 h-auto py-3 sm:py-4 flex flex-col items-start gap-1 disabled:opacity-70 text-left"
+              className="bg-gradient-to-r from-brand-blue-500 to-pink-500 hover:from-brand-blue-600 hover:to-pink-600 h-auto py-3 sm:py-4 flex flex-col items-start gap-1 disabled:opacity-70 text-left"
             >
               <div className="flex items-center gap-2">
                 {isGeneratingStandard ? (
@@ -119,7 +119,7 @@ export default function UploadedFileCard({
             <Button
               onClick={onGenerateDeepDive}
               disabled={isGeneratingDeepDive}
-              className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 h-auto py-3 sm:py-4 flex flex-col items-start gap-1 disabled:opacity-70 text-left"
+              className="bg-gradient-to-r from-brand-teal-500 to-brand-blue-500 hover:from-brand-teal-600 hover:to-brand-blue-600 h-auto py-3 sm:py-4 flex flex-col items-start gap-1 disabled:opacity-70 text-left"
             >
               <div className="flex items-center gap-2">
                 {isGeneratingDeepDive ? (

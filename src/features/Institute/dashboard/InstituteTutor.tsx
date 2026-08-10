@@ -31,12 +31,12 @@ interface TutorView {
 
 function TutorCard({ tutor, onRemove }: { tutor: TutorView; onRemove: () => void }) {
   return (
-    <div className="rounded-2xl bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-indigo-300/70 dark:hover:border-indigo-500/40 transition-all overflow-hidden">
+    <div className="rounded-2xl bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-brand-teal-300/70 dark:hover:border-brand-teal-500/40 transition-all overflow-hidden">
       <div className="p-5">
         <div className="flex items-start gap-3">
           <Avatar className="h-11 w-11 shrink-0">
             <AvatarImage src={tutor.avatar ?? ""} />
-            <AvatarFallback className="bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-bold">
+            <AvatarFallback className="bg-brand-teal-100 dark:bg-brand-teal-500/20 text-brand-teal-700 dark:text-brand-teal-300 font-bold">
               {(tutor.name ?? tutor.email).slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -44,7 +44,7 @@ function TutorCard({ tutor, onRemove }: { tutor: TutorView; onRemove: () => void
             <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{tutor.name ?? tutor.email}</p>
             <p className="text-xs text-slate-400 truncate">{tutor.email}</p>
             {tutor.specialization && (
-              <span className="inline-flex mt-1.5 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-2 py-0.5 rounded-lg">
+              <span className="inline-flex mt-1.5 text-[11px] font-bold text-brand-teal-600 dark:text-brand-teal-400 bg-brand-teal-50 dark:bg-brand-teal-500/10 px-2 py-0.5 rounded-lg">
                 {tutor.specialization}
               </span>
             )}
@@ -162,7 +162,7 @@ export default function InstituteTutor() {
         </div>
         <button
           onClick={() => navigate("/institute-admin/tutorOnboarding")}
-          className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition-colors shadow-sm self-start sm:self-auto"
+          className="inline-flex items-center gap-2 bg-brand-teal-600 hover:bg-brand-teal-700 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition-colors shadow-sm self-start sm:self-auto"
         >
           <GraduationCap className="h-4 w-4" /> Onboard Tutor
         </button>
@@ -188,7 +188,7 @@ export default function InstituteTutor() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, email or specialization…"
-              className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-white/[0.04] border border-slate-200/70 dark:border-white/[0.06] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm font-medium text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
+              className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-white/[0.04] border border-slate-200/70 dark:border-white/[0.06] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 transition-all text-sm font-medium text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
             />
           </div>
 
@@ -199,7 +199,7 @@ export default function InstituteTutor() {
                 hint={search ? "Try a different name or specialization." : "Onboard your first tutor to get started."}
                 action={!search ? (
                   <button onClick={() => navigate("/institute-admin/tutorOnboarding")}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+                    className="inline-flex items-center gap-1 text-xs font-bold text-brand-teal-600 dark:text-brand-teal-400 hover:underline">
                     Go to Tutor Onboarding <ChevronRight className="h-3.5 w-3.5" />
                   </button>
                 ) : undefined}

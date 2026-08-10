@@ -10,8 +10,8 @@ export const StudentHero = ({ name }: StudentHeroProps) => {
   return (
     <div className="relative overflow-hidden rounded-3xl bg-slate-900 dark:bg-slate-950 text-white p-8 sm:p-10 shadow-xl border border-slate-800">
       {/* Abstract Background Shapes */}
-      <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob dark:opacity-10"></div>
-      <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000 dark:opacity-10"></div>
+      <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-brand-teal-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob dark:opacity-10"></div>
+      <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-brand-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000 dark:opacity-10"></div>
       
       <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
@@ -19,7 +19,7 @@ export const StudentHero = ({ name }: StudentHeroProps) => {
             {currentDate}
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold mb-3 tracking-tight text-white">
-            Welcome back, <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">{name}</span>!
+            Welcome back, <span className="bg-gradient-to-r from-brand-teal-400 to-brand-blue-400 bg-clip-text text-transparent">{name}</span>!
           </h1>
           <p className="text-slate-300 max-w-lg text-lg leading-relaxed">
             You've got <span className="text-white font-semibold">4 pending assignments</span> and <span className="text-white font-semibold">2 upcoming classes</span> this week. Stay focused!

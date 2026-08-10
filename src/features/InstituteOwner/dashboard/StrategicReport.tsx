@@ -18,7 +18,7 @@ const availableReports = [
     id: 1,
     title: "Monthly Performance Summary",
     tag: "Performance",
-    tagColor: "text-purple-400 bg-purple-500/10 border-purple-500/20",
+    tagColor: "text-brand-blue-400 bg-brand-blue-500/10 border-brand-blue-500/20",
     description: "Comprehensive overview of all batches, tutors, and student outcomes for the month",
     lastGenerated: "Feb 15, 2025",
     frequency: "Monthly"
@@ -152,7 +152,7 @@ export default function StrategicReport() {
                     <button className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-gray-800 rounded-lg transition-colors">
                       <Download size={16} /> PDF
                     </button>
-                    <button className="px-5 py-2 text-sm font-medium text-white bg-indigo-600 dark:bg-[#5A32FA] hover:bg-indigo-700 dark:hover:bg-[#4a26d9] rounded-lg transition-colors shadow-sm">
+                    <button className="px-5 py-2 text-sm font-medium text-white bg-brand-teal-600 dark:bg-[#12897C] hover:bg-brand-teal-700 dark:hover:bg-[#087F73] rounded-lg transition-colors shadow-sm">
                       Generate
                     </button>
                   </div>

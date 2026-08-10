@@ -29,7 +29,7 @@ const latencyData = [
 const analysisData = {
   user: 'Arjun Mehta',
   scores: {
-    score: { value: '62%', label: 'SCORE', icon: Activity, color: 'text-purple-600' },
+    score: { value: '62%', label: 'SCORE', icon: Activity, color: 'text-brand-blue-600' },
     confidence: { value: '68 dB', label: 'CONFIDENCE', icon: Volume2, color: 'text-blue-500' },
     pitch: { value: '41%', label: 'PITCH', icon: Activity, color: 'text-orange-500' },
     latency: { value: '1.8s', label: 'LATENCY', icon: Clock, color: 'text-red-500' },
@@ -73,12 +73,12 @@ const SpeakingPractice = () => {
           <div className="flex justify-between items-start mb-8">
             <div>
               <div className="flex items-center space-x-2">
-                <Mic className="w-8 h-8 text-purple-600" />
+                <Mic className="w-8 h-8 text-brand-blue-600" />
                 <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Speech Anatomy</h1>
               </div>
               <p className="text-slate-500 dark:text-slate-400 mt-1">Analysis for {analysisData.user}</p>
             </div>
-            <button className="flex items-center px-6 py-2.5 bg-purple-600 text-white font-bold rounded-xl hover:bg-purple-700 shadow-lg shadow-purple-600/20 transition-all active:scale-95">
+            <button className="flex items-center px-6 py-2.5 bg-brand-blue-600 text-white font-bold rounded-xl hover:bg-brand-blue-700 shadow-lg shadow-brand-blue-600/20 transition-all active:scale-95">
               <Mic className="w-5 h-5 mr-2" />
               Start Mic
             </button>

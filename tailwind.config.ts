@@ -22,7 +22,98 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				// Marketing site type. Loaded via Google Fonts in index.html.
+				manrope: ['Manrope', 'sans-serif'],
+				plex: ['"IBM Plex Sans"', 'sans-serif'],
+				jetbrains: ['"JetBrains Mono"', 'monospace'],
+			},
 			colors: {
+				/**
+				 * TestCrack brand palette — deep ink + action teal.
+				 * Replaces the previous indigo/purple scheme across the marketing
+				 * site. Scoped under `brand` so it does not disturb the shadcn
+				 * HSL tokens used by the authenticated app.
+				 */
+				brand: {
+					/**
+					 * Action teal. 50–950 ramp so the app-wide sweep can map
+					 * indigo-N -> brand-teal-N shade-for-shade and keep every
+					 * existing light/dark relationship intact.
+					 * 600 is the primary action colour; 700 its hover.
+					 */
+					/**
+					 * Vivid mint — the hero's bright accent. Nothing in the existing
+					 * ramp is saturated enough for it; revert to `teal-300` to drop it.
+					 */
+					mint: '#2EE8A6',
+					teal: {
+						DEFAULT: '#087F73',   // primary action
+						dark: '#0A6E64',      // hover
+						soft: '#7FBFB6',      // accents on dark
+						mute: '#B5D6D1',
+						tint: '#D6E7E4',      // badge / icon backgrounds
+						wash: '#EAF3F1',      // lightest fill
+						50: '#F0F7F5',
+						100: '#D6E7E4',
+						200: '#B0D4CE',
+						300: '#7FBFB6',
+						400: '#3E9E93',
+						500: '#12897C',
+						600: '#087F73',
+						700: '#0A6E64',
+						800: '#0C574F',
+						900: '#0E463F',
+						950: '#0E1F2B',
+					},
+					/**
+					 * Academic blue. purple/violet map here rather than onto teal,
+					 * so existing two-tone gradients keep a visible hue shift.
+					 */
+					blue: {
+						DEFAULT: '#185A78',   // secondary data accent
+						tint: '#E6EFF2',
+						50: '#F1F6F8',
+						100: '#DCE9EE',
+						200: '#BBD3DD',
+						300: '#8FB6C7',
+						400: '#4E8CA6',
+						500: '#256B8B',
+						600: '#185A78',
+						700: '#154B64',
+						800: '#133D52',
+						900: '#122F3F',
+						950: '#0E1F2B',
+					},
+					ink: {
+						DEFAULT: '#142B3A',   // headings, CTA block
+						deep: '#0E1F2B',      // footer
+					},
+					warm: {
+						DEFAULT: '#E8753D',   // risk / attention
+						tint: '#FDEEE6',
+					},
+					line: '#D8E0E2',
+					'on-ink': '#B7C4C9',    // body copy on dark
+					'on-ink-mute': '#8FA0A8',
+					// light chapters + body text
+					bg: '#F6F7F3',
+					'bg-alt': '#EAF0EF',
+					text: '#17232B',
+					'text-mute': '#5E6B73',
+					'on-ink-nav': '#C3CFD4',
+					'on-ink-feature': '#E6ECEE',
+					// hairline borders/dividers on ink
+					'line-09': 'rgba(246,247,243,0.09)',
+					'line-12': 'rgba(246,247,243,0.12)',
+					'line-14': 'rgba(246,247,243,0.14)',
+					'line-16': 'rgba(246,247,243,0.16)',
+					'line-20': 'rgba(246,247,243,0.20)',
+					'line-25': 'rgba(246,247,243,0.25)',
+					'line-35': 'rgba(246,247,243,0.35)',
+					'line-60': 'rgba(246,247,243,0.60)',
+					'wash-06': 'rgba(246,247,243,0.06)',
+				},
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',

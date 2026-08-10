@@ -129,7 +129,7 @@ export default function InstituteBillings() {
             
             {/* Header Section */}
             <div className="text-center max-w-3xl mx-auto space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400 text-xs font-bold tracking-wider uppercase mb-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-teal-100 text-brand-teal-700 dark:bg-brand-teal-500/10 dark:text-brand-teal-400 text-xs font-bold tracking-wider uppercase mb-2">
                 <Building2 className="w-3.5 h-3.5" /> For Institutes & Universities
               </div>
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
@@ -156,7 +156,7 @@ export default function InstituteBillings() {
                 <div className="space-y-4 mb-8 flex-1">
                   {perStudentFeatures.map((feature, idx) => (
                     <div key={idx} className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                      <CheckCircle2 className="w-5 h-5 text-brand-teal-600 dark:text-brand-teal-400 shrink-0" />
                       <span className="text-sm text-slate-700 dark:text-slate-300">{feature}</span>
                     </div>
                   ))}
@@ -167,8 +167,8 @@ export default function InstituteBillings() {
               </div>
 
               {/* Institute Pro Card */}
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-indigo-600 dark:border-indigo-500 p-8 shadow-xl relative flex flex-col transition-colors">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-indigo-600 text-white px-4 py-1 rounded-full text-xs font-bold tracking-wider flex items-center gap-1.5 shadow-sm">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-brand-teal-600 dark:border-brand-teal-500 p-8 shadow-xl relative flex flex-col transition-colors">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-brand-teal-600 text-white px-4 py-1 rounded-full text-xs font-bold tracking-wider flex items-center gap-1.5 shadow-sm">
                   <Sparkles className="w-3.5 h-3.5" /> Most Popular
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 mt-2">Institute Pro</h3>
@@ -182,12 +182,12 @@ export default function InstituteBillings() {
                 <div className="space-y-4 mb-8 flex-1">
                   {proFeatures.map((feature, idx) => (
                     <div key={idx} className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                      <CheckCircle2 className="w-5 h-5 text-brand-teal-600 dark:text-brand-teal-400 shrink-0" />
                       <span className="text-sm text-slate-700 dark:text-slate-300 font-medium">{feature}</span>
                     </div>
                   ))}
                 </div>
-                <button className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-colors shadow-md shadow-indigo-600/20">
+                <button className="w-full py-3.5 px-4 bg-brand-teal-600 hover:bg-brand-teal-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-colors shadow-md shadow-brand-teal-600/20">
                   Contact Sales <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -205,7 +205,7 @@ export default function InstituteBillings() {
               <div className="mb-12">
                 <div className="flex justify-between items-center mb-4">
                   <label className="font-semibold text-slate-700 dark:text-slate-300">Number of Students</label>
-                  <span className="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 font-bold px-3 py-1 rounded-lg border border-indigo-100 dark:border-indigo-500/20">
+                  <span className="bg-brand-teal-50 dark:bg-brand-teal-500/10 text-brand-teal-700 dark:text-brand-teal-400 font-bold px-3 py-1 rounded-lg border border-brand-teal-100 dark:border-brand-teal-500/20">
                     {studentCount}
                   </span>
                 </div>
@@ -216,7 +216,7 @@ export default function InstituteBillings() {
                   step="5"
                   value={studentCount} 
                   onChange={(e) => setStudentCount(parseInt(e.target.value))}
-                  className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                  className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-brand-teal-600"
                 />
                 <div className="flex justify-between text-xs text-slate-400 mt-2 font-medium">
                   <span>10</span>
@@ -233,9 +233,9 @@ export default function InstituteBillings() {
                   <p className="text-xs text-slate-500 mt-1">/month</p>
                 </div>
 
-                <div className={`p-6 rounded-xl border ${savings > 0 ? 'bg-indigo-50 border-indigo-200 dark:bg-indigo-900/20 dark:border-indigo-800/50' : 'bg-slate-50 border-slate-100 dark:bg-slate-800/50 dark:border-slate-800'} relative`}>
+                <div className={`p-6 rounded-xl border ${savings > 0 ? 'bg-brand-teal-50 border-brand-teal-200 dark:bg-brand-teal-900/20 dark:border-brand-teal-800/50' : 'bg-slate-50 border-slate-100 dark:bg-slate-800/50 dark:border-slate-800'} relative`}>
                   {savings > 0 && (
-                    <div className="absolute -top-3 left-4 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <div className="absolute -top-3 left-4 bg-brand-teal-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" /> Best value for you
                     </div>
                   )}
@@ -269,25 +269,25 @@ export default function InstituteBillings() {
                         <td className="py-3">Small Coaching Center (30)</td>
                         <td className="py-3">₹75,000</td>
                         <td className="py-3">₹65,000</td>
-                        <td className="py-3 font-semibold text-indigo-600 dark:text-indigo-400">Pro</td>
+                        <td className="py-3 font-semibold text-brand-teal-600 dark:text-brand-teal-400">Pro</td>
                       </tr>
                       <tr>
                         <td className="py-3">Mid-size Institute (100)</td>
                         <td className="py-3">₹2,50,000</td>
                         <td className="py-3">₹1,00,000</td>
-                        <td className="py-3 font-semibold text-indigo-600 dark:text-indigo-400">Pro</td>
+                        <td className="py-3 font-semibold text-brand-teal-600 dark:text-brand-teal-400">Pro</td>
                       </tr>
                       <tr>
                         <td className="py-3">University Department (300)</td>
                         <td className="py-3">₹7,50,000</td>
                         <td className="py-3">₹2,00,000</td>
-                        <td className="py-3 font-semibold text-indigo-600 dark:text-indigo-400">Pro</td>
+                        <td className="py-3 font-semibold text-brand-teal-600 dark:text-brand-teal-400">Pro</td>
                       </tr>
                       <tr>
                         <td className="py-3">Large University (500)</td>
                         <td className="py-3">₹12,50,000</td>
                         <td className="py-3">₹3,00,000</td>
-                        <td className="py-3 font-semibold text-indigo-600 dark:text-indigo-400">Pro</td>
+                        <td className="py-3 font-semibold text-brand-teal-600 dark:text-brand-teal-400">Pro</td>
                       </tr>
                     </tbody>
                   </table>
@@ -301,8 +301,8 @@ export default function InstituteBillings() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {featuresGrid.map((feat, idx) => (
                   <div key={idx} className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                    <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-500/10 rounded-lg flex items-center justify-center mb-4 border border-indigo-100 dark:border-indigo-500/20">
-                      <feat.icon className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                    <div className="w-12 h-12 bg-brand-teal-50 dark:bg-brand-teal-500/10 rounded-lg flex items-center justify-center mb-4 border border-brand-teal-100 dark:border-brand-teal-500/20">
+                      <feat.icon className="w-6 h-6 text-brand-teal-600 dark:text-brand-teal-400" />
                     </div>
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{feat.title}</h3>
                     <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{feat.desc}</p>

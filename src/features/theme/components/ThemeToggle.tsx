@@ -12,7 +12,7 @@ export function ThemeToggle() {
         id="theme-mode"
         checked={theme === "dark"}
         onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
-        className="data-[state=checked]:bg-indigo-600"
+        className="data-[state=checked]:bg-brand-teal-600"
       />
       <Label htmlFor="theme-mode" className="sr-only">Toggle theme</Label>
       {theme === "dark" ? (

@@ -94,11 +94,11 @@ export default function VoiceLab() {
 function HomeView({ onNavigate }: { onNavigate: (v: ViewState) => void }) {
   return (
     <div className="max-w-4xl animate-in fade-in duration-500">
-      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#8a42f5]/10 text-[#8a42f5] dark:text-[#a874f7] text-xs font-semibold tracking-wide mb-8">
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#256B8B]/10 text-[#256B8B] dark:text-[#4E8CA6] text-xs font-semibold tracking-wide mb-8">
         <Activity size={14} /> Voice Analysis Lab
       </div>
       <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-[#0b132b] dark:text-white">
-        Improve Your <span className="text-[#4338ca] dark:text-[#4338ca]">Vocal Delivery</span>
+        Improve Your <span className="text-[#0A6E64] dark:text-[#0A6E64]">Vocal Delivery</span>
       </h1>
       <p className="text-slate-500 dark:text-slate-400 text-lg mb-10 max-w-2xl">
         Practice your speaking skills with two focused tools. Work on pitch and rhythm, or analyze your fluency and filler words.
@@ -106,8 +106,8 @@ function HomeView({ onNavigate }: { onNavigate: (v: ViewState) => void }) {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
   {/* Vocal Resonance Card */}
-<div className="bg-indigo-100 dark:bg-slate-900 rounded-2xl p-8 shadow-sm border-none flex flex-col items-start gap-6 hover:shadow-md transition-shadow">
-  <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-xl">
+<div className="bg-brand-teal-100 dark:bg-slate-900 rounded-2xl p-8 shadow-sm border-none flex flex-col items-start gap-6 hover:shadow-md transition-shadow">
+  <div className="p-3 bg-brand-teal-50 dark:bg-brand-teal-900/20 text-brand-teal-600 dark:text-brand-teal-400 rounded-xl">
     <Radio size={24} />
   </div>
   <div>
@@ -116,15 +116,15 @@ function HomeView({ onNavigate }: { onNavigate: (v: ViewState) => void }) {
   </div>
   <button
     onClick={() => onNavigate('resonance')}
-    className="mt-auto bg-indigo-700 hover:bg-indigo-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-indigo-700 px-6 py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 w-full"
+    className="mt-auto bg-brand-teal-700 hover:bg-brand-teal-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-brand-teal-700 px-6 py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 w-full"
   >
     <Play size={16} fill="currentColor" /> Start Resonance Practice
   </button>
 </div>
 
 {/* Speech Anatomy Card */}
-<div className="bg-indigo-100 dark:bg-slate-900 rounded-2xl p-8 shadow-sm border-none flex flex-col items-start gap-6 hover:shadow-md transition-shadow">
-  <div className="p-3 bg-[#f5f0ff] dark:bg-[#8a42f5]/20 text-[#8a42f5] dark:text-[#a874f7] rounded-xl">
+<div className="bg-brand-teal-100 dark:bg-slate-900 rounded-2xl p-8 shadow-sm border-none flex flex-col items-start gap-6 hover:shadow-md transition-shadow">
+  <div className="p-3 bg-[#f5f0ff] dark:bg-[#256B8B]/20 text-[#256B8B] dark:text-[#4E8CA6] rounded-xl">
     <Scissors size={24} />
   </div>
   <div>
@@ -133,7 +133,7 @@ function HomeView({ onNavigate }: { onNavigate: (v: ViewState) => void }) {
   </div>
   <button
     onClick={() => onNavigate('anatomy')}
-    className="mt-auto bg-indigo-700 hover:bg-indigo-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-indigo-700 px-6 py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 w-full"
+    className="mt-auto bg-brand-teal-700 hover:bg-brand-teal-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-brand-teal-700 px-6 py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 w-full"
   >
     <Scissors size={16} /> Start Speech Anatomy
   </button>
@@ -397,7 +397,7 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
               <button
                 onClick={() => loadPrompt(selectedBand, seenPromptIdsRef.current)}
                 disabled={isLoadingPrompt || !prompt}
-                className="text-xs font-semibold text-[#8a42f5] dark:text-[#a874f7] hover:underline flex items-center gap-1 disabled:opacity-50"
+                className="text-xs font-semibold text-[#256B8B] dark:text-[#4E8CA6] hover:underline flex items-center gap-1 disabled:opacity-50"
               >
                 {isLoadingPrompt ? <Loader2 size={12} className="animate-spin" /> : <RotateCcw size={12} />} Refresh
               </button>
@@ -435,7 +435,7 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
             className={cn(
               'flex items-center justify-center gap-2 w-full py-4 rounded-xl font-semibold text-base transition-colors mt-2',
               prompt && !isLoadingPrompt
-                ? 'bg-[#8a42f5] hover:bg-[#7b3be6] text-white'
+                ? 'bg-[#256B8B] hover:bg-[#185A78] text-white'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
             )}
           >
@@ -491,7 +491,7 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
                 <WordPill key={i} word={w.word} status={w.status} />
               ))}
               {isListening && dissectedWords.length > 0 && (
-                <span className="animate-pulse border-r-2 border-[#8a42f5] h-5 self-center ml-1" />
+                <span className="animate-pulse border-r-2 border-[#256B8B] h-5 self-center ml-1" />
               )}
             </div>
           </div>
@@ -519,7 +519,7 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
         <div className="flex flex-col gap-6 animate-in fade-in flex items-center mt-4 w-full">
 
           <div className="text-center space-y-2 mb-4 w-full">
-            <div className="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-full bg-[#f5f0ff] dark:bg-[#8a42f5]/10 text-[#8a42f5] dark:text-[#a874f7] text-[10px] font-bold uppercase tracking-widest mb-2">
+            <div className="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-full bg-[#f5f0ff] dark:bg-[#256B8B]/10 text-[#256B8B] dark:text-[#4E8CA6] text-[10px] font-bold uppercase tracking-widest mb-2">
               <Activity size={12} /> Analysis Complete
             </div>
             <h2 className="text-3xl font-extrabold text-[#0b132b] dark:text-white">Speech Anatomy Results</h2>
@@ -595,7 +595,7 @@ function AnatomyView({ onExit, onNavigate }: { onExit: () => void; onNavigate: (
             </button>
             <button
               onClick={onExit}
-              className="flex-1 h-14 rounded-2xl font-bold bg-[#8a42f5] text-white hover:bg-[#7b3be6] transition-colors"
+              className="flex-1 h-14 rounded-2xl font-bold bg-[#256B8B] text-white hover:bg-[#185A78] transition-colors"
             >
               Back to Dashboard
             </button>
@@ -711,7 +711,7 @@ function ResonanceView({ onExit, onNavigate }: { onExit: () => void, onNavigate:
           <button
             onClick={() => loadPrompt(selectedBand, seenPromptIdsRef.current)}
             disabled={isLoadingPrompt || isListening}
-            className="text-xs font-semibold text-[#8a42f5] dark:text-[#a874f7] hover:underline flex items-center gap-1 disabled:opacity-50"
+            className="text-xs font-semibold text-[#256B8B] dark:text-[#4E8CA6] hover:underline flex items-center gap-1 disabled:opacity-50"
           >
             {isLoadingPrompt ? <Loader2 size={12} className="animate-spin" /> : <RotateCcw size={12} />} Refresh
           </button>
@@ -737,8 +737,8 @@ function ResonanceView({ onExit, onNavigate }: { onExit: () => void, onNavigate:
       {/* Live metrics strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {([
-          { label: 'Pitch',     value: metrics.pitch,     sub: `${metrics.pitchHz}Hz`,     color: 'text-violet-500' },
-          { label: 'Resonance', value: metrics.resonance, sub: `${metrics.centroidHz}Hz`,  color: 'text-indigo-500' },
+          { label: 'Pitch',     value: metrics.pitch,     sub: `${metrics.pitchHz}Hz`,     color: 'text-brand-blue-500' },
+          { label: 'Resonance', value: metrics.resonance, sub: `${metrics.centroidHz}Hz`,  color: 'text-brand-teal-500' },
           { label: 'Stress',    value: metrics.stress,    sub: 'dynamics',                 color: 'text-pink-500' },
           { label: 'Tempo',     value: metrics.tempo,     sub: 'rhythm',                   color: 'text-cyan-500' },
         ] as const).map(m => (
@@ -775,9 +775,9 @@ function ResonanceView({ onExit, onNavigate }: { onExit: () => void, onNavigate:
 
       {/* Overall score pulse */}
       {isListening && (
-        <div className="flex items-center justify-between bg-[#f5f0ff] dark:bg-[#8a42f5]/10 border border-[#8a42f5]/20 rounded-xl px-6 py-4">
-          <span className="text-sm font-semibold text-[#8a42f5] dark:text-[#a874f7]">Live Score</span>
-          <span className="text-2xl font-bold text-[#8a42f5] dark:text-[#a874f7]">{metrics.overall}%</span>
+        <div className="flex items-center justify-between bg-[#f5f0ff] dark:bg-[#256B8B]/10 border border-[#256B8B]/20 rounded-xl px-6 py-4">
+          <span className="text-sm font-semibold text-[#256B8B] dark:text-[#4E8CA6]">Live Score</span>
+          <span className="text-2xl font-bold text-[#256B8B] dark:text-[#4E8CA6]">{metrics.overall}%</span>
         </div>
       )}
 
@@ -790,7 +790,7 @@ function ResonanceView({ onExit, onNavigate }: { onExit: () => void, onNavigate:
             'flex items-center justify-center gap-2 w-full py-4 rounded-xl font-semibold text-base transition-colors mt-2 disabled:opacity-50 disabled:cursor-not-allowed',
             isListening
               ? 'bg-rose-500 hover:bg-rose-600 text-white'
-              : 'bg-[#8a42f5] hover:bg-[#7b3be6] text-white'
+              : 'bg-[#256B8B] hover:bg-[#185A78] text-white'
           )}
         >
           {isListening
@@ -810,7 +810,7 @@ function ResonanceView({ onExit, onNavigate }: { onExit: () => void, onNavigate:
           {/* Overall big score */}
           <div className="bg-white dark:bg-slate-900 border-none rounded-2xl p-8 text-center shadow-sm">
             <div className="text-sm font-medium text-slate-500 mb-2">Overall Score</div>
-            <div className="text-5xl font-black text-[#8a42f5] dark:text-[#a874f7] mb-2">{finalResults.overall}%</div>
+            <div className="text-5xl font-black text-[#256B8B] dark:text-[#4E8CA6] mb-2">{finalResults.overall}%</div>
             <div className="text-lg font-medium text-slate-700 dark:text-slate-300">Grade {grade(finalResults.overall)}</div>
           </div>
 
@@ -836,7 +836,7 @@ function ResonanceView({ onExit, onNavigate }: { onExit: () => void, onNavigate:
             </button>
             <button
               onClick={onExit}
-              className="flex-1 py-4 rounded-xl font-semibold bg-[#8a42f5] text-white hover:bg-[#7b3be6] transition-colors"
+              className="flex-1 py-4 rounded-xl font-semibold bg-[#256B8B] text-white hover:bg-[#185A78] transition-colors"
             >
               Back to Dashboard
             </button>
@@ -908,7 +908,7 @@ function DarkWordPill({ word, status }: { word: string; status: WordStatus }) {
 
 
 function LiveStatCard({ label, value, good, bad }: { label: string; value: number; good?: boolean; bad?: boolean }) {
-  const color = bad ? 'text-rose-500' : good ? 'text-emerald-500' : 'text-[#8a42f5] dark:text-[#a874f7]';
+  const color = bad ? 'text-rose-500' : good ? 'text-emerald-500' : 'text-[#256B8B] dark:text-[#4E8CA6]';
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border-none shadow-sm flex flex-col items-center justify-center">
       <div className={`text-2xl font-bold mb-1 ${color}`}>{value}</div>
@@ -919,7 +919,7 @@ function LiveStatCard({ label, value, good, bad }: { label: string; value: numbe
 
 function ScoreRing({ label, sublabel, score, color }: { label: string; sublabel?: string; score: number; color: 'purple' | 'blue' | 'green' }) {
   const colorMap = {
-    purple: { text: 'text-[#8a42f5] dark:text-[#a874f7]', ring: '#8a42f5' },
+    purple: { text: 'text-[#256B8B] dark:text-[#4E8CA6]', ring: '#256B8B' },
     blue:   { text: 'text-[#3b82f6] dark:text-[#60a5fa]', ring: '#3b82f6' }, 
     green:  { text: 'text-[#10b981] dark:text-[#34d399]', ring: '#10b981' },
   }[color];

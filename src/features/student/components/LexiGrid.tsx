@@ -538,7 +538,7 @@ const saveState = (index: number, tries: number, guess: string, score: number, s
     return (
       <div className="min-h-screen bg-[#07070a] flex items-center justify-center font-sans text-white">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
+          <Loader2 className="w-10 h-10 text-brand-teal-500 animate-spin" />
           <p className="text-slate-400 font-bold tracking-widest uppercase text-sm">Loading Today's Challenge...</p>
         </div>
       </div>
@@ -554,7 +554,7 @@ const saveState = (index: number, tries: number, guess: string, score: number, s
   const showSkipGate  = isGateMode && gameStatus !== 'completed_day';
 
   return (
-    <div className="min-h-screen bg-[#07070a] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-950/20 via-[#07070a] to-[#07070a] font-sans text-white flex flex-col selection:bg-indigo-500/30 overflow-x-hidden relative">
+    <div className="min-h-screen bg-[#07070a] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-teal-950/20 via-[#07070a] to-[#07070a] font-sans text-white flex flex-col selection:bg-brand-teal-500/30 overflow-x-hidden relative">
 
       {/* ── INTRO OVERLAY ── */}
       {introStage !== 'done' && (
@@ -562,7 +562,7 @@ const saveState = (index: number, tries: number, guess: string, score: number, s
           <div className="absolute inset-0 pointer-events-none">
             {introWordConfigs.map((config, i) => (
               <div key={i}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-indigo-400/20 font-black text-xl md:text-3xl uppercase whitespace-nowrap mix-blend-screen"
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-brand-teal-400/20 font-black text-xl md:text-3xl uppercase whitespace-nowrap mix-blend-screen"
                 style={{
                   animation: `flyToCenter 1.4s cubic-bezier(0.2,0,0.8,1) ${config.delay}s forwards`,
                   '--startX': `${config.startX}px`,
@@ -574,7 +574,7 @@ const saveState = (index: number, tries: number, guess: string, score: number, s
               </div>
             ))}
           </div>
-          <h1 className="relative z-10 text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 tracking-[0.2em] uppercase drop-shadow-[0_0_40px_rgba(129,140,248,0.6)] animate-[logoPop_1s_ease-out_1s_both]">
+          <h1 className="relative z-10 text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-brand-teal-400 to-brand-blue-400 tracking-[0.2em] uppercase drop-shadow-[0_0_40px_rgba(129,140,248,0.6)] animate-[logoPop_1s_ease-out_1s_both]">
             LexiGrid
           </h1>
         </div>
@@ -625,13 +625,13 @@ const saveState = (index: number, tries: number, guess: string, score: number, s
           <span className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border ${
             isGateMode
               ? 'bg-teal-500/20 text-teal-300 border-teal-500/30'
-              : 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
+              : 'bg-brand-teal-500/20 text-brand-teal-300 border-brand-teal-500/30'
           }`}>
             {isGateMode ? 'Gate Mode' : 'Practice Mode'}
           </span>
-          <div className="flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 px-4 py-2 rounded-full shadow-lg shadow-indigo-500/5">
+          <div className="flex items-center gap-2 bg-brand-teal-500/10 border border-brand-teal-500/20 px-4 py-2 rounded-full shadow-lg shadow-brand-teal-500/5">
             <Zap className="w-4 h-4 text-amber-400 fill-amber-400" />
-            <span className="font-black text-indigo-50 text-lg">{localMomentum}</span>
+            <span className="font-black text-brand-teal-50 text-lg">{localMomentum}</span>
           </div>
         </div>
       </header>
@@ -652,8 +652,8 @@ const saveState = (index: number, tries: number, guess: string, score: number, s
               {isPracticeMode ? (
                 /* ── Practice Round Complete ── */
                 <>
-                  <div className="w-20 h-20 bg-indigo-500/20 rounded-full flex items-center justify-center mb-6 ring-8 ring-indigo-500/10">
-                    <Award className="w-10 h-10 text-indigo-400" />
+                  <div className="w-20 h-20 bg-brand-teal-500/20 rounded-full flex items-center justify-center mb-6 ring-8 ring-brand-teal-500/10">
+                    <Award className="w-10 h-10 text-brand-teal-400" />
                   </div>
                   <h2 className="text-3xl font-black mb-2 text-white">Practice Round Complete</h2>
                   <p className="text-slate-400 mb-8 font-medium">
@@ -667,13 +667,13 @@ const saveState = (index: number, tries: number, guess: string, score: number, s
                     <div className="w-px bg-white/10" />
                     <div>
                       <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Mode</p>
-                      <p className="text-lg font-black text-indigo-400 mt-2">Practice</p>
+                      <p className="text-lg font-black text-brand-teal-400 mt-2">Practice</p>
                     </div>
                   </div>
                   <button
                     onClick={loadFreshWords}
                     disabled={isInitializing}
-                    className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-lg py-4 rounded-2xl transition-all shadow-lg hover:shadow-indigo-500/25 active:scale-[0.98] mb-3"
+                    className="w-full bg-brand-teal-600 hover:bg-brand-teal-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-lg py-4 rounded-2xl transition-all shadow-lg hover:shadow-brand-teal-500/25 active:scale-[0.98] mb-3"
                   >
                     Play Another Round
                   </button>
@@ -710,7 +710,7 @@ const saveState = (index: number, tries: number, guess: string, score: number, s
                   )}
                   <button
                     onClick={() => navigate('/student/dashboard', { state: { lexigridCompleted: true } })}
-                    className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-lg py-4 rounded-2xl transition-all shadow-lg hover:shadow-indigo-500/25 active:scale-[0.98] mb-3"
+                    className="w-full bg-brand-teal-600 hover:bg-brand-teal-500 text-white font-bold text-lg py-4 rounded-2xl transition-all shadow-lg hover:shadow-brand-teal-500/25 active:scale-[0.98] mb-3"
                   >
                     Return to Dashboard
                   </button>
@@ -736,7 +736,7 @@ const saveState = (index: number, tries: number, guess: string, score: number, s
                     <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">{Math.max(0, triesLeft)} attempts left</span>
                     <div className="flex gap-1.5 ml-1">
                       {Array.from({ length: MAX_TRIES }).map((_, i) => (
-                        <div key={i} className={`w-2 h-2 rounded-full transition-colors duration-300 ${i < triesLeft ? 'bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.5)]' : 'bg-slate-700'}`} />
+                        <div key={i} className={`w-2 h-2 rounded-full transition-colors duration-300 ${i < triesLeft ? 'bg-brand-teal-400 shadow-[0_0_8px_rgba(129,140,248,0.5)]' : 'bg-slate-700'}`} />
                       ))}
                     </div>
                   </div>
@@ -749,7 +749,7 @@ const saveState = (index: number, tries: number, guess: string, score: number, s
 
                 <button
                   onClick={() => setShowHint(true)}
-                  className={`inline-flex items-center gap-2 text-sm font-bold transition-all ${showHint ? 'text-amber-400' : 'text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 px-4 py-2 rounded-full border border-indigo-500/20'}`}
+                  className={`inline-flex items-center gap-2 text-sm font-bold transition-all ${showHint ? 'text-amber-400' : 'text-brand-teal-400 hover:text-brand-teal-300 bg-brand-teal-500/10 px-4 py-2 rounded-full border border-brand-teal-500/20'}`}
                 >
                   <Lightbulb className="w-4 h-4 shrink-0" />
                   <span>{showHint ? currentWordObj?.hint : 'Reveal Context Hint'}</span>
@@ -764,7 +764,7 @@ const saveState = (index: number, tries: number, guess: string, score: number, s
                     let bgColor  = 'bg-slate-900/80 border-slate-700/50 shadow-inner';
                     if (isErrorShake)             bgColor = 'bg-rose-500/20 border-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.3)]';
                     else if (gameStatus === 'won') bgColor = 'bg-emerald-500/20 border-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)]';
-                    else if (letter)              bgColor = 'bg-indigo-500/20 border-indigo-400 shadow-[0_0_15px_rgba(129,140,248,0.2)]';
+                    else if (letter)              bgColor = 'bg-brand-teal-500/20 border-brand-teal-400 shadow-[0_0_15px_rgba(129,140,248,0.2)]';
                     return (
                       <div key={colIndex} className={`flex-1 max-w-[4rem] aspect-[4/5] flex items-center justify-center text-2xl sm:text-4xl font-black uppercase border-2 rounded-xl sm:rounded-2xl transition-all duration-200 ${bgColor} text-white`}>
                         {letter}
@@ -824,7 +824,7 @@ const saveState = (index: number, tries: number, guess: string, score: number, s
                     </div>
                   )}
                   <div className="bg-slate-950/50 rounded-2xl p-4 sm:p-5 mb-8 border border-white/5 text-left">
-                    <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-2">Definition</p>
+                    <p className="text-[10px] font-bold text-brand-teal-400 uppercase tracking-widest mb-2">Definition</p>
                     <p className="text-sm text-slate-300 font-medium leading-relaxed">{currentWordObj?.hint}</p>
                   </div>
                   <button
@@ -866,13 +866,13 @@ const saveState = (index: number, tries: number, guess: string, score: number, s
         {gameStatus !== 'completed_day' && (
           <div className="w-full xl:w-[340px] shrink-0 bg-slate-900/40 border border-white/10 rounded-[32px] p-6 sm:p-8 xl:mt-6 backdrop-blur-md mb-10 xl:mb-0 shadow-xl">
             <div className="flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
-              <div className="bg-indigo-500/20 p-2 rounded-xl text-indigo-400"><Info className="w-5 h-5" /></div>
+              <div className="bg-brand-teal-500/20 p-2 rounded-xl text-brand-teal-400"><Info className="w-5 h-5" /></div>
               <h3 className="text-lg font-black text-white uppercase tracking-widest">How to Play</h3>
             </div>
             <div className="space-y-6">
               <div className="flex gap-4 items-start">
                 <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-400 shrink-0 mt-0.5">1</div>
-                <p className="text-sm text-slate-300 leading-relaxed font-medium">Read the basic word and guess its <strong className="text-indigo-300">Synonym</strong>.</p>
+                <p className="text-sm text-slate-300 leading-relaxed font-medium">Read the basic word and guess its <strong className="text-brand-teal-300">Synonym</strong>.</p>
               </div>
               <div className="flex gap-4 items-start">
                 <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-400 shrink-0 mt-0.5">2</div>
@@ -893,7 +893,7 @@ const saveState = (index: number, tries: number, guess: string, score: number, s
             <div className="mt-8 pt-6 border-t border-white/10">
               <p className="text-xs text-slate-500 text-center font-bold uppercase tracking-widest">Earn +{POINTS_PER_WORD} points per word!</p>
               {!isGateMode && (
-                <p className="text-xs text-indigo-400/70 text-center font-medium mt-2">Solve all 5 to stamp your Vocabulary passport slot</p>
+                <p className="text-xs text-brand-teal-400/70 text-center font-medium mt-2">Solve all 5 to stamp your Vocabulary passport slot</p>
               )}
               {isGateMode && (
                 <p className="text-xs text-amber-400/70 text-center font-medium mt-2">

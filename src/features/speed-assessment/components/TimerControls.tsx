@@ -62,7 +62,7 @@ export const TimerControls = ({
                 <Button 
                   onClick={onResume} 
                   size="lg"
-                  className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-lg"
+                  className="bg-gradient-to-r from-blue-500 to-brand-teal-600 hover:from-blue-600 hover:to-brand-teal-700 shadow-lg"
                 >
                   <Play className="w-5 h-5 mr-2" />
                   Resume

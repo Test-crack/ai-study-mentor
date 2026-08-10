@@ -90,8 +90,8 @@ export default function InferenceSprintGame() {
       <div className="bg-white dark:bg-slate-900 rounded-3xl border p-10 text-center shadow-sm border-slate-200 dark:border-slate-800">
         <Trophy className="w-16 h-16 text-amber-500 mx-auto mb-4" />
         <h2 className="text-3xl font-black text-slate-800 dark:text-white mb-2">Sprint Complete!</h2>
-        <p className="text-slate-500 mb-6">Score: <strong className="text-violet-500">+{score} pts</strong></p>
-        <button onClick={handleRestart} className="flex items-center gap-2 bg-violet-500 hover:bg-violet-600 text-white font-bold px-8 py-3 rounded-xl mx-auto transition-all">
+        <p className="text-slate-500 mb-6">Score: <strong className="text-brand-blue-500">+{score} pts</strong></p>
+        <button onClick={handleRestart} className="flex items-center gap-2 bg-brand-blue-500 hover:bg-brand-blue-600 text-white font-bold px-8 py-3 rounded-xl mx-auto transition-all">
           <RotateCcw className="w-4 h-4" /> Sprint Again
         </button>
       </div>
@@ -100,7 +100,7 @@ export default function InferenceSprintGame() {
 
   const btnBase = 'flex-1 py-4 rounded-2xl font-black text-base transition-all active:scale-95 border-2';
   const getBtn = (ans: Answer) => {
-    if (!checked) return `${btnBase} border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 text-slate-700 dark:text-white`;
+    if (!checked) return `${btnBase} border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-brand-blue-400 hover:bg-brand-blue-50 dark:hover:bg-brand-blue-500/10 text-slate-700 dark:text-white`;
     if (ans === stmt.answer) return `${btnBase} border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300`;
     if (ans === selected)    return `${btnBase} border-rose-500 bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-300 opacity-70`;
     return `${btnBase} border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-400 opacity-40`;
@@ -115,15 +115,15 @@ export default function InferenceSprintGame() {
             <div className={`flex items-center gap-1 font-black text-sm px-3 py-1 rounded-full ${timeLeft <= 4 ? 'bg-rose-100 text-rose-600 animate-pulse' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}>
               <Timer className="w-3.5 h-3.5" /> {timeLeft}s
             </div>
-            <span className="font-black text-violet-500 flex items-center gap-1"><Zap className="w-3.5 h-3.5" />{score} pts</span>
+            <span className="font-black text-brand-blue-500 flex items-center gap-1"><Zap className="w-3.5 h-3.5" />{score} pts</span>
           </div>
         </div>
         <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-          <div className="h-full bg-violet-500 rounded-full transition-all duration-300" style={{ width: `${(doneStmts / totalStmts) * 100}%` }} />
+          <div className="h-full bg-brand-blue-500 rounded-full transition-all duration-300" style={{ width: `${(doneStmts / totalStmts) * 100}%` }} />
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-violet-200 dark:border-violet-500/30 p-6 shadow-sm">
-          <p className="text-xs font-black text-violet-400 uppercase tracking-widest mb-2">Passage</p>
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-brand-blue-200 dark:border-brand-blue-500/30 p-6 shadow-sm">
+          <p className="text-xs font-black text-brand-blue-400 uppercase tracking-widest mb-2">Passage</p>
           <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{round.passage}</p>
         </div>
 
@@ -143,7 +143,7 @@ export default function InferenceSprintGame() {
               Answer: {stmt.answer}
             </p>
             <p className="text-sm text-slate-600 dark:text-slate-400">{stmt.explanation}</p>
-            <button onClick={handleNext} className="mt-3 bg-violet-500 hover:bg-violet-600 text-white font-bold px-5 py-2 rounded-xl text-sm transition-all">
+            <button onClick={handleNext} className="mt-3 bg-brand-blue-500 hover:bg-brand-blue-600 text-white font-bold px-5 py-2 rounded-xl text-sm transition-all">
               {doneStmts + 1 < totalStmts ? 'Next →' : 'Finish →'}
             </button>
           </div>

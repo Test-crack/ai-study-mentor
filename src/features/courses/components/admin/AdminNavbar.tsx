@@ -32,10 +32,10 @@ export const AdminNavbar = () => {
               onClick={() => navigate("/")}
               className="flex flex-col items-start hover:opacity-80 transition-opacity group"
             >
-              <span className="text-xl font-bold text-indigo-600">
+              <span className="text-xl font-bold text-brand-teal-600">
                 TestCrack
               </span>
-              <span className="text-[10px] uppercase tracking-widest font-bold text-slate-500 -mt-0.5 group-hover:text-indigo-700 transition-colors">
+              <span className="text-[10px] uppercase tracking-widest font-bold text-slate-500 -mt-0.5 group-hover:text-brand-teal-700 transition-colors">
                 Instructor
               </span>
             </button>
@@ -49,11 +49,11 @@ export const AdminNavbar = () => {
                   onClick={() => navigate(item.route)}
                   className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
                     activeTab === item.id 
-                      ? "text-indigo-600 bg-indigo-50/50" 
-                      : "text-gray-500 hover:text-indigo-600 hover:bg-gray-50 font-medium"
+                      ? "text-brand-teal-600 bg-brand-teal-50/50" 
+                      : "text-gray-500 hover:text-brand-teal-600 hover:bg-gray-50 font-medium"
                   }`}
                 >
-                  <item.icon className={`h-4 w-4 ${activeTab === item.id ? "text-indigo-600" : "text-gray-400"}`} />
+                  <item.icon className={`h-4 w-4 ${activeTab === item.id ? "text-brand-teal-600" : "text-gray-400"}`} />
                   <span>{item.label}</span>
                 </Button>
               ))}
@@ -72,7 +72,7 @@ export const AdminNavbar = () => {
               <span>Student View</span>
             </Button>
 
-            <Button variant="ghost" size="icon" className="relative text-gray-400 hover:text-indigo-600">
+            <Button variant="ghost" size="icon" className="relative text-gray-400 hover:text-brand-teal-600">
                 <Bell className="h-5 w-5" />
                 <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
             </Button>
@@ -82,7 +82,7 @@ export const AdminNavbar = () => {
             <div className="flex items-center space-x-3 pl-2">
                 <div className="hidden lg:block text-right">
                     <p className="text-sm font-bold text-gray-900 leading-tight">{user?.email?.split('@')[0] || "Instructor"}</p>
-                    <p className="text-[10px] text-indigo-500 font-bold uppercase tracking-tighter mt-0.5">Pro Mentor</p>
+                    <p className="text-[10px] text-brand-teal-500 font-bold uppercase tracking-tighter mt-0.5">Pro Mentor</p>
                 </div>
                 <Button 
                     variant="ghost" 
@@ -90,7 +90,7 @@ export const AdminNavbar = () => {
                     className="p-0 hover:bg-transparent"
                     onClick={() => navigate("/profile")}
                 >
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-md transition-transform hover:scale-105 active:scale-95">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-teal-500 to-brand-blue-500 flex items-center justify-center text-white font-bold text-sm shadow-md transition-transform hover:scale-105 active:scale-95">
                         {user?.email?.[0].toUpperCase() || "I"}
                     </div>
                 </Button>

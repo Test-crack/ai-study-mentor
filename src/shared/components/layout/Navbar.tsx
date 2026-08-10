@@ -4,6 +4,7 @@ import {
   LogOut, Menu, X, Home, FileText, Video, BookMarked,
   TrendingUp, User, GraduationCap, Zap
 } from "lucide-react";
+import testcrackLogo from '@/assets/testcrack-logo.svg';
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/shared/utils";
@@ -55,7 +56,7 @@ export function Navbar({
   };
 
   return (
-    <nav className="bg-white/90 backdrop-blur-xl border-b border-indigo-50/50 sticky top-0 z-50 shadow-sm">
+    <nav className="bg-white/90 backdrop-blur-xl border-b border-brand-teal-50/50 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <div className="flex items-center gap-6">
@@ -83,9 +84,7 @@ export function Navbar({
               }
             }}
              className="flex items-center gap-3 active:scale-95 transition-transform">
-              <div className="bg-gradient-to-br from-indigo-600 to-violet-600 text-white p-2 rounded-xl shadow-lg">
-                <GraduationCap className="h-6 w-6" />
-              </div>
+              <img src={testcrackLogo} alt="TestCrack" className="h-10 w-10 object-contain" />
               <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 hidden sm:block">
                 TestCrack
               </span>
@@ -102,11 +101,11 @@ export function Navbar({
                       className={cn(
                         "px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 transition-all duration-200",
                         isActive 
-                          ? "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" 
+                          ? "bg-brand-teal-50 text-brand-teal-700 shadow-sm ring-1 ring-brand-teal-200" 
                           : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                       )}
                     >
-                      <item.icon className={cn("h-4 w-4", isActive ? "text-indigo-600" : "text-slate-400")} />
+                      <item.icon className={cn("h-4 w-4", isActive ? "text-brand-teal-600" : "text-slate-400")} />
                       {item.label}
                     </button>
                   );
@@ -148,7 +147,7 @@ export function Navbar({
                 } else {
                   navigate('/login');
                 }
-              }} className="bg-indigo-600 text-white rounded-full px-6 shadow-md hover:shadow-lg transition-all">
+              }} className="bg-brand-teal-600 text-white rounded-full px-6 shadow-md hover:shadow-lg transition-all">
                 {isLoggedIn ? "Dashboard" : "Login"}
               </Button>
             )}
@@ -167,7 +166,7 @@ export function Navbar({
                 className={cn(
                   "w-full flex items-center gap-3 p-4 rounded-2xl border text-sm font-medium transition-all",
                   location.pathname === item.path 
-                    ? "bg-indigo-50 border-indigo-100 text-indigo-700" 
+                    ? "bg-brand-teal-50 border-brand-teal-100 text-brand-teal-700" 
                     : "bg-white border-slate-100 text-slate-600"
                 )}
               >

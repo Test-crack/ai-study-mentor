@@ -88,8 +88,8 @@ export function MCQContent({
   const getOptionStyle = (optionId: string) => {
     if (!isSubmitted) {
       return selectedAnswer === optionId
-        ? 'border-purple-500 bg-purple-50'
-        : 'border-gray-200 hover:border-purple-300 hover:bg-purple-50/50';
+        ? 'border-brand-blue-500 bg-brand-blue-50'
+        : 'border-gray-200 hover:border-brand-blue-300 hover:bg-brand-blue-50/50';
     }
 
     if (optionId === mcq.correct_answer) {
@@ -104,7 +104,7 @@ export function MCQContent({
   const getOptionLabelStyle = (optionId: string) => {
     if (!isSubmitted) {
       return selectedAnswer === optionId
-        ? 'bg-purple-600 text-white'
+        ? 'bg-brand-blue-600 text-white'
         : 'bg-gray-100 text-gray-600';
     }
 
@@ -125,13 +125,13 @@ export function MCQContent({
       <Card className={cn(
         "border-2 transition-all duration-500 overflow-hidden relative z-20",
         isFocusMode 
-          ? "border-purple-500 shadow-[0_0_50px_-12px_rgba(147,51,234,0.4)] scale-[1.02] bg-white" 
-          : "border-purple-100 bg-gradient-to-br from-white to-purple-50/30"
+          ? "border-brand-blue-500 shadow-[0_0_50px_-12px_rgba(147,51,234,0.4)] scale-[1.02] bg-white" 
+          : "border-brand-blue-100 bg-gradient-to-br from-white to-brand-blue-50/30"
       )}>
         <CardContent className="p-0">
           <div className={cn(
             "p-6 text-white transition-all duration-500",
-            isFocusMode ? "bg-slate-900" : "bg-gradient-to-r from-purple-600 to-indigo-600"
+            isFocusMode ? "bg-slate-900" : "bg-gradient-to-r from-brand-blue-600 to-brand-teal-600"
           )}>
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-3">
@@ -156,7 +156,7 @@ export function MCQContent({
                 onClick={onToggleFocus}
                 className={cn(
                   "gap-2 border-white/20 border hover:bg-white/20 text-white transition-all",
-                  isFocusMode && "bg-purple-600 border-purple-400 hover:bg-purple-500"
+                  isFocusMode && "bg-brand-blue-600 border-brand-blue-400 hover:bg-brand-blue-500"
                 )}
               >
                 {isFocusMode ? <Zap className="h-4 w-4 fill-current text-amber-300" /> : <Target className="h-4 w-4" />}
@@ -205,7 +205,7 @@ export function MCQContent({
                       'flex-1 text-base',
                       isSubmitted && isThisCorrect ? 'text-green-800 font-semibold' : 
                       isSubmitted && isThisSelected && !isThisCorrect ? 'text-red-800 font-medium' :
-                      isThisSelected ? 'text-purple-900 font-medium' : 'text-gray-700'
+                      isThisSelected ? 'text-brand-blue-900 font-medium' : 'text-gray-700'
                     )}>
                       {option.text}
                     </span>
@@ -285,7 +285,7 @@ export function MCQContent({
                     size="lg"
                     className={cn(
                       'px-8 font-bold transition-all',
-                      selectedAnswer ? 'bg-purple-600 hover:bg-purple-700 shadow-lg' : 'bg-gray-300'
+                      selectedAnswer ? 'bg-brand-blue-600 hover:bg-brand-blue-700 shadow-lg' : 'bg-gray-300'
                     )}
                   >
                     Submit Answer

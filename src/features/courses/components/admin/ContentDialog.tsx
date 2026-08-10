@@ -149,7 +149,7 @@ export const ContentDialog = ({
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border-slate-100 shadow-2xl p-0 gap-0 bg-[#f8fafc]">
         <DialogHeader className="p-6 pb-2 bg-white">
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
-            {isEditing ? <Pencil className="h-5 w-5 text-indigo-600" /> : <Plus className="h-5 w-5 text-indigo-600" />}
+            {isEditing ? <Pencil className="h-5 w-5 text-brand-teal-600" /> : <Plus className="h-5 w-5 text-brand-teal-600" />}
             {isEditing ? `Edit ${contentType === ContentType.NOTES ? 'Note' : 'MCQ'}` : "Add Content to Module"}
           </DialogTitle>
           <DialogDescription>
@@ -163,16 +163,16 @@ export const ContentDialog = ({
               <div 
                 className={`cursor-pointer rounded-2xl p-4 border-2 transition-all ${
                   contentType === ContentType.NOTES 
-                    ? "border-indigo-600 bg-indigo-50" 
-                    : "border-slate-200 bg-white hover:border-indigo-300"
+                    ? "border-brand-teal-600 bg-brand-teal-50" 
+                    : "border-slate-200 bg-white hover:border-brand-teal-300"
                 }`}
                 onClick={() => setContentType(ContentType.NOTES)}
               >
                 <div className="flex items-center gap-3 mb-2">
-                  <div className={`p-2 rounded-lg ${contentType === ContentType.NOTES ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-500"}`}>
+                  <div className={`p-2 rounded-lg ${contentType === ContentType.NOTES ? "bg-brand-teal-600 text-white" : "bg-slate-100 text-slate-500"}`}>
                     <FileText className="h-5 w-5" />
                   </div>
-                  <span className={`font-bold ${contentType === ContentType.NOTES ? "text-indigo-900" : "text-slate-600"}`}>
+                  <span className={`font-bold ${contentType === ContentType.NOTES ? "text-brand-teal-900" : "text-slate-600"}`}>
                     Note / Article
                   </span>
                 </div>
@@ -184,16 +184,16 @@ export const ContentDialog = ({
               <div 
                 className={`cursor-pointer rounded-2xl p-4 border-2 transition-all ${
                   contentType === ContentType.MCQ
-                    ? "border-purple-600 bg-purple-50" 
-                    : "border-slate-200 bg-white hover:border-purple-300"
+                    ? "border-brand-blue-600 bg-brand-blue-50" 
+                    : "border-slate-200 bg-white hover:border-brand-blue-300"
                 }`}
                 onClick={() => setContentType(ContentType.MCQ)}
               >
                 <div className="flex items-center gap-3 mb-2">
-                  <div className={`p-2 rounded-lg ${contentType === ContentType.MCQ ? "bg-purple-600 text-white" : "bg-slate-100 text-slate-500"}`}>
+                  <div className={`p-2 rounded-lg ${contentType === ContentType.MCQ ? "bg-brand-blue-600 text-white" : "bg-slate-100 text-slate-500"}`}>
                     <HelpCircle className="h-5 w-5" />
                   </div>
-                  <span className={`font-bold ${contentType === ContentType.MCQ ? "text-purple-900" : "text-slate-600"}`}>
+                  <span className={`font-bold ${contentType === ContentType.MCQ ? "text-brand-blue-900" : "text-slate-600"}`}>
                     Quiz / MCQ
                   </span>
                 </div>
@@ -312,7 +312,7 @@ export const ContentDialog = ({
           <Button 
             onClick={handleSubmit} 
             disabled={isLoading || !title.trim() || (contentType === ContentType.NOTES && !noteBody) || (contentType === ContentType.MCQ && !question)}
-            className="rounded-xl font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-100"
+            className="rounded-xl font-bold bg-brand-teal-600 hover:bg-brand-teal-700 text-white shadow-lg shadow-brand-teal-100"
           >
             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Save Content"}
           </Button>

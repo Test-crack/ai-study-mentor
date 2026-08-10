@@ -4,6 +4,7 @@ import {
   ClipboardCheck, History, Sparkles, Settings, LogOut,
   Timer, FileText, BookOpen, Target, Gamepad2, Lock, HelpCircle
 } from "lucide-react";
+import testcrackLogo from '@/assets/testcrack-logo.svg';
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useTheme } from "@/features/theme/ThemeProvider";
@@ -76,7 +77,7 @@ export const StudentSidebar = ({
 
   const isItemDisabled = (itemId: string) => {
     if (isActivelyDrilling) return true;
-    if (isLocked && itemId !== 'dashboard') return true;
+    if (isLocked && itemId !== 'dashboard' && itemId !== 'how-it-works') return true;
     return false;
   };
 
@@ -181,9 +182,7 @@ export const StudentSidebar = ({
       >
         {/* Brand Header */}
         <div className="flex items-center px-5 mb-8 whitespace-nowrap">
-          <div className="bg-indigo-600 p-2.5 rounded-xl shrink-0 flex items-center justify-center shadow-lg shadow-indigo-600/20">
-            <GraduationCap className="h-6 w-6 text-white" />
-          </div>
+          <img src={testcrackLogo} alt="TestCrack" className="h-9 w-9 object-contain shrink-0" />
           <span className={labelCls("text-xl font-bold text-slate-900 dark:text-white tracking-wide")}>
             TestCrack
           </span>
@@ -216,7 +215,7 @@ export const StudentSidebar = ({
                         "w-full flex items-center rounded-xl px-4 py-3 relative",
                         "transition-colors duration-150",
                         activeTab === item.id && !disabled
-                          ? "bg-indigo-600/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400"
+                          ? "bg-brand-teal-600/10 text-brand-teal-600 dark:bg-brand-teal-500/20 dark:text-brand-teal-400"
                           : "bg-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800",
                         disabled && "opacity-40 pointer-events-none"
                       )}
@@ -224,7 +223,7 @@ export const StudentSidebar = ({
                       <item.icon className={cn(
                         "h-5 w-5 shrink-0",
                         activeTab === item.id && !disabled
-                          ? "text-indigo-600 dark:text-indigo-400"
+                          ? "text-brand-teal-600 dark:text-brand-teal-400"
                           : "text-slate-500"
                       )} />
 

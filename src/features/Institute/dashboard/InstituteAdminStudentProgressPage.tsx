@@ -75,7 +75,7 @@ export default function InstituteAdminStudentProgressPage() {
     <InstituteAdminLayout activeTab="students">
       <button
         onClick={() => navigate("/institute-admin/students")}
-        className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-brand-teal-600 dark:hover:text-brand-teal-400 transition-colors"
       >
         <ChevronLeft className="h-4 w-4" /> Back to Students
       </button>
@@ -99,7 +99,7 @@ export default function InstituteAdminStudentProgressPage() {
                 className={cn(
                   "inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-colors",
                   activeTab === t.id
-                    ? "bg-indigo-600 text-white shadow-sm"
+                    ? "bg-brand-teal-600 text-white shadow-sm"
                     : "bg-white dark:bg-white/[0.04] text-slate-600 dark:text-slate-300 border border-slate-200/70 dark:border-white/[0.06] hover:bg-slate-50 dark:hover:bg-white/[0.08]"
                 )}
               >

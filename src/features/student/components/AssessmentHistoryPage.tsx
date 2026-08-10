@@ -90,14 +90,14 @@ const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
 
 const SKILL_CONFIG: Record<SkillType, { label: string; shortLabel: string; icon: React.ReactNode; color: string; bg: string; border: string }> = {
   LISTENING: { label: "Listening", shortLabel: "Listen",  icon: <Headphones className="h-4 w-4" />, color: "text-sky-600 dark:text-sky-400",       bg: "bg-sky-50 dark:bg-sky-500/10",       border: "border-sky-200 dark:border-sky-500/30" },
-  READING:   { label: "Reading",   shortLabel: "Read",    icon: <BookOpen   className="h-4 w-4" />, color: "text-violet-600 dark:text-violet-400", bg: "bg-violet-50 dark:bg-violet-500/10", border: "border-violet-200 dark:border-violet-500/30" },
+  READING:   { label: "Reading",   shortLabel: "Read",    icon: <BookOpen   className="h-4 w-4" />, color: "text-brand-blue-600 dark:text-brand-blue-400", bg: "bg-brand-blue-50 dark:bg-brand-blue-500/10", border: "border-brand-blue-200 dark:border-brand-blue-500/30" },
   WRITING:   { label: "Writing",   shortLabel: "Write",   icon: <PenLine    className="h-4 w-4" />, color: "text-amber-600 dark:text-amber-400",   bg: "bg-amber-50 dark:bg-amber-500/10",   border: "border-amber-200 dark:border-amber-500/30" },
   SPEAKING:  { label: "Speaking",  shortLabel: "Speak",   icon: <Mic        className="h-4 w-4" />, color: "text-rose-600 dark:text-rose-400",     bg: "bg-rose-50 dark:bg-rose-500/10",     border: "border-rose-200 dark:border-rose-500/30" },
 };
 
 const MODE_CONFIG: Record<string, { label: string; badge: string }> = {
-  INTERNAL_ASSESSMENT: { label: "Internal Assessment", badge: "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400" },
-  MOCK:                { label: "Mock Test",            badge: "bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400" },
+  INTERNAL_ASSESSMENT: { label: "Internal Assessment", badge: "bg-brand-teal-100 text-brand-teal-700 dark:bg-brand-teal-500/20 dark:text-brand-teal-400" },
+  MOCK:                { label: "Mock Test",            badge: "bg-brand-blue-100 text-brand-blue-700 dark:bg-brand-blue-500/20 dark:text-brand-blue-400" },
   DIAGNOSTIC:          { label: "Diagnostic",           badge: "bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-400" },
 };
 
@@ -123,7 +123,7 @@ const SUB_SKILL_LABELS: Record<string, string> = {
 
 const SUBSKILL_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; dot: string }> = {
   fluency:       { label: "Fluency",       color: "text-blue-600 dark:text-blue-400",       bg: "bg-blue-50 dark:bg-blue-500/10",       border: "border-blue-200 dark:border-blue-500/30",       dot: "bg-blue-500" },
-  grammar:       { label: "Grammar",       color: "text-violet-600 dark:text-violet-400",   bg: "bg-violet-50 dark:bg-violet-500/10",   border: "border-violet-200 dark:border-violet-500/30",   dot: "bg-violet-500" },
+  grammar:       { label: "Grammar",       color: "text-brand-blue-600 dark:text-brand-blue-400",   bg: "bg-brand-blue-50 dark:bg-brand-blue-500/10",   border: "border-brand-blue-200 dark:border-brand-blue-500/30",   dot: "bg-brand-blue-500" },
   vocabulary:    { label: "Vocabulary",    color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-500/10", border: "border-emerald-200 dark:border-emerald-500/30", dot: "bg-emerald-500" },
   pronunciation: { label: "Pronunciation", color: "text-rose-600 dark:text-rose-400",       bg: "bg-rose-50 dark:bg-rose-500/10",       border: "border-rose-200 dark:border-rose-500/30",       dot: "bg-rose-500" },
   coherence:     { label: "Coherence",     color: "text-amber-600 dark:text-amber-400",     bg: "bg-amber-50 dark:bg-amber-500/10",     border: "border-amber-200 dark:border-amber-500/30",     dot: "bg-amber-500" },
@@ -216,11 +216,11 @@ const SubSkillCard = ({ subSkillKey, data, score }: { subSkillKey: string; data:
           </div>
         )}
         {data.next_step && (
-          <div className="bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/30 rounded-xl p-3 sm:p-4 flex items-start gap-3">
-            <ArrowRight className="h-4 w-4 text-indigo-500 mt-0.5 shrink-0" />
+          <div className="bg-brand-teal-50 dark:bg-brand-teal-500/10 border border-brand-teal-200 dark:border-brand-teal-500/30 rounded-xl p-3 sm:p-4 flex items-start gap-3">
+            <ArrowRight className="h-4 w-4 text-brand-teal-500 mt-0.5 shrink-0" />
             <div className="min-w-0">
-              <p className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1">Next Step</p>
-              <p className="text-sm text-indigo-700 dark:text-indigo-300 leading-relaxed break-words">{data.next_step}</p>
+              <p className="text-[10px] font-black text-brand-teal-600 dark:text-brand-teal-400 uppercase tracking-widest mb-1">Next Step</p>
+              <p className="text-sm text-brand-teal-700 dark:text-brand-teal-300 leading-relaxed break-words">{data.next_step}</p>
             </div>
           </div>
         )}
@@ -347,7 +347,7 @@ const SubScoreDisplay = ({ subScores, onViewFullReport }: { subScores: Record<st
         </div>
       )}
       {hasRichFeedback(subScores) && onViewFullReport && (
-        <button onClick={onViewFullReport} className="w-full flex items-center justify-center gap-2 py-2.5 sm:py-3 px-4 rounded-xl border-2 border-indigo-200 dark:border-indigo-500/40 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 font-bold text-sm hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors">
+        <button onClick={onViewFullReport} className="w-full flex items-center justify-center gap-2 py-2.5 sm:py-3 px-4 rounded-xl border-2 border-brand-teal-200 dark:border-brand-teal-500/40 bg-brand-teal-50 dark:bg-brand-teal-500/10 text-brand-teal-700 dark:text-brand-teal-300 font-bold text-sm hover:bg-brand-teal-100 dark:hover:bg-brand-teal-500/20 transition-colors">
           <Sparkles className="h-4 w-4" /> View Full AI Report
         </button>
       )}
@@ -394,7 +394,7 @@ const IASubSkillRow = ({ score }: { score: SectionScore }) => {
               <span className="text-[11px] text-slate-400 tabular-nums">{score.correct}/{score.total} correct</span>
             )}
             {score.ai_graded && (
-              <span className="text-[10px] font-bold bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 px-1.5 py-0.5 rounded-full">AI Graded</span>
+              <span className="text-[10px] font-bold bg-brand-blue-100 dark:bg-brand-blue-500/20 text-brand-blue-600 dark:text-brand-blue-400 px-1.5 py-0.5 rounded-full">AI Graded</span>
             )}
           </div>
         )}
@@ -409,11 +409,11 @@ const IASubSkillRow = ({ score }: { score: SectionScore }) => {
           )}
           {score.ai_feedback.key_observations && score.ai_feedback.key_observations.length > 0 && (
             <div>
-              <p className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-2">Key Observations</p>
+              <p className="text-[10px] font-black text-brand-teal-600 dark:text-brand-teal-400 uppercase tracking-widest mb-2">Key Observations</p>
               <ul className="space-y-2">
                 {score.ai_feedback.key_observations.map((obs, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300">
-                    <span className="text-indigo-400 mt-0.5 shrink-0 font-bold">•</span>
+                    <span className="text-brand-teal-400 mt-0.5 shrink-0 font-bold">•</span>
                     <span className="break-words min-w-0">{obs.replace(/\*\*/g, "")}</span>
                   </li>
                 ))}
@@ -451,9 +451,9 @@ const IASessionCard = ({ entry }: { entry: IAEntry }) => {
         className={`w-full flex items-start gap-3 sm:gap-4 p-3 sm:p-4 lg:p-5 text-left transition-colors ${isMissed ? "cursor-default" : "hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer"}`}
       >
         {/* IA number badge */}
-        <div className={`flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex flex-col items-center justify-center ${isMissed ? "bg-rose-100 dark:bg-rose-500/20" : "bg-indigo-100 dark:bg-indigo-500/20"}`}>
-          <span className={`text-[9px] font-black uppercase leading-none ${isMissed ? "text-rose-400 dark:text-rose-500" : "text-indigo-400 dark:text-indigo-500"}`}>IA</span>
-          <span className={`text-sm sm:text-base font-black leading-tight ${isMissed ? "text-rose-600 dark:text-rose-400" : "text-indigo-600 dark:text-indigo-400"}`}>#{entry.ia_number}</span>
+        <div className={`flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex flex-col items-center justify-center ${isMissed ? "bg-rose-100 dark:bg-rose-500/20" : "bg-brand-teal-100 dark:bg-brand-teal-500/20"}`}>
+          <span className={`text-[9px] font-black uppercase leading-none ${isMissed ? "text-rose-400 dark:text-rose-500" : "text-brand-teal-400 dark:text-brand-teal-500"}`}>IA</span>
+          <span className={`text-sm sm:text-base font-black leading-tight ${isMissed ? "text-rose-600 dark:text-rose-400" : "text-brand-teal-600 dark:text-brand-teal-400"}`}>#{entry.ia_number}</span>
         </div>
 
         {/* Main content */}
@@ -469,11 +469,11 @@ const IASessionCard = ({ entry }: { entry: IAEntry }) => {
               <span className="text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400">Missed</span>
             ) : (
               <>
-                <span className="text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400">
+                <span className="text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-brand-teal-100 text-brand-teal-700 dark:bg-brand-teal-500/20 dark:text-brand-teal-400">
                   {scores.length} sub-skill{scores.length !== 1 ? "s" : ""}
                 </span>
                 {hasAnyAI && (
-                  <span className="text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-400">AI Graded</span>
+                  <span className="text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-brand-blue-100 text-brand-blue-700 dark:bg-brand-blue-500/20 dark:text-brand-blue-400">AI Graded</span>
                 )}
               </>
             )}
@@ -592,7 +592,7 @@ const MockSubSkillRow = ({ score }: { score: MockSubSkillScore }) => {
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1.5">
           <span className="text-[11px] text-slate-400 tabular-nums">MCQ {score.correct}/{score.total_mcq}</span>
           {score.ai_band != null && (
-            <span className="text-[10px] font-bold bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 px-1.5 py-0.5 rounded-full tabular-nums">
+            <span className="text-[10px] font-bold bg-brand-blue-100 dark:bg-brand-blue-500/20 text-brand-blue-600 dark:text-brand-blue-400 px-1.5 py-0.5 rounded-full tabular-nums">
               AI {score.ai_band.toFixed(1)}
             </span>
           )}
@@ -608,11 +608,11 @@ const MockSubSkillRow = ({ score }: { score: MockSubSkillScore }) => {
           )}
           {score.ai_feedback.key_observations && score.ai_feedback.key_observations.length > 0 && (
             <div>
-              <p className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-2">Key Observations</p>
+              <p className="text-[10px] font-black text-brand-teal-600 dark:text-brand-teal-400 uppercase tracking-widest mb-2">Key Observations</p>
               <ul className="space-y-2">
                 {score.ai_feedback.key_observations.map((obs, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300">
-                    <span className="text-indigo-400 mt-0.5 shrink-0 font-bold">•</span>
+                    <span className="text-brand-teal-400 mt-0.5 shrink-0 font-bold">•</span>
                     <span className="break-words min-w-0">{obs.replace(/\*\*/g, "")}</span>
                   </li>
                 ))}
@@ -655,7 +655,7 @@ const MockSkillRow = ({ score }: { score: MockSkillScore }) => {
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1.5 ml-9 sm:ml-10">
           <span className="text-[11px] text-slate-400 tabular-nums">{score.correct}/{score.total} correct</span>
           {score.ai_graded && (
-            <span className="text-[10px] font-bold bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 px-1.5 py-0.5 rounded-full">AI Graded</span>
+            <span className="text-[10px] font-bold bg-brand-blue-100 dark:bg-brand-blue-500/20 text-brand-blue-600 dark:text-brand-blue-400 px-1.5 py-0.5 rounded-full">AI Graded</span>
           )}
         </div>
       </button>
@@ -683,7 +683,7 @@ const MockSessionCard = ({ entry }: { entry: MockEntry }) => {
   const attemptLabel = entry.attempt_type === "EARNED" ? "Earned Mock" : "Standard Mock";
   const attemptBadge = entry.attempt_type === "EARNED"
     ? "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400"
-    : "bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400";
+    : "bg-brand-blue-100 text-brand-blue-700 dark:bg-brand-blue-500/20 dark:text-brand-blue-400";
 
   const monthLabel = (() => {
     const [y, m] = entry.month_year.split("-");
@@ -708,8 +708,8 @@ const MockSessionCard = ({ entry }: { entry: MockEntry }) => {
         onClick={() => setExpanded((p) => !p)}
         className="w-full flex items-start gap-3 sm:gap-4 p-3 sm:p-4 lg:p-5 text-left hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
       >
-        <div className="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-purple-100 dark:bg-purple-500/20 flex flex-col items-center justify-center">
-          <FileText className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+        <div className="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-brand-blue-100 dark:bg-brand-blue-500/20 flex flex-col items-center justify-center">
+          <FileText className="h-5 w-5 text-brand-blue-600 dark:text-brand-blue-400" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
@@ -719,7 +719,7 @@ const MockSessionCard = ({ entry }: { entry: MockEntry }) => {
             </span>
             <span className={`text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full ${attemptBadge}`}>{attemptLabel}</span>
             {scores.some((s) => s.ai_graded) && (
-              <span className="text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-400">AI Graded</span>
+              <span className="text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-brand-blue-100 text-brand-blue-700 dark:bg-brand-blue-500/20 dark:text-brand-blue-400">AI Graded</span>
             )}
           </div>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -919,8 +919,8 @@ const FilterChip = ({ label, active, onClick }: { label: string; active: boolean
     onClick={onClick}
     className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all duration-150 border whitespace-nowrap ${
       active
-        ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
-        : "bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-indigo-300 hover:text-indigo-600"
+        ? "bg-brand-teal-600 text-white border-brand-teal-600 shadow-sm"
+        : "bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-brand-teal-300 hover:text-brand-teal-600"
     }`}
   >
     {label}
@@ -1025,7 +1025,7 @@ const AssessmentHistoryPage = () => {
               <span className="hidden sm:inline">{label}</span>
               <span className="sm:hidden">{shortLabel}</span>
               {count > 0 && (
-                <span className="ml-0.5 text-[10px] font-black bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded-full shrink-0">
+                <span className="ml-0.5 text-[10px] font-black bg-brand-teal-100 dark:bg-brand-teal-500/20 text-brand-teal-600 dark:text-brand-teal-400 px-1.5 py-0.5 rounded-full shrink-0">
                   {count}
                 </span>
               )}

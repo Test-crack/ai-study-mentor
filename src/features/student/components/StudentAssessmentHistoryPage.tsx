@@ -102,7 +102,7 @@ export default function StudentAssessmentHistoryPage() {
                 <ArrowLeft className="w-4 h-4 mr-2" /> Back to Assessment
               </Button>
               <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
-                <Clock className="h-8 w-8 text-indigo-600" />
+                <Clock className="h-8 w-8 text-brand-teal-600" />
                 Assessment History
               </h1>
               <p className="text-slate-500 dark:text-slate-400 mt-1">Track your progress and analyze your reading performance over time.</p>
@@ -126,8 +126,8 @@ export default function StudentAssessmentHistoryPage() {
                         <AreaChart data={chartData}>
                             <defs>
                                 <linearGradient id="colorWpm" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#818cf8" stopOpacity={0.3}/>
-                                    <stop offset="95%" stopColor="#818cf8" stopOpacity={0}/>
+                                    <stop offset="5%" stopColor="#3E9E93" stopOpacity={0.3}/>
+                                    <stop offset="95%" stopColor="#3E9E93" stopOpacity={0}/>
                                 </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
@@ -137,7 +137,7 @@ export default function StudentAssessmentHistoryPage() {
                                 contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0' }}
                                 itemStyle={{ color: '#1e293b' }}
                             />
-                            <Area type="monotone" dataKey="wpm" stroke="#6366f1" strokeWidth={3} fillOpacity={1} fill="url(#colorWpm)" />
+                            <Area type="monotone" dataKey="wpm" stroke="#12897C" strokeWidth={3} fillOpacity={1} fill="url(#colorWpm)" />
                         </AreaChart>
                     </ResponsiveContainer>
                 </CardContent>
@@ -214,14 +214,14 @@ export default function StudentAssessmentHistoryPage() {
                         filteredHistory.map((item) => (
                             <div 
                                 key={item.id} 
-                                className="group flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-indigo-100 dark:hover:border-indigo-900/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all cursor-pointer"
+                                className="group flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-brand-teal-100 dark:hover:border-brand-teal-900/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all cursor-pointer"
                             >
                                 <div className="flex items-center gap-4">
-                                    <div className="h-12 w-12 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform">
+                                    <div className="h-12 w-12 rounded-lg bg-brand-teal-50 dark:bg-brand-teal-900/20 flex items-center justify-center text-brand-teal-600 dark:text-brand-teal-400 group-hover:scale-110 transition-transform">
                                         <BookOpen className="w-5 h-5" />
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                        <h4 className="font-bold text-slate-900 dark:text-white group-hover:text-brand-teal-600 dark:group-hover:text-brand-teal-400 transition-colors">
                                             {item.passageTitle || "Assessment"}
                                         </h4>
                                         <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
@@ -249,7 +249,7 @@ export default function StudentAssessmentHistoryPage() {
                                         <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{Math.round(item.accuracy)}%</div>
                                         <div className="text-xs text-slate-500 uppercase tracking-wider font-medium">Accuracy</div>
                                     </div>
-                                    <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 group-hover:text-indigo-600 group-hover:border-indigo-200 transition-colors">
+                                    <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 group-hover:text-brand-teal-600 group-hover:border-brand-teal-200 transition-colors">
                                         <TrendingUp className="w-4 h-4" />
                                     </div>
                                 </div>

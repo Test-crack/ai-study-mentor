@@ -21,7 +21,7 @@ const tutors = [
     details: "IELTS Batch 12, Advanced Writing • 43 students",
     rating: "4.8",
     ratingColor: "text-orange-400",
-    avatarColor: "bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300",
+    avatarColor: "bg-brand-blue-100 text-brand-blue-700 dark:bg-brand-blue-900/50 dark:text-brand-blue-300",
     needsSupport: false,
     metrics: {
       improvement: "+20%",

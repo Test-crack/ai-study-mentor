@@ -64,12 +64,12 @@ export function EnrollmentModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[420px] p-0 overflow-hidden max-h-[90vh]">
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-5 py-4 text-white">
+        <div className="bg-gradient-to-r from-brand-blue-600 to-brand-teal-600 px-5 py-4 text-white">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-white">
               {isFree ? 'Enroll for Free' : 'Complete Enrollment'}
             </DialogTitle>
-            <DialogDescription className="text-purple-100 text-sm line-clamp-1">
+            <DialogDescription className="text-brand-blue-100 text-sm line-clamp-1">
               {course.title}
             </DialogDescription>
           </DialogHeader>
@@ -102,7 +102,7 @@ export function EnrollmentModal({
           {/* Price Summary - Compact */}
           <div className="flex items-center justify-between">
             <span className="text-gray-600">Total</span>
-            <span className="text-xl font-bold text-purple-600">
+            <span className="text-xl font-bold text-brand-blue-600">
               {formatPrice(course.price)}
             </span>
           </div>
@@ -136,7 +136,7 @@ export function EnrollmentModal({
             <Button
               onClick={handleEnroll}
               disabled={enrolling}
-              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+              className="flex-1 bg-brand-blue-600 hover:bg-brand-blue-700 text-white"
             >
               {enrolling ? (
                 <>

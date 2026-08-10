@@ -72,13 +72,13 @@ export default function StudentCoursesPage() {
         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
             <Button 
                 onClick={() => navigate(`/learn/${course.slug}`)}
-                className="rounded-full bg-white text-indigo-700 hover:bg-indigo-50"
+                className="rounded-full bg-white text-brand-teal-700 hover:bg-brand-teal-50"
             >
                 <PlayCircle className="h-5 w-5 mr-2" /> Continue Learning
             </Button>
         </div>
         <div className="absolute top-3 right-3">
-             <Badge className="bg-white/90 text-indigo-700 dark:bg-slate-900/90 dark:text-white backdrop-blur-sm shadow-sm">
+             <Badge className="bg-white/90 text-brand-teal-700 dark:bg-slate-900/90 dark:text-white backdrop-blur-sm shadow-sm">
                 In Progress
              </Badge>
         </div>
@@ -88,7 +88,7 @@ export default function StudentCoursesPage() {
       <div className="p-5 space-y-4">
         <div>
            <div className="flex justify-between items-start mb-2">
-             <Badge variant="outline" className="text-xs border-indigo-200 text-indigo-600 dark:border-indigo-800 dark:text-indigo-400">
+             <Badge variant="outline" className="text-xs border-brand-teal-200 text-brand-teal-600 dark:border-brand-teal-800 dark:text-brand-teal-400">
                 {course.Domain?.name || 'General'}
              </Badge>
              <DropdownMenu>
@@ -103,7 +103,7 @@ export default function StudentCoursesPage() {
                 </DropdownMenuContent>
              </DropdownMenu>
            </div>
-           <h3 className="font-bold text-lg text-slate-900 dark:text-white line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+           <h3 className="font-bold text-lg text-slate-900 dark:text-white line-clamp-1 group-hover:text-brand-teal-600 dark:group-hover:text-brand-teal-400 transition-colors">
              {course.title}
            </h3>
            <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">
@@ -118,7 +118,7 @@ export default function StudentCoursesPage() {
              <span>0%</span>
            </div>
            <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-             <div className="h-full bg-indigo-600 w-0 rounded-full"></div> 
+             <div className="h-full bg-brand-teal-600 w-0 rounded-full"></div> 
            </div>
         </div>
 
@@ -181,7 +181,7 @@ export default function StudentCoursesPage() {
                     </Button>
                     <Button 
                         onClick={() => navigate('/courses')} 
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white hidden sm:flex"
+                        className="bg-brand-teal-600 hover:bg-brand-teal-700 text-white hidden sm:flex"
                     >
                         Browse Courses
                     </Button>
@@ -203,14 +203,14 @@ export default function StudentCoursesPage() {
                 </div>
             ) : (
                 <div className="text-center py-20">
-                    <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-900/20 mb-6">
-                        <BookOpen className="h-10 w-10 text-indigo-600 dark:text-indigo-400" />
+                    <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-brand-teal-50 dark:bg-brand-teal-900/20 mb-6">
+                        <BookOpen className="h-10 w-10 text-brand-teal-600 dark:text-brand-teal-400" />
                     </div>
                     <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">No courses found</h2>
                     <p className="text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-6">
                         {search ? "We couldn't find any courses matching your search." : "You haven't enrolled in any courses yet. Start your learning journey today!"}
                     </p>
-                    <Button onClick={() => navigate('/courses')} className="bg-indigo-600 text-white">
+                    <Button onClick={() => navigate('/courses')} className="bg-brand-teal-600 text-white">
                         Browse Catalog
                     </Button>
                 </div>

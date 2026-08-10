@@ -143,8 +143,8 @@ function CreateInstituteModal({ onClose, onCreated }: CreateModalProps) {
       <div className="bg-white dark:bg-[#15141B] rounded-2xl shadow-2xl w-full max-w-lg border border-slate-200 dark:border-[#26252D]">
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-[#26252D]">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-              <Building2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <div className="p-2 bg-brand-teal-50 dark:bg-brand-teal-900/30 rounded-lg">
+              <Building2 className="w-5 h-5 text-brand-teal-600 dark:text-brand-teal-400" />
             </div>
             <div>
               <h2 className="font-bold text-slate-900 dark:text-white text-base">Add New Institute</h2>
@@ -162,7 +162,7 @@ function CreateInstituteModal({ onClose, onCreated }: CreateModalProps) {
             <div className="relative">
               <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input type="text" required value={form.instituteName} onChange={set('instituteName')} placeholder="e.g. Ace English Academy"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-indigo-500 dark:text-white placeholder-slate-400" />
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400" />
             </div>
           </div>
 
@@ -171,7 +171,7 @@ function CreateInstituteModal({ onClose, onCreated }: CreateModalProps) {
             <div className="relative">
               <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input type="text" value={form.address} onChange={set('address')} placeholder="City, State"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-indigo-500 dark:text-white placeholder-slate-400" />
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400" />
             </div>
           </div>
 
@@ -182,7 +182,7 @@ function CreateInstituteModal({ onClose, onCreated }: CreateModalProps) {
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input type="text" required value={form.ownerName} onChange={set('ownerName')} placeholder="Full name"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-indigo-500 dark:text-white placeholder-slate-400" />
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400" />
               </div>
             </div>
             <div className="space-y-1.5">
@@ -190,14 +190,14 @@ function CreateInstituteModal({ onClose, onCreated }: CreateModalProps) {
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input type="email" required value={form.ownerEmail} onChange={set('ownerEmail')} placeholder="owner@institute.com"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-indigo-500 dark:text-white placeholder-slate-400" />
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400" />
               </div>
             </div>
           </div>
 
-          <div className="flex items-start gap-2 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/40 rounded-lg p-3">
-            <CheckCircle2 className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
-            <p className="text-xs text-indigo-700 dark:text-indigo-300 leading-relaxed">
+          <div className="flex items-start gap-2 bg-brand-teal-50 dark:bg-brand-teal-900/20 border border-brand-teal-100 dark:border-brand-teal-800/40 rounded-lg p-3">
+            <CheckCircle2 className="w-4 h-4 text-brand-teal-500 mt-0.5 shrink-0" />
+            <p className="text-xs text-brand-teal-700 dark:text-brand-teal-300 leading-relaxed">
               An invite email will be sent to the owner's email address. They'll click the link to set their password and access the Institute Owner dashboard.
             </p>
           </div>
@@ -208,7 +208,7 @@ function CreateInstituteModal({ onClose, onCreated }: CreateModalProps) {
               Cancel
             </button>
             <button type="submit" disabled={loading}
-              className="flex-1 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
+              className="flex-1 py-2.5 rounded-lg bg-brand-teal-600 hover:bg-brand-teal-700 text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
               {loading ? 'Creating...' : 'Create & Send Invite'}
             </button>
@@ -267,8 +267,8 @@ function EditInstituteModal({ institute, onClose, onUpdated }: EditModalProps) {
       <div className="bg-white dark:bg-[#15141B] rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-[#26252D]">
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-[#26252D]">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-              <Building2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <div className="p-2 bg-brand-teal-50 dark:bg-brand-teal-900/30 rounded-lg">
+              <Building2 className="w-5 h-5 text-brand-teal-600 dark:text-brand-teal-400" />
             </div>
             <div>
               <h2 className="font-bold text-slate-900 dark:text-white text-base">Edit Institute</h2>
@@ -286,7 +286,7 @@ function EditInstituteModal({ institute, onClose, onUpdated }: EditModalProps) {
             <div className="relative">
               <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input type="text" required value={form.name} onChange={set('name')} placeholder="e.g. Ace English Academy"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-indigo-500 dark:text-white placeholder-slate-400" />
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400" />
             </div>
           </div>
 
@@ -295,7 +295,7 @@ function EditInstituteModal({ institute, onClose, onUpdated }: EditModalProps) {
             <div className="relative">
               <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input type="text" value={form.address} onChange={set('address')} placeholder="City, State"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-indigo-500 dark:text-white placeholder-slate-400" />
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400" />
             </div>
           </div>
 
@@ -305,7 +305,7 @@ function EditInstituteModal({ institute, onClose, onUpdated }: EditModalProps) {
               Cancel
             </button>
             <button type="submit" disabled={loading}
-              className="flex-1 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
+              className="flex-1 py-2.5 rounded-lg bg-brand-teal-600 hover:bg-brand-teal-700 text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
               {loading ? 'Saving...' : 'Save Changes'}
             </button>
@@ -409,7 +409,7 @@ export default function SuperAdminInstitutes() {
                   </div>
                 )}
               </div>
-              <button onClick={load} className="p-2 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors" title="Refresh">
+              <button onClick={load} className="p-2 rounded-lg text-slate-400 hover:text-brand-teal-600 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors" title="Refresh">
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               </button>
             </div>
@@ -423,12 +423,12 @@ export default function SuperAdminInstitutes() {
                   placeholder="Search institutes..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-transparent border border-slate-200 dark:border-gray-800 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition-all dark:text-white placeholder-slate-400 shadow-sm"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-transparent border border-slate-200 dark:border-gray-800 rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 transition-all dark:text-white placeholder-slate-400 shadow-sm"
                 />
               </div>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 dark:bg-[#7C3AED] dark:hover:bg-[#6D28D9] text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
+                className="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2.5 bg-brand-teal-600 hover:bg-brand-teal-700 dark:bg-[#185A78] dark:hover:bg-[#185A78] text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
               >
                 <Plus className="w-4 h-4" />
                 Add Institute
@@ -439,7 +439,7 @@ export default function SuperAdminInstitutes() {
             <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl shadow-sm overflow-hidden">
               {loading ? (
                 <div className="py-16 flex justify-center">
-                  <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+                  <Loader2 className="w-6 h-6 animate-spin text-brand-teal-500" />
                 </div>
               ) : institutes.length === 0 ? (
                 <div className="py-12 text-center text-slate-500 dark:text-gray-500 text-sm">
@@ -496,7 +496,7 @@ export default function SuperAdminInstitutes() {
                               ) : (
                                 <div className={`w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm shrink-0 ${
                                   inst.isActive
-                                    ? 'bg-indigo-100 dark:bg-[#2D1F4D] text-indigo-700 dark:text-[#D97CFF]'
+                                    ? 'bg-brand-teal-100 dark:bg-[#142B3A] text-brand-teal-700 dark:text-[#D97CFF]'
                                     : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                                 }`}>
                                   {getInitials(inst.name)}
@@ -517,7 +517,7 @@ export default function SuperAdminInstitutes() {
                           <td className="px-4 py-4">
                             {inst.owner ? (
                               <div className="flex items-center gap-2">
-                                <div className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center text-[9px] font-bold text-purple-700 dark:text-purple-300 shrink-0">
+                                <div className="w-6 h-6 rounded-full bg-brand-blue-100 dark:bg-brand-blue-900/40 flex items-center justify-center text-[9px] font-bold text-brand-blue-700 dark:text-brand-blue-300 shrink-0">
                                   {getInitials(inst.owner.name ?? inst.owner.email)}
                                 </div>
                                 <div>
@@ -534,14 +534,14 @@ export default function SuperAdminInstitutes() {
 
                           {/* Students */}
                           <td className="px-4 py-4 text-center">
-                            <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2.5 py-1 rounded-full text-[13px] font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">
+                            <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2.5 py-1 rounded-full text-[13px] font-bold bg-brand-teal-50 text-brand-teal-700 dark:bg-brand-teal-900/30 dark:text-brand-teal-300">
                               {inst.studentCount}
                             </span>
                           </td>
 
                           {/* Instructors */}
                           <td className="px-4 py-4 text-center">
-                            <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2.5 py-1 rounded-full text-[13px] font-bold bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+                            <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2.5 py-1 rounded-full text-[13px] font-bold bg-brand-blue-50 text-brand-blue-700 dark:bg-brand-blue-900/30 dark:text-brand-blue-300">
                               {inst.instructorCount}
                             </span>
                           </td>

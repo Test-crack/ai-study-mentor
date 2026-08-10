@@ -7,11 +7,11 @@
 /* Headings with gradient underlines */
 .enhanced-markdown h1 {
   @apply text-3xl font-bold mt-8 mb-4 pb-3;
-  background: linear-gradient(to right, #9333ea, #3b82f6);
+  background: linear-gradient(to right, #185A78, #3b82f6);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  border-bottom: 3px solid #9333ea;
+  border-bottom: 3px solid #185A78;
 }
 
 .enhanced-markdown h2 {
@@ -42,13 +42,13 @@
 }
 
 .enhanced-markdown li {
-  @apply ml-2 pl-3 border-l-2 border-purple-300 text-gray-700;
+  @apply ml-2 pl-3 border-l-2 border-brand-blue-300 text-gray-700;
   position: relative;
 }
 
 .enhanced-markdown ul li::before {
   content: "▸";
-  @apply text-purple-500 font-bold absolute -left-5;
+  @apply text-brand-blue-500 font-bold absolute -left-5;
 }
 
 .enhanced-markdown ol li {
@@ -67,7 +67,7 @@
 
 /* Code inline */
 .enhanced-markdown code {
-  @apply bg-gray-100 text-purple-700 px-2 py-1 rounded text-sm font-mono;
+  @apply bg-gray-100 text-brand-blue-700 px-2 py-1 rounded text-sm font-mono;
 }
 
 /* Code blocks */
@@ -95,7 +95,7 @@
 }
 
 .enhanced-markdown th {
-  @apply bg-purple-100 text-purple-900 font-semibold p-3 text-left border border-purple-200;
+  @apply bg-brand-blue-100 text-brand-blue-900 font-semibold p-3 text-left border border-brand-blue-200;
 }
 
 .enhanced-markdown td {

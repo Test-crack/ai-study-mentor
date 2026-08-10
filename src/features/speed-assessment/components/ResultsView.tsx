@@ -37,8 +37,8 @@ export const ResultsView = ({
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       {/* Header */}
-      <Card className="bg-gradient-to-r from-green-500 via-blue-500 to-purple-600 text-white overflow-hidden relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-green-500/90 via-blue-500/90 to-purple-600/90"></div>
+      <Card className="bg-gradient-to-r from-green-500 via-blue-500 to-brand-blue-600 text-white overflow-hidden relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-green-500/90 via-blue-500/90 to-brand-blue-600/90"></div>
         <CardContent className="relative z-10 p-8 text-center">
           <div className="space-y-4">
             <div className="text-6xl animate-bounce">🎉</div>
@@ -192,16 +192,16 @@ export const ResultsView = ({
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 hover:shadow-xl transition-shadow relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-16 h-16 bg-purple-200 rounded-bl-full opacity-50"></div>
+        <Card className="bg-gradient-to-br from-brand-blue-50 to-brand-blue-100 border-2 border-brand-blue-200 hover:shadow-xl transition-shadow relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-16 h-16 bg-brand-blue-200 rounded-bl-full opacity-50"></div>
           <CardContent className="p-6 relative z-10">
             <div className="flex items-center justify-between mb-3">
-              <div className="p-2 bg-purple-500 rounded-lg">
+              <div className="p-2 bg-brand-blue-500 rounded-lg">
                 <BookOpen className="w-6 h-6 text-white" />
               </div>
               <div className="text-right">
-                <div className="text-3xl font-bold text-purple-900 animate-pulse">{assessmentResults.metrics.retention}</div>
-                <div className="text-sm font-medium text-purple-700">%</div>
+                <div className="text-3xl font-bold text-brand-blue-900 animate-pulse">{assessmentResults.metrics.retention}</div>
+                <div className="text-sm font-medium text-brand-blue-700">%</div>
                 {assessmentResults.baseMetrics && assessmentResults.baseMetrics.retention !== assessmentResults.metrics.retention && (
                   <div className="flex items-center space-x-1 mt-1">
                     {assessmentResults.metrics.retention > assessmentResults.baseMetrics.retention ? (
@@ -216,7 +216,7 @@ export const ResultsView = ({
                 )}
               </div>
             </div>
-            <div className="text-sm text-purple-600">Retention</div>
+            <div className="text-sm text-brand-blue-600">Retention</div>
             <Progress value={assessmentResults.metrics.retention} className="mt-2 h-2" />
           </CardContent>
         </Card>
@@ -252,17 +252,17 @@ export const ResultsView = ({
       </div>
 
       {/* Feedback Section */}
-      <Card className="bg-gradient-to-r from-indigo-50 to-blue-50 border-indigo-200">
+      <Card className="bg-gradient-to-r from-brand-teal-50 to-blue-50 border-brand-teal-200">
         <CardHeader>
-          <CardTitle className="flex items-center text-indigo-900">
-            <div className="p-2 bg-indigo-500 rounded-lg mr-3">
+          <CardTitle className="flex items-center text-brand-teal-900">
+            <div className="p-2 bg-brand-teal-500 rounded-lg mr-3">
               <Lightbulb className="w-5 h-5 text-white" />
             </div>
             Personalized Feedback
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-lg text-indigo-800 leading-relaxed">{assessmentResults.feedback}</p>
+          <p className="text-lg text-brand-teal-800 leading-relaxed">{assessmentResults.feedback}</p>
         </CardContent>
       </Card>
       
@@ -329,12 +329,12 @@ export const ResultsView = ({
               <div className="text-sm font-medium text-green-700">Words Read</div>
               <div className="text-xs text-green-600 mt-1">Total passage length</div>
             </div>
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg">
-              <div className="text-3xl font-bold text-purple-900 mb-1">
+            <div className="bg-gradient-to-br from-brand-blue-50 to-brand-blue-100 p-4 rounded-lg">
+              <div className="text-3xl font-bold text-brand-blue-900 mb-1">
                 {assessmentResults.answerReview.filter(a => a.isCorrect).length}/{assessmentResults.answerReview.length}
               </div>
-              <div className="text-sm font-medium text-purple-700">Questions Correct</div>
-              <div className="text-xs text-purple-600 mt-1">Comprehension score</div>
+              <div className="text-sm font-medium text-brand-blue-700">Questions Correct</div>
+              <div className="text-xs text-brand-blue-600 mt-1">Comprehension score</div>
             </div>
             <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-lg">
               <div className="text-3xl font-bold text-orange-900 mb-1">{currentPassage.idealWPM}</div>
@@ -426,7 +426,7 @@ export const ResultsView = ({
       </Card>
 
       {/* Action Buttons */}
-      <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+      <Card className="bg-gradient-to-r from-blue-500 to-brand-blue-600 text-white">
         <CardContent className="p-8 text-center">
           <h3 className="text-xl font-semibold mb-4">Ready for another challenge?</h3>
           <div className="flex flex-col sm:flex-row justify-center items-center space-y-3 sm:space-y-0 sm:space-x-4">

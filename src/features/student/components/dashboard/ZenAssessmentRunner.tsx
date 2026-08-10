@@ -156,7 +156,7 @@ export function ZenAssessmentRunner({ onCancel, onComplete }: RunnerProps) {
         {step !== 'reading' && (
             <div className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800 p-4">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-indigo-600 font-bold">
+                    <div className="flex items-center gap-2 text-brand-teal-600 font-bold">
                         <Brain className="w-6 h-6" />
                         <span>Zen Mode</span>
                     </div>
@@ -230,7 +230,7 @@ const SelectionView = ({ modules, selectedDifficulty, onDifficultyChange, onSele
       className="space-y-8 max-w-5xl mx-auto px-4"
     >
       <div className="text-center space-y-4">
-        <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600 dark:from-indigo-400 dark:to-purple-400">
+        <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-teal-500 to-brand-blue-600 dark:from-brand-teal-400 dark:to-brand-blue-400">
           Choose Your Challenge
         </h2>
         <p className="text-slate-500 dark:text-slate-400 text-lg">Select a topic to begin your assessment</p>
@@ -244,8 +244,8 @@ const SelectionView = ({ modules, selectedDifficulty, onDifficultyChange, onSele
             className={cn(
               "px-6 py-2 rounded-full capitalize text-sm font-medium transition-all",
               selectedDifficulty === diff 
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 scale-105" 
-                : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-indigo-500"
+                ? "bg-brand-teal-600 text-white shadow-lg shadow-brand-teal-500/30 scale-105" 
+                : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-brand-teal-500"
             )}
           >
             {diff}
@@ -259,15 +259,15 @@ const SelectionView = ({ modules, selectedDifficulty, onDifficultyChange, onSele
             key={module.id}
             whileHover={{ y: -5 }}
             onClick={() => onSelectModule(module.id)}
-            className="group cursor-pointer bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-indigo-500/50 transition-all relative overflow-hidden"
+            className="group cursor-pointer bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-brand-teal-500/50 transition-all relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
               <BookOpen className="w-24 h-24 transform rotate-12" />
             </div>
-            <div className="h-12 w-12 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center mb-4 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform">
+            <div className="h-12 w-12 rounded-xl bg-brand-teal-50 dark:bg-brand-teal-900/20 flex items-center justify-center mb-4 text-brand-teal-600 dark:text-brand-teal-400 group-hover:scale-110 transition-transform">
               <Brain className="w-6 h-6" />
             </div>
-            <h3 className="font-bold text-lg mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+            <h3 className="font-bold text-lg mb-2 group-hover:text-brand-teal-600 dark:group-hover:text-brand-teal-400 transition-colors">
               {module.name}
             </h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">
@@ -299,7 +299,7 @@ const InstructionsView = ({ passage, onStart }: any) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
             <div className="space-y-6">
                 <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-indigo-600" /> Assessment Instructions
+                    <BookOpen className="w-5 h-5 text-brand-teal-600" /> Assessment Instructions
                 </h3>
                 <div className="space-y-4">
                     {[
@@ -309,7 +309,7 @@ const InstructionsView = ({ passage, onStart }: any) => (
                         "Get your personalized speed & retention score."
                     ].map((step, i) => (
                         <div key={i} className="flex gap-4">
-                            <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-sm font-bold shrink-0">
+                            <div className="w-6 h-6 rounded-full bg-brand-teal-100 dark:bg-brand-teal-900/30 text-brand-teal-600 dark:text-brand-teal-400 flex items-center justify-center text-sm font-bold shrink-0">
                                 {i + 1}
                             </div>
                             <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">{step}</p>
@@ -332,20 +332,20 @@ const InstructionsView = ({ passage, onStart }: any) => (
                         <div className="text-xs text-slate-500 uppercase tracking-wider font-medium">Est. Time</div>
                     </div>
                 </div>
-                <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800/30">
+                <div className="p-4 bg-brand-teal-50 dark:bg-brand-teal-900/20 rounded-xl border border-brand-teal-100 dark:border-brand-teal-800/30">
                     <div className="flex justify-between items-center mb-1">
-                        <span className="text-sm text-indigo-900 dark:text-indigo-300 font-medium">Target Speed</span>
-                        <span className="font-bold text-indigo-700 dark:text-indigo-400">250 WPM</span>
+                        <span className="text-sm text-brand-teal-900 dark:text-brand-teal-300 font-medium">Target Speed</span>
+                        <span className="font-bold text-brand-teal-700 dark:text-brand-teal-400">250 WPM</span>
                     </div>
-                    <div className="w-full bg-indigo-200 dark:bg-indigo-900/50 rounded-full h-1.5">
-                        <div className="bg-indigo-600 h-1.5 rounded-full w-2/3"></div>
+                    <div className="w-full bg-brand-teal-200 dark:bg-brand-teal-900/50 rounded-full h-1.5">
+                        <div className="bg-brand-teal-600 h-1.5 rounded-full w-2/3"></div>
                     </div>
                 </div>
             </div>
         </div>
 
         <div className="flex justify-center">
-            <Button onClick={onStart} size="lg" className="px-12 py-6 text-lg rounded-full shadow-xl shadow-indigo-500/20 bg-indigo-600 hover:bg-indigo-700 hover:scale-105 transition-all duration-300 group">
+            <Button onClick={onStart} size="lg" className="px-12 py-6 text-lg rounded-full shadow-xl shadow-brand-teal-500/20 bg-brand-teal-600 hover:bg-brand-teal-700 hover:scale-105 transition-all duration-300 group">
                 Start Assessment <ArrowLeft className="w-5 h-5 ml-2 rotate-180 group-hover:translate-x-1 transition-transform" />
             </Button>
         </div>
@@ -365,7 +365,7 @@ const CalibrationView = ({ onComplete }: { onComplete: () => void }) => (
           ease: "easeInOut"
         }}
         onAnimationComplete={onComplete}
-        className="w-48 h-48 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-indigo-500/30"
+        className="w-48 h-48 rounded-full bg-gradient-to-tr from-brand-teal-500 to-brand-blue-600 flex items-center justify-center shadow-2xl shadow-brand-teal-500/30"
       >
         <span className="text-white font-medium text-lg">Breathe</span>
       </motion.div>
@@ -385,7 +385,7 @@ const ReadingView = ({ currentTime, currentPassage, onFinish, focusData }: any) 
       className="max-w-4xl mx-auto space-y-8 py-8"
     >
         {/* Sticky Header with Badges */}
-        <div className="sticky top-0 bg-[#F8FAFC]/95 dark:bg-slate-950/95 backdrop-blur-md py-4 z-10 space-y-4 border-b border-indigo-100 dark:border-slate-800 shadow-sm px-4 -mx-4">
+        <div className="sticky top-0 bg-[#F8FAFC]/95 dark:bg-slate-950/95 backdrop-blur-md py-4 z-10 space-y-4 border-b border-brand-teal-100 dark:border-slate-800 shadow-sm px-4 -mx-4">
             <div className="flex items-center justify-between">
                 <div>
                    <h3 className="font-bold text-slate-900 dark:text-white truncate max-w-[200px] md:max-w-md">
@@ -409,12 +409,12 @@ const ReadingView = ({ currentTime, currentPassage, onFinish, focusData }: any) 
                     </div>
 
                     {/* Timer Badge */}
-                    <div className="flex items-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-lg font-mono font-bold text-lg border border-indigo-100 dark:border-indigo-800/30">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-brand-teal-50 dark:bg-brand-teal-900/20 text-brand-teal-600 dark:text-brand-teal-400 rounded-lg font-mono font-bold text-lg border border-brand-teal-100 dark:border-brand-teal-800/30">
                         <Clock className="w-4 h-4" />
                         <span>{Math.floor(currentTime / 60)}:{(currentTime % 60).toString().padStart(2, '0')}</span>
                     </div>
 
-                    <Button onClick={onFinish} size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20">
+                    <Button onClick={onFinish} size="sm" className="bg-brand-teal-600 hover:bg-brand-teal-700 text-white shadow-lg shadow-brand-teal-500/20">
                         Done Reading
                     </Button>
                 </div>
@@ -441,7 +441,7 @@ const ReadingView = ({ currentTime, currentPassage, onFinish, focusData }: any) 
         </div>
 
         <div className="flex justify-center pt-12 pb-24">
-            <Button onClick={onFinish} size="lg" className="px-12 py-6 text-lg rounded-full shadow-xl shadow-indigo-500/20 bg-indigo-600 hover:bg-indigo-700 hover:scale-105 transition-all duration-300">
+            <Button onClick={onFinish} size="lg" className="px-12 py-6 text-lg rounded-full shadow-xl shadow-brand-teal-500/20 bg-brand-teal-600 hover:bg-brand-teal-700 hover:scale-105 transition-all duration-300">
                 I'm Finished Reading
             </Button>
         </div>
@@ -482,16 +482,16 @@ const QuestionsView = ({ currentPassage, currentQuestionIndex, answers, onAnswer
                             className={cn(
                                 "p-4 rounded-xl border-2 cursor-pointer transition-all flex items-center justify-between group",
                                 answers[question.id] === option 
-                                    ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20" 
-                                    : "border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900"
+                                    ? "border-brand-teal-600 bg-brand-teal-50 dark:bg-brand-teal-900/20" 
+                                    : "border-slate-200 dark:border-slate-800 hover:border-brand-teal-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900"
                             )}
                         >
                             <span className={cn(
                                 "font-medium",
-                                answers[question.id] === option ? "text-indigo-700 dark:text-indigo-300" : "text-slate-700 dark:text-slate-300"
+                                answers[question.id] === option ? "text-brand-teal-700 dark:text-brand-teal-300" : "text-slate-700 dark:text-slate-300"
                             )}>{option}</span>
                             {answers[question.id] === option && (
-                                <CheckCircle2 className="w-5 h-5 text-indigo-600 animate-in zoom-in" />
+                                <CheckCircle2 className="w-5 h-5 text-brand-teal-600 animate-in zoom-in" />
                             )}
                         </div>
                     ))}
@@ -548,7 +548,7 @@ const ResultsView = ({ assessmentResults, totalReadingTime, onComplete, onRetake
             {[
                 { label: "Reading Speed", value: Math.round(assessmentResults?.metrics.weightedWPM || 0), unit: "WPM", icon: Zap, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-900/10" },
                 { label: "Comprehension", value: Math.round(assessmentResults?.metrics.accuracy || 0), unit: "%", icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-900/10" },
-                { label: "Total Time", value: `${Math.floor(totalReadingTime / 60)}:${(totalReadingTime % 60).toString().padStart(2, '0')}`, unit: "min", icon: Clock, color: "text-indigo-500", bg: "bg-indigo-50 dark:bg-indigo-900/10" }
+                { label: "Total Time", value: `${Math.floor(totalReadingTime / 60)}:${(totalReadingTime % 60).toString().padStart(2, '0')}`, unit: "min", icon: Clock, color: "text-brand-teal-500", bg: "bg-brand-teal-50 dark:bg-brand-teal-900/10" }
             ].map((stat, i) => (
                 <motion.div
                     key={stat.label}

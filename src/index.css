@@ -21,7 +21,7 @@ All colors MUST be HSL.
     --popover-foreground: 224 71% 4%;
 
     /* Primary: Deep Royal Blue */
-    --primary: 221 83% 53%; /* Vivid Blue for actions */
+    --primary: 174 88% 26%; /* Action Teal #087F73 */
     --primary-foreground: 210 40% 98%;
 
     /* Secondary: Subtle Blue-Grey */
@@ -39,7 +39,7 @@ All colors MUST be HSL.
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 221 83% 53%; /* Matching Primary */
+    --ring: 174 88% 26%; /* Matching Primary */
 
     --radius: 0.75rem; /* Slightly more rounded for modern feel */
 
@@ -50,7 +50,7 @@ All colors MUST be HSL.
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 174 76% 40%;
   }
 
   .dark {
@@ -63,7 +63,7 @@ All colors MUST be HSL.
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217.2 91.2% 59.8%;
+    --primary: 174 76% 40%; /* Action Teal, lifted for dark */
     --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -80,16 +80,16 @@ All colors MUST be HSL.
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --ring: 174 76% 40%;
     
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary: 174 76% 40%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 174 76% 40%;
   }
 }
 
@@ -137,7 +137,7 @@ All colors MUST be HSL.
 }
 
 .markdown-content em {
-  @apply italic text-purple-700 font-medium;
+  @apply italic text-brand-blue-700 font-medium;
 }
 
 .markdown-content code {
@@ -149,7 +149,7 @@ All colors MUST be HSL.
 }
 
 .markdown-content blockquote {
-  @apply bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-400 p-4 my-4 rounded-r-lg italic text-blue-800;
+  @apply bg-gradient-to-r from-blue-50 to-brand-teal-50 border-l-4 border-blue-400 p-4 my-4 rounded-r-lg italic text-blue-800;
 }
 
 .markdown-content a {
@@ -170,6 +170,23 @@ All colors MUST be HSL.
   position: absolute;
   height: 2px;
   width: 20px;
-  background: linear-gradient(to right, transparent, #4f46e5);
+  /* Light teal: the engine connectors now sit on the ink hero, not a light panel. */
+  background: linear-gradient(to right, transparent, #7FBFB6);
   animation: data-flow 3s linear infinite;
+}
+
+/* Hero band-lift connector: drifts the arrow gently upward to read as "improving". */
+@keyframes arrow-drift {
+  0%, 100% { transform: translateY(0); opacity: 0.7; }
+  50% { transform: translateY(-4px); opacity: 1; }
+}
+
+.animate-arrow-drift {
+  animation: arrow-drift 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-arrow-drift {
+    animation: none;
+  }
 }

@@ -5,7 +5,8 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { useToast } from "@/shared/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, EyeOff, GraduationCap, ChevronLeft } from "lucide-react";
+import { Eye, EyeOff, ChevronLeft } from "lucide-react";
+import testcrackLogo from '@/assets/testcrack-logo.svg';
 const LoginPage = () => {
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -73,30 +74,26 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 lg:p-12">
+    <div className="min-h-screen bg-brand-bg font-plex text-brand-text antialiased flex items-center justify-center p-4 lg:p-12">
       {/* OPEN BOOK CONTAINER */}
-      <div className="flex w-full max-w-5xl bg-white rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.1)] min-h-[620px] flex-col md:flex-row border border-slate-100">
+      <div className="flex w-full max-w-5xl bg-white overflow-hidden min-h-[620px] flex-col md:flex-row border border-brand-line">
 
         {/* LEFT – Visual Branding */}
-        <div className="w-full md:w-[45%] bg-gradient-to-br from-indigo-900 to-blue-800 p-10 md:p-14 flex flex-col justify-between relative overflow-hidden text-white">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-32 -mt-32 blur-[100px] pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/20 rounded-full -ml-20 -mb-20 blur-[80px] pointer-events-none" />
+        <div className="w-full md:w-[45%] bg-brand-ink p-10 md:p-14 flex flex-col justify-between relative overflow-hidden text-brand-bg">
 
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-10">
-              <div className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-lg ring-1 ring-white/10">
-           <Link to="/">
-  <GraduationCap className="h-7 w-7 text-indigo-100" />
-</Link>
-              </div>
-              <span className="text-2xl font-bold tracking-tight text-white/95 drop-shadow-sm">TestCrack</span>
+              <Link to="/">
+                <img src={testcrackLogo} alt="TestCrack" className="h-10 w-10 object-contain shrink-0" />
+              </Link>
+              <span className="font-manrope text-2xl font-extrabold tracking-[-0.03em] text-brand-bg">TestCrack</span>
             </div>
 
             <div className="space-y-6">
-              <h2 style={{ fontFamily: "sans-serif", fontWeight: "bold" }} className="text-4xl lg:text-5xl font-extrabold leading-[1.15]">
+              <h2 className="font-manrope text-4xl lg:text-5xl font-extrabold leading-[1.05] tracking-[-0.04em] text-brand-bg">
                 {isForgotPassword ? "Recover Your Access." : "Welcome Back to TestCrack."}
               </h2>
-              <p className="text-purple-100/80 text-lg leading-relaxed max-w-xs">
+              <p className="text-brand-on-ink text-[18px] leading-[1.7] max-w-xs">
                 {isForgotPassword
                   ? "Enter your email and we'll send you a link to reset your password."
                   : "Sign in to access your personalized study companion and master your exams."}
@@ -105,9 +102,9 @@ const LoginPage = () => {
           </div>
 
           {/* Bottom decorative card */}
-          <div className="relative z-10 mt-10 p-5 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl">
-            <p className="text-xs text-indigo-200/70 uppercase tracking-widest font-semibold mb-1">Access controlled</p>
-            <p className="text-sm text-indigo-50/80 leading-relaxed">
+          <div className="relative z-10 mt-10 p-5 border border-brand-line-16">
+            <p className="font-jetbrains text-[10.5px] text-brand-teal-soft uppercase tracking-[0.16em] mb-2">Access controlled</p>
+            <p className="text-[14px] text-brand-on-ink leading-[1.65]">
               Accounts are created by administrators. Contact your institute or platform admin to get access.
             </p>
           </div>
@@ -117,10 +114,10 @@ const LoginPage = () => {
         <div className="w-full md:w-[55%] p-8 md:p-20 flex flex-col justify-center bg-white">
 
           <div className="mb-8">
-            <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-3">
+            <h3 className="font-manrope text-3xl font-extrabold text-brand-ink tracking-[-0.04em] leading-[1.1] mb-3">
               {isForgotPassword ? "Reset Password" : "Sign In"}
             </h3>
-            <p className="text-slate-500 font-medium">
+            <p className="text-brand-text-mute text-[16.5px] leading-[1.7]">
               {isForgotPassword
                 ? "Enter your email address to receive a reset link."
                 : "Enter your credentials to access your dashboard."}
@@ -129,13 +126,13 @@ const LoginPage = () => {
 
           <form onSubmit={isForgotPassword ? handleForgotPassword : handleLogin} className="space-y-6">
             <div className="space-y-2.5">
-              <Label htmlFor="email" className="text-slate-700 font-bold text-sm ml-1">
+              <Label htmlFor="email" className="font-jetbrains text-[10.5px] text-brand-text-mute uppercase tracking-[0.14em]">
                 Email Address
               </Label>
               <Input
                 id="email"
                 type="email"
-                className="h-12 bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 rounded-2xl transition-all"
+                className="h-12 bg-white border-brand-line rounded-[4px] text-[14.5px] text-brand-text placeholder:text-brand-text-mute focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-brand-teal transition-colors duration-150"
                 placeholder="name@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -145,12 +142,12 @@ const LoginPage = () => {
 
             {!isForgotPassword && (
               <div className="space-y-2.5">
-                <div className="flex justify-between items-center ml-1">
-                  <Label htmlFor="password" className="text-slate-700 font-bold text-sm">Password</Label>
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="password" className="font-jetbrains text-[10.5px] text-brand-text-mute uppercase tracking-[0.14em]">Password</Label>
                   <button
                     type="button"
                     onClick={() => setIsForgotPassword(true)}
-                    className="text-xs font-bold text-purple-600 hover:text-purple-800 transition-colors"
+                    className="text-[13px] font-semibold text-brand-teal hover:text-brand-teal-dark hover:underline transition-colors duration-150"
                   >
                     Forgot password?
                   </button>
@@ -159,7 +156,7 @@ const LoginPage = () => {
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    className="h-12 bg-slate-50 border-slate-200 pr-12 focus:bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 rounded-2xl transition-all"
+                    className="h-12 bg-white border-brand-line pr-12 rounded-[4px] text-[14.5px] text-brand-text placeholder:text-brand-text-mute focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-brand-teal transition-colors duration-150"
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -168,7 +165,7 @@ const LoginPage = () => {
                   />
                   <button
                     type="button"
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-text-mute hover:text-brand-ink transition-colors duration-150"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -179,7 +176,7 @@ const LoginPage = () => {
 
             <Button
               type="submit"
-              className="w-full h-14 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl transition-all shadow-xl shadow-slate-200 active:scale-[0.98] mt-4"
+              className="w-full h-14 bg-brand-teal hover:bg-brand-teal-dark text-white font-semibold text-[15.5px] rounded-md shadow-none transition-colors duration-150 active:scale-[0.98] mt-4"
               disabled={loading}
             >
               {loading
@@ -198,7 +195,7 @@ const LoginPage = () => {
                   setIsForgotPassword(false);
                   setEmail("");
                 }}
-                className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-purple-600 transition-colors"
+                className="inline-flex items-center gap-2 text-[14px] font-semibold text-brand-text-mute hover:text-brand-teal transition-colors duration-150"
               >
                 <ChevronLeft className="h-4 w-4" />
                 Back to sign in

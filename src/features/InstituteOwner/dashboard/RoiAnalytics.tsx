@@ -7,7 +7,7 @@ import { InstituteOwnerTopbar} from '../components/InstituteOwnerTopbar';
 // --- Mock Data ---
 const topMetrics = [
   { title: "Monthly Savings", value: "₹263K", subtext: "50% cost reduction", valueColor: "text-emerald-600 dark:text-[#10B981]" },
-  { title: "Annual Projection", value: "₹31.5L", subtext: "12-month forecast", valueColor: "text-indigo-600 dark:text-[#A67CFF]" },
+  { title: "Annual Projection", value: "₹31.5L", subtext: "12-month forecast", valueColor: "text-brand-teal-600 dark:text-[#4E8CA6]" },
   { title: "Tutor Hours Saved", value: "263h", subtext: "per month", valueColor: "text-slate-900 dark:text-white" },
   { title: "Cost Per Assessment", value: "₹18", subtext: "vs ₹200 manual", valueColor: "text-slate-900 dark:text-white" },
 ];

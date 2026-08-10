@@ -20,7 +20,7 @@ export function KpiCard({
   accent?: "indigo" | "emerald" | "amber" | "rose" | "blue";
 }) {
   const accents: Record<string, { bg: string; text: string }> = {
-    indigo:  { bg: "bg-indigo-50 dark:bg-indigo-500/10",   text: "text-indigo-600 dark:text-indigo-400" },
+    indigo:  { bg: "bg-brand-teal-50 dark:bg-brand-teal-500/10",   text: "text-brand-teal-600 dark:text-brand-teal-400" },
     emerald: { bg: "bg-emerald-50 dark:bg-emerald-500/10", text: "text-emerald-600 dark:text-emerald-400" },
     amber:   { bg: "bg-amber-50 dark:bg-amber-500/10",     text: "text-amber-600 dark:text-amber-400" },
     rose:    { bg: "bg-rose-50 dark:bg-rose-500/10",       text: "text-rose-600 dark:text-rose-400" },
@@ -167,7 +167,7 @@ export function SectionCard({
     <div className={`rounded-2xl bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] shadow-sm ${className}`}>
       <div className="px-5 py-4 border-b border-slate-100 dark:border-white/[0.06] flex items-center justify-between gap-3">
         <h2 className="flex items-center gap-2 text-sm font-black text-slate-900 dark:text-white uppercase tracking-wide">
-          {Icon && <Icon className="h-4 w-4 text-indigo-500" />}
+          {Icon && <Icon className="h-4 w-4 text-brand-teal-500" />}
           {title}
         </h2>
         {actions}

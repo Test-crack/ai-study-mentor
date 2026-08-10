@@ -37,8 +37,8 @@ function Avatar({ name, avatar }: { name: string; avatar: string | null }) {
   }
   const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
   return (
-    <div className="h-8 w-8 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center shrink-0">
-      <span className="text-[11px] font-black text-indigo-600 dark:text-indigo-400">{initials}</span>
+    <div className="h-8 w-8 rounded-full bg-brand-teal-100 dark:bg-brand-teal-500/20 flex items-center justify-center shrink-0">
+      <span className="text-[11px] font-black text-brand-teal-600 dark:text-brand-teal-400">{initials}</span>
     </div>
   );
 }
@@ -87,7 +87,7 @@ export function DiagnosticOverviewTab({ rows, batchId }: Props) {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search students…"
-            className="w-full pl-9 pr-3 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
+            className="w-full pl-9 pr-3 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-teal-500/30 text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
           />
         </div>
       </div>
@@ -156,7 +156,7 @@ export function DiagnosticOverviewTab({ rows, batchId }: Props) {
                         className={cn(
                           'inline-flex items-center gap-1 text-xs font-bold transition-colors',
                           row.is_diagnosed
-                            ? 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300'
+                            ? 'text-brand-teal-600 dark:text-brand-teal-400 hover:text-brand-teal-700 dark:hover:text-brand-teal-300'
                             : 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
                         )}
                       >

@@ -193,8 +193,8 @@ export default function ReadingPractice() {
   if (loadingPassage) {
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#F8FAFC] dark:bg-slate-950 gap-4">
-        <div className="w-16 h-16 rounded-2xl bg-[#7B61FF]/10 flex items-center justify-center animate-pulse">
-          <BookOpen className="w-8 h-8 text-[#7B61FF]" />
+        <div className="w-16 h-16 rounded-2xl bg-[#3E9E93]/10 flex items-center justify-center animate-pulse">
+          <BookOpen className="w-8 h-8 text-[#3E9E93]" />
         </div>
         <p className="text-slate-500 font-medium animate-pulse">Loading passage...</p>
       </div>
@@ -210,7 +210,7 @@ export default function ReadingPractice() {
       {view === 'library' && (
         <div className="space-y-6">
 
-          <div className="bg-gradient-to-br from-[#7B61FF] to-[#5B41DF] rounded-2xl p-8 md:p-10 text-white shadow-lg relative overflow-hidden">
+          <div className="bg-gradient-to-br from-[#3E9E93] to-[#087F73] rounded-2xl p-8 md:p-10 text-white shadow-lg relative overflow-hidden">
             <div className="absolute -top-10 -right-10 w-48 h-48 bg-white/5 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 left-1/3 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none" />
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -218,7 +218,7 @@ export default function ReadingPractice() {
                 <h1 className="text-3xl font-extrabold mb-2 flex items-center gap-2">
                   IELTS Reading Practice <Sparkles className="h-6 w-6 text-yellow-300" fill="currentColor" />
                 </h1>
-                <p className="text-indigo-100 max-w-2xl text-base leading-relaxed">
+                <p className="text-brand-teal-100 max-w-2xl text-base leading-relaxed">
                   Sharpen your comprehension with authentic IELTS-style passages. Read, answer, and receive
                   instant performance analysis with WPM, accuracy, and efficiency scores.
                 </p>
@@ -241,8 +241,8 @@ export default function ReadingPractice() {
                   onClick={() => setActiveCategory(cat)}
                   className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
                     activeCategory === cat
-                      ? 'bg-[#7B61FF] text-white shadow-md shadow-[#7B61FF]/25'
-                      : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:border-[#7B61FF]/50'
+                      ? 'bg-[#3E9E93] text-white shadow-md shadow-[#3E9E93]/25'
+                      : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:border-[#3E9E93]/50'
                   }`}
                 >
                   {cat}
@@ -271,14 +271,14 @@ export default function ReadingPractice() {
                 <Card
                   key={passage.id}
                   onClick={() => handleSelectPassage(passage)}
-                  className="group border border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900 hover:shadow-md hover:border-[#7B61FF] dark:hover:border-[#7B61FF] transition-all cursor-pointer flex flex-col h-52"
+                  className="group border border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900 hover:shadow-md hover:border-[#3E9E93] dark:hover:border-[#3E9E93] transition-all cursor-pointer flex flex-col h-52"
                 >
                   <CardHeader className="pb-3 flex-none">
                     <div className="flex justify-between items-start gap-3">
-                      <CardTitle className="text-base font-bold text-slate-800 dark:text-slate-100 group-hover:text-[#7B61FF] dark:group-hover:text-[#9b86ff] transition-colors line-clamp-2 leading-snug">
+                      <CardTitle className="text-base font-bold text-slate-800 dark:text-slate-100 group-hover:text-[#3E9E93] dark:group-hover:text-[#7FBFB6] transition-colors line-clamp-2 leading-snug">
                         {passage.title}
                       </CardTitle>
-                      <Badge className="bg-indigo-50 text-[#7B61FF] hover:bg-indigo-100 dark:bg-[#7B61FF]/20 dark:text-[#9b86ff] flex-shrink-0 text-xs">
+                      <Badge className="bg-brand-teal-50 text-[#3E9E93] hover:bg-brand-teal-100 dark:bg-[#3E9E93]/20 dark:text-[#7FBFB6] flex-shrink-0 text-xs">
                         {passage.category}
                       </Badge>
                     </div>
@@ -291,7 +291,7 @@ export default function ReadingPractice() {
                       <span className="text-xs font-semibold text-slate-400 flex items-center gap-1">
                         <FileText className="w-3 h-3" /> {passage.wordCount} words
                       </span>
-                      <span className="text-xs text-[#7B61FF] dark:text-[#9b86ff] font-bold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                      <span className="text-xs text-[#3E9E93] dark:text-[#7FBFB6] font-bold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
                         Start Reading <ChevronRight className="w-3 h-3" />
                       </span>
                     </div>
@@ -315,10 +315,10 @@ export default function ReadingPractice() {
             </Button>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full px-4 py-2 shadow-sm">
-                <Clock className="w-4 h-4 text-[#7B61FF]" />
+                <Clock className="w-4 h-4 text-[#3E9E93]" />
                 <span className="font-mono font-bold text-slate-700 dark:text-slate-200 text-sm">{formatTime(elapsed)}</span>
               </div>
-              <Button onClick={handleSubmit} disabled={submitting} className="bg-[#7B61FF] hover:bg-[#6a50e5] text-white shadow-sm rounded-full">
+              <Button onClick={handleSubmit} disabled={submitting} className="bg-[#3E9E93] hover:bg-[#12897C] text-white shadow-sm rounded-full">
                 {submitting ? (
                   <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Evaluating...</>
                 ) : (
@@ -333,7 +333,7 @@ export default function ReadingPractice() {
             <div className="w-full lg:w-[55%] flex flex-col gap-4 overflow-y-auto pr-1 custom-scrollbar">
               <Card className="border-none shadow-sm bg-white dark:bg-slate-900 flex-shrink-0">
                 <CardHeader className="pb-4 border-b border-slate-100 dark:border-slate-800">
-                  <div className="flex items-center gap-2 text-[#7B61FF] dark:text-[#9b86ff] mb-2">
+                  <div className="flex items-center gap-2 text-[#3E9E93] dark:text-[#7FBFB6] mb-2">
                     <BookOpen className="h-4 w-4" />
                     <span className="text-xs font-bold uppercase tracking-wider">Reading Passage</span>
                   </div>
@@ -344,7 +344,7 @@ export default function ReadingPractice() {
                     <span className="text-xs text-slate-400 flex items-center gap-1">
                       <FileText className="w-3 h-3" /> {selectedPassage.wordCount} words
                     </span>
-                    <Badge className="bg-indigo-50 text-[#7B61FF] dark:bg-[#7B61FF]/20 dark:text-[#9b86ff] text-xs">
+                    <Badge className="bg-brand-teal-50 text-[#3E9E93] dark:bg-[#3E9E93]/20 dark:text-[#7FBFB6] text-xs">
                       {selectedPassage.category}
                     </Badge>
                   </div>
@@ -356,10 +356,10 @@ export default function ReadingPractice() {
                 </CardContent>
               </Card>
 
-              <Card className="border border-indigo-100 dark:border-indigo-900/30 bg-indigo-50 dark:bg-indigo-900/10 flex-shrink-0 mb-4">
+              <Card className="border border-brand-teal-100 dark:border-brand-teal-900/30 bg-brand-teal-50 dark:bg-brand-teal-900/10 flex-shrink-0 mb-4">
                 <CardContent className="p-4 flex gap-3">
-                  <AlertTriangle className="h-4 w-4 text-indigo-500 dark:text-indigo-400 flex-shrink-0 mt-0.5" />
-                  <ul className="text-xs text-indigo-700 dark:text-indigo-400/80 space-y-1 list-disc list-inside">
+                  <AlertTriangle className="h-4 w-4 text-brand-teal-500 dark:text-brand-teal-400 flex-shrink-0 mt-0.5" />
+                  <ul className="text-xs text-brand-teal-700 dark:text-brand-teal-400/80 space-y-1 list-disc list-inside">
                     <li>Read the questions first to know what details to look for.</li>
                     <li>Skim the passage once, then read key sections in depth.</li>
                     <li>Your reading time is tracked — it contributes to your WPM score.</li>
@@ -387,7 +387,7 @@ export default function ReadingPractice() {
                   {selectedPassage.questions.map((q, qi) => (
                     <div key={q.id} className="space-y-3">
                       <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-100 leading-relaxed">
-                        <span className="text-[#7B61FF] font-black mr-1.5">Q{qi + 1}.</span>
+                        <span className="text-[#3E9E93] font-black mr-1.5">Q{qi + 1}.</span>
                         {q.stem}
                       </h4>
                       <div className="space-y-2">
@@ -400,18 +400,18 @@ export default function ReadingPractice() {
                               onClick={() => handleOptionSelect(q.id, opt)}
                               className={`relative p-3.5 rounded-xl border-2 cursor-pointer transition-all duration-200 flex items-center gap-3 ${
                                 isSelected
-                                  ? 'border-[#7B61FF] bg-indigo-50 dark:border-[#7B61FF] dark:bg-[#7B61FF]/10'
-                                  : 'border-slate-200 bg-white hover:border-[#7B61FF]/40 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-[#7B61FF]/40'
+                                  ? 'border-[#3E9E93] bg-brand-teal-50 dark:border-[#3E9E93] dark:bg-[#3E9E93]/10'
+                                  : 'border-slate-200 bg-white hover:border-[#3E9E93]/40 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-[#3E9E93]/40'
                               }`}
                             >
                               <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 text-xs font-black transition-all ${
                                 isSelected
-                                  ? 'border-[#7B61FF] bg-[#7B61FF] text-white'
+                                  ? 'border-[#3E9E93] bg-[#3E9E93] text-white'
                                   : 'border-slate-300 dark:border-slate-600 text-slate-400'
                               }`}>
                                 {label}
                               </div>
-                              <span className={`text-sm ${isSelected ? 'text-indigo-900 font-semibold dark:text-indigo-200' : 'text-slate-700 dark:text-slate-300'}`}>
+                              <span className={`text-sm ${isSelected ? 'text-brand-teal-900 font-semibold dark:text-brand-teal-200' : 'text-slate-700 dark:text-slate-300'}`}>
                                 {opt}
                               </span>
                             </div>
@@ -438,24 +438,24 @@ export default function ReadingPractice() {
       {view === 'results' && results && selectedPassage && (
         <div className="space-y-6 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
 
-          <div className="bg-gradient-to-br from-[#7B61FF] to-[#5B41DF] rounded-3xl p-8 text-white text-center relative overflow-hidden shadow-xl shadow-[#7B61FF]/20">
+          <div className="bg-gradient-to-br from-[#3E9E93] to-[#087F73] rounded-3xl p-8 text-white text-center relative overflow-hidden shadow-xl shadow-[#3E9E93]/20">
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
             <div className="relative z-10">
               <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4 border-2 border-white/20">
                 <Trophy className="w-10 h-10 text-yellow-300" />
               </div>
-              <p className="text-indigo-100 text-sm font-bold uppercase tracking-widest mb-1">Your Grade</p>
+              <p className="text-brand-teal-100 text-sm font-bold uppercase tracking-widest mb-1">Your Grade</p>
               <div className={`text-7xl font-black mb-3 ${results.grade === 'F' ? 'text-rose-300' : 'text-white'}`}>
                 {results.grade}
               </div>
-              <p className="text-indigo-100 max-w-sm mx-auto text-sm leading-relaxed">
+              <p className="text-brand-teal-100 max-w-sm mx-auto text-sm leading-relaxed">
                 {results.feedback?.[0] ?? 'Great effort! Keep practicing to improve.'}
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-3 justify-center">
-            <StatBadge label="WPM" value={Math.round(results.wpm)} color="text-[#7B61FF]" />
+            <StatBadge label="WPM" value={Math.round(results.wpm)} color="text-[#3E9E93]" />
             <StatBadge label="Retention" value={`${Math.round(results.retentionScore)}%`} color={getScoreColor(results.retentionScore)} />
             <StatBadge label="Efficiency" value={`${Math.round(results.efficiencyScore)}%`} color={getScoreColor(results.efficiencyScore)} />
             <StatBadge label="Correct" value={`${results.correct}/${results.total}`} color="text-emerald-500" />
@@ -473,7 +473,7 @@ export default function ReadingPractice() {
               <CardContent className="space-y-2">
                 {results.feedback.slice(1).map((tip, i) => (
                   <div key={i} className="flex gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#7B61FF] mt-2 flex-shrink-0" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#3E9E93] mt-2 flex-shrink-0" />
                     <p className="text-sm text-slate-700 dark:text-slate-300">{tip}</p>
                   </div>
                 ))}
@@ -492,7 +492,7 @@ export default function ReadingPractice() {
             <Card className="border-none shadow-sm bg-white dark:bg-slate-900">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base font-bold flex items-center gap-2">
-                  <BarChart2 className="w-4 h-4 text-[#7B61FF]" /> Answer Review
+                  <BarChart2 className="w-4 h-4 text-[#3E9E93]" /> Answer Review
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -511,7 +511,7 @@ export default function ReadingPractice() {
                       </div>
                       <div className="flex-1 space-y-2">
                         <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-                          <span className="text-[#7B61FF] mr-1">Q{i + 1}.</span>
+                          <span className="text-[#3E9E93] mr-1">Q{i + 1}.</span>
                           {sa.stem}
                         </p>
                         <div className="space-y-1 text-xs">
@@ -541,7 +541,7 @@ export default function ReadingPractice() {
             <Button variant="outline" onClick={handleRetry} className="flex-1">
               <RotateCcw className="w-4 h-4 mr-2" /> Try Same Passage Again
             </Button>
-            <Button onClick={handleRestart} className="flex-1 bg-[#7B61FF] hover:bg-[#6a50e5] text-white">
+            <Button onClick={handleRestart} className="flex-1 bg-[#3E9E93] hover:bg-[#12897C] text-white">
               <BookOpen className="w-4 h-4 mr-2" /> Back to Library
             </Button>
             <Button variant="outline" onClick={() => navigate('/student/reading-assessment/history')} className="flex-1">

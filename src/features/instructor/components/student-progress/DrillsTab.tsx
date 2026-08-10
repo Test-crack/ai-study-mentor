@@ -17,7 +17,7 @@ function StatCard({ icon, label, value, sub }: {
 }) {
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 flex items-center gap-3">
-      <div className="h-10 w-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center shrink-0 text-indigo-600 dark:text-indigo-400">
+      <div className="h-10 w-10 rounded-xl bg-brand-teal-50 dark:bg-brand-teal-500/10 flex items-center justify-center shrink-0 text-brand-teal-600 dark:text-brand-teal-400">
         {icon}
       </div>
       <div>
@@ -43,7 +43,7 @@ function StreakCalendar({ days }: { days: Array<{ date: string; active: boolean 
               className={cn(
                 'h-6 w-6 rounded-md border transition-colors',
                 day.active
-                  ? 'bg-indigo-500 border-indigo-600 dark:bg-indigo-500 dark:border-indigo-400'
+                  ? 'bg-brand-teal-500 border-brand-teal-600 dark:bg-brand-teal-500 dark:border-brand-teal-400'
                   : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700'
               )}
             />
@@ -106,14 +106,14 @@ export function DrillsTab({ drillStats, lexiStats, streak }: Props) {
                 />
                 <Bar dataKey="dcs" radius={[4, 4, 0, 0]}>
                   {chartData.map((entry, i) => (
-                    <Cell key={i} fill={entry.hasData ? '#6366f1' : '#e2e8f0'} />
+                    <Cell key={i} fill={entry.hasData ? '#12897C' : '#e2e8f0'} />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
           <div className="flex items-center gap-4 mt-3 text-xs text-slate-400">
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-indigo-500" /> Active day</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-brand-teal-500" /> Active day</span>
             <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-slate-200 dark:bg-slate-700" /> No drills</span>
           </div>
         </div>
@@ -123,7 +123,7 @@ export function DrillsTab({ drillStats, lexiStats, streak }: Props) {
           <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-4">Activity Calendar (30d)</h3>
           <StreakCalendar days={streak_calendar} />
           <div className="flex items-center gap-3 mt-4 text-xs text-slate-400">
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-indigo-500" /> Active</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-brand-teal-500" /> Active</span>
             <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-slate-200 dark:bg-slate-700" /> Inactive</span>
           </div>
         </div>

@@ -637,7 +637,7 @@ ${note.aiInsights}
                     setQuizAnswers({});
                     setCurrentSection(0);
                   }}
-                  className="bg-gradient-to-r from-purple-500 to-blue-500"
+                  className="bg-gradient-to-r from-brand-blue-500 to-blue-500"
                 >
                   Back to Study Material
                 </Button>
@@ -792,7 +792,7 @@ ${note.aiInsights}
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-purple-600">{Math.floor(studyTime / 60)}</div>
+              <div className="text-2xl font-bold text-brand-blue-600">{Math.floor(studyTime / 60)}</div>
               <div className="text-sm text-muted-foreground">Minutes Studied</div>
             </CardContent>
           </Card>
@@ -846,10 +846,10 @@ ${note.aiInsights}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-lg">
+              <div className="bg-gradient-to-r from-brand-blue-50 to-blue-50 p-6 rounded-lg">
                 <h3 className="font-semibold text-lg mb-2">Your Learning Path</h3>
-                <p className="text-purple-800 mb-4">{selectedNote.summary}</p>
-                <div className="text-sm text-purple-700">
+                <p className="text-brand-blue-800 mb-4">{selectedNote.summary}</p>
+                <div className="text-sm text-brand-blue-700">
                   <strong>AI Strategy:</strong> {selectedNote.aiInsights}
                 </div>
               </div>
@@ -917,7 +917,7 @@ ${note.aiInsights}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Brain className="h-5 w-5 text-purple-600" />
+                <Brain className="h-5 w-5 text-brand-blue-600" />
                 <span>Master Key Concepts</span>
               </CardTitle>
               <CardDescription>Click concepts when you understand them completely</CardDescription>
@@ -936,13 +936,13 @@ ${note.aiInsights}
                     <div className="flex items-start space-x-3">
                       <div className="flex-shrink-0">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                          isMastered ? 'bg-green-500 text-white' : 'bg-purple-100 text-purple-600'
+                          isMastered ? 'bg-green-500 text-white' : 'bg-brand-blue-100 text-brand-blue-600'
                         }`}>
                           {isMastered ? <CheckCircle className="h-5 w-5" /> : <span className="font-semibold text-sm">{index + 1}</span>}
                         </div>
                       </div>
                       <div className="flex-1">
-                        <h4 className={`font-semibold ${isMastered ? 'text-green-900' : 'text-purple-900'}`}>
+                        <h4 className={`font-semibold ${isMastered ? 'text-green-900' : 'text-brand-blue-900'}`}>
                           {concept.term}
                         </h4>
                         <p className="text-sm text-gray-700 mt-1">{concept.definition}</p>
@@ -1129,7 +1129,7 @@ ${note.aiInsights}
   return (
     <div className="space-y-6">
       <div className="text-center space-y-4">
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-brand-blue-600 to-blue-600 bg-clip-text text-transparent">
           AI Study Mentor
         </h2>
         <p className="text-muted-foreground">
@@ -1139,13 +1139,13 @@ ${note.aiInsights}
 
       {/* Upload Section */}
       <Card 
-        className="border-2 border-dashed border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50"
+        className="border-2 border-dashed border-brand-blue-200 bg-gradient-to-br from-brand-blue-50 to-blue-50"
         onDrop={handleDrop}
         onDragOver={handleDragOver}
       >
         <CardContent className="flex flex-col items-center justify-center py-12">
-          <div className="p-4 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full mb-4">
-            {loading ? <Upload className="h-8 w-8 text-purple-600 animate-pulse" /> : <Plus className="h-8 w-8 text-purple-600" />}
+          <div className="p-4 bg-gradient-to-br from-brand-blue-100 to-blue-100 rounded-full mb-4">
+            {loading ? <Upload className="h-8 w-8 text-brand-blue-600 animate-pulse" /> : <Plus className="h-8 w-8 text-brand-blue-600" />}
           </div>
           <h3 className="text-xl font-semibold mb-2">Upload Your Study Material</h3>
           <p className="text-muted-foreground text-center mb-6">
@@ -1155,7 +1155,7 @@ ${note.aiInsights}
           <Button 
             onClick={handleChooseFiles} 
             disabled={loading}
-            className="bg-gradient-to-r from-purple-500 to-blue-500"
+            className="bg-gradient-to-r from-brand-blue-500 to-blue-500"
           >
             {loading ? (
               <>
@@ -1193,7 +1193,7 @@ ${note.aiInsights}
         
         {loadingNotes ? (
           <div className="text-center py-8">
-            <Brain className="h-8 w-8 animate-pulse mx-auto mb-2 text-purple-600" />
+            <Brain className="h-8 w-8 animate-pulse mx-auto mb-2 text-brand-blue-600" />
             <p className="text-muted-foreground">Loading your learning materials...</p>
           </div>
         ) : uploadedNotes.length === 0 ? (
@@ -1215,7 +1215,7 @@ ${note.aiInsights}
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <CardTitle className="flex items-center space-x-2">
-                      <Book className="h-5 w-5 text-purple-600" />
+                      <Book className="h-5 w-5 text-brand-blue-600" />
                       <span>{note.title}</span>
                       {note.completed && (
                         <Badge className="ml-2 bg-green-500">
@@ -1250,9 +1250,9 @@ ${note.aiInsights}
 
                 {/* Learning Content Preview */}
                 {note.processed && (
-                  <div className="grid grid-cols-4 gap-4 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
+                  <div className="grid grid-cols-4 gap-4 p-4 bg-gradient-to-r from-brand-blue-50 to-blue-50 rounded-lg">
                     <div className="text-center">
-                      <div className="text-lg font-semibold text-purple-600">
+                      <div className="text-lg font-semibold text-brand-blue-600">
                         {note.highlights?.length || 0}
                       </div>
                       <div className="text-xs text-muted-foreground">Key Highlights</div>
@@ -1279,12 +1279,12 @@ ${note.aiInsights}
                 )}
 
                 {/* AI Learning Strategy */}
-                <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg">
+                <div className="bg-gradient-to-r from-brand-blue-50 to-blue-50 p-4 rounded-lg">
                   <div className="flex items-center space-x-2 mb-2">
-                    <Star className="h-4 w-4 text-purple-600" />
-                    <h4 className="font-medium text-purple-800">AI Learning Strategy</h4>
+                    <Star className="h-4 w-4 text-brand-blue-600" />
+                    <h4 className="font-medium text-brand-blue-800">AI Learning Strategy</h4>
                   </div>
-                  <p className="text-sm text-purple-700">{note.aiInsights}</p>
+                  <p className="text-sm text-brand-blue-700">{note.aiInsights}</p>
                 </div>
 
                 {/* Action Buttons */}
@@ -1296,7 +1296,7 @@ ${note.aiInsights}
                   <div className="flex space-x-2">
                     <Button 
                       size="sm" 
-                      className="bg-gradient-to-r from-purple-500 to-blue-500 flex items-center space-x-2" 
+                      className="bg-gradient-to-r from-brand-blue-500 to-blue-500 flex items-center space-x-2" 
                       disabled={!note.processed}
                       onClick={() => startLearning(note)}
                     >

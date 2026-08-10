@@ -26,19 +26,19 @@ export const Instructions = ({
       <CardContent className="space-y-6">
         <div className="space-y-4">
           <div className="flex items-start space-x-3">
-            <div className="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">1</div>
+            <div className="bg-brand-blue-100 text-brand-blue-600 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">1</div>
             <p>Read the passage about <strong>{moduleData?.name}</strong> at your natural pace</p>
           </div>
           <div className="flex items-start space-x-3">
-            <div className="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">2</div>
+            <div className="bg-brand-blue-100 text-brand-blue-600 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">2</div>
             <p>Use the timer controls to track your reading time accurately</p>
           </div>
           <div className="flex items-start space-x-3">
-            <div className="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">3</div>
+            <div className="bg-brand-blue-100 text-brand-blue-600 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">3</div>
             <p>Answer comprehension questions based on what you read</p>
           </div>
           <div className="flex items-start space-x-3">
-            <div className="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">4</div>
+            <div className="bg-brand-blue-100 text-brand-blue-600 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">4</div>
             <p>Get your personalized reading speed and comprehension score</p>
           </div>
         </div>

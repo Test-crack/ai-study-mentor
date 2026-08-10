@@ -35,7 +35,7 @@ export default function Subscription() {
   // Helper for plan text styling
   const getPlanColor = (type: string) => {
     if (type === 'enterprise') return 'text-blue-500 dark:text-[#3B82F6]';
-    return 'text-purple-600 dark:text-[#A78BFA]';
+    return 'text-brand-blue-600 dark:text-[#4E8CA6]';
   };
 
   return (
@@ -91,7 +91,7 @@ export default function Subscription() {
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-transparent border border-slate-200 dark:border-gray-800 rounded-lg text-sm focus:outline-none focus:border-indigo-500 dark:focus:border-[#8B5CF6] transition-all text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 shadow-sm"
+                className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-transparent border border-slate-200 dark:border-gray-800 rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:focus:border-[#256B8B] transition-all text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 shadow-sm"
               />
             </div>
 

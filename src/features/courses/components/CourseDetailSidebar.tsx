@@ -113,7 +113,7 @@ export function CourseDetailSidebar({
     if (!user) {
       return (
         <Button
-          className="w-full bg-purple-600 hover:bg-purple-700 text-white py-6 text-lg font-semibold"
+          className="w-full bg-brand-blue-600 hover:bg-brand-blue-700 text-white py-6 text-lg font-semibold"
           onClick={() => navigate('/login')}
         >
           <LogIn className="h-5 w-5 mr-2" />
@@ -125,7 +125,7 @@ export function CourseDetailSidebar({
     if (!course.isEnrolled) {
       return (
         <Button
-          className="w-full bg-purple-600 hover:bg-purple-700 text-white py-6 text-lg font-semibold"
+          className="w-full bg-brand-blue-600 hover:bg-brand-blue-700 text-white py-6 text-lg font-semibold"
           onClick={() => setShowEnrollModal(true)}
         >
           {course.price && course.price > 0 ? 'Enroll Now' : 'Enroll for Free'}
@@ -208,7 +208,7 @@ export function CourseDetailSidebar({
       <div className="lg:sticky lg:top-24">
         <Card className="overflow-hidden shadow-lg">
           {/* Course Preview Image */}
-          <div className="h-48 bg-gradient-to-br from-purple-600 to-indigo-700 relative">
+          <div className="h-48 bg-gradient-to-br from-brand-blue-600 to-brand-teal-700 relative">
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors">
                 <PlayCircle className="h-10 w-10 text-white" />
@@ -234,7 +234,7 @@ export function CourseDetailSidebar({
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">Your Progress</span>
-                  <span className="font-semibold text-purple-600">
+                  <span className="font-semibold text-brand-blue-600">
                     {course.progressPercent ?? course.enrollment?.progress_percent ?? 0}%
                   </span>
                 </div>

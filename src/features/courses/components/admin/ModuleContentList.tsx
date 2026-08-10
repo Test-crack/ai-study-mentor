@@ -46,14 +46,14 @@ export const ModuleContentList = ({
       {contentItems.map((item, index) => (
         <div 
           key={item.id}
-          className="group flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-100 hover:shadow-sm hover:border-indigo-100 transition-all"
+          className="group flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-100 hover:shadow-sm hover:border-brand-teal-100 transition-all"
         >
-          <GripVertical className="h-4 w-4 text-slate-300 cursor-grab active:cursor-grabbing hover:text-indigo-400" />
+          <GripVertical className="h-4 w-4 text-slate-300 cursor-grab active:cursor-grabbing hover:text-brand-teal-400" />
           
           <div className={`h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
             item.type === ContentType.NOTES 
               ? "bg-blue-50 text-blue-600" 
-              : "bg-purple-50 text-purple-600"
+              : "bg-brand-blue-50 text-brand-blue-600"
           }`}>
             {item.type === ContentType.NOTES ? (
               <FileText className="h-4 w-4" />
@@ -87,7 +87,7 @@ export const ModuleContentList = ({
             <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"
+                className="h-8 w-8 text-slate-400 hover:text-brand-teal-600 hover:bg-brand-teal-50 rounded-lg"
                 onClick={() => onPreview(item)}
             >
                 <Eye className="h-3.5 w-3.5" />
@@ -95,7 +95,7 @@ export const ModuleContentList = ({
             <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"
+                className="h-8 w-8 text-slate-400 hover:text-brand-teal-600 hover:bg-brand-teal-50 rounded-lg"
                 onClick={() => onEdit(item)}
             >
                 <Pencil className="h-3.5 w-3.5" />

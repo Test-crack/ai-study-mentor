@@ -111,7 +111,7 @@ export default function BatchInsight() {
 
   const topMetrics = [
     { title: 'Total Batches',   value: String(batches.length),                                    subtext: 'Across institute',                          icon: BookOpen,      accent: 'bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' },
-    { title: 'Total Students',  value: String(summary?.total_students ?? '—'),                    subtext: `${summary?.active_today ?? 0} active today`, icon: Users,         accent: 'bg-indigo-100 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' },
+    { title: 'Total Students',  value: String(summary?.total_students ?? '—'),                    subtext: `${summary?.active_today ?? 0} active today`, icon: Users,         accent: 'bg-brand-teal-100 dark:bg-brand-teal-500/10 text-brand-teal-600 dark:text-brand-teal-400' },
     { title: 'Avg Band Score',  value: summary?.avg_band != null ? summary.avg_band.toFixed(1) : '—', subtext: 'Across all students',                   icon: BarChart2,     accent: 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
     { title: 'At Risk',         value: String(summary?.at_risk_count ?? '—'),                     subtext: `IA completion: ${iaCompRate}% (7d)`,        icon: AlertTriangle, accent: 'bg-rose-100 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400' },
   ];
@@ -139,19 +139,19 @@ export default function BatchInsight() {
           <div className="max-w-[1400px] mx-auto">
 
             {/* ── Hero Banner ─────────────────────────────────────────────── */}
-            <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-indigo-100/80 dark:border-white/[0.06] bg-gradient-to-r from-[#eff4ff] via-[#f4f1ff] to-[#f3f0ff] dark:from-[#111827] dark:via-[#161a38] dark:to-[#1e1b4b] px-5 sm:px-8 pt-6 sm:pt-8 pb-20 sm:pb-24 shadow-sm">
+            <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-brand-teal-100/80 dark:border-white/[0.06] bg-gradient-to-r from-[#eff4ff] via-[#f4f1ff] to-[#f3f0ff] dark:from-[#111827] dark:via-[#161a38] dark:to-[#1e1b4b] px-5 sm:px-8 pt-6 sm:pt-8 pb-20 sm:pb-24 shadow-sm">
               <div aria-hidden className="pointer-events-none select-none absolute inset-0">
-                <div className="absolute -top-20 -right-12 w-64 h-64 rounded-full bg-indigo-300/25 dark:bg-indigo-500/15 blur-3xl" />
-                <div className="absolute -bottom-28 left-1/3 w-72 h-72 rounded-full bg-violet-300/20 dark:bg-violet-500/10 blur-3xl" />
+                <div className="absolute -top-20 -right-12 w-64 h-64 rounded-full bg-brand-teal-300/25 dark:bg-brand-teal-500/15 blur-3xl" />
+                <div className="absolute -bottom-28 left-1/3 w-72 h-72 rounded-full bg-brand-blue-300/20 dark:bg-brand-blue-500/10 blur-3xl" />
                 <div className="absolute top-8 -left-10 w-44 h-44 rounded-full bg-sky-300/20 dark:bg-sky-500/10 blur-3xl" />
               </div>
 
               <div className="relative">
-                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-300 bg-white/60 dark:bg-white/[0.06] border border-white/70 dark:border-white/[0.08] backdrop-blur px-2.5 py-1 rounded-full">
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-brand-teal-600 dark:text-brand-teal-300 bg-white/60 dark:bg-white/[0.06] border border-white/70 dark:border-white/[0.08] backdrop-blur px-2.5 py-1 rounded-full">
                    Owner Portal
                 </span>
                 <h1 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                  Batch <span className="text-indigo-600 dark:text-indigo-400">Insights</span>
+                  Batch <span className="text-brand-teal-600 dark:text-brand-teal-400">Insights</span>
                 </h1>
                 <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
                   Overview of all your institute batches. Click a batch to view detailed analytics.
@@ -211,12 +211,12 @@ export default function BatchInsight() {
                           <div
                             key={batch.id}
                             onClick={() => navigate(`/institute-owner/batches/${toSlug(batch.name)}/analytics`, { state: { batchId: batch.id } })}
-                            className="bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-indigo-300/70 dark:hover:border-indigo-500/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group"
+                            className="bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-brand-teal-300/70 dark:hover:border-brand-teal-500/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group"
                           >
                             {/* Left Column: Info */}
                             <div className="md:w-1/4">
                               <div className="flex items-center gap-2 mb-1">
-                                <h3 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                <h3 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white group-hover:text-brand-teal-600 dark:group-hover:text-brand-teal-400 transition-colors">
                                   {batch.name}
                                 </h3>
                                 <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ring-1 ring-inset ${statusStyle.badge}`}>
@@ -260,7 +260,7 @@ export default function BatchInsight() {
                                   </div>
                                   <div className="w-full bg-slate-100 dark:bg-white/[0.06] rounded-full h-1.5 mb-2 overflow-hidden">
                                     <div
-                                      className="bg-gradient-to-r from-indigo-500 to-violet-500 h-1.5 rounded-full transition-all"
+                                      className="bg-gradient-to-r from-brand-teal-500 to-brand-blue-500 h-1.5 rounded-full transition-all"
                                       style={{ width: `${Math.min(100, capacityPercentage)}%` }}
                                     />
                                   </div>
@@ -272,8 +272,8 @@ export default function BatchInsight() {
                                   <p className="text-xs text-slate-400 dark:text-slate-500">{enrolled} enrolled</p>
                                 </div>
                               )}
-                              <div className="h-8 w-8 rounded-full bg-slate-50 dark:bg-white/[0.04] group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/15 flex items-center justify-center shrink-0 transition-colors">
-                                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-500 group-hover:translate-x-0.5 transition-all" />
+                              <div className="h-8 w-8 rounded-full bg-slate-50 dark:bg-white/[0.04] group-hover:bg-brand-teal-50 dark:group-hover:bg-brand-teal-500/15 flex items-center justify-center shrink-0 transition-colors">
+                                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-brand-teal-500 group-hover:translate-x-0.5 transition-all" />
                               </div>
                             </div>
                           </div>

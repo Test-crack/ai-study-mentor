@@ -84,7 +84,7 @@ export const NotificationBell = () => {
             {unreadCount > 0 ? (
               <button
                 onClick={markAllRead}
-                className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors"
+                className="text-xs font-semibold text-brand-teal-600 dark:text-brand-teal-400 hover:text-brand-teal-800 dark:hover:text-brand-teal-300 transition-colors"
               >
                 Mark all read
               </button>
@@ -121,7 +121,7 @@ export const NotificationBell = () => {
                         <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
                           {cfg.title(item.n)}
                         </p>
-                        {item.unread && <span className="w-2 h-2 rounded-full bg-indigo-500 shrink-0" />}
+                        {item.unread && <span className="w-2 h-2 rounded-full bg-brand-teal-500 shrink-0" />}
                         {item.isCta && (
                           <span className="text-[10px] font-bold uppercase tracking-wide text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-1.5 py-0.5 rounded shrink-0">
                             Action

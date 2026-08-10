@@ -179,12 +179,12 @@ function StudentRow({
   };
 
   return (
-    <div className="flex items-center gap-3 py-2.5 px-4 rounded-xl hover:bg-indigo-50/50 dark:hover:bg-indigo-500/[0.06] transition-colors group">
+    <div className="flex items-center gap-3 py-2.5 px-4 rounded-xl hover:bg-brand-teal-50/50 dark:hover:bg-brand-teal-500/[0.06] transition-colors group">
       {/* Avatar */}
       {student.profileImage ? (
         <img src={student.profileImage} alt="" className="w-9 h-9 rounded-full object-cover shrink-0 ring-2 ring-white dark:ring-white/[0.06]" />
       ) : (
-        <div className="w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center text-xs font-black text-indigo-600 dark:text-indigo-400 shrink-0">
+        <div className="w-9 h-9 rounded-full bg-brand-teal-100 dark:bg-brand-teal-500/20 flex items-center justify-center text-xs font-black text-brand-teal-600 dark:text-brand-teal-400 shrink-0">
           {getInitials(student.name, student.email)}
         </div>
       )}
@@ -244,7 +244,7 @@ function StudentRow({
         <div className="w-20 flex justify-end">
           <button
             onClick={goToProgress}
-            className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+            className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-brand-teal-600 dark:text-brand-teal-400 hover:text-brand-teal-700 dark:hover:text-brand-teal-300 bg-brand-teal-50 dark:bg-brand-teal-500/10 hover:bg-brand-teal-100 dark:hover:bg-brand-teal-500/20 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
           >
             View <ArrowRight className="w-3 h-3" />
           </button>
@@ -254,7 +254,7 @@ function StudentRow({
       {/* Mobile-only View button */}
       <button
         onClick={goToProgress}
-        className="sm:hidden flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 rounded-lg shrink-0"
+        className="sm:hidden flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-brand-teal-600 dark:text-brand-teal-400 bg-brand-teal-50 dark:bg-brand-teal-500/10 rounded-lg shrink-0"
       >
         View <ArrowRight className="w-3 h-3" />
       </button>
@@ -280,7 +280,7 @@ function BatchSummaryBar({ batch, enrichment }: { batch: InstructorBatch; enrich
       ? { label: `Avg Band: ${avgBand.toFixed(1)}`, cls: bandColorText(avgBand), icon: null }
       : null,
     activeToday !== null
-      ? { label: `${activeToday} active today`, cls: 'text-indigo-600 dark:text-indigo-400', icon: null }
+      ? { label: `${activeToday} active today`, cls: 'text-brand-teal-600 dark:text-brand-teal-400', icon: null }
       : null,
     atRiskCount !== null && atRiskCount > 0
       ? { label: `${atRiskCount} at risk`, cls: 'text-rose-600 dark:text-rose-400', icon: <AlertTriangle className="w-3 h-3" /> }
@@ -349,7 +349,7 @@ function BatchCard({
       >
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-4 min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shrink-0 shadow-md shadow-indigo-500/25">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-teal-500 to-brand-blue-600 flex items-center justify-center shrink-0 shadow-md shadow-brand-teal-500/25">
               <Layers className="w-5 h-5 text-white" />
             </div>
             <div className="min-w-0">
@@ -379,14 +379,14 @@ function BatchCard({
         {/* Stats row */}
         <div className="mt-4 flex items-center gap-5 flex-wrap">
           <div className="flex items-center gap-2">
-            <GraduationCap className="w-3.5 h-3.5 text-indigo-500" />
+            <GraduationCap className="w-3.5 h-3.5 text-brand-teal-500" />
             <span className="text-sm font-bold text-slate-800 dark:text-white">{batch.studentCount}</span>
             <span className="text-xs text-slate-400 dark:text-slate-500">
               {batch.maxStudents ? `/ ${batch.maxStudents} ` : ''}students
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <Users className="w-3.5 h-3.5 text-violet-500" />
+            <Users className="w-3.5 h-3.5 text-brand-blue-500" />
             <span className="text-xs text-slate-500 dark:text-slate-400">
               {batch.instructorCount} instructor{batch.instructorCount !== 1 ? 's' : ''}
             </span>
@@ -419,10 +419,10 @@ function BatchCard({
             <div className="px-5 py-3 border-b border-slate-100 dark:border-white/[0.05] flex items-center gap-2 flex-wrap">
               <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mr-1">Co-instructors:</span>
               {batch.instructors.map(i => (
-                <span key={i.userId} className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 text-xs font-medium border border-violet-200 dark:border-violet-500/20">
+                <span key={i.userId} className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-brand-blue-50 dark:bg-brand-blue-500/10 text-brand-blue-700 dark:text-brand-blue-300 text-xs font-medium border border-brand-blue-200 dark:border-brand-blue-500/20">
                   {i.profileImage
                     ? <img src={i.profileImage} className="w-4 h-4 rounded-full object-cover" alt="" />
-                    : <span className="w-4 h-4 rounded-full bg-violet-200 dark:bg-violet-700 flex items-center justify-center text-[9px] font-bold">{getInitials(i.name, i.email)}</span>
+                    : <span className="w-4 h-4 rounded-full bg-brand-blue-200 dark:bg-brand-blue-700 flex items-center justify-center text-[9px] font-bold">{getInitials(i.name, i.email)}</span>
                   }
                   {i.name ?? i.email}
                 </span>
@@ -439,7 +439,7 @@ function BatchCard({
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Search students…"
-                className="w-full pl-9 pr-4 py-2 text-sm bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.07] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
+                className="w-full pl-9 pr-4 py-2 text-sm bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.07] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-teal-500/30 text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
               />
             </div>
             {enrichLoading && (
@@ -531,7 +531,7 @@ export default function InstructorBatchView() {
       {/* Ambient page glows (dark only) */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden hidden dark:block">
         <div className="absolute -top-60 left-1/4 w-[44rem] h-[44rem] rounded-full bg-blue-700/10 blur-[140px]" />
-        <div className="absolute -bottom-20 -left-20 w-[32rem] h-[32rem] rounded-full bg-indigo-600/8 blur-[130px]" />
+        <div className="absolute -bottom-20 -left-20 w-[32rem] h-[32rem] rounded-full bg-brand-teal-600/8 blur-[130px]" />
       </div>
 
       <InstructorSidebar
@@ -560,9 +560,9 @@ export default function InstructorBatchView() {
               </div>
               <button
                 onClick={load}
-                className="p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-colors"
+                className="p-2 rounded-xl text-slate-400 hover:text-brand-teal-600 dark:hover:text-brand-teal-400 hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-colors"
               >
-                <RefreshCw className={cn('w-4 h-4', loading && 'animate-spin text-indigo-500')} />
+                <RefreshCw className={cn('w-4 h-4', loading && 'animate-spin text-brand-teal-500')} />
               </button>
             </div>
 
@@ -576,8 +576,8 @@ export default function InstructorBatchView() {
               </>
             ) : batches.length === 0 ? (
               <div className="py-24 text-center bg-white dark:bg-[#0E0E16] rounded-2xl border border-slate-200/70 dark:border-white/[0.06] shadow-[0_2px_12px_-4px_rgba(15,23,42,0.08)] dark:shadow-none">
-                <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center mx-auto mb-4">
-                  <Layers className="w-8 h-8 text-indigo-400" />
+                <div className="w-16 h-16 rounded-2xl bg-brand-teal-50 dark:bg-brand-teal-500/10 flex items-center justify-center mx-auto mb-4">
+                  <Layers className="w-8 h-8 text-brand-teal-400" />
                 </div>
                 <h3 className="font-bold text-slate-900 dark:text-white">No batches assigned yet</h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-xs mx-auto">
@@ -589,9 +589,9 @@ export default function InstructorBatchView() {
                 {/* Summary stat cards — tinted like Engagement Pulse */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {[
-                    { label: 'Total Batches',  value: totals.batches,  cls: 'text-indigo-700 dark:text-indigo-300',  cardBg: 'bg-indigo-50/80 border-indigo-100 dark:bg-indigo-950/40 dark:border-indigo-500/20 dark:shadow-[0_0_28px_rgba(99,102,241,0.18)]' },
+                    { label: 'Total Batches',  value: totals.batches,  cls: 'text-brand-teal-700 dark:text-brand-teal-300',  cardBg: 'bg-brand-teal-50/80 border-brand-teal-100 dark:bg-brand-teal-950/40 dark:border-brand-teal-500/20 dark:shadow-[0_0_28px_rgba(99,102,241,0.18)]' },
                     { label: 'Active Batches', value: totals.active,   cls: 'text-emerald-700 dark:text-emerald-300', cardBg: 'bg-emerald-50/80 border-emerald-100 dark:bg-emerald-950/40 dark:border-emerald-500/20 dark:shadow-[0_0_28px_rgba(16,185,129,0.15)]' },
-                    { label: 'Total Students', value: totals.students, cls: 'text-violet-700 dark:text-violet-300',   cardBg: 'bg-violet-50/80 border-violet-100 dark:bg-violet-950/40 dark:border-violet-500/20 dark:shadow-[0_0_28px_rgba(139,92,246,0.16)]' },
+                    { label: 'Total Students', value: totals.students, cls: 'text-brand-blue-700 dark:text-brand-blue-300',   cardBg: 'bg-brand-blue-50/80 border-brand-blue-100 dark:bg-brand-blue-950/40 dark:border-brand-blue-500/20 dark:shadow-[0_0_28px_rgba(139,92,246,0.16)]' },
                   ].map(s => (
                     <div key={s.label} className={cn(
                       'rounded-2xl border p-5 text-center transition-all duration-200 hover:-translate-y-0.5',

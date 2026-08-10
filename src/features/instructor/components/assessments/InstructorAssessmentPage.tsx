@@ -61,7 +61,7 @@ export default function InstructorAssessmentPage() {
       {/* Ambient page glows (dark only) */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden hidden dark:block">
         <div className="absolute -top-60 left-1/4 w-[44rem] h-[44rem] rounded-full bg-blue-700/10 blur-[140px]" />
-        <div className="absolute -bottom-20 -left-20 w-[32rem] h-[32rem] rounded-full bg-indigo-600/8 blur-[130px]" />
+        <div className="absolute -bottom-20 -left-20 w-[32rem] h-[32rem] rounded-full bg-brand-teal-600/8 blur-[130px]" />
       </div>
 
       <InstructorSidebar
@@ -93,7 +93,7 @@ export default function InstructorAssessmentPage() {
                 {data && (
                   <button
                     onClick={refetch}
-                    className="p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-colors"
+                    className="p-2 rounded-xl text-slate-400 hover:text-brand-teal-600 dark:hover:text-brand-teal-400 hover:bg-brand-teal-50 dark:hover:bg-brand-teal-500/10 transition-colors"
                     title="Refresh"
                   >
                     <RefreshCw className="h-4 w-4" />
@@ -165,7 +165,7 @@ export default function InstructorAssessmentPage() {
                         className={cn(
                           'flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 whitespace-nowrap',
                           activeTab === tab.id
-                            ? 'bg-indigo-600 text-white shadow-[0_4px_14px_-2px_rgba(99,102,241,0.5)] dark:bg-indigo-500/15 dark:text-indigo-300 dark:border dark:border-indigo-500/20 dark:shadow-[0_0_20px_rgba(99,102,241,0.15)]'
+                            ? 'bg-brand-teal-600 text-white shadow-[0_4px_14px_-2px_rgba(99,102,241,0.5)] dark:bg-brand-teal-500/15 dark:text-brand-teal-300 dark:border dark:border-brand-teal-500/20 dark:shadow-[0_0_20px_rgba(99,102,241,0.15)]'
                             : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/[0.04]'
                         )}
                       >

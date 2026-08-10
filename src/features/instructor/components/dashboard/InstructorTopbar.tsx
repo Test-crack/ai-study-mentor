@@ -92,7 +92,7 @@ export const InstructorTopbar = ({ onCreateCourse }: InstructorTopbarProps) => {
             className={[
               "h-8 w-8 cursor-pointer shrink-0",
               "ring-2 ring-slate-100 dark:ring-white/[0.06]",
-              "hover:ring-indigo-200 dark:hover:ring-indigo-500/30",
+              "hover:ring-brand-teal-200 dark:hover:ring-brand-teal-500/30",
               "transition-all duration-200",
               "border-2 border-white dark:border-[#0D0D14]",
               "shadow-sm",
@@ -100,7 +100,7 @@ export const InstructorTopbar = ({ onCreateCourse }: InstructorTopbarProps) => {
             onClick={() => navigate('/profile')}
           >
             <AvatarImage src={profile?.profileImage || ""} />
-            <AvatarFallback className="bg-indigo-600 text-white text-xs font-black">
+            <AvatarFallback className="bg-brand-teal-600 text-white text-xs font-black">
               {displayName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>

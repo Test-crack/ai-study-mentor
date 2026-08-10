@@ -66,7 +66,7 @@ export function CoursesPagination({
               onClick={() => onPageChange(page)}
               className={
                 currentPage === page
-                  ? 'bg-purple-600 hover:bg-purple-700'
+                  ? 'bg-brand-blue-600 hover:bg-brand-blue-700'
                   : 'hover:bg-gray-100'
               }
             >

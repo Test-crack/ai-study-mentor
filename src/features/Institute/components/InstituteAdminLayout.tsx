@@ -21,7 +21,7 @@ export const InstituteAdminLayout = ({ children, activeTab }: InstituteAdminLayo
       {/* Ambient glow layer — dark mode only */}
       <div className="pointer-events-none fixed inset-0 hidden dark:block">
         <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-700/10 blur-[140px] rounded-full"></div>
-        <div className="absolute bottom-0 left-0 w-[450px] h-[450px] bg-indigo-600/[0.08] blur-[130px] rounded-full"></div>
+        <div className="absolute bottom-0 left-0 w-[450px] h-[450px] bg-brand-teal-600/[0.08] blur-[130px] rounded-full"></div>
       </div>
 
       {/* Sidebar — hidden on mobile, surfaced via the topbar Sheet */}

@@ -99,12 +99,12 @@ export default function LexiGridGame() {
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-10 text-center shadow-sm">
           <Trophy className="w-16 h-16 text-amber-500 mx-auto mb-4" />
           <h2 className="text-3xl font-black text-slate-800 dark:text-white mb-2">Session Complete!</h2>
-          <p className="text-slate-500 mb-6">You scored <strong className="text-indigo-500">{score} / {ROUNDS.length * 2}</strong> points</p>
-          <div className="flex items-center justify-center gap-2 bg-indigo-50 dark:bg-indigo-500/10 rounded-2xl px-6 py-3 mb-8 inline-flex mx-auto">
-            <Zap className="w-5 h-5 text-indigo-500" />
-            <span className="text-lg font-black text-indigo-600 dark:text-indigo-400">+{score} Momentum added</span>
+          <p className="text-slate-500 mb-6">You scored <strong className="text-brand-teal-500">{score} / {ROUNDS.length * 2}</strong> points</p>
+          <div className="flex items-center justify-center gap-2 bg-brand-teal-50 dark:bg-brand-teal-500/10 rounded-2xl px-6 py-3 mb-8 inline-flex mx-auto">
+            <Zap className="w-5 h-5 text-brand-teal-500" />
+            <span className="text-lg font-black text-brand-teal-600 dark:text-brand-teal-400">+{score} Momentum added</span>
           </div>
-          <button onClick={handleRestart} className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white font-bold px-8 py-3 rounded-xl mx-auto transition-all">
+          <button onClick={handleRestart} className="flex items-center gap-2 bg-brand-teal-500 hover:bg-brand-teal-600 text-white font-bold px-8 py-3 rounded-xl mx-auto transition-all">
             <RotateCcw className="w-4 h-4" /> Play Again
           </button>
         </div>
@@ -118,15 +118,15 @@ export default function LexiGridGame() {
         {/* Progress */}
         <div className="flex items-center justify-between text-sm">
           <span className="font-bold text-slate-500">Round {roundIdx + 1} of {ROUNDS.length}</span>
-          <span className="font-black text-indigo-500 flex items-center gap-1"><Zap className="w-3.5 h-3.5" /> {score} pts</span>
+          <span className="font-black text-brand-teal-500 flex items-center gap-1"><Zap className="w-3.5 h-3.5" /> {score} pts</span>
         </div>
         <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-          <div className="h-full bg-indigo-500 rounded-full transition-all duration-500" style={{ width: `${((roundIdx) / ROUNDS.length) * 100}%` }} />
+          <div className="h-full bg-brand-teal-500 rounded-full transition-all duration-500" style={{ width: `${((roundIdx) / ROUNDS.length) * 100}%` }} />
         </div>
 
         {/* Clue card */}
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-7 shadow-sm">
-          <p className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-3">Clue</p>
+          <p className="text-xs font-black text-brand-teal-400 uppercase tracking-widest mb-3">Clue</p>
           <p className="text-xl font-bold text-slate-800 dark:text-white leading-relaxed mb-2">{round.clue}</p>
           <p className="text-sm text-slate-400 font-mono">{round.hint}</p>
         </div>
@@ -146,9 +146,9 @@ export default function LexiGridGame() {
                     ? 'bg-emerald-100 dark:bg-emerald-500/20 border-emerald-400'
                     : 'bg-rose-100 dark:bg-rose-500/20 border-rose-400';
               } else if (i === activeCell) {
-                bg = 'bg-indigo-100 dark:bg-indigo-500/20 border-indigo-400 ring-2 ring-indigo-300';
+                bg = 'bg-brand-teal-100 dark:bg-brand-teal-500/20 border-brand-teal-400 ring-2 ring-brand-teal-300';
               } else if (cells[i]) {
-                bg = 'bg-indigo-50 dark:bg-indigo-500/10 border-indigo-300';
+                bg = 'bg-brand-teal-50 dark:bg-brand-teal-500/10 border-brand-teal-300';
               }
               return (
                 <div
@@ -176,7 +176,7 @@ export default function LexiGridGame() {
                         const e = new KeyboardEvent('keydown', { key: letter });
                         window.dispatchEvent(e);
                       }}
-                      className="w-9 h-9 bg-slate-100 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-300 transition-colors"
+                      className="w-9 h-9 bg-slate-100 dark:bg-slate-800 hover:bg-brand-teal-100 dark:hover:bg-brand-teal-500/20 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-300 transition-colors"
                     >
                       {letter}
                     </button>
@@ -214,7 +214,7 @@ export default function LexiGridGame() {
               <button
                 onClick={handleCheck}
                 disabled={cells.some(c => c === '')}
-                className="ml-auto bg-indigo-500 hover:bg-indigo-600 disabled:opacity-40 text-white font-bold px-6 py-2.5 rounded-xl transition-all text-sm"
+                className="ml-auto bg-brand-teal-500 hover:bg-brand-teal-600 disabled:opacity-40 text-white font-bold px-6 py-2.5 rounded-xl transition-all text-sm"
               >
                 Check Answer
               </button>

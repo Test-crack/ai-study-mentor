@@ -47,8 +47,8 @@ function AvatarCell({ name, avatar }: { name: string; avatar: string | null }) {
       {avatar ? (
         <img src={avatar} alt={name} className="h-8 w-8 rounded-full object-cover flex-shrink-0 ring-1 ring-slate-200/70 dark:ring-white/10" />
       ) : (
-        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-500/20 dark:to-violet-500/20 ring-1 ring-indigo-200/60 dark:ring-indigo-500/20 flex items-center justify-center flex-shrink-0">
-          <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
+        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-teal-100 to-brand-blue-100 dark:from-brand-teal-500/20 dark:to-brand-blue-500/20 ring-1 ring-brand-teal-200/60 dark:ring-brand-teal-500/20 flex items-center justify-center flex-shrink-0">
+          <span className="text-xs font-bold text-brand-teal-600 dark:text-brand-teal-400">
             {name.charAt(0).toUpperCase()}
           </span>
         </div>
@@ -141,14 +141,14 @@ export default function InstituteStudentsPage() {
           <div className="max-w-[1400px] mx-auto">
 
             {/* ── Hero Banner ─────────────────────────────────────────────── */}
-            <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-indigo-100/80 dark:border-white/[0.06] bg-gradient-to-r from-[#eff4ff] via-[#f4f1ff] to-[#f3f0ff] dark:from-[#111827] dark:via-[#161a38] dark:to-[#1e1b4b] px-5 sm:px-8 pt-6 sm:pt-8 pb-16 sm:pb-20 shadow-sm">
+            <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-brand-teal-100/80 dark:border-white/[0.06] bg-gradient-to-r from-[#eff4ff] via-[#f4f1ff] to-[#f3f0ff] dark:from-[#111827] dark:via-[#161a38] dark:to-[#1e1b4b] px-5 sm:px-8 pt-6 sm:pt-8 pb-16 sm:pb-20 shadow-sm">
               <div aria-hidden className="pointer-events-none select-none absolute inset-0">
-                <div className="absolute -top-20 -right-12 w-64 h-64 rounded-full bg-indigo-300/25 dark:bg-indigo-500/15 blur-3xl" />
-                <div className="absolute -bottom-28 left-1/3 w-72 h-72 rounded-full bg-violet-300/20 dark:bg-violet-500/10 blur-3xl" />
+                <div className="absolute -top-20 -right-12 w-64 h-64 rounded-full bg-brand-teal-300/25 dark:bg-brand-teal-500/15 blur-3xl" />
+                <div className="absolute -bottom-28 left-1/3 w-72 h-72 rounded-full bg-brand-blue-300/20 dark:bg-brand-blue-500/10 blur-3xl" />
               </div>
 
               <div className="relative">
-                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-300 bg-white/60 dark:bg-white/[0.06] border border-white/70 dark:border-white/[0.08] backdrop-blur px-2.5 py-1 rounded-full">
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-brand-teal-600 dark:text-brand-teal-300 bg-white/60 dark:bg-white/[0.06] border border-white/70 dark:border-white/[0.08] backdrop-blur px-2.5 py-1 rounded-full">
            Owner Portal
                 </span>
                 <h1 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
@@ -170,7 +170,7 @@ export default function InstituteStudentsPage() {
                   placeholder="Search by name…"
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 dark:bg-white/[0.04] border border-slate-200/70 dark:border-white/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300 dark:focus:border-indigo-500/40 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 transition-colors"
+                  className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 dark:bg-white/[0.04] border border-slate-200/70 dark:border-white/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-teal-500/30 focus:border-brand-teal-300 dark:focus:border-brand-teal-500/40 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 transition-colors"
                 />
               </div>
 
@@ -178,7 +178,7 @@ export default function InstituteStudentsPage() {
               <select
                 value={batchFilter}
                 onChange={e => setBatchFilter(e.target.value)}
-                className="text-sm bg-slate-50 dark:bg-white/[0.04] border border-slate-200/70 dark:border-white/[0.08] rounded-xl px-3 py-2 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-colors"
+                className="text-sm bg-slate-50 dark:bg-white/[0.04] border border-slate-200/70 dark:border-white/[0.08] rounded-xl px-3 py-2 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500/30 transition-colors"
               >
                 <option value="">All Batches</option>
                 {batchOptions.map(([id, name]) => (
