@@ -31,6 +31,7 @@ type SectionState =
 type RecordState =
   | "idle"
   | "recording"
+  | "paused"
   | "recorded"
   | "uploading"
   | "processing"
@@ -1534,6 +1535,7 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
   const [elapsed, setElapsed] = useState(0);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [data, setData] = useState<any>(null);
   const [animBars] = useState(() => Array.from({ length: 12 }, () => Math.random()));
 
@@ -1551,12 +1553,13 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
   }, []);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const MAX_DURATION = 90;
 
-  const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current?.state === "recording") {
+  const finishRecording = useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       mediaRecorderRef.current.stop();
     }
     if (timerRef.current) clearInterval(timerRef.current);
@@ -1564,14 +1567,26 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
 
   useEffect(() => {
     if (elapsed >= MAX_DURATION && recordState === "recording") {
-      stopRecording();
+      setNotice("Time's up — your recording was finished automatically at 90 seconds.");
+      finishRecording();
     }
-  }, [elapsed, recordState, stopRecording]);
+  }, [elapsed, recordState, finishRecording]);
+
+  // Release the mic and stop the timer if the student navigates away mid-recording.
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (mediaRecorderRef.current) mediaRecorderRef.current.onstop = null;
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+    };
+  }, []);
 
   const startRecording = async () => {
     setError(null);
+    setNotice(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
       const mimeType = MediaRecorder.isTypeSupported("audio/webm")
         ? "audio/webm"
         : "audio/mp4";
@@ -1588,6 +1603,7 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
         setAudioBlob(blob);
         setRecordState("recorded");
         stream.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
       };
 
       mr.start(250);
@@ -1596,6 +1612,22 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
       timerRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
     } catch {
       setError("Microphone access denied. Please allow microphone access and try again.");
+    }
+  };
+
+  const pauseRecording = () => {
+    if (mediaRecorderRef.current?.state === "recording") {
+      mediaRecorderRef.current.pause();
+      if (timerRef.current) clearInterval(timerRef.current);
+      setRecordState("paused");
+    }
+  };
+
+  const resumeRecording = () => {
+    if (mediaRecorderRef.current?.state === "paused") {
+      mediaRecorderRef.current.resume();
+      timerRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
+      setRecordState("recording");
     }
   };
 
@@ -1627,6 +1659,7 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
     setAudioBlob(null);
     setElapsed(0);
     setError(null);
+    setNotice(null);
     setRecordState("idle");
   };
 
@@ -1638,7 +1671,7 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
         <div className="w-10 h-10 bg-brand-teal-wash border border-brand-teal-tint rounded-xl flex items-center justify-center text-xl">🎤</div>
         <div>
           <p className="font-manrope text-brand-ink font-bold text-[16px] tracking-[-0.02em]">Speaking Section</p>
-          <p className="text-brand-text-mute text-[13.5px] leading-[1.6]">Up to 90 seconds · Speak clearly and naturally</p>
+          <p className="text-brand-text-mute text-[13.5px] leading-[1.6]">Up to 90 seconds · Pause anytime · Speak clearly and naturally</p>
         </div>
       </div>
 
@@ -1658,21 +1691,22 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
           <ul className="text-brand-text text-[14px] space-y-2 leading-[1.6]">
             <li className="flex gap-2"><span className="text-brand-teal-600 font-bold">→</span>Read the prompt carefully before recording</li>
             <li className="flex gap-2"><span className="text-brand-teal-600 font-bold">→</span>Tap the button below to start — you have 90 seconds</li>
+            <li className="flex gap-2"><span className="text-brand-teal-600 font-bold">→</span>Need a moment? Tap again to pause — you won't lose your progress</li>
             <li className="flex gap-2"><span className="text-brand-teal-600 font-bold">→</span>Speak naturally — your response will be transcribed and scored</li>
           </ul>
         </div>
       )}
 
       <div className="flex flex-col items-center gap-5 py-4">
-        {recordState === "recording" && (
-          <div className="flex items-center gap-1 h-12">
+        {(recordState === "recording" || recordState === "paused") && (
+          <div className={`flex items-center gap-1 h-12 transition-opacity duration-200 ${recordState === "paused" ? "opacity-30" : ""}`}>
             {animBars.map((h, i) => (
               <div
                 key={i}
                 className="w-1.5 bg-rose-500 rounded-full"
                 style={{
                   height: `${20 + h * 30}px`,
-                  animation: `waveform 0.${5 + (i % 5)}s ease-in-out infinite alternate`,
+                  animation: recordState === "recording" ? `waveform 0.${5 + (i % 5)}s ease-in-out infinite alternate` : "none",
                   animationDelay: `${i * 0.06}s`,
                 }}
               />
@@ -1680,7 +1714,7 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
           </div>
         )}
 
-        {(recordState === "recording" || recordState === "recorded") && (
+        {(recordState === "recording" || recordState === "paused" || recordState === "recorded") && (
           <div className="w-full space-y-2">
             <div className="flex justify-between font-jetbrains text-[12px] text-brand-text-mute font-semibold tabular-nums">
               <span>{formatTime(elapsed)}</span>
@@ -1699,17 +1733,38 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
           </div>
         )}
 
-        {(recordState === "idle" || recordState === "recording") && (
+        {(recordState === "idle" || recordState === "recording" || recordState === "paused") && (
           <button
-            onClick={recordState === "idle" ? startRecording : stopRecording}
+            onClick={
+              recordState === "idle" ? startRecording
+              : recordState === "recording" ? pauseRecording
+              : resumeRecording
+            }
+            aria-label={
+              recordState === "idle" ? "Start recording"
+              : recordState === "recording" ? "Pause recording"
+              : "Resume recording"
+            }
             className={`w-20 h-20 rounded-2xl flex items-center justify-center text-2xl transition-colors duration-150 shadow-sm ${
               recordState === "recording"
                 ? "bg-rose-500 hover:bg-rose-600 text-white animate-pulse"
+                : recordState === "paused"
+                ? "bg-amber-500 hover:bg-amber-600 text-white"
                 : "bg-brand-teal-700 hover:bg-brand-teal-600 text-white"
             }`}
           >
             {recordState === "idle" && "●"}
-            {recordState === "recording" && "■"}
+            {recordState === "recording" && "❚❚"}
+            {recordState === "paused" && "▶"}
+          </button>
+        )}
+
+        {(recordState === "recording" || recordState === "paused") && (
+          <button
+            onClick={finishRecording}
+            className="px-5 py-2 bg-white hover:bg-brand-bg-alt text-brand-text border border-brand-line font-semibold text-[13px] rounded-xl transition-colors duration-150 active:scale-[0.98]"
+          >
+            ✓ Finish Recording
           </button>
         )}
 
@@ -1721,7 +1776,8 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
 
         <p className="text-brand-text-mute text-[13.5px] text-center leading-[1.6]">
           {recordState === "idle" && "Tap to start recording"}
-          {recordState === "recording" && "Recording… tap the square to stop"}
+          {recordState === "recording" && "Recording… tap to pause, or Finish when you're done"}
+          {recordState === "paused" && "Paused — tap to resume, or Finish to end here"}
           {recordState === "recorded" && `Recorded (${formatTime(elapsed)}). Review below, then submit when ready.`}
         </p>
 
@@ -1765,6 +1821,12 @@ function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => vo
       {error && (
         <div className="border border-brand-warm/30 bg-brand-warm-tint rounded-2xl p-4">
           <p className="text-brand-text font-medium text-[14px] leading-[1.6]">{error}</p>
+        </div>
+      )}
+
+      {notice && !error && (
+        <div className="border border-brand-line bg-brand-bg rounded-2xl p-4">
+          <p className="text-brand-text-mute font-medium text-[13.5px] leading-[1.6]">{notice}</p>
         </div>
       )}
 
