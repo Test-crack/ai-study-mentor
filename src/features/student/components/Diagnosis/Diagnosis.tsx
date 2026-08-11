@@ -1134,6 +1134,8 @@ function ReadingPhase({
   const answeredCount = data?.questions?.filter((q: any) => answers[q.id]).length ?? 0;
   const totalCount    = data?.questions?.length ?? 0;
   const timerWarning  = timeLeft <= 60 && timeLeft > 0;
+  // Once time is up the section ends, so allow submitting a partial/empty set.
+  const canSubmit     = allAnswered || timeLeft <= 0;
 
   const handleSubmit = async () => {
     setSectionState("submitting");
@@ -1291,9 +1293,9 @@ function ReadingPhase({
 
       <button
         onClick={handleSubmit}
-        disabled={!allAnswered || sectionState === "submitting"}
+        disabled={!canSubmit || sectionState === "submitting"}
         className={`w-full py-3.5 rounded-xl font-semibold text-[15px] transition-colors duration-150 ${
-          allAnswered
+          canSubmit
             ? "bg-brand-teal-700 hover:bg-brand-teal-600 text-white active:scale-[0.99]"
             : "bg-brand-bg-alt text-brand-text-mute cursor-not-allowed"
         }`}
