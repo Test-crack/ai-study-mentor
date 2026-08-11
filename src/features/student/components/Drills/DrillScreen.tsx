@@ -23,31 +23,31 @@ const SKILL_ACCENT: Record<string, {
 }> = {
   LISTENING: {
     icon: <Headphones className="w-5 h-5" />,
-    chipBg: 'bg-teal-100 dark:bg-teal-500/15',
-    chipText: 'text-teal-600 dark:text-teal-400',
-    fill: 'bg-teal-500',
-    glow: 'dark:shadow-[0_0_18px_rgba(20,184,166,0.18)]',
+    chipBg: 'bg-sky-100',
+    chipText: 'text-sky-600',
+    fill: 'bg-sky-500',
+    glow: '',
   },
   READING: {
     icon: <BookOpen className="w-5 h-5" />,
-    chipBg: 'bg-brand-blue-100 dark:bg-brand-blue-500/15',
-    chipText: 'text-brand-blue-600 dark:text-brand-blue-400',
+    chipBg: 'bg-brand-blue-100',
+    chipText: 'text-brand-blue-600',
     fill: 'bg-brand-blue-500',
-    glow: 'dark:shadow-[0_0_18px_rgba(139,92,246,0.18)]',
+    glow: '',
   },
   WRITING: {
     icon: <PenLine className="w-5 h-5" />,
-    chipBg: 'bg-amber-100 dark:bg-amber-500/15',
-    chipText: 'text-amber-600 dark:text-amber-400',
+    chipBg: 'bg-amber-100',
+    chipText: 'text-amber-600',
     fill: 'bg-amber-500',
-    glow: 'dark:shadow-[0_0_18px_rgba(245,158,11,0.16)]',
+    glow: '',
   },
   SPEAKING: {
     icon: <Mic className="w-5 h-5" />,
-    chipBg: 'bg-rose-100 dark:bg-rose-500/15',
-    chipText: 'text-rose-600 dark:text-rose-400',
+    chipBg: 'bg-rose-100',
+    chipText: 'text-rose-600',
     fill: 'bg-rose-500',
-    glow: 'dark:shadow-[0_0_18px_rgba(244,63,94,0.16)]',
+    glow: '',
   },
 };
 const getAccent = (skill: string) => SKILL_ACCENT[skill.toUpperCase()] ?? SKILL_ACCENT.SPEAKING;
@@ -271,7 +271,7 @@ export default function DrillScreen() {
   const progressPct = (currentPromptIndex / totalPrompts) * 100;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#020617] transition-colors duration-500">
+    <div className="min-h-screen bg-brand-bg transition-colors duration-500">
       <StudentSidebar activeTab="dashboard" isCollapsed={isSidebarCollapsed} toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} />
 
       <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'} flex flex-col min-h-screen`}>
@@ -279,22 +279,22 @@ export default function DrillScreen() {
 
         {/* ── Focus-mode sticky progress strip (only during the active drill) ── */}
         {!loading && !isSubmitting && !initError && !submitFailed && prompts.length > 0 && !isComplete && (
-          <div className="sticky top-0 z-30 bg-[#F8FAFC]/90 dark:bg-[#020617]/90 backdrop-blur-md border-b border-slate-100 dark:border-white/[0.05]">
+          <div className="sticky top-0 z-30 bg-brand-bg/90 backdrop-blur-md border-b border-brand-line">
             <div className="max-w-4xl mx-auto px-6 py-3">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <span className={`grid place-items-center h-7 w-7 rounded-lg shrink-0 ${accent.chipBg} ${accent.chipText}`}>
                     {accent.icon}
                   </span>
-                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 capitalize truncate">
+                  <span className="text-xs font-semibold text-brand-text-mute capitalize truncate">
                     {skill.toLowerCase()} · {subSkill.toLowerCase().replace(/_/g, ' ')}
                   </span>
                 </div>
-                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 tabular-nums shrink-0">
+                <span className="text-[11px] font-bold text-brand-text-mute tabular-nums shrink-0">
                   {currentPromptIndex + 1} / {totalPrompts}
                 </span>
               </div>
-              <div className="h-1.5 w-full bg-slate-200 dark:bg-white/[0.06] rounded-full overflow-hidden">
+              <div className="h-1.5 w-full bg-brand-bg-alt rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-500 ease-out ${accent.fill}`}
                   style={{ width: `${progressPct}%` }}
@@ -308,40 +308,40 @@ export default function DrillScreen() {
          
 
           {loading || isSubmitting ? (
-            <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+            <div className="flex flex-col items-center justify-center py-20 text-brand-text-mute">
               <Loader2 className="w-10 h-10 animate-spin mb-4 text-brand-teal-500" />
-              <p className="font-medium text-slate-500 dark:text-slate-400">
+              <p className="font-medium text-brand-text-mute">
                 {isSubmitting ? 'Saving session results...' : 'Loading your customized drills...'}
               </p>
             </div>
           ) : initError ? (
-            <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-900/60 rounded-3xl border border-rose-200 dark:border-rose-500/20 text-center px-8 shadow-sm">
-              <div className="h-14 w-14 rounded-2xl bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center mb-4">
+            <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-rose-200 text-center px-8 shadow-sm">
+              <div className="h-14 w-14 rounded-2xl bg-rose-50 flex items-center justify-center mb-4">
                 <AlertTriangle className="w-7 h-7 text-rose-400" />
               </div>
-              <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Couldn't load your drill</h2>
-              <p className="text-slate-500 dark:text-slate-400 mb-1 max-w-sm text-sm">{initError}</p>
+              <h2 className="text-xl font-bold text-brand-text mb-2">Couldn't load your drill</h2>
+              <p className="text-brand-text-mute mb-1 max-w-sm text-sm">{initError}</p>
             </div>
           ) : submitFailed ? (
-            <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-900/60 rounded-3xl border border-rose-200 dark:border-rose-500/20 text-center px-8 shadow-sm">
-              <div className="h-14 w-14 rounded-2xl bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center mb-4">
+            <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-rose-200 text-center px-8 shadow-sm">
+              <div className="h-14 w-14 rounded-2xl bg-rose-50 flex items-center justify-center mb-4">
                 <AlertTriangle className="w-7 h-7 text-rose-400" />
               </div>
-              <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Couldn't save your results</h2>
-              <p className="text-slate-500 dark:text-slate-400 mb-6 max-w-sm">Your answers are safe — tap Retry to save your session and claim your momentum points.</p>
+              <h2 className="text-xl font-bold text-brand-text mb-2">Couldn't save your results</h2>
+              <p className="text-brand-text-mute mb-6 max-w-sm">Your answers are safe — tap Retry to save your session and claim your momentum points.</p>
               <button
                 onClick={() => {
                   const pending = pendingCompleteRef.current;
                   if (pending) completeSession(pending.answers, pending.correctCount);
                 }}
-                className="px-6 py-3 bg-brand-teal-600 hover:bg-brand-teal-700 text-white font-semibold rounded-2xl transition-colors shadow-md"
+                className="px-6 py-3 bg-brand-teal-700 hover:bg-brand-teal-600 text-white font-semibold rounded-2xl transition-colors shadow-sm"
               >
                 Retry
               </button>
             </div>
           ) : prompts.length === 0 && !isComplete ? (
-            <div className="text-center py-20 bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-white/[0.06] shadow-sm">
-              <p className="text-slate-500 dark:text-slate-400 font-medium">No drills available for this topic right now.</p>
+            <div className="text-center py-20 bg-white rounded-3xl border border-brand-line shadow-sm">
+              <p className="text-brand-text-mute font-medium">No drills available for this topic right now.</p>
             </div>
           ) : !isComplete ? (
             <>
@@ -351,10 +351,10 @@ export default function DrillScreen() {
                   {accent.icon}
                 </div>
                 <div className="min-w-0">
-                  <h1 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-white capitalize leading-tight truncate">
+                  <h1 className="font-manrope text-lg sm:text-xl font-bold text-brand-text capitalize leading-tight truncate">
                     {skill.toLowerCase()} {subSkill.toLowerCase().replace(/_/g, ' ')}
                   </h1>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider">
+                  <p className="font-jetbrains text-xs text-brand-text-mute font-medium uppercase tracking-wider">
                     Today's Focus · Prompt {currentPromptIndex + 1} of {totalPrompts}
                   </p>
                 </div>
@@ -363,7 +363,7 @@ export default function DrillScreen() {
               {/* Drill content — keyed wrapper animates each prompt in */}
               <div
                 key={currentPromptIndex}
-                className="bg-white dark:bg-slate-900/60 rounded-3xl p-6 sm:p-8 shadow-sm dark:shadow-none border border-slate-200 dark:border-white/[0.06] animate-in fade-in slide-in-from-bottom-3 duration-300"
+                className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-brand-line animate-in fade-in slide-in-from-bottom-3 duration-300"
               >
                 {(() => {
                   const currentPrompt = prompts[currentPromptIndex];
@@ -374,7 +374,7 @@ export default function DrillScreen() {
                   }
 
                   return (
-                    <div className="text-center py-10 text-slate-400 font-medium">
+                    <div className="text-center py-10 text-brand-text-mute font-medium">
                       This question type is not supported in the current flow.
                     </div>
                   );

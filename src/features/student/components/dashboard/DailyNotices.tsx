@@ -55,7 +55,7 @@ function NotificationBanner({
         )}
         <button
           onClick={onDismiss}
-          className={`p-2 rounded-xl ${cfg.bodyColor} opacity-60 hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/10 transition-all`}
+          className={`p-2 rounded-xl ${cfg.bodyColor} opacity-60 hover:opacity-100 hover:bg-black/5 transition-all`}
           aria-label="Dismiss notification"
         >
           <X className="w-4 h-4" />
@@ -72,66 +72,66 @@ function NotificationBanner({
  * Display rules:
  *  - Live CTAs (today's IA / this month's mock) come first — they are the
  *    student's actual next action.
- *  - Persisted events (missed IAs…) follow, skipping anything the student
- *    already dismissed (dismissals are server-side, cross-device).
- *  - Hard cap of MAX_BANNERS; the overflow lives in the topbar bell.
+ * - Persisted events (missed IAs…) follow, skipping anything the student
+ * already dismissed (dismissals are server-side, cross-device).
+ * - Hard cap of MAX_BANNERS; the overflow lives in the topbar bell.
  *
  * Dismissal: events dismiss via the API (permanent, stays in bell history);
  * CTAs have no DB row, so they dismiss per-session via sessionStorage — they
  * are transient by nature and will resolve or expire on their own.
  */
 export const DailyNotices = ({ isLocked = false }: { isLocked?: boolean }) => {
-  const { cta, events, loading, dismiss } = useNotifications();
+ const { cta, events, loading, dismiss } = useNotifications();
 
-  // Session-scoped dismissals for CTAs only (no DB identity to dismiss against).
-  // sessionStorage is the source of truth (CTAs arrive async, after mount);
-  // this state exists purely to trigger a re-render on dismiss.
-  const [dismissedCtas, setDismissedCtas] = useState<Set<string>>(new Set());
+ // Session-scoped dismissals for CTAs only (no DB identity to dismiss against).
+ // sessionStorage is the source of truth (CTAs arrive async, after mount);
+ // this state exists purely to trigger a re-render on dismiss.
+ const [dismissedCtas, setDismissedCtas] = useState<Set<string>>(new Set());
 
-  if (loading) {
-    return (
-      <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-3xl p-6 shadow-sm animate-pulse h-24" />
-    );
-  }
+ if (loading) {
+ return (
+ <div className="bg-amber-50 border border-amber-200 rounded-3xl p-6 shadow-sm animate-pulse h-24" />
+ );
+ }
 
-  const ctaKey = (n: Notification) =>
-    `dismissed-${n.type}-${n.ia_number ?? ''}-${n.ia_date ?? n.month_year ?? ''}`;
+ const ctaKey = (n: Notification) =>
+ `dismissed-${n.type}-${n.ia_number ??''}-${n.ia_date ?? n.month_year ??''}`;
 
-  const visibleCtas = (cta as Notification[]).filter(
-    (n) => !dismissedCtas.has(ctaKey(n)) && sessionStorage.getItem(ctaKey(n)) !== 'true'
-  );
-  const visibleEvents = events
-    .filter((e) => !e.dismissed_at)
-    .map(eventToNotification);
+ const visibleCtas = (cta as Notification[]).filter(
+ (n) => !dismissedCtas.has(ctaKey(n)) && sessionStorage.getItem(ctaKey(n)) !=='true'
+ );
+ const visibleEvents = events
+ .filter((e) => !e.dismissed_at)
+ .map(eventToNotification);
 
-  const all = [...visibleCtas, ...visibleEvents];
-  const shown = all.slice(0, MAX_BANNERS);
-  const overflow = all.length - shown.length;
+ const all = [...visibleCtas, ...visibleEvents];
+ const shown = all.slice(0, MAX_BANNERS);
+ const overflow = all.length - shown.length;
 
-  if (shown.length === 0) return null;
+ if (shown.length === 0) return null;
 
-  return (
-    <div className="space-y-4">
-      {shown.map((n, idx) => (
-        <NotificationBanner
-          key={n.id ?? `${n.type}-${idx}`}
-          notification={n}
-          isLocked={isLocked}
-          onDismiss={() => {
-            if (n.id) {
-              dismiss(n.id); // persisted event → API, cross-device
-            } else {
-              const key = ctaKey(n);
-              sessionStorage.setItem(key, 'true');
-              setDismissedCtas((prev) => new Set(prev).add(key));
-            }
-          }}
-        />
-      ))}
-      {overflow > 0 && (
-        <p className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 px-2">
-          <Bell className="w-3.5 h-3.5" />
-          {overflow} more notification{overflow !== 1 ? 's' : ''} in the bell at the top right.
+ return (
+ <div className="space-y-4">
+ {shown.map((n, idx) => (
+ <NotificationBanner
+ key={n.id ?? `${n.type}-${idx}`}
+ notification={n}
+ isLocked={isLocked}
+ onDismiss={() => {
+ if (n.id) {
+ dismiss(n.id); // persisted event → API, cross-device
+ } else {
+ const key = ctaKey(n);
+ sessionStorage.setItem(key,'true');
+ setDismissedCtas((prev) => new Set(prev).add(key));
+ }
+ }}
+ />
+ ))}
+ {overflow > 0 && (
+ <p className="flex items-center gap-1.5 text-xs text-brand-text-mute px-2">
+ <Bell className="w-3.5 h-3.5" />
+ {overflow} more notification{overflow !== 1 ?'s':''} in the bell at the top right.
         </p>
       )}
     </div>

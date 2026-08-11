@@ -576,7 +576,7 @@ function InterimResultCard({
           className="pointer-events-none absolute inset-0 opacity-[0.06]"
           style={{
             backgroundImage:
-              'linear-gradient(to right, #2EE8A6 1px, transparent 1px), linear-gradient(to bottom, #2EE8A6 1px, transparent 1px)',
+              'linear-gradient(to right, #3EE0A0 1px, transparent 1px), linear-gradient(to bottom, #3EE0A0 1px, transparent 1px)',
             backgroundSize: '48px 48px',
           }}
         />
@@ -737,7 +737,7 @@ function DiagnosticGate({
           className="pointer-events-none absolute inset-0 opacity-[0.06]"
           style={{
             backgroundImage:
-              'linear-gradient(to right, #2EE8A6 1px, transparent 1px), linear-gradient(to bottom, #2EE8A6 1px, transparent 1px)',
+              'linear-gradient(to right, #3EE0A0 1px, transparent 1px), linear-gradient(to bottom, #3EE0A0 1px, transparent 1px)',
             backgroundSize: '56px 56px',
           }}
         />
@@ -1897,7 +1897,7 @@ function SpeakingResultCard({
           className="pointer-events-none absolute inset-0 opacity-[0.06]"
           style={{
             backgroundImage:
-              'linear-gradient(to right, #2EE8A6 1px, transparent 1px), linear-gradient(to bottom, #2EE8A6 1px, transparent 1px)',
+              'linear-gradient(to right, #3EE0A0 1px, transparent 1px), linear-gradient(to bottom, #3EE0A0 1px, transparent 1px)',
             backgroundSize: '48px 48px',
           }}
         />
@@ -2038,7 +2038,7 @@ function DiagnosticSummaryScreen({
           className="pointer-events-none absolute inset-0 opacity-[0.06]"
           style={{
             backgroundImage:
-              'linear-gradient(to right, #2EE8A6 1px, transparent 1px), linear-gradient(to bottom, #2EE8A6 1px, transparent 1px)',
+              'linear-gradient(to right, #3EE0A0 1px, transparent 1px), linear-gradient(to bottom, #3EE0A0 1px, transparent 1px)',
             backgroundSize: '48px 48px',
           }}
         />
@@ -2067,7 +2067,7 @@ function DiagnosticSummaryScreen({
               <PolarAngleAxis dataKey="skill" tick={{ fill: '#17232B', fontSize: 10, fontWeight: 600 }} />
               <PolarRadiusAxis domain={[4, 9]} tickCount={6} tick={{ fill: '#5E6B73', fontSize: 9 }} />
               <Radar name={`Target (${target.toFixed(1)})`} dataKey="target" stroke="#8FA0A8" strokeDasharray="4 4" fill="#8FA0A8" fillOpacity={0.04} isAnimationActive={false} />
-              <Radar name="Your Band" dataKey="band" stroke="#0A6E64" fill="#0A6E64" fillOpacity={0.35} strokeWidth={2} />
+              <Radar name="Your Band" dataKey="band" stroke="#0B6151" fill="#0B6151" fillOpacity={0.35} strokeWidth={2} />
               <Legend wrapperStyle={{ fontSize: 11, fontWeight: 600 }} />
             </RadarChart>
           </ResponsiveContainer>
@@ -2341,7 +2341,7 @@ function DiagnosticReportModal({
                 <PolarAngleAxis dataKey="skill" tick={{ fill: '#17232B', fontSize: 10, fontWeight: 600 }} />
                 <PolarRadiusAxis domain={[4, 9]} tickCount={6} tick={{ fill: '#5E6B73', fontSize: 9 }} />
                 <Radar name={`Target (${targetBand.toFixed(1)})`} dataKey="target" stroke="#8FA0A8" strokeDasharray="4 4" fill="#8FA0A8" fillOpacity={0.04} isAnimationActive={false} />
-                <Radar name="Your Band" dataKey="band" stroke="#0A6E64" fill="#0A6E64" fillOpacity={0.35} strokeWidth={2} isAnimationActive={false} />
+                <Radar name="Your Band" dataKey="band" stroke="#0B6151" fill="#0B6151" fillOpacity={0.35} strokeWidth={2} isAnimationActive={false} />
                 <Legend wrapperStyle={{ fontSize: 11, fontWeight: 600 }} />
               </RadarChart>
             </ResponsiveContainer>
@@ -2852,7 +2852,7 @@ function OnboardingScreen({ onComplete }: { onComplete: () => void }) {
           className="absolute inset-0 pointer-events-none opacity-[0.06]"
           style={{
             backgroundImage:
-              'linear-gradient(to right, #2EE8A6 1px, transparent 1px), linear-gradient(to bottom, #2EE8A6 1px, transparent 1px)',
+              'linear-gradient(to right, #3EE0A0 1px, transparent 1px), linear-gradient(to bottom, #3EE0A0 1px, transparent 1px)',
             backgroundSize: '56px 56px',
           }}
         />

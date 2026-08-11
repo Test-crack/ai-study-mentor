@@ -104,11 +104,11 @@ export default function IeltsWriting() {
       {view === 'library' && (
         <div className="space-y-8 h-full">
 
-          <div className="bg-[#3E9E93] rounded-2xl p-8 md:p-10 text-white shadow-md relative overflow-hidden">
+          <div className="bg-brand-teal-600 rounded-2xl p-8 md:p-10 text-white shadow-md relative overflow-hidden">
             <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h1 className="text-3xl font-bold mb-3 flex items-center gap-2">
+                <h1 className="font-manrope text-3xl font-bold mb-3 flex items-center gap-2">
                   IELTS Writing Analysis <Sparkles className="h-6 w-6 text-yellow-300" fill="currentColor" />
                 </h1>
                 <p className="text-brand-teal-50 max-w-2xl text-base md:text-lg leading-relaxed mb-6">
@@ -127,13 +127,13 @@ export default function IeltsWriting() {
 
           {isLoading ? (
             <div className="flex justify-center items-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3E9E93]"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-teal-600"></div>
             </div>
           ) : assignments.length === 0 ? (
-            <Card className="border-none shadow-sm bg-white dark:bg-slate-900 flex flex-col items-center justify-center p-12 text-center">
-              <BookOpen className="h-12 w-12 text-slate-300 dark:text-slate-600 mb-4" />
-              <CardTitle className="text-lg text-slate-700 dark:text-slate-200">No Assignments Yet</CardTitle>
-              <CardDescription className="dark:text-slate-400">Your instructor hasn't assigned any writing tasks currently.</CardDescription>
+            <Card className="border-none shadow-sm bg-white flex flex-col items-center justify-center p-12 text-center">
+              <BookOpen className="h-12 w-12 text-brand-line mb-4" />
+              <CardTitle className="font-manrope text-lg text-brand-text">No Assignments Yet</CardTitle>
+              <CardDescription>Your instructor hasn't assigned any writing tasks currently.</CardDescription>
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -141,25 +141,25 @@ export default function IeltsWriting() {
                 <Card
                   key={assignment.id}
                   onClick={() => handleSelectAssignment(assignment)}
-                  className="border border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900 hover:shadow-md hover:border-[#3E9E93] dark:hover:border-[#3E9E93] transition-all cursor-pointer flex flex-col h-64 group"
+                  className="border border-brand-line shadow-sm bg-white hover:shadow-md hover:border-brand-teal-600 transition-all cursor-pointer flex flex-col h-64 group"
                 >
                   <CardHeader className="pb-3 flex-none">
                     <div className="flex justify-between items-start gap-4">
-                      <CardTitle className="text-lg font-bold text-slate-800 dark:text-slate-100 group-hover:text-[#3E9E93] dark:group-hover:text-[#7FBFB6] transition-colors line-clamp-2">
+                      <CardTitle className="font-manrope text-lg font-bold text-brand-text group-hover:text-brand-teal-600 transition-colors line-clamp-2">
                         {assignment.title}
                       </CardTitle>
-                      <Badge className="bg-brand-teal-50 text-[#3E9E93] hover:bg-brand-teal-100 dark:bg-[#3E9E93]/20 dark:text-[#7FBFB6] flex-shrink-0">
+                      <Badge className="bg-brand-teal-50 text-brand-teal-600 hover:bg-brand-teal-100 flex-shrink-0">
                         New
                       </Badge>
                     </div>
                   </CardHeader>
                   <CardContent className="flex flex-col flex-grow overflow-hidden pb-4">
-                    <p className="text-slate-600 dark:text-slate-400 text-sm flex-grow line-clamp-4">
+                    <p className="text-brand-text-mute text-sm flex-grow line-clamp-4">
                       {assignment.topic}
                     </p>
-                    <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-xs font-medium text-slate-500 dark:text-slate-500">
+                    <div className="mt-4 pt-4 border-t border-brand-line flex justify-between items-center text-xs font-medium text-brand-text-mute">
                       <span>Assigned: {assignment.assignedDate}</span>
-                      <span className="text-[#3E9E93] dark:text-[#7FBFB6] flex items-center group-hover:translate-x-1 transition-transform">
+                      <span className="text-brand-teal-600 flex items-center group-hover:translate-x-1 transition-transform">
                         Start Writing <ArrowLeft className="h-3 w-3 ml-1 rotate-180" />
                       </span>
                     </div>
@@ -175,18 +175,18 @@ export default function IeltsWriting() {
       {view === 'history' && (
         <div className="space-y-8 h-full">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={() => setView('library')} className="text-slate-600 hover:bg-slate-100 -ml-2">
+            <Button variant="ghost" onClick={() => setView('library')} className="text-brand-text-mute hover:bg-brand-bg-alt -ml-2">
               <ArrowLeft className="w-4 h-4 mr-2" /> Back to Assignments
             </Button>
-            <h2 className="text-2xl font-bold dark:text-white">Past Analytics</h2>
+            <h2 className="font-manrope text-2xl font-bold text-brand-text">Past Analytics</h2>
           </div>
 
           {history.length === 0 && !isLoading ? (
-            <Card className="p-8 text-center text-slate-500">No past writings found.</Card>
+            <Card className="p-8 text-center text-brand-text-mute">No past writings found.</Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {history.map((item) => (
-                <Card key={item.id} className="cursor-pointer hover:border-[#3E9E93]" onClick={() => {
+                <Card key={item.id} className="cursor-pointer hover:border-brand-teal-600" onClick={() => {
                   setEvaluationResult(item);
                   setSelectedAssignment(item.IeltsWritingTask || null);
                   setView('results');
@@ -197,8 +197,8 @@ export default function IeltsWriting() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex justify-between items-center text-sm">
-                      <span className="font-semibold text-slate-700 dark:text-slate-200">Band Score:</span>
-                      <Badge className="bg-[#3E9E93]">{item.aiBandScore}</Badge>
+                      <span className="font-semibold text-brand-text">Band Score:</span>
+                      <Badge className="bg-brand-teal-600">{item.aiBandScore}</Badge>
                     </div>
                   </CardContent>
                 </Card>
@@ -215,7 +215,7 @@ export default function IeltsWriting() {
             <Button
               variant="ghost"
               onClick={handleBack}
-              className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 -ml-2 w-fit"
+              className="text-brand-text-mute hover:text-brand-text hover:bg-brand-bg-alt -ml-2 w-fit"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Assignments
@@ -224,7 +224,7 @@ export default function IeltsWriting() {
             <Button
               onClick={handleSubmit}
               disabled={submitting}
-              className="bg-[#3E9E93] hover:bg-[#12897C] text-white shadow-sm w-full sm:w-auto"
+              className="bg-brand-teal-600 hover:bg-brand-teal-500 text-white shadow-sm w-full sm:w-auto"
             >
               {submitting ? (
                 <span className="flex items-center">Loading...</span>
@@ -237,27 +237,27 @@ export default function IeltsWriting() {
           <div className="flex flex-col lg:flex-row gap-6 flex-grow min-h-0">
 
             <div className="w-full lg:w-[40%] flex flex-col gap-6 overflow-y-auto pr-1">
-              <Card className="border-none shadow-sm bg-white dark:bg-slate-900 flex-shrink-0">
+              <Card className="border-none shadow-sm bg-white flex-shrink-0">
                 <CardHeader className="pb-4">
-                  <div className="flex items-center gap-2 text-[#3E9E93] dark:text-[#7FBFB6] mb-2">
+                  <div className="flex items-center gap-2 text-brand-teal-600 mb-2">
                     <PenTool className="h-5 w-5" />
-                    <span className="text-sm font-bold uppercase tracking-wider">Task Prompt</span>
+                    <span className="font-jetbrains text-[11px] font-bold uppercase tracking-[0.16em]">Task Prompt</span>
                   </div>
-                  <CardTitle className="text-xl text-slate-800 dark:text-white leading-tight">
+                  <CardTitle className="font-manrope text-xl text-brand-text leading-tight">
                     {selectedAssignment.title}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
+                  <div className="p-4 bg-brand-bg-alt rounded-xl border border-brand-line text-brand-text text-sm leading-relaxed whitespace-pre-wrap">
                     {selectedAssignment.topic}
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-none shadow-sm bg-amber-50 dark:bg-amber-900/10 border-amber-100 dark:border-amber-900/30 flex-shrink-0">
+              <Card className="border-none shadow-sm bg-amber-50 border-amber-100 flex-shrink-0">
                 <CardContent className="p-5">
-                  <h4 className="text-sm font-bold text-amber-800 dark:text-amber-500 mb-2">Instructions</h4>
-                  <ul className="text-sm text-amber-700 dark:text-amber-400/80 list-disc list-inside space-y-1.5">
+                  <h4 className="text-sm font-bold text-amber-800 mb-2">Instructions</h4>
+                  <ul className="text-sm text-amber-700 list-disc list-inside space-y-1.5">
                     <li>Target length is at least <strong>{targetWordCount} words</strong>.</li>
                     <li>Include your own knowledge and experiences.</li>
                     <li>Review spelling and grammar before submitting.</li>
@@ -266,15 +266,15 @@ export default function IeltsWriting() {
               </Card>
             </div>
 
-            <Card className="w-full lg:w-[60%] border border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900 flex flex-col overflow-hidden">
-              <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
-                <h3 className="font-semibold text-slate-700 dark:text-slate-200 text-sm">Your Response</h3>
+            <Card className="w-full lg:w-[60%] border border-brand-line shadow-sm bg-white flex flex-col overflow-hidden">
+              <div className="p-4 border-b border-brand-line flex justify-between items-center bg-brand-bg-alt/50">
+                <h3 className="font-semibold text-brand-text text-sm">Your Response</h3>
                 <Badge
                   variant="secondary"
                   className={`font-medium ${
                     wordCount >= targetWordCount
-                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                      : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : 'bg-brand-bg-alt text-brand-text-mute'
                   }`}
                 >
                   {wordCount} / {targetWordCount} words
@@ -285,7 +285,7 @@ export default function IeltsWriting() {
                 value={essayText}
                 onChange={(e) => setEssayText(e.target.value)}
                 placeholder="Start typing your essay here..."
-                className="flex-grow w-full p-6 resize-none bg-transparent focus:outline-none focus:ring-0 text-slate-800 dark:text-slate-200 leading-relaxed custom-scrollbar placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                className="flex-grow w-full p-6 resize-none bg-transparent focus:outline-none focus:ring-0 text-brand-text leading-relaxed custom-scrollbar placeholder:text-brand-text-mute"
                 spellCheck={false}
               />
             </Card>
@@ -297,17 +297,17 @@ export default function IeltsWriting() {
       {/* --- VIEW 4: RESULTS SCREEN --- */}
       {view === 'results' && evaluationResult && (
         <div className="space-y-6 max-w-4xl mx-auto h-full overflow-y-auto pb-12">
-          <Button variant="ghost" onClick={handleBack} className="text-slate-600 hover:bg-slate-100 -ml-2">
+          <Button variant="ghost" onClick={handleBack} className="text-brand-text-mute hover:bg-brand-bg-alt -ml-2">
             <ArrowLeft className="w-4 h-4 mr-2" /> Back
           </Button>
 
-          <div className="bg-gradient-to-br from-[#3E9E93] to-[#087F73] rounded-3xl p-8 text-white text-center relative overflow-hidden shadow-xl">
+          <div className="bg-gradient-to-br from-brand-teal-400 to-brand-teal-600 rounded-3xl p-8 text-white text-center relative overflow-hidden shadow-xl">
             <div className="relative z-10">
               <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4 border-2 border-white/20">
                 <CheckCircle className="w-10 h-10 text-emerald-300" />
               </div>
-              <p className="text-brand-teal-100 text-sm font-bold uppercase tracking-widest mb-1">Overall Band Score</p>
-              <div className="text-7xl font-black mb-3">
+              <p className="font-jetbrains text-brand-teal-100 text-[11px] font-bold uppercase tracking-[0.16em] mb-1">Overall Band Score</p>
+              <div className="font-manrope text-7xl font-black mb-3">
                 {evaluationResult.aiBandScore}
               </div>
             </div>
@@ -315,51 +315,51 @@ export default function IeltsWriting() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Card className="text-center p-4">
-              <p className="text-xs font-bold text-slate-400 uppercase">Grammar</p>
-              <p className="text-2xl font-black text-[#3E9E93]">{evaluationResult.aiGrammarScore}</p>
+              <p className="font-jetbrains text-[10.5px] font-bold text-brand-text-mute uppercase tracking-[0.14em]">Grammar</p>
+              <p className="font-manrope text-2xl font-black text-brand-teal-600">{evaluationResult.aiGrammarScore}</p>
             </Card>
             <Card className="text-center p-4">
-              <p className="text-xs font-bold text-slate-400 uppercase">Vocabulary</p>
-              <p className="text-2xl font-black text-[#3E9E93]">{evaluationResult.aiVocabularyScore}</p>
+              <p className="font-jetbrains text-[10.5px] font-bold text-brand-text-mute uppercase tracking-[0.14em]">Vocabulary</p>
+              <p className="font-manrope text-2xl font-black text-brand-teal-600">{evaluationResult.aiVocabularyScore}</p>
             </Card>
             <Card className="text-center p-4">
-              <p className="text-xs font-bold text-slate-400 uppercase">Coherence</p>
-              <p className="text-2xl font-black text-[#3E9E93]">{evaluationResult.aiCoherenceScore}</p>
+              <p className="font-jetbrains text-[10.5px] font-bold text-brand-text-mute uppercase tracking-[0.14em]">Coherence</p>
+              <p className="font-manrope text-2xl font-black text-brand-teal-600">{evaluationResult.aiCoherenceScore}</p>
             </Card>
             <Card className="text-center p-4">
-              <p className="text-xs font-bold text-slate-400 uppercase">Task Response</p>
-              <p className="text-2xl font-black text-[#3E9E93]">{evaluationResult.aiTaskResponseScore}</p>
+              <p className="font-jetbrains text-[10.5px] font-bold text-brand-text-mute uppercase tracking-[0.14em]">Task Response</p>
+              <p className="font-manrope text-2xl font-black text-brand-teal-600">{evaluationResult.aiTaskResponseScore}</p>
             </Card>
           </div>
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <BarChart2 className="w-5 h-5 text-[#3E9E93]" /> Coach Feedback
+              <CardTitle className="font-manrope text-lg flex items-center gap-2">
+                <BarChart2 className="w-5 h-5 text-brand-teal-600" /> Coach Feedback
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 text-sm text-slate-700 dark:text-slate-300">
+            <CardContent className="space-y-4 text-sm text-brand-text">
               <div>
-                <h4 className="font-bold text-slate-800 dark:text-white mb-2">Grammar Fixes:</h4>
+                <h4 className="font-bold text-brand-text mb-2">Grammar Fixes:</h4>
                 <ul className="list-disc pl-5 space-y-1">
                   {evaluationResult.aiFeedbackData?.grammar?.map((g: string, i: number) => <li key={i}>{g}</li>) || <li>No major grammar issues detected.</li>}
                 </ul>
               </div>
               <div>
-                <h4 className="font-bold text-slate-800 dark:text-white mb-2">Vocabulary Improvements:</h4>
+                <h4 className="font-bold text-brand-text mb-2">Vocabulary Improvements:</h4>
                 <ul className="list-disc pl-5 space-y-1">
                   {evaluationResult.aiFeedbackData?.vocabulary?.map((v: string, i: number) => <li key={i}>{v}</li>) || <li>Vocabulary was strong.</li>}
                 </ul>
               </div>
               <div>
-                <h4 className="font-bold text-slate-800 dark:text-white mb-2">Overall Guidance:</h4>
+                <h4 className="font-bold text-brand-text mb-2">Overall Guidance:</h4>
                 <p>{evaluationResult.aiFeedbackData?.improvements || 'Keep practicing.'}</p>
               </div>
             </CardContent>
           </Card>
 
           {evaluationResult.manualBandScore && (
-            <Card className="border-emerald-200 bg-emerald-50 dark:bg-emerald-900/10">
+            <Card className="border-emerald-200 bg-emerald-50">
               <CardHeader>
                 <CardTitle className="text-emerald-700 flex items-center gap-2">Instructor Review</CardTitle>
               </CardHeader>

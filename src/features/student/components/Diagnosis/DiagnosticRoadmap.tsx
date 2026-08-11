@@ -177,7 +177,7 @@ export default function DiagnosticRoadmap() {
             className="pointer-events-none absolute inset-0 opacity-[0.06]"
             style={{
               backgroundImage:
-                'linear-gradient(to right, #2EE8A6 1px, transparent 1px), linear-gradient(to bottom, #2EE8A6 1px, transparent 1px)',
+                'linear-gradient(to right, #3EE0A0 1px, transparent 1px), linear-gradient(to bottom, #3EE0A0 1px, transparent 1px)',
               backgroundSize: '56px 56px',
             }}
           />
@@ -296,7 +296,7 @@ export default function DiagnosticRoadmap() {
             className="pointer-events-none absolute inset-0 opacity-[0.06]"
             style={{
               backgroundImage:
-                'linear-gradient(to right, #2EE8A6 1px, transparent 1px), linear-gradient(to bottom, #2EE8A6 1px, transparent 1px)',
+                'linear-gradient(to right, #3EE0A0 1px, transparent 1px), linear-gradient(to bottom, #3EE0A0 1px, transparent 1px)',
               backgroundSize: '48px 48px',
             }}
           />

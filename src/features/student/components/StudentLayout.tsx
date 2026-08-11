@@ -44,7 +44,7 @@ export const StudentLayout = ({
   const [currentTab, setCurrentTab] = useState(activeTab);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#020617] transition-colors duration-300">
+    <div className="min-h-screen bg-brand-bg font-plex transition-colors duration-300">
       <StudentSidebar
         activeTab={currentTab}
         onTabChange={setCurrentTab}

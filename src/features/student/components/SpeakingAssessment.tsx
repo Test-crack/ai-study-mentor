@@ -178,15 +178,14 @@ const BandScoreArc = ({ score }: { score: number }) => {
   const radius = 80;
   const circumference = Math.PI * radius;
   const offset = circumference * (1 - pct);
-  const color = score >= 7 ? '#10b981' : score >= 5.5 ? '#3E9E93' : '#f59e0b';
+  const color = score >= 7 ? '#10b981' : score >= 5.5 ? '#0E7C66' : '#f59e0b';
 
   return (
     <div className="relative flex flex-col items-center">
       <svg width="200" height="110" viewBox="0 0 200 110">
         <path
           d="M 20 100 A 80 80 0 0 1 180 100"
-          fill="none" stroke="#e2e8f0" strokeWidth="14" strokeLinecap="round"
-          className="dark:stroke-slate-700"
+          fill="none" stroke="#D8E0E2" strokeWidth="14" strokeLinecap="round"
         />
         <path
           d="M 20 100 A 80 80 0 0 1 180 100"
@@ -198,7 +197,7 @@ const BandScoreArc = ({ score }: { score: number }) => {
         <text x="100" y="95" textAnchor="middle" fontSize="36" fontWeight="900" fill={color} fontFamily="system-ui">
           {score}
         </text>
-        <text x="100" y="108" textAnchor="middle" fontSize="10" fill="#94a3b8" fontFamily="system-ui" letterSpacing="2">
+        <text x="100" y="108" textAnchor="middle" fontSize="10" fill="#5E6B73" fontFamily="system-ui" letterSpacing="2">
           BAND SCORE
         </text>
       </svg>
@@ -209,10 +208,10 @@ const BandScoreArc = ({ score }: { score: number }) => {
 const SubScoreBar = ({ label, score, color }: { label: string; score: number; color: string }) => (
   <div className="space-y-1.5">
     <div className="flex justify-between items-center">
-      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{label}</span>
-      <span className="text-sm font-bold text-slate-800 dark:text-white">{score}</span>
+      <span className="font-jetbrains text-xs font-semibold text-brand-text-mute uppercase tracking-[0.14em]">{label}</span>
+      <span className="text-sm font-bold text-brand-text">{score}</span>
     </div>
-    <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+    <div className="h-2 bg-brand-bg-alt rounded-full overflow-hidden">
       <div
         className="h-full rounded-full transition-all duration-1000"
         style={{ width: `${bandFillPct(score)}%`, backgroundColor: color }}
@@ -226,7 +225,7 @@ const WaveformVisualizer = ({ isActive }: { isActive: boolean }) => (
     {Array.from({ length: 20 }).map((_, i) => (
       <div
         key={i}
-        className={`w-1.5 rounded-full transition-all ${isActive ? 'bg-[#3E9E93]' : 'bg-slate-200 dark:bg-slate-700'}`}
+        className={`w-1.5 rounded-full transition-all ${isActive ? 'bg-brand-teal-600' : 'bg-brand-line'}`}
         style={{
           height: isActive ? `${20 + Math.random() * 28}px` : '8px',
           animation: isActive ? `wave ${0.5 + Math.random() * 0.5}s ease-in-out infinite alternate` : 'none',
@@ -247,9 +246,9 @@ const TimerDisplay = ({ seconds }: { seconds: number }) => {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0');
   const s = (seconds % 60).toString().padStart(2, '0');
   return (
-    <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
-      <Clock size={14} className="text-[#3E9E93]" />
-      <span className="font-mono font-bold text-sm text-slate-700 dark:text-white">{m}:{s}</span>
+    <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-brand-line shadow-sm">
+      <Clock size={14} className="text-brand-teal-600" />
+      <span className="font-jetbrains font-bold text-sm text-brand-text">{m}:{s}</span>
     </div>
   );
 };
@@ -267,20 +266,20 @@ const ApiKeyModal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 md:p-8 max-w-md w-full shadow-2xl border border-slate-200 dark:border-slate-700">
+      <div className="bg-white rounded-2xl p-6 md:p-8 max-w-md w-full shadow-2xl border border-brand-line">
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-xl bg-[#3E9E93]/10 flex items-center justify-center">
-            <Sparkles size={20} className="text-[#3E9E93]" />
+          <div className="w-10 h-10 rounded-xl bg-brand-teal-wash flex items-center justify-center">
+            <Sparkles size={20} className="text-brand-teal-600" />
           </div>
           <div>
-            <h2 className="font-bold text-lg text-slate-900 dark:text-white">API Configuration</h2>
-            <p className="text-xs text-slate-500">Required for AI-powered assessment</p>
+            <h2 className="font-manrope font-bold text-lg text-brand-text">API Configuration</h2>
+            <p className="text-xs text-brand-text-mute">Required for AI-powered assessment</p>
           </div>
         </div>
 
         <div className="space-y-4 mb-6">
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
+            <label className="block font-jetbrains text-xs font-semibold text-brand-text-mute uppercase tracking-[0.14em] mb-1.5">
               ElevenLabs API Key <span className="text-red-400">*</span>
             </label>
             <input
@@ -288,12 +287,12 @@ const ApiKeyModal = ({
               value={elKey}
               onChange={(e) => setElKey(e.target.value)}
               placeholder="sk-..."
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#3E9E93]/50 placeholder-slate-400"
+              className="w-full px-3 py-2.5 rounded-xl border border-brand-line bg-brand-bg-alt text-sm text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-teal-600/50 placeholder-brand-text-mute"
             />
-            <p className="text-[10px] text-slate-400 mt-1">Used for AI voice questions</p>
+            <p className="text-[10px] text-brand-text-mute mt-1">Used for AI voice questions</p>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
+            <label className="block font-jetbrains text-xs font-semibold text-brand-text-mute uppercase tracking-[0.14em] mb-1.5">
               OpenAI API Key <span className="text-red-400">*</span>
             </label>
             <input
@@ -301,14 +300,14 @@ const ApiKeyModal = ({
               value={oaKey}
               onChange={(e) => setOaKey(e.target.value)}
               placeholder="sk-..."
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#3E9E93]/50 placeholder-slate-400"
+              className="w-full px-3 py-2.5 rounded-xl border border-brand-line bg-brand-bg-alt text-sm text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-teal-600/50 placeholder-brand-text-mute"
             />
-            <p className="text-[10px] text-slate-400 mt-1">Used for IELTS rubric evaluation</p>
+            <p className="text-[10px] text-brand-text-mute mt-1">Used for IELTS rubric evaluation</p>
           </div>
         </div>
 
-        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 mb-5">
-          <p className="text-xs text-amber-700 dark:text-amber-300">
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-5">
+          <p className="text-xs text-amber-700">
             ðŸ”’ Keys are only stored in memory for this session and never sent to our servers.
           </p>
         </div>
@@ -316,7 +315,7 @@ const ApiKeyModal = ({
         <button
           onClick={() => onConfirm(elKey, oaKey)}
           disabled={!elKey || !oaKey}
-          className="w-full bg-[#3E9E93] hover:bg-[#12897C] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-colors shadow-sm"
+          className="w-full bg-brand-teal-600 hover:bg-brand-teal-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-colors shadow-sm"
         >
           Start Assessment
         </button>
@@ -527,7 +526,7 @@ export default function SpeakingAssessment() {
   // Render
   // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return (
-    <div className="min-h-screen bg-[#f1f3f9] dark:bg-slate-950 transition-colors duration-300 font-sans text-slate-800 dark:text-slate-200">
+    <div className="min-h-screen bg-brand-bg transition-colors duration-300 font-sans text-brand-text">
       <StudentSidebar
         activeTab="speaking-asess"
         onTabChange={setActiveTab}
@@ -545,23 +544,31 @@ export default function SpeakingAssessment() {
             {view === 'intro' && (
               <>
                 {/* Hero Banner */}
-                <div className="bg-gradient-to-br from-[#3E9E93] to-[#256B8B] rounded-2xl p-8 md:p-10 text-white shadow-lg relative overflow-hidden mb-8">
+                <div className="bg-brand-ink rounded-2xl p-8 md:p-10 text-white shadow-lg relative overflow-hidden mb-8">
+                  <div
+                    className="absolute inset-0 opacity-[0.12] pointer-events-none"
+                    style={{
+                      backgroundImage:
+                        'linear-gradient(to right, #3EE0A0 1px, transparent 1px), linear-gradient(to bottom, #3EE0A0 1px, transparent 1px)',
+                      backgroundSize: '48px 48px',
+                    }}
+                  />
                   <div className="absolute -top-6 -right-6 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
                   <div className="absolute bottom-0 left-1/2 w-64 h-32 bg-white/5 rounded-full blur-3xl" />
                   <div className="relative z-10">
                     <div className="flex items-center gap-2 mb-3">
-                      <Radio size={20} className="text-yellow-300 animate-pulse" />
-                      <span className="text-xs font-bold uppercase tracking-widest text-brand-blue-200">IELTS Speaking Assessment</span>
+                      <Radio size={20} className="text-brand-mint animate-pulse" />
+                      <span className="font-jetbrains text-xs font-bold uppercase tracking-[0.16em] text-brand-on-ink">IELTS Speaking Assessment</span>
                     </div>
-                    <h1 className="text-3xl md:text-4xl font-black mb-3 leading-tight">
-                      AI Speaking Test <Sparkles className="inline h-7 w-7 text-yellow-300 ml-1" fill="currentColor" />
+                    <h1 className="font-manrope text-3xl md:text-4xl font-black mb-3 leading-tight">
+                      AI Speaking Test <Sparkles className="inline h-7 w-7 text-brand-mint ml-1" fill="currentColor" />
                     </h1>
-                    <p className="text-brand-blue-100 max-w-xl text-base leading-relaxed mb-6">
+                    <p className="text-brand-on-ink-feature max-w-xl text-base leading-relaxed mb-6">
                       Experience a real IELTS-style speaking test powered by AI. Get instant band scores, personalized feedback, and a clear path to your target score.
                     </p>
                     <button
                       onClick={() => setShowApiModal(true)}
-                      className="flex items-center gap-2 bg-white text-[#3E9E93] hover:bg-brand-blue-50 font-bold rounded-xl px-7 py-3 shadow-md text-sm transition-all"
+                      className="flex items-center gap-2 bg-white text-brand-teal-700 hover:bg-brand-teal-wash font-bold rounded-xl px-7 py-3 shadow-md text-sm transition-all"
                     >
                       <Mic size={18} /> Start Speaking Test
                     </button>
@@ -571,36 +578,36 @@ export default function SpeakingAssessment() {
                 {/* Info Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                   {[
-                    { icon: <MessageSquare size={22} className="text-[#3E9E93]" />, title: 'AI Examiner', desc: 'ElevenLabs voice asks you IELTS Part 1, 2 & 3 questions in real time.' },
+                    { icon: <MessageSquare size={22} className="text-brand-teal-600" />, title: 'AI Examiner', desc: 'ElevenLabs voice asks you IELTS Part 1, 2 & 3 questions in real time.' },
                     { icon: <Waves size={22} className="text-[#10b981]" />, title: 'Live Transcription', desc: 'Your speech is transcribed live using Web Speech API for accurate analysis.' },
                     { icon: <BarChart3 size={22} className="text-[#f59e0b]" />, title: 'Band Score + Report', desc: 'GPT-4 evaluates against official IELTS rubrics and gives band scores & improvement cards.' },
                   ].map((card, i) => (
-                    <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800">
-                      <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-3">{card.icon}</div>
-                      <h3 className="font-bold text-slate-900 dark:text-white mb-1">{card.title}</h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{card.desc}</p>
+                    <div key={i} className="bg-white rounded-2xl p-5 shadow-sm border border-brand-line">
+                      <div className="w-10 h-10 rounded-xl bg-brand-bg-alt flex items-center justify-center mb-3">{card.icon}</div>
+                      <h3 className="font-manrope font-bold text-brand-text mb-1">{card.title}</h3>
+                      <p className="text-xs text-brand-text-mute leading-relaxed">{card.desc}</p>
                     </div>
                   ))}
                 </div>
 
                 {/* Test Structure */}
-                <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
-                  <h2 className="font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                    <BookOpen size={18} className="text-[#3E9E93]" /> Test Structure
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-brand-line">
+                  <h2 className="font-manrope font-bold text-brand-text mb-4 flex items-center gap-2">
+                    <BookOpen size={18} className="text-brand-teal-600" /> Test Structure
                   </h2>
                   <div className="space-y-3">
                     {[
-                      { part: 'Part 1', label: 'Introduction & Interview', desc: '2 questions about yourself and familiar topics', time: '~4 min', color: 'bg-[#3E9E93]/10 text-[#3E9E93]' },
+                      { part: 'Part 1', label: 'Introduction & Interview', desc: '2 questions about yourself and familiar topics', time: '~4 min', color: 'bg-brand-teal-wash text-brand-teal-700' },
                       { part: 'Part 2', label: 'Individual Long Turn', desc: '1 cue card topic with 1-min prep time', time: '~3 min', color: 'bg-[#10b981]/10 text-[#10b981]' },
                       { part: 'Part 3', label: 'Two-way Discussion', desc: '2 abstract discussion questions', time: '~5 min', color: 'bg-[#f59e0b]/10 text-[#f59e0b]' },
                     ].map((p, i) => (
-                      <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
-                        <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shrink-0 ${p.color}`}>{p.part}</span>
+                      <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-brand-bg-alt">
+                        <span className={`px-2 py-1 rounded-lg font-jetbrains text-[10px] font-bold uppercase tracking-[0.14em] shrink-0 ${p.color}`}>{p.part}</span>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-slate-800 dark:text-white">{p.label}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">{p.desc}</p>
+                          <p className="text-sm font-semibold text-brand-text">{p.label}</p>
+                          <p className="text-xs text-brand-text-mute">{p.desc}</p>
                         </div>
-                        <span className="text-xs font-bold text-slate-400 shrink-0">{p.time}</span>
+                        <span className="text-xs font-bold text-brand-text-mute shrink-0">{p.time}</span>
                       </div>
                     ))}
                   </div>
@@ -616,43 +623,43 @@ export default function SpeakingAssessment() {
                   <div className="flex items-center gap-3">
                     <button
                       onClick={handleReset}
-                      className="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
+                      className="p-2 bg-white border border-brand-line rounded-xl hover:bg-brand-bg-alt transition-colors shadow-sm"
                     >
-                      <ArrowLeft size={18} className="text-slate-600 dark:text-slate-400" />
+                      <ArrowLeft size={18} className="text-brand-text-mute" />
                     </button>
                     <div>
-                      <h1 className="font-bold text-slate-900 dark:text-white text-lg">Speaking Test</h1>
-                      <p className="text-xs text-slate-500">Question {currentQIdx + 1} of {totalQuestions}</p>
+                      <h1 className="font-manrope font-bold text-brand-text text-lg">Speaking Test</h1>
+                      <p className="text-xs text-brand-text-mute">Question {currentQIdx + 1} of {totalQuestions}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <TimerDisplay seconds={totalTimer} />
                     <button
                       onClick={() => setIsMuted(!isMuted)}
-                      className="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
+                      className="p-2 bg-white border border-brand-line rounded-xl hover:bg-brand-bg-alt transition-colors shadow-sm"
                     >
-                      {isMuted ? <VolumeX size={16} className="text-red-500" /> : <Volume2 size={16} className="text-slate-600 dark:text-slate-400" />}
+                      {isMuted ? <VolumeX size={16} className="text-red-500" /> : <Volume2 size={16} className="text-brand-text-mute" />}
                     </button>
                   </div>
                 </div>
 
                 {/* Progress Bar */}
-                <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-800">
+                <div className="bg-white rounded-2xl p-4 shadow-sm border border-brand-line">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Progress</span>
-                    <span className="text-xs font-bold text-[#3E9E93]">{Math.round(((currentQIdx) / totalQuestions) * 100)}%</span>
+                    <span className="font-jetbrains text-xs font-semibold text-brand-text-mute uppercase tracking-[0.14em]">Progress</span>
+                    <span className="text-xs font-bold text-brand-teal-600">{Math.round(((currentQIdx) / totalQuestions) * 100)}%</span>
                   </div>
-                  <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-2 bg-brand-bg-alt rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-[#3E9E93] to-[#256B8B] rounded-full transition-all duration-500"
+                      className="h-full bg-gradient-to-r from-brand-teal-600 to-brand-blue-600 rounded-full transition-all duration-500"
                       style={{ width: `${((currentQIdx) / totalQuestions) * 100}%` }}
                     />
                   </div>
                   <div className="flex justify-between mt-2">
                     {IELTS_QUESTIONS.map((q, i) => (
                       <div key={q.id} className="flex flex-col items-center gap-1">
-                        <div className={`w-2.5 h-2.5 rounded-full transition-all ${i < currentQIdx ? 'bg-[#10b981]' : i === currentQIdx ? 'bg-[#3E9E93] ring-2 ring-[#3E9E93]/30' : 'bg-slate-200 dark:bg-slate-700'}`} />
-                        <span className={`text-[8px] font-bold uppercase ${i === currentQIdx ? 'text-[#3E9E93]' : 'text-slate-400'}`}>
+                        <div className={`w-2.5 h-2.5 rounded-full transition-all ${i < currentQIdx ? 'bg-[#10b981]' : i === currentQIdx ? 'bg-brand-teal-600 ring-2 ring-brand-teal-600/30' : 'bg-brand-line'}`} />
+                        <span className={`font-jetbrains text-[8px] font-bold uppercase ${i === currentQIdx ? 'text-brand-teal-600' : 'text-brand-text-mute'}`}>
                           P{q.part}
                         </span>
                       </div>
@@ -661,56 +668,56 @@ export default function SpeakingAssessment() {
                 </div>
 
                 {/* Question Card */}
-                <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 md:p-8 shadow-sm border border-slate-100 dark:border-slate-800">
+                <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-brand-line">
                   <div className="flex items-center gap-2 mb-4">
-                    <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest
-                      ${currentQuestion.part === 1 ? 'bg-[#3E9E93]/10 text-[#3E9E93]' :
+                    <span className={`px-3 py-1 rounded-lg font-jetbrains text-[10px] font-bold uppercase tracking-[0.16em]
+                      ${currentQuestion.part === 1 ? 'bg-brand-teal-wash text-brand-teal-700' :
                         currentQuestion.part === 2 ? 'bg-[#10b981]/10 text-[#10b981]' :
                         'bg-[#f59e0b]/10 text-[#f59e0b]'}`}>
                       Part {currentQuestion.part}
                     </span>
                     {recordingState === 'listening_ai' && (
-                      <span className="flex items-center gap-1.5 px-2 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-[10px] font-bold uppercase">
+                      <span className="flex items-center gap-1.5 px-2 py-1 bg-brand-blue-tint text-brand-blue-600 rounded-lg font-jetbrains text-[10px] font-bold uppercase">
                         <Volume2 size={11} className="animate-pulse" /> AI Speakingâ€¦
                       </span>
                     )}
                     {recordingState === 'recording' && (
-                      <span className="flex items-center gap-1.5 px-2 py-1 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-lg text-[10px] font-bold uppercase animate-pulse">
+                      <span className="flex items-center gap-1.5 px-2 py-1 bg-red-50 text-red-500 rounded-lg font-jetbrains text-[10px] font-bold uppercase animate-pulse">
                         <Radio size={11} /> Recording
                       </span>
                     )}
                   </div>
 
-                  <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white leading-relaxed mb-3">
+                  <h2 className="font-manrope text-xl md:text-2xl font-bold text-brand-text leading-relaxed mb-3">
                     {currentQuestion.text}
                   </h2>
 
                   {currentQuestion.hint && (
-                    <div className="flex items-start gap-2 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                      <Target size={14} className="text-[#3E9E93] mt-0.5 shrink-0" />
-                      <p className="text-xs text-slate-500 dark:text-slate-400">{currentQuestion.hint}</p>
+                    <div className="flex items-start gap-2 p-3 bg-brand-bg-alt rounded-xl">
+                      <Target size={14} className="text-brand-teal-600 mt-0.5 shrink-0" />
+                      <p className="text-xs text-brand-text-mute">{currentQuestion.hint}</p>
                     </div>
                   )}
                 </div>
 
                 {/* Waveform & Recording Controls */}
-                <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-brand-line">
                   <WaveformVisualizer isActive={recordingState === 'recording'} />
 
                   {/* Live Transcript */}
                   {(currentTranscript || recordingState === 'recording') && (
-                    <div className="mt-4 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl min-h-[60px]">
-                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Live Transcript</p>
-                      <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-                        {currentTranscript || <span className="italic text-slate-400">Listeningâ€¦</span>}
+                    <div className="mt-4 p-3 bg-brand-bg-alt rounded-xl min-h-[60px]">
+                      <p className="font-jetbrains text-xs font-semibold text-brand-text-mute uppercase tracking-[0.14em] mb-1.5">Live Transcript</p>
+                      <p className="text-sm text-brand-text leading-relaxed">
+                        {currentTranscript || <span className="italic text-brand-text-mute">Listeningâ€¦</span>}
                       </p>
                     </div>
                   )}
 
                   {errorMsg && (
-                    <div className="mt-3 flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                    <div className="mt-3 flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl">
                       <AlertCircle size={14} className="text-red-500 shrink-0" />
-                      <p className="text-xs text-red-600 dark:text-red-400">{errorMsg}</p>
+                      <p className="text-xs text-red-600">{errorMsg}</p>
                     </div>
                   )}
 
@@ -727,18 +734,18 @@ export default function SpeakingAssessment() {
                       {recordingState === 'recording' && (
                         <button
                           onClick={stopRecording}
-                          className="flex items-center gap-2 bg-slate-800 dark:bg-white dark:text-slate-900 text-white font-bold px-5 py-3 rounded-xl transition-colors shadow-sm animate-pulse"
+                          className="flex items-center gap-2 bg-brand-ink text-white font-bold px-5 py-3 rounded-xl transition-colors shadow-sm animate-pulse"
                         >
                           <Square size={16} fill="currentColor" /> Stop
                         </button>
                       )}
                       {recordingState === 'listening_ai' && (
-                        <div className="flex items-center gap-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-5 py-3 rounded-xl font-semibold text-sm">
+                        <div className="flex items-center gap-2 bg-brand-blue-tint text-brand-blue-600 px-5 py-3 rounded-xl font-semibold text-sm">
                           <Loader2 size={16} className="animate-spin" /> AI is speakingâ€¦
                         </div>
                       )}
                       {recordingState === 'processing' && (
-                        <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-5 py-3 rounded-xl font-semibold text-sm">
+                        <div className="flex items-center gap-2 bg-brand-bg-alt text-brand-text-mute px-5 py-3 rounded-xl font-semibold text-sm">
                           <Loader2 size={16} className="animate-spin" /> Processingâ€¦
                         </div>
                       )}
@@ -752,7 +759,7 @@ export default function SpeakingAssessment() {
                       {transcripts.find((t) => t.questionId === currentQuestion.id) && (
                         <button
                           onClick={handleNextQuestion}
-                          className="flex items-center gap-2 bg-[#3E9E93] hover:bg-[#12897C] text-white font-bold px-5 py-3 rounded-xl transition-colors shadow-sm"
+                          className="flex items-center gap-2 bg-brand-teal-600 hover:bg-brand-teal-700 text-white font-bold px-5 py-3 rounded-xl transition-colors shadow-sm"
                         >
                           {currentQIdx < totalQuestions - 1 ? (
                             <><span className="hidden sm:inline">Next</span> <ChevronRight size={18} /></>
@@ -767,8 +774,8 @@ export default function SpeakingAssessment() {
 
                 {/* Answered Questions */}
                 {transcripts.length > 0 && (
-                  <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800">
-                    <h3 className="font-bold text-slate-700 dark:text-slate-300 text-sm mb-3 flex items-center gap-2">
+                  <div className="bg-white rounded-2xl p-5 shadow-sm border border-brand-line">
+                    <h3 className="font-manrope font-bold text-brand-text text-sm mb-3 flex items-center gap-2">
                       <CheckCircle size={16} className="text-[#10b981]" /> Completed ({transcripts.length}/{totalQuestions})
                     </h3>
                     <div className="space-y-2">
@@ -778,8 +785,8 @@ export default function SpeakingAssessment() {
                           <div key={t.questionId} className="flex items-start gap-2.5 p-2.5 bg-[#10b981]/5 border border-[#10b981]/20 rounded-xl">
                             <CheckCircle size={14} className="text-[#10b981] mt-0.5 shrink-0" />
                             <div className="flex-1 min-w-0">
-                              <p className="text-xs text-slate-600 dark:text-slate-400 truncate">{q?.text}</p>
-                              <p className="text-[10px] text-slate-400 mt-0.5">Duration: {t.duration}s</p>
+                              <p className="text-xs text-brand-text-mute truncate">{q?.text}</p>
+                              <p className="text-[10px] text-brand-text-mute mt-0.5">Duration: {t.duration}s</p>
                             </div>
                           </div>
                         );
@@ -793,12 +800,12 @@ export default function SpeakingAssessment() {
             {/* â”€â”€â”€ ANALYZING VIEW â”€â”€â”€ */}
             {view === 'analyzing' && (
               <div className="flex flex-col items-center justify-center min-h-[60vh] animate-in fade-in duration-500">
-                <div className="bg-white dark:bg-slate-900 rounded-3xl p-10 md:p-14 shadow-sm border border-slate-100 dark:border-slate-800 max-w-md w-full text-center">
+                <div className="bg-white rounded-3xl p-10 md:p-14 shadow-sm border border-brand-line max-w-md w-full text-center">
                   <div className="relative w-24 h-24 mx-auto mb-6">
                     <svg className="w-24 h-24 -rotate-90" viewBox="0 0 96 96">
-                      <circle cx="48" cy="48" r="40" fill="none" stroke="#e2e8f0" strokeWidth="8" className="dark:stroke-slate-700" />
+                      <circle cx="48" cy="48" r="40" fill="none" stroke="#D8E0E2" strokeWidth="8" />
                       <circle
-                        cx="48" cy="48" r="40" fill="none" stroke="#3E9E93" strokeWidth="8"
+                        cx="48" cy="48" r="40" fill="none" stroke="#0E7C66" strokeWidth="8"
                         strokeLinecap="round"
                         strokeDasharray={251}
                         strokeDashoffset={251 - (251 * analysisProgress) / 100}
@@ -806,11 +813,11 @@ export default function SpeakingAssessment() {
                       />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-xl font-black text-[#3E9E93]">{analysisProgress}%</span>
+                      <span className="text-xl font-black text-brand-teal-600">{analysisProgress}%</span>
                     </div>
                   </div>
-                  <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2">Analyzing Your Test</h2>
-                  <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
+                  <h2 className="font-manrope text-2xl font-black text-brand-text mb-2">Analyzing Your Test</h2>
+                  <p className="text-brand-text-mute text-sm mb-6">
                     GPT-4 is evaluating your responses against official IELTS rubricsâ€¦
                   </p>
                   <div className="space-y-2 text-left">
@@ -824,9 +831,9 @@ export default function SpeakingAssessment() {
                         {step.done ? (
                           <CheckCircle size={14} className="text-[#10b981] shrink-0" />
                         ) : (
-                          <Loader2 size={14} className="text-slate-300 shrink-0 animate-spin" />
+                          <Loader2 size={14} className="text-brand-line shrink-0 animate-spin" />
                         )}
-                        <span className={`text-xs ${step.done ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400'}`}>{step.label}</span>
+                        <span className={`text-xs ${step.done ? 'text-brand-text' : 'text-brand-text-mute'}`}>{step.label}</span>
                       </div>
                     ))}
                   </div>
@@ -840,64 +847,64 @@ export default function SpeakingAssessment() {
                 {/* Results Header */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white">Your Results</h1>
-                    <p className="text-sm text-slate-500 mt-0.5">IELTS Speaking Assessment Â· {new Date().toLocaleDateString()}</p>
+                    <h1 className="font-manrope text-2xl md:text-3xl font-black text-brand-text">Your Results</h1>
+                    <p className="text-sm text-brand-text-mute mt-0.5">IELTS Speaking Assessment Â· {new Date().toLocaleDateString()}</p>
                   </div>
                   <button
                     onClick={handleReset}
-                    className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold px-4 py-2.5 rounded-xl transition-colors shadow-sm text-sm"
+                    className="flex items-center gap-2 bg-white border border-brand-line hover:bg-brand-bg-alt text-brand-text font-semibold px-4 py-2.5 rounded-xl transition-colors shadow-sm text-sm"
                   >
                     <RotateCcw size={15} /> Retake
                   </button>
                 </div>
 
                 {/* Band Score Card */}
-                <div className="bg-gradient-to-br from-[#3E9E93] to-[#256B8B] rounded-2xl p-6 md:p-8 text-white shadow-lg">
+                <div className="bg-brand-ink rounded-2xl p-6 md:p-8 text-white shadow-lg">
                   <div className="flex flex-col md:flex-row items-center gap-6">
                     <div className="flex flex-col items-center">
                       <BandScoreArc score={result.bandScore} />
                     </div>
                     <div className="flex-1 text-center md:text-left">
-                      <p className="text-brand-blue-200 text-sm font-semibold uppercase tracking-wider mb-2">Overall Band Score</p>
+                      <p className="text-brand-on-ink text-sm font-semibold uppercase tracking-wider mb-2">Overall Band Score</p>
                       <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
                         <span className="text-5xl font-black">{result.bandScore}</span>
                         <div className="bg-white/20 rounded-xl px-3 py-1.5">
-                          <p className="text-xs font-bold text-brand-blue-100 whitespace-nowrap">{result.projectedBand}</p>
+                          <p className="text-xs font-bold text-brand-on-ink-feature whitespace-nowrap">{result.projectedBand}</p>
                         </div>
                       </div>
-                      <p className="text-brand-blue-100 text-sm leading-relaxed max-w-sm">{result.overallFeedback}</p>
+                      <p className="text-brand-on-ink-feature text-sm leading-relaxed max-w-sm">{result.overallFeedback}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Sub Scores */}
-                <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
-                  <h2 className="font-bold text-slate-900 dark:text-white mb-5 flex items-center gap-2">
-                    <BarChart3 size={18} className="text-[#3E9E93]" /> Score Breakdown
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-brand-line">
+                  <h2 className="font-manrope font-bold text-brand-text mb-5 flex items-center gap-2">
+                    <BarChart3 size={18} className="text-brand-teal-600" /> Score Breakdown
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <SubScoreBar label="Fluency & Coherence" score={result.subScores.fluency} color="#3E9E93" />
+                    <SubScoreBar label="Fluency & Coherence" score={result.subScores.fluency} color="#0E7C66" />
                     <SubScoreBar label="Lexical Resource" score={result.subScores.vocabulary} color="#10b981" />
                     <SubScoreBar label="Grammar & Accuracy" score={result.subScores.grammar} color="#f59e0b" />
-                    <SubScoreBar label="Pronunciation" score={result.subScores.pronunciation} color="#3b82f6" />
+                    <SubScoreBar label="Pronunciation" score={result.subScores.pronunciation} color="#185A78" />
                   </div>
                 </div>
 
                 {/* Feedback Cards â€” Weaknesses */}
                 <div>
-                  <h2 className="font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                    <AlertCircle size={18} className="text-red-500" /> 3 Key Weaknesses
+                  <h2 className="font-manrope font-bold text-brand-text mb-4 flex items-center gap-2">
+                    <AlertCircle size={18} className="text-rose-500" /> 3 Key Weaknesses
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {result.weaknesses.map((w, i) => (
-                      <div key={i} className="bg-red-50 dark:bg-red-900/10 border-2 border-red-100 dark:border-red-900/30 rounded-2xl p-5 hover:shadow-md transition-shadow">
+                      <div key={i} className="bg-rose-50 border-2 border-rose-100 rounded-2xl p-5 hover:shadow-md transition-shadow">
                         <div className="flex items-center gap-2 mb-2">
-                          <div className="w-7 h-7 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                            <span className="text-xs font-black text-red-500">{i + 1}</span>
+                          <div className="w-7 h-7 rounded-lg bg-rose-100 flex items-center justify-center">
+                            <span className="text-xs font-black text-rose-500">{i + 1}</span>
                           </div>
-                          <h3 className="font-bold text-red-700 dark:text-red-400 text-sm">{w.title}</h3>
+                          <h3 className="font-manrope font-bold text-rose-700 text-sm">{w.title}</h3>
                         </div>
-                        <p className="text-xs text-red-600/80 dark:text-red-400/80 leading-relaxed">{w.description}</p>
+                        <p className="text-xs text-rose-600/80 leading-relaxed">{w.description}</p>
                       </div>
                     ))}
                   </div>
@@ -905,34 +912,34 @@ export default function SpeakingAssessment() {
 
                 {/* Feedback Cards â€” Improvements */}
                 <div>
-                  <h2 className="font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                  <h2 className="font-manrope font-bold text-brand-text mb-4 flex items-center gap-2">
                     <TrendingUp size={18} className="text-[#10b981]" /> 3 Ways to Improve
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {result.improvements.map((imp, i) => (
-                      <div key={i} className="bg-emerald-50 dark:bg-emerald-900/10 border-2 border-emerald-100 dark:border-emerald-900/30 rounded-2xl p-5 hover:shadow-md transition-shadow">
+                      <div key={i} className="bg-emerald-50 border-2 border-emerald-100 rounded-2xl p-5 hover:shadow-md transition-shadow">
                         <div className="flex items-center gap-2 mb-2">
-                          <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                            <Zap size={13} className="text-emerald-600 dark:text-emerald-400" />
+                          <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center">
+                            <Zap size={13} className="text-emerald-600" />
                           </div>
-                          <h3 className="font-bold text-emerald-700 dark:text-emerald-400 text-sm">{imp.title}</h3>
+                          <h3 className="font-manrope font-bold text-emerald-700 text-sm">{imp.title}</h3>
                         </div>
-                        <p className="text-xs text-emerald-600/80 dark:text-emerald-400/80 leading-relaxed">{imp.description}</p>
+                        <p className="text-xs text-emerald-600/80 leading-relaxed">{imp.description}</p>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Band Projection Card */}
-                <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/10 dark:to-orange-900/10 border-2 border-amber-200 dark:border-amber-800 rounded-2xl p-6">
+                <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl p-6">
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
-                      <Award size={22} className="text-amber-600 dark:text-amber-400" />
+                    <div className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center shrink-0">
+                      <Award size={22} className="text-amber-600" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-amber-800 dark:text-amber-300 text-lg mb-1">Your Score Projection</h3>
-                      <p className="text-2xl font-black text-amber-700 dark:text-amber-400 mb-2">{result.projectedBand}</p>
-                      <p className="text-sm text-amber-700/80 dark:text-amber-400/80 leading-relaxed">
+                      <h3 className="font-manrope font-bold text-amber-800 text-lg mb-1">Your Score Projection</h3>
+                      <p className="text-2xl font-black text-amber-700 mb-2">{result.projectedBand}</p>
+                      <p className="text-sm text-amber-700/80 leading-relaxed">
                         With consistent practice on the improvements above, you can realistically achieve this band improvement within 4â€“6 weeks. Focus especially on your top weakness.
                       </p>
                     </div>
@@ -943,11 +950,11 @@ export default function SpeakingAssessment() {
                 <div className="flex flex-col sm:flex-row gap-3 pb-8">
                   <button
                     onClick={handleReset}
-                    className="flex-1 flex items-center justify-center gap-2 bg-[#3E9E93] hover:bg-[#12897C] text-white font-bold py-3.5 rounded-xl transition-colors shadow-sm"
+                    className="flex-1 flex items-center justify-center gap-2 bg-brand-teal-600 hover:bg-brand-teal-700 text-white font-bold py-3.5 rounded-xl transition-colors shadow-sm"
                   >
                     <RotateCcw size={18} /> Take Another Test
                   </button>
-                  <button className="flex-1 flex items-center justify-center gap-2 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold py-3.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                  <button className="flex-1 flex items-center justify-center gap-2 bg-white border-2 border-brand-line text-brand-text font-bold py-3.5 rounded-xl hover:bg-brand-bg-alt transition-colors">
                     <BookOpen size={18} /> Study Plan
                   </button>
                 </div>

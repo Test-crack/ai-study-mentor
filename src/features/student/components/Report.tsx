@@ -102,15 +102,15 @@ const Report = () => {
         <div>
           <div className="flex items-center gap-2">
             <BarChart2 className="h-6 w-6 text-brand-teal-500" />
-            <h1 className="text-2xl font-black text-slate-800 dark:text-white">Reports</h1>
+            <h1 className="font-manrope text-2xl font-black text-brand-text">Reports</h1>
           </div>
-          <p className="text-sm text-slate-500 mt-0.5">
+          <p className="text-sm text-brand-text-mute mt-0.5">
             Your performance breakdown — all mock data until Wednesday integration
           </p>
         </div>
 
         {/* ── Tab Bar ── */}
-        <div className="flex gap-1 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-1.5 shadow-sm w-fit">
+        <div className="flex gap-1 bg-white border border-brand-line rounded-2xl p-1.5 shadow-sm w-fit">
           {([
             { id: "bandarc",   label: "Band Arc",            icon: <TrendingUp    className="h-4 w-4" /> },
             { id: "radar",     label: "Competency Radar",    icon: <Target        className="h-4 w-4" /> },
@@ -122,7 +122,7 @@ const Report = () => {
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 ${
                 reportTab === tab.id
                   ? "bg-brand-teal-600 text-white shadow-sm"
-                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                  : "text-brand-text-mute hover:text-brand-text"
               }`}
             >
               {tab.icon} {tab.label}
@@ -148,12 +148,12 @@ const Report = () => {
 // ─── TAB: BAND ARC ────────────────────────────────────────────────────────────
 
 const BandArcTab = () => (
-  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6 shadow-sm">
+  <div className="bg-white rounded-2xl border border-brand-line p-6 shadow-sm">
     <div className="mb-5">
-      <h2 className="text-base font-black text-slate-800 dark:text-white flex items-center gap-2">
+      <h2 className="font-manrope text-base font-black text-brand-text flex items-center gap-2">
         <TrendingUp className="h-5 w-5 text-brand-teal-500" /> Band Score Arc — All 4 Skills
       </h2>
-      <p className="text-xs text-slate-500 mt-1">
+      <p className="text-xs text-brand-text-mute mt-1">
         Line chart showing band score progression over time · Mock data Mar 10 – Mar 24
       </p>
     </div>
@@ -194,22 +194,22 @@ const BandArcTab = () => (
 // ─── TAB: RADAR ───────────────────────────────────────────────────────────────
 
 const RadarTab = () => (
-  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6 shadow-sm">
+  <div className="bg-white rounded-2xl border border-brand-line p-6 shadow-sm">
     <div className="mb-5">
-      <h2 className="text-base font-black text-slate-800 dark:text-white flex items-center gap-2">
+      <h2 className="font-manrope text-base font-black text-brand-text flex items-center gap-2">
         <Target className="h-5 w-5 text-brand-teal-500" /> Competency Radar — Current vs Target
       </h2>
-      <p className="text-xs text-slate-500 mt-1">
+      <p className="text-xs text-brand-text-mute mt-1">
         Spider chart overlaying your current band per skill against your target band
       </p>
     </div>
 
     <div className="flex gap-4 mb-5">
-      <span className="inline-flex items-center gap-2 text-xs font-bold text-brand-teal-600 dark:text-brand-teal-400">
+      <span className="inline-flex items-center gap-2 text-xs font-bold text-brand-teal-600">
         <span className="h-2.5 w-2.5 rounded-full bg-brand-teal-500" /> Current Band
       </span>
-      <span className="inline-flex items-center gap-2 text-xs font-bold text-slate-400">
-        <span className="h-2.5 w-2.5 rounded-full border-2 border-slate-400" /> Target Band
+      <span className="inline-flex items-center gap-2 text-xs font-bold text-brand-text-mute">
+        <span className="h-2.5 w-2.5 rounded-full border-2 border-brand-line" /> Target Band
       </span>
     </div>
 
@@ -242,32 +242,32 @@ const ReadinessTab = () => {
     <div className="space-y-4">
       <div className={`rounded-2xl border p-4 flex items-start gap-3 ${
         isOnTrack
-          ? "bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/25"
-          : "bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/25"
+          ? "bg-emerald-50 border-emerald-200"
+          : "bg-amber-50 border-amber-200"
       }`}>
         {isOnTrack
           ? <CheckCircle2 className="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" />
           : <AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
         }
         <div>
-          <p className={`text-sm font-bold ${isOnTrack ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300"}`}>
+          <p className={`text-sm font-bold ${isOnTrack ? "text-emerald-700" : "text-amber-700"}`}>
             {isOnTrack
               ? "On track to hit your target band by June 15!"
               : `At current pace: projected band ${lastProjected.toFixed(1)} by June 15 — ${gap} below target 7.5`
             }
           </p>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-brand-text-mute mt-0.5">
             Increase Speaking + Writing practice frequency to close the gap.
           </p>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6 shadow-sm">
+      <div className="bg-white rounded-2xl border border-brand-line p-6 shadow-sm">
         <div className="mb-5">
-          <h2 className="text-base font-black text-slate-800 dark:text-white flex items-center gap-2">
+          <h2 className="font-manrope text-base font-black text-brand-text flex items-center gap-2">
             <CalendarClock className="h-5 w-5 text-brand-teal-500" /> Predicted Readiness — Overall Band Trajectory
           </h2>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-brand-text-mute mt-1">
             Current trajectory vs target band vs exam date (Jun 15) · Arithmetic projection from mock data
           </p>
         </div>
@@ -279,6 +279,7 @@ const ReadinessTab = () => {
           <span className="inline-flex items-center gap-2 text-xs font-bold text-rose-500">
             <span className="h-2.5 w-8 rounded bg-rose-400 inline-block" /> Target 7.5
           </span>
+
         </div>
 
         <ResponsiveContainer width="100%" height={300}>
@@ -307,46 +308,46 @@ const ReadinessTab = () => {
 // ─── PERFORMANCE TABLE ────────────────────────────────────────────────────────
 
 const statusConfig = {
-  "On Track": { color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-500/10" },
-  "At Risk":  { color: "text-amber-600 dark:text-amber-400",    bg: "bg-amber-50 dark:bg-amber-500/10"    },
-  "Critical": { color: "text-rose-600 dark:text-rose-400",      bg: "bg-rose-50 dark:bg-rose-500/10"      },
+  "On Track": { color: "text-emerald-600", bg: "bg-emerald-50" },
+  "At Risk":  { color: "text-amber-600",   bg: "bg-amber-50"   },
+  "Critical": { color: "text-rose-600",    bg: "bg-rose-50"    },
 };
 
 const PerformanceTable = () => (
-  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
-    <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
-      <h2 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">Performance Table</h2>
-      <p className="text-xs text-slate-400 mt-0.5">Current snapshot across all 4 skills</p>
+  <div className="bg-white rounded-2xl border border-brand-line shadow-sm overflow-hidden">
+    <div className="px-6 py-4 border-b border-brand-line">
+      <h2 className="font-manrope text-sm font-black text-brand-text uppercase tracking-wider">Performance Table</h2>
+      <p className="text-xs text-brand-text-mute mt-0.5">Current snapshot across all 4 skills</p>
     </div>
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-slate-50 dark:bg-slate-800/50">
+          <tr className="bg-brand-bg-alt">
             {["Skill", "Current Band", "Target Band", "Gap", "Sessions", "Δ Last", "Status"].map((h) => (
-              <th key={h} className="px-5 py-3 text-left text-[11px] font-black text-slate-400 uppercase tracking-wider">
+              <th key={h} className="px-5 py-3 text-left font-jetbrains text-[10.5px] font-black text-brand-text-mute uppercase tracking-[0.14em]">
                 {h}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+        <tbody className="divide-y divide-brand-line">
           {PERFORMANCE_TABLE.map((row) => {
             const sc = statusConfig[row.status as keyof typeof statusConfig];
             const skillColor = SKILL_COLORS[row.skill];
             return (
-              <tr key={row.skill} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+              <tr key={row.skill} className="hover:bg-brand-bg-alt transition-colors">
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-2">
                     <span style={{ color: skillColor }}>{SKILL_ICONS[row.skill]}</span>
-                    <span className="font-bold text-slate-800 dark:text-white">{row.skill}</span>
+                    <span className="font-bold text-brand-text">{row.skill}</span>
                   </div>
                 </td>
-                <td className="px-5 py-4 font-black text-slate-800 dark:text-white">{row.current.toFixed(1)}</td>
-                <td className="px-5 py-4 text-slate-500">{row.target.toFixed(1)}</td>
+                <td className="px-5 py-4 font-black text-brand-text">{row.current.toFixed(1)}</td>
+                <td className="px-5 py-4 text-brand-text-mute">{row.target.toFixed(1)}</td>
                 <td className="px-5 py-4 font-bold text-rose-500">-{row.gap.toFixed(1)}</td>
-                <td className="px-5 py-4 text-slate-500">{row.sessions}</td>
+                <td className="px-5 py-4 text-brand-text-mute">{row.sessions}</td>
                 <td className="px-5 py-4">
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400">+{row.delta.toFixed(1)}</span>
+                  <span className="font-bold text-emerald-600">+{row.delta.toFixed(1)}</span>
                 </td>
                 <td className="px-5 py-4">
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${sc.bg} ${sc.color}`}>

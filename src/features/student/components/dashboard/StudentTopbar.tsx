@@ -5,8 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avat
 import { Button } from "@/shared/components/ui/button";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { ThemeToggle } from "@/features/theme/components/ThemeToggle";
-import { useMomentum } from "@/features/student/Context/MomentumContext"; 
+import { useMomentum } from "@/features/student/Context/MomentumContext";
 
 interface StudentTopbarProps {
   onUpgradeClick?: () => void;
@@ -45,14 +44,14 @@ export const StudentTopbar = ({ onUpgradeClick }: StudentTopbarProps) => {
   const initials = displayName.substring(0, 2).toUpperCase();
 
   return (
-    <header className="h-16 flex items-center justify-between px-4 sm:px-6 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm sticky top-0 z-40 flex-shrink-0 w-full">
-      
+    <header className="h-16 flex items-center justify-between px-4 sm:px-6 border-b border-brand-line bg-white/95 backdrop-blur-sm sticky top-0 z-40 flex-shrink-0 w-full">
+
       {/* Mobile Menu Trigger */}
       <div className="md:hidden">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 -ml-2 transition-transform duration-200"
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-brand-text-mute hover:bg-brand-bg-alt -ml-2 transition-transform duration-200"
           onClick={handleMenuClick}
           aria-label="Toggle Sidebar"
         >
@@ -68,24 +67,22 @@ export const StudentTopbar = ({ onUpgradeClick }: StudentTopbarProps) => {
 
       {/* Right Actions */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-1.5 bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 rounded-full px-3 py-1.5 hidden sm:flex">
-          <Flame className="w-3.5 h-3.5 text-orange-500 fill-orange-500" />
-          <span className="text-sm font-black text-orange-600 dark:text-orange-400">{streak}</span>
-          <span className="text-xs text-orange-400 font-medium hidden sm:inline">day streak</span>
+        <div className="flex items-center gap-1.5 bg-brand-warm-tint dark:bg-brand-warm/10 border border-brand-warm/20 dark:border-brand-warm/25 rounded-full px-3 py-1.5 hidden sm:flex">
+          <Flame className="w-3.5 h-3.5 text-brand-warm fill-brand-warm" />
+          <span className="font-manrope text-sm font-black text-brand-warm">{streak}</span>
+          <span className="text-xs text-brand-warm font-medium hidden sm:inline opacity-80">day streak</span>
         </div>
 
-        <div className="flex items-center gap-1.5 bg-brand-teal-50 dark:bg-brand-teal-500/10 border border-brand-teal-100 dark:border-brand-teal-500/20 rounded-full px-3 py-1.5">
-          <Zap className="w-3.5 h-3.5 text-brand-teal-500 fill-brand-teal-500" />
-          <span className="text-sm font-black text-brand-teal-600 dark:text-brand-teal-400">{totalMomentum}</span>
-          <span className="text-xs text-brand-teal-400 font-medium hidden sm:inline">pts</span>
+        <div className="flex items-center gap-1.5 bg-brand-ink rounded-full px-3 py-1.5">
+          <Zap className="w-3.5 h-3.5 text-brand-mint fill-brand-mint" />
+          <span className="font-manrope text-sm font-black text-brand-mint">{totalMomentum}</span>
+          <span className="text-xs text-brand-mint/70 font-medium hidden sm:inline">momentum</span>
         </div>
-
-        <ThemeToggle />
 
         <NotificationBell />
 
         <Avatar
-          className="h-8 w-8 ml-1 border border-slate-200 dark:border-slate-700 cursor-pointer hover:ring-2 hover:ring-brand-teal-100 transition-all shrink-0"
+          className="h-8 w-8 ml-1 border border-brand-line cursor-pointer hover:ring-2 hover:ring-brand-teal-tint transition-all shrink-0"
           onClick={() => navigate('/student/settings')}
         >
           <AvatarImage src={profile?.profileImage || ""} />

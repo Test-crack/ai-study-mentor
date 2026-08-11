@@ -46,12 +46,12 @@ export interface BannerConfig {
 
 export const NOTIFICATION_CONFIG: Record<NotificationType, BannerConfig> = {
   IA_PENDING: {
-    bgColor:     "bg-amber-50 dark:bg-amber-500/10",
-    borderColor: "border-amber-200 dark:border-amber-500/30",
-    iconBg:      "bg-amber-100 dark:bg-amber-500/20",
-    icon:        <CalendarClock className="w-6 h-6 text-amber-600 dark:text-amber-400" />,
-    titleColor:  "text-amber-900 dark:text-amber-300",
-    bodyColor:   "text-amber-700/80 dark:text-amber-400/80",
+    bgColor:     "bg-white border-l-[3px] border-l-amber-500",
+    borderColor: "border-brand-line",
+    iconBg:      "bg-amber-500/12",
+    icon:        <CalendarClock className="w-6 h-6 text-amber-600" />,
+    titleColor:  "text-brand-text",
+    bodyColor:   "text-brand-text-mute",
     title:  (n) => `Internal Assessment #${n.ia_number ?? ""} — Due Today`,
     body:   ()  => "Your Internal Assessment is scheduled for today. Complete it before the window closes.",
     ctaLabel: "Start Assessment",
@@ -59,12 +59,12 @@ export const NOTIFICATION_CONFIG: Record<NotificationType, BannerConfig> = {
     route: "/student/internal",
   },
   IA_IN_PROGRESS: {
-    bgColor:     "bg-amber-50 dark:bg-amber-500/10",
-    borderColor: "border-amber-200 dark:border-amber-500/30",
-    iconBg:      "bg-amber-100 dark:bg-amber-500/20",
-    icon:        <PlayCircle className="w-6 h-6 text-amber-600 dark:text-amber-400" />,
-    titleColor:  "text-amber-900 dark:text-amber-300",
-    bodyColor:   "text-amber-700/80 dark:text-amber-400/80",
+    bgColor:     "bg-white border-l-[3px] border-l-amber-500",
+    borderColor: "border-brand-line",
+    iconBg:      "bg-amber-500/12",
+    icon:        <PlayCircle className="w-6 h-6 text-amber-600" />,
+    titleColor:  "text-brand-text",
+    bodyColor:   "text-brand-text-mute",
     title:  (n) => `Internal Assessment #${n.ia_number ?? ""} — In Progress`,
     body:   (n) =>
       `You left mid-test with ${n.answers_saved ?? 0} answer${(n.answers_saved ?? 0) !== 1 ? "s" : ""} saved. Pick up where you left off.`,
@@ -73,25 +73,25 @@ export const NOTIFICATION_CONFIG: Record<NotificationType, BannerConfig> = {
     route: "/student/internal",
   },
   MOCK_PENDING: {
-    bgColor:     "bg-emerald-50 dark:bg-emerald-500/10",
-    borderColor: "border-emerald-200 dark:border-emerald-500/30",
-    iconBg:      "bg-emerald-100 dark:bg-emerald-500/20",
-    icon:        <Trophy className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />,
-    titleColor:  "text-emerald-900 dark:text-emerald-300",
-    bodyColor:   "text-emerald-700/80 dark:text-emerald-400/80",
+    bgColor:     "bg-white border-l-[3px] border-l-brand-teal-600",
+    borderColor: "border-brand-line",
+    iconBg:      "bg-brand-teal-100",
+    icon:        <Trophy className="w-6 h-6 text-brand-teal-600" />,
+    titleColor:  "text-brand-text",
+    bodyColor:   "text-brand-text-mute",
     title:  (n) => `Monthly Mock Test${n.attempt_type ? ` — ${n.attempt_type}` : ""} Available`,
     body:   (n) => `Your mock test for ${n.month_year ?? "this month"} is ready. Take it to measure your full IELTS readiness.`,
     ctaLabel: "Start Mock Test",
-    ctaClass: "bg-emerald-600 hover:bg-emerald-700 text-white",
+    ctaClass: "bg-brand-teal-600 hover:bg-brand-teal-700 text-white",
     route: "/student/mock",
   },
   MOCK_IN_PROGRESS: {
-    bgColor:     "bg-amber-50 dark:bg-amber-500/10",
-    borderColor: "border-amber-200 dark:border-amber-500/30",
-    iconBg:      "bg-amber-100 dark:bg-amber-500/20",
-    icon:        <BookOpen className="w-6 h-6 text-amber-600 dark:text-amber-400" />,
-    titleColor:  "text-amber-900 dark:text-amber-300",
-    bodyColor:   "text-amber-700/80 dark:text-amber-400/80",
+    bgColor:     "bg-white border-l-[3px] border-l-amber-500",
+    borderColor: "border-brand-line",
+    iconBg:      "bg-amber-500/12",
+    icon:        <BookOpen className="w-6 h-6 text-amber-600" />,
+    titleColor:  "text-brand-text",
+    bodyColor:   "text-brand-text-mute",
     title:  (n) => `Monthly Mock Test${n.attempt_type ? ` — ${n.attempt_type}` : ""} — Paused`,
     body:   (n) =>
       `You left your mock test incomplete with ${n.answers_saved ?? 0} answer${(n.answers_saved ?? 0) !== 1 ? "s" : ""} saved. Continue before the window closes.`,
@@ -99,16 +99,17 @@ export const NOTIFICATION_CONFIG: Record<NotificationType, BannerConfig> = {
     ctaClass: "bg-amber-600 hover:bg-amber-700 text-white",
     route: "/student/mock",
   },
-  // Reframed from punitive to a gentle, recoverable nudge.
-  // Light-blue gradient with white text — calm, low-pressure, and clearly a
-  // "let's find your way back" moment rather than an alarm.
+  // Reframed from punitive to a gentle, recoverable nudge — calm, low-pressure,
+  // a "let's find your way back" moment rather than an alarm. Restyled onto
+  // the same white-card + left-border-accent language as the rest of the
+  // dashboard instead of the old full-gradient banner.
   IA_MISSED: {
-    bgColor:     "bg-gradient-to-r from-sky-800 to-brand-teal-600 dark:from-sky-800 dark:to-brand-teal-600",
-    borderColor: "border-sky-300/40 dark:border-sky-400/30",
-    iconBg:      "bg-white/20",
-    icon:        <Compass className="w-6 h-6 text-white" />,
-    titleColor:  "text-white",
-    bodyColor:   "text-white/90",
+    bgColor:     "bg-white border-l-[3px] border-l-brand-blue-500",
+    borderColor: "border-brand-line",
+    iconBg:      "bg-brand-blue-500/12",
+    icon:        <Compass className="w-6 h-6 text-brand-blue-600" />,
+    titleColor:  "text-brand-text",
+    bodyColor:   "text-brand-text-mute",
     title:  ()  => "Let's find your way back on track",
     body:   (n) => {
       const date = n.ia_date
@@ -118,7 +119,7 @@ export const NOTIFICATION_CONFIG: Record<NotificationType, BannerConfig> = {
       return `No worries — it happens to everyone. Your assessment on ${date} slipped by, so your Momentum dipped by ${pts} pts for now. The good news: you'll earn it right back the moment you complete your next drill.`;
     },
     ctaLabel: "Get back on track",
-    ctaClass: "bg-white hover:bg-white/90 text-blue-600",
+    ctaClass: "bg-brand-blue-600 hover:bg-brand-blue-700 text-white",
     route: "/student/assessment-history",
   },
 };

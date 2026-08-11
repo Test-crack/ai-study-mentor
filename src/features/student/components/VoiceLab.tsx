@@ -98,7 +98,7 @@ function HomeView({ onNavigate }: { onNavigate: (v: ViewState) => void }) {
         <Activity size={14} /> Voice Analysis Lab
       </div>
       <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-[#0b132b] dark:text-white">
-        Improve Your <span className="text-[#0A6E64] dark:text-[#0A6E64]">Vocal Delivery</span>
+        Improve Your <span className="text-[#0B6151] dark:text-[#0B6151]">Vocal Delivery</span>
       </h1>
       <p className="text-slate-500 dark:text-slate-400 text-lg mb-10 max-w-2xl">
         Practice your speaking skills with two focused tools. Work on pitch and rhythm, or analyze your fluency and filler words.

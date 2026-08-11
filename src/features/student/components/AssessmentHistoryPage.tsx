@@ -89,16 +89,16 @@ interface ReportPayload {
 const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
 
 const SKILL_CONFIG: Record<SkillType, { label: string; shortLabel: string; icon: React.ReactNode; color: string; bg: string; border: string }> = {
-  LISTENING: { label: "Listening", shortLabel: "Listen",  icon: <Headphones className="h-4 w-4" />, color: "text-sky-600 dark:text-sky-400",       bg: "bg-sky-50 dark:bg-sky-500/10",       border: "border-sky-200 dark:border-sky-500/30" },
-  READING:   { label: "Reading",   shortLabel: "Read",    icon: <BookOpen   className="h-4 w-4" />, color: "text-brand-blue-600 dark:text-brand-blue-400", bg: "bg-brand-blue-50 dark:bg-brand-blue-500/10", border: "border-brand-blue-200 dark:border-brand-blue-500/30" },
-  WRITING:   { label: "Writing",   shortLabel: "Write",   icon: <PenLine    className="h-4 w-4" />, color: "text-amber-600 dark:text-amber-400",   bg: "bg-amber-50 dark:bg-amber-500/10",   border: "border-amber-200 dark:border-amber-500/30" },
-  SPEAKING:  { label: "Speaking",  shortLabel: "Speak",   icon: <Mic        className="h-4 w-4" />, color: "text-rose-600 dark:text-rose-400",     bg: "bg-rose-50 dark:bg-rose-500/10",     border: "border-rose-200 dark:border-rose-500/30" },
+  LISTENING: { label: "Listening", shortLabel: "Listen",  icon: <Headphones className="h-4 w-4" />, color: "text-sky-600",       bg: "bg-sky-50",       border: "border-sky-200" },
+  READING:   { label: "Reading",   shortLabel: "Read",    icon: <BookOpen   className="h-4 w-4" />, color: "text-brand-blue-600", bg: "bg-brand-blue-50", border: "border-brand-blue-200" },
+  WRITING:   { label: "Writing",   shortLabel: "Write",   icon: <PenLine    className="h-4 w-4" />, color: "text-amber-600",   bg: "bg-amber-50",   border: "border-amber-200" },
+  SPEAKING:  { label: "Speaking",  shortLabel: "Speak",   icon: <Mic        className="h-4 w-4" />, color: "text-rose-600",     bg: "bg-rose-50",     border: "border-rose-200" },
 };
 
 const MODE_CONFIG: Record<string, { label: string; badge: string }> = {
-  INTERNAL_ASSESSMENT: { label: "Internal Assessment", badge: "bg-brand-teal-100 text-brand-teal-700 dark:bg-brand-teal-500/20 dark:text-brand-teal-400" },
-  MOCK:                { label: "Mock Test",            badge: "bg-brand-blue-100 text-brand-blue-700 dark:bg-brand-blue-500/20 dark:text-brand-blue-400" },
-  DIAGNOSTIC:          { label: "Diagnostic",           badge: "bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-400" },
+  INTERNAL_ASSESSMENT: { label: "Internal Assessment", badge: "bg-brand-teal-100 text-brand-teal-700" },
+  MOCK:                { label: "Mock Test",            badge: "bg-brand-blue-100 text-brand-blue-700" },
+  DIAGNOSTIC:          { label: "Diagnostic",           badge: "bg-brand-teal-100 text-brand-teal-700" },
 };
 
 const SCORE_KEY_LABELS: Record<string, string> = {
@@ -122,12 +122,12 @@ const SUB_SKILL_LABELS: Record<string, string> = {
 };
 
 const SUBSKILL_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; dot: string }> = {
-  fluency:       { label: "Fluency",       color: "text-blue-600 dark:text-blue-400",       bg: "bg-blue-50 dark:bg-blue-500/10",       border: "border-blue-200 dark:border-blue-500/30",       dot: "bg-blue-500" },
-  grammar:       { label: "Grammar",       color: "text-brand-blue-600 dark:text-brand-blue-400",   bg: "bg-brand-blue-50 dark:bg-brand-blue-500/10",   border: "border-brand-blue-200 dark:border-brand-blue-500/30",   dot: "bg-brand-blue-500" },
-  vocabulary:    { label: "Vocabulary",    color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-500/10", border: "border-emerald-200 dark:border-emerald-500/30", dot: "bg-emerald-500" },
-  pronunciation: { label: "Pronunciation", color: "text-rose-600 dark:text-rose-400",       bg: "bg-rose-50 dark:bg-rose-500/10",       border: "border-rose-200 dark:border-rose-500/30",       dot: "bg-rose-500" },
-  coherence:     { label: "Coherence",     color: "text-amber-600 dark:text-amber-400",     bg: "bg-amber-50 dark:bg-amber-500/10",     border: "border-amber-200 dark:border-amber-500/30",     dot: "bg-amber-500" },
-  task_response: { label: "Task Response", color: "text-teal-600 dark:text-teal-400",       bg: "bg-teal-50 dark:bg-teal-500/10",       border: "border-teal-200 dark:border-teal-500/30",       dot: "bg-teal-500" },
+  fluency:       { label: "Fluency",       color: "text-blue-600",       bg: "bg-blue-50",       border: "border-blue-200",       dot: "bg-blue-500" },
+  grammar:       { label: "Grammar",       color: "text-brand-blue-600",   bg: "bg-brand-blue-50",   border: "border-brand-blue-200",   dot: "bg-brand-blue-500" },
+  vocabulary:    { label: "Vocabulary",    color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-200", dot: "bg-emerald-500" },
+  pronunciation: { label: "Pronunciation", color: "text-rose-600",       bg: "bg-rose-50",       border: "border-rose-200",       dot: "bg-rose-500" },
+  coherence:     { label: "Coherence",     color: "text-amber-600",     bg: "bg-amber-50",     border: "border-amber-200",     dot: "bg-amber-500" },
+  task_response: { label: "Task Response", color: "text-teal-600",       bg: "bg-teal-50",       border: "border-teal-200",       dot: "bg-teal-500" },
 };
 
 const SUBSKILL_SCORE_KEY: Record<string, string> = {
@@ -142,17 +142,17 @@ const SKILL_ORDER: SkillType[] = ["LISTENING", "READING", "WRITING", "SPEAKING"]
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 
 const bandColor = (band: number) => {
-  if (band >= 7.5) return "text-emerald-600 dark:text-emerald-400";
-  if (band >= 6.0) return "text-sky-600 dark:text-sky-400";
-  if (band >= 5.0) return "text-amber-600 dark:text-amber-400";
-  return "text-rose-600 dark:text-rose-400";
+  if (band >= 7.5) return "text-emerald-600";
+  if (band >= 6.0) return "text-sky-600";
+  if (band >= 5.0) return "text-amber-600";
+  return "text-rose-600";
 };
 
 const bandBg = (band: number) => {
-  if (band >= 7.5) return "bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30";
-  if (band >= 6.0) return "bg-sky-50 dark:bg-sky-500/10 border-sky-200 dark:border-sky-500/30";
-  if (band >= 5.0) return "bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/30";
-  return "bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/30";
+  if (band >= 7.5) return "bg-emerald-50 border-emerald-200";
+  if (band >= 6.0) return "bg-sky-50 border-sky-200";
+  if (band >= 5.0) return "bg-amber-50 border-amber-200";
+  return "bg-rose-50 border-rose-200";
 };
 
 const formatDate = (iso: string) =>
@@ -181,46 +181,46 @@ const SubSkillCard = ({ subSkillKey, data, score }: { subSkillKey: string; data:
       <div className={`${cfg.bg} px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between gap-3`}>
         <div className="flex items-center gap-2.5 min-w-0">
           <span className={`w-2.5 h-2.5 rounded-full ${cfg.dot} shrink-0`} />
-          <h3 className={`font-black text-sm sm:text-base ${cfg.color} truncate`}>{cfg.label}</h3>
+          <h3 className={`font-manrope font-black text-sm sm:text-base ${cfg.color} truncate`}>{cfg.label}</h3>
         </div>
         {score != null && !isNaN(score) && (
           <div className="flex items-baseline gap-1 shrink-0">
-            <span className={`text-xl sm:text-2xl font-black ${bandColor(score)}`}>{score % 1 === 0 ? score.toFixed(1) : score}</span>
-            <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wide">Band</span>
+            <span className={`font-manrope text-xl sm:text-2xl font-black ${bandColor(score)}`}>{score % 1 === 0 ? score.toFixed(1) : score}</span>
+            <span className="text-[10px] text-brand-text-mute font-semibold font-jetbrains uppercase tracking-[0.14em]">Band</span>
           </div>
         )}
       </div>
-      <div className="px-4 sm:px-5 py-3 sm:py-4 space-y-4 bg-white dark:bg-slate-900">
+      <div className="px-4 sm:px-5 py-3 sm:py-4 space-y-4 bg-white">
         {data.score_rationale && (
           <div>
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Rationale</p>
-            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed break-words">{data.score_rationale}</p>
+            <p className="text-[10px] font-black text-brand-text-mute font-jetbrains uppercase tracking-[0.16em] mb-1.5">Rationale</p>
+            <p className="text-sm text-brand-text-mute leading-relaxed break-words">{data.score_rationale}</p>
           </div>
         )}
         {strengths.length > 0 && (
           <div>
-            <p className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-2 flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3" /> Strengths</p>
-            <ul className="space-y-1.5">{strengths.map((s, i) => <li key={i} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" /><span className="break-words">{s}</span></li>)}</ul>
+            <p className="text-[10px] font-black text-emerald-600 font-jetbrains uppercase tracking-[0.16em] mb-2 flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3" /> Strengths</p>
+            <ul className="space-y-1.5">{strengths.map((s, i) => <li key={i} className="flex items-start gap-2 text-sm text-brand-text"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" /><span className="break-words">{s}</span></li>)}</ul>
           </div>
         )}
         {issues.length > 0 && (
           <div>
-            <p className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-2">Observed Issues</p>
-            <ul className="space-y-1.5">{issues.map((issue, i) => <li key={i} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300"><span className="text-amber-500 mt-0.5 shrink-0 font-bold">•</span><span className="break-words">{issue}</span></li>)}</ul>
+            <p className="text-[10px] font-black text-amber-600 font-jetbrains uppercase tracking-[0.16em] mb-2">Observed Issues</p>
+            <ul className="space-y-1.5">{issues.map((issue, i) => <li key={i} className="flex items-start gap-2 text-sm text-brand-text"><span className="text-amber-500 mt-0.5 shrink-0 font-bold">•</span><span className="break-words">{issue}</span></li>)}</ul>
           </div>
         )}
         {errors.length > 0 && (
           <div>
-            <p className="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest mb-2">Error Examples</p>
-            <ul className="space-y-1.5">{errors.map((err, i) => <li key={i} className="flex items-start gap-2 sm:gap-2.5 text-xs sm:text-sm font-mono bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20 rounded-lg px-2.5 sm:px-3 py-2 text-slate-700 dark:text-slate-300"><span className="text-rose-500 shrink-0 font-bold not-italic">✗</span><span className="not-italic break-words min-w-0">{err}</span></li>)}</ul>
+            <p className="text-[10px] font-black text-rose-600 font-jetbrains uppercase tracking-[0.16em] mb-2">Error Examples</p>
+            <ul className="space-y-1.5">{errors.map((err, i) => <li key={i} className="flex items-start gap-2 sm:gap-2.5 text-xs sm:text-sm font-mono bg-rose-50 border border-rose-100 rounded-lg px-2.5 sm:px-3 py-2 text-brand-text"><span className="text-rose-500 shrink-0 font-bold not-italic">✗</span><span className="not-italic break-words min-w-0">{err}</span></li>)}</ul>
           </div>
         )}
         {data.next_step && (
-          <div className="bg-brand-teal-50 dark:bg-brand-teal-500/10 border border-brand-teal-200 dark:border-brand-teal-500/30 rounded-xl p-3 sm:p-4 flex items-start gap-3">
+          <div className="bg-brand-teal-50 border border-brand-teal-200 rounded-xl p-3 sm:p-4 flex items-start gap-3">
             <ArrowRight className="h-4 w-4 text-brand-teal-500 mt-0.5 shrink-0" />
             <div className="min-w-0">
-              <p className="text-[10px] font-black text-brand-teal-600 dark:text-brand-teal-400 uppercase tracking-widest mb-1">Next Step</p>
-              <p className="text-sm text-brand-teal-700 dark:text-brand-teal-300 leading-relaxed break-words">{data.next_step}</p>
+              <p className="text-[10px] font-black text-brand-teal-600 font-jetbrains uppercase tracking-[0.16em] mb-1">Next Step</p>
+              <p className="text-sm text-brand-teal-700 leading-relaxed break-words">{data.next_step}</p>
             </div>
           </div>
         )}
@@ -248,22 +248,22 @@ const FullAIReportModal = ({ report, onClose }: { report: ReportPayload; onClose
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full sm:max-w-2xl max-h-[92vh] sm:max-h-[88vh] bg-white dark:bg-slate-900 shadow-2xl flex flex-col rounded-t-3xl sm:rounded-2xl overflow-hidden">
+      <div className="relative w-full sm:max-w-2xl max-h-[92vh] sm:max-h-[88vh] bg-white shadow-2xl flex flex-col rounded-t-3xl sm:rounded-2xl overflow-hidden">
         <div className={`${cfg.bg} border-b ${cfg.border} px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between gap-3 shrink-0`}>
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <div className={`h-9 w-9 sm:h-10 sm:w-10 rounded-xl flex items-center justify-center border ${cfg.border} ${cfg.bg} ${cfg.color} shrink-0`}>{cfg.icon}</div>
             <div className="min-w-0">
-              <h2 className="text-sm sm:text-base font-black text-slate-800 dark:text-white truncate">{cfg.label} — Full AI Report</h2>
-              {wordCount != null && <p className="text-xs text-slate-500 mt-0.5">{wordCount} words written</p>}
+              <h2 className="font-manrope text-sm sm:text-base font-black text-brand-text truncate">{cfg.label} — Full AI Report</h2>
+              {wordCount != null && <p className="text-xs text-brand-text-mute mt-0.5">{wordCount} words written</p>}
             </div>
           </div>
-          <button onClick={onClose} aria-label="Close" className="p-2 rounded-xl hover:bg-black/10 dark:hover:bg-white/10 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors shrink-0"><X className="h-5 w-5" /></button>
+          <button onClick={onClose} aria-label="Close" className="p-2 rounded-xl hover:bg-black/10 text-brand-text-mute hover:text-brand-text transition-colors shrink-0"><X className="h-5 w-5" /></button>
         </div>
         <div className="overflow-y-auto flex-1 px-4 sm:px-6 py-4 sm:py-5 space-y-4">
           {priorityAction && (
-            <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-2xl p-4 sm:p-5">
-              <div className="flex items-center gap-2 mb-2"><Target className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" /><p className="text-[10px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-widest">Priority Action</p></div>
-              <p className="text-sm font-semibold text-amber-900 dark:text-amber-200 leading-relaxed break-words">{priorityAction}</p>
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 sm:p-5">
+              <div className="flex items-center gap-2 mb-2"><Target className="h-4 w-4 text-amber-600 shrink-0" /><p className="text-[10px] font-black text-amber-700 font-jetbrains uppercase tracking-[0.16em]">Priority Action</p></div>
+              <p className="text-sm font-semibold text-amber-900 leading-relaxed break-words">{priorityAction}</p>
             </div>
           )}
           {feedback && subSkillOrder.map((key) => {
@@ -274,10 +274,10 @@ const FullAIReportModal = ({ report, onClose }: { report: ReportPayload; onClose
             return <SubSkillCard key={key} subSkillKey={key} data={data} score={score} />;
           })}
           {fillerWords && fillerWords.length > 0 && (
-            <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5">
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-1.5"><MessageSquare className="h-3 w-3" /> Filler Words Detected</p>
+            <div className="bg-brand-bg-alt border border-brand-line rounded-2xl p-4 sm:p-5">
+              <p className="text-[10px] font-black text-brand-text-mute font-jetbrains uppercase tracking-[0.16em] mb-3 flex items-center gap-1.5"><MessageSquare className="h-3 w-3" /> Filler Words Detected</p>
               <div className="flex flex-wrap gap-2">
-                {fillerWords.map((f, i) => <span key={i} className="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300">{f}</span>)}
+                {fillerWords.map((f, i) => <span key={i} className="bg-white border border-brand-line rounded-lg px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold text-brand-text-mute">{f}</span>)}
               </div>
             </div>
           )}
@@ -303,11 +303,11 @@ const SubScoreDisplay = ({ subScores, onViewFullReport }: { subScores: Record<st
     <div className="space-y-4">
       {namedScoreKeys.length > 0 && (
         <div>
-          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Sub-scores</p>
+          <p className="text-[10px] font-black text-brand-text-mute font-jetbrains uppercase tracking-[0.16em] mb-2">Sub-scores</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {namedScoreKeys.map((key) => (
-              <div key={key} className="bg-white dark:bg-slate-900 rounded-xl p-2.5 sm:p-3 border border-slate-100 dark:border-slate-800 min-w-0">
-                <p className="text-[11px] text-slate-400 font-semibold mb-0.5 truncate">{SCORE_KEY_LABELS[key]}</p>
+              <div key={key} className="bg-white rounded-xl p-2.5 sm:p-3 border border-brand-line min-w-0">
+                <p className="text-[11px] text-brand-text-mute font-semibold mb-0.5 truncate">{SCORE_KEY_LABELS[key]}</p>
                 <p className={`text-lg sm:text-xl font-black ${bandColor(Number(subScores[key]))}`}>{Number(subScores[key]).toFixed(1)}</p>
               </div>
             ))}
@@ -316,23 +316,23 @@ const SubScoreDisplay = ({ subScores, onViewFullReport }: { subScores: Record<st
       )}
       {hasQuestionData && (
         <div>
-          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Score Breakdown</p>
+          <p className="text-[10px] font-black text-brand-text-mute font-jetbrains uppercase tracking-[0.16em] mb-2">Score Breakdown</p>
           <div className="flex flex-wrap gap-2 mb-2">
-            <div className="bg-white dark:bg-slate-900 rounded-xl p-2.5 sm:p-3 border border-slate-100 dark:border-slate-800 text-center flex-1 min-w-[80px] sm:flex-none sm:min-w-[80px]">
-              <p className="text-[11px] text-slate-400 font-semibold">Correct</p>
-              <p className="text-lg sm:text-xl font-black text-slate-800 dark:text-white">{subScores.correct_answers}/{subScores.total_questions}</p>
+            <div className="bg-white rounded-xl p-2.5 sm:p-3 border border-brand-line text-center flex-1 min-w-[80px] sm:flex-none sm:min-w-[80px]">
+              <p className="text-[11px] text-brand-text-mute font-semibold">Correct</p>
+              <p className="font-manrope text-lg sm:text-xl font-black text-brand-text">{subScores.correct_answers}/{subScores.total_questions}</p>
             </div>
             {subScores.accuracy_percentage != null && (
-              <div className="bg-white dark:bg-slate-900 rounded-xl p-2.5 sm:p-3 border border-slate-100 dark:border-slate-800 text-center flex-1 min-w-[80px] sm:flex-none sm:min-w-[80px]">
-                <p className="text-[11px] text-slate-400 font-semibold">Accuracy</p>
-                <p className="text-lg sm:text-xl font-black text-slate-800 dark:text-white">{Number(subScores.accuracy_percentage).toFixed(0)}%</p>
+              <div className="bg-white rounded-xl p-2.5 sm:p-3 border border-brand-line text-center flex-1 min-w-[80px] sm:flex-none sm:min-w-[80px]">
+                <p className="text-[11px] text-brand-text-mute font-semibold">Accuracy</p>
+                <p className="font-manrope text-lg sm:text-xl font-black text-brand-text">{Number(subScores.accuracy_percentage).toFixed(0)}%</p>
               </div>
             )}
           </div>
           {subScores.by_question_type && Object.keys(subScores.by_question_type).length > 0 && (
             <div className="flex flex-wrap gap-2">
               {Object.entries(subScores.by_question_type).map(([type, data]: [string, any]) => (
-                <span key={type} className="bg-white dark:bg-slate-900 rounded-lg px-2.5 sm:px-3 py-1 sm:py-1.5 border border-slate-100 dark:border-slate-800 text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+                <span key={type} className="bg-white rounded-lg px-2.5 sm:px-3 py-1 sm:py-1.5 border border-brand-line text-[11px] font-semibold text-brand-text-mute">
                   {type.toUpperCase()}: {data.correct}/{data.total}
                 </span>
               ))}
@@ -342,12 +342,12 @@ const SubScoreDisplay = ({ subScores, onViewFullReport }: { subScores: Record<st
       )}
       {simpleFeedback && !hasRichFeedback({ feedback: subScores.feedback } as any) && (
         <div>
-          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1.5"><MessageSquare className="h-3 w-3" /> AI Feedback</p>
-          <p className="text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 rounded-xl p-3 sm:p-4 border border-slate-100 dark:border-slate-800 leading-relaxed break-words">{simpleFeedback}</p>
+          <p className="text-[10px] font-black text-brand-text-mute font-jetbrains uppercase tracking-[0.16em] mb-2 flex items-center gap-1.5"><MessageSquare className="h-3 w-3" /> AI Feedback</p>
+          <p className="text-sm text-brand-text bg-white rounded-xl p-3 sm:p-4 border border-brand-line leading-relaxed break-words">{simpleFeedback}</p>
         </div>
       )}
       {hasRichFeedback(subScores) && onViewFullReport && (
-        <button onClick={onViewFullReport} className="w-full flex items-center justify-center gap-2 py-2.5 sm:py-3 px-4 rounded-xl border-2 border-brand-teal-200 dark:border-brand-teal-500/40 bg-brand-teal-50 dark:bg-brand-teal-500/10 text-brand-teal-700 dark:text-brand-teal-300 font-bold text-sm hover:bg-brand-teal-100 dark:hover:bg-brand-teal-500/20 transition-colors">
+        <button onClick={onViewFullReport} className="w-full flex items-center justify-center gap-2 py-2.5 sm:py-3 px-4 rounded-xl border-2 border-brand-teal-200 bg-brand-teal-50 text-brand-teal-700 font-bold text-sm hover:bg-brand-teal-100 transition-colors">
           <Sparkles className="h-4 w-4" /> View Full AI Report
         </button>
       )}
@@ -364,10 +364,10 @@ const IASubSkillRow = ({ score }: { score: SectionScore }) => {
   const hasAI    = !!(score.ai_graded && score.ai_feedback);
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 overflow-hidden">
+    <div className="bg-white rounded-xl border border-brand-line overflow-hidden">
       <button
         onClick={() => hasAI && setExpanded((p) => !p)}
-        className={`w-full px-3 sm:px-4 py-3 text-left transition-colors ${hasAI ? "hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer" : "cursor-default"}`}
+        className={`w-full px-3 sm:px-4 py-3 text-left transition-colors ${hasAI ? "hover:bg-brand-bg-alt cursor-pointer" : "cursor-default"}`}
       >
         {/* Top row: label + band + chevron (always visible) */}
         <div className="flex items-center gap-2 sm:gap-3">
@@ -376,11 +376,11 @@ const IASubSkillRow = ({ score }: { score: SectionScore }) => {
               {skillCfg.icon} {skillCfg.label}
             </span>
           )}
-          <span className="flex-1 text-sm font-semibold text-slate-700 dark:text-slate-200 min-w-0 break-words">{label}</span>
-          <span className={`text-base sm:text-lg font-black shrink-0 tabular-nums ${bandColor(score.band)}`}>
+          <span className="flex-1 text-sm font-semibold text-brand-text min-w-0 break-words">{label}</span>
+          <span className={`font-manrope text-base sm:text-lg font-black shrink-0 tabular-nums ${bandColor(score.band)}`}>
             {score.band % 1 === 0 ? score.band.toFixed(1) : score.band}
           </span>
-          {hasAI ? (expanded ? <ChevronUp className="h-4 w-4 text-slate-400 shrink-0" /> : <ChevronDown className="h-4 w-4 text-slate-400 shrink-0" />) : <span className="w-4 shrink-0" />}
+          {hasAI ? (expanded ? <ChevronUp className="h-4 w-4 text-brand-text-mute shrink-0" /> : <ChevronDown className="h-4 w-4 text-brand-text-mute shrink-0" />) : <span className="w-4 shrink-0" />}
         </div>
         {/* Bottom row: secondary info — wraps below on mobile */}
         {(score.total > 0 || score.ai_graded || (skillCfg && true)) && (
@@ -391,28 +391,28 @@ const IASubSkillRow = ({ score }: { score: SectionScore }) => {
               </span>
             )}
             {score.total > 0 && (
-              <span className="text-[11px] text-slate-400 tabular-nums">{score.correct}/{score.total} correct</span>
+              <span className="text-[11px] text-brand-text-mute tabular-nums">{score.correct}/{score.total} correct</span>
             )}
             {score.ai_graded && (
-              <span className="text-[10px] font-bold bg-brand-blue-100 dark:bg-brand-blue-500/20 text-brand-blue-600 dark:text-brand-blue-400 px-1.5 py-0.5 rounded-full">AI Graded</span>
+              <span className="text-[10px] font-bold bg-brand-blue-100 text-brand-blue-600 px-1.5 py-0.5 rounded-full">AI Graded</span>
             )}
           </div>
         )}
       </button>
       {expanded && score.ai_feedback && (
-        <div className="border-t border-slate-100 dark:border-slate-800 px-3 sm:px-4 py-3 sm:py-4 bg-slate-50 dark:bg-slate-800/40 space-y-4">
+        <div className="border-t border-brand-line px-3 sm:px-4 py-3 sm:py-4 bg-brand-bg-alt space-y-4">
           {score.ai_feedback.rationale && (
             <div>
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">AI Rationale</p>
-              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed break-words">{score.ai_feedback.rationale}</p>
+              <p className="text-[10px] font-black text-brand-text-mute font-jetbrains uppercase tracking-[0.16em] mb-1.5">AI Rationale</p>
+              <p className="text-sm text-brand-text-mute leading-relaxed break-words">{score.ai_feedback.rationale}</p>
             </div>
           )}
           {score.ai_feedback.key_observations && score.ai_feedback.key_observations.length > 0 && (
             <div>
-              <p className="text-[10px] font-black text-brand-teal-600 dark:text-brand-teal-400 uppercase tracking-widest mb-2">Key Observations</p>
+              <p className="text-[10px] font-black text-brand-teal-600 font-jetbrains uppercase tracking-[0.16em] mb-2">Key Observations</p>
               <ul className="space-y-2">
                 {score.ai_feedback.key_observations.map((obs, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300">
+                  <li key={i} className="flex items-start gap-2 text-sm text-brand-text-mute">
                     <span className="text-brand-teal-400 mt-0.5 shrink-0 font-bold">•</span>
                     <span className="break-words min-w-0">{obs.replace(/\*\*/g, "")}</span>
                   </li>
@@ -445,47 +445,47 @@ const IASessionCard = ({ entry }: { entry: IAEntry }) => {
   const carryForward = entry.carry_forward_subskills ?? [];
 
   return (
-    <div className={`bg-white dark:bg-slate-900 rounded-2xl border shadow-sm overflow-hidden ${isMissed ? "border-rose-200 dark:border-rose-500/30" : "border-slate-200 dark:border-slate-800"}`}>
+    <div className={`bg-white rounded-2xl border shadow-sm overflow-hidden ${isMissed ? "border-rose-200" : "border-brand-line"}`}>
       <button
         onClick={() => !isMissed && setExpanded((p) => !p)}
-        className={`w-full flex items-start gap-3 sm:gap-4 p-3 sm:p-4 lg:p-5 text-left transition-colors ${isMissed ? "cursor-default" : "hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer"}`}
+        className={`w-full flex items-start gap-3 sm:gap-4 p-3 sm:p-4 lg:p-5 text-left transition-colors ${isMissed ? "cursor-default" : "hover:bg-brand-bg-alt cursor-pointer"}`}
       >
         {/* IA number badge */}
-        <div className={`flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex flex-col items-center justify-center ${isMissed ? "bg-rose-100 dark:bg-rose-500/20" : "bg-brand-teal-100 dark:bg-brand-teal-500/20"}`}>
-          <span className={`text-[9px] font-black uppercase leading-none ${isMissed ? "text-rose-400 dark:text-rose-500" : "text-brand-teal-400 dark:text-brand-teal-500"}`}>IA</span>
-          <span className={`text-sm sm:text-base font-black leading-tight ${isMissed ? "text-rose-600 dark:text-rose-400" : "text-brand-teal-600 dark:text-brand-teal-400"}`}>#{entry.ia_number}</span>
+        <div className={`flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex flex-col items-center justify-center ${isMissed ? "bg-rose-100" : "bg-brand-teal-100"}`}>
+          <span className={`font-jetbrains text-[9px] font-black uppercase tracking-[0.14em] leading-none ${isMissed ? "text-rose-400" : "text-brand-teal-400"}`}>IA</span>
+          <span className={`font-manrope text-sm sm:text-base font-black leading-tight ${isMissed ? "text-rose-600" : "text-brand-teal-600"}`}>#{entry.ia_number}</span>
         </div>
 
         {/* Main content */}
         <div className="flex-1 min-w-0">
           {/* Title row */}
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
-            <span className="font-bold text-slate-800 dark:text-white text-sm">
+            <span className="font-manrope font-bold text-brand-text text-sm">
               <span className="hidden sm:inline">Internal Assessment </span>
               <span className="sm:hidden">IA </span>
               #{entry.ia_number}
             </span>
             {isMissed ? (
-              <span className="text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400">Missed</span>
+              <span className="text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">Missed</span>
             ) : (
               <>
-                <span className="text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-brand-teal-100 text-brand-teal-700 dark:bg-brand-teal-500/20 dark:text-brand-teal-400">
+                <span className="text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-brand-teal-100 text-brand-teal-700">
                   {scores.length} sub-skill{scores.length !== 1 ? "s" : ""}
                 </span>
                 {hasAnyAI && (
-                  <span className="text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-brand-blue-100 text-brand-blue-700 dark:bg-brand-blue-500/20 dark:text-brand-blue-400">AI Graded</span>
+                  <span className="text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-brand-blue-100 text-brand-blue-700">AI Graded</span>
                 )}
               </>
             )}
           </div>
           {/* Meta row */}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <div className="flex items-center gap-1 text-[11px] sm:text-xs text-slate-400">
+            <div className="flex items-center gap-1 text-[11px] sm:text-xs text-brand-text-mute">
               <Clock className="h-3 w-3 shrink-0" />
               <span>{formatIADate(entry.ia_date)}</span>
             </div>
             {entry.momentum_awarded != null && (
-              <div className={`flex items-center gap-1 text-[11px] sm:text-xs font-bold ${isMissed ? "text-rose-500 dark:text-rose-400" : "text-amber-600 dark:text-amber-400"}`}>
+              <div className={`flex items-center gap-1 text-[11px] sm:text-xs font-bold ${isMissed ? "text-rose-500" : "text-amber-600"}`}>
                 <Zap className={`h-3 w-3 shrink-0 ${isMissed ? "text-rose-400" : "fill-amber-400 text-amber-400"}`} />
                 {entry.momentum_awarded > 0 ? "+" : ""}{entry.momentum_awarded} Momentum
               </div>
@@ -508,9 +508,9 @@ const IASessionCard = ({ entry }: { entry: IAEntry }) => {
           {/* Carry forward */}
           {isMissed && carryForward.length > 0 && (
             <div className="mt-2 flex flex-wrap items-center gap-1 sm:gap-1.5">
-              <span className="text-[10px] text-rose-500 dark:text-rose-400 font-semibold w-full sm:w-auto">Will be retried:</span>
+              <span className="text-[10px] text-rose-500 font-semibold w-full sm:w-auto">Will be retried:</span>
               {carryForward.map((s, i) => (
-                <span key={i} className="text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30">
+                <span key={i} className="text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200">
                   {SUB_SKILL_LABELS[s.sub_skill] ?? s.sub_skill}
                 </span>
               ))}
@@ -522,38 +522,38 @@ const IASessionCard = ({ entry }: { entry: IAEntry }) => {
         <div className="flex flex-col items-end gap-1 shrink-0">
           {isMissed ? (
             <>
-              <p className="text-xl sm:text-2xl font-black text-rose-400 dark:text-rose-500">—</p>
-              <p className="text-[9px] sm:text-[10px] text-rose-400 dark:text-rose-500 font-semibold uppercase tracking-wide text-right leading-tight">
+              <p className="font-manrope text-xl sm:text-2xl font-black text-rose-400">—</p>
+              <p className="text-[9px] sm:text-[10px] text-rose-400 font-semibold font-jetbrains uppercase tracking-[0.14em] text-right leading-tight">
                 <span className="hidden sm:inline">No submission</span>
                 <span className="sm:hidden">No sub.</span>
               </p>
             </>
           ) : avgBand !== null ? (
             <>
-              <p className={`text-2xl sm:text-3xl font-black leading-none ${bandColor(avgBand)}`}>{avgBand.toFixed(1)}</p>
-              <p className="text-[9px] sm:text-[10px] text-slate-400 font-semibold uppercase tracking-wide">Avg Band</p>
+              <p className={`font-manrope text-2xl sm:text-3xl font-black leading-none ${bandColor(avgBand)}`}>{avgBand.toFixed(1)}</p>
+              <p className="text-[9px] sm:text-[10px] text-brand-text-mute font-semibold font-jetbrains uppercase tracking-[0.14em]">Avg Band</p>
             </>
           ) : (
-            <p className="text-xs text-slate-400">—</p>
+            <p className="text-xs text-brand-text-mute">—</p>
           )}
           {!isMissed && (
-            <div className="text-slate-400 mt-1">
+            <div className="text-brand-text-mute mt-1">
               {expanded ? <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5" /> : <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5" />}
             </div>
           )}
         </div>
       </button>
       {!isMissed && expanded && (
-        <div className="border-t border-slate-100 dark:border-slate-800 p-3 sm:p-4 lg:p-5 bg-slate-50/50 dark:bg-slate-800/20">
+        <div className="border-t border-brand-line p-3 sm:p-4 lg:p-5 bg-brand-bg-alt/50">
           {scores.length === 0 ? (
-            <p className="text-sm text-slate-400 italic">No detailed breakdown available.</p>
+            <p className="text-sm text-brand-text-mute italic">No detailed breakdown available.</p>
           ) : (
             <>
               <div className="space-y-2">
                 {scores.map((score, i) => <IASubSkillRow key={i} score={score} />)}
               </div>
               {hasAnyAI && (
-                <p className="text-[11px] text-slate-400 mt-3 flex items-center gap-1.5">
+                <p className="text-[11px] text-brand-text-mute mt-3 flex items-center gap-1.5">
                   <ChevronDown className="h-3 w-3 shrink-0" /> <span>Tap any AI Graded row to expand feedback</span>
                 </p>
               )}
@@ -573,45 +573,45 @@ const MockSubSkillRow = ({ score }: { score: MockSubSkillScore }) => {
   const hasAI = !!(score.ai_feedback);
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 overflow-hidden">
+    <div className="bg-white rounded-xl border border-brand-line overflow-hidden">
       <button
         onClick={() => hasAI && setExpanded((p) => !p)}
-        className={`w-full px-3 sm:px-4 py-3 text-left transition-colors ${hasAI ? "hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer" : "cursor-default"}`}
+        className={`w-full px-3 sm:px-4 py-3 text-left transition-colors ${hasAI ? "hover:bg-brand-bg-alt cursor-pointer" : "cursor-default"}`}
       >
         {/* Top row: label + band + chevron */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <span className="flex-1 text-sm font-semibold text-slate-700 dark:text-slate-200 min-w-0 break-words">{label}</span>
-          <span className={`text-base sm:text-lg font-black shrink-0 tabular-nums ${bandColor(score.band)}`}>
+          <span className="flex-1 text-sm font-semibold text-brand-text min-w-0 break-words">{label}</span>
+          <span className={`font-manrope text-base sm:text-lg font-black shrink-0 tabular-nums ${bandColor(score.band)}`}>
             {score.band % 1 === 0 ? score.band.toFixed(1) : score.band}
           </span>
           {hasAI
-            ? (expanded ? <ChevronUp className="h-4 w-4 text-slate-400 shrink-0" /> : <ChevronDown className="h-4 w-4 text-slate-400 shrink-0" />)
+            ? (expanded ? <ChevronUp className="h-4 w-4 text-brand-text-mute shrink-0" /> : <ChevronDown className="h-4 w-4 text-brand-text-mute shrink-0" />)
             : <span className="w-4 shrink-0" />}
         </div>
         {/* Bottom row: counts + AI band chip */}
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1.5">
-          <span className="text-[11px] text-slate-400 tabular-nums">MCQ {score.correct}/{score.total_mcq}</span>
+          <span className="text-[11px] text-brand-text-mute tabular-nums">MCQ {score.correct}/{score.total_mcq}</span>
           {score.ai_band != null && (
-            <span className="text-[10px] font-bold bg-brand-blue-100 dark:bg-brand-blue-500/20 text-brand-blue-600 dark:text-brand-blue-400 px-1.5 py-0.5 rounded-full tabular-nums">
+            <span className="text-[10px] font-bold bg-brand-blue-100 text-brand-blue-600 px-1.5 py-0.5 rounded-full tabular-nums">
               AI {score.ai_band.toFixed(1)}
             </span>
           )}
         </div>
       </button>
       {expanded && score.ai_feedback && (
-        <div className="border-t border-slate-100 dark:border-slate-800 px-3 sm:px-4 py-3 sm:py-4 bg-slate-50 dark:bg-slate-800/40 space-y-4">
+        <div className="border-t border-brand-line px-3 sm:px-4 py-3 sm:py-4 bg-brand-bg-alt space-y-4">
           {score.ai_feedback.rationale && (
             <div>
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">AI Rationale</p>
-              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed break-words">{score.ai_feedback.rationale}</p>
+              <p className="text-[10px] font-black text-brand-text-mute font-jetbrains uppercase tracking-[0.16em] mb-1.5">AI Rationale</p>
+              <p className="text-sm text-brand-text-mute leading-relaxed break-words">{score.ai_feedback.rationale}</p>
             </div>
           )}
           {score.ai_feedback.key_observations && score.ai_feedback.key_observations.length > 0 && (
             <div>
-              <p className="text-[10px] font-black text-brand-teal-600 dark:text-brand-teal-400 uppercase tracking-widest mb-2">Key Observations</p>
+              <p className="text-[10px] font-black text-brand-teal-600 font-jetbrains uppercase tracking-[0.16em] mb-2">Key Observations</p>
               <ul className="space-y-2">
                 {score.ai_feedback.key_observations.map((obs, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300">
+                  <li key={i} className="flex items-start gap-2 text-sm text-brand-text-mute">
                     <span className="text-brand-teal-400 mt-0.5 shrink-0 font-bold">•</span>
                     <span className="break-words min-w-0">{obs.replace(/\*\*/g, "")}</span>
                   </li>
@@ -633,39 +633,39 @@ const MockSkillRow = ({ score }: { score: MockSkillScore }) => {
   const canExpand = score.ai_graded && (score.sub_skill_scores ?? []).length > 0;
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 overflow-hidden">
+    <div className="bg-white rounded-xl border border-brand-line overflow-hidden">
       <button
         onClick={() => canExpand && setExpanded((p) => !p)}
-        className={`w-full px-3 sm:px-4 py-3 text-left transition-colors ${canExpand ? "hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer" : "cursor-default"}`}
+        className={`w-full px-3 sm:px-4 py-3 text-left transition-colors ${canExpand ? "hover:bg-brand-bg-alt cursor-pointer" : "cursor-default"}`}
       >
         {/* Top row: icon + label + band + chevron */}
         <div className="flex items-center gap-2 sm:gap-3">
           {cfg && (
             <div className={`h-7 w-7 rounded-lg flex items-center justify-center shrink-0 ${cfg.bg} ${cfg.color}`}>{cfg.icon}</div>
           )}
-          <span className="flex-1 text-sm font-semibold text-slate-700 dark:text-slate-200 min-w-0 break-words">{cfg?.label ?? score.skill}</span>
-          <span className={`text-base sm:text-lg font-black shrink-0 tabular-nums ${bandColor(score.band)}`}>
+          <span className="flex-1 text-sm font-semibold text-brand-text min-w-0 break-words">{cfg?.label ?? score.skill}</span>
+          <span className={`font-manrope text-base sm:text-lg font-black shrink-0 tabular-nums ${bandColor(score.band)}`}>
             {score.band % 1 === 0 ? score.band.toFixed(1) : score.band}
           </span>
           {canExpand
-            ? (expanded ? <ChevronUp className="h-4 w-4 text-slate-400 shrink-0" /> : <ChevronDown className="h-4 w-4 text-slate-400 shrink-0" />)
+            ? (expanded ? <ChevronUp className="h-4 w-4 text-brand-text-mute shrink-0" /> : <ChevronDown className="h-4 w-4 text-brand-text-mute shrink-0" />)
             : <span className="w-4 shrink-0" />}
         </div>
         {/* Bottom row: counts + ai chip */}
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1.5 ml-9 sm:ml-10">
-          <span className="text-[11px] text-slate-400 tabular-nums">{score.correct}/{score.total} correct</span>
+          <span className="text-[11px] text-brand-text-mute tabular-nums">{score.correct}/{score.total} correct</span>
           {score.ai_graded && (
-            <span className="text-[10px] font-bold bg-brand-blue-100 dark:bg-brand-blue-500/20 text-brand-blue-600 dark:text-brand-blue-400 px-1.5 py-0.5 rounded-full">AI Graded</span>
+            <span className="text-[10px] font-bold bg-brand-blue-100 text-brand-blue-600 px-1.5 py-0.5 rounded-full">AI Graded</span>
           )}
         </div>
       </button>
       {expanded && score.sub_skill_scores && score.sub_skill_scores.length > 0 && (
-        <div className="border-t border-slate-100 dark:border-slate-800 p-2.5 sm:p-3 bg-slate-50/60 dark:bg-slate-800/20 space-y-2">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 mb-1">Sub-skill Breakdown</p>
+        <div className="border-t border-brand-line p-2.5 sm:p-3 bg-brand-bg-alt/60 space-y-2">
+          <p className="text-[10px] font-black text-brand-text-mute font-jetbrains uppercase tracking-[0.16em] px-1 mb-1">Sub-skill Breakdown</p>
           {score.sub_skill_scores.map((sub, i) => (
             <MockSubSkillRow key={i} score={sub} />
           ))}
-          <p className="text-[11px] text-slate-400 pt-1 flex items-center gap-1.5">
+          <p className="text-[11px] text-brand-text-mute pt-1 flex items-center gap-1.5">
             <ChevronDown className="h-3 w-3 shrink-0" /> <span>Tap any sub-skill row to expand AI feedback</span>
           </p>
         </div>
@@ -682,8 +682,8 @@ const MockSessionCard = ({ entry }: { entry: MockEntry }) => {
 
   const attemptLabel = entry.attempt_type === "EARNED" ? "Earned Mock" : "Standard Mock";
   const attemptBadge = entry.attempt_type === "EARNED"
-    ? "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400"
-    : "bg-brand-blue-100 text-brand-blue-700 dark:bg-brand-blue-500/20 dark:text-brand-blue-400";
+    ? "bg-amber-100 text-amber-700"
+    : "bg-brand-blue-100 text-brand-blue-700";
 
   const monthLabel = (() => {
     const [y, m] = entry.month_year.split("-");
@@ -703,34 +703,34 @@ const MockSessionCard = ({ entry }: { entry: MockEntry }) => {
   );
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-2xl border border-brand-line shadow-sm overflow-hidden">
       <button
         onClick={() => setExpanded((p) => !p)}
-        className="w-full flex items-start gap-3 sm:gap-4 p-3 sm:p-4 lg:p-5 text-left hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
+        className="w-full flex items-start gap-3 sm:gap-4 p-3 sm:p-4 lg:p-5 text-left hover:bg-brand-bg-alt transition-colors"
       >
-        <div className="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-brand-blue-100 dark:bg-brand-blue-500/20 flex flex-col items-center justify-center">
-          <FileText className="h-5 w-5 text-brand-blue-600 dark:text-brand-blue-400" />
+        <div className="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-brand-blue-100 flex flex-col items-center justify-center">
+          <FileText className="h-5 w-5 text-brand-blue-600" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
-            <span className="font-bold text-slate-800 dark:text-white text-sm">
+            <span className="font-manrope font-bold text-brand-text text-sm">
               <span className="hidden sm:inline">Mock Test — {monthLabel}</span>
               <span className="sm:hidden">Mock — {monthLabelShort}</span>
             </span>
             <span className={`text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full ${attemptBadge}`}>{attemptLabel}</span>
             {scores.some((s) => s.ai_graded) && (
-              <span className="text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-brand-blue-100 text-brand-blue-700 dark:bg-brand-blue-500/20 dark:text-brand-blue-400">AI Graded</span>
+              <span className="text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-brand-blue-100 text-brand-blue-700">AI Graded</span>
             )}
           </div>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             {entry.time_submitted_at && (
-              <div className="flex items-center gap-1 text-[11px] sm:text-xs text-slate-400 min-w-0">
+              <div className="flex items-center gap-1 text-[11px] sm:text-xs text-brand-text-mute min-w-0">
                 <Clock className="h-3 w-3 shrink-0" />
                 <span className="truncate">{formatDate(entry.time_submitted_at)}</span>
               </div>
             )}
             {entry.momentum_awarded != null && (
-              <div className="flex items-center gap-1 text-[11px] sm:text-xs font-bold text-amber-600 dark:text-amber-400">
+              <div className="flex items-center gap-1 text-[11px] sm:text-xs font-bold text-amber-600">
                 <Zap className="h-3 w-3 fill-amber-400 text-amber-400 shrink-0" />
                 +{entry.momentum_awarded} Momentum
               </div>
@@ -750,8 +750,8 @@ const MockSessionCard = ({ entry }: { entry: MockEntry }) => {
           </div>
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
-          <p className={`text-2xl sm:text-3xl font-black leading-none ${bandColor(displayBand)}`}>{displayBand.toFixed(1)}</p>
-          <p className="text-[9px] sm:text-[10px] text-slate-400 font-semibold uppercase tracking-wide text-right leading-tight">
+          <p className={`font-manrope text-2xl sm:text-3xl font-black leading-none ${bandColor(displayBand)}`}>{displayBand.toFixed(1)}</p>
+          <p className="text-[9px] sm:text-[10px] text-brand-text-mute font-semibold font-jetbrains uppercase tracking-[0.14em] text-right leading-tight">
             {entry.real_band_score != null ? (
               <>
                 <span className="hidden sm:inline">Real Band</span>
@@ -764,24 +764,24 @@ const MockSessionCard = ({ entry }: { entry: MockEntry }) => {
               </>
             )}
           </p>
-          <div className="text-slate-400 mt-1">
+          <div className="text-brand-text-mute mt-1">
             {expanded ? <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5" /> : <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5" />}
           </div>
         </div>
       </button>
       {expanded && (
-        <div className="border-t border-slate-100 dark:border-slate-800 p-3 sm:p-4 lg:p-5 bg-slate-50/50 dark:bg-slate-800/20">
+        <div className="border-t border-brand-line p-3 sm:p-4 lg:p-5 bg-brand-bg-alt/50">
           {scores.length === 0 ? (
-            <p className="text-sm text-slate-400 italic">No detailed breakdown available.</p>
+            <p className="text-sm text-brand-text-mute italic">No detailed breakdown available.</p>
           ) : (
             <>
               {entry.real_band_score != null && (
                 <div className={`mb-3 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border flex items-center justify-between gap-2 ${bandBg(entry.real_band_score)}`}>
-                  <span className="text-[11px] sm:text-xs font-bold text-slate-600 dark:text-slate-300 leading-tight">
+                  <span className="text-[11px] sm:text-xs font-bold text-brand-text-mute leading-tight">
                     <span className="hidden sm:inline">IELTS Overall Band Score</span>
                     <span className="sm:hidden">IELTS Overall</span>
                   </span>
-                  <span className={`text-lg sm:text-xl font-black shrink-0 ${bandColor(entry.real_band_score)}`}>{entry.real_band_score.toFixed(1)}</span>
+                  <span className={`font-manrope text-lg sm:text-xl font-black shrink-0 ${bandColor(entry.real_band_score)}`}>{entry.real_band_score.toFixed(1)}</span>
                 </div>
               )}
               <div className="space-y-2">
@@ -805,23 +805,23 @@ const AssessmentRow = ({ entry, isExpanded, onToggle, onOpenReport }: {
   const modeCfg = MODE_CONFIG[entry.mode] ?? { label: entry.mode, badge: "" };
 
   return (
-    <div className={`bg-white dark:bg-slate-900 rounded-2xl border shadow-sm overflow-hidden transition-all duration-200 ${cfg.border}`}>
-      <button onClick={onToggle} className="w-full flex items-start gap-3 sm:gap-4 p-3 sm:p-4 lg:p-5 text-left hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+    <div className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-all duration-200 ${cfg.border}`}>
+      <button onClick={onToggle} className="w-full flex items-start gap-3 sm:gap-4 p-3 sm:p-4 lg:p-5 text-left hover:bg-brand-bg-alt transition-colors">
         <div className={`flex-shrink-0 h-10 w-10 rounded-xl flex items-center justify-center ${cfg.bg} ${cfg.color}`}>{cfg.icon}</div>
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-            <span className="font-bold text-slate-800 dark:text-white text-sm sm:text-base">{cfg.label}</span>
+            <span className="font-manrope font-bold text-brand-text text-sm sm:text-base">{cfg.label}</span>
             <span className={`text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full ${modeCfg.badge}`}>{modeCfg.label}</span>
           </div>
-          <div className="flex items-center gap-1 mt-1 text-[11px] sm:text-xs text-slate-400 min-w-0">
+          <div className="flex items-center gap-1 mt-1 text-[11px] sm:text-xs text-brand-text-mute min-w-0">
             <Clock className="h-3 w-3 shrink-0" />
             <span className="truncate">{formatDate(entry.created_at)}</span>
           </div>
         </div>
         <div className="flex flex-col items-end shrink-0">
-          <p className={`text-2xl sm:text-3xl font-black leading-none ${bandColor(entry.band_score)}`}>{entry.band_score.toFixed(1)}</p>
-          <p className="text-[9px] sm:text-[10px] text-slate-400 font-semibold uppercase tracking-wide mt-1">Band</p>
-          <div className="text-slate-400 mt-1">{isExpanded ? <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5" /> : <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5" />}</div>
+          <p className={`font-manrope text-2xl sm:text-3xl font-black leading-none ${bandColor(entry.band_score)}`}>{entry.band_score.toFixed(1)}</p>
+          <p className="text-[9px] sm:text-[10px] text-brand-text-mute font-semibold font-jetbrains uppercase tracking-[0.14em] mt-1">Band</p>
+          <div className="text-brand-text-mute mt-1">{isExpanded ? <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5" /> : <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5" />}</div>
         </div>
       </button>
       {isExpanded && (
@@ -832,7 +832,7 @@ const AssessmentRow = ({ entry, isExpanded, onToggle, onOpenReport }: {
               onViewFullReport={hasRichFeedback(entry.sub_scores) ? () => onOpenReport({ skill: entry.skill, subScores: entry.sub_scores! }) : undefined}
             />
           ) : (
-            <p className="text-sm text-slate-400 italic">No detailed breakdown available for this entry.</p>
+            <p className="text-sm text-brand-text-mute italic">No detailed breakdown available for this entry.</p>
           )}
         </div>
       )}
@@ -845,9 +845,9 @@ const AssessmentRow = ({ entry, isExpanded, onToggle, onOpenReport }: {
 const DiagnosticReportTab = ({ data, onOpenReport }: { data: AssessmentEntry[]; onOpenReport: (p: ReportPayload) => void }) => {
   if (data.length === 0) {
     return (
-      <div className="text-center py-12 sm:py-16 text-slate-400 px-4">
+      <div className="text-center py-12 sm:py-16 text-brand-text-mute px-4">
         <Stethoscope className="h-10 w-10 mx-auto mb-3 opacity-40" />
-        <p className="font-semibold text-slate-600 dark:text-slate-300">No diagnostic report found</p>
+        <p className="font-semibold text-brand-text-mute">No diagnostic report found</p>
         <p className="text-sm mt-1">Complete your diagnostic assessment to see your baseline scores here.</p>
       </div>
     );
@@ -857,9 +857,9 @@ const DiagnosticReportTab = ({ data, onOpenReport }: { data: AssessmentEntry[]; 
 
   return (
     <div className="space-y-4 sm:space-y-5">
-      <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400 flex-wrap">
+      <div className="flex items-center gap-2 text-xs sm:text-sm text-brand-text-mute flex-wrap">
         <Clock className="h-4 w-4 shrink-0" />
-        <span>Assessed on <span className="font-semibold text-slate-700 dark:text-slate-200">{formatDate(data[0].created_at)}</span></span>
+        <span>Assessed on <span className="font-semibold text-brand-text">{formatDate(data[0].created_at)}</span></span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
         {SKILL_ORDER.map((skill) => {
@@ -867,25 +867,25 @@ const DiagnosticReportTab = ({ data, onOpenReport }: { data: AssessmentEntry[]; 
           const entry = bySkill[skill];
           if (!entry) {
             return (
-              <div key={skill} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-4 sm:p-5 opacity-40">
+              <div key={skill} className="bg-white rounded-2xl border border-brand-line p-4 sm:p-5 opacity-40">
                 <div className="flex items-center gap-3">
                   <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${cfg.bg} ${cfg.color}`}>{cfg.icon}</div>
-                  <div className="min-w-0"><p className="font-bold text-slate-800 dark:text-white truncate">{cfg.label}</p><p className="text-xs text-slate-400">Not assessed</p></div>
+                  <div className="min-w-0"><p className="font-manrope font-bold text-brand-text truncate">{cfg.label}</p><p className="text-xs text-brand-text-mute">Not assessed</p></div>
                 </div>
               </div>
             );
           }
           const rich = entry.sub_scores ? hasRichFeedback(entry.sub_scores) : false;
           return (
-            <div key={skill} className={`bg-white dark:bg-slate-900 rounded-2xl border ${cfg.border} p-4 sm:p-5 flex flex-col`}>
+            <div key={skill} className={`bg-white rounded-2xl border ${cfg.border} p-4 sm:p-5 flex flex-col`}>
               <div className="flex items-center justify-between gap-3 mb-4">
                 <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                   <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${cfg.bg} ${cfg.color}`}>{cfg.icon}</div>
-                  <p className="font-bold text-slate-800 dark:text-white truncate">{cfg.label}</p>
+                  <p className="font-manrope font-bold text-brand-text truncate">{cfg.label}</p>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className={`text-2xl sm:text-3xl font-black leading-none ${bandColor(entry.band_score)}`}>{entry.band_score.toFixed(1)}</p>
-                  <p className="text-[9px] sm:text-[10px] text-slate-400 font-semibold uppercase tracking-wide mt-1">Band</p>
+                  <p className={`font-manrope text-2xl sm:text-3xl font-black leading-none ${bandColor(entry.band_score)}`}>{entry.band_score.toFixed(1)}</p>
+                  <p className="text-[9px] sm:text-[10px] text-brand-text-mute font-semibold font-jetbrains uppercase tracking-[0.14em] mt-1">Band</p>
                 </div>
               </div>
               {entry.sub_scores && Object.keys(entry.sub_scores).length > 0 && (
@@ -908,7 +908,7 @@ const SectionLabel = ({
   icon: React.ReactNode;
   text: string;
 }) => (
-  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+  <p className="text-[10px] font-black text-brand-text-mute font-jetbrains uppercase tracking-[0.16em] flex items-center gap-1.5">
     {icon}
     {text}
   </p>
@@ -920,7 +920,7 @@ const FilterChip = ({ label, active, onClick }: { label: string; active: boolean
     className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all duration-150 border whitespace-nowrap ${
       active
         ? "bg-brand-teal-600 text-white border-brand-teal-600 shadow-sm"
-        : "bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-brand-teal-300 hover:text-brand-teal-600"
+        : "bg-brand-bg-alt text-brand-text-mute border-brand-line hover:border-brand-teal-300 hover:text-brand-teal-600"
     }`}
   >
     {label}
@@ -1001,12 +1001,12 @@ const AssessmentHistoryPage = () => {
       >
         {/* Header */}
         <div>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-800 dark:text-white">Assessment History</h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Track your progress across all assessments</p>
+          <h1 className="font-manrope text-xl sm:text-2xl font-black text-brand-text">Assessment History</h1>
+          <p className="text-xs sm:text-sm text-brand-text-mute mt-0.5">Track your progress across all assessments</p>
         </div>
 
         {/* Tabs — full-width on mobile with horizontal scroll fallback */}
-        <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-800/50 rounded-xl w-full sm:w-fit overflow-x-auto no-scrollbar">
+        <div className="flex gap-1 p-1 bg-brand-bg-alt rounded-xl w-full sm:w-fit overflow-x-auto no-scrollbar">
           {([
             ["ia",         <ListChecks  className="h-4 w-4 shrink-0" />, "Internal Assessments", "IAs",       iaHistory.length],
             ["mock",       <FileText    className="h-4 w-4 shrink-0" />, "Mock Tests",           "Mocks",     mockEntries.length],
@@ -1017,15 +1017,15 @@ const AssessmentHistoryPage = () => {
               onClick={() => setActiveTab(tab as any)}
               className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all whitespace-nowrap flex-1 sm:flex-none ${
                 activeTab === tab
-                  ? "bg-white dark:bg-slate-900 text-slate-800 dark:text-white shadow-sm"
-                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                  ? "bg-white text-brand-text shadow-sm"
+                  : "text-brand-text-mute hover:text-brand-text"
               }`}
             >
               {icon}
               <span className="hidden sm:inline">{label}</span>
               <span className="sm:hidden">{shortLabel}</span>
               {count > 0 && (
-                <span className="ml-0.5 text-[10px] font-black bg-brand-teal-100 dark:bg-brand-teal-500/20 text-brand-teal-600 dark:text-brand-teal-400 px-1.5 py-0.5 rounded-full shrink-0">
+                <span className="ml-0.5 text-[10px] font-black bg-brand-teal-100 text-brand-teal-600 px-1.5 py-0.5 rounded-full shrink-0">
                   {count}
                 </span>
               )}
@@ -1036,9 +1036,9 @@ const AssessmentHistoryPage = () => {
         {/* ── Internal Assessments Tab ── */}
         {activeTab === "ia" && (
           <>
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-3 sm:p-4 shadow-sm">
+            <div className="bg-white rounded-2xl border border-brand-line p-3 sm:p-4 shadow-sm">
               <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-3">
-                <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider sm:mr-1">
+                <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-brand-text-mute font-jetbrains uppercase tracking-[0.14em] sm:mr-1">
                   <Filter className="h-3.5 w-3.5 shrink-0" /> Filter by Skill
                 </div>
                 <div className="flex flex-wrap gap-1.5 sm:gap-2">
@@ -1054,16 +1054,16 @@ const AssessmentHistoryPage = () => {
               </div>
             </div>
             {!iaLoading && !iaError && (
-              <p className="text-xs sm:text-sm text-slate-500">{filteredIA.length} IA{filteredIA.length !== 1 ? "s" : ""} found</p>
+              <p className="text-xs sm:text-sm text-brand-text-mute">{filteredIA.length} IA{filteredIA.length !== 1 ? "s" : ""} found</p>
             )}
             {iaLoading ? (
-              <div className="flex items-center justify-center py-12 sm:py-16 gap-3 text-slate-400"><Loader2 className="h-5 w-5 animate-spin" /><span className="text-sm font-medium">Loading IA history…</span></div>
+              <div className="flex items-center justify-center py-12 sm:py-16 gap-3 text-brand-text-mute"><Loader2 className="h-5 w-5 animate-spin" /><span className="text-sm font-medium">Loading IA history…</span></div>
             ) : iaError ? (
-              <div className="flex flex-col items-center py-12 sm:py-16 gap-3 text-slate-400 px-4 text-center"><AlertCircle className="h-8 w-8 text-rose-400" /><p className="text-sm font-semibold text-slate-600 dark:text-slate-300">Failed to load IA history</p><p className="text-xs">Please refresh and try again.</p></div>
+              <div className="flex flex-col items-center py-12 sm:py-16 gap-3 text-brand-text-mute px-4 text-center"><AlertCircle className="h-8 w-8 text-rose-400" /><p className="text-sm font-semibold text-brand-text-mute">Failed to load IA history</p><p className="text-xs">Please refresh and try again.</p></div>
             ) : filteredIA.length === 0 ? (
-              <div className="text-center py-12 sm:py-16 text-slate-400 px-4">
+              <div className="text-center py-12 sm:py-16 text-brand-text-mute px-4">
                 <BarChart2 className="h-10 w-10 mx-auto mb-3 opacity-40" />
-                <p className="font-semibold text-slate-600 dark:text-slate-300">{iaHistory.length === 0 ? "No completed IAs yet" : "No entries match this filter"}</p>
+                <p className="font-semibold text-brand-text-mute">{iaHistory.length === 0 ? "No completed IAs yet" : "No entries match this filter"}</p>
                 {iaHistory.length === 0 && <p className="text-sm mt-1">Complete an Internal Assessment to see your results here.</p>}
               </div>
             ) : (
@@ -1077,9 +1077,9 @@ const AssessmentHistoryPage = () => {
         {/* ── Mock Tests Tab ── */}
         {activeTab === "mock" && (
           <>
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-3 sm:p-4 shadow-sm">
+            <div className="bg-white rounded-2xl border border-brand-line p-3 sm:p-4 shadow-sm">
               <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-3">
-                <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider sm:mr-1">
+                <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-brand-text-mute font-jetbrains uppercase tracking-[0.14em] sm:mr-1">
                   <Filter className="h-3.5 w-3.5 shrink-0" /> Filter by Skill
                 </div>
                 <div className="flex flex-wrap gap-1.5 sm:gap-2">
@@ -1090,16 +1090,16 @@ const AssessmentHistoryPage = () => {
               </div>
             </div>
             {!mockLoading && !mockError && (
-              <p className="text-xs sm:text-sm text-slate-500">{filteredMock.length} entr{filteredMock.length !== 1 ? "ies" : "y"} found</p>
+              <p className="text-xs sm:text-sm text-brand-text-mute">{filteredMock.length} entr{filteredMock.length !== 1 ? "ies" : "y"} found</p>
             )}
             {mockLoading ? (
-              <div className="flex items-center justify-center py-12 sm:py-16 gap-3 text-slate-400"><Loader2 className="h-5 w-5 animate-spin" /><span className="text-sm font-medium">Loading mock tests…</span></div>
+              <div className="flex items-center justify-center py-12 sm:py-16 gap-3 text-brand-text-mute"><Loader2 className="h-5 w-5 animate-spin" /><span className="text-sm font-medium">Loading mock tests…</span></div>
             ) : mockError ? (
-              <div className="flex flex-col items-center py-12 sm:py-16 gap-3 text-slate-400 px-4 text-center"><AlertCircle className="h-8 w-8 text-rose-400" /><p className="text-sm font-semibold text-slate-600 dark:text-slate-300">Failed to load mock tests</p></div>
+              <div className="flex flex-col items-center py-12 sm:py-16 gap-3 text-brand-text-mute px-4 text-center"><AlertCircle className="h-8 w-8 text-rose-400" /><p className="text-sm font-semibold text-brand-text-mute">Failed to load mock tests</p></div>
             ) : filteredMock.length === 0 ? (
-              <div className="text-center py-12 sm:py-16 text-slate-400 px-4">
+              <div className="text-center py-12 sm:py-16 text-brand-text-mute px-4">
                 <BarChart2 className="h-10 w-10 mx-auto mb-3 opacity-40" />
-                <p className="font-semibold text-slate-600 dark:text-slate-300">{mockEntries.length === 0 ? "No completed mock tests yet" : "No entries match this filter"}</p>
+                <p className="font-semibold text-brand-text-mute">{mockEntries.length === 0 ? "No completed mock tests yet" : "No entries match this filter"}</p>
                 {mockEntries.length === 0 && <p className="text-sm mt-1">Complete a Mock Test to see your full skill breakdown here.</p>}
               </div>
             ) : (
@@ -1113,7 +1113,7 @@ const AssessmentHistoryPage = () => {
         {/* ── Diagnostic Tab ── */}
         {activeTab === "diagnostic" && (
           diagnosticLoading ? (
-            <div className="flex items-center justify-center py-12 sm:py-16 gap-3 text-slate-400"><Loader2 className="h-5 w-5 animate-spin" /><span className="text-sm font-medium">Loading diagnostic report…</span></div>
+            <div className="flex items-center justify-center py-12 sm:py-16 gap-3 text-brand-text-mute"><Loader2 className="h-5 w-5 animate-spin" /><span className="text-sm font-medium">Loading diagnostic report…</span></div>
           ) : (
             <DiagnosticReportTab data={diagnostic} onOpenReport={setActiveReport} />
           )

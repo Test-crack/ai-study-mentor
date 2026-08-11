@@ -28,7 +28,7 @@ const detectTrapWords = (text: string): TrapWordResult => {
       return (
         <mark
           key={index}
-          className="bg-amber-200 dark:bg-amber-500/30 text-amber-900 dark:text-amber-200 font-bold px-1 rounded-sm not-italic"
+          className="bg-amber-200 text-amber-900 font-bold px-1 rounded-sm not-italic"
           title={`Trap word: "${clean}" — read this carefully`}
         >
           {token}
@@ -142,7 +142,7 @@ export default function McqDrill({ prompt, onComplete }: McqDrillProps) {
 
   // Shared shells — keep both phases visually consistent and responsive.
   const cardBase =
-    'rounded-2xl border bg-white dark:bg-white/[0.03] border-slate-200 dark:border-white/[0.07]';
+    'rounded-2xl border bg-white border-brand-line';
   const chip =
     'inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wider';
 
@@ -155,26 +155,26 @@ export default function McqDrill({ prompt, onComplete }: McqDrillProps) {
       <div className="flex flex-col animate-in fade-in duration-300">
 
         <div className="mb-4 sm:mb-5">
-          <span className={`${chip} bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400`}>
+          <span className={`${chip} bg-amber-50 border border-amber-200 text-amber-700`}>
             <Search className="w-3.5 h-3.5 shrink-0" />
             <span>Step 1 — Read the question</span>
           </span>
         </div>
 
         <div className={`${cardBase} p-4 sm:p-6 mb-4 sm:mb-5`}>
-          <p className="text-lg sm:text-xl md:text-2xl font-semibold text-slate-800 dark:text-white leading-relaxed break-words">
+          <p className="text-lg sm:text-xl md:text-2xl font-semibold text-brand-text leading-relaxed break-words">
             {trapResult.highlighted}
           </p>
         </div>
 
         {trapResult.hasTrapWords ? (
-          <div className="flex items-start gap-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-2xl p-4 mb-4 sm:mb-5 animate-in fade-in duration-300">
+          <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-4 sm:mb-5 animate-in fade-in duration-300">
             <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
             <div className="min-w-0">
-              <p className="text-sm font-bold text-amber-800 dark:text-amber-300 mb-1">
+              <p className="text-sm font-bold text-amber-800 mb-1">
                 Trap word{trapResult.foundWords.length > 1 ? 's' : ''} detected
               </p>
-              <p className="text-sm text-amber-700/90 dark:text-amber-400/80 leading-relaxed">
+              <p className="text-sm text-amber-700/90 leading-relaxed">
                 This question contains <TrapWordList words={trapResult.foundWords} />. Trap words invert or
                 restrict what is being asked — students who miss them often pick the wrong option even when
                 they know the content. Re-read the question with them in mind before answering.
@@ -182,22 +182,22 @@ export default function McqDrill({ prompt, onComplete }: McqDrillProps) {
             </div>
           </div>
         ) : (
-          <div className="flex items-start gap-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-2xl p-4 mb-4 sm:mb-5">
+          <div className="flex items-start gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl p-4 mb-4 sm:mb-5">
             <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-            <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300">
+            <p className="text-sm font-medium text-emerald-800">
               No trap words detected. Read carefully and proceed when ready.
             </p>
           </div>
         )}
 
-        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+        <p className="text-sm text-brand-text-mute mb-6">
           Work out what the question is actually asking before you look at the options.
         </p>
 
-        <div className="pt-4 border-t border-slate-100 dark:border-white/[0.05] flex sm:justify-end">
+        <div className="pt-4 border-t border-brand-line flex sm:justify-end">
           <Button
             onClick={handleConfirmQuestion}
-            className="w-full sm:w-auto bg-brand-teal-600 hover:bg-brand-teal-700 text-white px-6 sm:px-8 h-12 sm:h-14 rounded-xl font-bold text-sm sm:text-base shadow-sm transition-colors"
+            className="w-full sm:w-auto bg-brand-teal-700 hover:bg-brand-teal-600 text-white px-6 sm:px-8 h-12 sm:h-14 rounded-xl font-bold text-sm sm:text-base shadow-sm transition-colors"
           >
             <Eye className="w-5 h-5 mr-2 shrink-0" />
             I understand — show options
@@ -216,12 +216,12 @@ export default function McqDrill({ prompt, onComplete }: McqDrillProps) {
 
       {/* Phase indicator + trap word reminder */}
       <div className="flex flex-wrap items-center gap-2 mb-4 sm:mb-5">
-        <span className={`${chip} bg-brand-teal-50 dark:bg-brand-teal-500/10 border border-brand-teal-200 dark:border-brand-teal-500/20 text-brand-teal-700 dark:text-brand-teal-400`}>
+        <span className={`${chip} bg-brand-teal-50 border border-brand-teal-200 text-brand-teal-700`}>
           <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
           <span>Step 2 — Select your answer</span>
         </span>
         {trapResult.hasTrapWords && (
-          <span className={`${chip} bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400`}>
+          <span className={`${chip} bg-amber-50 border border-amber-200 text-amber-700`}>
             <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
             <span className="normal-case tracking-normal font-semibold">
               Trap: {trapResult.foundWords.join(', ')}
@@ -231,7 +231,7 @@ export default function McqDrill({ prompt, onComplete }: McqDrillProps) {
       </div>
 
       {/* Question — trap highlights retained as a reminder */}
-      <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-slate-800 dark:text-white leading-relaxed break-words mb-5 sm:mb-6">
+      <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-brand-text leading-relaxed break-words mb-5 sm:mb-6">
         {trapResult.highlighted}
       </h2>
 
@@ -247,24 +247,24 @@ export default function McqDrill({ prompt, onComplete }: McqDrillProps) {
           const isThisCorrect  = key === correctAnswerKey;
 
           let stateStyles =
-            'border-slate-200 dark:border-white/[0.07] bg-white dark:bg-white/[0.03] hover:border-brand-teal-400 dark:hover:border-brand-teal-500/40 hover:bg-slate-50 dark:hover:bg-white/[0.05] active:scale-[0.995]';
-          let badgeStyles = 'bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400';
+            'border-brand-line bg-white hover:border-brand-teal-300 hover:bg-brand-bg-alt active:scale-[0.995]';
+          let badgeStyles = 'bg-brand-bg-alt text-brand-text-mute';
           let icon: React.ReactNode = null;
 
           if (hasChecked) {
             if (isThisCorrect) {
-              stateStyles = 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-900 dark:text-emerald-200';
+              stateStyles = 'border-emerald-500 bg-emerald-50 text-emerald-900';
               badgeStyles = 'bg-emerald-500 text-white';
               icon = <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />;
             } else if (isThisSelected) {
-              stateStyles = 'border-rose-400 bg-rose-50 dark:bg-rose-500/10 text-rose-900 dark:text-rose-200';
+              stateStyles = 'border-rose-400 bg-rose-50 text-rose-900';
               badgeStyles = 'bg-rose-500 text-white';
               icon = <XCircle className="w-5 h-5 text-rose-500 shrink-0" />;
             } else {
-              stateStyles = 'border-slate-200 dark:border-white/[0.05] bg-slate-50/60 dark:bg-white/[0.01] opacity-55';
+              stateStyles = 'border-brand-line bg-brand-bg-alt/60 opacity-55';
             }
           } else if (isThisSelected) {
-            stateStyles = 'border-brand-teal-500 ring-2 ring-brand-teal-500/25 bg-brand-teal-50 dark:bg-brand-teal-500/10 text-brand-teal-800 dark:text-brand-teal-200';
+            stateStyles = 'border-brand-teal-500 ring-2 ring-brand-teal-500/25 bg-brand-teal-50 text-brand-teal-800';
             badgeStyles = 'bg-brand-teal-600 text-white';
           }
 
@@ -297,8 +297,8 @@ export default function McqDrill({ prompt, onComplete }: McqDrillProps) {
           aria-live="polite"
           className={`rounded-2xl border p-4 sm:p-5 mb-6 animate-in fade-in slide-in-from-bottom-2 ${
             isCorrect
-              ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20'
-              : 'bg-slate-50 dark:bg-white/[0.04] border-slate-200 dark:border-white/[0.07]'
+              ? 'bg-emerald-50 border-emerald-200'
+              : 'bg-brand-bg-alt border-brand-line'
           }`}
         >
           <div className="flex items-start gap-3">
@@ -309,8 +309,8 @@ export default function McqDrill({ prompt, onComplete }: McqDrillProps) {
             <div className="min-w-0 flex-1">
               <p className={`font-bold text-sm sm:text-base mb-1 ${
                 isCorrect
-                  ? 'text-emerald-800 dark:text-emerald-200'
-                  : 'text-slate-800 dark:text-white'
+                  ? 'text-emerald-800'
+                  : 'text-brand-text'
               }`}>
                 {isCorrect ? 'Correct' : `Not quite — the answer is ${correctAnswerKey}`}
               </p>
@@ -318,8 +318,8 @@ export default function McqDrill({ prompt, onComplete }: McqDrillProps) {
               {explanation && (
                 <p className={`text-sm leading-relaxed break-words ${
                   isCorrect
-                    ? 'text-emerald-800/90 dark:text-emerald-200/90'
-                    : 'text-slate-600 dark:text-slate-300'
+                    ? 'text-emerald-800/90'
+                    : 'text-brand-text-mute'
                 }`}>
                   {explanation}
                 </p>
@@ -327,9 +327,9 @@ export default function McqDrill({ prompt, onComplete }: McqDrillProps) {
 
               {/* Trap-word coaching, folded into the single feedback card */}
               {trapResult.hasTrapWords && (
-                <div className="mt-3 pt-3 border-t border-amber-200/70 dark:border-amber-500/20 flex items-start gap-2">
+                <div className="mt-3 pt-3 border-t border-amber-200/70 flex items-start gap-2">
                   <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                  <p className="text-sm text-amber-800 dark:text-amber-300/90 leading-relaxed">
+                  <p className="text-sm text-amber-800 leading-relaxed">
                     This question contained <TrapWordList words={trapResult.foundWords} />. Trap words change
                     what the question is asking — always re-read with them in focus before selecting.
                   </p>
@@ -341,19 +341,19 @@ export default function McqDrill({ prompt, onComplete }: McqDrillProps) {
       )}
 
       {/* Action bar — sticks to the bottom of the viewport on small screens */}
-      <div className="sticky bottom-0 -mx-6 sm:mx-0 px-6 sm:px-0 py-3 sm:py-0 sm:pt-4 bg-[#F8FAFC]/95 dark:bg-[#020617]/95 sm:bg-transparent sm:dark:bg-transparent backdrop-blur-sm sm:backdrop-blur-none border-t border-slate-200 dark:border-white/[0.06] sm:border-slate-100 dark:sm:border-white/[0.05] flex sm:justify-end">
+      <div className="sticky bottom-0 -mx-6 sm:mx-0 px-6 sm:px-0 py-3 sm:py-0 sm:pt-4 bg-brand-bg/95 sm:bg-transparent backdrop-blur-sm sm:backdrop-blur-none border-t border-brand-line sm:border-brand-line flex sm:justify-end">
         {!hasChecked ? (
           <Button
             onClick={handleCheck}
             disabled={!selectedOption}
-            className="w-full sm:w-auto bg-brand-teal-600 hover:bg-brand-teal-700 text-white px-6 sm:px-8 h-12 sm:h-14 rounded-xl font-bold text-sm sm:text-base shadow-sm transition-colors disabled:opacity-50"
+            className="w-full sm:w-auto bg-brand-teal-700 hover:bg-brand-teal-600 text-white px-6 sm:px-8 h-12 sm:h-14 rounded-xl font-bold text-sm sm:text-base shadow-sm transition-colors disabled:opacity-50"
           >
             Check answer
           </Button>
         ) : (
           <Button
             onClick={handleNext}
-            className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 dark:text-slate-900 text-white px-6 sm:px-8 h-12 sm:h-14 rounded-xl font-bold text-sm sm:text-base shadow-sm transition-colors"
+            className="w-full sm:w-auto bg-brand-ink hover:bg-brand-ink-deep text-white px-6 sm:px-8 h-12 sm:h-14 rounded-xl font-bold text-sm sm:text-base shadow-sm transition-colors"
           >
             Next <ChevronRight className="w-5 h-5 ml-1 shrink-0" />
           </Button>

@@ -44,8 +44,8 @@ export default function AudioResponseDrill({ prompt, onComplete }: AudioDrillPro
     <div className="flex flex-col items-center text-center space-y-8 animate-in fade-in">
 
       {/* Prompt */}
-      <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl w-full border border-slate-100 dark:border-slate-700">
-        <p className="text-xl font-medium text-slate-800 dark:text-slate-100 leading-relaxed">
+      <div className="p-6 bg-brand-bg-alt rounded-2xl w-full border border-brand-line">
+        <p className="text-xl font-medium text-brand-text leading-relaxed">
           "{prompt.text}"
         </p>
       </div>
@@ -62,19 +62,19 @@ export default function AudioResponseDrill({ prompt, onComplete }: AudioDrillPro
             <span className="font-bold text-xs tracking-wider">TAP TO SPEAK</span>
           </button>
         ) : isProcessing ? (
-          <div className="flex flex-col items-center text-slate-500 space-y-3 py-6">
+          <div className="flex flex-col items-center text-brand-text-mute space-y-3 py-6">
             <Loader2 className="w-8 h-8 animate-spin text-rose-500" />
             <span className="font-medium">Evaluating pronunciation...</span>
           </div>
         ) : (
           <div className="flex flex-col items-center animate-in zoom-in">
-            <div className="text-4xl font-mono font-black text-rose-500 mb-6 flex items-center gap-3 bg-rose-50 dark:bg-rose-500/10 px-6 py-2 rounded-2xl">
+            <div className="text-4xl font-mono font-black text-rose-500 mb-6 flex items-center gap-3 bg-rose-50 px-6 py-2 rounded-2xl">
               <span className="w-3 h-3 rounded-full bg-rose-500 animate-pulse" />
               00:{timeLeft.toString().padStart(2, '0')}
             </div>
             <button
               onClick={handleStop}
-              className="flex items-center px-8 py-3 rounded-xl bg-slate-800 text-white hover:bg-slate-700 font-bold transition-all hover:scale-105"
+              className="flex items-center px-8 py-3 rounded-xl bg-brand-ink text-white hover:bg-brand-ink-nav font-bold transition-all hover:scale-105"
             >
               <Square className="w-5 h-5 mr-2 fill-current" /> Stop & Submit
             </button>
