@@ -54,7 +54,10 @@ export const StudentSidebar = ({
 
   const isLocked = isLockedProp ?? selfLocked;
 
-  const isActivelyDrilling = location.pathname.includes('/drill');
+  // Extra/bonus drills (?extra=true) are optional practice, not the mandatory
+  // gate flow — navigation should stay usable during them.
+  const isExtraDrill = new URLSearchParams(location.search).get('extra') === 'true';
+  const isActivelyDrilling = location.pathname.includes('/drill') && !isExtraDrill;
   const isLeft = alignment === 'left';
   const canExpand = !isLocked && !isActivelyDrilling;
 

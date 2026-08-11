@@ -637,7 +637,7 @@ const StudentDashboardPage = () => {
               </section>
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div className="lg:col-span-4"><WeeklyRhythmIndicator /></div>
+                <div className="lg:col-span-4"><WeeklyRhythmIndicator currentStreak={dailyDrillState?.daily_streak ?? 0} goal={7} /></div>
                 <div className="lg:col-span-4">
                   <PredictedReadinessCard readiness={dynamicReadiness} />
                 </div>
@@ -1317,36 +1317,45 @@ const FocusAreaCard = ({
 const MomentumWalletCard = ({ momentum }: { momentum: number }) => {
   const navigate = useNavigate();
   return (
-    <div className="bg-white border border-brand-line rounded-2xl p-5 shadow-sm h-full flex flex-col">
-      <div className="flex items-center gap-2.5 mb-4">
-        <div className="w-8 h-8 rounded-xl bg-brand-teal-100 flex items-center justify-center flex-shrink-0">
-          <Wallet className="w-4 h-4 text-brand-teal-600" />
+    <div
+      className="relative overflow-hidden rounded-3xl bg-brand-ink-deep border border-brand-line-16 p-5 shadow-sm h-full flex flex-col"
+      style={{
+        backgroundImage:
+          'linear-gradient(to right, rgba(62,224,160,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(62,224,160,0.05) 1px, transparent 1px)',
+        backgroundSize: '32px 32px',
+      }}
+    >
+      <div className="relative z-10 flex items-center gap-2.5 mb-4">
+        <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
+          <Wallet className="w-4 h-4 text-brand-mint" />
         </div>
         <div>
-          <p className="font-dm font-bold text-brand-text text-sm leading-tight">Momentum Wallet</p>
-          <p className="text-xs text-brand-text-mute leading-tight">Earned from drills &amp; streaks</p>
+          <p className="font-dm font-bold text-white text-sm leading-tight">Momentum Wallet</p>
+          <p className="text-xs text-brand-on-ink-mute leading-tight">Earned from drills &amp; streaks</p>
         </div>
       </div>
 
-      <p className="font-jetbrains text-4xl font-black text-brand-text tabular-nums leading-none">
-        {momentum.toLocaleString()}
-      </p>
-      <p className="text-xs text-brand-text-mute mt-1 mb-4">points</p>
+      <div className="relative z-10 flex flex-col flex-1">
+        <p className="font-jetbrains text-4xl font-black text-white tabular-nums leading-none">
+          {momentum.toLocaleString()}
+        </p>
+        <p className="text-xs text-brand-on-ink-mute mt-1 mb-4">points</p>
 
-      <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-brand-bg-alt/60 border border-brand-line mb-4">
-        <div className="w-8 h-8 rounded-lg bg-brand-teal-100 flex items-center justify-center flex-shrink-0">
-          <Target className="w-4 h-4 text-brand-teal-600" />
+        <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/5 border border-brand-line-16 mb-4">
+          <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+            <Target className="w-4 h-4 text-brand-mint" />
+          </div>
+          <span className="flex-1 text-xs text-brand-on-ink-mute">Extra mock test</span>
+          <span className="font-jetbrains text-xs font-bold text-brand-mint">2,500</span>
         </div>
-        <span className="flex-1 text-xs text-brand-text-mute">Extra mock test</span>
-        <span className="font-jetbrains text-xs font-bold text-brand-teal-600">2,500</span>
-      </div>
 
-      <button
-        onClick={() => navigate("/student/mock")}
-        className="mt-auto w-full py-2.5 rounded-xl border border-brand-teal-200 text-brand-teal-600 font-bold text-xs uppercase tracking-wide hover:bg-brand-teal-50 transition-colors flex items-center justify-center gap-1.5"
-      >
-        Redeem for extra practice <ArrowRight className="w-3.5 h-3.5" />
-      </button>
+        <button
+          onClick={() => navigate("/student/mock")}
+          className="mt-auto w-full py-2.5 rounded-xl border border-brand-line-16 text-white font-bold text-xs uppercase tracking-wide hover:bg-white/5 transition-colors flex items-center justify-center gap-1.5"
+        >
+          Redeem for extra practice <ArrowRight className="w-3.5 h-3.5" />
+        </button>
+      </div>
     </div>
   );
 };
@@ -1442,7 +1451,7 @@ const SkillBandCard = ({
                 const guide = getSubSkillGuide(key);
                 let label = key.replace(/Score/g, "").replace(/_/g, "").replace(/([A-Z])/g, "$1").trim();
                 label = label.charAt(0).toUpperCase() + label.slice(1);
-                
+
                 return (
                   <div
                     key={key}
@@ -1626,47 +1635,51 @@ const WEEKLY_RHYTHM = [
   { day: "Sun", type: "Rest", color: "slate", text: "Rest & Recovery" },
 ];
 
-const colorConfig: Record<string, any> = {
-  blue: { bg: "bg-brand-blue-500", border: "border-brand-blue-500", text: "text-brand-blue-600", ring: "ring-brand-blue-500/30" },
-  purple: { bg: "bg-brand-blue-700", border: "border-brand-blue-700", text: "text-brand-blue-700", ring: "ring-brand-blue-700/30" },
-  teal: { bg: "bg-brand-teal-500", border: "border-brand-teal-500", text: "text-brand-teal-600", ring: "ring-brand-teal-500/30" },
-  amber: { bg: "bg-amber-500", border: "border-amber-500", text: "text-amber-600", ring: "ring-amber-500/30" },
-  slate: { bg: "bg-brand-text-mute", border: "border-brand-line", text: "text-brand-text-mute", ring: "ring-brand-line/30" },
-};
-
-const WeeklyRhythmIndicator = () => {
+const WeeklyRhythmIndicator = ({ currentStreak, goal = 7 }: { currentStreak: number; goal?: number }) => {
   const jsDay = new Date().getDay();
-  const currentDayIndex = jsDay === 0 ? 6 : jsDay - 1;
+  const currentDayIndex = jsDay === 0 ? 6 : jsDay - 1; // Mon=0 … Sun=6
   const todayConfig = WEEKLY_RHYTHM[currentDayIndex];
+  const streakLeft = Math.max(0, goal - currentStreak);
+
   return (
     <div className="bg-white rounded-3xl border border-brand-line p-6 shadow-sm h-full flex flex-col justify-center">
-      <div className="flex items-center justify-between gap-1 mb-6 relative px-2 mt-2">
-        <div className="absolute left-4 right-4 top-2 h-0.5 bg-brand-bg-alt z-0" />
+      <span className="font-jetbrains text-[10.5px] font-medium uppercase tracking-[0.14em] text-brand-text-mute">
+        This Week
+      </span>
+
+      <div className="flex items-end gap-3 mt-3 mb-5">
+        <span className="font-jetbrains text-[34px] font-bold text-brand-text leading-none tracking-tight">
+          {currentStreak}
+        </span>
+        <span className="text-[13.5px] text-brand-text-mute pb-0.5">
+          day streak{streakLeft > 0 ? ` · ${streakLeft} more to your ${goal}-day goal` : " · weekly goal hit 🎉"}
+        </span>
+      </div>
+
+      <div className="flex gap-1.5">
         {WEEKLY_RHYTHM.map((day, idx) => {
           const isToday = idx === currentDayIndex;
-          const isFuture = idx > currentDayIndex;
-          const colors = colorConfig[day.color];
+          // Approximates completed days from the streak count — we don't have
+          // per-day attendance rows, only the rolling streak total.
+          const isDone = idx < currentDayIndex && idx >= currentDayIndex - currentStreak;
           return (
-            <div key={day.day} className="relative z-10 flex flex-col items-center gap-3">
+            <div key={day.day} className="flex-1 flex flex-col items-center gap-2">
               <div
-                className={`w-4 h-4 rounded-full transition-all duration-300
- ${isFuture ?`bg-white border-2 ${colors.border}`: colors.bg}
- ${isToday ?`ring-4 ring-offset-2 ${colors.ring} scale-125`: ""}
-`}
+                className={`w-full rounded-md transition-all duration-300 ${
+                  isToday ? "h-10 bg-brand-ink-deep" : isDone ? "h-7 bg-brand-mint" : "h-7 bg-brand-bg-alt"
+                }`}
               />
-              <span className={`font-jetbrains text-[10px] font-bold uppercase tracking-widest ${isToday ? "text-brand-text " : "text-brand-text-mute "}`}>
+              <span className={`font-jetbrains text-[9px] font-bold uppercase tracking-wider ${isToday ? "text-brand-text" : "text-brand-text-mute"}`}>
                 {day.day}
               </span>
             </div>
           );
         })}
       </div>
-      <div className="bg-brand-bg-alt border border-brand-line rounded-2xl p-4 text-center">
-        <p className="text-sm font-medium text-brand-text-mute">
-          Today:{""}
-          <span className={`ml-1 font-semibold ${colorConfig[todayConfig.color].text}`}>
-            {todayConfig.text}
-          </span>
+
+      <div className="mt-4 px-3.5 py-3 bg-brand-teal-wash border border-brand-teal-200 rounded-xl">
+        <p className="text-[13px] text-brand-text-mute">
+          Today: <strong className="text-brand-text font-semibold">{todayConfig.text}</strong>
         </p>
       </div>
     </div>

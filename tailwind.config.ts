@@ -97,6 +97,15 @@ export default {
 						tint: '#FDEEE6',
 						danger: '#DC4C1B',    // destructive hover (e.g. logout)
 					},
+					/**
+					 * Dashboard reference accent — Internal Assessment required badges/
+					 * left-border cards. Distinct from brand-blue (academic data blue).
+					 */
+					purple: {
+						DEFAULT: '#5B5BD6',
+						hover: '#4A4AC4',
+						tint: '#A78BFA',
+					},
 					line: '#D8E0E2',
 					'on-ink': '#B7C4C9',    // body copy on dark
 					'on-ink-mute': '#8FA0A8',

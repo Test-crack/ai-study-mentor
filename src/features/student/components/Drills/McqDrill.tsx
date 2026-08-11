@@ -144,7 +144,7 @@ export default function McqDrill({ prompt, onComplete }: McqDrillProps) {
   const cardBase =
     'rounded-2xl border bg-white border-brand-line';
   const chip =
-    'inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wider';
+    'font-jetbrains inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wider';
 
   // ─────────────────────────────────────────────────────────────────────────
   // PHASE 1 — QUESTION PREVIEW
@@ -197,7 +197,7 @@ export default function McqDrill({ prompt, onComplete }: McqDrillProps) {
         <div className="pt-4 border-t border-brand-line flex sm:justify-end">
           <Button
             onClick={handleConfirmQuestion}
-            className="w-full sm:w-auto bg-brand-teal-700 hover:bg-brand-teal-600 text-white px-6 sm:px-8 h-12 sm:h-14 rounded-xl font-bold text-sm sm:text-base shadow-sm transition-colors"
+            className="w-full sm:w-auto bg-brand-teal-600 hover:bg-brand-teal-700 text-white px-6 sm:px-8 h-12 sm:h-14 rounded-xl font-bold text-sm sm:text-base shadow-sm transition-colors"
           >
             <Eye className="w-5 h-5 mr-2 shrink-0" />
             I understand — show options
@@ -346,14 +346,14 @@ export default function McqDrill({ prompt, onComplete }: McqDrillProps) {
           <Button
             onClick={handleCheck}
             disabled={!selectedOption}
-            className="w-full sm:w-auto bg-brand-teal-700 hover:bg-brand-teal-600 text-white px-6 sm:px-8 h-12 sm:h-14 rounded-xl font-bold text-sm sm:text-base shadow-sm transition-colors disabled:opacity-50"
+            className="w-full sm:w-auto bg-brand-teal-600 hover:bg-brand-teal-700 text-white px-6 sm:px-8 h-12 sm:h-14 rounded-xl font-bold text-sm sm:text-base shadow-sm transition-colors disabled:opacity-50"
           >
             Check answer
           </Button>
         ) : (
           <Button
             onClick={handleNext}
-            className="w-full sm:w-auto bg-brand-ink hover:bg-brand-ink-deep text-white px-6 sm:px-8 h-12 sm:h-14 rounded-xl font-bold text-sm sm:text-base shadow-sm transition-colors"
+            className="w-full sm:w-auto bg-brand-ink-deep hover:bg-brand-ink text-white px-6 sm:px-8 h-12 sm:h-14 rounded-xl font-bold text-sm sm:text-base shadow-sm transition-colors"
           >
             Next <ChevronRight className="w-5 h-5 ml-1 shrink-0" />
           </Button>

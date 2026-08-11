@@ -27,6 +27,14 @@ function parseDateParts(dateStr: string): { day: number; month: string } {
   return { day: d, month: MONTH_SHORT[m - 1] };
 }
 
+const CARD_BG =
+  "relative overflow-hidden rounded-3xl bg-brand-ink-deep border border-brand-line-16 p-5 shadow-sm h-full flex flex-col";
+const CARD_GRID_STYLE = {
+  backgroundImage:
+    'linear-gradient(to right, rgba(62,224,160,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(62,224,160,0.05) 1px, transparent 1px)',
+  backgroundSize: '32px 32px',
+};
+
 export default function IAScheduleWidget() {
   const navigate = useNavigate();
   const [status, setStatus]   = useState<IAStatusSlim | null>(null);
@@ -48,30 +56,30 @@ export default function IAScheduleWidget() {
   }, []);
 
   if (loading) return (
-    <div className="bg-white border border-brand-line rounded-2xl p-5 shadow-sm h-full flex flex-col animate-pulse">
-      <div className="flex items-center justify-between mb-4">
+    <div className={`${CARD_BG} animate-pulse`} style={CARD_GRID_STYLE}>
+      <div className="relative z-10 flex items-center justify-between mb-4">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-brand-bg-alt flex-shrink-0" />
+          <div className="w-8 h-8 rounded-xl bg-white/10 flex-shrink-0" />
           <div className="space-y-1.5">
-            <div className="h-3 w-24 bg-brand-bg-alt rounded" />
-            <div className="h-2.5 w-16 bg-brand-bg-alt rounded" />
+            <div className="h-3 w-24 bg-white/10 rounded" />
+            <div className="h-2.5 w-16 bg-white/10 rounded" />
           </div>
         </div>
-        <div className="h-3 w-10 bg-brand-bg-alt rounded" />
+        <div className="h-3 w-10 bg-white/10 rounded" />
       </div>
-      <div className="flex flex-col gap-3 flex-1">
+      <div className="relative z-10 flex flex-col gap-3 flex-1">
         {[0, 1].map(i => (
-          <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-brand-line">
-            <div className="w-12 h-12 rounded-xl bg-brand-bg-alt flex-shrink-0" />
+          <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-brand-line-16">
+            <div className="w-12 h-12 rounded-xl bg-white/10 flex-shrink-0" />
             <div className="flex-1 space-y-1.5">
-              <div className="h-3 w-36 bg-brand-bg-alt rounded" />
-              <div className="h-2.5 w-20 bg-brand-bg-alt rounded" />
+              <div className="h-3 w-36 bg-white/10 rounded" />
+              <div className="h-2.5 w-20 bg-white/10 rounded" />
             </div>
-            <div className="h-5 w-14 bg-brand-bg-alt rounded-lg" />
+            <div className="h-5 w-14 bg-white/10 rounded-lg" />
           </div>
         ))}
       </div>
-      <div className="mt-4 h-9 w-full bg-brand-bg-alt rounded-xl" />
+      <div className="relative z-10 mt-4 h-9 w-full bg-white/10 rounded-xl" />
     </div>
   );
 
@@ -85,39 +93,41 @@ export default function IAScheduleWidget() {
   const isImminent = !!nextSlot && nextSlot.days_away <= 1 && !isIADay;
 
   return (
-    <div className="bg-white border border-brand-line rounded-2xl p-5 shadow-sm h-full flex flex-col">
+    <div className={CARD_BG} style={CARD_GRID_STYLE}>
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="relative z-10 flex items-center justify-between mb-4">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-brand-teal-100 flex items-center justify-center flex-shrink-0">
-            <CalendarClock className="w-4 h-4 text-brand-teal-600" />
+          <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
+            <CalendarClock className="w-4 h-4 text-brand-mint" />
           </div>
           <div>
-            <p className="font-dm font-bold text-brand-text text-sm leading-tight">IA Schedule</p>
-            <p className="text-xs text-brand-text-mute leading-tight">Internal Assessments</p>
+            <p className="font-dm font-bold text-white text-sm leading-tight">IA Schedule</p>
+            <p className="text-xs text-brand-on-ink-mute leading-tight">Internal Assessments</p>
           </div>
         </div>
         <button
           onClick={() => navigate("/student/internal")}
-          className="text-xs font-semibold text-brand-teal-600 hover:underline flex items-center gap-0.5"
+          className="text-xs font-semibold text-brand-mint hover:underline flex items-center gap-0.5"
         >
           View <ChevronRight className="w-3.5 h-3.5" />
         </button>
       </div>
 
+      <div className="relative z-10 flex flex-col flex-1">
+
       {/* Due tomorrow — required, not yet actionable */}
       {isImminent && (
-        <div className="rounded-xl px-4 py-3 mb-4 border border-brand-line border-l-[3px] border-l-brand-blue-500 bg-white">
+        <div className="rounded-xl px-4 py-3 mb-4 border border-brand-line-16 border-l-[3px] border-l-brand-purple bg-white/5">
           <div className="flex items-center gap-2 mb-1">
-            <p className="font-jetbrains text-xs font-black uppercase tracking-widest text-brand-text">
+            <p className="font-jetbrains text-xs font-black uppercase tracking-widest text-white">
               Internal Assessment #{status.current_ia_number}
             </p>
-            <span className="font-jetbrains text-[9px] font-bold uppercase tracking-wider bg-brand-blue-500/12 text-brand-blue-600 px-2 py-0.5 rounded-full">
+            <span className="font-jetbrains text-[9px] font-bold uppercase tracking-wider bg-brand-purple/20 text-brand-purple-tint px-2 py-0.5 rounded-full">
               Required
             </span>
           </div>
-          <p className="text-xs font-medium text-brand-text-mute">
+          <p className="text-xs font-medium text-brand-on-ink-mute">
             Due {nextSlot.days_away === 0 ? "today" : "tomorrow"}, {nextSlot.date_formatted}. This re-scores your sub-scores — miss it and your scores go stale and momentum drops.
           </p>
         </div>
@@ -125,27 +135,27 @@ export default function IAScheduleWidget() {
 
       {/* Today is IA day banner */}
       {isIADay && (
-        <div className={`rounded-xl px-4 py-3 mb-4 flex items-center justify-between border border-l-[3px] bg-white ${
+        <div className={`rounded-xl px-4 py-3 mb-4 flex items-center justify-between border border-l-[3px] bg-white/5 ${
  canStart
- ? "border-brand-line border-l-brand-teal-600 "
- : "border-brand-line border-l-rose-500 "
+ ? "border-brand-line-16 border-l-brand-mint "
+ : "border-brand-line-16 border-l-rose-500 "
  }`}>
           <div>
             <div className="flex items-center gap-2 mb-0.5">
-              <p className="font-jetbrains text-xs font-black uppercase tracking-widest text-brand-text">
+              <p className="font-jetbrains text-xs font-black uppercase tracking-widest text-white">
                 IA #{status.current_ia_number} — Today
               </p>
-              <span className={`font-jetbrains text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full text-white ${canStart ? "bg-brand-teal-600" : "bg-rose-500"}`}>
+              <span className={`font-jetbrains text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${canStart ? "bg-brand-mint text-brand-ink-deep" : "bg-rose-500 text-white"}`}>
                 Required
               </span>
             </div>
-            <p className={`text-xs font-medium ${canStart ? "text-brand-teal-600 " : "text-rose-600 "}`}>
+            <p className={`text-xs font-medium ${canStart ? "text-brand-mint " : "text-rose-300 "}`}>
               {canStart ? "You're eligible — start your assessment" : `DCS ${status.avg_dcs}% — need 40% to start`}
             </p>
           </div>
           {canStart
-            ? <CheckCircle2 className="w-5 h-5 text-brand-teal-600 flex-shrink-0" />
-            : <Zap         className="w-5 h-5 text-rose-500 flex-shrink-0" />
+            ? <CheckCircle2 className="w-5 h-5 text-brand-mint flex-shrink-0" />
+            : <Zap         className="w-5 h-5 text-rose-400 flex-shrink-0" />
           }
         </div>
       )}
@@ -163,26 +173,26 @@ export default function IAScheduleWidget() {
                 key={slot.number}
                 className={`flex items-center gap-3 p-3 rounded-xl border transition-colors ${
  i === 0
- ? "border-brand-teal-200 bg-brand-teal-50/60 "
- : "border-brand-line bg-brand-bg-alt/60 "
+ ? "border-brand-mint/25 bg-white/5 "
+ : "border-brand-line-16 bg-white/[0.03] "
  }`}
               >
                 {/* Date pill */}
                 <div className={`flex flex-col items-center justify-center rounded-xl w-12 h-12 flex-shrink-0 border-2 ${
  i === 0
- ? "bg-brand-teal-600 border-brand-teal-700 "
- : "bg-brand-bg-alt border-brand-line "
+ ? "bg-brand-mint border-brand-mint/60 "
+ : "bg-white/5 border-brand-line-16 "
  }`}>
-                  <span className={`font-black text-base leading-none ${i === 0 ? "text-white" : "text-brand-text "}`}>{day}</span>
-                  <span className={`font-jetbrains text-[9px] font-bold uppercase tracking-wide leading-none mt-0.5 ${i === 0 ? "text-brand-teal-200" : "text-brand-text-mute "}`}>{month}</span>
+                  <span className={`font-black text-base leading-none ${i === 0 ? "text-brand-ink-deep" : "text-white "}`}>{day}</span>
+                  <span className={`font-jetbrains text-[9px] font-bold uppercase tracking-wide leading-none mt-0.5 ${i === 0 ? "text-brand-ink-deep/70" : "text-brand-on-ink-mute "}`}>{month}</span>
                 </div>
 
                 {/* Details */}
                 <div className="flex-1 min-w-0">
-                  <p className={`font-bold text-sm truncate ${i === 0 ? "text-brand-text " : "text-brand-text-mute "}`}>
+                  <p className={`font-bold text-sm truncate ${i === 0 ? "text-white " : "text-brand-on-ink-mute "}`}>
                     Internal Assessment #{slot.number}
                   </p>
-                  <p className={`text-xs font-medium ${i === 0 ? "text-brand-teal-600 " : "text-brand-text-mute "}`}>
+                  <p className={`text-xs font-medium ${i === 0 ? "text-brand-mint " : "text-brand-on-ink-mute "}`}>
                     {slot.date_formatted}
                   </p>
                 </div>
@@ -190,8 +200,8 @@ export default function IAScheduleWidget() {
                 {/* Days badge */}
                 <span className={`text-xs font-black px-2 py-1 rounded-lg whitespace-nowrap ${
  i === 0
- ? "bg-brand-teal-600 text-white"
- : "bg-brand-bg-alt text-brand-text-mute "
+ ? "bg-brand-mint text-brand-ink-deep"
+ : "bg-white/10 text-brand-on-ink-mute "
  }`}>
                   {label}
                 </span>
@@ -200,16 +210,17 @@ export default function IAScheduleWidget() {
           })}
         </div>
       ) : (
-        <p className="text-xs text-brand-text-mute text-center py-4">No upcoming IA slots calculated yet.</p>
+        <p className="text-xs text-brand-on-ink-mute text-center py-4">No upcoming IA slots calculated yet.</p>
       )}
 
       {/* CTA */}
       <button
         onClick={() => navigate("/student/internal")}
-        className="mt-4 w-full py-2.5 rounded-xl border border-brand-teal-200 text-brand-teal-600 font-bold text-xs uppercase tracking-wide hover:bg-brand-teal-50 transition-colors"
+        className="mt-4 w-full py-2.5 rounded-xl border border-brand-line-16 text-white font-bold text-xs uppercase tracking-wide hover:bg-white/5 transition-colors"
       >
         {isIADay && canStart ? "Start Today's Assessment →" : "View Full Schedule →"}
       </button>
+      </div>
     </div>
   );
 }

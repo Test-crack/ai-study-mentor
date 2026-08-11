@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { StudentSidebar } from '../dashboard/StudentSidebar';
 import { StudentTopbar } from '../dashboard/StudentTopbar';
-import { Mic, Square, Loader2, Send, Flame, Zap, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Mic, Square, Loader2, Send, Flame, Zap, ArrowRight } from 'lucide-react';
 import { useMomentum } from "@/features/student/Context/MomentumContext";
 import { callBackend } from '@/features/auth/services/authClient';
 
@@ -69,19 +69,19 @@ export default function ApplyDrillScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-brand-bg transition-colors duration-500">
+    <div className="min-h-screen bg-brand-bg font-dm transition-colors duration-500">
       <StudentSidebar activeTab="dashboard" isCollapsed={true} toggleCollapse={() => {}} />
       <div className="transition-all duration-300 lg:pl-20 flex flex-col min-h-screen">
         <StudentTopbar onUpgradeClick={() => {}} />
 
         <main className="flex-1 p-6 max-w-3xl mx-auto w-full animate-in fade-in mt-10">
           {!isComplete ? (
-            <div className="bg-white rounded-3xl p-8 shadow-sm border border-brand-teal-tint">
+            <div className="bg-white rounded-[20px] p-8 shadow-sm border border-brand-line">
               <div className="text-center mb-8">
-                <span className="bg-brand-teal-wash text-brand-teal-700 font-bold px-4 py-1.5 rounded-full text-sm tracking-wide uppercase">
+                <span className="font-jetbrains bg-brand-teal-wash text-brand-teal-700 font-bold px-4 py-1.5 rounded-full text-[11px] tracking-[0.14em] uppercase">
                   Final Step
                 </span>
-                <h1 className="font-manrope text-2xl font-black text-brand-text mt-6">
+                <h1 className="font-dm text-2xl font-bold text-brand-text mt-6">
                   Apply what you just learned: <span className="text-brand-teal-600">{subSkill}</span>
                 </h1>
                 <p className="text-brand-text-mute mt-2">One single prompt. Show us what you absorbed from the video.</p>
@@ -108,7 +108,7 @@ export default function ApplyDrillScreen() {
                     </div>
                   </div>
                   <div className="flex justify-end">
-                    <button onClick={handleSubmit} disabled={textAnswer.length < 10} className="flex items-center px-6 py-3 bg-brand-teal-700 text-white font-bold rounded-xl hover:bg-brand-teal-600 disabled:opacity-50 transition-colors shadow-sm">
+                    <button onClick={handleSubmit} disabled={textAnswer.length < 10} className="flex items-center px-6 py-3 bg-brand-teal-600 text-white font-bold rounded-xl hover:bg-brand-teal-700 disabled:opacity-50 transition-colors shadow-sm">
                       Submit Apply Drill <Send className="w-4 h-4 ml-2" />
                     </button>
                   </div>
@@ -126,22 +126,22 @@ export default function ApplyDrillScreen() {
 
                   {isProcessing ? (
                      <div className="flex flex-col items-center text-brand-text-mute space-y-3 py-10">
-                       <Loader2 className="w-8 h-8 animate-spin text-brand-teal-500" />
+                       <Loader2 className="w-8 h-8 animate-spin text-brand-mint" />
                        <span className="font-medium">Finalizing session...</span>
                      </div>
                   ) : !isRecording ? (
-                    <button onClick={() => setIsRecording(true)} className="relative group flex flex-col items-center justify-center w-32 h-32 rounded-full bg-brand-teal-700 text-white shadow-sm hover:scale-105 transition-all">
+                    <button onClick={() => setIsRecording(true)} className="relative group flex flex-col items-center justify-center w-32 h-32 rounded-full bg-brand-teal-600 text-white shadow-sm hover:scale-105 transition-all">
                       <div className="absolute inset-0 rounded-full bg-brand-teal-400 opacity-30 group-hover:animate-ping" />
                       <Mic className="w-10 h-10 mb-2" />
-                      <span className="font-bold text-xs tracking-wider">START</span>
+                      <span className="font-jetbrains font-bold text-xs tracking-wider">START</span>
                     </button>
                   ) : (
                     <div className="flex flex-col items-center animate-in zoom-in">
-                      <div className="text-4xl font-mono font-black text-brand-teal-600 mb-6 flex items-center gap-3 tabular-nums">
-                        <span className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
+                      <div className="font-jetbrains text-4xl font-black text-brand-teal-600 mb-6 flex items-center gap-3 tabular-nums">
+                        <span className="w-3 h-3 rounded-full bg-brand-warm-danger animate-pulse" />
                         {formatTime(timeLeft)}
                       </div>
-                      <button onClick={handleSubmit} className="flex items-center px-8 py-3 rounded-xl bg-brand-ink text-white hover:bg-brand-ink-nav font-bold transition-all">
+                      <button onClick={handleSubmit} className="flex items-center px-8 py-3 rounded-xl bg-brand-ink-deep text-white hover:bg-brand-ink font-bold transition-all">
                         <Square className="w-5 h-5 mr-2 fill-current" /> Stop & Submit
                       </button>
                     </div>
@@ -150,30 +150,39 @@ export default function ApplyDrillScreen() {
               )}
             </div>
           ) : (
-            // Final Summary Completion Card
-            <div className="bg-gradient-to-br from-brand-teal-600 to-brand-blue-600 p-1 rounded-3xl shadow-sm animate-in zoom-in duration-500">
-              <div className="bg-white rounded-[22px] p-8 md:p-12 text-center">
-                <div className="h-20 w-20 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-6 ring-4 ring-emerald-100/50">
-                  <CheckCircle2 className="w-11 h-11 text-emerald-500" />
+            // Final Summary Completion Card — dark ink hero, matches the reference's drill-complete panel
+            <div
+              className="relative overflow-hidden rounded-3xl bg-brand-ink-deep p-8 md:p-12 text-center animate-in zoom-in duration-500"
+              style={{
+                backgroundImage:
+                  'linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px), linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px)',
+                backgroundSize: '44px 44px',
+              }}
+            >
+              <div className="relative z-10">
+                <div className="flex items-center justify-center gap-3 mb-5">
+                  <span className="h-px w-6 bg-brand-mint" aria-hidden="true" />
+                  <span className="font-jetbrains text-[10.5px] font-medium uppercase tracking-[0.14em] text-brand-mint">Session Complete</span>
+                  <span className="h-px w-6 bg-brand-mint" aria-hidden="true" />
                 </div>
-                <h2 className="font-manrope text-3xl font-black text-brand-text mb-4">Full Session Complete!</h2>
+                <h2 className="font-dm text-3xl font-bold text-white mb-4">Full Session Complete!</h2>
 
                 <div className="inline-flex flex-wrap justify-center gap-3 mb-8">
-                   <div className="flex items-center gap-2 bg-brand-bg-alt px-4 py-2 rounded-xl border border-brand-line">
-                      <Zap className="w-5 h-5 text-amber-500 fill-amber-500"/>
-                      <span className="font-bold text-brand-text tabular-nums">+{initialScore + 25 + 30} pts total</span>
+                   <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-brand-line-16">
+                      <Zap className="w-5 h-5 text-amber-400 fill-amber-400"/>
+                      <span className="font-jetbrains font-bold text-white tabular-nums">+{initialScore + 25 + 30} pts total</span>
                    </div>
-                   <div className="flex items-center gap-2 bg-orange-50 px-4 py-2 rounded-xl border border-orange-100">
-                      <Flame className="w-5 h-5 text-orange-500 fill-orange-500"/>
-                      <span className="font-bold text-orange-700">Streak: Day {streak}</span>
+                   <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-brand-line-16">
+                      <Flame className="w-5 h-5 text-orange-400 fill-orange-400"/>
+                      <span className="font-jetbrains font-bold text-orange-300">Streak: Day {streak}</span>
                    </div>
                 </div>
 
-                <p className="text-brand-text-mute mb-8 font-medium">Excellent work today. You've completed your targeted drills, absorbed a lesson, and proved your knowledge. See you tomorrow!</p>
+                <p className="text-brand-on-ink-mute mb-8 font-medium">Excellent work today. You've completed your targeted drills, absorbed a lesson, and proved your knowledge. See you tomorrow!</p>
 
                 <button
                   onClick={() => navigate('/student/dashboard', { state: { drillCompleted: true } })}
-                  className="w-full sm:w-auto inline-flex items-center justify-center bg-brand-teal-700 hover:bg-brand-teal-600 text-white px-8 py-4 rounded-xl font-bold hover:scale-[1.02] transition-all shadow-sm"
+                  className="w-full sm:w-auto inline-flex items-center justify-center bg-white hover:bg-white/90 text-brand-ink-deep px-8 py-4 rounded-xl font-bold hover:scale-[1.02] transition-all shadow-sm"
                 >
                   Back to Dashboard <ArrowRight className="w-5 h-5 ml-2" />
                 </button>
