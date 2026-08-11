@@ -8,13 +8,19 @@ import type {
   DiagnosticSubScoresSpeaking,
 } from './types';
 
+type ResetSkill = 'LISTENING' | 'READING' | 'WRITING' | 'SPEAKING' | 'ALL';
+
 interface Props {
   results:         DiagnosticSkillResult[];
   studentName?:    string;
-  // Parent supplies the actual retake call — its endpoint differs by portal
+  // Parent supplies the actual reset call — its endpoint differs by portal
   // (instructor vs. institute-owner vs. institute-admin), so this component
-  // stays agnostic to which one is calling. Omit to hide the button entirely.
-  onRequestRetake?: () => Promise<void> | void;
+  // stays agnostic to which one is calling. Omit to hide reset buttons entirely.
+  onRequestReset?: (skill: ResetSkill) => Promise<void> | void;
+  // The instructor portal's retake endpoint only supports whole-diagnostic
+  // retakes, not per-skill — set false there to hide per-card Reset buttons
+  // so the confirm copy never claims a per-skill reset that can't happen.
+  perSkillReset?: boolean;
 }
 
 const SKILL_ORDER = ['LISTENING', 'READING', 'WRITING', 'SPEAKING'];
@@ -148,12 +154,18 @@ function Sparkline({ points }: { points: { created_at: string; band_score: numbe
   );
 }
 
-function RetakeConfirmModal({ studentName, onConfirm, onCancel, loading, error }: {
-  studentName: string;
-  onConfirm:   () => void;
-  onCancel:    () => void;
-  loading:     boolean;
-  error:       string | null;
+function skillLabel(s: ResetSkill): string {
+  return s === 'ALL' ? 'all skills' : s.charAt(0) + s.slice(1).toLowerCase();
+}
+
+function ResetConfirmModal({ studentName, skill, otherScoredSkills, onConfirm, onCancel, loading, error }: {
+  studentName:        string;
+  skill:               ResetSkill;
+  otherScoredSkills:   string[];
+  onConfirm:           () => void;
+  onCancel:            () => void;
+  loading:             boolean;
+  error:               string | null;
 }) {
   return (
     <div className="fixed inset-0 z-[200] bg-black/40 flex items-center justify-center p-4" onClick={onCancel}>
@@ -162,13 +174,23 @@ function RetakeConfirmModal({ studentName, onConfirm, onCancel, loading, error }
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-start justify-between mb-3">
-          <h3 className="text-base font-black text-slate-800 dark:text-slate-100">Request Diagnostic Retake?</h3>
+          <h3 className="text-base font-black text-slate-800 dark:text-slate-100">
+            Reset {skillLabel(skill)} diagnostic?
+          </h3>
           <button onClick={onCancel} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
             <X className="h-4 w-4" />
           </button>
         </div>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-          This clears <strong className="text-slate-700 dark:text-slate-200">{studentName}</strong>'s current diagnostic baseline and lets them take it again. This can't be undone.
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
+          This clears <strong className="text-slate-700 dark:text-slate-200">{studentName}</strong>'s {skillLabel(skill)} diagnostic score and lets them take it again. This can't be undone.
+        </p>
+        {skill !== 'ALL' && otherScoredSkills.length > 0 && (
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
+            {otherScoredSkills.join(', ')} keep their current scores — only {skillLabel(skill)} is reset.
+          </p>
+        )}
+        <p className="text-sm text-amber-700 dark:text-amber-400 mb-4">
+          The student will be locked out of drills, IA, and mocks until they redo {skillLabel(skill)}.
         </p>
         {error && (
           <p className="text-xs text-rose-600 dark:text-rose-400 font-semibold mb-4">{error}</p>
@@ -186,7 +208,7 @@ function RetakeConfirmModal({ studentName, onConfirm, onCancel, loading, error }
             disabled={loading}
             className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 disabled:opacity-60 transition-colors"
           >
-            {loading ? 'Requesting…' : 'Confirm Retake'}
+            {loading ? 'Resetting…' : 'Confirm Reset'}
           </button>
         </div>
       </div>
@@ -246,7 +268,11 @@ function FeedbackBlock({ skill, data }: { skill: string; data: Record<string, an
   );
 }
 
-function SkillCard({ result, history }: { result: DiagnosticSkillResult; history: DiagnosticSkillResult[] }) {
+function SkillCard({ result, history, onReset }: {
+  result:   DiagnosticSkillResult;
+  history:  DiagnosticSkillResult[];
+  onReset?: (skill: ResetSkill) => void;
+}) {
   const skill = result.skill;
   const ss    = result.sub_scores as any;
   const fb    = result.feedback_json;
@@ -266,6 +292,15 @@ function SkillCard({ result, history }: { result: DiagnosticSkillResult; history
             {skill.charAt(0) + skill.slice(1).toLowerCase()}
           </p>
           <p className="text-[10px] text-slate-400 mt-0.5">{date}</p>
+          {onReset && (
+            <button
+              onClick={() => onReset(skill as ResetSkill)}
+              className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-bold text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
+            >
+              <RotateCcw className="h-3 w-3" />
+              Reset
+            </button>
+          )}
         </div>
         <div className="text-right shrink-0">
           <p className={cn('text-3xl font-black leading-none', bandColorText(result.band_score))}>
@@ -338,20 +373,21 @@ function SkillCard({ result, history }: { result: DiagnosticSkillResult; history
   );
 }
 
-export function DiagnosticTab({ results, studentName, onRequestRetake }: Props) {
-  const [retakeOpen,    setRetakeOpen]    = useState(false);
+export function DiagnosticTab({ results, studentName, onRequestReset, perSkillReset = true }: Props) {
+  const [resetSkill,   setResetSkill]   = useState<ResetSkill | null>(null);
   const [retakeLoading, setRetakeLoading] = useState(false);
   const [retakeError,   setRetakeError]   = useState<string | null>(null);
+  const retakeOpen = resetSkill !== null;
 
   const handleRetakeConfirm = async () => {
-    if (!onRequestRetake) return;
+    if (!onRequestReset || !resetSkill) return;
     setRetakeLoading(true);
     setRetakeError(null);
     try {
-      await onRequestRetake();
-      setRetakeOpen(false);
+      await onRequestReset(resetSkill);
+      setResetSkill(null);
     } catch (e: any) {
-      setRetakeError(e?.message ?? 'Failed to request retake.');
+      setRetakeError(e?.message ?? 'Failed to reset diagnostic.');
     } finally {
       setRetakeLoading(false);
     }
@@ -437,13 +473,13 @@ export function DiagnosticTab({ results, studentName, onRequestRetake }: Props) 
           </div>
         ) : <div />}
 
-        {onRequestRetake && (
+        {onRequestReset && (
           <button
-            onClick={() => { setRetakeError(null); setRetakeOpen(true); }}
+            onClick={() => { setRetakeError(null); setResetSkill('ALL'); }}
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-800 hover:border-rose-200 dark:hover:border-rose-500/30 transition-colors"
           >
             <RotateCcw className="h-3.5 w-3.5" />
-            Request Retake
+            {perSkillReset ? 'Reset All' : 'Request Retake'}
           </button>
         )}
       </div>
@@ -451,17 +487,24 @@ export function DiagnosticTab({ results, studentName, onRequestRetake }: Props) 
       {/* Skill cards grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {latestPerSkill.map(r => (
-          <SkillCard key={r.skill} result={r} history={bySkill.get(r.skill) ?? [r]} />
+          <SkillCard
+            key={r.skill}
+            result={r}
+            history={bySkill.get(r.skill) ?? [r]}
+            onReset={onRequestReset && perSkillReset ? (skill) => { setRetakeError(null); setResetSkill(skill); } : undefined}
+          />
         ))}
       </div>
 
       {retakeOpen && (
-        <RetakeConfirmModal
+        <ResetConfirmModal
           studentName={studentName || 'this student'}
+          skill={resetSkill!}
+          otherScoredSkills={latestPerSkill.filter(r => r.skill !== resetSkill).map(r => r.skill.charAt(0) + r.skill.slice(1).toLowerCase())}
           loading={retakeLoading}
           error={retakeError}
           onConfirm={handleRetakeConfirm}
-          onCancel={() => { if (!retakeLoading) setRetakeOpen(false); }}
+          onCancel={() => { if (!retakeLoading) setResetSkill(null); }}
         />
       )}
     </div>

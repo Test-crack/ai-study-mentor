@@ -76,6 +76,15 @@ export default function InstituteOwnerStudentProgressPage() {
 
   useEffect(() => { setData(null); load(); }, [load]);
 
+  const resetDiagnostic = useCallback(async (skill: string) => {
+    const res = await callBackend(
+      `${getBackendUrl()}/api/institute-owner/students/${resolvedStudentId}/diagnostic/reset`,
+      { method: 'POST', body: JSON.stringify({ skill }) }
+    );
+    if (!res?.success) throw new Error(res?.error ?? 'Failed to reset diagnostic.');
+    await load();
+  }, [resolvedStudentId, load]);
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 flex">
       <div className="hidden lg:block">
@@ -154,7 +163,11 @@ export default function InstituteOwnerStudentProgressPage() {
                 />
               )}
               {activeTab === 'diagnostic' && (
-                <DiagnosticTab results={(data as any).diagnostic_results ?? []} />
+                <DiagnosticTab
+                  results={(data as any).diagnostic_results ?? []}
+                  studentName={(data as any).student?.name}
+                  onRequestReset={resetDiagnostic}
+                />
               )}
             </div>
           )}
