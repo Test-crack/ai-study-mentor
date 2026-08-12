@@ -8,7 +8,7 @@ import { callBackend } from "@/features/auth/services/authClient";
 import { transformSectionAudioUrls } from "@/features/student/utils/iaAudioUtils";
 import * as mockTimerStore from "@/features/student/utils/mockTimerStore";
 import {
-  GraduationCap, ArrowRight, CheckCircle2, AlertCircle, Mic, PlayCircle,
+  ArrowRight, CheckCircle2, AlertCircle, Mic, PlayCircle,
   Zap, Loader2, Lock, XCircle, Trophy, Calendar, BookOpen, ArrowLeft, Flame,
   ChevronDown, Clock, Play,
 } from "lucide-react";
@@ -211,8 +211,11 @@ function TopNavBar({ totalMomentum, phase, onBack }: { totalMomentum: number; ph
               </button>
             )}
             <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
-              <div className="p-1.5 sm:p-2 bg-brand-teal-600 rounded-xl flex-shrink-0 shadow-sm">
-                <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+              <div className="grid grid-cols-2 grid-rows-2 gap-[3px] w-[20px] h-[20px] sm:w-[22px] sm:h-[22px] shrink-0">
+                <div className="rounded-[3px] bg-brand-purple" />
+                <div className="rounded-[3px] bg-brand-purple-tint" />
+                <div className="rounded-[3px] bg-amber-500" />
+                <div className="rounded-[3px] bg-brand-mint" />
               </div>
               <span className="font-manrope text-base sm:text-xl font-semibold text-brand-text tracking-tight truncate">TestCrack</span>
             </div>

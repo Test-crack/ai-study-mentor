@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useMomentum } from "@/features/student/Context/MomentumContext";
 import { callBackend } from '@/features/auth/services/authClient';
-import { ArrowLeft, Lightbulb, CheckCircle2, Zap, Info, ShieldAlert, Award, Loader2, RotateCcw, Eye, Target, Heart, Sparkles, Trophy, KeyRound } from 'lucide-react';
+import { ArrowLeft, Lightbulb, CheckCircle2, Zap, Info, ShieldAlert, Award, Loader2, RotateCcw, Eye, Target, Sparkles, Trophy, KeyRound, Lock } from 'lucide-react';
 import {
   stampPassportSlot,
   PASSPORT_BONUS_PTS,
@@ -122,6 +122,9 @@ export default function LexiGrid() {
   const [showHint, setShowHint]         = useState(false);
   const [flyingScore, setFlyingScore]   = useState(false);
   const [localMomentum, setLocalMomentum] = useState(totalMomentum);
+  // Display-only — the actual solved words, for the sidebar's "Words Banked" list
+  const [solvedWords, setSolvedWords]   = useState<string[]>([]);
+  const [howOpen, setHowOpen]           = useState(false);
 
   useEffect(() => {
     // Keep localMomentum in sync with global context.
@@ -393,6 +396,7 @@ const saveState = (
         setGameStatus('won');
         const newScore = wordsWon + 1;
         setWordsWon(newScore);
+        setSolvedWords(prev => [...prev, targetWord]);
         saveState(currentIndex, triesLeft, currentGuess, newScore);
         applySessionMomentum(newScore, sessionLettersRevealed);
         triggerWinAnimation(MAX_TRIES - triesLeft + 1);
@@ -444,6 +448,7 @@ const saveState = (
     setGameStatus('playing');
     setWordRevealedPositions({});
     setSessionLettersRevealed(0);
+    setSolvedWords([]);
     totalAttemptsRef.current = 0;
     allBonusEligibleRef.current = true;
     sessionAwardedRef.current = 0;
@@ -653,15 +658,22 @@ const saveState = (
   const showSkipGate  = isGateMode && gameStatus !== 'completed_day';
 
   return (
-    <div className="min-h-screen bg-[#07070a] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-teal-950/20 via-[#07070a] to-[#07070a] font-sans text-white flex flex-col selection:bg-brand-teal-500/30 overflow-x-hidden relative">
+    <div
+      className="min-h-screen bg-brand-ink-deep font-dm text-white flex flex-col selection:bg-brand-mint/30 overflow-x-hidden relative"
+      style={{
+        backgroundImage:
+          'linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px), linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px)',
+        backgroundSize: '44px 44px',
+      }}
+    >
 
       {/* ── INTRO OVERLAY ── */}
       {introStage !== 'done' && (
-        <div className={`fixed inset-0 z-[100] bg-[#07070a] flex items-center justify-center overflow-hidden transition-opacity duration-500 ${introStage === 'fading' ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`fixed inset-0 z-[100] bg-brand-ink-deep flex items-center justify-center overflow-hidden transition-opacity duration-500 ${introStage === 'fading' ? 'opacity-0' : 'opacity-100'}`}>
           <div className="absolute inset-0 pointer-events-none">
             {introWordConfigs.map((config, i) => (
               <div key={i}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-brand-teal-400/20 font-black text-xl md:text-3xl uppercase whitespace-nowrap mix-blend-screen"
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-brand-mint/20 font-black text-xl md:text-3xl uppercase whitespace-nowrap mix-blend-screen"
                 style={{
                   animation: `flyToCenter 1.4s cubic-bezier(0.2,0,0.8,1) ${config.delay}s forwards`,
                   '--startX': `${config.startX}px`,
@@ -673,7 +685,7 @@ const saveState = (
               </div>
             ))}
           </div>
-          <h1 className="relative z-10 text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-brand-teal-400 to-brand-blue-400 tracking-[0.2em] uppercase drop-shadow-[0_0_40px_rgba(129,140,248,0.6)] animate-[logoPop_1s_ease-out_1s_both]">
+          <h1 className="relative z-10 font-dm text-5xl md:text-7xl font-bold text-brand-mint tracking-[0.2em] uppercase animate-[logoPop_1s_ease-out_1s_both]">
             LexiGrid
           </h1>
         </div>
@@ -686,53 +698,29 @@ const saveState = (
       )}
 
       {/* ── Topbar ── */}
-      <header className="flex items-center justify-between p-4 sm:p-6 max-w-7xl mx-auto w-full relative z-20">
-        <button onClick={() => navigate('/student/dashboard')} className="flex items-center justify-center w-10 h-10 rounded-2xl bg-slate-900/60 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all active:scale-95">
-          <ArrowLeft className="w-5 h-5 text-slate-300" />
-        </button>
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Skip Gate — gate mode only. Spends premium momentum to bypass the gate. */}
-          {showSkipGate && (
-            <button
-              onClick={handleSkipGate}
-              disabled={!canAffordSkip || isSkipping}
-              title={canAffordSkip ? `Spend ${SKIP_GATE_COST} momentum to skip to Drill 2` : 'Not enough momentum'}
-              className={`group flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs font-black uppercase tracking-widest border-2 transition-all
-                ${canAffordSkip
-                  ? 'bg-gradient-to-br from-amber-500/15 to-amber-600/5 text-amber-300 border-amber-500/40 hover:border-amber-400/70 hover:shadow-[0_0_20px_rgba(251,191,36,0.25)] active:scale-95'
-                  : 'bg-slate-800/40 text-slate-500 border-white/5 opacity-50 cursor-not-allowed'}`}
-            >
-              {isSkipping ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : canAffordSkip ? (
-                <Zap className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-              ) : (
-                <ShieldAlert className="w-3.5 h-3.5" />
-              )}
-              <span className="hidden sm:inline">
-                {canAffordSkip ? 'Skip Gate' : 'Not enough momentum'}
-              </span>
-              <span className="sm:hidden">Skip</span>
-              {canAffordSkip && (
-                <span className="flex items-center gap-0.5 text-amber-400/80">
-                  · {SKIP_GATE_COST}
-                  <Zap className="w-3 h-3 fill-amber-400 text-amber-400" />
-                </span>
-              )}
-            </button>
-          )}
-          <span className={`flex items-center gap-1.5 text-[10px] font-black px-3 py-1.5 rounded-2xl uppercase tracking-widest border ${
-            isGateMode
-              ? 'bg-teal-500/20 text-teal-300 border-teal-500/30'
-              : 'bg-brand-teal-500/20 text-brand-teal-300 border-brand-teal-500/30'
-          }`}>
-            {isGateMode ? <ShieldAlert className="w-3 h-3" /> : <Sparkles className="w-3 h-3" />}
-            {isGateMode ? 'Gate Mode' : 'Practice Mode'}
-          </span>
-          <div className="flex items-center gap-2 bg-gradient-to-br from-brand-teal-500/15 to-brand-teal-600/5 border border-brand-teal-500/30 px-4 py-2 rounded-2xl shadow-[0_0_20px_rgba(20,184,166,0.15)]">
-            <Zap className="w-4 h-4 text-amber-400 fill-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.6)]" />
-            <span className="font-black text-brand-teal-50 text-lg tabular-nums">{localMomentum}</span>
+      <header className="flex flex-wrap items-center justify-between gap-y-2 gap-x-3 p-3 sm:p-6 max-w-7xl mx-auto w-full relative z-20 border-b border-brand-line-16">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+          <button onClick={() => navigate('/student/dashboard')} className="flex items-center gap-1.5 text-brand-on-ink-mute hover:text-white transition-colors text-xs sm:text-sm font-medium shrink-0">
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Dashboard</span>
+          </button>
+          <div className="hidden sm:block w-px h-5 bg-brand-line-16" />
+          <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0 flex-wrap">
+            <div className="grid grid-cols-2 grid-rows-2 gap-[3px] w-[20px] h-[20px] sm:w-[22px] sm:h-[22px] shrink-0">
+              <div className="rounded-[3px] bg-brand-purple" />
+              <div className="rounded-[3px] bg-brand-purple-tint" />
+              <div className="rounded-[3px] bg-amber-500" />
+              <div className="rounded-[3px] bg-brand-mint" />
+            </div>
+            <span className="font-dm text-sm sm:text-[15px] font-bold text-white shrink-0">LexiGrid</span>
+            <span className="font-jetbrains text-[8.5px] sm:text-[9.5px] font-bold uppercase tracking-[0.08em] sm:tracking-[0.1em] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-amber-500/15 text-amber-400 whitespace-nowrap">
+              {isGateMode ? 'Gate · Unlocks Drill 2' : 'Practice Mode'}
+            </span>
           </div>
+        </div>
+        <div className="flex items-center gap-1.5 sm:gap-2 bg-white/5 border border-brand-line-16 px-3 sm:px-4 py-1.5 rounded-full shrink-0">
+          <Zap className="w-3.5 h-3.5 text-brand-mint" />
+          <span className="font-jetbrains font-bold text-white text-sm tabular-nums">{localMomentum.toLocaleString()}</span>
         </div>
       </header>
 
@@ -747,42 +735,40 @@ const saveState = (
         <div className="flex-1 flex flex-col items-center w-full max-w-3xl relative z-10">
           
         {gameStatus === 'completed_day' && (
-            <div className="relative w-full max-w-lg bg-gradient-to-b from-slate-900/70 to-slate-950/80 backdrop-blur-xl border border-white/10 rounded-[32px] p-8 sm:p-10 flex flex-col items-center text-center shadow-2xl animate-in zoom-in-95 duration-500 mt-10 overflow-hidden">
-              <div className="pointer-events-none absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1.4px)', backgroundSize: '22px 22px' }} />
+            <div className="relative w-full max-w-lg bg-white/[0.02] border border-brand-line-16 rounded-[28px] p-8 sm:p-10 flex flex-col items-center text-center animate-in zoom-in-95 duration-500 mt-10 overflow-hidden">
 
               {isPracticeMode ? (
                 /* ── Practice Round Complete ── */
                 <>
-                  <div className="relative w-20 h-20 bg-brand-teal-500/20 rounded-full flex items-center justify-center mb-6 ring-8 ring-brand-teal-500/10">
-                    <div className="absolute inset-0 rounded-full bg-brand-teal-400/20 animate-ping" />
-                    <Award className="relative w-10 h-10 text-brand-teal-400" />
+                  <div className="relative w-20 h-20 bg-brand-mint/15 rounded-full flex items-center justify-center mb-6">
+                    <Award className="relative w-10 h-10 text-brand-mint" />
                   </div>
-                  <h2 className="relative text-3xl font-black mb-2 text-white">Practice Round Complete</h2>
-                  <p className="relative text-slate-400 mb-8 font-medium">
+                  <h2 className="font-dm text-3xl font-bold mb-2 text-white">Practice Round Complete</h2>
+                  <p className="text-brand-on-ink-mute mb-8 font-medium">
                     Your daily momentum was already earned — this was a practice session.
                   </p>
                   <div className="relative w-full grid grid-cols-2 gap-3 mb-8">
-                    <div className="bg-slate-950/50 rounded-2xl p-5 border border-white/5 flex flex-col items-center">
-                      <Target className="w-4 h-4 text-slate-500 mb-1.5" />
-                      <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Score</p>
-                      <p className="text-3xl font-black text-white">{wordsWon} <span className="text-lg text-slate-600">/ {DAILY_LIMIT}</span></p>
+                    <div className="bg-white/[0.03] rounded-2xl p-5 border border-brand-line-16 flex flex-col items-center">
+                      <Target className="w-4 h-4 text-brand-on-ink-mute mb-1.5" />
+                      <p className="font-jetbrains text-[10px] font-bold text-brand-on-ink-mute uppercase tracking-widest mb-1">Score</p>
+                      <p className="font-jetbrains text-3xl font-bold text-white">{wordsWon} <span className="text-lg text-brand-on-ink-mute/60">/ {DAILY_LIMIT}</span></p>
                     </div>
-                    <div className="bg-slate-950/50 rounded-2xl p-5 border border-white/5 flex flex-col items-center">
-                      <Sparkles className="w-4 h-4 text-brand-teal-400 mb-1.5" />
-                      <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Mode</p>
-                      <p className="text-lg font-black text-brand-teal-400">Practice</p>
+                    <div className="bg-white/[0.03] rounded-2xl p-5 border border-brand-line-16 flex flex-col items-center">
+                      <Sparkles className="w-4 h-4 text-brand-mint mb-1.5" />
+                      <p className="font-jetbrains text-[10px] font-bold text-brand-on-ink-mute uppercase tracking-widest mb-1">Mode</p>
+                      <p className="font-jetbrains text-lg font-bold text-brand-mint">Practice</p>
                     </div>
                   </div>
                   <button
                     onClick={loadFreshWords}
                     disabled={isInitializing}
-                    className="relative w-full bg-brand-teal-600 hover:bg-brand-teal-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-lg py-4 rounded-2xl transition-all shadow-lg hover:shadow-brand-teal-500/25 active:scale-[0.98] mb-3"
+                    className="relative w-full bg-brand-mint hover:bg-brand-teal-300 disabled:opacity-50 disabled:cursor-not-allowed text-brand-ink-deep font-bold text-lg py-4 rounded-2xl transition-all active:scale-[0.98] mb-3"
                   >
                     Play Another Round
                   </button>
                   <button
                     onClick={() => navigate('/student/dashboard')}
-                    className="relative w-full bg-white/5 hover:bg-white/10 text-slate-400 font-bold text-base py-3 rounded-2xl transition-all"
+                    className="relative w-full bg-white/5 hover:bg-white/10 text-brand-on-ink-mute font-bold text-base py-3 rounded-2xl transition-all"
                   >
                     Return to Dashboard
                   </button>
@@ -790,38 +776,37 @@ const saveState = (
               ) : (
                 /* ── Daily Challenge Complete (first round — momentum earned) ── */
                 <>
-                  <div className="relative w-20 h-20 bg-amber-500/20 rounded-full flex items-center justify-center mb-6 ring-8 ring-amber-500/10">
-                    <div className="absolute inset-0 rounded-full bg-amber-400/20 animate-ping" />
+                  <div className="relative w-20 h-20 bg-amber-500/15 rounded-full flex items-center justify-center mb-6">
                     <Trophy className="relative w-10 h-10 text-amber-400" />
                   </div>
-                  <h2 className="relative text-3xl font-black mb-2 text-white">Daily Challenge Complete</h2>
-                  <p className="relative text-slate-400 mb-10 font-medium">Here is your vocabulary wrap-up for today.</p>
+                  <h2 className="font-dm text-3xl font-bold mb-2 text-white">Daily Challenge Complete</h2>
+                  <p className="text-brand-on-ink-mute mb-10 font-medium">Here is your vocabulary wrap-up for today.</p>
                   <div className="relative w-full grid grid-cols-2 gap-3 mb-8">
-                    <div className="bg-slate-950/50 rounded-2xl p-5 border border-white/5 flex flex-col items-center">
-                      <Target className="w-4 h-4 text-slate-500 mb-1.5" />
-                      <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Score</p>
-                      <p className="text-3xl font-black text-white">{wordsWon} <span className="text-lg text-slate-600">/ {DAILY_LIMIT}</span></p>
+                    <div className="bg-white/[0.03] rounded-2xl p-5 border border-brand-line-16 flex flex-col items-center">
+                      <Target className="w-4 h-4 text-brand-on-ink-mute mb-1.5" />
+                      <p className="font-jetbrains text-[10px] font-bold text-brand-on-ink-mute uppercase tracking-widest mb-1">Score</p>
+                      <p className="font-jetbrains text-3xl font-bold text-white">{wordsWon} <span className="text-lg text-brand-on-ink-mute/60">/ {DAILY_LIMIT}</span></p>
                     </div>
-                    <div className="bg-slate-950/50 rounded-2xl p-5 border border-white/5 flex flex-col items-center">
-                      <Zap className="w-4 h-4 text-amber-400 fill-amber-400 mb-1.5" />
-                      <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Momentum</p>
-                      <p className="text-3xl font-black text-amber-400">+{wordsWon * POINTS_PER_WORD}</p>
+                    <div className="bg-white/[0.03] rounded-2xl p-5 border border-brand-line-16 flex flex-col items-center">
+                      <Zap className="w-4 h-4 text-brand-mint mb-1.5" />
+                      <p className="font-jetbrains text-[10px] font-bold text-brand-on-ink-mute uppercase tracking-widest mb-1">Momentum</p>
+                      <p className="font-jetbrains text-3xl font-bold text-brand-mint">+{wordsWon * POINTS_PER_WORD}</p>
                     </div>
                   </div>
                   {submitError && (
-                    <div className="relative w-full mb-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl px-4 py-3 text-rose-400 text-xs font-bold text-center">
+                    <div className="relative w-full mb-4 bg-brand-warm-danger/10 border border-brand-warm-danger/30 rounded-2xl px-4 py-3 text-brand-warm-danger text-xs font-bold text-center">
                       Score couldn't be saved — check your connection. It will sync automatically next time you open the app.
                     </div>
                   )}
                   <button
                     onClick={() => navigate('/student/dashboard', { state: { lexigridCompleted: true } })}
-                    className="relative w-full bg-brand-teal-600 hover:bg-brand-teal-500 text-white font-bold text-lg py-4 rounded-2xl transition-all shadow-lg hover:shadow-brand-teal-500/25 active:scale-[0.98] mb-3"
+                    className="relative w-full bg-brand-mint hover:bg-brand-teal-300 text-brand-ink-deep font-bold text-lg py-4 rounded-2xl transition-all active:scale-[0.98] mb-3"
                   >
                     Return to Dashboard
                   </button>
                   <button
                     onClick={() => { setIsPracticeMode(true); loadFreshWords(); }}
-                    className="relative w-full bg-white/5 hover:bg-white/10 text-slate-400 font-bold text-base py-3 rounded-2xl transition-all"
+                    className="relative w-full bg-white/5 hover:bg-white/10 text-brand-on-ink-mute font-bold text-base py-3 rounded-2xl transition-all"
                   >
                     Keep Practising →
                   </button>
@@ -831,97 +816,57 @@ const saveState = (
           )}
           {/* ── ACTIVE GAME ── */}
           {gameStatus !== 'completed_day' && (
-            <div className="relative w-full rounded-[36px] sm:rounded-[40px] border border-white/10 bg-gradient-to-b from-slate-900/60 via-slate-950/60 to-slate-950/80 backdrop-blur-xl shadow-[0_0_80px_-20px_rgba(20,184,166,0.15)] px-4 sm:px-8 py-8 sm:py-10 mt-2 xl:mt-4 overflow-hidden">
-              {/* decorative dot grid + corner glows */}
-              <div className="pointer-events-none absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1.4px)', backgroundSize: '26px 26px' }} />
-              <div className="pointer-events-none absolute -top-24 -left-24 w-64 h-64 bg-brand-teal-500/10 rounded-full blur-3xl" />
-              <div className="pointer-events-none absolute -bottom-24 -right-24 w-64 h-64 bg-brand-blue-500/10 rounded-full blur-3xl" />
+            <div className="relative w-full rounded-[20px] sm:rounded-[28px] border border-brand-line-16 bg-white/[0.02] px-3 sm:px-8 py-6 sm:py-10 mt-2 xl:mt-4 overflow-hidden">
 
               <div className="relative z-10">
-                {/* Skip Gate — normal-flow row, right-aligned, above the word HUD so it never overlaps the attempts badge at any breakpoint */}
-                {showSkipGate && gameStatus === 'playing' && (
-                  <div className="flex justify-end mb-5 sm:mb-6">
-                    <div className="flex flex-col items-end gap-1.5 max-w-[220px] sm:max-w-xs">
-                      <button
-                        onClick={handleSkipGate}
-                        disabled={!canAffordSkip || isSkipping}
-                        className={`flex items-center gap-1.5 pl-3 pr-3.5 py-2 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest border-2 transition-all
-                          ${canAffordSkip
-                            ? 'bg-gradient-to-br from-amber-500/20 to-amber-600/10 text-amber-300 border-amber-400/50 hover:border-amber-300/80 hover:shadow-[0_0_20px_rgba(251,191,36,0.3)] active:scale-95'
-                            : 'bg-slate-900/60 text-slate-500 border-white/10 opacity-60 cursor-not-allowed'}`}
-                      >
-                        {isSkipping ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : canAffordSkip ? (
-                          <Zap className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                        ) : (
-                          <ShieldAlert className="w-3.5 h-3.5" />
-                        )}
-                        <span>{isSkipping ? 'Skipping…' : `Skip Gate · ${SKIP_GATE_COST}`}</span>
-                      </button>
-                      <p className="hidden sm:block text-[10px] text-slate-500 font-medium text-right leading-snug">
-                        {canAffordSkip
-                          ? `Spend ${SKIP_GATE_COST} momentum to unlock Drill 2 without solving today's words.`
-                          : `You need ${SKIP_GATE_COST - localMomentum} more momentum to skip — or just solve the words.`}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
                 <div className="text-center w-full">
-                  {/* Word progress track */}
-                  <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-5">
+                  {/* Word lock row — one per daily word: solved / current / locked */}
+                  <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-6 sm:mb-8">
                     {Array.from({ length: DAILY_LIMIT }).map((_, i) => (
-                      <div key={i} className={`h-1.5 sm:h-2 rounded-full transition-all duration-500 ${
-                        i < currentIndex ? 'w-6 sm:w-8 bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]' :
-                        i === currentIndex ? 'w-10 sm:w-12 bg-gradient-to-r from-brand-teal-400 to-brand-blue-400 shadow-[0_0_12px_rgba(45,212,191,0.5)]' :
-                        'w-6 sm:w-8 bg-slate-700/60'
-                      }`} />
+                      <div key={i} className={`w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center transition-all duration-300 ${
+                        i < currentIndex ? 'bg-brand-mint/15 border-brand-mint/40 text-brand-mint' :
+                        i === currentIndex ? 'bg-brand-mint text-brand-ink-deep border-brand-mint' :
+                        'bg-white/5 border-brand-line-16 text-brand-on-ink-mute/50'
+                      }`}>
+                        {i < currentIndex
+                          ? <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                          : i === currentIndex
+                            ? <KeyRound className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            : <Lock className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
+                      </div>
                     ))}
                   </div>
 
-                  <div className="flex items-center justify-between mb-8 px-2 max-w-lg mx-auto">
-                    <span className="flex items-center gap-1.5 text-[10px] sm:text-xs font-black uppercase tracking-widest text-brand-teal-300 bg-brand-teal-500/10 px-3 py-1.5 rounded-full border border-brand-teal-500/20">
-                      <Target className="w-3 h-3" />
-                      Word {currentIndex + 1} of {DAILY_LIMIT}
-                    </span>
-                    <div className="flex items-center gap-2 bg-slate-800/50 px-3 py-1.5 rounded-full border border-white/5">
-                      <div className="flex items-center gap-1">
-                        {Array.from({ length: MAX_TRIES }).map((_, i) => (
-                          <Heart key={i} className={`w-3.5 h-3.5 transition-all duration-300 ${i < triesLeft ? 'fill-rose-500 text-rose-500 drop-shadow-[0_0_5px_rgba(244,63,94,0.6)]' : 'fill-slate-800 text-slate-700'}`} />
-                        ))}
-                      </div>
-                      <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">{Math.max(0, triesLeft)} attempts left</span>
-                    </div>
-                  </div>
-
-                  <p className="text-slate-400 font-medium mb-2 text-sm sm:text-base">Find the Band {currentWordObj.target_band ?? 7.0} synonym for:</p>
-                  <p className="text-3xl sm:text-5xl font-black text-white uppercase tracking-widest mb-6 drop-shadow-lg break-words">
+                  <p className="font-jetbrains text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.1em] sm:tracking-[0.14em] text-brand-on-ink-mute mb-2 sm:mb-3">
+                    Find the Band {currentWordObj.target_band ?? 7.0} synonym for
+                  </p>
+                  <p className="font-dm text-2xl sm:text-3xl md:text-5xl font-bold text-white uppercase tracking-wide mb-4 sm:mb-5 break-words px-2">
                     {currentWordObj?.base}
                   </p>
 
-                  <button
-                    onClick={() => setShowHint(true)}
-                    className={`inline-flex items-center gap-2 text-sm font-bold transition-all ${showHint ? 'text-amber-400' : 'text-brand-teal-400 hover:text-brand-teal-300 bg-brand-teal-500/10 px-4 py-2 rounded-full border border-brand-teal-500/20'}`}
-                  >
-                    <Lightbulb className="w-4 h-4 shrink-0" />
-                    <span>{showHint ? currentWordObj?.hint : 'Reveal Context Hint'}</span>
-                  </button>
+                  <div className="flex items-center justify-center gap-2 sm:gap-2.5 mb-2 flex-wrap">
+                    <span className="font-jetbrains text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.1em] sm:tracking-[0.12em] px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-white/5 border border-brand-line-16 text-brand-on-ink-mute whitespace-nowrap">
+                      Word {currentIndex + 1} of {DAILY_LIMIT}
+                    </span>
+                    <span className="font-jetbrains text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.1em] sm:tracking-[0.12em] px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-white/5 border border-brand-line-16 text-brand-on-ink-mute whitespace-nowrap">
+                      {Math.max(0, triesLeft)} tries left
+                    </span>
+                  </div>
                 </div>
 
                 {/* Vault Lock Grid */}
-                <div className="w-full flex justify-center mt-12 mb-10 px-2 sm:px-4">
-                  <div className={`flex w-full max-w-3xl justify-center gap-1.5 sm:gap-2.5 ${isErrorShake ? 'animate-[shake_0.4s_ease-in-out]' : ''}`}>
+                <div className="w-full flex justify-center mt-8 mb-10 px-1 sm:px-4 overflow-x-auto">
+                  <div className={`flex w-full max-w-3xl justify-center gap-1 sm:gap-2.5 ${isErrorShake ? 'animate-[shake_0.4s_ease-in-out]' : ''}`}>
                     {Array.from({ length: wordLength }).map((_, colIndex) => {
                       const isRevealed = !!wordRevealedPositions[colIndex];
                       const letter = displayLetters[colIndex] || '';
-                      let bgColor  = 'bg-slate-900/80 border-slate-700/50 shadow-inner';
-                      if (isRevealed)               bgColor = 'bg-gradient-to-b from-amber-500/25 to-amber-600/10 border-amber-400/70 shadow-[0_0_16px_rgba(251,191,36,0.25)]';
-                      else if (isErrorShake)         bgColor = 'bg-rose-500/20 border-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.3)]';
-                      else if (gameStatus === 'won') bgColor = 'bg-gradient-to-b from-emerald-500/25 to-emerald-600/10 border-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)]';
-                      else if (letter)               bgColor = 'bg-gradient-to-b from-brand-teal-500/25 to-brand-teal-600/10 border-brand-teal-400 shadow-[0_0_15px_rgba(129,140,248,0.2)] -translate-y-0.5';
+                      let bgColor  = 'bg-white/[0.03] border-brand-line-16';
+                      if (isRevealed)               bgColor = 'bg-amber-500/15 border-amber-400/60';
+                      else if (isErrorShake)         bgColor = 'bg-brand-warm-danger/15 border-brand-warm-danger';
+                      else if (gameStatus === 'won') bgColor = 'bg-brand-mint/15 border-brand-mint';
+                      else if (letter)               bgColor = 'bg-white/5 border-brand-mint/50 -translate-y-0.5';
                       return (
-                        <div key={colIndex} className={`relative flex-1 max-w-[4rem] aspect-[4/5] flex items-center justify-center text-2xl sm:text-4xl font-black uppercase border-2 rounded-xl sm:rounded-2xl transition-all duration-200 ${bgColor} ${isRevealed ? 'text-amber-400' : 'text-white'}`}>
+                        <div key={colIndex} className={`relative flex-1 min-w-0 max-w-[4rem] aspect-[4/5] flex items-center justify-center font-jetbrains text-base sm:text-2xl md:text-4xl font-bold uppercase border-2 rounded-lg sm:rounded-2xl transition-all duration-200 ${bgColor} ${isRevealed ? 'text-amber-400' : 'text-white'}`}>
                           {isRevealed && (
                             <KeyRound className="absolute top-1 right-1 w-2.5 h-2.5 text-amber-400/70" />
                           )}
@@ -971,38 +916,38 @@ const saveState = (
 
                 {/* Word result overlay */}
                 {(gameStatus === 'won' || gameStatus === 'lost') ? (
-                  <div className="relative w-full max-w-lg mx-auto bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-[32px] p-6 sm:p-8 text-center animate-in slide-in-from-bottom-8 duration-500 shadow-2xl">
+                  <div className="relative w-full max-w-lg mx-auto bg-white/[0.03] border border-brand-line-16 rounded-[24px] p-6 sm:p-8 text-center animate-in slide-in-from-bottom-8 duration-500">
                     {gameStatus === 'won' ? (
                       <div className="flex flex-col items-center">
-                        <div className="relative bg-emerald-500/20 text-emerald-400 p-3 rounded-full mb-3">
-                          <div className="absolute inset-0 rounded-full bg-emerald-400/20 animate-ping" />
-                          <CheckCircle2 className="relative w-8 h-8" />
+                        <div className="bg-brand-mint/15 text-brand-mint p-3 rounded-full mb-3">
+                          <CheckCircle2 className="w-8 h-8" />
                         </div>
-                        <h3 className="text-2xl sm:text-3xl font-black text-white mb-6">Nailed it!</h3>
+                        <h3 className="font-dm text-2xl sm:text-3xl font-bold text-white mb-6">Nailed it!</h3>
                       </div>
                     ) : (
                       <div className="flex flex-col items-center">
-                        <div className="bg-rose-500/20 text-rose-400 p-3 rounded-full mb-3"><ShieldAlert className="w-8 h-8" /></div>
-                        <h3 className="text-2xl sm:text-3xl font-black text-white mb-2">Out of tries!</h3>
-                        <p className="text-slate-300 mb-6 text-base sm:text-lg">The correct word was <strong className="text-emerald-400 tracking-widest">{targetWord}</strong></p>
+                        <div className="bg-brand-warm-danger/15 text-brand-warm-danger p-3 rounded-full mb-3"><ShieldAlert className="w-8 h-8" /></div>
+                        <h3 className="font-dm text-2xl sm:text-3xl font-bold text-white mb-2">Out of tries!</h3>
+                        <p className="text-brand-on-ink-mute mb-6 text-base sm:text-lg">The correct word was <strong className="text-brand-mint tracking-widest">{targetWord}</strong></p>
                       </div>
                     )}
-                    <div className="bg-slate-950/50 rounded-2xl p-4 sm:p-5 mb-8 border border-white/5 text-left">
-                      <p className="text-[10px] font-bold text-brand-teal-400 uppercase tracking-widest mb-2">Definition</p>
-                      <p className="text-sm text-slate-300 font-medium leading-relaxed">{currentWordObj?.hint}</p>
+                    <div className="bg-white/[0.03] rounded-2xl p-4 sm:p-5 mb-8 border border-brand-line-16 text-left">
+                      <p className="font-jetbrains text-[10px] font-bold text-brand-mint uppercase tracking-widest mb-2">Definition</p>
+                      <p className="text-sm text-brand-on-ink-mute font-medium leading-relaxed">{currentWordObj?.hint}</p>
                     </div>
                     <button
                       onClick={handleNextWord}
-                      className="w-full bg-white text-slate-900 hover:bg-slate-200 font-black text-lg py-4 rounded-2xl transition-all active:scale-[0.98]"
+                      className="w-full bg-white text-brand-ink-deep hover:bg-white/90 font-bold text-lg py-4 rounded-2xl transition-all active:scale-[0.98]"
                     >
                       {currentIndex === DAILY_LIMIT - 1 ? 'See Final Score' : 'Next Word'}
                     </button>
                   </div>
                 ) : (
-                  /* Keyboard */
-                  <div className="w-full max-w-2xl mx-auto flex flex-col gap-2 sm:gap-2.5 px-2">
+                  <>
+                  {/* Keyboard */}
+                  <div className="w-full max-w-2xl mx-auto flex flex-col gap-1.5 sm:gap-2.5 px-0.5 sm:px-2">
                     {KEYBOARD_ROWS.map((row, i) => (
-                      <div key={i} className="flex justify-center gap-1.5 sm:gap-2 w-full">
+                      <div key={i} className="flex justify-center gap-1 sm:gap-2 w-full">
                         {row.map(key => {
                           const isSpecial = key === 'ENTER' || key === '⌫';
                           return (
@@ -1010,12 +955,12 @@ const saveState = (
                               key={key}
                               onClick={() => handleKeyPress(key)}
                               disabled={isErrorShake}
-                              className={`h-12 sm:h-14 rounded-xl font-bold text-xs sm:text-base flex items-center justify-center transition-all active:scale-95 border shadow-sm
+                              className={`font-jetbrains h-10 sm:h-14 rounded-lg sm:rounded-xl font-bold text-[10px] sm:text-base flex items-center justify-center transition-all active:scale-95 border min-w-0
                                 ${isSpecial
                                   ? key === 'ENTER'
-                                    ? 'px-3 sm:px-6 text-[10px] sm:text-xs tracking-wider bg-gradient-to-b from-brand-teal-500 to-brand-teal-600 hover:from-brand-teal-400 hover:to-brand-teal-500 text-white border-brand-teal-400/40 shadow-[0_2px_0_0_rgba(0,0,0,0.2)]'
-                                    : 'px-3 sm:px-6 text-[10px] sm:text-xs tracking-wider bg-gradient-to-b from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-slate-300 border-white/5'
-                                  : 'flex-1 max-w-[40px] sm:max-w-[48px] bg-gradient-to-b from-slate-700/80 to-slate-800/80 hover:from-slate-600/80 hover:to-slate-700/80 text-white border-white/5'}
+                                    ? 'px-2 sm:px-6 text-[8px] sm:text-xs tracking-wider bg-transparent hover:bg-brand-mint/10 text-brand-mint border-brand-mint/50'
+                                    : 'px-2 sm:px-6 text-[8px] sm:text-xs tracking-wider bg-white/5 hover:bg-white/10 text-white border-brand-line-16'
+                                  : 'flex-1 max-w-[30px] sm:max-w-[48px] bg-white/5 hover:bg-white/10 text-white border-brand-line-16'}
                                 ${isErrorShake ? 'opacity-50 cursor-not-allowed active:scale-100' : ''}`}
                             >
                               {key}
@@ -1025,65 +970,118 @@ const saveState = (
                       </div>
                     ))}
                   </div>
+
+                  {/* Hint + Skip-gate pair */}
+                  <div className="flex items-center justify-center gap-3 mt-6 flex-wrap">
+                    <button
+                      onClick={() => setShowHint(true)}
+                      className={`inline-flex items-center gap-2 text-[13px] font-bold px-4 py-2.5 rounded-full border transition-all ${
+                        showHint
+                          ? 'text-amber-400 border-amber-400/40 bg-amber-500/10'
+                          : 'text-amber-400 border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/15'
+                      }`}
+                    >
+                      <Lightbulb className="w-4 h-4 shrink-0" />
+                      <span>{showHint ? currentWordObj?.hint : 'Reveal context hint'}</span>
+                    </button>
+                    {showSkipGate && (
+                      <button
+                        onClick={handleSkipGate}
+                        disabled={!canAffordSkip || isSkipping}
+                        title={canAffordSkip ? `Spend ${SKIP_GATE_COST} momentum to skip to Drill 2` : 'Not enough momentum'}
+                        className={`inline-flex items-center gap-2 text-[13px] font-bold px-4 py-2.5 rounded-full border transition-all ${
+                          canAffordSkip
+                            ? 'text-brand-on-ink-mute border-brand-line-16 bg-white/5 hover:bg-white/10'
+                            : 'text-brand-on-ink-mute/50 border-brand-line-16 bg-white/[0.02] cursor-not-allowed'
+                        }`}
+                      >
+                        {isSkipping
+                          ? <Loader2 className="w-4 h-4 animate-spin" />
+                          : <ShieldAlert className="w-4 h-4" />}
+                        <span>{isSkipping ? 'Skipping…' : `Skip the gate · ${SKIP_GATE_COST} pts`}</span>
+                      </button>
+                    )}
+                  </div>
+                  </>
                 )}
               </div>
             </div>
           )}
         </div>
 
-        {/* ── How to Play ── */}
+        {/* ── Sidebar: earned this grid + how it works + words banked ── */}
         {gameStatus !== 'completed_day' && (
-          <div className="relative w-full xl:w-[340px] shrink-0 flex flex-col xl:h-full bg-gradient-to-b from-slate-900/50 to-slate-950/50 border border-white/10 rounded-[32px] p-6 sm:p-8 xl:mt-6 backdrop-blur-md mb-10 xl:mb-0 shadow-xl overflow-hidden">
-            <div className="pointer-events-none absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1.4px)', backgroundSize: '24px 24px' }} />
-            <div className="relative flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
-              <div className="bg-brand-teal-500/20 p-2 rounded-xl text-brand-teal-400"><Info className="w-5 h-5" /></div>
-              <h3 className="text-lg font-black text-white uppercase tracking-widest">How to Play</h3>
+          <div className="relative w-full xl:w-[300px] shrink-0 flex flex-col gap-3 xl:mt-6 mb-10 xl:mb-0">
+
+            <div className="relative overflow-hidden rounded-[20px] border border-brand-line-16 bg-white/[0.02] p-6">
+              <span className="font-jetbrains text-[9.5px] font-medium uppercase tracking-[0.14em] text-brand-on-ink-mute">
+                Earned This Grid
+              </span>
+              <div className="flex items-end gap-2 mt-3">
+                <span className="font-jetbrains text-4xl font-bold text-brand-mint leading-none">{wordsWon * POINTS_PER_WORD - sessionLettersRevealed * REVEAL_COST}</span>
+                <span className="text-[12.5px] text-brand-on-ink-mute pb-0.5">of {DAILY_LIMIT * POINTS_PER_WORD} possible</span>
+              </div>
+              <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-brand-line-16">
+                <div className="flex items-center justify-between text-[13px]">
+                  <span className="flex items-center gap-2 text-brand-on-ink-mute"><span className="w-1.5 h-1.5 rounded-full bg-brand-mint" /> Per word solved</span>
+                  <span className="font-jetbrains font-bold text-brand-mint">+{POINTS_PER_WORD} pts</span>
+                </div>
+                <div className="flex items-center justify-between text-[13px]">
+                  <span className="flex items-center gap-2 text-brand-on-ink-mute"><span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> Per letter revealed</span>
+                  <span className="font-jetbrains font-bold text-amber-400">−{REVEAL_COST} pts</span>
+                </div>
+              </div>
             </div>
-            <div className="relative space-y-6">
-              <div className="flex gap-4 items-start">
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 border border-white/10 flex items-center justify-center text-brand-teal-300 shrink-0 mt-0.5"><Target className="w-3.5 h-3.5" /></div>
-                <p className="text-sm text-slate-300 leading-relaxed font-medium">Read the basic word and guess its <strong className="text-brand-teal-300">Synonym</strong>.</p>
-              </div>
-              <div className="flex gap-4 items-start">
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 border border-white/10 flex items-center justify-center text-amber-300 shrink-0 mt-0.5"><KeyRound className="w-3.5 h-3.5" /></div>
-                <p className="text-sm text-slate-300 leading-relaxed font-medium">Type the word into the lock. You have exactly <strong className="text-amber-400">3 attempts</strong> to crack it.</p>
-              </div>
-              <div className="flex gap-4 items-start">
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 border border-white/10 flex items-center justify-center text-rose-300 shrink-0 mt-0.5"><ShieldAlert className="w-3.5 h-3.5" /></div>
-                <div className="flex flex-col gap-3 w-full">
-                  <p className="text-sm text-slate-300 leading-relaxed font-medium">If you guess incorrectly, the lock flashes red and clears your attempt.</p>
-                  <div className="flex gap-1.5 opacity-80">
-                    {['W','R','O','N','G'].map(l => (
-                      <div key={l} className="flex-1 aspect-[4/5] bg-rose-500/20 text-rose-500 flex items-center justify-center font-black rounded-lg border border-rose-500">{l}</div>
+
+            <div className="rounded-[20px] border border-brand-line-16 bg-white/[0.02] overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setHowOpen(o => !o)}
+                className="w-full flex items-center justify-between px-6 py-4"
+              >
+                <span className="font-jetbrains text-[9.5px] font-medium uppercase tracking-[0.14em] text-brand-on-ink-mute flex items-center gap-2">
+                  <Info className="w-3.5 h-3.5" /> How It Works
+                </span>
+                <span className={`text-brand-on-ink-mute transition-transform ${howOpen ? 'rotate-180' : ''}`}>⌄</span>
+              </button>
+              {howOpen && (
+                <div className="px-6 pb-6 space-y-4 animate-in fade-in">
+                  <p className="text-[13px] text-brand-on-ink-mute leading-relaxed">Read the basic word and guess its <strong className="text-white">synonym</strong>.</p>
+                  <p className="text-[13px] text-brand-on-ink-mute leading-relaxed">Type it into the grid. You get exactly <strong className="text-white">{MAX_TRIES} attempts</strong> to crack it.</p>
+                  <p className="text-[13px] text-brand-on-ink-mute leading-relaxed">A wrong guess clears and costs an attempt. Stuck? Reveal a letter for {REVEAL_COST} pts.</p>
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-[20px] border border-brand-line-16 bg-white/[0.02] p-6">
+              <span className="font-jetbrains text-[9.5px] font-medium uppercase tracking-[0.14em] text-brand-on-ink-mute">
+                Words Banked
+              </span>
+              <div className="mt-3 rounded-xl border border-brand-line-16 bg-white/[0.02] px-4 py-3 min-h-[46px] flex flex-wrap gap-2 items-center">
+                {solvedWords.length === 0
+                  ? <span className="text-[13px] text-brand-on-ink-mute/60">Nothing yet</span>
+                  : solvedWords.map((w, i) => (
+                      <span key={i} className="font-jetbrains text-[11px] font-bold text-brand-mint bg-brand-mint/10 border border-brand-mint/25 rounded-full px-2.5 py-1">
+                        {w}
+                      </span>
                     ))}
-                  </div>
-                </div>
-              </div>
-              <div className="flex gap-4 items-start">
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 border border-white/10 flex items-center justify-center text-amber-300 shrink-0 mt-0.5"><Eye className="w-3.5 h-3.5" /></div>
-                <p className="text-sm text-slate-300 leading-relaxed font-medium">Stuck? After a failed attempt, you can <strong className="text-amber-300">reveal a letter</strong> for {REVEAL_COST} pts each.</p>
               </div>
             </div>
-            <div className="relative mt-6 xl:mt-auto pt-5 border-t border-white/10 space-y-2">
-              <div className="flex items-center gap-2 bg-brand-teal-500/10 border border-brand-teal-500/20 rounded-xl px-3 py-2.5">
-                <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400 shrink-0" />
-                <p className="text-xs text-slate-300 font-bold">Earn +{POINTS_PER_WORD} points per word!</p>
+
+            {!isGateMode && (
+              <div className="flex items-center gap-2 bg-brand-mint/5 border border-brand-mint/15 rounded-xl px-3.5 py-3">
+                <Sparkles className="w-3.5 h-3.5 text-brand-mint shrink-0" />
+                <p className="text-xs text-brand-mint/90 font-medium">Solve all {DAILY_LIMIT} to stamp your Vocabulary passport slot.</p>
               </div>
-              {!isGateMode && (
-                <div className="flex items-center gap-2 bg-brand-teal-500/5 border border-brand-teal-500/10 rounded-xl px-3 py-2.5">
-                  <Sparkles className="w-3.5 h-3.5 text-brand-teal-400 shrink-0" />
-                  <p className="text-xs text-brand-teal-400/90 font-medium">Solve all 5 to stamp your Vocabulary passport slot</p>
-                </div>
-              )}
-              {isGateMode && (
-                <div className="flex items-center gap-2 bg-amber-500/5 border border-amber-500/10 rounded-xl px-3 py-2.5">
-                  <ShieldAlert className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                  <p className="text-xs text-amber-400/90 font-medium">
-                    In a hurry? Spend {SKIP_GATE_COST} momentum to skip straight to Drill 2.
-                  </p>
-                </div>
-              )}
-            </div>
+            )}
+            {isGateMode && (
+              <div className="flex items-center gap-2 bg-amber-500/5 border border-amber-500/15 rounded-xl px-3.5 py-3">
+                <ShieldAlert className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <p className="text-xs text-amber-400/90 font-medium">
+                  In a hurry? Spend {SKIP_GATE_COST} momentum to skip straight to Drill 2.
+                </p>
+              </div>
+            )}
           </div>
         )}
       </main>
