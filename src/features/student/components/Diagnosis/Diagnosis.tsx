@@ -51,6 +51,9 @@ interface DiagnosticStatus {
   writing_scored: boolean;
   speaking_scored: boolean;
   overall_complete: boolean;
+  // Changes whenever an admin resets this student's diagnostic server-side.
+  // Compared against SK.resetMarker to detect a reset and drop stale cached progress.
+  reset_marker?: string;
 }
 
 interface AllResults {
@@ -190,6 +193,7 @@ const SK = {
   speakingResult:     "tc_speaking_result",
   speakingSubmitting: "tc_speaking_submitting",
   activeTabLock:      "tc_active_tab",
+  resetMarker:        "tc_reset_marker",
 };
 
 // Per-student namespace so diagnostic progress on a shared device never leaks
@@ -2506,19 +2510,32 @@ function DiagnosisInner() {
     let pollingInterval: ReturnType<typeof setInterval>;
 
     const checkStatus = async () => {
-      const currentSavedPhase = storageLoad<Phase>(SK.phase);
-      
+      let currentSavedPhase = storageLoad<Phase>(SK.phase);
+
       if (currentSavedPhase === "summary" || currentSavedPhase === "speaking_result") {
           clearInterval(pollingInterval);
           return;
       }
 
-      const savedResults = storageLoad<AllResults>(SK.results);
-      if (savedResults) setResults(savedResults);
-
       try {
         const status = await fetchDiagnosticStatus(studentId);
         if (!isMounted) return;
+
+        // An admin reset can happen entirely server-side — this is how the browser
+        // finds out. If the marker changed since we last saw it, our cached phase/
+        // answers/timers are stale (they describe a diagnostic attempt that no longer
+        // exists), so drop them instead of resuming into a section that's been wiped.
+        const cachedMarker = storageLoad<string>(SK.resetMarker);
+        if (status.reset_marker) {
+          if (cachedMarker && cachedMarker !== status.reset_marker) {
+            storageClear(SK.phase, SK.results, SK.listeningAnswers, SK.listeningAudioPlayed, SK.readingAnswers, SK.readingTimeLeft, SK.writingText, SK.speakingResult);
+            currentSavedPhase = null;
+          }
+          storageSave(SK.resetMarker, status.reset_marker);
+        }
+
+        const savedResults = storageLoad<AllResults>(SK.results);
+        if (savedResults) setResults(savedResults);
 
         if (status.overall_complete) {
           clearInterval(pollingInterval);
