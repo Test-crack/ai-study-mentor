@@ -1244,7 +1244,9 @@ function ReadingPhase({
                   return (
                     <label
                       key={val}
-                      className={`px-4 py-2 rounded-xl border cursor-pointer text-[13.5px] font-semibold transition-colors duration-150 ${
+                      className={`px-4 py-2 rounded-xl border text-[13.5px] font-semibold transition-colors duration-150 ${
+                        timeLeft <= 0 ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+                      } ${
                         isSelected
                           ? 'border-transparent bg-brand-teal-700 text-white'
                           : 'border-brand-line text-brand-text-mute hover:border-brand-teal-300 hover:text-brand-text'
@@ -1256,6 +1258,7 @@ function ReadingPhase({
                         name={q.id}
                         value={val}
                         checked={isSelected}
+                        disabled={timeLeft <= 0}
                         onChange={() => setAnswers(prev => ({ ...prev, [q.id]: val }))}
                         className="sr-only"
                       />
@@ -1269,7 +1272,9 @@ function ReadingPhase({
                   return (
                     <label
                       key={letter}
-                      className={`px-4 py-2 rounded-xl border cursor-pointer text-[13.5px] font-semibold transition-colors duration-150 ${
+                      className={`px-4 py-2 rounded-xl border text-[13.5px] font-semibold transition-colors duration-150 ${
+                        timeLeft <= 0 ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+                      } ${
                         isSelected
                           ? 'border-transparent bg-brand-teal-700 text-white'
                           : 'border-brand-line text-brand-text-mute hover:border-brand-teal-300 hover:text-brand-text'
@@ -1281,6 +1286,7 @@ function ReadingPhase({
                         name={q.id}
                         value={letter}
                         checked={isSelected}
+                        disabled={timeLeft <= 0}
                         onChange={() => setAnswers(prev => ({ ...prev, [q.id]: letter }))}
                         className="sr-only"
                       />
