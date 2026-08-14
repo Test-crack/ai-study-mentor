@@ -309,8 +309,10 @@ async function submitSpeaking(
   try {
     data = await uploadFileToBackend(`/api/diagnostic/submit/speaking`, formData, "POST");
   } catch (httpErr: any) {
-    // 422 → server detected no usable speech; responseData is attached by uploadFileToBackend
-    if (httpErr?.responseData?.can_retry) {
+    // 422 → server detected no usable speech; responseData is attached by uploadFileToBackend.
+    // Only this specific error code should discard the recording — ai_grading_failed
+    // (a real server/AI failure) also sets can_retry but must keep the blob for resubmit.
+    if (httpErr?.responseData?.error === 'no_speech_detected') {
       const retryErr = new Error(httpErr.responseData.message ?? 'No speech detected. Please re-record.');
       (retryErr as any).canRetry = true;
       throw retryErr;
