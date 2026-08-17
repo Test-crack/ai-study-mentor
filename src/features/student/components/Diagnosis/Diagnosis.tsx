@@ -1312,22 +1312,12 @@ function ReadingPhase({
 
       <button
         onClick={handleSubmit}
-<<<<<<< HEAD
-        disabled={(!allAnswered && timeLeft > 0) || sectionState === "submitting"}
-        className={`w-full py-3.5 rounded-lg font-black text-sm uppercase tracking-wide border-2 transition-all ${
-          allAnswered || timeLeft === 0
-            ? "bg-brand-teal-700 hover:bg-brand-teal-600 text-white border-gray-900 neo-btn"
-            : "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-300"
-        }`}
-        style={allAnswered || timeLeft === 0 ? { boxShadow: '4px 4px 0 #0F0F0F' } : {}}
-=======
         disabled={!canSubmit || sectionState === "submitting"}
         className={`w-full py-3.5 rounded-xl font-semibold text-[15px] transition-colors duration-150 ${
           canSubmit
             ? "bg-brand-teal-700 hover:bg-brand-teal-600 text-white active:scale-[0.99]"
             : "bg-brand-bg-alt text-brand-text-mute cursor-not-allowed"
         }`}
->>>>>>> b10f8eaafc1230471974961f4bd825a50d58469b
       >
         {sectionState === "submitting" ? (
           <span className="flex items-center justify-center gap-2">
