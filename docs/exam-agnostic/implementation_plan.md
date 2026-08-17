@@ -34,7 +34,8 @@
 | 1 | ExamType enum + SkillType renames | ✅ Done — `platform/s1` | commit `0e30604` |
 | 2 | `exam_type` columns on existing tables | ✅ Done — `platform/s1` | commit `0e30604` |
 | 3 | Batch table renames | ✅ Done — `platform/s1` | commit `0e30604` |
-| 4 | New tables: subscriptions, DPDP, Viva | 🔲 | `platform/s2` |
+| 3.5 | Super Admin: institute mgmt + exam selection | ✅ Done — see `superadmin_institute_plan.md` | `platform/s1` |
+| 4 | New tables: ~~subscriptions~~ DPDP + Viva (subscriptions pulled to 3.5) | 🔲 | `platform/s2` |
 | 5 | `packages/exam-engine` interfaces | 🔲 | `platform/s2` |
 | 6 | Extract IELTS logic behind interfaces | 🔲 | `platform/s3` |
 | 7 | Prove abstraction: IELTS through registry (gate) | 🔲 | `platform/s3` |
@@ -169,11 +170,13 @@ Raw SQL: search for `"ielts_batch"` across all SQL strings.
 
 ---
 
-## Phase 4 — New Tables: Subscriptions, DPDP, Viva
+## Phase 4 — New Tables: DPDP, Viva
 
 **TC-05 Steps 1.5–1.6 + Viva Engine**
 
-### 4.1 institute_exam_subscriptions (TC-05 Step 1.5)
+> **4.1 moved to Phase 3.5.** `InstituteExamSubscription` is created (structurally) in Phase 3.5 because institute registration + exam selection needs it. Pricing/tier semantics remain deferred. See `superadmin_institute_plan.md`. The original 4.1 spec is retained below for reference on the fields deferred to a later billing phase.
+
+### 4.1 institute_exam_subscriptions (TC-05 Step 1.5) — ⚠️ MOVED TO PHASE 3.5
 
 ```prisma
 model InstituteExamSubscription {

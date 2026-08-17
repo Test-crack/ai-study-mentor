@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
-  Search, Plus, Building2, Mail, User, MapPin,
+  Search, Plus, Building2, Mail, User, MapPin, Phone,
   Loader2, RefreshCw, X, CheckCircle2, MoreVertical,
   GraduationCap, BookOpen, PowerOff, Zap
 } from 'lucide-react';
@@ -8,8 +8,12 @@ import { SuperAdminSidebar } from '../Components/SuperadminSidebar';
 import { SuperAdminTopbar } from '../Components/Superadmintopbar';
 import {
   fetchInstitutes, createInstitute, toggleInstituteStatus, updateInstitute,
-  InstituteRecord
+  setInstituteExams, setExamStatus,
+  InstituteRecord, InstituteExamRecord
 } from '../services/superadminService';
+import {
+  EXAM_TYPES, EXAM_LABELS, EXAM_AVAILABILITY, type ExamType, type BillingStatus,
+} from '@/shared/constants/examTypes';
 import { useToast } from '@/shared/hooks/use-toast';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -21,6 +25,25 @@ const formatDate = (iso: string) => {
   try { return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }); }
   catch { return '—'; }
 };
+
+// ─── Exam badge ───────────────────────────────────────────────────────────────
+
+const STATUS_STYLES: Record<BillingStatus, string> = {
+  ACTIVE:    'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
+  TRIAL:     'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+  CANCELLED: 'bg-slate-200 text-slate-500 dark:bg-slate-700/40 dark:text-slate-400 line-through',
+};
+
+function ExamBadge({ exam }: { exam: InstituteExamRecord }) {
+  return (
+    <span
+      title={`${EXAM_LABELS[exam.examType]} — ${exam.billingStatus}`}
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold ${STATUS_STYLES[exam.billingStatus]}`}
+    >
+      {EXAM_LABELS[exam.examType]}
+    </span>
+  );
+}
 
 // ─── Three-dot Menu ───────────────────────────────────────────────────────────
 
@@ -107,14 +130,23 @@ function CreateInstituteModal({ onClose, onCreated }: CreateModalProps) {
     address: '',
     ownerName: '',
     ownerEmail: '',
+    ownerPhone: '',
   });
+  const [examTypes, setExamTypes] = useState<ExamType[]>(['IELTS']);
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(prev => ({ ...prev, [k]: e.target.value }));
 
+  const toggleExam = (exam: ExamType) =>
+    setExamTypes(prev => prev.includes(exam) ? prev.filter(x => x !== exam) : [...prev, exam]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.instituteName.trim() || !form.ownerName.trim() || !form.ownerEmail.trim()) return;
+    if (examTypes.length === 0) {
+      toast({ title: 'Select at least one exam', description: 'An institute must offer at least one exam.', variant: 'destructive' });
+      return;
+    }
     setLoading(true);
     try {
       const res = await createInstitute({
@@ -122,6 +154,8 @@ function CreateInstituteModal({ onClose, onCreated }: CreateModalProps) {
         address:       form.address || undefined,
         ownerName:     form.ownerName,
         ownerEmail:    form.ownerEmail,
+        ownerPhone:    form.ownerPhone || undefined,
+        examTypes,
       });
       toast({
         title: '✅ Institute Created',
@@ -185,7 +219,7 @@ function CreateInstituteModal({ onClose, onCreated }: CreateModalProps) {
                   className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400" />
               </div>
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 mb-4">
               <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Owner Email *</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -193,6 +227,41 @@ function CreateInstituteModal({ onClose, onCreated }: CreateModalProps) {
                   className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400" />
               </div>
             </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Owner Phone <span className="text-slate-400 normal-case font-normal">(optional)</span></label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input type="tel" value={form.ownerPhone} onChange={set('ownerPhone')} placeholder="+91 98765 43210"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400" />
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-slate-100 dark:border-[#26252D] pt-4">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Exams Offered *</p>
+            <div className="flex flex-wrap gap-2">
+              {EXAM_TYPES.map((exam) => {
+                const selected = examTypes.includes(exam);
+                const soon = EXAM_AVAILABILITY[exam] === 'soon';
+                return (
+                  <button
+                    key={exam}
+                    type="button"
+                    onClick={() => toggleExam(exam)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                      selected
+                        ? 'bg-brand-teal-600 border-brand-teal-600 text-white'
+                        : 'bg-slate-50 dark:bg-[#0A0A0B] border-slate-200 dark:border-[#26252D] text-slate-600 dark:text-slate-300 hover:border-brand-teal-400'
+                    }`}
+                  >
+                    {selected && <CheckCircle2 className="w-3.5 h-3.5" />}
+                    {EXAM_LABELS[exam]}
+                    {soon && <span className="text-[9px] font-medium opacity-70">soon</span>}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-2">Each selected exam starts on a 30-day trial. You can change this later.</p>
           </div>
 
           <div className="flex items-start gap-2 bg-brand-teal-50 dark:bg-brand-teal-900/20 border border-brand-teal-100 dark:border-brand-teal-800/40 rounded-lg p-3">
@@ -233,25 +302,43 @@ function EditInstituteModal({ institute, onClose, onUpdated }: EditModalProps) {
   const [form, setForm] = useState({
     name: institute.name,
     address: institute.address || '',
-    logoUrl: institute.logoUrl || '',
+    contactEmail: institute.contactEmail || '',
+    contactPhone: institute.contactPhone || '',
   });
+  // Offered = any exam whose subscription is not CANCELLED.
+  const [offered, setOffered] = useState<Set<ExamType>>(
+    () => new Set(institute.exams.filter(e => e.billingStatus !== 'CANCELLED').map(e => e.examType))
+  );
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(prev => ({ ...prev, [k]: e.target.value }));
 
+  const toggleExam = (exam: ExamType) =>
+    setOffered(prev => {
+      const next = new Set(prev);
+      next.has(exam) ? next.delete(exam) : next.add(exam);
+      return next;
+    });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim()) return;
+    if (offered.size === 0) {
+      toast({ title: 'Select at least one exam', description: 'An institute must offer at least one exam.', variant: 'destructive' });
+      return;
+    }
     setLoading(true);
     try {
       await updateInstitute(institute.id, {
         name: form.name,
         address: form.address,
-        logoUrl: form.logoUrl, // Could support file upload here later, static text for now
+        contactEmail: form.contactEmail,
+        contactPhone: form.contactPhone,
       });
+      await setInstituteExams(institute.id, [...offered]);
       toast({
         title: '✅ Institute Updated',
-        description: 'Institute details have been successfully updated.',
+        description: 'Profile and exam offerings have been updated.',
       });
       onUpdated();
       onClose();
@@ -264,15 +351,15 @@ function EditInstituteModal({ institute, onClose, onUpdated }: EditModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-[#15141B] rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-[#26252D]">
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-[#26252D]">
+      <div className="bg-white dark:bg-[#15141B] rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-[#26252D] max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-[#26252D] sticky top-0 bg-white dark:bg-[#15141B] z-10">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-brand-teal-50 dark:bg-brand-teal-900/30 rounded-lg">
               <Building2 className="w-5 h-5 text-brand-teal-600 dark:text-brand-teal-400" />
             </div>
             <div>
               <h2 className="font-bold text-slate-900 dark:text-white text-base">Edit Institute</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Update profile information</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Update profile &amp; exam offerings</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-slate-400">
@@ -297,6 +384,52 @@ function EditInstituteModal({ institute, onClose, onUpdated }: EditModalProps) {
               <input type="text" value={form.address} onChange={set('address')} placeholder="City, State"
                 className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400" />
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Contact Email <span className="text-slate-400 normal-case font-normal">(institute)</span></label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input type="email" value={form.contactEmail} onChange={set('contactEmail')} placeholder="info@institute.com"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400" />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Contact Phone <span className="text-slate-400 normal-case font-normal">(institute)</span></label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input type="tel" value={form.contactPhone} onChange={set('contactPhone')} placeholder="+91 98765 43210"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400" />
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-slate-100 dark:border-[#26252D] pt-4">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Exams Offered *</p>
+            <div className="flex flex-wrap gap-2">
+              {EXAM_TYPES.map((exam) => {
+                const selected = offered.has(exam);
+                const soon = EXAM_AVAILABILITY[exam] === 'soon';
+                return (
+                  <button
+                    key={exam}
+                    type="button"
+                    onClick={() => toggleExam(exam)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                      selected
+                        ? 'bg-brand-teal-600 border-brand-teal-600 text-white'
+                        : 'bg-slate-50 dark:bg-[#0A0A0B] border-slate-200 dark:border-[#26252D] text-slate-600 dark:text-slate-300 hover:border-brand-teal-400'
+                    }`}
+                  >
+                    {selected && <CheckCircle2 className="w-3.5 h-3.5" />}
+                    {EXAM_LABELS[exam]}
+                    {soon && <span className="text-[9px] font-medium opacity-70">soon</span>}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-2">Removing an exam cancels its subscription (data is preserved). Billing status is managed on the Subscriptions page.</p>
           </div>
 
           <div className="flex gap-3 pt-4 border-t border-slate-100 dark:border-[#26252D]">
@@ -508,6 +641,13 @@ export default function SuperAdminInstitutes() {
                                   <p className="text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-0.5 mt-0.5">
                                     <MapPin className="w-3 h-3 shrink-0" />{inst.address}
                                   </p>
+                                )}
+                                {inst.exams.filter(e => e.billingStatus !== 'CANCELLED').length > 0 && (
+                                  <div className="flex flex-wrap gap-1 mt-1.5">
+                                    {inst.exams
+                                      .filter(e => e.billingStatus !== 'CANCELLED')
+                                      .map(e => <ExamBadge key={e.examType} exam={e} />)}
+                                  </div>
                                 )}
                               </div>
                             </div>
