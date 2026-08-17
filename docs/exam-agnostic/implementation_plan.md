@@ -31,9 +31,9 @@
 | Phase | Description | Status | PR |
 |-------|-------------|--------|----|
 | S0 | DB naming standardization | ✅ Done — `platform/s1` | commit `1779a31` |
-| 1 | ExamType enum + SkillType renames | 🔲 Next | `platform/s2` |
-| 2 | `exam_type` columns on existing tables | 🔲 | `platform/s2` |
-| 3 | Batch table renames | 🔲 | `platform/s2` |
+| 1 | ExamType enum + SkillType renames | ✅ Done — `platform/s1` | commit `0e30604` |
+| 2 | `exam_type` columns on existing tables | ✅ Done — `platform/s1` | commit `0e30604` |
+| 3 | Batch table renames | ✅ Done — `platform/s1` | commit `0e30604` |
 | 4 | New tables: subscriptions, DPDP, Viva | 🔲 | `platform/s2` |
 | 5 | `packages/exam-engine` interfaces | 🔲 | `platform/s2` |
 | 6 | Extract IELTS logic behind interfaces | 🔲 | `platform/s3` |
