@@ -239,7 +239,7 @@ const LandingPage = () => {
     <div className="min-h-screen bg-white font-plex text-brand-text antialiased">
 
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-brand-ink border-b border-brand-line-12 transform-gpu">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-brand-ink-nav border-b border-brand-line-12 transform-gpu">
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-2">

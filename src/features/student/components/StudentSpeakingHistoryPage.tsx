@@ -24,36 +24,36 @@ function HistorySkeleton() {
       {/* Stat Cards Skeleton */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[1, 2, 3, 4].map(i => (
-          <div key={i} className="bg-white dark:bg-slate-900 p-6 rounded-3xl border-none shadow-[0_2px_10px_rgba(0,0,0,0.04)] flex flex-col justify-center h-[136px]">
+          <div key={i} className="bg-white p-6 rounded-3xl border border-brand-line flex flex-col justify-center h-[136px]">
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-2xl bg-slate-200 dark:bg-slate-800 shrink-0" />
-              <div className="h-3 w-24 bg-slate-200 dark:bg-slate-800 rounded" />
+              <div className="w-12 h-12 rounded-2xl bg-brand-bg-alt shrink-0" />
+              <div className="h-3 w-24 bg-brand-bg-alt rounded" />
             </div>
-            <div className="h-8 w-20 bg-slate-200 dark:bg-slate-800 rounded" />
+            <div className="h-8 w-20 bg-brand-bg-alt rounded" />
           </div>
         ))}
       </div>
 
       {/* Charts Section Skeleton */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border-none">
-          <div className="h-6 w-48 bg-slate-200 dark:bg-slate-800 rounded mb-6" />
-          <div className="h-[300px] w-full bg-slate-100 dark:bg-slate-800/50 rounded-xl" />
+        <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-brand-line">
+          <div className="h-6 w-48 bg-brand-bg-alt rounded mb-6" />
+          <div className="h-[300px] w-full bg-brand-bg-alt rounded-xl" />
         </div>
 
-        <div className="bg-[#fffbf0] dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 p-6 rounded-3xl">
+        <div className="bg-amber-50 border border-amber-100 p-6 rounded-3xl">
           <div className="flex items-center gap-2 mb-6">
-            <div className="w-5 h-5 bg-amber-200 dark:bg-amber-800/50 rounded-full shrink-0" />
-            <div className="h-5 w-32 bg-amber-200 dark:bg-amber-800/50 rounded" />
+            <div className="w-5 h-5 bg-amber-200 rounded-full shrink-0" />
+            <div className="h-5 w-32 bg-amber-200 rounded" />
           </div>
-          <div className="h-4 w-full bg-amber-100 dark:bg-amber-900/30 rounded mb-2" />
-          <div className="h-4 w-3/4 bg-amber-100 dark:bg-amber-900/30 rounded mb-6" />
-          
+          <div className="h-4 w-full bg-amber-100 rounded mb-2" />
+          <div className="h-4 w-3/4 bg-amber-100 rounded mb-6" />
+
           <div className="space-y-3">
             {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className="flex items-center justify-between bg-white dark:bg-slate-800 p-3 rounded-xl border border-amber-100 dark:border-slate-700">
-                <div className="h-4 w-16 bg-slate-200 dark:bg-slate-700 rounded" />
-                <div className="h-4 w-12 bg-slate-200 dark:bg-slate-700 rounded" />
+              <div key={i} className="flex items-center justify-between bg-white p-3 rounded-xl border border-amber-100">
+                <div className="h-4 w-16 bg-brand-bg-alt rounded" />
+                <div className="h-4 w-12 bg-brand-bg-alt rounded" />
               </div>
             ))}
           </div>
@@ -61,27 +61,27 @@ function HistorySkeleton() {
       </div>
 
       {/* Table Skeleton */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border-none overflow-hidden">
-        <div className="h-6 w-32 bg-slate-200 dark:bg-slate-800 rounded mb-6" />
+      <div className="bg-white rounded-3xl p-6 border border-brand-line overflow-hidden">
+        <div className="h-6 w-32 bg-brand-bg-alt rounded mb-6" />
         <div className="w-full">
           {/* Header Row */}
-          <div className="flex border-b border-slate-100 dark:border-slate-800 pb-3 mb-2">
-            <div className="w-2/12 h-4 bg-slate-200 dark:bg-slate-800 rounded ml-4" />
-            <div className="w-3/12 h-4 bg-slate-200 dark:bg-slate-800 rounded mx-4" />
-            <div className="w-2/12 h-4 bg-slate-200 dark:bg-slate-800 rounded mx-4" />
-            <div className="w-2/12 h-4 bg-slate-200 dark:bg-slate-800 rounded mx-4" />
-            <div className="w-2/12 h-4 bg-slate-200 dark:bg-slate-800 rounded mx-4" />
-            <div className="w-1/12 h-4 bg-slate-200 dark:bg-slate-800 rounded mr-4" />
+          <div className="flex border-b border-brand-line pb-3 mb-2">
+            <div className="w-2/12 h-4 bg-brand-bg-alt rounded ml-4" />
+            <div className="w-3/12 h-4 bg-brand-bg-alt rounded mx-4" />
+            <div className="w-2/12 h-4 bg-brand-bg-alt rounded mx-4" />
+            <div className="w-2/12 h-4 bg-brand-bg-alt rounded mx-4" />
+            <div className="w-2/12 h-4 bg-brand-bg-alt rounded mx-4" />
+            <div className="w-1/12 h-4 bg-brand-bg-alt rounded mr-4" />
           </div>
           {/* Data Rows */}
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="flex py-4 border-b border-slate-50 dark:border-slate-800/50 items-center">
-              <div className="w-2/12 h-4 bg-slate-100 dark:bg-slate-800/50 rounded ml-4" />
-              <div className="w-3/12 h-4 bg-slate-100 dark:bg-slate-800/50 rounded mx-4" />
-              <div className="w-2/12 h-6 bg-slate-100 dark:bg-slate-800/50 rounded mx-4" />
-              <div className="w-2/12 h-4 bg-slate-100 dark:bg-slate-800/50 rounded mx-4" />
-              <div className="w-2/12 h-4 bg-slate-100 dark:bg-slate-800/50 rounded mx-4" />
-              <div className="w-1/12 h-4 bg-slate-100 dark:bg-slate-800/50 rounded mr-4" />
+            <div key={i} className="flex py-4 border-b border-brand-line items-center">
+              <div className="w-2/12 h-4 bg-brand-bg-alt rounded ml-4" />
+              <div className="w-3/12 h-4 bg-brand-bg-alt rounded mx-4" />
+              <div className="w-2/12 h-6 bg-brand-bg-alt rounded mx-4" />
+              <div className="w-2/12 h-4 bg-brand-bg-alt rounded mx-4" />
+              <div className="w-2/12 h-4 bg-brand-bg-alt rounded mx-4" />
+              <div className="w-1/12 h-4 bg-brand-bg-alt rounded mr-4" />
             </div>
           ))}
         </div>
@@ -163,7 +163,7 @@ export default function StudentSpeakingHistoryPage() {
   }, [history]);
 
   return (
-    <div className="min-h-screen bg-[#f1f3f9] dark:bg-slate-950 transition-colors duration-300 font-sans text-slate-800 dark:text-slate-200">
+    <div className="min-h-screen bg-brand-bg transition-colors duration-300 font-sans text-brand-text">
       <StudentSidebar 
         activeTab="assessments" 
         onTabChange={(tab) => navigate(`/${profile?.role?.toLowerCase()}/${tab}`)}
@@ -178,42 +178,42 @@ export default function StudentSpeakingHistoryPage() {
           {/* Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
             <div>
-              <Button variant="ghost" className="mb-4 -ml-4 text-slate-500 hover:text-slate-900" onClick={() => navigate('/student/speaking-assessment')}>
+              <Button variant="ghost" className="mb-4 -ml-4 text-brand-text-mute hover:text-brand-text" onClick={() => navigate('/student/speaking-assessment')}>
                 <ChevronLeft className="w-4 h-4 mr-1" /> Back to Practice
               </Button>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
-                <Activity className="w-8 h-8 text-[#256B8B]" />
+              <h1 className="text-3xl font-manrope font-bold text-brand-text flex items-center gap-3">
+                <Activity className="w-8 h-8 text-brand-blue-500" />
                 Analytics & History
               </h1>
-              <p className="text-slate-500 dark:text-slate-400 mt-1">Track your speaking progression over time.</p>
+              <p className="text-brand-text-mute mt-1">Track your speaking progression over time.</p>
             </div>
           </div>
 
           {isLoading ? (
             <HistorySkeleton />
           ) : history.length === 0 ? (
-            <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 text-center shadow-sm">
-                <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Target className="w-10 h-10 text-slate-400" />
+            <div className="bg-white border border-brand-line rounded-3xl p-12 text-center">
+                <div className="w-20 h-20 bg-brand-bg-alt rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Target className="w-10 h-10 text-brand-text-mute" />
                 </div>
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">No Practice History Yet</h2>
-                <p className="text-slate-500 mb-6">Complete your first speaking practice to see your analytics dashboard here.</p>
-                <Button onClick={() => navigate('/student/speaking-assessment')} className="bg-[#256B8B] hover:bg-[#185A78] text-white">Start Practicing</Button>
+                <h2 className="text-2xl font-manrope font-bold text-brand-text mb-2">No Practice History Yet</h2>
+                <p className="text-brand-text-mute mb-6">Complete your first speaking practice to see your analytics dashboard here.</p>
+                <Button onClick={() => navigate('/student/speaking-assessment')} className="bg-brand-blue-600 hover:bg-brand-blue-700 text-white">Start Practicing</Button>
             </div>
           ) : (
             <div className="space-y-8">
               {/* Stat Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard icon={<TrendingUp />} label="Avg Fluency Score" value={`${stats.avgScore}/100`} color="text-emerald-500" bg="bg-emerald-50 dark:bg-emerald-500/10" />
-                <StatCard icon={<Zap />} label="Peak Speaking Speed" value={`${stats.peakWpm} WPM`} color="text-[#256B8B]" bg="bg-[#256B8B]/10" />
-                <StatCard icon={<Award />} label="Practice Sessions" value={stats.totalAssessments} color="text-blue-500" bg="bg-blue-50 dark:bg-blue-500/10" />
-                <StatCard icon={<Target />} label="Keyword Hit Rate" value={`${stats.avgKeywords}%`} color="text-amber-500" bg="bg-amber-50 dark:bg-amber-500/10" />
+                <StatCard icon={<TrendingUp />} label="Avg Fluency Score" value={`${stats.avgScore}/100`} color="text-emerald-500" bg="bg-emerald-50" />
+                <StatCard icon={<Zap />} label="Peak Speaking Speed" value={`${stats.peakWpm} WPM`} color="text-brand-blue-500" bg="bg-brand-blue-50" />
+                <StatCard icon={<Award />} label="Practice Sessions" value={stats.totalAssessments} color="text-brand-blue-500" bg="bg-brand-blue-50" />
+                <StatCard icon={<Target />} label="Keyword Hit Rate" value={`${stats.avgKeywords}%`} color="text-amber-500" bg="bg-amber-50" />
               </div>
 
               {/* Charts Section */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border-none">
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Fluency Progression</h3>
+                <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-brand-line">
+                  <h3 className="text-lg font-manrope font-bold text-brand-text mb-6">Fluency Progression</h3>
                   <div className="h-[300px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -226,9 +226,9 @@ export default function StudentSpeakingHistoryPage() {
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                         <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
                         <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                        <Tooltip 
+                        <Tooltip
                             contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                            labelStyle={{ color: '#0b132b', fontWeight: 'bold' }}
+                            labelStyle={{ color: '#142B3A', fontWeight: 'bold' }}
                         />
                         <Area type="monotone" dataKey="fluency" stroke="#256B8B" strokeWidth={3} fillOpacity={1} fill="url(#colorFluency)" name="Fluency Score" />
                         <Line type="monotone" dataKey="wpm" stroke="#10b981" strokeWidth={3} dot={false} name="WPM" />
@@ -237,33 +237,33 @@ export default function StudentSpeakingHistoryPage() {
                   </div>
                 </div>
 
-                <div className="bg-[#fffbf0] dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 p-6 rounded-3xl">
+                <div className="bg-amber-50 border border-amber-100 p-6 rounded-3xl">
                    <div className="flex items-center gap-2 mb-6">
                       <AlertTriangle className="w-5 h-5 text-amber-500" />
-                      <h3 className="font-bold text-[#8a6a24] dark:text-amber-500">Historical Fillers</h3>
+                      <h3 className="font-manrope font-bold text-amber-700">Historical Fillers</h3>
                    </div>
-                   <p className="text-sm text-[#8a6a24]/80 dark:text-slate-400 mb-6">Words that most commonly disrupt your fluency across all sessions.</p>
-                   
+                   <p className="text-sm text-amber-700/80 mb-6">Words that most commonly disrupt your fluency across all sessions.</p>
+
                    <div className="space-y-3">
                      {overallFillers.length > 0 ? overallFillers.map((f, i) => (
-                       <div key={i} className="flex items-center justify-between bg-white dark:bg-slate-800 p-3 rounded-xl border border-amber-100 dark:border-slate-700">
+                       <div key={i} className="flex items-center justify-between bg-white p-3 rounded-xl border border-amber-100">
                            <span className="font-mono text-rose-500 font-bold uppercase">{f.word}</span>
-                           <span className="text-sm font-black text-slate-400">{f.count}x Total</span>
+                           <span className="text-sm font-black text-brand-text-mute">{f.count}x Total</span>
                        </div>
                      )) : (
-                       <div className="text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-xl">No significant filler usage detected! Your speech holds high structural integrity.</div>
+                       <div className="text-emerald-600 font-bold bg-emerald-50 p-4 rounded-xl">No significant filler usage detected! Your speech holds high structural integrity.</div>
                      )}
                    </div>
                 </div>
               </div>
 
               {/* History List */}
-              <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border-none overflow-hidden">
-                 <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Past Sessions</h3>
+              <div className="bg-white rounded-3xl p-6 border border-brand-line overflow-hidden">
+                 <h3 className="text-lg font-manrope font-bold text-brand-text mb-6">Past Sessions</h3>
                  <div className="overflow-x-auto">
                    <table className="w-full text-left border-collapse">
                      <thead>
-                       <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-500 text-sm font-semibold">
+                       <tr className="border-b border-brand-line text-brand-text-mute text-sm font-semibold">
                          <th className="pb-3 pl-4">Date</th>
                          <th className="pb-3">Topic</th>
                          <th className="pb-3">Band</th>
@@ -274,19 +274,19 @@ export default function StudentSpeakingHistoryPage() {
                      </thead>
                      <tbody className="text-sm">
                        {history.map((h, i) => (
-                         <tr key={i} className="border-b border-slate-50 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                           <td className="py-4 pl-4 text-slate-600 dark:text-slate-400 font-medium">{new Date(h.createdAt).toLocaleDateString()}</td>
-                           <td className="py-4 text-[#0b132b] dark:text-slate-200 font-bold max-w-[200px] truncate">{h.topicTitle || h.topicId}</td>
+                         <tr key={i} className="border-b border-brand-line hover:bg-brand-bg-alt transition-colors">
+                           <td className="py-4 pl-4 text-brand-text-mute font-medium">{new Date(h.createdAt).toLocaleDateString()}</td>
+                           <td className="py-4 text-brand-text font-bold max-w-[200px] truncate">{h.topicTitle || h.topicId}</td>
                            <td className="py-4">
-                             <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded text-xs font-bold">{h.bandLevel}</span>
+                             <span className="px-2 py-1 bg-brand-bg-alt text-brand-text-mute rounded text-xs font-bold">{h.bandLevel}</span>
                            </td>
                            <td className="py-4 text-center">
                              <span className={cn("font-bold", h.fluencyScore >= 80 ? "text-emerald-500" : h.fluencyScore >= 60 ? "text-amber-500" : "text-rose-500")}>
                                {h.fluencyScore}
                              </span>
                            </td>
-                           <td className="py-4 text-center font-mono text-slate-600 dark:text-slate-400">{h.weightedWpm}</td>
-                           <td className="py-4 text-right pr-4 font-bold text-[#256B8B] dark:text-[#4E8CA6]">
+                           <td className="py-4 text-center font-mono text-brand-text-mute">{h.weightedWpm}</td>
+                           <td className="py-4 text-right pr-4 font-bold text-brand-blue-500">
                              {h.keywordsHit}/{h.totalKeywords}
                            </td>
                          </tr>
@@ -305,12 +305,12 @@ export default function StudentSpeakingHistoryPage() {
 }
 
 const StatCard = ({ icon, label, value, color, bg }: any) => (
-  <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border-none shadow-[0_2px_10px_rgba(0,0,0,0.04)] flex flex-col justify-center h-[136px]">
+  <div className="bg-white p-6 rounded-3xl border border-brand-line flex flex-col justify-center h-[136px]">
     <div className="flex items-center gap-4 mb-4">
       <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center", bg, color)}>
         {icon}
       </div>
-      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</div>
+      <div className="text-[10px] font-jetbrains font-bold text-brand-text-mute uppercase tracking-widest">{label}</div>
     </div>
     <div className={cn("text-3xl font-black", color)}>{value}</div>
   </div>

@@ -114,14 +114,14 @@ export default function StudentReadingAssessmentPage() {
 
   const getTopicStyle = (band: string, type?: string) => {
     const bandNum = band.split(' ')[1];
-    let color = "text-[#3E9E93] dark:text-[#7FBFB6]";
-    let bg = "bg-brand-teal-50 dark:bg-[#3E9E93]/20";
-    let border = "border-brand-teal-100 dark:border-[#3E9E93]/40";
+    let color = "text-brand-teal-600";
+    let bg = "bg-brand-teal-50";
+    let border = "border-brand-teal-100";
     let iconType = 'pencil';
 
-    if (bandNum === '5') { color = "text-teal-600 dark:text-teal-400"; bg = "bg-teal-50 dark:bg-teal-900/20"; border = "border-teal-100 dark:border-teal-800"; }
-    else if (bandNum === '7') { color = "text-amber-600 dark:text-amber-400"; bg = "bg-amber-50 dark:bg-amber-900/20"; border = "border-amber-100 dark:border-amber-800"; }
-    else if (bandNum === '8') { color = "text-rose-600 dark:text-rose-400"; bg = "bg-rose-50 dark:bg-rose-900/20"; border = "border-rose-100 dark:border-rose-800"; }
+    if (bandNum === '5') { color = "text-teal-600"; bg = "bg-teal-50"; border = "border-teal-100"; }
+    else if (bandNum === '7') { color = "text-amber-600"; bg = "bg-amber-50"; border = "border-amber-100"; }
+    else if (bandNum === '8') { color = "text-rose-600"; bg = "bg-rose-50"; border = "border-rose-100"; }
 
     if (type === 'Paragraph') iconType = 'paper';
     else if (bandNum === '8') iconType = 'scroll';
@@ -207,19 +207,19 @@ export default function StudentReadingAssessmentPage() {
   };
 
   const renderLiveTranscript = () => {
-    if (!realTranscript) return <span className="text-slate-500 italic">Listening for speech...</span>;
+    if (!realTranscript) return <span className="text-brand-text-mute italic">Listening for speech...</span>;
     return wordsArray.map((word: string, i: number) => {
       const cleanWord = word.replace(/[.,!?]/g, "").toLowerCase();
       if (currentStep === 2) {
         if (["um", "uh", "ah", "hmm", "err"].includes(cleanWord))
           return <span key={i} className="text-amber-500 font-medium mx-0.5">{word} </span>;
-        return <span key={i} className="text-teal-600 dark:text-teal-400 mx-0.5">{word} </span>;
+        return <span key={i} className="text-brand-teal-600 mx-0.5">{word} </span>;
       }
       if (currentStep === 3) {
         const isKeyword = selectedTopic?.keywords.some((k: string) => k.toLowerCase().includes(cleanWord));
         if (isKeyword && cleanWord.length > 3)
-          return <span key={i} className="bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 font-medium px-1 rounded mx-0.5">{word} </span>;
-        return <span key={i} className="text-slate-600 dark:text-slate-300 mx-0.5">{word} </span>;
+          return <span key={i} className="bg-brand-teal-tint text-brand-teal-700 font-medium px-1 rounded mx-0.5">{word} </span>;
+        return <span key={i} className="text-brand-text mx-0.5">{word} </span>;
       }
       return <span key={i} className="mx-0.5">{word} </span>;
     });
@@ -234,7 +234,7 @@ export default function StudentReadingAssessmentPage() {
           const parts = chunk.split(new RegExp(`(${keyword})`, 'gi'));
           parts.forEach(part => {
             if (part.toLowerCase() === keyword.toLowerCase()) {
-              newResult.push(<span key={Math.random()} className="text-[#3E9E93] dark:text-[#7FBFB6] font-bold bg-brand-teal-50 dark:bg-[#3E9E93]/20 px-1.5 py-0.5 rounded-md">{part}</span>);
+              newResult.push(<span key={Math.random()} className="text-brand-teal-600 font-bold bg-brand-teal-wash px-1.5 py-0.5 rounded-md">{part}</span>);
             } else if (part) {
               newResult.push(part);
             }
@@ -249,19 +249,19 @@ export default function StudentReadingAssessmentPage() {
   const recordTranscripts = () => (
     <>
       {isListening && !isSTTReady ? (
-        <div className="flex items-center justify-center h-full text-slate-400 font-medium">
-          <Loader2 className="w-5 h-5 mr-3 animate-spin text-[#3E9E93]" />
+        <div className="flex items-center justify-center h-full text-brand-text-mute font-medium">
+          <Loader2 className="w-5 h-5 mr-3 animate-spin text-brand-teal-600" />
           <span>Connecting to microphone...</span>
         </div>
       ) : !isListening && wordsArray.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-full text-slate-400 italic space-y-2">
-          <Mic className="w-8 h-8 text-slate-300 mb-2" />
+        <div className="flex flex-col items-center justify-center h-full text-brand-text-mute italic space-y-2">
+          <Mic className="w-8 h-8 text-brand-line mb-2" />
           <span>Waiting to record...</span>
         </div>
       ) : (
         <div className="text-lg leading-relaxed">
           {renderLiveTranscript()}
-          {isListening && <span className="inline-block w-2 h-5 bg-[#3E9E93] ml-1 animate-pulse align-middle rounded-sm"></span>}
+          {isListening && <span className="inline-block w-2 h-5 bg-brand-teal-600 ml-1 animate-pulse align-middle rounded-sm"></span>}
         </div>
       )}
     </>
@@ -271,8 +271,8 @@ export default function StudentReadingAssessmentPage() {
     <div className="flex flex-col items-center justify-center mt-10 space-y-6">
       {!isListening ? (
         <button onClick={handleStartRecording}
-          className="relative group flex flex-col items-center justify-center w-36 h-36 rounded-full bg-gradient-to-br from-[#3E9E93] to-[#12897C] text-white shadow-[0_8px_30px_rgba(123,97,255,0.4)] transition-all duration-300 hover:scale-105 active:scale-95">
-          <div className="absolute inset-0 rounded-full bg-[#3E9E93] opacity-30 group-hover:animate-ping" />
+          className="relative group flex flex-col items-center justify-center w-36 h-36 rounded-full bg-gradient-to-br from-brand-teal-700 to-brand-teal-600 text-white shadow-[0_8px_30px_rgba(8,127,115,0.35)] transition-all duration-300 hover:scale-105 active:scale-95">
+          <div className="absolute inset-0 rounded-full bg-brand-teal-600 opacity-30 group-hover:animate-ping" />
           <Mic className="w-12 h-12 mb-2 relative z-10" />
           <span className="font-bold text-sm tracking-wide relative z-10">TAP TO RECORD</span>
         </button>
@@ -283,7 +283,7 @@ export default function StudentReadingAssessmentPage() {
             {formatTime(recordingTime)}
           </div>
           <button disabled={isLoadingAction} onClick={onStop}
-            className="flex items-center justify-center px-10 py-4 rounded-2xl bg-brand-teal-700 text-white hover:bg-brand-teal-700 font-bold text-lg shadow-lg transition-all hover:scale-105 active:scale-95 w-full sm:w-auto">
+            className="flex items-center justify-center px-10 py-4 rounded-2xl bg-brand-teal-700 text-white hover:bg-brand-teal-600 font-bold text-lg shadow-lg transition-all hover:scale-105 active:scale-95 w-full sm:w-auto">
             {isLoadingAction ? (
               <><Loader2 className="w-6 h-6 mr-3 animate-spin" /> Processing...</>
             ) : (
@@ -303,11 +303,11 @@ export default function StudentReadingAssessmentPage() {
       {!selectedTopic ? (
         /* LANDING VIEW */
         <>
-          <div className="bg-[#3E9E93] rounded-2xl p-8 md:p-10 text-white shadow-md relative overflow-hidden mb-8">
+          <div className="bg-brand-teal-700 rounded-2xl p-8 md:p-10 text-white shadow-md relative overflow-hidden mb-8">
             <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
             <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
-                <h1 className="text-3xl font-bold mb-3 flex items-center gap-2">
+                <h1 className="font-manrope text-3xl font-bold mb-3 flex items-center gap-2">
                   Speaking Practice <Sparkles className="h-6 w-6 text-yellow-300" fill="currentColor" />
                 </h1>
                 <p className="text-brand-teal-50 max-w-2xl text-base md:text-lg leading-relaxed mb-6 md:mb-0">
@@ -316,7 +316,7 @@ export default function StudentReadingAssessmentPage() {
               </div>
               <div>
                 <Button variant="secondary" onClick={() => navigate('/student/speaking-history')}
-                  className="gap-2 font-semibold bg-white text-[#3E9E93] hover:bg-slate-100 rounded-full px-6 py-2 shadow-sm">
+                  className="gap-2 font-semibold bg-white text-brand-teal-700 hover:bg-brand-bg-alt rounded-full px-6 py-2 shadow-sm">
                   <Activity className="w-4 h-4" />
                   View Analytics History
                 </Button>
@@ -324,15 +324,15 @@ export default function StudentReadingAssessmentPage() {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2 mb-8 border-b border-slate-200 dark:border-slate-800 pb-4">
+          <div className="flex flex-wrap gap-2 mb-8 border-b border-brand-line pb-4">
             {['All Levels', 'Band 5', 'Band 6', 'Band 7', 'Band 8'].map((label) => {
               const level = label === 'All Levels' ? 'All' : label;
               return (
                 <button key={label} onClick={() => setActiveBand(level as BandLevel)}
                   className={cn("px-4 py-2 rounded-md text-sm font-medium transition-colors",
                     activeBand === level
-                      ? "bg-[#0b132b] text-white dark:bg-white dark:text-[#0b132b]"
-                      : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800")}>
+                      ? "bg-brand-ink text-white"
+                      : "text-brand-text-mute hover:bg-brand-bg-alt")}>
                   {label}
                 </button>
               );
@@ -342,17 +342,17 @@ export default function StudentReadingAssessmentPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {isLoading ? (
               Array(6).fill(0).map((_, i) => (
-                <Card key={i} className="border-none shadow-sm animate-pulse rounded-2xl bg-white dark:bg-slate-900 h-[200px]" />
+                <Card key={i} className="border-none shadow-sm animate-pulse rounded-2xl bg-white h-[200px]" />
               ))
             ) : topics.map((topic) => {
               const styles = getTopicStyle(topic.band);
               return (
                 <Card key={topic.id}
-                  className="border-none shadow-sm hover:shadow-md hover:border-[#3E9E93]/50 transition-all cursor-pointer rounded-2xl bg-white dark:bg-slate-900 overflow-hidden group"
+                  className="border-none shadow-sm hover:shadow-md hover:border-brand-teal-300 transition-all cursor-pointer rounded-2xl bg-white overflow-hidden group"
                   onClick={() => handleSelectTopic(topic.id)}>
                   {isFetchingDetail && selectedTopic?.id !== topic.id && (
-                    <div className="absolute inset-0 bg-white/50 dark:bg-slate-900/50 flex items-center justify-center z-10 backdrop-blur-sm">
-                      <Loader2 className="w-6 h-6 animate-spin text-[#3E9E93]" />
+                    <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10 backdrop-blur-sm">
+                      <Loader2 className="w-6 h-6 animate-spin text-brand-teal-600" />
                     </div>
                   )}
                   <CardContent className="p-6">
@@ -362,8 +362,8 @@ export default function StudentReadingAssessmentPage() {
                       </div>
                       <span className={cn("px-2.5 py-1 rounded-md text-xs font-semibold border", styles.border, styles.color, styles.bg)}>{topic.band}</span>
                     </div>
-                    <h3 className="text-base font-semibold text-[#0b132b] dark:text-slate-100 mb-4 line-clamp-2 group-hover:text-[#3E9E93] transition-colors">{topic.title}</h3>
-                    <div className="flex items-center gap-4 text-slate-500 text-sm">
+                    <h3 className="font-manrope text-base font-semibold text-brand-ink mb-4 line-clamp-2 group-hover:text-brand-teal-600 transition-colors">{topic.title}</h3>
+                    <div className="flex items-center gap-4 text-brand-text-mute text-sm">
                       <div className="flex items-center gap-1.5"><Target className="w-4 h-4" /> {topic.phrases}</div>
                       <div className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> {topic.words}w</div>
                     </div>
@@ -384,7 +384,7 @@ export default function StudentReadingAssessmentPage() {
       ) : (
         /* MULTI-STEP FLOW */
         <div className="max-w-3xl mx-auto space-y-8">
-          <Button variant="ghost" onClick={resetToLanding} className="mb-2 -ml-4 text-slate-500 hover:text-[#0b132b] dark:hover:text-slate-100">
+          <Button variant="ghost" onClick={resetToLanding} className="mb-2 -ml-4 text-brand-text-mute hover:text-brand-ink">
             <ChevronRight className="w-4 h-4 rotate-180 mr-1" /> Back to topics
           </Button>
 
@@ -392,7 +392,7 @@ export default function StudentReadingAssessmentPage() {
             <div className="flex gap-2">
               {[1, 2, 3, 4].map(s => (
                 <div key={s} className={cn("h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors",
-                  currentStep === s ? "bg-[#3E9E93] text-white ring-4 ring-[#3E9E93]/20 dark:ring-[#3E9E93]/40" : s < currentStep ? "bg-[#10b981] text-white" : "bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-400")}>
+                  currentStep === s ? "bg-brand-teal-600 text-white ring-4 ring-brand-teal-600/20" : s < currentStep ? "bg-emerald-500 text-white" : "bg-brand-bg-alt text-brand-text-mute")}>
                   {s < currentStep ? <Check className="h-4 w-4" /> : s}
                 </div>
               ))}
@@ -402,36 +402,36 @@ export default function StudentReadingAssessmentPage() {
           {currentStep === 1 && (
             <StepContainer title="Familiarization" desc="Review the question and model answer carefully before starting.">
               <div className="space-y-6">
-                <div className="p-6 bg-white dark:bg-slate-900 rounded-2xl border-none shadow-sm">
-                  <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Question</h3>
-                  <p className="text-lg text-[#0b132b] dark:text-slate-100 font-semibold">{selectedTopic.title}</p>
+                <div className="p-6 bg-white rounded-2xl border-none shadow-sm">
+                  <h3 className="font-jetbrains text-sm font-bold text-brand-text-mute uppercase tracking-[0.14em] mb-3">Question</h3>
+                  <p className="text-lg text-brand-ink font-semibold">{selectedTopic.title}</p>
                 </div>
-                <div className="p-6 bg-brand-teal-200 dark:bg-slate-900 rounded-2xl border-none shadow-sm">
+                <div className="p-6 bg-brand-teal-wash rounded-2xl border-none shadow-sm">
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-sm font-bold text-[#3E9E93] uppercase tracking-wider flex items-center gap-2">
+                    <h3 className="font-jetbrains text-sm font-bold text-brand-teal-600 uppercase tracking-[0.14em] flex items-center gap-2">
                       <BookOpen className="w-4 h-4" /> Model Answer
                     </h3>
                   </div>
-                  <div className="text-slate-700 dark:text-slate-300 text-lg leading-relaxed bg-slate-50 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <div className="text-brand-text text-lg leading-relaxed bg-brand-bg-alt p-6 rounded-xl border border-brand-line">
                     {renderHighlightedText(selectedTopic.modelAnswer, selectedTopic.keywords)}
                   </div>
                 </div>
               </div>
               <div className="pt-4 w-full flex flex-col items-center">
-                <button onClick={() => setShowTips(!showTips)} className="text-[#3E9E93] dark:text-[#7FBFB6] text-sm font-medium flex items-center gap-1.5 hover:underline mb-4">
+                <button onClick={() => setShowTips(!showTips)} className="text-brand-teal-600 text-sm font-medium flex items-center gap-1.5 hover:underline mb-4">
                   <Info className="w-4 h-4" /> {showTips ? 'Hide Practice Tips' : 'View Practice Tips'}
                 </button>
                 {showTips && (
-                  <ul className="mb-6 w-full p-6 bg-brand-teal-50/50 dark:bg-slate-900 rounded-2xl border border-brand-teal-100 dark:border-slate-800 space-y-3">
+                  <ul className="mb-6 w-full p-6 bg-brand-teal-50/50 rounded-2xl border border-brand-teal-100 space-y-3">
                     {selectedTopic.tips.map((tip: string, i: number) => (
-                      <li key={i} className="text-sm text-slate-700 dark:text-slate-300 flex items-start gap-3">
-                        <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#3E9E93] shrink-0" />
+                      <li key={i} className="text-sm text-brand-text flex items-start gap-3">
+                        <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-brand-teal-600 shrink-0" />
                         <span className="leading-relaxed">{tip}</span>
                       </li>
                     ))}
                   </ul>
                 )}
-                <Button size="lg" className="w-full sm:w-2/3 bg-[#3E9E93] hover:bg-[#12897C] text-white rounded-2xl h-14 shadow-[0_8px_20px_rgba(123,97,255,0.2)] font-bold text-lg transition-transform active:scale-95" onClick={() => setCurrentStep(2)}>
+                <Button size="lg" className="w-full sm:w-2/3 bg-brand-teal-700 hover:bg-brand-teal-600 text-white rounded-2xl h-14 shadow-[0_8px_20px_rgba(8,127,115,0.2)] font-bold text-lg transition-transform active:scale-95" onClick={() => setCurrentStep(2)}>
                   Start Practice
                 </Button>
               </div>
@@ -446,15 +446,15 @@ export default function StudentReadingAssessmentPage() {
                 <StatMini label="Fillers" value={currentFillers.total} isWarning={currentFillers.total > 2} />
                 <StatMini label="Pauses" value={pauseCount} />
               </div>
-              <div className="p-8 bg-brand-teal-100 dark:bg-slate-900 rounded-3xl border-none shadow-[0_4px_25px_rgba(0,0,0,0.03)] mb-8">
-                <p className="text-slate-800 dark:text-slate-200 text-xl leading-loose font-medium">{selectedTopic.modelAnswer}</p>
+              <div className="p-8 bg-brand-teal-100 rounded-3xl border-none shadow-[0_4px_25px_rgba(0,0,0,0.03)] mb-8">
+                <p className="text-brand-text text-xl leading-loose font-medium">{selectedTopic.modelAnswer}</p>
               </div>
-              <div className={cn("bg-white dark:bg-slate-900 rounded-3xl p-6 border-2 transition-colors duration-300",
+              <div className={cn("bg-white rounded-3xl p-6 border-2 transition-colors duration-300",
                 isListening ? "border-rose-200 shadow-[0_0_30px_rgba(225,29,72,0.1)]" : "border-transparent shadow-sm")}>
-                <div className="flex justify-between items-center mb-4 pb-4 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-sm font-bold uppercase tracking-widest text-slate-400">Your Transcript</span>
+                <div className="flex justify-between items-center mb-4 pb-4 border-b border-brand-line">
+                  <span className="font-jetbrains text-sm font-bold uppercase tracking-[0.16em] text-brand-text-mute">Your Transcript</span>
                 </div>
-                <div className="min-h-[120px] bg-slate-50 dark:bg-slate-800/50 rounded-xl p-5 border border-slate-100 dark:border-slate-800">
+                <div className="min-h-[120px] bg-brand-bg-alt rounded-xl p-5 border border-brand-line">
                   {recordTranscripts()}
                 </div>
               </div>
@@ -474,17 +474,17 @@ export default function StudentReadingAssessmentPage() {
                 <StatMini label="Fillers" value={currentFillers.total} isWarning={currentFillers.total > 2} />
                 <StatMini label="Pauses" value={pauseCount} />
               </div>
-              <div className="p-8 bg-white dark:bg-slate-900 rounded-3xl border-none shadow-[0_4px_25px_rgba(0,0,0,0.03)] mb-8">
-                <div className="text-slate-800 dark:text-slate-200 text-xl leading-loose font-medium">
+              <div className="p-8 bg-white rounded-3xl border-none shadow-[0_4px_25px_rgba(0,0,0,0.03)] mb-8">
+                <div className="text-brand-text text-xl leading-loose font-medium">
                   {renderHighlightedText(selectedTopic.modelAnswer, selectedTopic.keywords)}
                 </div>
               </div>
-              <div className={cn("bg-white dark:bg-slate-900 rounded-3xl p-6 border-2 transition-colors duration-300",
+              <div className={cn("bg-white rounded-3xl p-6 border-2 transition-colors duration-300",
                 isListening ? "border-rose-200 shadow-[0_0_30px_rgba(225,29,72,0.1)]" : "border-transparent shadow-sm")}>
-                <div className="flex justify-between items-center mb-4 pb-4 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-sm font-bold uppercase tracking-widest text-slate-400">Your Transcript</span>
+                <div className="flex justify-between items-center mb-4 pb-4 border-b border-brand-line">
+                  <span className="font-jetbrains text-sm font-bold uppercase tracking-[0.16em] text-brand-text-mute">Your Transcript</span>
                 </div>
-                <div className="min-h-[120px] bg-slate-50 dark:bg-slate-800/50 rounded-xl p-5 border border-slate-100 dark:border-slate-800">
+                <div className="min-h-[120px] bg-brand-bg-alt rounded-xl p-5 border border-brand-line">
                   {recordTranscripts()}
                 </div>
               </div>
@@ -508,8 +508,8 @@ export default function StudentReadingAssessmentPage() {
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 text-emerald-500 mb-2 shadow-sm">
                   <CheckCircle className="w-8 h-8" />
                 </div>
-                <h2 className="text-4xl font-black text-[#0b132b] dark:text-white">Practice Complete!</h2>
-                <span className="inline-block px-4 py-1.5 bg-brand-teal-50 dark:bg-[#3E9E93]/10 text-[#3E9E93] rounded-full text-xs font-bold uppercase tracking-widest mt-2 border border-brand-teal-100">
+                <h2 className="font-manrope text-4xl font-black text-brand-ink">Practice Complete!</h2>
+                <span className="font-jetbrains inline-block px-4 py-1.5 bg-brand-teal-50 text-brand-teal-600 rounded-full text-xs font-bold uppercase tracking-[0.16em] mt-2 border border-brand-teal-100">
                   Band {selectedTopic.band.split(' ')[1]} Assessment Saved
                 </span>
               </div>
@@ -520,31 +520,31 @@ export default function StudentReadingAssessmentPage() {
                 <ScoreCard label="Keywords Hit" value={`${backendResults.keywordsHit}/${backendResults.totalKeywords}`} max={backendResults.totalKeywords} rawVal={backendResults.keywordsHit} />
               </div>
 
-              <div className="w-full max-w-4xl bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm mt-4 relative overflow-hidden">
+              <div className="w-full max-w-4xl bg-white p-8 rounded-3xl border border-brand-line shadow-sm mt-4 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-amber-50 rounded-full blur-3xl -mr-10 -mt-10" />
                 <div className="flex items-center gap-3 mb-6 relative z-10">
                   <div className="p-2.5 bg-amber-100 text-amber-600 rounded-xl">
                     <AlertTriangle className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-[#0b132b] dark:text-white">Filler Word Analysis</h3>
-                    <p className="text-sm text-slate-500">Words that interrupted your fluency</p>
+                    <h3 className="font-manrope text-xl font-bold text-brand-ink">Filler Word Analysis</h3>
+                    <p className="text-sm text-brand-text-mute">Words that interrupted your fluency</p>
                   </div>
                 </div>
                 {backendResults.frequentFillers.length > 0 ? (
                   <div className="relative z-10">
                     <div className="flex flex-wrap gap-3 mb-6">
                       {backendResults.frequentFillers.map((f: any, i: number) => (
-                        <div key={i} className="bg-amber-50 dark:bg-slate-800 px-5 py-2.5 rounded-xl border border-amber-200 dark:border-slate-700 flex items-center gap-3 shadow-sm">
-                          <span className="font-mono text-amber-700 dark:text-amber-400 font-bold text-lg">{f.word}</span>
-                          <span className="flex items-center justify-center w-6 h-6 bg-white dark:bg-slate-900 rounded-full text-xs font-black text-slate-500 shadow-sm">{f.count}</span>
+                        <div key={i} className="bg-amber-50 px-5 py-2.5 rounded-xl border border-amber-200 flex items-center gap-3 shadow-sm">
+                          <span className="font-mono text-amber-700 font-bold text-lg">{f.word}</span>
+                          <span className="flex items-center justify-center w-6 h-6 bg-white rounded-full text-xs font-black text-brand-text-mute shadow-sm">{f.count}</span>
                         </div>
                       ))}
                     </div>
-                    <div className="flex items-start gap-3 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100">
-                      <TrendingUp className="w-5 h-5 text-[#3E9E93] shrink-0 mt-0.5" />
-                      <p className="text-sm text-slate-600 dark:text-slate-300">
-                        <strong className="text-slate-900 dark:text-white">Pro Tip:</strong> Pauses are significantly better for your score than fillers. If you need a moment to think, simply take a short breath instead of saying "{backendResults.frequentFillers[0]?.word || 'um'}".
+                    <div className="flex items-start gap-3 bg-brand-bg-alt p-4 rounded-xl border border-brand-line">
+                      <TrendingUp className="w-5 h-5 text-brand-teal-600 shrink-0 mt-0.5" />
+                      <p className="text-sm text-brand-text-mute">
+                        <strong className="text-brand-text">Pro Tip:</strong> Pauses are significantly better for your score than fillers. If you need a moment to think, simply take a short breath instead of saying "{backendResults.frequentFillers[0]?.word || 'um'}".
                       </p>
                     </div>
                   </div>
@@ -557,10 +557,10 @@ export default function StudentReadingAssessmentPage() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4 w-full max-w-2xl">
-                <Button variant="outline" className="flex-1 h-14 rounded-2xl font-bold border-2 text-slate-600 hover:text-[#0b132b] bg-white hover:bg-slate-50 text-lg transition-transform active:scale-95" onClick={() => setCurrentStep(1)}>
+                <Button variant="outline" className="flex-1 h-14 rounded-2xl font-bold border-2 text-brand-text-mute hover:text-brand-ink bg-white hover:bg-brand-bg-alt text-lg transition-transform active:scale-95" onClick={() => setCurrentStep(1)}>
                   <RotateCcw className="w-5 h-5 mr-2" /> Try Again
                 </Button>
-                <Button className="flex-1 h-14 rounded-2xl font-bold bg-[#3E9E93] text-white hover:bg-[#12897C] shadow-[0_8px_20px_rgba(123,97,255,0.2)] text-lg transition-transform active:scale-95" onClick={resetToLanding}>
+                <Button className="flex-1 h-14 rounded-2xl font-bold bg-brand-teal-700 text-white hover:bg-brand-teal-600 shadow-[0_8px_20px_rgba(8,127,115,0.2)] text-lg transition-transform active:scale-95" onClick={resetToLanding}>
                   Back to Dashboard
                 </Button>
               </div>
@@ -577,21 +577,21 @@ export default function StudentReadingAssessmentPage() {
 const StepContainer = ({ title, desc, children }: any) => (
   <div className="space-y-6 animate-in fade-in duration-300 flex flex-col items-center">
     <div className="mb-8 text-center max-w-2xl">
-      <h2 className="text-3xl font-black text-[#0b132b] dark:text-white tracking-tight">{title}</h2>
-      <p className="text-slate-500 mt-3 text-lg">{desc}</p>
+      <h2 className="font-manrope text-3xl font-black text-brand-ink tracking-tight">{title}</h2>
+      <p className="text-brand-text-mute mt-3 text-lg">{desc}</p>
     </div>
     <div className="w-full">{children}</div>
   </div>
 );
 
 const StatMini = ({ label, value, isWarning = false, isGood = false }: { label: string; value: string | number; isWarning?: boolean; isGood?: boolean }) => {
-  let colorClass = "text-[#3E9E93] dark:text-[#7FBFB6]";
+  let colorClass = "text-brand-teal-600";
   if (isWarning) colorClass = "text-amber-500";
   if (isGood) colorClass = "text-emerald-500";
   return (
-    <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center">
+    <div className="bg-white p-5 rounded-3xl border border-brand-line shadow-sm flex flex-col items-center justify-center">
       <div className={cn("text-3xl font-black mb-1", colorClass)}>{value}</div>
-      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</div>
+      <div className="font-jetbrains text-[10px] font-bold text-brand-text-mute uppercase tracking-[0.16em]">{label}</div>
     </div>
   );
 };
@@ -601,13 +601,13 @@ const ScoreCard = ({ label, value, max, suffix = "", rawVal }: { label: string; 
   const ratio = numericVal / max;
   let theme = { text: 'text-rose-500', bg: 'bg-rose-50', border: 'border-rose-100' };
   if (ratio >= 0.8) theme = { text: 'text-emerald-500', bg: 'bg-emerald-50', border: 'border-emerald-100' };
-  else if (ratio >= 0.5) theme = { text: 'text-[#3E9E93]', bg: 'bg-brand-teal-50', border: 'border-brand-teal-100' };
+  else if (ratio >= 0.5) theme = { text: 'text-brand-teal-600', bg: 'bg-brand-teal-50', border: 'border-brand-teal-100' };
   return (
     <div className={cn("p-8 rounded-3xl border flex flex-col items-center justify-center transition-all", theme.bg, theme.border)}>
-      <div className={cn("text-5xl font-black mb-2 flex items-baseline", theme.text)}>
+      <div className={cn("font-manrope text-5xl font-black mb-2 flex items-baseline", theme.text)}>
         {value}<span className="text-2xl ml-1 opacity-50">{suffix}</span>
       </div>
-      <div className={cn("text-xs font-bold uppercase tracking-widest opacity-80", theme.text)}>{label}</div>
+      <div className={cn("font-jetbrains text-xs font-bold uppercase tracking-[0.16em] opacity-80", theme.text)}>{label}</div>
     </div>
   );
 };

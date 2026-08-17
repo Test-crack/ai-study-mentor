@@ -18,14 +18,14 @@ export default function ParagraphRepairDrill({ prompt, onComplete }: ParagraphDr
     <div className="flex flex-col space-y-6 animate-in fade-in">
 
       {/* Prompt */}
-      <div className="bg-amber-50 dark:bg-amber-900/10 p-5 rounded-2xl border border-amber-200 dark:border-amber-800/50">
-        <p className="text-sm font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest mb-2">
+      <div className="bg-amber-50 p-5 rounded-2xl border border-amber-200">
+        <p className="font-jetbrains text-sm font-bold text-amber-600 uppercase tracking-widest mb-2">
           Repair Task
         </p>
-        <p className="text-slate-800 dark:text-slate-200 font-medium">
+        <p className="text-brand-text font-medium">
           {prompt.text}
           <br /><br />
-          <span className="text-slate-500">
+          <span className="text-brand-text-mute">
             "The graph illustrates the global consumption of fast food.
             ___ it shows a steady increase over the last decade.
             ___ there was a slight dip in 2020."
@@ -38,7 +38,7 @@ export default function ParagraphRepairDrill({ prompt, onComplete }: ParagraphDr
         value={answer}
         onChange={e => setAnswer(e.target.value)}
         placeholder="Type your repaired paragraph here..."
-        className="w-full h-40 p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-transparent focus:border-amber-500 dark:focus:border-amber-500 outline-none resize-none transition-colors"
+        className="w-full h-40 p-4 rounded-2xl border-2 border-brand-line bg-transparent focus:border-amber-500 outline-none resize-none transition-colors"
       />
 
       {/* Submit */}

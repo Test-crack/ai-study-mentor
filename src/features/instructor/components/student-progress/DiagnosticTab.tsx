@@ -1,4 +1,5 @@
-import { Cpu, CheckCircle2, FileSearch } from 'lucide-react';
+import { useState } from 'react';
+import { Cpu, CheckCircle2, FileSearch, RotateCcw, X } from 'lucide-react';
 import { cn } from '@/shared/utils';
 import type {
   DiagnosticSkillResult,
@@ -7,8 +8,19 @@ import type {
   DiagnosticSubScoresSpeaking,
 } from './types';
 
+type ResetSkill = 'LISTENING' | 'READING' | 'WRITING' | 'SPEAKING' | 'ALL';
+
 interface Props {
-  results: DiagnosticSkillResult[];
+  results:         DiagnosticSkillResult[];
+  studentName?:    string;
+  // Parent supplies the actual reset call — its endpoint differs by portal
+  // (instructor vs. institute-owner vs. institute-admin), so this component
+  // stays agnostic to which one is calling. Omit to hide reset buttons entirely.
+  onRequestReset?: (skill: ResetSkill) => Promise<void> | void;
+  // The instructor portal's retake endpoint only supports whole-diagnostic
+  // retakes, not per-skill — set false there to hide per-card Reset buttons
+  // so the confirm copy never claims a per-skill reset that can't happen.
+  perSkillReset?: boolean;
 }
 
 const SKILL_ORDER = ['LISTENING', 'READING', 'WRITING', 'SPEAKING'];
@@ -108,6 +120,102 @@ function SpeakingSubScores({ ss }: { ss: DiagnosticSubScoresSpeaking }) {
   );
 }
 
+// Simple SVG sparkline — no charting library needed, per spec. Needs 2+ points
+// to draw a meaningful trend line; a single attempt renders nothing.
+function Sparkline({ points }: { points: { created_at: string; band_score: number }[] }) {
+  if (points.length < 2) return null;
+  const W = 120, H = 32, PAD = 4;
+  const bands = points.map(p => p.band_score);
+  const min = Math.min(...bands, 4);
+  const max = Math.max(...bands, 9);
+  const range = max - min || 1;
+  const stepX = (W - PAD * 2) / (points.length - 1);
+  const coords = points.map((p, i) => {
+    const x = PAD + i * stepX;
+    const y = H - PAD - ((p.band_score - min) / range) * (H - PAD * 2);
+    return [x, y] as const;
+  });
+  const trendColor = points[points.length - 1].band_score >= points[0].band_score ? '#10B981' : '#F43F5E';
+
+  return (
+    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} className="overflow-visible shrink-0">
+      <polyline
+        points={coords.map(([x, y]) => `${x},${y}`).join(' ')}
+        fill="none"
+        stroke={trendColor}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {coords.map(([x, y], i) => (
+        <circle key={i} cx={x} cy={y} r="2.5" fill={trendColor} />
+      ))}
+    </svg>
+  );
+}
+
+function skillLabel(s: ResetSkill): string {
+  return s === 'ALL' ? 'all skills' : s.charAt(0) + s.slice(1).toLowerCase();
+}
+
+function ResetConfirmModal({ studentName, skill, otherScoredSkills, onConfirm, onCancel, loading, error }: {
+  studentName:        string;
+  skill:               ResetSkill;
+  otherScoredSkills:   string[];
+  onConfirm:           () => void;
+  onCancel:            () => void;
+  loading:             boolean;
+  error:               string | null;
+}) {
+  return (
+    <div className="fixed inset-0 z-[200] bg-black/40 flex items-center justify-center p-4" onClick={onCancel}>
+      <div
+        className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl max-w-sm w-full p-6"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between mb-3">
+          <h3 className="text-base font-black text-slate-800 dark:text-slate-100">
+            Reset {skillLabel(skill)} diagnostic?
+          </h3>
+          <button onClick={onCancel} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
+          This clears <strong className="text-slate-700 dark:text-slate-200">{studentName}</strong>'s {skillLabel(skill)} diagnostic score and lets them take it again. This can't be undone.
+        </p>
+        {skill !== 'ALL' && otherScoredSkills.length > 0 && (
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
+            {otherScoredSkills.join(', ')} keep their current scores — only {skillLabel(skill)} is reset.
+          </p>
+        )}
+        <p className="text-sm text-amber-700 dark:text-amber-400 mb-4">
+          The student will be locked out of drills, IA, and mocks until they redo {skillLabel(skill)}.
+        </p>
+        {error && (
+          <p className="text-xs text-rose-600 dark:text-rose-400 font-semibold mb-4">{error}</p>
+        )}
+        <div className="flex items-center justify-end gap-2">
+          <button
+            onClick={onCancel}
+            disabled={loading}
+            className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={loading}
+            className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 disabled:opacity-60 transition-colors"
+          >
+            {loading ? 'Resetting…' : 'Confirm Reset'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function formatKey(k: string): string {
   return k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
@@ -160,13 +268,20 @@ function FeedbackBlock({ skill, data }: { skill: string; data: Record<string, an
   );
 }
 
-function SkillCard({ result }: { result: DiagnosticSkillResult }) {
+function SkillCard({ result, history, onReset }: {
+  result:   DiagnosticSkillResult;
+  history:  DiagnosticSkillResult[];
+  onReset?: (skill: ResetSkill) => void;
+}) {
   const skill = result.skill;
   const ss    = result.sub_scores as any;
   const fb    = result.feedback_json;
   const date  = new Date(result.created_at).toLocaleDateString('en-IN', {
     day: 'numeric', month: 'short', year: 'numeric',
   });
+  // Earlier attempts for this skill, most recent first — `history` includes the
+  // current attempt too, so drop the last (already shown as the card header).
+  const pastAttempts = history.slice(0, -1).reverse();
 
   return (
     <div className={cn('rounded-2xl border p-5 space-y-4', bandColorBg(result.band_score))}>
@@ -177,6 +292,15 @@ function SkillCard({ result }: { result: DiagnosticSkillResult }) {
             {skill.charAt(0) + skill.slice(1).toLowerCase()}
           </p>
           <p className="text-[10px] text-slate-400 mt-0.5">{date}</p>
+          {onReset && (
+            <button
+              onClick={() => onReset(skill as ResetSkill)}
+              className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-bold text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
+            >
+              <RotateCcw className="h-3 w-3" />
+              Reset
+            </button>
+          )}
         </div>
         <div className="text-right shrink-0">
           <p className={cn('text-3xl font-black leading-none', bandColorText(result.band_score))}>
@@ -201,6 +325,26 @@ function SkillCard({ result }: { result: DiagnosticSkillResult }) {
             : (
               <p className="text-xs text-slate-400">Score details unavailable.</p>
             )}
+        </div>
+      )}
+
+      {/* Band over time — only shows once retakes produce more than one attempt */}
+      {pastAttempts.length > 0 && (
+        <div className="bg-white/70 dark:bg-slate-900/50 rounded-xl p-3 space-y-2">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Band Over Time</p>
+            <Sparkline points={history} />
+          </div>
+          <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
+            {pastAttempts.slice(0, 4).map((h, i) => (
+              <div key={i} className="flex items-center justify-between text-xs">
+                <span className="text-slate-400">
+                  {new Date(h.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </span>
+                <span className={cn('font-bold', bandColorText(h.band_score))}>{h.band_score.toFixed(1)}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -229,7 +373,26 @@ function SkillCard({ result }: { result: DiagnosticSkillResult }) {
   );
 }
 
-export function DiagnosticTab({ results }: Props) {
+export function DiagnosticTab({ results, studentName, onRequestReset, perSkillReset = true }: Props) {
+  const [resetSkill,   setResetSkill]   = useState<ResetSkill | null>(null);
+  const [retakeLoading, setRetakeLoading] = useState(false);
+  const [retakeError,   setRetakeError]   = useState<string | null>(null);
+  const retakeOpen = resetSkill !== null;
+
+  const handleRetakeConfirm = async () => {
+    if (!onRequestReset || !resetSkill) return;
+    setRetakeLoading(true);
+    setRetakeError(null);
+    try {
+      await onRequestReset(resetSkill);
+      setResetSkill(null);
+    } catch (e: any) {
+      setRetakeError(e?.message ?? 'Failed to reset diagnostic.');
+    } finally {
+      setRetakeLoading(false);
+    }
+  };
+
   if (results.length === 0) {
     return (
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-12 text-center space-y-3">
@@ -242,15 +405,28 @@ export function DiagnosticTab({ results }: Props) {
     );
   }
 
-  const sorted = [...results].sort(
-    (a, b) => SKILL_ORDER.indexOf(a.skill) - SKILL_ORDER.indexOf(b.skill)
-  );
+  // Group by skill and sort each skill's attempts oldest → newest, so the
+  // last entry per group is always the "current" result shown on the card,
+  // and everything before it is history for the timeline/sparkline.
+  const bySkill = new Map<string, DiagnosticSkillResult[]>();
+  for (const r of results) {
+    const list = bySkill.get(r.skill) ?? [];
+    list.push(r);
+    bySkill.set(r.skill, list);
+  }
+  for (const list of bySkill.values()) {
+    list.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+  }
 
-  const avgBand = results.length > 0
-    ? (results.reduce((s, r) => s + r.band_score, 0) / results.length).toFixed(1)
+  const latestPerSkill = SKILL_ORDER
+    .filter(s => bySkill.has(s))
+    .map(s => bySkill.get(s)![bySkill.get(s)!.length - 1]);
+
+  const avgBand = latestPerSkill.length > 0
+    ? (latestPerSkill.reduce((s, r) => s + r.band_score, 0) / latestPerSkill.length).toFixed(1)
     : null;
 
-  const diagnosed = new Set(results.map(r => r.skill));
+  const diagnosed = new Set(latestPerSkill.map(r => r.skill));
   const pending = SKILL_ORDER.filter(s => !diagnosed.has(s));
 
   return (
@@ -260,8 +436,8 @@ export function DiagnosticTab({ results }: Props) {
         {[
           {
             label: 'Skills Diagnosed',
-            value: `${results.length} / 4`,
-            cls: results.length === 4
+            value: `${latestPerSkill.length} / 4`,
+            cls: latestPerSkill.length === 4
               ? 'text-emerald-600 dark:text-emerald-400'
               : 'text-amber-600 dark:text-amber-400',
           },
@@ -272,7 +448,7 @@ export function DiagnosticTab({ results }: Props) {
           },
           {
             label: 'Completed',
-            value: new Date(results[results.length - 1]?.created_at ?? '').toLocaleDateString('en-IN', {
+            value: new Date(latestPerSkill[latestPerSkill.length - 1]?.created_at ?? '').toLocaleDateString('en-IN', {
               day: 'numeric', month: 'short', year: 'numeric',
             }),
             cls: 'text-slate-700 dark:text-slate-300',
@@ -288,18 +464,49 @@ export function DiagnosticTab({ results }: Props) {
         ))}
       </div>
 
-      {/* Pending skills notice */}
-      {pending.length > 0 && (
-        <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl px-4 py-3 text-xs text-amber-700 dark:text-amber-400">
-          <span className="font-bold">Pending: </span>
-          {pending.map(s => s.charAt(0) + s.slice(1).toLowerCase()).join(', ')} not yet diagnosed.
-        </div>
-      )}
+      {/* Pending skills notice + retake request */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        {pending.length > 0 ? (
+          <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl px-4 py-3 text-xs text-amber-700 dark:text-amber-400">
+            <span className="font-bold">Pending: </span>
+            {pending.map(s => s.charAt(0) + s.slice(1).toLowerCase()).join(', ')} not yet diagnosed.
+          </div>
+        ) : <div />}
+
+        {onRequestReset && (
+          <button
+            onClick={() => { setRetakeError(null); setResetSkill('ALL'); }}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-800 hover:border-rose-200 dark:hover:border-rose-500/30 transition-colors"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            {perSkillReset ? 'Reset All' : 'Request Retake'}
+          </button>
+        )}
+      </div>
 
       {/* Skill cards grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {sorted.map(r => <SkillCard key={r.skill} result={r} />)}
+        {latestPerSkill.map(r => (
+          <SkillCard
+            key={r.skill}
+            result={r}
+            history={bySkill.get(r.skill) ?? [r]}
+            onReset={onRequestReset && perSkillReset ? (skill) => { setRetakeError(null); setResetSkill(skill); } : undefined}
+          />
+        ))}
       </div>
+
+      {retakeOpen && (
+        <ResetConfirmModal
+          studentName={studentName || 'this student'}
+          skill={resetSkill!}
+          otherScoredSkills={latestPerSkill.filter(r => r.skill !== resetSkill).map(r => r.skill.charAt(0) + r.skill.slice(1).toLowerCase())}
+          loading={retakeLoading}
+          error={retakeError}
+          onConfirm={handleRetakeConfirm}
+          onCancel={() => { if (!retakeLoading) setResetSkill(null); }}
+        />
+      )}
     </div>
   );
 }

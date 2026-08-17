@@ -72,7 +72,7 @@ export default function StudentAssessmentHistoryPage() {
   }));
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
+    <div className="min-h-screen bg-brand-bg transition-colors duration-300">
       <StudentSidebar
         activeTab="assessment"
         onTabChange={(tab) => {
@@ -94,18 +94,18 @@ export default function StudentAssessmentHistoryPage() {
           {/* Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <Button 
-                variant="ghost" 
-                className="pl-0 hover:pl-2 transition-all text-slate-500 mb-2"
+              <Button
+                variant="ghost"
+                className="pl-0 hover:pl-2 transition-all text-brand-text-mute mb-2"
                 onClick={() => navigate('/student/reading')}
               >
                 <ArrowLeft className="w-4 h-4 mr-2" /> Back to Assessment
               </Button>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+              <h1 className="text-3xl font-bold font-manrope text-brand-text flex items-center gap-3">
                 <Clock className="h-8 w-8 text-brand-teal-600" />
                 Assessment History
               </h1>
-              <p className="text-slate-500 dark:text-slate-400 mt-1">Track your progress and analyze your reading performance over time.</p>
+              <p className="text-brand-text-mute mt-1">Track your progress and analyze your reading performance over time.</p>
             </div>
             <div className="flex gap-2">
                 <Button variant="outline">
@@ -116,10 +116,10 @@ export default function StudentAssessmentHistoryPage() {
 
           {/* Charts Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="border-none shadow-md">
+            <Card className="bg-white border border-brand-line rounded-2xl shadow-sm">
                 <CardHeader>
-                    <CardTitle className="text-lg font-bold">Reading Speed Trend</CardTitle>
-                    <CardDescription>Your WPM progress over the last sessions</CardDescription>
+                    <CardTitle className="text-lg font-bold font-manrope text-brand-text">Reading Speed Trend</CardTitle>
+                    <CardDescription className="text-brand-text-mute">Your WPM progress over the last sessions</CardDescription>
                 </CardHeader>
                 <CardContent className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
@@ -130,12 +130,12 @@ export default function StudentAssessmentHistoryPage() {
                                     <stop offset="95%" stopColor="#3E9E93" stopOpacity={0}/>
                                 </linearGradient>
                             </defs>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                            <XAxis dataKey="date" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-                            <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value} wpm`} />
-                            <Tooltip 
-                                contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                                itemStyle={{ color: '#1e293b' }}
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#D8E0E2" />
+                            <XAxis dataKey="date" stroke="#5E6B73" fontSize={12} tickLine={false} axisLine={false} />
+                            <YAxis stroke="#5E6B73" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value} wpm`} />
+                            <Tooltip
+                                contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #D8E0E2' }}
+                                itemStyle={{ color: '#17232B' }}
                             />
                             <Area type="monotone" dataKey="wpm" stroke="#12897C" strokeWidth={3} fillOpacity={1} fill="url(#colorWpm)" />
                         </AreaChart>
@@ -143,10 +143,10 @@ export default function StudentAssessmentHistoryPage() {
                 </CardContent>
             </Card>
 
-            <Card className="border-none shadow-md">
+            <Card className="bg-white border border-brand-line rounded-2xl shadow-sm">
                 <CardHeader>
-                    <CardTitle className="text-lg font-bold">Comprehension Trend</CardTitle>
-                    <CardDescription>Accuracy percentage over time</CardDescription>
+                    <CardTitle className="text-lg font-bold font-manrope text-brand-text">Comprehension Trend</CardTitle>
+                    <CardDescription className="text-brand-text-mute">Accuracy percentage over time</CardDescription>
                 </CardHeader>
                 <CardContent className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
@@ -157,12 +157,12 @@ export default function StudentAssessmentHistoryPage() {
                                     <stop offset="95%" stopColor="#34d399" stopOpacity={0}/>
                                 </linearGradient>
                             </defs>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                            <XAxis dataKey="date" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-                            <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}%`} />
-                            <Tooltip 
-                                contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                                itemStyle={{ color: '#1e293b' }}
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#D8E0E2" />
+                            <XAxis dataKey="date" stroke="#5E6B73" fontSize={12} tickLine={false} axisLine={false} />
+                            <YAxis stroke="#5E6B73" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}%`} />
+                            <Tooltip
+                                contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #D8E0E2' }}
+                                itemStyle={{ color: '#17232B' }}
                             />
                             <Area type="monotone" dataKey="accuracy" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorAcc)" />
                         </AreaChart>
@@ -172,18 +172,18 @@ export default function StudentAssessmentHistoryPage() {
           </div>
 
           {/* Activity List */}
-          <Card className="border-none shadow-md bg-white dark:bg-slate-900">
+          <Card className="bg-white border border-brand-line rounded-2xl shadow-sm">
             <CardHeader>
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="space-y-1">
-                        <CardTitle className="text-xl">Detailed History</CardTitle>
-                        <CardDescription>Review all your past assessment sessions</CardDescription>
+                        <CardTitle className="text-xl font-manrope text-brand-text">Detailed History</CardTitle>
+                        <CardDescription className="text-brand-text-mute">Review all your past assessment sessions</CardDescription>
                     </div>
                     <div className="flex items-center gap-3 w-full sm:w-auto">
                         <div className="relative flex-1 sm:w-64">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                            <Input 
-                                placeholder="Search modules..." 
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-text-mute" />
+                            <Input
+                                placeholder="Search modules..."
                                 className="pl-10"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -191,7 +191,7 @@ export default function StudentAssessmentHistoryPage() {
                         </div>
                         <Select value={filterDifficulty} onValueChange={setFilterDifficulty}>
                             <SelectTrigger className="w-[140px]">
-                                <Filter className="w-4 h-4 mr-2 text-slate-400" />
+                                <Filter className="w-4 h-4 mr-2 text-brand-text-mute" />
                                 <SelectValue placeholder="Difficulty" />
                             </SelectTrigger>
                             <SelectContent>
@@ -207,24 +207,24 @@ export default function StudentAssessmentHistoryPage() {
             <CardContent>
                 <div className="space-y-4">
                     {filteredHistory.length === 0 ? (
-                        <div className="text-center py-12 text-slate-500">
+                        <div className="text-center py-12 text-brand-text-mute">
                             No assessments found matching your filters.
                         </div>
                     ) : (
                         filteredHistory.map((item) => (
-                            <div 
-                                key={item.id} 
-                                className="group flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-brand-teal-100 dark:hover:border-brand-teal-900/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all cursor-pointer"
+                            <div
+                                key={item.id}
+                                className="group flex items-center justify-between p-4 rounded-xl border border-brand-line hover:border-brand-teal-100 hover:bg-brand-bg-alt transition-all cursor-pointer"
                             >
                                 <div className="flex items-center gap-4">
-                                    <div className="h-12 w-12 rounded-lg bg-brand-teal-50 dark:bg-brand-teal-900/20 flex items-center justify-center text-brand-teal-600 dark:text-brand-teal-400 group-hover:scale-110 transition-transform">
+                                    <div className="h-12 w-12 rounded-lg bg-brand-teal-50 flex items-center justify-center text-brand-teal-600 group-hover:scale-110 transition-transform">
                                         <BookOpen className="w-5 h-5" />
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-slate-900 dark:text-white group-hover:text-brand-teal-600 dark:group-hover:text-brand-teal-400 transition-colors">
+                                        <h4 className="font-bold text-brand-text group-hover:text-brand-teal-600 transition-colors">
                                             {item.passageTitle || "Assessment"}
                                         </h4>
-                                        <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
+                                        <div className="flex items-center gap-3 text-xs font-jetbrains uppercase tracking-[0.14em] text-brand-text-mute mt-1">
                                             <span className="flex items-center gap-1">
                                                 <Calendar className="w-3 h-3" />
                                                 {item.completedAt ? format(new Date(item.completedAt), "MMM d, yyyy â€¢ h:mm a") : (item.createdAt ? format(new Date(item.createdAt), "MMM d, yyyy â€¢ h:mm a") : "N/A")}
@@ -242,14 +242,14 @@ export default function StudentAssessmentHistoryPage() {
 
                                 <div className="flex items-center gap-8">
                                     <div className="text-center hidden sm:block">
-                                        <div className="text-lg font-bold text-slate-900 dark:text-white">{Math.round(item.weightedWPM)}</div>
-                                        <div className="text-xs text-slate-500 uppercase tracking-wider font-medium">WPM</div>
+                                        <div className="text-lg font-bold text-brand-text">{Math.round(item.weightedWPM)}</div>
+                                        <div className="text-xs font-jetbrains text-brand-text-mute uppercase tracking-[0.14em] font-medium">WPM</div>
                                     </div>
                                     <div className="text-center hidden sm:block">
-                                        <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{Math.round(item.accuracy)}%</div>
-                                        <div className="text-xs text-slate-500 uppercase tracking-wider font-medium">Accuracy</div>
+                                        <div className="text-lg font-bold text-emerald-600">{Math.round(item.accuracy)}%</div>
+                                        <div className="text-xs font-jetbrains text-brand-text-mute uppercase tracking-[0.14em] font-medium">Accuracy</div>
                                     </div>
-                                    <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 group-hover:text-brand-teal-600 group-hover:border-brand-teal-200 transition-colors">
+                                    <div className="w-10 h-10 rounded-full bg-white border border-brand-line flex items-center justify-center text-brand-text-mute group-hover:text-brand-teal-600 group-hover:border-brand-teal-200 transition-colors">
                                         <TrendingUp className="w-4 h-4" />
                                     </div>
                                 </div>

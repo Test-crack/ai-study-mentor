@@ -1,5 +1,6 @@
 // src/features/student/drills/DrillResultCard.tsx
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, PlayCircle, Lock, ExternalLink, MessageSquare, Flame, Zap, Loader2, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { useMomentum } from "@/features/student/Context/MomentumContext";
@@ -10,9 +11,20 @@ interface ResultCardProps {
   subSkill:        string;
   momentumScore:   number;
   feedback:        string[];
+  answerResults?:  boolean[];
   drillSessionId:  string | null;
   onUnlockNext:    () => void;
 }
+
+const toSubSkillLabel = (key: string) =>
+  key.replace(/Score/gi, '').replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').trim()
+    .replace(/\b\w/g, c => c.toUpperCase());
+
+const DARK_HERO_GRID: React.CSSProperties = {
+  backgroundImage:
+    'linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px), linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px)',
+  backgroundSize: '44px 44px',
+};
 
 interface RecommendationItem {
   id:            string;
@@ -31,8 +43,9 @@ interface RecommendationItem {
 const FALLBACK_THUMB = null;
 
 export default function DrillResultCard({
-  skill, subSkill, momentumScore, feedback, drillSessionId, onUnlockNext,
+  skill, subSkill, momentumScore, feedback, answerResults = [], drillSessionId, onUnlockNext,
 }: ResultCardProps) {
+  const navigate = useNavigate();
   const [videoWatched,        setVideoWatched]        = useState(false);
   const [reflection,          setReflection]          = useState('');
   const [error,               setError]               = useState('');
@@ -42,6 +55,10 @@ export default function DrillResultCard({
 
   const [rec,     setRec]     = useState<RecommendationItem | null>(null);
   const [recLoad, setRecLoad] = useState(true);
+
+  // ── Real LexiGrid gate status — the same daily-drill-state contract the dashboard uses ──
+  const [nextAction, setNextAction]   = useState<string | null>(null);
+  const [lexiDone, setLexiDone]       = useState(false);
 
   const { totalMomentum, streak, syncMomentum } = useMomentum();
 
@@ -55,6 +72,18 @@ export default function DrillResultCard({
       .catch(err  => console.warn('[DrillResultCard] recommendation fetch failed:', err))
       .finally(() => setRecLoad(false));
   }, [skill, subSkill]);
+
+  useEffect(() => {
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+    callBackend(`${backendUrl}/api/student/daily-drill-state`)
+      .then(res => {
+        if (res.success) {
+          setNextAction(res.next_action ?? null);
+          setLexiDone(!!res.lexigrid_completed_today);
+        }
+      })
+      .catch(err => console.warn('[DrillResultCard] daily-drill-state fetch failed:', err));
+  }, []);
 
   useEffect(() => {
     if (!hasClicked || watchTimer <= 0) return;
@@ -107,86 +136,134 @@ export default function DrillResultCard({
   const durationTag = rec?.duration_min ? `${rec.duration_min} min` : null;
   const sourceTag   = rec?.source ?? null;
 
+  const correctCount = answerResults.filter(Boolean).length;
+  const doneTitle = answerResults.length === 0
+    ? 'Drill Complete!'
+    : correctCount === answerResults.length
+      ? `Clean run. ${correctCount} from ${answerResults.length}.`
+      : `${correctCount} from ${answerResults.length} — that moves the number.`;
+
+  // ── LexiGrid gate — mirrors the dashboard's real state (no new gating logic) ──
+  const isLexiOpen = nextAction === 'LEXIGRID';
+  const lexiUnlocked = isLexiOpen || lexiDone;
+  const lexiCta = lexiDone ? 'Practice round →' : isLexiOpen ? 'Play LexiGrid →' : 'Locked until it opens';
+  const lexiBody = lexiDone
+    ? 'Solved for today. LexiGrid stays open for practice rounds that never affect your band.'
+    : isLexiOpen
+      ? "It's open now — solve today's grid to keep your streak moving."
+      : 'LexiGrid opens once today’s gate chain reaches it.';
+  const goLexiGrid = () => navigate(isLexiOpen ? '/student/lexigrid?mode=gate' : '/student/lexigrid');
+
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8">
+    <div className="space-y-3.5 animate-in fade-in slide-in-from-bottom-8">
 
       {/* ── Back to Dashboard ── */}
       <div className="flex justify-end">
         <button
           onClick={onUnlockNext}
-          className="flex items-center gap-2 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-brand-teal-600 dark:hover:text-brand-teal-400 transition-colors"
+          className="flex items-center gap-2 text-sm font-semibold text-brand-text-mute hover:text-brand-teal-600 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Dashboard
         </button>
       </div>
 
-      {/* Score Summary — white pop-out card with emerald numerals */}
-      <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-white/[0.06] p-8 rounded-3xl shadow-sm dark:shadow-[0_0_30px_rgba(16,185,129,0.08)] relative overflow-hidden">
-        {/* Soft emerald glow */}
-        <div className="pointer-events-none absolute -top-12 -right-12 w-44 h-44 rounded-full bg-emerald-400/15 dark:bg-emerald-500/15 blur-3xl" />
-        <div className="relative z-10 flex flex-col items-center text-center mb-6">
-          <div className="h-16 w-16 rounded-2xl bg-emerald-50 dark:bg-emerald-500/15 flex items-center justify-center mb-4 ring-4 ring-emerald-100/50 dark:ring-emerald-500/10">
-            <CheckCircle2 className="w-9 h-9 text-emerald-500" />
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white mb-2">Drill Complete!</h2>
-          <p className="text-emerald-600 dark:text-emerald-400 font-bold text-lg">You earned +{momentumScore} points.</p>
-        </div>
-        <div className="grid grid-cols-2 gap-4 border-t border-slate-100 dark:border-white/[0.06] pt-6 mt-2 relative z-10">
-          <div className="text-center">
-            <p className="text-slate-400 dark:text-slate-500 text-[11px] font-bold uppercase tracking-wider mb-1 flex justify-center items-center gap-1">
-              <Zap className="w-4 h-4 text-amber-500" /> Total Momentum
+      {/* Score Summary — dark ink hero, two-column split matching the reference's "drill complete" panel */}
+      <div
+        className="relative overflow-hidden rounded-3xl bg-brand-ink-deep"
+        style={DARK_HERO_GRID}
+      >
+        <div className="relative z-10 grid grid-cols-1 sm:grid-cols-[1.25fr_0.75fr]">
+          <div className="p-8 border-b sm:border-b-0 sm:border-r border-brand-line-16">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="h-px w-6 bg-brand-mint" aria-hidden="true" />
+              <span className="font-jetbrains text-[10.5px] font-medium uppercase tracking-[0.14em] text-brand-mint">Drill Complete</span>
+            </div>
+            <h2 className="font-dm text-2xl sm:text-[28px] leading-[1.15] font-bold text-white mb-2">{doneTitle}</h2>
+            <p className="text-brand-on-ink-mute text-sm leading-[1.6] max-w-md mb-5">
+              Momentum is banked and your sub-score updates at the next internal assessment.
             </p>
-            <p className="text-2xl font-black text-slate-800 dark:text-white tabular-nums">{totalMomentum}</p>
+            {answerResults.length > 0 && (
+              <div className="flex gap-[7px]">
+                {answerResults.map((ok, i) => (
+                  <div
+                    key={i}
+                    className={`w-[30px] h-[30px] rounded-lg flex items-center justify-center font-jetbrains text-sm font-bold ${
+                      ok ? 'bg-brand-mint text-brand-ink-deep' : 'bg-brand-warm-danger text-white'
+                    }`}
+                  >
+                    {ok ? '✓' : '×'}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          <div className="text-center border-l border-slate-100 dark:border-white/[0.06]">
-            <p className="text-slate-400 dark:text-slate-500 text-[11px] font-bold uppercase tracking-wider mb-1 flex justify-center items-center gap-1">
-              <Flame className="w-4 h-4 text-orange-500" /> Streak
-            </p>
-            <p className="text-2xl font-black text-slate-800 dark:text-white tabular-nums">Day {streak}</p>
+          <div className="p-8 flex flex-col justify-center gap-5">
+            <div>
+              <p className="font-jetbrains text-[9.5px] tracking-[0.12em] text-brand-on-ink-mute">MOMENTUM EARNED</p>
+              <p className="font-jetbrains text-[36px] font-bold text-brand-mint leading-none mt-2">+{momentumScore}</p>
+            </div>
+            <div className="flex items-center gap-5 pt-4 border-t border-brand-line-16">
+              <div>
+                <p className="font-jetbrains text-[9.5px] tracking-[0.12em] text-brand-on-ink-mute flex items-center gap-1">
+                  <Zap className="w-3.5 h-3.5 text-amber-400" /> Total
+                </p>
+                <p className="font-jetbrains text-lg font-bold text-white mt-1 tabular-nums">{totalMomentum}</p>
+              </div>
+              <div>
+                <p className="font-jetbrains text-[9.5px] tracking-[0.12em] text-brand-on-ink-mute flex items-center gap-1">
+                  <Flame className="w-3.5 h-3.5 text-orange-400" /> Streak
+                </p>
+                <p className="font-jetbrains text-lg font-bold text-white mt-1 tabular-nums">Day {streak}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Session Feedback */}
-      {feedback && feedback.length > 0 && (
-        <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-white/[0.06] rounded-3xl p-6 shadow-sm">
-          <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-widest mb-4 flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-brand-teal-500" /> Session Feedback
-          </h3>
-          <div className="space-y-3">
-            {feedback.map((text, i) => (
-              <div key={i} className="flex gap-3 text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-white/[0.03] p-3.5 rounded-xl">
-                <span className="font-bold text-brand-teal-500 shrink-0">Q{i + 1}.</span>
-                <p>{text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* ── Recommended lesson (left) + breakdown/next-gate (right) ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_0.5fr] gap-3.5 items-start">
+        <div className="flex flex-col gap-3.5 min-w-0">
 
-      {/* Video Recommendation Gate */}
-      {!recLoad && !rec ? (
-        <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-white/[0.06] rounded-3xl p-6 shadow-sm text-center">
-          <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-4">No recommended lesson available for this topic right now.</p>
-          <button
-            onClick={onUnlockNext}
-            className="px-6 py-3 bg-brand-teal-600 hover:bg-brand-teal-700 text-white font-bold rounded-xl transition-colors shadow-md"
-          >
-            Continue to Next Drill
-          </button>
-        </div>
-      ) : (
-      <div className="bg-white dark:bg-slate-900/60 border border-brand-teal-100 dark:border-white/[0.06] rounded-3xl p-6 shadow-sm">
-        <h3 className="text-sm font-bold text-brand-teal-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-          <PlayCircle className="w-5 h-5" /> Recommended Lesson
-        </h3>
+          {/* Session Feedback */}
+          {feedback && feedback.length > 0 && (
+            <div className="bg-white border border-brand-line rounded-3xl p-6 shadow-sm">
+              <h3 className="font-jetbrains text-sm font-bold text-brand-text uppercase tracking-[0.16em] mb-4 flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-brand-teal-500" /> Session Feedback
+              </h3>
+              <div className="space-y-3">
+                {feedback.map((text, i) => (
+                  <div key={i} className="flex gap-3 text-sm text-brand-text-mute bg-brand-bg-alt p-3.5 rounded-xl">
+                    <span className="font-bold text-brand-teal-500 shrink-0">Q{i + 1}.</span>
+                    <p>{text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Video Recommendation Gate */}
+          {!recLoad && !rec ? (
+            <div className="bg-white border border-brand-line rounded-3xl p-6 shadow-sm text-center">
+              <p className="text-brand-text-mute text-sm font-medium mb-4">No recommended lesson available for this topic right now.</p>
+              <button
+                onClick={onUnlockNext}
+                className="px-6 py-3 bg-brand-teal-600 hover:bg-brand-teal-700 text-white font-bold rounded-xl transition-colors shadow-sm"
+              >
+                Continue to Next Drill
+              </button>
+            </div>
+          ) : (
+          <div className="bg-white border border-brand-teal-100 rounded-3xl p-6 shadow-sm">
+            <h3 className="font-jetbrains text-sm font-bold text-brand-teal-600 uppercase tracking-[0.16em] mb-4 flex items-center gap-2">
+              <PlayCircle className="w-5 h-5" /> Recommended Lesson
+            </h3>
 
         {/* Thumbnail */}
-        <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-6 bg-slate-800 group">
+        <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-6 bg-brand-ink group">
           {recLoad ? (
-            <div className="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-800">
-              <Loader2 className="w-8 h-8 text-slate-400 animate-spin" />
+            <div className="w-full h-full flex items-center justify-center bg-brand-bg-alt">
+              <Loader2 className="w-8 h-8 text-brand-text-mute animate-spin" />
             </div>
           ) : (
             <>
@@ -197,12 +274,12 @@ export default function DrillResultCard({
                   className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity duration-300"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-brand-teal-900 via-slate-800 to-slate-900" />
+                <div className="w-full h-full bg-gradient-to-br from-brand-teal-900 via-brand-ink to-brand-ink-deep" />
               )}
               <div className="absolute inset-0 flex items-center justify-center">
                 <button
                   onClick={handleWatchClick}
-                  className="flex items-center gap-2 bg-red-600 text-white px-6 py-3 rounded-full font-bold hover:bg-red-700 transition-transform hover:scale-105 shadow-lg"
+                  className="flex items-center gap-2 bg-brand-warm-danger text-white px-6 py-3 rounded-full font-bold hover:bg-brand-warm-danger/90 transition-transform hover:scale-105 shadow-lg"
                 >
                   <PlayCircle className="w-5 h-5 fill-white" />
                   Watch on YouTube
@@ -214,35 +291,35 @@ export default function DrillResultCard({
         </div>
 
         {/* Info row */}
-        <div className="bg-slate-50 dark:bg-white/[0.03] p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
+        <div className="bg-brand-bg-alt p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
           <div className="flex-1 min-w-0">
-            <p className="font-bold text-slate-800 dark:text-white text-base leading-snug mb-1">{recTitle}</p>
+            <p className="font-bold text-brand-text text-base leading-snug mb-1">{recTitle}</p>
 
             <div className="flex flex-wrap items-center gap-1.5 mb-2">
               {targetTag && (
-                <span className="text-[10px] font-bold uppercase tracking-widest bg-brand-teal-100 dark:bg-brand-teal-500/15 text-brand-teal-700 dark:text-brand-teal-300 px-2 py-0.5 rounded-full">
+                <span className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.14em] bg-brand-teal-100 text-brand-teal-700 px-2 py-0.5 rounded-full">
                   {targetTag}
                 </span>
               )}
               {levelTag && (
-                <span className="text-[10px] font-bold uppercase tracking-widest bg-slate-200 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full">
+                <span className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.14em] bg-brand-bg-alt text-brand-text-mute px-2 py-0.5 rounded-full">
                   {levelTag}
                 </span>
               )}
               {durationTag && (
-                <span className="text-[10px] font-bold text-slate-400 flex items-center gap-0.5">
+                <span className="text-[10px] font-bold text-brand-text-mute flex items-center gap-0.5">
                   ⏱ {durationTag}
                 </span>
               )}
               {sourceTag && (
-                <span className="text-[10px] font-bold text-slate-400">
+                <span className="text-[10px] font-bold text-brand-text-mute">
                   · {sourceTag}
                 </span>
               )}
             </div>
 
             {rec?.description && (
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">{rec.description}</p>
+              <p className="text-xs text-brand-text-mute leading-relaxed line-clamp-2">{rec.description}</p>
             )}
           </div>
 
@@ -252,14 +329,14 @@ export default function DrillResultCard({
               disabled={!hasClicked || watchTimer > 0}
               className={`px-6 py-2.5 text-white text-sm font-bold rounded-xl w-full sm:w-auto transition-all ${
                 !hasClicked || watchTimer > 0
-                  ? 'bg-slate-300 dark:bg-white/[0.08] cursor-not-allowed text-slate-500'
-                  : 'bg-brand-teal-600 hover:bg-brand-teal-700 shadow-md'
+                  ? 'bg-brand-bg-alt cursor-not-allowed text-brand-text-mute'
+                  : 'bg-brand-teal-600 hover:bg-brand-teal-700 shadow-sm'
               }`}
             >
               {!hasClicked ? 'Mark as Watched' : watchTimer > 0 ? `Wait ${watchTimer}s…` : 'Mark as Watched'}
             </button>
           ) : (
-            <span className="flex items-center text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-500/10 px-4 py-2 rounded-lg">
+            <span className="flex items-center text-emerald-600 font-bold bg-emerald-50 px-4 py-2 rounded-lg">
               <CheckCircle2 className="w-4 h-4 mr-2" /> Watched
             </span>
           )}
@@ -267,22 +344,22 @@ export default function DrillResultCard({
 
         {/* Reflection gate */}
         {videoWatched && (
-          <div className="space-y-4 animate-in fade-in zoom-in duration-300 border-t border-slate-100 dark:border-white/[0.06] pt-6">
-            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">
+          <div className="space-y-4 animate-in fade-in zoom-in duration-300 border-t border-brand-line pt-6">
+            <label className="block text-sm font-bold text-brand-text">
               In one sentence, what is one thing from this video you will try in your next session?
             </label>
             <textarea
               value={reflection}
               onChange={e => setReflection(e.target.value)}
               placeholder="E.g., I will focus on my syllable stress…"
-              className="w-full p-4 rounded-xl border border-slate-200 dark:border-white/[0.07] bg-transparent focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none resize-none text-slate-800 dark:text-slate-200 transition-all"
+              className="w-full p-4 rounded-xl border border-brand-line bg-transparent focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none resize-none text-brand-text transition-all"
               rows={3}
             />
             {error && <p className="text-rose-500 text-sm font-bold">{error}</p>}
             <button
               onClick={handleSubmitReflection}
               disabled={savingReflection}
-              className="w-full py-4 bg-brand-teal-600 hover:bg-brand-teal-700 text-white font-bold rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2 shadow-md"
+              className="w-full py-4 bg-brand-teal-600 hover:bg-brand-teal-700 text-white font-bold rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2 shadow-sm"
             >
               {savingReflection ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</>
@@ -294,12 +371,74 @@ export default function DrillResultCard({
         )}
 
         {!videoWatched && (
-          <p className="text-center text-xs text-slate-400 font-semibold flex items-center justify-center mt-4">
+          <p className="text-center text-xs text-brand-text-mute font-semibold flex items-center justify-center mt-4">
             <Lock className="w-3 h-3 mr-1" /> Watch video to unlock next session
           </p>
         )}
       </div>
       )}
+        </div>
+
+        {/* ── Question breakdown + what's next — real data, no fabricated fields ── */}
+        <div className="flex flex-col gap-3.5 min-w-0">
+          {answerResults.length > 0 && (
+            <div className="bg-white border border-brand-line rounded-3xl p-6 shadow-sm">
+              <span className="font-jetbrains text-[10.5px] font-medium uppercase tracking-[0.14em] text-brand-text-mute">
+                Question Breakdown
+              </span>
+              <div className="flex flex-col gap-[7px] mt-3.5">
+                {answerResults.map((ok, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-3 py-2.5 px-3 bg-brand-bg-alt/60 border border-brand-line rounded-[10px]"
+                  >
+                    <span
+                      className={`w-[22px] h-[22px] flex-none rounded-[7px] flex items-center justify-center text-[11px] font-bold text-white ${
+                        ok ? 'bg-brand-teal-600' : 'bg-brand-warm-danger'
+                      }`}
+                    >
+                      {ok ? '✓' : '×'}
+                    </span>
+                    <span className="flex-1 min-w-0 text-[13px] text-brand-text-mute truncate">Question {i + 1}</span>
+                    <span className={`font-jetbrains text-[12.5px] font-bold ${ok ? 'text-brand-teal-600' : 'text-brand-text-mute'}`}>
+                      {ok ? '+10' : '+0'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div
+            className={`bg-white border rounded-3xl p-6 shadow-sm ${lexiUnlocked ? 'border-brand-teal-200' : 'border-brand-line'}`}
+          >
+            <span className={`font-jetbrains text-[10.5px] font-medium uppercase tracking-[0.14em] ${lexiUnlocked ? 'text-brand-teal-600' : 'text-brand-text-mute'}`}>
+              Next In Today's Session
+            </span>
+            <div className="text-[17px] font-bold text-brand-text tracking-tight mt-2.5">LexiGrid</div>
+            <p className="text-[13.5px] leading-[1.6] text-brand-text-mute mt-1.5">{lexiBody}</p>
+            <button
+              type="button"
+              onClick={goLexiGrid}
+              disabled={!lexiUnlocked}
+              className={`mt-4 w-full py-3 rounded-xl text-[14px] font-bold transition-colors ${
+                lexiUnlocked
+                  ? 'bg-brand-teal-600 hover:bg-brand-teal-700 text-white'
+                  : 'bg-brand-bg-alt text-brand-text-mute cursor-not-allowed'
+              }`}
+            >
+              {lexiCta}
+            </button>
+            <button
+              type="button"
+              onClick={onUnlockNext}
+              className="block w-full text-center mt-3 text-[13px] font-semibold text-brand-teal-600 hover:text-brand-teal-700 transition-colors"
+            >
+              Back to dashboard
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

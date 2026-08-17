@@ -184,7 +184,7 @@ export default function InstructorAssessmentPage() {
                   <MockOverviewTab rows={data.mock_overview} batchId={batchId} />
                 )}
                 {activeTab === 'diagnostic' && (
-                  <DiagnosticOverviewTab rows={data.diagnostic_overview} batchId={batchId} />
+                  <DiagnosticOverviewTab rows={data.diagnostic_overview} batchId={batchId} refetch={refetch} />
                 )}
               </div>
             )}

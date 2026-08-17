@@ -356,15 +356,15 @@ export default function StudentProfilePage() {
       mainClassName="p-6 max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500"
     >
       {/* Header Section */}
-      <div className="relative rounded-3xl overflow-hidden bg-white dark:bg-slate-900 shadow-xl border border-slate-100 dark:border-slate-800">
+      <div className="relative rounded-3xl overflow-hidden bg-white shadow-sm border border-brand-line">
         {/* Cover / Banner Gradient */}
-        <div className="h-32 bg-gradient-to-r from-brand-teal-600 via-brand-blue-600 to-brand-blue-600 dark:from-brand-teal-900 dark:to-slate-900"></div>
+        <div className="h-32 bg-gradient-to-r from-brand-teal-600 via-brand-blue-600 to-brand-blue-600"></div>
 
         <div className="px-8 pb-8">
           <div className="flex flex-col md:flex-row items-end -mt-12 gap-6">
             {/* Avatar */}
             <div className="relative group">
-              <div className="h-28 w-28 rounded-full border-4 border-white dark:border-slate-900 shadow-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative">
+              <div className="h-28 w-28 rounded-full border-4 border-white shadow-sm overflow-hidden bg-brand-bg-alt flex items-center justify-center relative">
                 {uploading ? (
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-20">
                     <Loader2 className="h-8 w-8 text-white animate-spin" />
@@ -374,7 +374,7 @@ export default function StudentProfilePage() {
                 {profile?.profileImage ? (
                   <img src={profile.profileImage} alt="Profile" className="h-full w-full object-cover" />
                 ) : (
-                  <span className="text-3xl font-bold text-brand-teal-600 dark:text-brand-teal-400">{getInitials()}</span>
+                  <span className="text-3xl font-bold text-brand-teal-600">{getInitials()}</span>
                 )}
 
                 {/* Upload Overlay */}
@@ -398,12 +398,12 @@ export default function StudentProfilePage() {
 
             {/* User Info */}
             <div className="flex-1 text-center md:text-left">
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
+              <h1 className="font-manrope text-2xl font-bold text-brand-text mb-1">
                 {profile?.name || 'Student'}
               </h1>
-              <div className="flex items-center justify-center md:justify-start gap-4 text-sm text-slate-500 dark:text-slate-400">
+              <div className="flex items-center justify-center md:justify-start gap-4 text-sm text-brand-text-mute">
                 <span className="flex items-center gap-1"><Mail className="h-3 w-3" /> {profile?.email}</span>
-                <Badge variant="secondary" className="bg-brand-teal-50 text-brand-teal-700 dark:bg-brand-teal-900/30 dark:text-brand-teal-300 border-brand-teal-100 dark:border-brand-teal-800">
+                <Badge variant="secondary" className="bg-brand-teal-50 text-brand-teal-700 border-brand-teal-100">
                   {profile?.role || 'STUDENT'}
                 </Badge>
               </div>
@@ -424,7 +424,7 @@ export default function StudentProfilePage() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="px-8 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+        <div className="px-8 border-t border-brand-line bg-brand-bg-alt/50">
           <div className="flex gap-8 overflow-x-auto">
             {[
               { id: 'general', label: 'General Info', icon: User },
@@ -435,8 +435,8 @@ export default function StudentProfilePage() {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`py-4 text-sm font-semibold flex items-center gap-2 border-b-2 transition-all ${
                   activeTab === tab.id
-                    ? 'border-brand-teal-600 text-brand-teal-600 dark:text-brand-teal-400'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                    ? 'border-brand-teal-600 text-brand-teal-600'
+                    : 'border-transparent text-brand-text-mute hover:text-brand-text'
                 }`}
               >
                 <tab.icon className="h-4 w-4" />
@@ -452,38 +452,38 @@ export default function StudentProfilePage() {
         {/* Left Column: Main Form */}
         <div className="xl:col-span-2 space-y-6">
           {activeTab === 'general' && (
-            <Card className="border-none shadow-sm bg-white dark:bg-slate-900">
+            <Card className="border border-brand-line shadow-sm bg-white">
               <CardHeader>
-                <CardTitle className="text-lg font-bold text-slate-800 dark:text-white">Personal Information</CardTitle>
-                <CardDescription className="dark:text-slate-400">Update your personal details here.</CardDescription>
+                <CardTitle className="font-manrope text-lg font-bold text-brand-text">Personal Information</CardTitle>
+                <CardDescription className="text-brand-text-mute">Update your personal details here.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="text-slate-600 dark:text-slate-300">Full Name</Label>
+                    <Label htmlFor="name" className="text-brand-text-mute">Full Name</Label>
                     <Input
                       id="name"
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
-                      className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:ring-brand-teal-500"
+                      className="bg-brand-bg-alt border-brand-line focus:ring-brand-teal-500"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-slate-600 dark:text-slate-300">Phone Number</Label>
+                    <Label htmlFor="phone" className="text-brand-text-mute">Phone Number</Label>
                     <Input
                       id="phone"
                       value={formData.phoneNo}
                       onChange={(e) => handleInputChange('phoneNo', e.target.value)}
                       placeholder="+1 234 567 890"
-                      className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:ring-brand-teal-500"
+                      className="bg-brand-bg-alt border-brand-line focus:ring-brand-teal-500"
                     />
                   </div>
                   <div className="space-y-2 md:col-span-2">
-                    <Label className="text-slate-600 dark:text-slate-300">Email Address</Label>
-                    <div className="flex items-center px-3 py-2 bg-slate-100 dark:bg-slate-800/50 rounded-md border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-sm">
+                    <Label className="text-brand-text-mute">Email Address</Label>
+                    <div className="flex items-center px-3 py-2 bg-brand-bg-alt rounded-md border border-brand-line text-brand-text-mute text-sm">
                       <Mail className="h-4 w-4 mr-2" />
                       {profile?.email}
-                      <Badge variant="outline" className="ml-auto text-green-600 border-green-200 bg-green-50 dark:bg-green-900/10 dark:text-green-400 dark:border-green-800">Verified</Badge>
+                      <Badge variant="outline" className="ml-auto text-green-600 border-green-200 bg-green-50">Verified</Badge>
                     </div>
                   </div>
                 </div>
@@ -492,7 +492,7 @@ export default function StudentProfilePage() {
                   <Button
                     onClick={handleSave}
                     disabled={saving}
-                    className="bg-brand-teal-600 hover:bg-brand-teal-700 text-white min-w-[140px]"
+                    className="bg-brand-teal-700 hover:bg-brand-teal-600 text-white min-w-[140px]"
                   >
                     {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
                     Save Changes
@@ -503,25 +503,25 @@ export default function StudentProfilePage() {
           )}
 
           {activeTab === 'security' && (
-            <Card className="border-none shadow-sm bg-white dark:bg-slate-900">
+            <Card className="border border-brand-line shadow-sm bg-white">
               <CardHeader>
-                <CardTitle className="text-lg font-bold text-slate-800 dark:text-white">Security Settings</CardTitle>
-                <CardDescription className="dark:text-slate-400">Manage your password and account security.</CardDescription>
+                <CardTitle className="font-manrope text-lg font-bold text-brand-text">Security Settings</CardTitle>
+                <CardDescription className="text-brand-text-mute">Manage your password and account security.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <div className="p-4 rounded-xl bg-brand-bg-alt border border-brand-line flex items-center justify-between">
                   <div>
-                    <h4 className="font-semibold text-slate-800 dark:text-slate-200">Password</h4>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Last changed 3 months ago</p>
+                    <h4 className="font-semibold text-brand-text">Password</h4>
+                    <p className="text-sm text-brand-text-mute">Last changed 3 months ago</p>
                   </div>
-                  <Button variant="outline" className="dark:border-slate-700 dark:text-slate-300">Change Password</Button>
+                  <Button variant="outline">Change Password</Button>
                 </div>
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 flex items-center justify-between opacity-60">
+                <div className="p-4 rounded-xl bg-brand-bg-alt border border-brand-line flex items-center justify-between opacity-60">
                   <div>
-                    <h4 className="font-semibold text-slate-800 dark:text-slate-200">Two-Factor Authentication</h4>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Add an extra layer of security.</p>
+                    <h4 className="font-semibold text-brand-text">Two-Factor Authentication</h4>
+                    <p className="text-sm text-brand-text-mute">Add an extra layer of security.</p>
                   </div>
-                  <Button variant="outline" disabled className="dark:border-slate-700">Coming Soon</Button>
+                  <Button variant="outline" disabled>Coming Soon</Button>
                 </div>
               </CardContent>
             </Card>
@@ -531,10 +531,10 @@ export default function StudentProfilePage() {
         {/* Right Column: Stats / Info */}
         <div className="space-y-6">
           {/* Goal Tracking — Target Band + Exam Date */}
-          <Card className="border-none shadow-sm bg-white dark:bg-slate-900">
+          <Card className="border border-brand-line shadow-sm bg-white">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-              <CardTitle className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                <Target className="h-4 w-4 text-brand-teal-600 dark:text-brand-teal-400" />
+              <CardTitle className="font-jetbrains text-xs font-bold text-brand-text-mute uppercase tracking-[0.14em] flex items-center gap-2">
+                <Target className="h-4 w-4 text-brand-teal-600" />
                 Goal Tracking
               </CardTitle>
               <Button
@@ -542,7 +542,6 @@ export default function StudentProfilePage() {
                 size="sm"
                 onClick={openBandDialog}
                 disabled={bandsLoading || bandsError}
-                className="dark:border-slate-700 dark:text-slate-300"
               >
                 <Pencil className="h-3.5 w-3.5 mr-1.5" />
                 Edit
@@ -550,10 +549,10 @@ export default function StudentProfilePage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-500 dark:text-slate-400">Current band</span>
-                <span className="font-bold text-slate-800 dark:text-white">
+                <span className="text-sm text-brand-text-mute">Current band</span>
+                <span className="font-bold text-brand-text">
                   {bandsLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+                    <Loader2 className="h-4 w-4 animate-spin text-brand-text-mute" />
                   ) : currentBand != null ? (
                     currentBand.toFixed(1)
                   ) : (
@@ -561,11 +560,11 @@ export default function StudentProfilePage() {
                   )}
                 </span>
               </div>
-              <div className="flex justify-between items-center border-t border-slate-100 dark:border-slate-800 pt-3">
-                <span className="text-sm text-slate-500 dark:text-slate-400">Target band</span>
-                <span className="font-bold text-brand-teal-600 dark:text-brand-teal-400">
+              <div className="flex justify-between items-center border-t border-brand-line pt-3">
+                <span className="text-sm text-brand-text-mute">Target band</span>
+                <span className="font-bold text-brand-teal-600">
                   {bandsLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+                    <Loader2 className="h-4 w-4 animate-spin text-brand-text-mute" />
                   ) : targetBand != null ? (
                     targetBand.toFixed(1)
                   ) : (
@@ -575,14 +574,14 @@ export default function StudentProfilePage() {
               </div>
 
               {/* Exam date */}
-              <div className="border-t border-slate-100 dark:border-slate-800 pt-3 space-y-2">
+              <div className="border-t border-brand-line pt-3 space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                  <span className="text-sm text-brand-text-mute flex items-center gap-1.5">
                     <Calendar className="h-3.5 w-3.5" /> Exam date
                   </span>
-                  <span className="font-bold text-slate-800 dark:text-white text-sm">
+                  <span className="font-bold text-brand-text text-sm">
                     {bandsLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+                      <Loader2 className="h-4 w-4 animate-spin text-brand-text-mute" />
                     ) : (
                       examDate ?? 'Not set'
                     )}
@@ -596,12 +595,12 @@ export default function StudentProfilePage() {
                         disabled={bandsLoading}
                         className={`flex h-9 flex-1 items-center gap-2 rounded-lg border px-3 text-sm transition-colors
                           ${examDateDraft
-                            ? 'border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100'
-                            : 'border-dashed border-slate-300 dark:border-slate-600 text-slate-400 dark:text-slate-500'}
-                          bg-slate-50 dark:bg-slate-800 hover:border-brand-teal-400 dark:hover:border-brand-teal-500
+                            ? 'border-brand-line text-brand-text'
+                            : 'border-dashed border-brand-line text-brand-text-mute'}
+                          bg-brand-bg-alt hover:border-brand-teal-400
                           focus:outline-none focus:ring-2 focus:ring-brand-teal-500/40 disabled:opacity-60 disabled:cursor-not-allowed`}
                       >
-                        <Calendar className="h-4 w-4 shrink-0 text-brand-teal-500 dark:text-brand-teal-400" />
+                        <Calendar className="h-4 w-4 shrink-0 text-brand-teal-500" />
                         <span className="truncate">
                           {examDateDraft ? format(parseYMD(examDateDraft), 'EEE, d MMM yyyy') : 'Pick a date'}
                         </span>
@@ -620,7 +619,7 @@ export default function StudentProfilePage() {
                         classNames={{
                           day_selected:
                             'bg-brand-teal-600 text-white hover:bg-brand-teal-600 hover:text-white focus:bg-brand-teal-600 focus:text-white rounded-lg',
-                          day_today: 'text-brand-teal-600 dark:text-brand-teal-400 font-semibold',
+                          day_today: 'text-brand-teal-600 font-semibold',
                         }}
                       />
                     </PopoverContent>
@@ -629,52 +628,52 @@ export default function StudentProfilePage() {
                     size="sm"
                     onClick={handleExamDateSave}
                     disabled={savingExamDate || bandsLoading || !examDateDraft || examDateDraft === examDate}
-                    className="h-9 bg-brand-teal-600 hover:bg-brand-teal-700 text-white shrink-0"
+                    className="h-9 bg-brand-teal-700 hover:bg-brand-teal-600 text-white shrink-0"
                   >
                     {savingExamDate ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Save'}
                   </Button>
                 </div>
                 {!bandsLoading && !examDate && (
-                  <p className="text-xs text-slate-400 dark:text-slate-500">
+                  <p className="text-xs text-brand-text-mute">
                     Your dashboard uses this to predict exam readiness.
                   </p>
                 )}
               </div>
 
               {bandsError && (
-                <div className="flex items-start justify-between gap-2 text-sm text-amber-600 dark:text-amber-400 pt-1">
+                <div className="flex items-start justify-between gap-2 text-sm text-amber-600 pt-1">
                   <span className="flex items-start gap-1.5">
                     <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                     Couldn't load your band data — editing is locked.
                   </span>
                   <button
                     onClick={fetchBandData}
-                    className="inline-flex items-center gap-1 font-semibold text-brand-teal-600 dark:text-brand-teal-400 hover:text-brand-teal-700 shrink-0"
+                    className="inline-flex items-center gap-1 font-semibold text-brand-teal-600 hover:text-brand-teal-700 shrink-0"
                   >
                     <RefreshCw className="h-3.5 w-3.5" /> Retry
                   </button>
                 </div>
               )}
               {!bandsLoading && !bandsError && currentBand != null && targetBand != null && targetBand > currentBand && (
-                <div className="flex items-center gap-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-400 pt-1">
+                <div className="flex items-center gap-1.5 text-sm font-medium text-emerald-600 pt-1">
                   <TrendingUp className="h-4 w-4" />
                   {(targetBand - currentBand).toFixed(1)} bands to go
                 </div>
               )}
               {!bandsLoading && !bandsError && currentBand != null && targetBand != null && targetBand <= currentBand && (
-                <p className="text-sm text-amber-600 dark:text-amber-400 pt-1">
+                <p className="text-sm text-amber-600 pt-1">
                   You've reached your target — time to aim higher.
                 </p>
               )}
               {!bandsLoading && !bandsError && targetBand == null && (
-                <p className="text-sm text-slate-400 dark:text-slate-500 pt-1">
+                <p className="text-sm text-brand-text-mute pt-1">
                   Set a target to track your progress.
                 </p>
               )}
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-sm bg-brand-teal-600 dark:bg-brand-teal-900 text-white overflow-hidden relative">
+          <Card className="border-none shadow-sm bg-brand-teal-700 text-white overflow-hidden relative">
             <div className="absolute top-0 right-0 p-8 opacity-10">
               <Shield className="h-32 w-32 rotate-12" />
             </div>
@@ -693,18 +692,18 @@ export default function StudentProfilePage() {
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-sm bg-white dark:bg-slate-900">
+          <Card className="border border-brand-line shadow-sm bg-white">
             <CardHeader>
-              <CardTitle className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Account Completion</CardTitle>
+              <CardTitle className="font-jetbrains text-xs font-bold text-brand-text-mute uppercase tracking-[0.14em]">Account Completion</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm font-medium">
-                    <span className="text-slate-700 dark:text-slate-200">Profile Details</span>
-                    <span className="text-brand-teal-600 dark:text-brand-teal-400">80%</span>
+                    <span className="text-brand-text">Profile Details</span>
+                    <span className="text-brand-teal-600">80%</span>
                   </div>
-                  <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-2 bg-brand-bg-alt rounded-full overflow-hidden">
                     <div className="h-full bg-brand-teal-600 w-[80%] rounded-full"></div>
                   </div>
                 </div>
@@ -716,10 +715,10 @@ export default function StudentProfilePage() {
 
       {/* Target Band Edit Dialog */}
       <Dialog open={bandDialogOpen} onOpenChange={(open) => !savingBand && setBandDialogOpen(open)}>
-        <DialogContent className="sm:max-w-md bg-white dark:bg-slate-900">
+        <DialogContent className="sm:max-w-md bg-white">
           <DialogHeader>
-            <DialogTitle className="text-slate-900 dark:text-white">Update your target band</DialogTitle>
-            <DialogDescription className="dark:text-slate-400">
+            <DialogTitle className="font-manrope text-brand-text">Update your target band</DialogTitle>
+            <DialogDescription className="text-brand-text-mute">
               {bandsLoading || bandsError
                 ? 'Your current band is unavailable, so editing is locked to prevent an invalid target.'
                 : currentBand != null
@@ -753,8 +752,8 @@ export default function StudentProfilePage() {
                     isSelected
                       ? 'bg-brand-teal-600 border-brand-teal-600 text-white shadow-sm'
                       : locked
-                        ? 'bg-slate-50 dark:bg-slate-800/40 border-slate-100 dark:border-slate-800 text-slate-300 dark:text-slate-600 cursor-not-allowed line-through'
-                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-brand-teal-400 dark:hover:border-brand-teal-500'
+                        ? 'bg-brand-bg-alt border-brand-line text-brand-text-mute cursor-not-allowed line-through'
+                        : 'bg-white border-brand-line text-brand-text hover:border-brand-teal-400'
                   }`}
                 >
                   {band.toFixed(1)}
@@ -768,7 +767,6 @@ export default function StudentProfilePage() {
               variant="outline"
               onClick={() => setBandDialogOpen(false)}
               disabled={savingBand}
-              className="dark:border-slate-700 dark:text-slate-300"
             >
               Cancel
             </Button>
@@ -782,7 +780,7 @@ export default function StudentProfilePage() {
                 selectedBand === targetBand ||
                 targetTooLow
               }
-              className="bg-brand-teal-600 hover:bg-brand-teal-700 text-white min-w-[120px]"
+              className="bg-brand-teal-700 hover:bg-brand-teal-600 text-white min-w-[120px]"
             >
               {savingBand ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
               Save Target

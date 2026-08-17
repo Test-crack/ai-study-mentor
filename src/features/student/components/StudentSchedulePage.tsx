@@ -20,7 +20,7 @@ export default function StudentSchedulePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
+    <div className="min-h-screen bg-brand-bg transition-colors duration-300">
       <StudentSidebar 
         activeTab="schedule" 
         onTabChange={(tab) => {
@@ -39,51 +39,51 @@ export default function StudentSchedulePage() {
             
             {/* Header - Visible */}
             <div className="mb-8 relative z-10">
-                <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                <h1 className="font-manrope text-3xl font-bold text-brand-text flex items-center gap-3">
                     <CalendarIcon className="h-8 w-8 text-brand-teal-600" />
                     My Schedule
                 </h1>
-                <p className="text-slate-500 dark:text-slate-400 mt-1">Manage your upcoming classes and learning sessions.</p>
+                <p className="text-brand-text-mute mt-1">Manage your upcoming classes and learning sessions.</p>
             </div>
 
             {/* Blurred Content Container */}
             <div className="relative">
                 {/* The "Blurred" Content */}
-                <div className="filter blur-md select-none pointer-events-none opacity-50 dark:opacity-30">
+                <div className="filter blur-md select-none pointer-events-none opacity-50">
                     <div className="space-y-4">
                         {/* Day Header */}
                         <div className="flex items-center gap-4 mb-6">
-                            <div className="text-2xl font-bold text-slate-800 dark:text-slate-200">Today</div>
-                            <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1"></div>
+                            <div className="text-2xl font-bold text-brand-text">Today</div>
+                            <div className="h-px bg-brand-line flex-1"></div>
                         </div>
 
                         {/* Dummy Items */}
                         {dummySchedule.map((item, i) => (
-                            <div key={i} className="flex items-center p-6 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                                <div className="w-24 font-bold text-slate-700 dark:text-slate-300">{item.time}</div>
-                                <div className="w-px h-10 bg-slate-100 dark:bg-slate-800 mx-6"></div>
+                            <div key={i} className="flex items-center p-6 bg-white rounded-xl border border-brand-line shadow-sm">
+                                <div className="w-24 font-bold text-brand-text">{item.time}</div>
+                                <div className="w-px h-10 bg-brand-line mx-6"></div>
                                 <div className="flex-1">
-                                    <h3 className="font-semibold text-lg text-slate-900 dark:text-white">{item.event}</h3>
-                                    <span className="inline-block mt-1 px-3 py-1 rounded-full text-xs bg-brand-teal-50 text-brand-teal-700 dark:bg-brand-teal-900/30 dark:text-brand-teal-300">{item.type}</span>
+                                    <h3 className="font-semibold text-lg text-brand-text">{item.event}</h3>
+                                    <span className="inline-block mt-1 px-3 py-1 rounded-full text-xs bg-brand-teal-50 text-brand-teal-700">{item.type}</span>
                                 </div>
-                                <ChevronRight className="h-5 w-5 text-slate-400" />
+                                <ChevronRight className="h-5 w-5 text-brand-text-mute" />
                             </div>
                         ))}
-                         
+
                          <div className="flex items-center gap-4 my-8">
-                            <div className="text-2xl font-bold text-slate-800 dark:text-slate-200">Tomorrow</div>
-                            <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1"></div>
+                            <div className="text-2xl font-bold text-brand-text">Tomorrow</div>
+                            <div className="h-px bg-brand-line flex-1"></div>
                         </div>
 
                          {dummySchedule.slice(0, 2).map((item, i) => (
-                            <div key={`tomorrow-${i}`} className="flex items-center p-6 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                                <div className="w-24 font-bold text-slate-700 dark:text-slate-300">{item.time}</div>
-                                <div className="w-px h-10 bg-slate-100 dark:bg-slate-800 mx-6"></div>
+                            <div key={`tomorrow-${i}`} className="flex items-center p-6 bg-white rounded-xl border border-brand-line shadow-sm">
+                                <div className="w-24 font-bold text-brand-text">{item.time}</div>
+                                <div className="w-px h-10 bg-brand-line mx-6"></div>
                                 <div className="flex-1">
-                                    <h3 className="font-semibold text-lg text-slate-900 dark:text-white">{item.event}</h3>
-                                    <span className="inline-block mt-1 px-3 py-1 rounded-full text-xs bg-brand-blue-50 text-brand-blue-700 dark:bg-brand-blue-900/30 dark:text-brand-blue-300">{item.type}</span>
+                                    <h3 className="font-semibold text-lg text-brand-text">{item.event}</h3>
+                                    <span className="inline-block mt-1 px-3 py-1 rounded-full text-xs bg-brand-blue-50 text-brand-blue-700">{item.type}</span>
                                 </div>
-                                <ChevronRight className="h-5 w-5 text-slate-400" />
+                                <ChevronRight className="h-5 w-5 text-brand-text-mute" />
                             </div>
                         ))}
                     </div>
@@ -95,27 +95,27 @@ export default function StudentSchedulePage() {
                         {/* Glow Effect */}
                         <div className="absolute -inset-4 bg-gradient-to-r from-brand-teal-500 via-brand-blue-500 to-pink-500 opacity-30 rounded-full blur-xl group-hover:opacity-50 transition-opacity duration-1000 animate-pulse"></div>
                         
-                        <div className="relative bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 text-center max-w-md mx-auto transform transition-transform group-hover:scale-105">
+                        <div className="relative bg-white p-8 rounded-2xl shadow-sm border border-brand-line text-center max-w-md mx-auto transform transition-transform group-hover:scale-105">
                             <div className="h-16 w-16 bg-gradient-to-br from-brand-teal-500 to-brand-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-brand-teal-500/30">
                                 <Lock className="h-8 w-8 text-white" />
                             </div>
-                            
-                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+
+                            <h2 className="font-manrope text-2xl font-bold text-brand-text mb-2">
                                 Unlock Your Schedule
                             </h2>
-                            <p className="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed">
+                            <p className="text-brand-text-mute mb-8 leading-relaxed">
                                 Get access to advanced scheduling, live class reminders, and exclusive 1-on-1 mentorship sessions with our Premium plan.
                             </p>
-                            
-                            <Button 
-                                size="lg" 
-                                className="w-full bg-gradient-to-r from-brand-teal-600 to-brand-blue-600 hover:from-brand-teal-700 hover:to-brand-blue-700 text-white shadow-lg shadow-brand-teal-500/20"
+
+                            <Button
+                                size="lg"
+                                className="w-full bg-gradient-to-r from-brand-teal-700 to-brand-blue-700 hover:from-brand-teal-600 hover:to-brand-blue-600 text-white shadow-lg shadow-brand-teal-500/20"
                             >
                                 <Star className="h-4 w-4 mr-2 fill-current" />
                                 Upgrade to Premium
                             </Button>
-                            
-                            <p className="mt-4 text-xs text-slate-400">
+
+                            <p className="mt-4 text-xs text-brand-text-mute">
                                 30-day money-back guarantee. Cancel anytime.
                             </p>
                         </div>

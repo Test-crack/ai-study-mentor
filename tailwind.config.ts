@@ -27,6 +27,8 @@ export default {
 				manrope: ['Manrope', 'sans-serif'],
 				plex: ['"IBM Plex Sans"', 'sans-serif'],
 				jetbrains: ['"JetBrains Mono"', 'monospace'],
+				// Student Dashboard only — matches the reference design's primary UI font.
+				dm: ['"DM Sans"', 'sans-serif'],
 			},
 			colors: {
 				/**
@@ -46,10 +48,10 @@ export default {
 					 * Vivid mint — the hero's bright accent. Nothing in the existing
 					 * ramp is saturated enough for it; revert to `teal-300` to drop it.
 					 */
-					mint: '#2EE8A6',
+					mint: '#3EE0A0',
 					teal: {
-						DEFAULT: '#087F73',   // primary action
-						dark: '#0A6E64',      // hover
+						DEFAULT: '#0E7C66',   // primary action
+						dark: '#0B6151',      // hover
 						soft: '#7FBFB6',      // accents on dark
 						mute: '#B5D6D1',
 						tint: '#D6E7E4',      // badge / icon backgrounds
@@ -58,10 +60,10 @@ export default {
 						100: '#D6E7E4',
 						200: '#B0D4CE',
 						300: '#7FBFB6',
-						400: '#3E9E93',
+						400: '#0D9488',
 						500: '#12897C',
-						600: '#087F73',
-						700: '#0A6E64',
+						600: '#0E7C66',
+						700: '#0B6151',
 						800: '#0C574F',
 						900: '#0E463F',
 						950: '#0E1F2B',
@@ -87,17 +89,28 @@ export default {
 					},
 					ink: {
 						DEFAULT: '#142B3A',   // headings, CTA block
-						deep: '#0E1F2B',      // footer
+						deep: '#0B1F26',      // footer
+						nav: '#1C3D4D',       // nav bar — lighter than ink so the logo's dark squares stay visible
 					},
 					warm: {
 						DEFAULT: '#E8753D',   // risk / attention
 						tint: '#FDEEE6',
+						danger: '#DC4C1B',    // destructive hover (e.g. logout)
+					},
+					/**
+					 * Dashboard reference accent — Internal Assessment required badges/
+					 * left-border cards. Distinct from brand-blue (academic data blue).
+					 */
+					purple: {
+						DEFAULT: '#5B5BD6',
+						hover: '#4A4AC4',
+						tint: '#A78BFA',
 					},
 					line: '#D8E0E2',
 					'on-ink': '#B7C4C9',    // body copy on dark
 					'on-ink-mute': '#8FA0A8',
 					// light chapters + body text
-					bg: '#F6F7F3',
+					bg: '#F4F5F1',
 					'bg-alt': '#EAF0EF',
 					text: '#17232B',
 					'text-mute': '#5E6B73',

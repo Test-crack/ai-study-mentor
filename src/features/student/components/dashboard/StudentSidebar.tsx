@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import {
   GraduationCap, LayoutDashboard, Mic, PenTool, Headphones,
   ClipboardCheck, History, Sparkles, Settings, LogOut,
-  Timer, FileText, BookOpen, Target, Gamepad2, Lock, HelpCircle
+  Timer, FileText, BookOpen, Target, Gamepad2, Lock, HelpCircle, Compass
 } from "lucide-react";
 import testcrackLogo from '@/assets/testcrack-logo.svg';
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { useTheme } from "@/features/theme/ThemeProvider";
 import { callBackend } from "@/features/auth/services/authClient";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -38,7 +37,6 @@ export const StudentSidebar = ({
   alignment = 'left'
 }: SidebarProps) => {
   const { signOut } = useAuth();
-  const { setTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -56,7 +54,10 @@ export const StudentSidebar = ({
 
   const isLocked = isLockedProp ?? selfLocked;
 
-  const isActivelyDrilling = location.pathname.includes('/drill');
+  // Extra/bonus drills (?extra=true) are optional practice, not the mandatory
+  // gate flow — navigation should stay usable during them.
+  const isExtraDrill = new URLSearchParams(location.search).get('extra') === 'true';
+  const isActivelyDrilling = location.pathname.includes('/drill') && !isExtraDrill;
   const isLeft = alignment === 'left';
   const canExpand = !isLocked && !isActivelyDrilling;
 
@@ -110,6 +111,7 @@ export const StudentSidebar = ({
     {
       title: "Resources",
       items: [
+        { id: 'roadmap', icon: Compass, label: 'My Roadmap', path: '/student/diagnostic/roadmap' },
         { id: 'suggestion', icon: Sparkles, label: 'Recommendations', path: '/student/suggestion' },
         { id: 'courses-section', icon: GraduationCap, label: 'My Courses', path: '/student/courses-section' },
         { id: 'Report', icon: FileText, label: 'Report', path: '/student/report' },
@@ -122,7 +124,7 @@ export const StudentSidebar = ({
     if (isNewStudent) {
       return {
         ...group,
-        items: group.items.filter(item => !['games', 'suggestion', 'Report'].includes(item.id))
+        items: group.items.filter(item => !['games', 'suggestion', 'Report', 'roadmap'].includes(item.id))
       };
     }
     return group;
@@ -136,7 +138,6 @@ export const StudentSidebar = ({
   };
 
   const handleLogout = async () => {
-    setTheme('light');
     await signOut();
   };
 
@@ -169,7 +170,7 @@ export const StudentSidebar = ({
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
         className={cn(
-          "group fixed top-4 bottom-4 z-[9999] bg-white dark:bg-[#0B1120] rounded-2xl flex flex-col justify-between py-6 border border-slate-200 dark:border-slate-800 shadow-xl overflow-x-hidden",
+          "group fixed top-4 bottom-4 z-[9999] bg-brand-ink rounded-2xl flex flex-col justify-between py-6 border border-brand-line-12 shadow-xl overflow-x-hidden",
           "transition-[width,transform] duration-300 ease-in-out",
           isLeft ? "left-4" : "right-4",
           !isOpen
@@ -183,7 +184,7 @@ export const StudentSidebar = ({
         {/* Brand Header */}
         <div className="flex items-center px-5 mb-8 whitespace-nowrap">
           <img src={testcrackLogo} alt="TestCrack" className="h-9 w-9 object-contain shrink-0" />
-          <span className={labelCls("text-xl font-bold text-slate-900 dark:text-white tracking-wide")}>
+          <span className={labelCls("font-manrope text-xl font-bold text-brand-bg tracking-[-0.02em]")}>
             TestCrack
           </span>
         </div>
@@ -193,7 +194,7 @@ export const StudentSidebar = ({
           {filteredGroups.map((group, groupIdx) => (
             <div key={groupIdx} className="mb-6">
               <div className={cn(
-                "text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 whitespace-nowrap overflow-hidden",
+                "font-jetbrains text-[10px] font-bold text-brand-on-ink-mute uppercase tracking-[0.16em] mb-3 whitespace-nowrap overflow-hidden",
                 "transition-[max-width,opacity,padding] duration-200 ease-out",
                 "max-w-[200px] opacity-100 px-3",
                 "md:max-w-0 md:opacity-0 md:px-0",
@@ -215,16 +216,16 @@ export const StudentSidebar = ({
                         "w-full flex items-center rounded-xl px-4 py-3 relative",
                         "transition-colors duration-150",
                         activeTab === item.id && !disabled
-                          ? "bg-brand-teal-600/10 text-brand-teal-600 dark:bg-brand-teal-500/20 dark:text-brand-teal-400"
-                          : "bg-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800",
+                          ? "bg-brand-mint/15 text-brand-mint"
+                          : "bg-transparent text-brand-on-ink-mute hover:bg-white/5",
                         disabled && "opacity-40 pointer-events-none"
                       )}
                     >
                       <item.icon className={cn(
                         "h-5 w-5 shrink-0",
                         activeTab === item.id && !disabled
-                          ? "text-brand-teal-600 dark:text-brand-teal-400"
-                          : "text-slate-500"
+                          ? "text-brand-mint"
+                          : "text-brand-on-ink-mute"
                       )} />
 
                       <span className={labelCls("font-medium text-sm text-left flex-1")}>
@@ -233,7 +234,7 @@ export const StudentSidebar = ({
 
                       {disabled && (
                         <Lock className={cn(
-                          "w-4 h-4 text-slate-400 shrink-0 overflow-hidden",
+                          "w-4 h-4 text-brand-on-ink-mute shrink-0 overflow-hidden",
                           "transition-[max-width,opacity] duration-200",
                           "max-w-[20px] opacity-100",
                           "md:max-w-0 md:opacity-0",
@@ -249,12 +250,12 @@ export const StudentSidebar = ({
         </nav>
 
         {/* Bottom Actions */}
-        <div className="pt-4 px-3 border-t border-slate-200 dark:border-slate-800 space-y-1.5 shrink-0">
+        <div className="pt-4 px-3 border-t border-brand-line-12 space-y-1.5 shrink-0">
           <button
             onClick={() => handleNavigation({ id: 'settings', path: '/student/settings' })}
             disabled={isActivelyDrilling || isLocked}
             className={cn(
-              "w-full flex items-center rounded-xl bg-transparent px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-150",
+              "w-full flex items-center rounded-xl bg-transparent px-4 py-3 text-brand-on-ink-mute hover:bg-white/5 transition-colors duration-150",
               (isActivelyDrilling || isLocked) && "opacity-40 pointer-events-none"
             )}
           >
@@ -266,7 +267,7 @@ export const StudentSidebar = ({
             onClick={handleLogout}
             disabled={isActivelyDrilling}
             className={cn(
-              "w-full flex items-center rounded-xl bg-transparent px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 transition-colors duration-150",
+              "w-full flex items-center rounded-xl bg-transparent px-4 py-3 text-brand-on-ink-mute hover:bg-brand-warm-danger/10 hover:text-brand-warm-danger transition-colors duration-150",
               isActivelyDrilling && "opacity-40 pointer-events-none"
             )}
           >

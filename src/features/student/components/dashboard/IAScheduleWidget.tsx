@@ -48,30 +48,30 @@ export default function IAScheduleWidget() {
   }, []);
 
   if (loading) return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm h-full flex flex-col animate-pulse">
+    <div className="bg-white border border-brand-line rounded-2xl p-5 shadow-sm h-full flex flex-col animate-pulse">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex-shrink-0" />
+          <div className="w-8 h-8 rounded-xl bg-brand-bg-alt flex-shrink-0" />
           <div className="space-y-1.5">
-            <div className="h-3 w-24 bg-slate-100 dark:bg-slate-800 rounded" />
-            <div className="h-2.5 w-16 bg-slate-100 dark:bg-slate-800 rounded" />
+            <div className="h-3 w-24 bg-brand-bg-alt rounded" />
+            <div className="h-2.5 w-16 bg-brand-bg-alt rounded" />
           </div>
         </div>
-        <div className="h-3 w-10 bg-slate-100 dark:bg-slate-800 rounded" />
+        <div className="h-3 w-10 bg-brand-bg-alt rounded" />
       </div>
       <div className="flex flex-col gap-3 flex-1">
         {[0, 1].map(i => (
-          <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
-            <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex-shrink-0" />
+          <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-brand-line">
+            <div className="w-12 h-12 rounded-xl bg-brand-bg-alt flex-shrink-0" />
             <div className="flex-1 space-y-1.5">
-              <div className="h-3 w-36 bg-slate-100 dark:bg-slate-800 rounded" />
-              <div className="h-2.5 w-20 bg-slate-100 dark:bg-slate-800 rounded" />
+              <div className="h-3 w-36 bg-brand-bg-alt rounded" />
+              <div className="h-2.5 w-20 bg-brand-bg-alt rounded" />
             </div>
-            <div className="h-5 w-14 bg-slate-100 dark:bg-slate-800 rounded-lg" />
+            <div className="h-5 w-14 bg-brand-bg-alt rounded-lg" />
           </div>
         ))}
       </div>
-      <div className="mt-4 h-9 w-full bg-slate-100 dark:bg-slate-800 rounded-xl" />
+      <div className="mt-4 h-9 w-full bg-brand-bg-alt rounded-xl" />
     </div>
   );
 
@@ -81,46 +81,70 @@ export default function IAScheduleWidget() {
   const isIADay    = status.is_ia_day;
   const slots      = status.upcoming_ias.slice(0, 2);
   const canStart   = isIADay && status.dcs_eligible;
+  const nextSlot   = slots[0];
+  const isImminent = !!nextSlot && nextSlot.days_away <= 1 && !isIADay;
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm h-full flex flex-col">
+    <div className="bg-white border border-brand-line rounded-2xl p-5 shadow-sm h-full flex flex-col">
 
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-brand-teal-100 dark:bg-brand-teal-500/20 flex items-center justify-center flex-shrink-0">
-            <CalendarClock className="w-4 h-4 text-brand-teal-600 dark:text-brand-teal-400" />
+          <div className="w-8 h-8 rounded-xl bg-brand-teal-100 flex items-center justify-center flex-shrink-0">
+            <CalendarClock className="w-4 h-4 text-brand-teal-600" />
           </div>
           <div>
-            <p className="font-bold text-slate-800 dark:text-white text-sm leading-tight">IA Schedule</p>
-            <p className="text-xs text-slate-400 dark:text-slate-500 leading-tight">Internal Assessments</p>
+            <p className="font-dm font-bold text-brand-text text-sm leading-tight">IA Schedule</p>
+            <p className="text-xs text-brand-text-mute leading-tight">Internal Assessments</p>
           </div>
         </div>
         <button
           onClick={() => navigate("/student/internal")}
-          className="text-xs font-semibold text-brand-teal-600 dark:text-brand-teal-400 hover:underline flex items-center gap-0.5"
+          className="text-xs font-semibold text-brand-teal-600 hover:underline flex items-center gap-0.5"
         >
           View <ChevronRight className="w-3.5 h-3.5" />
         </button>
       </div>
 
+      {/* Due tomorrow — required, not yet actionable */}
+      {isImminent && (
+        <div className="rounded-xl px-4 py-3 mb-4 border border-brand-line border-l-[3px] border-l-brand-purple bg-white">
+          <div className="flex items-center gap-2 mb-1">
+            <p className="font-jetbrains text-xs font-black uppercase tracking-widest text-brand-text">
+              Internal Assessment #{status.current_ia_number}
+            </p>
+            <span className="font-jetbrains text-[9px] font-bold uppercase tracking-wider bg-brand-purple/12 text-brand-purple px-2 py-0.5 rounded-full">
+              Required
+            </span>
+          </div>
+          <p className="text-xs font-medium text-brand-text-mute">
+            Due {nextSlot.days_away === 0 ? "today" : "tomorrow"}, {nextSlot.date_formatted}. This re-scores your sub-scores — miss it and your scores go stale and momentum drops.
+          </p>
+        </div>
+      )}
+
       {/* Today is IA day banner */}
       {isIADay && (
-        <div className={`rounded-xl px-4 py-3 mb-4 flex items-center justify-between border ${
-          canStart
-            ? "bg-brand-teal-50 dark:bg-brand-teal-500/10 border-brand-teal-200 dark:border-brand-teal-500/30"
-            : "bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/30"
-        }`}>
+        <div className={`rounded-xl px-4 py-3 mb-4 flex items-center justify-between border border-l-[3px] bg-white ${
+ canStart
+ ? "border-brand-line border-l-brand-teal-600 "
+ : "border-brand-line border-l-rose-500 "
+ }`}>
           <div>
-            <p className={`text-xs font-black uppercase tracking-widest mb-0.5 ${canStart ? "text-brand-teal-700 dark:text-brand-teal-300" : "text-rose-700 dark:text-rose-300"}`}>
-              IA #{status.current_ia_number} — Today
-            </p>
-            <p className={`text-xs font-medium ${canStart ? "text-brand-teal-600 dark:text-brand-teal-400" : "text-rose-600 dark:text-rose-400"}`}>
+            <div className="flex items-center gap-2 mb-0.5">
+              <p className="font-jetbrains text-xs font-black uppercase tracking-widest text-brand-text">
+                IA #{status.current_ia_number} — Today
+              </p>
+              <span className={`font-jetbrains text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full text-white ${canStart ? "bg-brand-teal-600" : "bg-rose-500"}`}>
+                Required
+              </span>
+            </div>
+            <p className={`text-xs font-medium ${canStart ? "text-brand-teal-600 " : "text-rose-600 "}`}>
               {canStart ? "You're eligible — start your assessment" : `DCS ${status.avg_dcs}% — need 40% to start`}
             </p>
           </div>
           {canStart
-            ? <CheckCircle2 className="w-5 h-5 text-brand-teal-600 dark:text-brand-teal-400 flex-shrink-0" />
+            ? <CheckCircle2 className="w-5 h-5 text-brand-teal-600 flex-shrink-0" />
             : <Zap         className="w-5 h-5 text-rose-500 flex-shrink-0" />
           }
         </div>
@@ -138,37 +162,37 @@ export default function IAScheduleWidget() {
               <div
                 key={slot.number}
                 className={`flex items-center gap-3 p-3 rounded-xl border transition-colors ${
-                  i === 0
-                    ? "border-brand-teal-200 dark:border-brand-teal-500/30 bg-brand-teal-50/60 dark:bg-brand-teal-500/5"
-                    : "border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/30"
-                }`}
+ i === 0
+ ? "border-brand-teal-200 bg-brand-teal-50/60 "
+ : "border-brand-line bg-brand-bg-alt/60 "
+ }`}
               >
                 {/* Date pill */}
                 <div className={`flex flex-col items-center justify-center rounded-xl w-12 h-12 flex-shrink-0 border-2 ${
-                  i === 0
-                    ? "bg-brand-teal-600 border-brand-teal-700 dark:border-brand-teal-500"
-                    : "bg-slate-200 dark:bg-slate-700 border-slate-300 dark:border-slate-600"
-                }`}>
-                  <span className={`font-black text-base leading-none ${i === 0 ? "text-white" : "text-slate-700 dark:text-slate-200"}`}>{day}</span>
-                  <span className={`text-[9px] font-bold uppercase tracking-wide leading-none mt-0.5 ${i === 0 ? "text-brand-teal-200" : "text-slate-500 dark:text-slate-400"}`}>{month}</span>
+ i === 0
+ ? "bg-brand-teal-600 border-brand-teal-700 "
+ : "bg-brand-bg-alt border-brand-line "
+ }`}>
+                  <span className={`font-black text-base leading-none ${i === 0 ? "text-white" : "text-brand-text "}`}>{day}</span>
+                  <span className={`font-jetbrains text-[9px] font-bold uppercase tracking-wide leading-none mt-0.5 ${i === 0 ? "text-brand-teal-200" : "text-brand-text-mute "}`}>{month}</span>
                 </div>
 
                 {/* Details */}
                 <div className="flex-1 min-w-0">
-                  <p className={`font-bold text-sm truncate ${i === 0 ? "text-slate-800 dark:text-white" : "text-slate-600 dark:text-slate-300"}`}>
+                  <p className={`font-bold text-sm truncate ${i === 0 ? "text-brand-text " : "text-brand-text-mute "}`}>
                     Internal Assessment #{slot.number}
                   </p>
-                  <p className={`text-xs font-medium ${i === 0 ? "text-brand-teal-600 dark:text-brand-teal-400" : "text-slate-400 dark:text-slate-500"}`}>
+                  <p className={`text-xs font-medium ${i === 0 ? "text-brand-teal-600 " : "text-brand-text-mute "}`}>
                     {slot.date_formatted}
                   </p>
                 </div>
 
                 {/* Days badge */}
                 <span className={`text-xs font-black px-2 py-1 rounded-lg whitespace-nowrap ${
-                  i === 0
-                    ? "bg-brand-teal-600 text-white"
-                    : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
-                }`}>
+ i === 0
+ ? "bg-brand-teal-600 text-white"
+ : "bg-brand-bg-alt text-brand-text-mute "
+ }`}>
                   {label}
                 </span>
               </div>
@@ -176,13 +200,13 @@ export default function IAScheduleWidget() {
           })}
         </div>
       ) : (
-        <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-4">No upcoming IA slots calculated yet.</p>
+        <p className="text-xs text-brand-text-mute text-center py-4">No upcoming IA slots calculated yet.</p>
       )}
 
       {/* CTA */}
       <button
         onClick={() => navigate("/student/internal")}
-        className="mt-4 w-full py-2.5 rounded-xl border border-brand-teal-200 dark:border-brand-teal-500/30 text-brand-teal-600 dark:text-brand-teal-400 font-bold text-xs uppercase tracking-wide hover:bg-brand-teal-50 dark:hover:bg-brand-teal-500/10 transition-colors"
+        className="mt-4 w-full py-2.5 rounded-xl border border-brand-teal-200 text-brand-teal-600 font-bold text-xs uppercase tracking-wide hover:bg-brand-teal-50 transition-colors"
       >
         {isIADay && canStart ? "Start Today's Assessment →" : "View Full Schedule →"}
       </button>
