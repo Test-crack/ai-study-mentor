@@ -823,6 +823,7 @@ function ListeningPhase({
   );
   // ── CHANGE 1: track whether audio is currently playing ──
   const [audioPlaying, setAudioPlaying] = useState<boolean>(false);
+  const [audioLoadError, setAudioLoadError] = useState(false);
   const [error, setError] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const [data, setData] = useState<any>(null);
@@ -879,6 +880,11 @@ function ListeningPhase({
   const handleAudioEnded = () => {
     setAudioPlaying(false);
     setAudioPlayed(true);
+  };
+
+  const handleAudioError = () => {
+    setAudioLoadError(true);
+    setAudioPlayed(true); // unblock student so they can still answer and submit
   };
 
   if (sectionState === "loading") {
@@ -957,12 +963,13 @@ function ListeningPhase({
                 : "Play once. Listen carefully before answering."}
             </p>
           </div>
-          {/* ── CHANGE 1: wire up onPlay and onEnded ── */}
+          {/* ── CHANGE 1: wire up onPlay, onEnded, onError ── */}
           <audio
             ref={audioRef}
             src={data?.audio_url || ""}
             onPlay={handleAudioPlay}
             onEnded={handleAudioEnded}
+            onError={handleAudioError}
           />
           <button
             onClick={() => {
@@ -980,6 +987,11 @@ function ListeningPhase({
             {audioButtonLabel}
           </button>
         </div>
+        {audioLoadError && (
+          <p className="text-amber-700 text-xs font-bold mt-2 px-1">
+            Audio could not be loaded — please contact your instructor. You may still answer the questions below.
+          </p>
+        )}
       </div>
 
       <div className="space-y-4">
@@ -1143,7 +1155,7 @@ function ReadingPhase({
   // Once time is up the section ends, so allow submitting a partial/empty set.
   const canSubmit     = allAnswered || timeLeft <= 0;
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     setSectionState("submitting");
     setError(false);
     try {
@@ -1156,7 +1168,14 @@ function ReadingPhase({
       setError(true);
       setSectionState("ready");
     }
-  };
+  }, [studentId, answers, onComplete]);
+
+  const autoSubmittedRef = useRef(false);
+  useEffect(() => {
+    if (sectionState !== "ready" || timeLeft !== 0 || autoSubmittedRef.current) return;
+    autoSubmittedRef.current = true;
+    handleSubmit();
+  }, [sectionState, timeLeft, handleSubmit]);
 
   if (sectionState === "loading") {
     return (
@@ -1317,6 +1336,8 @@ function ReadingPhase({
             <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             Submitting…
           </span>
+        ) : timeLeft === 0 && !allAnswered ? (
+          `Submit Reading (time's up — ${answeredCount}/${totalCount} answered)`
         ) : (
           `Submit Reading ${allAnswered ? "✓" : `(${answeredCount}/${totalCount})`}`
         )}
@@ -2018,7 +2039,7 @@ function DiagnosticSummaryScreen({
 }) {
   const { profile } = useAuth();
   const skills: Skill[] = ["listening", "reading", "writing", "speaking"];
-  const avgScore = getAverageScore(results);
+  const avgScore = Math.round(getAverageScore(results) * 2) / 2;
   const overallLevel = getBandLevel(avgScore);
   const target = Number(targetBand) || 7.0;
   const [breakdownOpen, setBreakdownOpen] = useState(false);
@@ -2605,7 +2626,11 @@ function DiagnosisInner() {
 
     if (studentId) {
        checkStatus();
-       pollingInterval = setInterval(checkStatus, 10000);
+       // Only poll at gate — once active in a section, status updates come from submissions
+       const savedPhase = storageLoad<Phase>(SK.phase);
+       if (!savedPhase || savedPhase === "gate") {
+         pollingInterval = setInterval(checkStatus, 10000);
+       }
     }
 
     return () => { 
