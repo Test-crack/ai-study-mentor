@@ -35,7 +35,7 @@
 | 2 | `exam_type` columns on existing tables | ✅ Done — `platform/s1` | commit `0e30604` |
 | 3 | Batch table renames | ✅ Done — `platform/s1` | commit `0e30604` |
 | 3.5 | Super Admin: institute mgmt + exam selection | ✅ Done — see `superadmin_institute_plan.md` | `platform/s1` |
-| 4 | New tables: ~~subscriptions~~ DPDP + Viva (subscriptions pulled to 3.5) | 🔲 | `platform/s2` |
+| 4 | New tables: ~~subscriptions~~ DPDP + Viva (subscriptions pulled to 3.5) | ✅ Done — `platform/s1` (schema + DOB UI; guardian/viva scaffold-only) | `platform/s1` |
 | 5 | `packages/exam-engine` interfaces | 🔲 | `platform/s2` |
 | 6 | Extract IELTS logic behind interfaces | 🔲 | `platform/s3` |
 | 7 | Prove abstraction: IELTS through registry (gate) | 🔲 | `platform/s3` |
