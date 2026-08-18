@@ -16,14 +16,14 @@ function StatCard({ icon, label, value, sub }: {
   icon: React.ReactNode; label: string; value: string | number; sub?: string;
 }) {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 flex items-center gap-3">
-      <div className="h-10 w-10 rounded-xl bg-brand-teal-50 dark:bg-brand-teal-500/10 flex items-center justify-center shrink-0 text-brand-teal-600 dark:text-brand-teal-400">
+    <div className="bg-white rounded-2xl border border-brand-line p-4 flex items-center gap-3">
+      <div className="h-10 w-10 rounded-xl bg-brand-teal-50 flex items-center justify-center shrink-0 text-brand-teal-600">
         {icon}
       </div>
       <div>
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{label}</p>
-        <p className="text-xl font-black text-slate-900 dark:text-white leading-tight">{value}</p>
-        {sub && <p className="text-[10px] text-slate-400 mt-0.5">{sub}</p>}
+        <p className="text-[10px] font-bold text-brand-text-mute font-jetbrains uppercase tracking-wider">{label}</p>
+        <p className="text-xl font-black text-brand-text leading-tight">{value}</p>
+        {sub && <p className="text-[10px] text-brand-text-mute mt-0.5">{sub}</p>}
       </div>
     </div>
   );
@@ -43,8 +43,8 @@ function StreakCalendar({ days }: { days: Array<{ date: string; active: boolean 
               className={cn(
                 'h-6 w-6 rounded-md border transition-colors',
                 day.active
-                  ? 'bg-brand-teal-500 border-brand-teal-600 dark:bg-brand-teal-500 dark:border-brand-teal-400'
-                  : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700'
+                  ? 'bg-brand-teal-500 border-brand-teal-600'
+                  : 'bg-brand-bg-alt border-brand-line'
               )}
             />
           ))}
@@ -89,8 +89,8 @@ export function DrillsTab({ drillStats, lexiStats, streak }: Props) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* DCS Chart */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5">
-          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-4">Daily DCS — Last 14 Days</h3>
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-brand-line shadow-sm p-5">
+          <h3 className="text-sm font-bold text-brand-text mb-4">Daily DCS — Last 14 Days</h3>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }} barSize={14}>
@@ -112,36 +112,36 @@ export function DrillsTab({ drillStats, lexiStats, streak }: Props) {
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex items-center gap-4 mt-3 text-xs text-slate-400">
+          <div className="flex items-center gap-4 mt-3 text-xs text-brand-text-mute">
             <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-brand-teal-500" /> Active day</span>
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-slate-200 dark:bg-slate-700" /> No drills</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-brand-bg-alt" /> No drills</span>
           </div>
         </div>
 
         {/* Streak Calendar */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5">
-          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-4">Activity Calendar (30d)</h3>
+        <div className="bg-white rounded-2xl border border-brand-line shadow-sm p-5">
+          <h3 className="text-sm font-bold text-brand-text mb-4">Activity Calendar (30d)</h3>
           <StreakCalendar days={streak_calendar} />
-          <div className="flex items-center gap-3 mt-4 text-xs text-slate-400">
+          <div className="flex items-center gap-3 mt-4 text-xs text-brand-text-mute">
             <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-brand-teal-500" /> Active</span>
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-slate-200 dark:bg-slate-700" /> Inactive</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-brand-bg-alt" /> Inactive</span>
           </div>
         </div>
       </div>
 
       {/* Sub-skill breakdown */}
       {topSkills.length > 0 && (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-          <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800">
-            <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200">
+        <div className="bg-white rounded-2xl border border-brand-line shadow-sm overflow-hidden">
+          <div className="px-5 py-3 border-b border-brand-line">
+            <h3 className="text-sm font-bold text-brand-text">
               Sub-skills Practiced
-              <span className="ml-2 text-[11px] font-normal text-slate-400">({topSkills.length} of 10 drilled)</span>
+              <span className="ml-2 text-[11px] font-normal text-brand-text-mute">({topSkills.length} of 10 drilled)</span>
             </h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="border-b border-slate-100 dark:border-slate-800 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                <tr className="border-b border-brand-line text-[11px] font-bold text-brand-text-mute font-jetbrains uppercase tracking-wider">
                   <th className="py-3 pl-5">Sub-skill</th>
                   <th className="py-3 text-right">Sessions</th>
                   <th className="py-3 text-right pr-5">Avg Accuracy</th>
@@ -149,23 +149,23 @@ export function DrillsTab({ drillStats, lexiStats, streak }: Props) {
               </thead>
               <tbody>
                 {topSkills.map((sk, i) => (
-                  <tr key={sk.key} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                  <tr key={sk.key} className="border-b border-brand-line hover:bg-brand-bg-alt transition-colors">
                     <td className="py-3 pl-5">
                       <div className="flex items-center gap-3">
-                        <span className="text-[10px] font-black text-slate-400 w-4">{i + 1}</span>
+                        <span className="text-[10px] font-black text-brand-text-mute w-4">{i + 1}</span>
                         <div>
-                          <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{sk.display}</span>
-                          <span className="ml-1.5 text-[10px] font-medium text-slate-400">{sk.parent}</span>
+                          <span className="text-sm font-semibold text-brand-text">{sk.display}</span>
+                          <span className="ml-1.5 text-[10px] font-medium text-brand-text-mute">{sk.parent}</span>
                         </div>
                       </div>
                     </td>
-                    <td className="py-3 text-right text-sm font-bold text-slate-600 dark:text-slate-400">{sk.count}</td>
+                    <td className="py-3 text-right text-sm font-bold text-brand-text-mute">{sk.count}</td>
                     <td className="py-3 pr-5 text-right">
                       <span className={cn(
                         'text-sm font-black',
-                        sk.avg_accuracy >= 70 ? 'text-emerald-600 dark:text-emerald-400' :
-                        sk.avg_accuracy >= 50 ? 'text-amber-600 dark:text-amber-400' :
-                        'text-rose-600 dark:text-rose-400'
+                        sk.avg_accuracy >= 70 ? 'text-emerald-600' :
+                        sk.avg_accuracy >= 50 ? 'text-amber-600' :
+                        'text-rose-600'
                       )}>
                         {sk.avg_accuracy}%
                       </span>

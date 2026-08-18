@@ -62,24 +62,27 @@ export default function InstituteSettings() {
   };
 
   const inputClass =
-    "w-full px-4 py-2.5 bg-white dark:bg-white/[0.04] border border-slate-200/70 dark:border-white/[0.06] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 transition-all text-sm font-medium text-slate-700 dark:text-slate-200 placeholder:text-slate-400";
+    "w-full px-4 py-2.5 min-h-[40px] bg-white border border-brand-line rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 transition-all text-sm font-medium text-brand-text placeholder:text-brand-text-mute";
+
+  const labelClass =
+    "font-jetbrains block text-xs font-bold text-brand-text-mute uppercase tracking-wide mb-1.5";
 
   return (
     <InstituteAdminLayout activeTab="settings">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Institute Settings</h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Your institute's identity across the platform and invite emails.</p>
+        <h1 className="text-xl sm:text-2xl font-bold text-brand-text">Institute Settings</h1>
+        <p className="text-sm text-brand-text-mute mt-0.5">Your institute's identity across the platform and invite emails.</p>
       </div>
 
       {error && <ErrorBanner message={error} onRetry={load} />}
 
       {loading ? (
         <div className="space-y-4 animate-pulse">
-          <div className="h-64 bg-slate-100 dark:bg-white/[0.04] rounded-2xl" />
-          <div className="h-40 bg-slate-100 dark:bg-white/[0.04] rounded-2xl" />
+          <div className="h-64 bg-brand-bg-alt rounded-2xl" />
+          <div className="h-40 bg-brand-bg-alt rounded-2xl" />
         </div>
       ) : profile && (
-        <div className="max-w-2xl space-y-6">
+        <div className="w-full max-w-2xl space-y-4 sm:space-y-6">
           <SectionCard
             title="Institute Profile"
             icon={Building2}
@@ -90,55 +93,57 @@ export default function InstituteSettings() {
             }
           >
             <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">
-                  Institute name
-                </label>
-                <input value={name} onChange={(e) => setName(e.target.value)} className={inputClass} placeholder="Your institute's name" />
-                {!name.trim() && <p className="text-xs text-rose-500 mt-1 font-medium">Name is required.</p>}
-                <p className="text-xs text-slate-400 mt-1.5">Shown on student/tutor dashboards and in every invite email.</p>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">
-                  <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> Address</span>
-                </label>
-                <textarea value={address} onChange={(e) => setAddress(e.target.value)} rows={2} className={inputClass} placeholder="Street, city, state" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">
-                  <span className="inline-flex items-center gap-1"><ImageIcon className="h-3 w-3" /> Logo URL</span>
-                </label>
-                <div className="flex items-center gap-3">
-                  <input value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} className={inputClass} placeholder="https://…/logo.png" />
-                  {logoUrl && (
-                    <img
-                      src={logoUrl}
-                      alt="Logo preview"
-                      className="h-11 w-11 rounded-xl object-cover border border-slate-200 dark:border-white/[0.08] shrink-0"
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                    />
-                  )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelClass}>
+                    Institute name
+                  </label>
+                  <input value={name} onChange={(e) => setName(e.target.value)} className={inputClass} placeholder="Your institute's name" />
+                  {!name.trim() && <p className="text-xs text-rose-500 mt-1 font-medium">Name is required.</p>}
+                  <p className="text-xs text-brand-text-mute mt-1.5">Shown on student/tutor dashboards and in every invite email.</p>
+                </div>
+                <div>
+                  <label className={labelClass}>
+                    <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> Address</span>
+                  </label>
+                  <textarea value={address} onChange={(e) => setAddress(e.target.value)} rows={2} className={inputClass} placeholder="Street, city, state" />
+                </div>
+                <div className="md:col-span-2">
+                  <label className={labelClass}>
+                    <span className="inline-flex items-center gap-1"><ImageIcon className="h-3 w-3" /> Logo URL</span>
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <input value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} className={inputClass} placeholder="https://…/logo.png" />
+                    {logoUrl && (
+                      <img
+                        src={logoUrl}
+                        alt="Logo preview"
+                        className="h-11 w-11 rounded-xl object-cover border border-brand-line shrink-0"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div className="pt-2 flex items-center gap-3">
+              <div className="pt-4 flex flex-col sm:flex-row sm:items-center gap-3 border-t border-brand-line">
                 <button
                   onClick={save}
                   disabled={!dirty || saving || !name.trim()}
-                  className="inline-flex items-center gap-2 bg-brand-teal-600 hover:bg-brand-teal-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors shadow-sm"
+                  className="inline-flex items-center justify-center gap-2 bg-brand-teal-600 hover:bg-brand-teal-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-bold px-5 py-2.5 min-h-[40px] rounded-xl transition-colors shadow-sm w-full sm:w-auto"
                 >
                   <Save className="h-4 w-4" /> {saving ? "Saving…" : "Save changes"}
                 </button>
-                {dirty && !saving && <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">Unsaved changes</p>}
+                {dirty && !saving && <p className="text-xs text-amber-600 font-medium">Unsaved changes</p>}
               </div>
             </div>
           </SectionCard>
 
           <SectionCard title="Account" icon={ShieldCheck}>
-            <div className="text-sm text-slate-500 dark:text-slate-400 space-y-1.5">
+            <div className="text-sm text-brand-text-mute space-y-1.5">
               <p>
                 Institute created on{" "}
-                <strong className="text-slate-700 dark:text-slate-300 font-semibold">
+                <strong className="text-brand-text font-semibold">
                   {new Date(profile.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
                 </strong>.
               </p>

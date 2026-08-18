@@ -31,8 +31,21 @@ const TABS: { key: Tab; label: string }[] = [
   { key: 'heatmap',     label: 'Subskill Heatmap' },
 ];
 
+// Chart palette — literal hex values of the brand tokens (chart libs need hex)
+const CHART_PRIMARY   = '#12897C'; // brand-teal-500
+const CHART_SECONDARY = '#185A78'; // brand-blue-600
+const CHART_GRID      = '#D8E0E2'; // brand-line
+const CHART_AXIS      = '#5E6B73'; // brand-text-mute
+
+const CHART_TOOLTIP_STYLE = {
+  borderRadius: 12,
+  fontSize: 12,
+  border: `1px solid ${CHART_GRID}`,
+  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+} as const;
+
 function Skeleton({ h = 'h-64' }: { h?: string }) {
-  return <div className={`${h} bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] rounded-2xl animate-pulse`} />;
+  return <div className={`${h} bg-white border border-brand-line rounded-2xl animate-pulse`} />;
 }
 
 // ─── Sub-panels ───────────────────────────────────────────────────────────────
@@ -46,19 +59,19 @@ function CohortPanel({ data }: { data: CohortProgressData | null }) {
   }));
 
   return (
-    <div className="bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] rounded-2xl p-5 sm:p-6 shadow-sm">
-      <h3 className="font-bold tracking-tight text-slate-900 dark:text-white mb-1">6-Month Band Progress</h3>
-      <p className="text-xs text-slate-400 dark:text-slate-500 mb-5">Average band scores across all batches, tracked by IA sessions.</p>
-      <div className="h-72">
+    <div className="bg-white border border-brand-line rounded-2xl p-4 sm:p-6 shadow-sm">
+      <h3 className="font-jetbrains text-[11px] font-bold uppercase tracking-[0.15em] text-brand-text mb-1">6-Month Band Progress</h3>
+      <p className="text-xs text-brand-text-mute mb-5">Average band scores across all batches, tracked by IA sessions.</p>
+      <div className="h-64 sm:h-80 lg:h-96 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" strokeOpacity={0.5} />
-            <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-            <YAxis domain={[4, 9]} tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-            <Tooltip contentStyle={{ borderRadius: 12, fontSize: 12, border: '1px solid rgba(148,163,184,0.25)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }} />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={CHART_GRID} strokeOpacity={0.8} />
+            <XAxis dataKey="name" tick={{ fontSize: 11, fill: CHART_AXIS }} axisLine={false} tickLine={false} />
+            <YAxis domain={[4, 9]} tick={{ fontSize: 11, fill: CHART_AXIS }} axisLine={false} tickLine={false} />
+            <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
-            <Line type="monotone" dataKey="avg"  name="IA Avg Band"   stroke="#12897C" strokeWidth={3} dot={{ r: 4 }} connectNulls />
-            <Line type="monotone" dataKey="mock" name="Mock Avg Band" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} strokeDasharray="4 2" connectNulls />
+            <Line type="monotone" dataKey="avg"  name="IA Avg Band"   stroke={CHART_PRIMARY} strokeWidth={3} dot={{ r: 4 }} connectNulls />
+            <Line type="monotone" dataKey="mock" name="Mock Avg Band" stroke={CHART_SECONDARY} strokeWidth={2} dot={{ r: 3 }} strokeDasharray="4 2" connectNulls />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -71,7 +84,7 @@ function BatchCompPanel({ rows }: { rows: BatchComparisonRow[] }) {
 
   if (rows.length === 0) {
     return (
-      <div className="bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] rounded-2xl p-12 text-center text-slate-500 dark:text-slate-400 shadow-sm">
+      <div className="bg-white border border-brand-line rounded-2xl p-12 text-center text-brand-text-mute shadow-sm">
         No batch data available yet.
       </div>
     );
@@ -84,71 +97,71 @@ function BatchCompPanel({ rows }: { rows: BatchComparisonRow[] }) {
 
   return (
     <div className="space-y-4">
-      <div className="bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] rounded-2xl p-5 sm:p-6 shadow-sm">
-        <h3 className="font-bold tracking-tight text-slate-900 dark:text-white mb-4">Avg Band by Batch</h3>
-        <div className="h-56">
+      <div className="bg-white border border-brand-line rounded-2xl p-4 sm:p-6 shadow-sm">
+        <h3 className="font-jetbrains text-[11px] font-bold uppercase tracking-[0.15em] text-brand-text mb-4">Avg Band by Batch</h3>
+        <div className="h-64 sm:h-80 lg:h-96 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.5} />
-              <XAxis dataKey="name" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
-              <YAxis domain={[4, 9]} tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ borderRadius: 12, fontSize: 12, border: '1px solid rgba(148,163,184,0.25)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }} />
-              <Bar dataKey="band" name="Avg Band" fill="#12897C" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="imp" name="Improvement" fill="#10b981" radius={[4, 4, 0, 0]} />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={CHART_GRID} strokeOpacity={0.8} />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: CHART_AXIS }} axisLine={false} tickLine={false} />
+              <YAxis domain={[4, 9]} tick={{ fontSize: 11, fill: CHART_AXIS }} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
+              <Bar dataKey="band" name="Avg Band" fill={CHART_PRIMARY} radius={[4, 4, 0, 0]} />
+              <Bar dataKey="imp" name="Improvement" fill={CHART_SECONDARY} radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] rounded-2xl shadow-sm overflow-hidden">
-        <div className="px-5 sm:px-6 py-4 border-b border-slate-100 dark:border-white/[0.06]">
-          <h3 className="font-bold tracking-tight text-slate-900 dark:text-white">Batch Details</h3>
+      <div className="bg-white border border-brand-line rounded-2xl shadow-sm overflow-hidden">
+        <div className="px-4 sm:px-6 py-4 border-b border-brand-line">
+          <h3 className="font-jetbrains text-[11px] font-bold uppercase tracking-[0.15em] text-brand-text">Batch Details</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-[10px] uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-white/[0.06] bg-slate-50/60 dark:bg-white/[0.02]">
-                <th className="px-5 sm:px-6 py-2.5 text-left font-semibold">Batch</th>
-                <th className="px-4 py-2.5 text-center font-semibold">Students</th>
-                <th className="px-4 py-2.5 text-center font-semibold">Avg Band</th>
-                <th className="px-4 py-2.5 text-center font-semibold">Improvement</th>
-                <th className="px-4 py-2.5 text-center font-semibold">IA Rate</th>
-                <th className="px-4 py-2.5 text-center font-semibold">At Risk</th>
-                <th className="px-4 py-2.5 text-center font-semibold">On Target</th>
+              <tr className="font-jetbrains text-[10px] uppercase tracking-[0.12em] text-brand-text-mute border-b border-brand-line bg-brand-bg-alt">
+                <th className="px-4 sm:px-6 py-2.5 text-left font-bold">Batch</th>
+                <th className="px-4 py-2.5 text-center font-bold">Students</th>
+                <th className="px-4 py-2.5 text-center font-bold">Avg Band</th>
+                <th className="px-4 py-2.5 text-center font-bold">Improvement</th>
+                <th className="px-4 py-2.5 text-center font-bold">IA Rate</th>
+                <th className="px-4 py-2.5 text-center font-bold">At Risk</th>
+                <th className="px-4 py-2.5 text-center font-bold">On Target</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50 dark:divide-white/[0.04]">
+            <tbody className="divide-y divide-brand-line">
               {rows.map(b => (
                 <React.Fragment key={b.batch_id}>
                   <tr
-                    className="hover:bg-slate-50 dark:hover:bg-white/[0.03] cursor-pointer transition-colors"
+                    className="hover:bg-brand-bg-alt cursor-pointer transition-colors"
                     onClick={() => setExpanded(expanded === b.batch_id ? null : b.batch_id)}
                   >
-                    <td className="px-5 sm:px-6 py-2.5">
+                    <td className="px-4 sm:px-6 py-3">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-[13px] text-slate-800 dark:text-slate-200">{b.batch_name}</span>
+                        <span className="font-medium text-[13px] text-brand-text">{b.batch_name}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-2.5 text-center font-bold tabular-nums">{b.student_count}</td>
-                    <td className="px-4 py-2.5 text-center">
-                      <span className="inline-flex items-center justify-center text-xs font-bold tabular-nums px-2.5 py-0.5 rounded-full bg-brand-teal-50 dark:bg-brand-teal-500/10 text-brand-teal-700 dark:text-brand-teal-400 ring-1 ring-inset ring-brand-teal-600/20 dark:ring-brand-teal-400/25">
+                    <td className="px-4 py-3 text-center font-bold tabular-nums text-brand-text">{b.student_count}</td>
+                    <td className="px-4 py-3 text-center">
+                      <span className="inline-flex items-center justify-center text-xs font-bold tabular-nums px-2.5 py-0.5 rounded-full bg-brand-teal-50 text-brand-teal-700 ring-1 ring-inset ring-brand-teal-600/20">
                         {b.avg_band !== null ? b.avg_band.toFixed(1) : '—'}
                       </span>
                     </td>
-                    <td className="px-4 py-2.5 text-center">
+                    <td className="px-4 py-3 text-center">
                       {b.improvement_delta !== null ? (
-                        <span className={`font-bold tabular-nums ${(b.improvement_delta ?? 0) > 0 ? 'text-emerald-600 dark:text-emerald-400' : (b.improvement_delta ?? 0) < 0 ? 'text-rose-500' : 'text-slate-400'}`}>
+                        <span className={`font-bold tabular-nums ${(b.improvement_delta ?? 0) > 0 ? 'text-emerald-600' : (b.improvement_delta ?? 0) < 0 ? 'text-rose-500' : 'text-brand-text-mute'}`}>
                           {(b.improvement_delta ?? 0) > 0 ? '+' : ''}{(b.improvement_delta ?? 0).toFixed(1)}
                         </span>
                       ) : '—'}
                     </td>
-                    <td className="px-4 py-2.5 text-center text-sm tabular-nums text-slate-600 dark:text-slate-300">{b.ia_completion_rate}%</td>
-                    <td className="px-4 py-2.5 text-center">
-                      <span className={`text-xs font-semibold tabular-nums px-2 py-0.5 rounded-full ring-1 ring-inset ${b.at_risk_pct > 20 ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 ring-rose-600/10 dark:ring-rose-400/20' : 'bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 ring-slate-400/20 dark:ring-white/10'}`}>
+                    <td className="px-4 py-3 text-center text-sm tabular-nums text-brand-text">{b.ia_completion_rate}%</td>
+                    <td className="px-4 py-3 text-center">
+                      <span className={`text-xs font-semibold tabular-nums px-2 py-0.5 rounded-full ring-1 ring-inset ${b.at_risk_pct > 20 ? 'bg-rose-50 text-rose-700 ring-rose-600/10' : 'bg-brand-bg-alt text-brand-text-mute ring-brand-line'}`}>
                         {b.at_risk_pct}%
                       </span>
                     </td>
-                    <td className="px-4 py-2.5 text-center text-slate-300 dark:text-slate-600 text-sm">—</td>
+                    <td className="px-4 py-3 text-center text-brand-text-mute text-sm">—</td>
                   </tr>
                 </React.Fragment>
               ))}
@@ -170,30 +183,30 @@ function EngagementPanel({ weeks }: { weeks: EngagementWeek[] }) {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
           { label: 'Active Rate (latest week)', value: `${latest?.engagement_rate ?? 0}%` },
           { label: 'Avg DCS (latest week)', value: `${latest?.avg_dcs ?? 0}%` },
           { label: 'Weeks tracked', value: weeks.length },
         ].map(m => (
-          <div key={m.label} className="rounded-2xl bg-white/85 dark:bg-[#131318]/90 backdrop-blur-xl border border-white/20 dark:border-white/[0.08] ring-1 ring-slate-900/[0.05] dark:ring-0 p-4 sm:p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">{m.label}</p>
-            <p className="text-2xl sm:text-3xl font-bold tracking-tight tabular-nums text-slate-900 dark:text-white">{m.value}</p>
+          <div key={m.label} className="rounded-2xl bg-white border border-brand-line p-4 sm:p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+            <p className="font-jetbrains text-[10px] font-bold uppercase tracking-wider text-brand-text-mute mb-2">{m.label}</p>
+            <p className="text-2xl sm:text-3xl font-black tracking-tight tabular-nums text-brand-text">{m.value}</p>
           </div>
         ))}
       </div>
-      <div className="bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] rounded-2xl p-5 sm:p-6 shadow-sm">
-        <h3 className="font-bold tracking-tight text-slate-900 dark:text-white mb-4">8-Week Engagement Trend</h3>
-        <div className="h-64">
+      <div className="bg-white border border-brand-line rounded-2xl p-4 sm:p-6 shadow-sm">
+        <h3 className="font-jetbrains text-[11px] font-bold uppercase tracking-[0.15em] text-brand-text mb-4">8-Week Engagement Trend</h3>
+        <div className="h-64 sm:h-80 lg:h-96 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.5} />
-              <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
-              <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ borderRadius: 12, fontSize: 12, border: '1px solid rgba(148,163,184,0.25)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }} formatter={(v) => `${v}%`} />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={CHART_GRID} strokeOpacity={0.8} />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: CHART_AXIS }} axisLine={false} tickLine={false} />
+              <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 11, fill: CHART_AXIS }} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={CHART_TOOLTIP_STYLE} formatter={(v) => `${v}%`} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Line type="monotone" dataKey="active" name="Active %" stroke="#12897C" strokeWidth={2} dot={{ r: 3 }} />
-              <Line type="monotone" dataKey="dcs" name="DCS %" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="active" name="Active %" stroke={CHART_PRIMARY} strokeWidth={2} dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="dcs" name="DCS %" stroke={CHART_SECONDARY} strokeWidth={2} dot={{ r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -210,35 +223,35 @@ function GoalsPanel({ data }: { data: GoalAchievementData | null }) {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
-          { label: 'Below Target', value: data.below, pct: pct(data.below), color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-50/80 dark:bg-rose-500/[0.07]', ring: 'ring-rose-600/10 dark:ring-rose-400/15' },
-          { label: 'Near Target (≤0.5)', value: data.near, pct: pct(data.near), color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50/80 dark:bg-amber-500/[0.07]', ring: 'ring-amber-600/10 dark:ring-amber-400/15' },
-          { label: 'At / Above Target', value: data.at_or_above, pct: pct(data.at_or_above), color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50/80 dark:bg-emerald-500/[0.07]', ring: 'ring-emerald-600/10 dark:ring-emerald-400/15' },
-          { label: 'Exam Ready', value: data.exam_ready, pct: total > 0 ? Math.round(data.exam_ready / total * 100) : 0, color: 'text-brand-teal-600 dark:text-brand-teal-400', bg: 'bg-brand-teal-50/80 dark:bg-brand-teal-500/[0.07]', ring: 'ring-brand-teal-600/10 dark:ring-brand-teal-400/15' },
+          { label: 'Below Target', value: data.below, pct: pct(data.below), color: 'text-rose-600', bg: 'bg-rose-50', ring: 'ring-rose-600/10' },
+          { label: 'Near Target (≤0.5)', value: data.near, pct: pct(data.near), color: 'text-amber-600', bg: 'bg-amber-50', ring: 'ring-amber-600/10' },
+          { label: 'At / Above Target', value: data.at_or_above, pct: pct(data.at_or_above), color: 'text-emerald-600', bg: 'bg-emerald-50', ring: 'ring-emerald-600/10' },
+          { label: 'Exam Ready', value: data.exam_ready, pct: total > 0 ? Math.round(data.exam_ready / total * 100) : 0, color: 'text-brand-teal-600', bg: 'bg-brand-teal-50', ring: 'ring-brand-teal-600/10' },
         ].map(m => (
           <div key={m.label} className={`${m.bg} rounded-2xl p-4 sm:p-5 shadow-sm ring-1 ring-inset ${m.ring} hover:shadow-md hover:-translate-y-0.5 transition-all duration-300`}>
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">{m.label}</p>
-            <p className={`text-2xl sm:text-3xl font-bold tracking-tight tabular-nums ${m.color}`}>{m.value}</p>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1.5">{m.pct}% of students with target</p>
+            <p className="font-jetbrains text-[10px] font-bold uppercase tracking-wider text-brand-text-mute mb-2">{m.label}</p>
+            <p className={`text-2xl sm:text-3xl font-black tracking-tight tabular-nums ${m.color}`}>{m.value}</p>
+            <p className="text-xs text-brand-text-mute mt-1.5">{m.pct}% of students with target</p>
           </div>
         ))}
       </div>
 
       {data.by_batch.length > 0 && (
-        <div className="bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] rounded-2xl p-5 sm:p-6 shadow-sm">
-          <h3 className="font-bold tracking-tight text-slate-900 dark:text-white mb-4">Goal Progress by Batch</h3>
+        <div className="bg-white border border-brand-line rounded-2xl p-4 sm:p-6 shadow-sm">
+          <h3 className="font-jetbrains text-[11px] font-bold uppercase tracking-[0.15em] text-brand-text mb-4">Goal Progress by Batch</h3>
           <div className="space-y-4">
             {data.by_batch.map(b => {
               const bTotal = b.below + b.near + b.at_or_above;
               const atPct = bTotal > 0 ? Math.round(b.at_or_above / bTotal * 100) : 0;
               return (
                 <div key={b.batch_id}>
-                  <div className="flex justify-between items-baseline text-sm mb-1.5">
-                    <span className="font-medium text-slate-700 dark:text-slate-300">{b.batch_name}</span>
-                    <span className="text-xs tabular-nums text-slate-400 dark:text-slate-500">{b.at_or_above}/{bTotal} on target ({atPct}%)</span>
+                  <div className="flex flex-wrap justify-between items-baseline gap-2 text-sm mb-1.5">
+                    <span className="font-medium text-brand-text">{b.batch_name}</span>
+                    <span className="text-xs tabular-nums text-brand-text-mute">{b.at_or_above}/{bTotal} on target ({atPct}%)</span>
                   </div>
-                  <div className="w-full bg-slate-100 dark:bg-white/[0.06] rounded-full h-2 flex overflow-hidden">
+                  <div className="w-full bg-brand-bg-alt rounded-full h-2 flex overflow-hidden">
                     <div className="bg-rose-400 h-2 transition-all" style={{ width: `${bTotal > 0 ? b.below / bTotal * 100 : 0}%` }} />
                     <div className="bg-amber-400 h-2 transition-all" style={{ width: `${bTotal > 0 ? b.near / bTotal * 100 : 0}%` }} />
                     <div className="bg-emerald-500 h-2 transition-all" style={{ width: `${atPct}%` }} />
@@ -247,7 +260,7 @@ function GoalsPanel({ data }: { data: GoalAchievementData | null }) {
               );
             })}
           </div>
-          <div className="flex items-center gap-4 mt-5 pt-4 border-t border-slate-100 dark:border-white/[0.06] text-xs text-slate-400 dark:text-slate-500">
+          <div className="flex flex-wrap items-center gap-4 mt-5 pt-4 border-t border-brand-line font-jetbrains text-[10px] uppercase tracking-wider text-brand-text-mute">
             <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-rose-400 inline-block" />Below</span>
             <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" />Near</span>
             <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />On/Above target</span>
@@ -259,7 +272,7 @@ function GoalsPanel({ data }: { data: GoalAchievementData | null }) {
 }
 
 function HeatmapPanel({ rows }: { rows: SubskillHeatmapRow[] }) {
-  if (rows.length === 0) return <div className="bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] rounded-2xl p-12 text-center text-slate-500 dark:text-slate-400 shadow-sm">No drill data yet.</div>;
+  if (rows.length === 0) return <div className="bg-white border border-brand-line rounded-2xl p-12 text-center text-brand-text-mute shadow-sm">No drill data yet.</div>;
 
   const bySkill = rows.reduce<Record<string, SubskillHeatmapRow[]>>((acc, r) => {
     (acc[r.skill] ??= []).push(r);
@@ -269,13 +282,13 @@ function HeatmapPanel({ rows }: { rows: SubskillHeatmapRow[] }) {
   return (
     <div className="space-y-4">
       {Object.entries(bySkill).map(([skill, subrows]) => (
-        <div key={skill} className="bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] rounded-2xl p-5 sm:p-6 shadow-sm">
-          <h3 className="font-bold tracking-tight text-slate-900 dark:text-white mb-4 capitalize">{skill.toLowerCase()}</h3>
+        <div key={skill} className="bg-white border border-brand-line rounded-2xl p-4 sm:p-6 shadow-sm">
+          <h3 className="font-jetbrains text-[11px] font-bold uppercase tracking-[0.15em] text-brand-text mb-4">{skill.toLowerCase()}</h3>
           <div className="space-y-2.5">
             {subrows.map(r => (
-              <div key={r.sub_skill} className="flex items-center gap-3">
-                <span className="text-xs text-slate-500 dark:text-slate-400 w-40 shrink-0 truncate" title={r.sub_skill}>{r.sub_skill}</span>
-                <div className="flex-1 bg-slate-100 dark:bg-white/[0.06] rounded-full h-2.5 relative overflow-hidden">
+              <div key={r.sub_skill} className="flex items-center gap-2 sm:gap-3">
+                <span className="text-xs text-brand-text-mute w-24 sm:w-40 shrink-0 truncate" title={r.sub_skill}>{r.sub_skill}</span>
+                <div className="flex-1 min-w-0 bg-brand-bg-alt rounded-full h-2.5 relative overflow-hidden">
                   <div
                     className={`h-2.5 rounded-full transition-all ${
                       r.avg_accuracy >= 75 ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
@@ -285,8 +298,8 @@ function HeatmapPanel({ rows }: { rows: SubskillHeatmapRow[] }) {
                     style={{ width: `${r.avg_accuracy}%` }}
                   />
                 </div>
-                <span className="text-xs font-bold tabular-nums w-10 text-right text-slate-700 dark:text-slate-300">{r.avg_accuracy}%</span>
-                <span className="text-xs tabular-nums text-slate-400 dark:text-slate-500 w-16 text-right">{r.drill_count} drills</span>
+                <span className="text-xs font-bold tabular-nums w-10 text-right text-brand-text">{r.avg_accuracy}%</span>
+                <span className="hidden sm:inline text-xs tabular-nums text-brand-text-mute w-16 text-right">{r.drill_count} drills</span>
               </div>
             ))}
           </div>
@@ -335,38 +348,29 @@ export default function Performance() {
   useEffect(() => { loadAll(); }, [loadAll]);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0a0a0a] font-sans text-slate-900 dark:text-white transition-colors duration-300">
-      <div className="hidden lg:block">
-        <InstituteOwnerSidebar
-          activeTab="performance"
-          isCollapsed={isSidebarCollapsed}
-          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        />
-      </div>
+    <div className="relative min-h-screen font-plex antialiased overflow-x-hidden bg-brand-bg text-brand-text">
+      <InstituteOwnerSidebar
+        activeTab="performance"
+        isCollapsed={isSidebarCollapsed}
+        toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      />
 
-      <div className={`transition-all duration-300 flex flex-col min-h-screen ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
+      <div className={`relative z-10 transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-24' : 'lg:pl-72'}`}>
         <InstituteOwnerTopbar />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="max-w-[1400px] mx-auto">
+        <main className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 max-w-[90rem] mx-auto pb-16">
 
             {/* ── Hero Banner ─────────────────────────────────────────────── */}
-            <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-brand-teal-100/80 dark:border-white/[0.06] bg-gradient-to-r from-[#eff4ff] via-[#f4f1ff] to-[#f3f0ff] dark:from-[#111827] dark:via-[#161a38] dark:to-[#1e1b4b] px-5 sm:px-8 pt-6 sm:pt-8 pb-14 sm:pb-16 shadow-sm">
-              <div aria-hidden className="pointer-events-none select-none absolute inset-0">
-                <div className="absolute -top-20 -right-12 w-64 h-64 rounded-full bg-brand-teal-300/25 dark:bg-brand-teal-500/15 blur-3xl" />
-                <div className="absolute -bottom-28 left-1/3 w-72 h-72 rounded-full bg-brand-blue-300/20 dark:bg-brand-blue-500/10 blur-3xl" />
-                <div className="absolute top-8 -left-10 w-44 h-44 rounded-full bg-sky-300/20 dark:bg-sky-500/10 blur-3xl" />
-              </div>
-
+            <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-brand-line-16 bg-brand-ink-deep text-white px-5 sm:px-8 pt-6 sm:pt-8 pb-6 sm:pb-8 shadow-sm">
               <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div>
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-brand-teal-600 dark:text-brand-teal-300 bg-white/60 dark:bg-white/[0.06] border border-white/70 dark:border-white/[0.08] backdrop-blur px-2.5 py-1 rounded-full">
+                  <span className="inline-flex items-center gap-1.5 font-jetbrains text-[10px] font-bold uppercase tracking-[0.2em] text-brand-teal-300 bg-brand-teal-500/10 border border-brand-teal-500/25 px-2.5 py-1 rounded-full">
                     <Sparkles className="w-3 h-3" /> Owner Portal
                   </span>
-                  <h1 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                    Performance <span className="text-brand-teal-600 dark:text-brand-teal-400">Analytics</span>
+                  <h1 className="mt-3 font-manrope text-2xl sm:text-3xl font-black tracking-tight text-white">
+                    Performance <span className="text-brand-mint">Analytics</span>
                   </h1>
-                  <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
+                  <p className="mt-1.5 text-sm text-brand-on-ink">
                     Cohort trends, batch comparison, and engagement insights
                   </p>
                 </div>
@@ -374,24 +378,24 @@ export default function Performance() {
                 <button
                   onClick={loadAll}
                   disabled={loading}
-                  className="self-start shrink-0 inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 bg-white/70 dark:bg-white/[0.06] hover:bg-white dark:hover:bg-white/[0.12] border border-white/70 dark:border-white/[0.08] backdrop-blur px-3.5 py-2 rounded-full shadow-sm transition-all disabled:opacity-60"
+                  className="self-start shrink-0 inline-flex items-center gap-1.5 min-h-[40px] text-xs font-bold text-white bg-white/5 hover:bg-white/10 border border-brand-line-16 px-4 py-2 rounded-full transition-all disabled:opacity-60"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Refresh
                 </button>
               </div>
             </section>
 
-            {/* ── Tabs (overlap hero) ─────────────────────────────────────── */}
-            <div className="relative z-10 -mt-7 sm:-mt-8">
-              <div className="inline-flex max-w-full gap-1 bg-white/85 dark:bg-[#131318]/90 backdrop-blur-xl border border-white/20 dark:border-white/[0.08] ring-1 ring-slate-900/[0.05] dark:ring-0 rounded-2xl p-1.5 shadow-sm overflow-x-auto">
+            {/* ── Tabs ────────────────────────────────────────────────────── */}
+            <div className="relative z-10">
+              <div className="flex flex-wrap gap-1 bg-white border border-brand-line rounded-2xl p-1.5 shadow-sm">
                 {TABS.map(t => (
                   <button
                     key={t.key}
                     onClick={() => setActiveTab(t.key)}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
+                    className={`min-h-[40px] px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all ${
                       activeTab === t.key
-                        ? 'bg-brand-teal-600 text-white shadow-sm dark:bg-brand-teal-500'
-                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/[0.04]'
+                        ? 'bg-brand-teal-600 text-white shadow-sm'
+                        : 'text-brand-text-mute hover:text-brand-text hover:bg-brand-bg-alt'
                     }`}
                   >
                     {t.label}
@@ -401,9 +405,9 @@ export default function Performance() {
             </div>
 
             {/* ── Panels ──────────────────────────────────────────────────── */}
-            <div className="mt-6 pb-4">
+            <div className="pb-4">
               {loading ? (
-                <div className="flex items-center justify-center h-64 rounded-2xl bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] shadow-sm">
+                <div className="flex items-center justify-center h-64 rounded-2xl bg-white border border-brand-line shadow-sm">
                   <Loader2 className="w-8 h-8 animate-spin text-brand-teal-500" />
                 </div>
               ) : (
@@ -417,7 +421,6 @@ export default function Performance() {
               )}
             </div>
 
-          </div>
         </main>
       </div>
     </div>

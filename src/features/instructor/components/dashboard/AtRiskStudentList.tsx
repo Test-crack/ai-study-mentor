@@ -22,56 +22,52 @@ function getSeverity(flags: string[]): Severity {
   return 'info';
 }
 
-// Reskinned: glass cards in dark, tinted surfaces in light
 const SEVERITY_CONFIG = {
   critical: {
     label:        'Critical',
-    labelClass:   'bg-rose-100 dark:bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30',
-    cardBorder:   'border-rose-200 dark:border-rose-500/25',
-    cardBg:       'bg-rose-50/40 dark:bg-rose-950/20',
-    headerBg:     'bg-rose-50/60 dark:bg-rose-500/[0.06]',
-    glow:         'dark:shadow-[0_0_24px_rgba(244,63,94,0.12)]',
+    labelClass:   'bg-rose-100 text-rose-700 border border-rose-200',
+    cardBorder:   'border-rose-200',
+    cardBg:       'bg-rose-50/40',
+    headerBg:     'bg-rose-50/60',
     dot:          'bg-rose-500',
-    sectionLabel: 'text-rose-600 dark:text-rose-400',
-    sectionLine:  'bg-rose-200 dark:bg-rose-500/25',
+    sectionLabel: 'text-rose-600',
+    sectionLine:  'bg-rose-200',
   },
   warning: {
     label:        'Warning',
-    labelClass:   'bg-amber-100 dark:bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30',
-    cardBorder:   'border-amber-200 dark:border-amber-500/25',
-    cardBg:       'bg-amber-50/40 dark:bg-amber-950/20',
-    headerBg:     'bg-amber-50/60 dark:bg-amber-500/[0.06]',
-    glow:         'dark:shadow-[0_0_24px_rgba(245,158,11,0.10)]',
+    labelClass:   'bg-amber-100 text-amber-700 border border-amber-200',
+    cardBorder:   'border-amber-200',
+    cardBg:       'bg-amber-50/40',
+    headerBg:     'bg-amber-50/60',
     dot:          'bg-amber-500',
-    sectionLabel: 'text-amber-600 dark:text-amber-400',
-    sectionLine:  'bg-amber-200 dark:bg-amber-500/25',
+    sectionLabel: 'text-amber-600',
+    sectionLine:  'bg-amber-200',
   },
   info: {
     label:        'Monitor',
-    labelClass:   'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700',
-    cardBorder:   'border-slate-200 dark:border-white/[0.07]',
-    cardBg:       'bg-white dark:bg-white/[0.02]',
-    headerBg:     'bg-slate-50/60 dark:bg-white/[0.03]',
-    glow:         '',
-    dot:          'bg-slate-400',
-    sectionLabel: 'text-slate-500 dark:text-slate-400',
-    sectionLine:  'bg-slate-200 dark:bg-white/[0.07]',
+    labelClass:   'bg-brand-bg-alt text-brand-text-mute border border-brand-line',
+    cardBorder:   'border-brand-line',
+    cardBg:       'bg-white',
+    headerBg:     'bg-brand-bg-alt',
+    dot:          'bg-brand-text-mute',
+    sectionLabel: 'text-brand-text-mute',
+    sectionLine:  'bg-brand-line',
   },
 };
 
 function getFlagMeta(flag: string): { icon: React.ReactNode; color: string } {
   const f = flag.toLowerCase();
   if (f.includes('assessment'))
-    return { icon: <ClipboardX className="h-3 w-3 shrink-0" />, color: 'text-rose-600 dark:text-rose-400' };
+    return { icon: <ClipboardX className="h-3 w-3 shrink-0" />, color: 'text-rose-600' };
   if (f.includes('declining'))
-    return { icon: <TrendingDown className="h-3 w-3 shrink-0" />, color: 'text-rose-600 dark:text-rose-400' };
+    return { icon: <TrendingDown className="h-3 w-3 shrink-0" />, color: 'text-rose-600' };
   if (f.includes('activity') || f.includes('days') || f.includes('never drilled'))
-    return { icon: <Clock className="h-3 w-3 shrink-0" />, color: 'text-amber-600 dark:text-amber-400' };
+    return { icon: <Clock className="h-3 w-3 shrink-0" />, color: 'text-amber-600' };
   if (f.includes('momentum') || f.includes('streak'))
-    return { icon: <Zap className="h-3 w-3 shrink-0" />, color: 'text-amber-600 dark:text-amber-400' };
+    return { icon: <Zap className="h-3 w-3 shrink-0" />, color: 'text-amber-600' };
   if (f.includes('diagnosed'))
-    return { icon: <Stethoscope className="h-3 w-3 shrink-0" />, color: 'text-slate-500 dark:text-slate-400' };
-  return { icon: <AlertTriangle className="h-3 w-3 shrink-0" />, color: 'text-slate-500 dark:text-slate-400' };
+    return { icon: <Stethoscope className="h-3 w-3 shrink-0" />, color: 'text-brand-text-mute' };
+  return { icon: <AlertTriangle className="h-3 w-3 shrink-0" />, color: 'text-brand-text-mute' };
 }
 
 function initials(name: string) {
@@ -79,12 +75,12 @@ function initials(name: string) {
 }
 
 const AVATAR_PALETTES = [
-  'bg-brand-teal-100 dark:bg-brand-teal-500/20 text-brand-teal-700 dark:text-brand-teal-400',
-  'bg-brand-blue-100 dark:bg-brand-blue-500/20 text-brand-blue-700 dark:text-brand-blue-400',
-  'bg-sky-100 dark:bg-sky-500/20 text-sky-700 dark:text-sky-400',
-  'bg-teal-100 dark:bg-teal-500/20 text-teal-700 dark:text-teal-400',
-  'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400',
-  'bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400',
+  'bg-brand-teal-100 text-brand-teal-700',
+  'bg-brand-blue-100 text-brand-blue-700',
+  'bg-sky-100 text-sky-700',
+  'bg-teal-100 text-teal-700',
+  'bg-amber-100 text-amber-700',
+  'bg-rose-100 text-rose-700',
 ];
 function avatarPalette(name: string) {
   const code = name.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
@@ -106,14 +102,9 @@ function RiskCard({ student, severity, batchId }: { student: AtRiskStudent; seve
     <div className={cn(
       'flex flex-col rounded-2xl border overflow-hidden transition-all duration-200',
       'hover:-translate-y-0.5',
-      cfg.cardBg, cfg.cardBorder, cfg.glow,
-      // Light shadow
-      'shadow-[0_2px_8px_-2px_rgba(15,23,42,0.07)]',
-      'hover:shadow-[0_6px_20px_-4px_rgba(15,23,42,0.12)]',
+      cfg.cardBg, cfg.cardBorder,
+      'shadow-sm hover:shadow-md',
     )}>
-
-      {/* Top hairline in dark mode */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent hidden dark:block" />
 
       {/* Card header */}
       <div className={cn('px-3 sm:px-4 pt-3 sm:pt-4 pb-3', cfg.headerBg)}>
@@ -129,54 +120,54 @@ function RiskCard({ student, severity, batchId }: { student: AtRiskStudent; seve
               }
             </div>
             <div className="min-w-0">
-              <span className={cn('text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md inline-block mb-0.5', cfg.labelClass)}>
+              <span className={cn('font-jetbrains text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md inline-block mb-0.5', cfg.labelClass)}>
                 {cfg.label}
               </span>
-              <p className="text-sm font-bold text-slate-800 dark:text-white truncate leading-tight">
+              <p className="text-sm font-bold text-brand-text truncate leading-tight">
                 {student.name}
               </p>
             </div>
           </div>
-          <span className="shrink-0 text-[11px] font-bold text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-white/[0.05] px-2 py-0.5 rounded-full whitespace-nowrap border border-slate-200 dark:border-white/[0.07]">
+          <span className="shrink-0 text-[11px] font-bold text-brand-text-mute bg-brand-bg-alt px-2 py-0.5 rounded-full whitespace-nowrap border border-brand-line">
             {student.flags.length} flag{student.flags.length !== 1 ? 's' : ''}
           </span>
         </div>
       </div>
 
       {/* Metrics strip — zebra tinted cells */}
-      <div className="grid grid-cols-3 divide-x divide-slate-100 dark:divide-white/[0.05] border-y border-slate-100 dark:border-white/[0.05]">
+      <div className="grid grid-cols-3 divide-x divide-brand-line border-y border-brand-line">
         {[
           {
             label: 'Band',
             value: student.current_band !== null ? student.current_band.toFixed(1) : '—',
             color: student.current_band !== null
               ? student.current_band >= 6
-                ? 'text-sky-600 dark:text-sky-400 font-black'
+                ? 'text-sky-600 font-black'
                 : student.current_band >= 5
-                  ? 'text-amber-600 dark:text-amber-400 font-black'
-                  : 'text-rose-600 dark:text-rose-400 font-black'
-              : 'text-slate-400',
+                  ? 'text-amber-600 font-black'
+                  : 'text-rose-600 font-black'
+              : 'text-brand-text-mute',
           },
           {
             label: 'Missed IAs',
             value: String(student.missed_ia_count),
             color: student.missed_ia_count >= 2
-              ? 'text-rose-600 dark:text-rose-400 font-bold'
-              : 'text-slate-700 dark:text-slate-300',
+              ? 'text-rose-600 font-bold'
+              : 'text-brand-text',
           },
           {
             label: 'Activity',
             value: inactiveLabel,
             color: student.days_inactive > 3 || student.days_inactive === -1
-              ? 'text-amber-600 dark:text-amber-400'
-              : 'text-slate-600 dark:text-slate-400',
+              ? 'text-amber-600'
+              : 'text-brand-text-mute',
           },
         ].map((m, i) => (
           <div key={m.label} className={cn(
             'px-2 sm:px-3 py-2 text-center',
-            i % 2 === 1 ? 'bg-slate-50/60 dark:bg-white/[0.02]' : ''
+            i % 2 === 1 ? 'bg-brand-bg-alt' : ''
           )}>
-            <p className="text-[9px] sm:text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5 truncate">{m.label}</p>
+            <p className="font-jetbrains text-[9px] sm:text-[10px] font-semibold text-brand-text-mute uppercase tracking-wider mb-0.5 truncate">{m.label}</p>
             <p className={cn('text-[11px] sm:text-xs leading-tight', m.color)}>{m.value}</p>
           </div>
         ))}
@@ -188,7 +179,7 @@ function RiskCard({ student, severity, batchId }: { student: AtRiskStudent; seve
           const { icon, color } = getFlagMeta(flag);
           return (
             <div key={i} className="flex items-start gap-2">
-              <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 w-3 shrink-0 tabular-nums mt-0.5">{i + 1}</span>
+              <span className="text-[10px] font-black text-brand-text-mute w-3 shrink-0 tabular-nums mt-0.5">{i + 1}</span>
               <span className={cn('flex items-center gap-1.5 text-xs font-medium leading-snug', color)}>
                 {icon}{flag}
               </span>
@@ -207,13 +198,12 @@ function RiskCard({ student, severity, batchId }: { student: AtRiskStudent; seve
           className={cn(
             'w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl',
             'text-xs font-bold transition-all duration-200 group',
-            'bg-slate-50 dark:bg-white/[0.04]',
-            'border border-slate-200 dark:border-white/[0.07]',
-            'text-slate-600 dark:text-slate-300',
-            'hover:bg-brand-teal-50 dark:hover:bg-brand-teal-500/10',
-            'hover:text-brand-teal-600 dark:hover:text-brand-teal-300',
-            'hover:border-brand-teal-200 dark:hover:border-brand-teal-500/30',
-            'hover:shadow-[0_0_12px_rgba(99,102,241,0.12)]',
+            'bg-brand-bg-alt',
+            'border border-brand-line',
+            'text-brand-text-mute',
+            'hover:bg-brand-teal-50',
+            'hover:text-brand-teal-600',
+            'hover:border-brand-teal-200',
           )}
         >
           View Student Profile
@@ -228,29 +218,29 @@ function RiskCard({ student, severity, batchId }: { student: AtRiskStudent; seve
 
 function CardSkeleton() {
   return (
-    <div className="rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.02] overflow-hidden animate-pulse">
-      <div className="px-3 sm:px-4 pt-3 sm:pt-4 pb-3 bg-slate-50/80 dark:bg-white/[0.03]">
+    <div className="rounded-2xl border border-brand-line bg-white overflow-hidden animate-pulse">
+      <div className="px-3 sm:px-4 pt-3 sm:pt-4 pb-3 bg-brand-bg-alt">
         <div className="flex items-center gap-2 sm:gap-2.5">
-          <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-slate-200 dark:bg-white/5 shrink-0" />
+          <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-brand-line shrink-0" />
           <div className="space-y-1.5 flex-1">
-            <div className="h-3 w-14 bg-slate-200 dark:bg-white/5 rounded" />
-            <div className="h-3.5 w-24 bg-slate-200 dark:bg-white/5 rounded" />
+            <div className="h-3 w-14 bg-brand-line rounded" />
+            <div className="h-3.5 w-24 bg-brand-line rounded" />
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-3 divide-x divide-slate-100 dark:divide-white/[0.04] border-y border-slate-100 dark:border-white/[0.04]">
+      <div className="grid grid-cols-3 divide-x divide-brand-line border-y border-brand-line">
         {[1, 2, 3].map(i => (
           <div key={i} className="px-2 sm:px-3 py-2 flex flex-col items-center gap-1">
-            <div className="h-2 w-8 bg-slate-100 dark:bg-white/5 rounded" />
-            <div className="h-3 w-6 bg-slate-200 dark:bg-white/5 rounded" />
+            <div className="h-2 w-8 bg-brand-bg-alt rounded" />
+            <div className="h-3 w-6 bg-brand-line rounded" />
           </div>
         ))}
       </div>
       <div className="px-3 sm:px-4 py-3 space-y-2">
-        {[1, 2, 3].map(i => <div key={i} className="h-3 w-full bg-slate-100 dark:bg-white/[0.04] rounded" />)}
+        {[1, 2, 3].map(i => <div key={i} className="h-3 w-full bg-brand-bg-alt rounded" />)}
       </div>
       <div className="px-3 sm:px-4 pb-3 sm:pb-4 pt-1">
-        <div className="h-9 w-full bg-slate-100 dark:bg-white/[0.04] rounded-xl" />
+        <div className="h-9 w-full bg-brand-bg-alt rounded-xl" />
       </div>
     </div>
   );
@@ -262,7 +252,7 @@ function SectionDivider({ label, count, severity }: { label: string; count: numb
   const cfg = SEVERITY_CONFIG[severity];
   return (
     <div className="flex items-center gap-3 col-span-full">
-      <div className={cn('flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest shrink-0', cfg.sectionLabel)}>
+      <div className={cn('font-jetbrains flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest shrink-0', cfg.sectionLabel)}>
         <span className={cn('h-1.5 w-1.5 rounded-full', cfg.dot)} />
         {label}
         <span className="font-semibold opacity-60">({count})</span>
@@ -280,8 +270,8 @@ export function AtRiskStudentList({ students, batchId, loading }: AtRiskStudentL
 
   if (loading) {
     return (
-      <div className="rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0E0E16] shadow-[0_2px_12px_-4px_rgba(15,23,42,0.08)] dark:shadow-none p-4 sm:p-5 space-y-4">
-        <div className="h-5 w-40 bg-slate-200 dark:bg-white/5 rounded animate-pulse" />
+      <div className="rounded-2xl border border-brand-line bg-white shadow-sm p-4 sm:p-5 space-y-4">
+        <div className="h-5 w-40 bg-brand-line rounded animate-pulse" />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {[1, 2, 3, 4].map(i => <CardSkeleton key={i} />)}
         </div>
@@ -291,12 +281,12 @@ export function AtRiskStudentList({ students, batchId, loading }: AtRiskStudentL
 
   if (students.length === 0) {
     return (
-      <div className="rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0E0E16] px-6 py-10 flex flex-col items-center text-center shadow-[0_2px_12px_-4px_rgba(15,23,42,0.08)] dark:shadow-none">
-        <div className="h-14 w-14 rounded-full bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center mb-4 ring-4 ring-emerald-100/50 dark:ring-emerald-500/10">
+      <div className="rounded-2xl border border-brand-line bg-white px-6 py-10 flex flex-col items-center text-center shadow-sm">
+        <div className="h-14 w-14 rounded-full bg-emerald-50 flex items-center justify-center mb-4 ring-4 ring-emerald-100/50">
           <CheckCircle2 className="h-7 w-7 text-emerald-500" />
         </div>
-        <p className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-1">No students at risk</p>
-        <p className="text-xs text-slate-400 max-w-xs">All students in this batch are meeting activity and performance thresholds.</p>
+        <p className="text-sm font-bold text-brand-text mb-1">No students at risk</p>
+        <p className="text-xs text-brand-text-mute max-w-xs">All students in this batch are meeting activity and performance thresholds.</p>
       </div>
     );
   }
@@ -329,33 +319,33 @@ export function AtRiskStudentList({ students, batchId, loading }: AtRiskStudentL
   });
 
   return (
-    <div className="rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0E0E16] shadow-[0_2px_12px_-4px_rgba(15,23,42,0.08)] dark:shadow-none p-4 sm:p-5 space-y-4 sm:space-y-5">
+    <div className="rounded-2xl border border-brand-line bg-white shadow-sm p-4 sm:p-5 space-y-4 sm:space-y-5">
 
       {/* Panel header */}
       <div className="flex items-start sm:items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="h-8 w-8 rounded-xl bg-rose-100 dark:bg-rose-500/15 flex items-center justify-center shrink-0">
-            <AlertTriangle className="h-4 w-4 text-rose-600 dark:text-rose-400" />
+          <div className="h-8 w-8 rounded-xl bg-rose-100 flex items-center justify-center shrink-0">
+            <AlertTriangle className="h-4 w-4 text-rose-600" />
           </div>
           <div className="min-w-0">
-            <h3 className="text-sm font-bold text-slate-800 dark:text-white leading-tight">Student Risk Monitor</h3>
-            <p className="text-[11px] text-slate-400 dark:text-slate-500 leading-tight">Flagged by activity &amp; performance rules</p>
+            <h3 className="text-sm font-bold text-brand-text leading-tight">Student Risk Monitor</h3>
+            <p className="text-[11px] text-brand-text-mute leading-tight">Flagged by activity &amp; performance rules</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
           {groups.critical > 0 && (
-            <span className="flex items-center gap-1 text-[11px] font-bold text-rose-600 dark:text-rose-300 bg-rose-50 dark:bg-rose-500/10 px-2 sm:px-2.5 py-1 rounded-full border border-rose-200 dark:border-rose-500/25 whitespace-nowrap shadow-[0_0_12px_rgba(244,63,94,0.12)]">
+            <span className="flex items-center gap-1 text-[11px] font-bold text-rose-600 bg-rose-50 px-2 sm:px-2.5 py-1 rounded-full border border-rose-200 whitespace-nowrap">
               <span className="h-1.5 w-1.5 rounded-full bg-rose-500 shrink-0" />{groups.critical} critical
             </span>
           )}
           {groups.warning > 0 && (
-            <span className="flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 px-2 sm:px-2.5 py-1 rounded-full border border-amber-200 dark:border-amber-500/25 whitespace-nowrap shadow-[0_0_12px_rgba(245,158,11,0.10)]">
+            <span className="flex items-center gap-1 text-[11px] font-bold text-amber-600 bg-amber-50 px-2 sm:px-2.5 py-1 rounded-full border border-amber-200 whitespace-nowrap">
               <span className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" />{groups.warning} warning
             </span>
           )}
           {groups.info > 0 && (
-            <span className="flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/[0.05] px-2 sm:px-2.5 py-1 rounded-full border border-slate-200 dark:border-white/[0.08] whitespace-nowrap">
-              <span className="h-1.5 w-1.5 rounded-full bg-slate-400 shrink-0" />{groups.info} monitor
+            <span className="flex items-center gap-1 text-[11px] font-bold text-brand-text-mute bg-brand-bg-alt px-2 sm:px-2.5 py-1 rounded-full border border-brand-line whitespace-nowrap">
+              <span className="h-1.5 w-1.5 rounded-full bg-brand-text-mute shrink-0" />{groups.info} monitor
             </span>
           )}
         </div>
@@ -374,15 +364,15 @@ export function AtRiskStudentList({ students, batchId, loading }: AtRiskStudentL
 
       {/* Pagination */}
       {pageCount > 1 && (
-        <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-white/[0.05]">
+        <div className="flex items-center justify-between pt-1 border-t border-brand-line">
           <button
             onClick={() => setPage(p => p - 1)}
             disabled={!hasPrev}
             className={cn(
               'h-8 w-8 rounded-full flex items-center justify-center transition-all',
               hasPrev
-                ? 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-brand-teal-100 dark:hover:bg-brand-teal-500/20 hover:text-brand-teal-600 dark:hover:text-brand-teal-400'
-                : 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
+                ? 'bg-brand-bg-alt text-brand-text hover:bg-brand-teal-100 hover:text-brand-teal-600'
+                : 'text-brand-text-mute cursor-not-allowed'
             )}
             aria-label="Previous page"
           >
@@ -397,15 +387,15 @@ export function AtRiskStudentList({ students, batchId, loading }: AtRiskStudentL
                   className={cn(
                     'rounded-full transition-all',
                     i === page
-                      ? 'h-2 w-5 bg-brand-teal-500 dark:bg-brand-teal-400'
-                      : 'h-2 w-2 bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20'
+                      ? 'h-2 w-5 bg-brand-teal-500'
+                      : 'h-2 w-2 bg-brand-line hover:bg-brand-text-mute'
                   )}
                   aria-label={`Page ${i + 1}`}
                 />
               ))}
             </div>
           ) : (
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{page + 1} / {pageCount}</span>
+            <span className="text-xs font-semibold text-brand-text-mute">{page + 1} / {pageCount}</span>
           )}
           <button
             onClick={() => setPage(p => p + 1)}
@@ -413,8 +403,8 @@ export function AtRiskStudentList({ students, batchId, loading }: AtRiskStudentL
             className={cn(
               'h-8 w-8 rounded-full flex items-center justify-center transition-all',
               hasNext
-                ? 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-brand-teal-100 dark:hover:bg-brand-teal-500/20 hover:text-brand-teal-600 dark:hover:text-brand-teal-400'
-                : 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
+                ? 'bg-brand-bg-alt text-brand-text hover:bg-brand-teal-100 hover:text-brand-teal-600'
+                : 'text-brand-text-mute cursor-not-allowed'
             )}
             aria-label="Next page"
           >

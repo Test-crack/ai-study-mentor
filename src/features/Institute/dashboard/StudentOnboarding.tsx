@@ -42,22 +42,22 @@ function StudentRowMenu({ isActive, onToggleStatus, onRemove }: {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(v => !v)}
-        className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+        className="p-2.5 sm:p-1.5 rounded-lg hover:bg-brand-bg-alt text-brand-text-mute hover:text-brand-text transition-colors"
       >
         <MoreVertical className="w-4 h-4" />
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 z-30 w-44 bg-white dark:bg-[#1E1D27] border border-slate-200 dark:border-[#2E2D3A] rounded-xl shadow-xl py-1 overflow-hidden">
+        <div className="absolute right-0 top-full mt-1 z-30 w-44 bg-white border border-brand-line rounded-xl shadow-sm py-1 overflow-hidden">
           <button
             onClick={() => { setOpen(false); onToggleStatus(); }}
-            className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm font-medium text-brand-teal-600 dark:text-brand-teal-400 hover:bg-brand-teal-50 dark:hover:bg-brand-teal-900/20 transition-colors"
+            className="w-full flex items-center gap-2.5 px-3.5 py-3 text-sm font-medium text-brand-teal-600 hover:bg-brand-teal-50 transition-colors"
           >
             <UserCheck className="w-4 h-4" />
             {isActive ? 'Deactivate' : 'Activate'}
           </button>
           <button
             onClick={() => { setOpen(false); onRemove(); }}
-            className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
+            className="w-full flex items-center gap-2.5 px-3.5 py-3 text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors"
           >
             <Trash2 className="w-4 h-4" /> Remove
           </button>
@@ -125,60 +125,60 @@ function AddStudentModal({ onClose, onAdded }: { onClose: () => void; onAdded: (
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-[#15141B] rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-[#26252D]">
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-[#26252D]">
+      <div className="bg-white rounded-2xl shadow-sm w-full max-w-md border border-brand-line">
+        <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-5 border-b border-brand-line">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-brand-teal-50 dark:bg-brand-teal-900/30 rounded-lg">
-              <UserCheck className="w-5 h-5 text-brand-teal-600 dark:text-brand-teal-400" />
+            <div className="p-2 bg-brand-teal-50 rounded-lg shrink-0">
+              <UserCheck className="w-5 h-5 text-brand-teal-600" />
             </div>
             <div>
-              <h2 className="font-bold text-slate-900 dark:text-white text-base">Enroll New Student</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Student will receive an email invite to set their password</p>
+              <h2 className="font-bold text-brand-text text-base">Enroll New Student</h2>
+              <p className="text-xs text-brand-text-mute mt-0.5">Student will receive an email invite to set their password</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-slate-400">
+          <button onClick={onClose} className="p-2.5 rounded-lg hover:bg-brand-bg-alt transition-colors text-brand-text-mute shrink-0">
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Full Name *</label>
+            <label className="font-jetbrains text-xs font-semibold text-brand-text uppercase tracking-wider">Full Name *</label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-text-mute" />
               <input
                 type="text" required value={form.studentName} onChange={set('studentName')}
                 placeholder="Student full name"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400"
+                className="w-full pl-10 pr-4 py-3 bg-brand-bg-alt border border-brand-line rounded-lg text-sm text-brand-text transition-all focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 placeholder:text-brand-text-mute"
               />
             </div>
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Email Address *</label>
+            <label className="font-jetbrains text-xs font-semibold text-brand-text uppercase tracking-wider">Email Address *</label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-text-mute" />
               <input
                 type="email" required value={form.studentEmail} onChange={set('studentEmail')}
                 placeholder="student@email.com"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400"
+                className="w-full pl-10 pr-4 py-3 bg-brand-bg-alt border border-brand-line rounded-lg text-sm text-brand-text transition-all focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 placeholder:text-brand-text-mute"
               />
             </div>
           </div>
 
-          <div className="flex items-start gap-2 bg-brand-teal-50 dark:bg-brand-teal-900/20 border border-brand-teal-100 dark:border-brand-teal-800/40 rounded-lg p-3">
+          <div className="flex items-start gap-2 bg-brand-teal-50 border border-brand-teal-100 rounded-lg p-3">
             <CheckCircle2 className="w-4 h-4 text-brand-teal-500 mt-0.5 shrink-0" />
-            <p className="text-xs text-brand-teal-700 dark:text-brand-teal-300 leading-relaxed">
+            <p className="text-xs text-brand-teal-700 leading-relaxed">
               The student will receive a Supabase invite email. Once they accept and set a password, they'll have access to the Student dashboard.
             </p>
           </div>
 
-          <div className="flex gap-3 pt-1">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 pt-1">
             <button type="button" onClick={onClose}
-              className="flex-1 py-2.5 rounded-lg border border-slate-200 dark:border-[#26252D] text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+              className="w-full sm:flex-1 py-3 rounded-lg border border-brand-line text-sm font-medium text-brand-text hover:bg-brand-bg-alt transition-colors">
               Cancel
             </button>
             <button type="submit" disabled={loading}
-              className="flex-1 py-2.5 rounded-lg bg-brand-teal-600 hover:bg-brand-teal-700 text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
+              className="w-full sm:flex-1 py-3 rounded-lg bg-brand-teal-600 hover:bg-brand-teal-700 text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
               {loading ? 'Enrolling...' : 'Enroll & Send Invite'}
             </button>
@@ -199,25 +199,25 @@ function ConfirmRemoveDialog({ student, onConfirm, onCancel, loading }: {
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-[#15141B] rounded-2xl shadow-2xl w-full max-w-sm border border-slate-200 dark:border-[#26252D] p-6 space-y-5">
+      <div className="bg-white rounded-2xl shadow-sm w-full max-w-sm border border-brand-line p-4 sm:p-6 space-y-5">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-rose-50 dark:bg-rose-900/30 rounded-lg">
-            <Trash2 className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+          <div className="p-2 bg-rose-50 rounded-lg shrink-0">
+            <Trash2 className="w-5 h-5 text-rose-600" />
           </div>
           <div>
-            <h3 className="font-bold text-slate-900 dark:text-white">Remove Student?</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{student.name ?? student.email}</p>
+            <h3 className="font-bold text-brand-text">Remove Student?</h3>
+            <p className="text-xs text-brand-text-mute mt-0.5">{student.name ?? student.email}</p>
           </div>
         </div>
-        <p className="text-sm text-slate-600 dark:text-slate-400">
+        <p className="text-sm text-brand-text">
           This will remove <strong>{student.email}</strong> from your institute. Their account will remain but they'll lose institute access.
         </p>
-        <div className="flex gap-3">
-          <button onClick={onCancel} className="flex-1 py-2.5 rounded-lg border border-slate-200 dark:border-[#26252D] text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+        <div className="flex flex-col-reverse sm:flex-row gap-3">
+          <button onClick={onCancel} className="w-full sm:flex-1 py-3 rounded-lg border border-brand-line text-sm font-medium text-brand-text hover:bg-brand-bg-alt transition-colors">
             Cancel
           </button>
           <button onClick={onConfirm} disabled={loading}
-            className="flex-1 py-2.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
+            className="w-full sm:flex-1 py-3 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
             {loading ? 'Removing...' : 'Yes, Remove'}
           </button>
@@ -296,43 +296,43 @@ export default function StudentOnboarding() {
         />
       )}
 
-          <div className="max-w-[1200px] mx-auto space-y-6">
+          <div className="w-full max-w-[1200px] mx-auto space-y-6 p-4 sm:p-6 lg:p-8">
 
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-start justify-between gap-3">
               <div>
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Student Onboarding</h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                <h1 className="font-manrope text-xl sm:text-2xl font-bold text-brand-text">Student Onboarding</h1>
+                <p className="text-sm text-brand-text-mute mt-0.5">
                   {loading ? '...' : `${students.length} student${students.length !== 1 ? 's' : ''} enrolled in your institute`}
                 </p>
               </div>
-              <button onClick={load} className="p-2 rounded-lg text-slate-400 hover:text-brand-teal-600 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors" title="Refresh">
+              <button onClick={load} className="p-2.5 rounded-lg text-brand-text-mute hover:text-brand-teal-600 hover:bg-brand-bg-alt transition-colors shrink-0" title="Refresh">
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               </button>
             </div>
 
             {/* Search + Add */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="relative w-full max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-gray-500" />
+              <div className="relative w-full sm:max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-text-mute" />
                 <input
                   type="text"
                   placeholder="Search students..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-transparent border border-slate-200 dark:border-gray-800 rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:focus:border-[#256B8B] transition-all dark:text-white placeholder-slate-400 dark:placeholder-gray-500 shadow-sm"
+                  className="w-full pl-10 pr-4 py-3 bg-brand-bg-alt border border-brand-line rounded-lg text-sm text-brand-text transition-all focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 placeholder:text-brand-text-mute"
                 />
               </div>
               <button
                 onClick={() => setShowAddModal(true)}
-                className="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2.5 bg-brand-teal-600 hover:bg-brand-teal-700 dark:bg-[#185A78] dark:hover:bg-[#185A78] text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
+                className="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-3 bg-brand-teal-600 hover:bg-brand-teal-700 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
               >
                 <Plus className="w-4 h-4" /> Add Student
               </button>
             </div>
 
             {/* Table */}
-            <div className="bg-white dark:bg-transparent border border-slate-200 dark:border-transparent rounded-xl shadow-sm dark:shadow-none overflow-hidden">
+            <div className="bg-white border border-brand-line rounded-xl shadow-sm overflow-hidden">
               {loading ? (
                 <div className="py-16 flex justify-center">
                   <Loader2 className="w-6 h-6 animate-spin text-brand-teal-500" />
@@ -341,45 +341,45 @@ export default function StudentOnboarding() {
                 <div className="w-full overflow-x-auto px-4 py-2">
                   <table className="w-full text-left border-collapse min-w-[700px]">
                     <thead>
-                      <tr className="border-b border-slate-100 dark:border-gray-800 text-slate-500 dark:text-gray-500 text-sm">
-                        <th className="pb-4 font-semibold dark:font-normal pl-2">Student</th>
-                        <th className="pb-4 font-semibold dark:font-normal">Contact</th>
-                        <th className="pb-4 font-semibold dark:font-normal">Enrolled</th>
-                        <th className="pb-4 font-semibold dark:font-normal">Status</th>
-                        <th className="pb-4 font-semibold dark:font-normal text-right pr-2">Actions</th>
+                      <tr className="border-b border-brand-line text-brand-text-mute text-sm">
+                        <th className="pb-4 pt-2 font-jetbrains text-[11px] font-semibold uppercase tracking-wider pl-2">Student</th>
+                        <th className="pb-4 pt-2 font-jetbrains text-[11px] font-semibold uppercase tracking-wider">Contact</th>
+                        <th className="pb-4 pt-2 font-jetbrains text-[11px] font-semibold uppercase tracking-wider">Enrolled</th>
+                        <th className="pb-4 pt-2 font-jetbrains text-[11px] font-semibold uppercase tracking-wider">Status</th>
+                        <th className="pb-4 pt-2 font-jetbrains text-[11px] font-semibold uppercase tracking-wider text-right pr-2">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-gray-800/50">
+                    <tbody className="divide-y divide-brand-line">
                       {filteredStudents.map((student) => (
-                        <tr key={student.id} className="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors group">
+                        <tr key={student.id} className="hover:bg-brand-bg-alt transition-colors group">
                           <td className="py-4 pl-2">
                             <div className="flex items-center gap-3">
                               {student.profileImage ? (
                                 <img src={student.profileImage} alt="" className="w-9 h-9 rounded-md object-cover shrink-0" />
                               ) : (
-                                <div className="w-9 h-9 rounded-md bg-brand-teal-100 dark:bg-[#1C1A2F] text-brand-teal-700 dark:text-[#256B8B] flex items-center justify-center text-xs font-bold shrink-0">
+                                <div className="w-9 h-9 rounded-md bg-brand-teal-100 text-brand-teal-700 flex items-center justify-center text-xs font-bold shrink-0">
                                   {getInitials(student.name, student.email)}
                                 </div>
                               )}
                               <div>
-                                <div className="font-semibold text-sm text-slate-900 dark:text-gray-200">
-                                  {student.name ?? <span className="italic text-slate-400 dark:text-gray-500 font-normal">No name yet</span>}
+                                <div className="font-semibold text-sm text-brand-text">
+                                  {student.name ?? <span className="italic text-brand-text-mute font-normal">No name yet</span>}
                                 </div>
-                                <div className="text-xs text-slate-500 dark:text-gray-500 mt-0.5">{student.email}</div>
+                                <div className="text-xs text-brand-text-mute mt-0.5">{student.email}</div>
                               </div>
                             </div>
                           </td>
                           <td className="py-4">
-                            <div className="text-sm text-slate-600 dark:text-gray-300">{student.phone ?? '—'}</div>
+                            <div className="text-sm text-brand-text">{student.phone ?? '—'}</div>
                           </td>
                           <td className="py-4">
-                            <div className="text-xs text-slate-500 dark:text-gray-500">{formatDate(student.enrolledAt)}</div>
+                            <div className="text-xs text-brand-text-mute">{formatDate(student.enrolledAt)}</div>
                           </td>
                           <td className="py-4">
-                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold tracking-wider ${
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded font-jetbrains text-[10px] font-bold tracking-wider ${
                               student.isActive
-                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                                : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : 'bg-amber-100 text-amber-700'
                             }`}>
                               <span className={`w-1.5 h-1.5 rounded-full ${student.isActive ? 'bg-emerald-500' : 'bg-amber-500'}`} />
                               {student.isActive ? 'ACTIVE' : 'INACTIVE'}
@@ -397,8 +397,8 @@ export default function StudentOnboarding() {
                       {filteredStudents.length === 0 && !loading && (
                         <tr>
                           <td colSpan={5} className="py-12 text-center">
-                            <UserCheck className="w-12 h-12 text-slate-200 dark:text-slate-700 mx-auto mb-3" />
-                            <p className="text-slate-500 dark:text-gray-500 text-sm">
+                            <UserCheck className="w-12 h-12 text-brand-line mx-auto mb-3" />
+                            <p className="text-brand-text-mute text-sm">
                               {searchQuery ? `No students matching "${searchQuery}"` : 'No students yet. Add one to get started.'}
                             </p>
                           </td>

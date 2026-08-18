@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { 
-  Users, 
-  Building2, 
-  Activity, 
-  Clock, 
-  Mic, 
-  BookOpen, 
-  Zap, 
-  MessageSquare, 
+import {
+  Users,
+  Building2,
+  Activity,
+  Clock,
+  Mic,
+  BookOpen,
+  Zap,
+  MessageSquare,
   BookMarked
 } from 'lucide-react';
 import { SuperAdminSidebar } from '../Components/SuperadminSidebar';
@@ -55,71 +55,68 @@ export default function PlatformAnalytics() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0A10] font-sans text-slate-900 dark:text-slate-200 transition-colors duration-300">
-      
-      {/* Sidebar */}
-      <div className="hidden lg:block">
-        <SuperAdminSidebar 
-          activeTab="platform-analytics" 
-          isCollapsed={isSidebarCollapsed} 
-          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
-        />
-      </div>
+    <div className="relative min-h-screen font-plex antialiased overflow-x-hidden bg-brand-bg text-brand-text">
 
-      <div className={`transition-all duration-300 flex flex-col min-h-screen ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
-        
+      {/* Sidebar */}
+      <SuperAdminSidebar
+        activeTab="platform-analytics"
+        isCollapsed={isSidebarCollapsed}
+        toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      />
+
+      <div className={`relative z-10 transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-24' : 'lg:pl-72'}`}>
+
         {/* Topbar */}
         <SuperAdminTopbar />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="max-w-[1400px] mx-auto space-y-6">
-            
+        <main className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 max-w-[90rem] mx-auto pb-16">
+
             {/* Top Metrics Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {topMetrics.map((metric, idx) => (
-                <div key={idx} className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl p-5 shadow-sm transition-colors flex items-center justify-between">
-                  <div>
+                <div key={idx} className="bg-white border border-brand-line rounded-2xl p-4 sm:p-6 shadow-sm flex items-center justify-between gap-3">
+                  <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-2">
-                      <metric.icon className="w-4 h-4 text-brand-teal-500 dark:text-brand-teal-400" />
-                      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">{metric.title}</p>
+                      <metric.icon className="w-4 h-4 text-brand-teal-500 shrink-0" />
+                      <p className="font-jetbrains text-[10px] font-bold text-brand-text-mute uppercase tracking-[0.15em]">{metric.title}</p>
                     </div>
-                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{metric.value}</h3>
-                    <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium mt-1">{metric.change}</p>
+                    <h3 className="text-2xl font-black text-brand-text">{metric.value}</h3>
+                    <p className="text-[10px] text-emerald-600 font-medium mt-1">{metric.change}</p>
                   </div>
                 </div>
               ))}
             </div>
 
             {/* Weekly Active Users Trend */}
-            <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl shadow-sm p-6 transition-colors">
-              <h2 className="text-base font-bold text-slate-900 dark:text-white mb-8">Weekly Active Users Trend</h2>
-              <div className="grid grid-cols-4 gap-4">
+            <div className="bg-white border border-brand-line rounded-2xl shadow-sm p-4 sm:p-6">
+              <h2 className="font-manrope text-base font-bold text-brand-text mb-6 sm:mb-8">Weekly Active Users Trend</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {wauTrend.map((week, idx) => (
-                  <div key={idx} className="flex flex-col items-center justify-end h-[160px] relative group">
+                  <div key={idx} className="flex flex-col items-center justify-end h-56 sm:h-64 lg:h-72 relative group">
                     <div className="w-full max-w-[100px] flex flex-col gap-1 items-center">
-                      <div className="text-center mb-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="text-lg font-bold text-slate-900 dark:text-white block">{week.students}</span>
-                        <span className="text-[10px] text-slate-500 dark:text-slate-400">students</span>
+                      <div className="text-center mb-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                        <span className="text-lg font-black text-brand-text block">{week.students}</span>
+                        <span className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.12em] text-brand-text-mute">students</span>
                       </div>
-                      
+
                       {/* Bar 1: Students */}
-                      <div 
-                        className="w-full bg-slate-200 dark:bg-[#26252D] rounded-sm relative group-hover:bg-brand-teal-100 dark:group-hover:bg-[#2E2D38] transition-colors"
+                      <div
+                        className="w-full bg-brand-line rounded-sm relative group-hover:bg-brand-teal-100 transition-colors"
                         style={{ height: '4px' }}
                       ></div>
-                      
+
                       <div className="text-center mt-1">
-                        <span className="text-lg font-bold text-brand-teal-600 dark:text-[#4E8CA6] block">{week.sessions}</span>
-                        <span className="text-[10px] text-brand-teal-400 dark:text-brand-teal-400/50">sessions</span>
+                        <span className="text-lg font-black text-brand-teal-600 block">{week.sessions}</span>
+                        <span className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.12em] text-brand-teal-500">sessions</span>
                       </div>
-                      
+
                       {/* Bar 2: Sessions */}
-                      <div 
-                        className="w-full bg-brand-teal-500 dark:bg-[#185A78] rounded-sm"
+                      <div
+                        className="w-full bg-brand-teal-500 rounded-sm"
                         style={{ height: '4px' }}
                       ></div>
-                      
-                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-4">{week.week}</span>
+
+                      <span className="font-jetbrains text-[11px] font-bold uppercase tracking-[0.12em] text-brand-text-mute mt-4">{week.week}</span>
                     </div>
                   </div>
                 ))}
@@ -128,46 +125,46 @@ export default function PlatformAnalytics() {
 
             {/* Main Middle Split */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              
+
               {/* Feature Adoption */}
-              <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl shadow-sm p-6 transition-colors">
-                <h2 className="text-base font-bold text-slate-900 dark:text-white mb-6">Feature Adoption</h2>
+              <div className="bg-white border border-brand-line rounded-2xl shadow-sm p-4 sm:p-6">
+                <h2 className="font-manrope text-base font-bold text-brand-text mb-6">Feature Adoption</h2>
                 <div className="space-y-6">
                   {featureAdoption.map((feature, idx) => (
                     <div key={idx} className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2 text-slate-900 dark:text-white font-medium">
-                          <feature.icon className="w-4 h-4 text-brand-teal-500 dark:text-[#4E8CA6]" />
-                          {feature.name}
+                      <div className="flex items-center justify-between gap-3 text-sm">
+                        <div className="flex items-center gap-2 text-brand-text font-semibold min-w-0">
+                          <feature.icon className="w-4 h-4 text-brand-teal-500 shrink-0" />
+                          <span className="truncate">{feature.name}</span>
                         </div>
-                        <span className="text-slate-500 dark:text-slate-400 text-xs">{feature.sessions} sessions</span>
+                        <span className="text-brand-text-mute text-xs whitespace-nowrap">{feature.sessions} sessions</span>
                       </div>
-                      <div className="w-full h-1.5 bg-slate-100 dark:bg-[#26252D] rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-brand-teal-500 dark:bg-[#185A78] rounded-full"
+                      <div className="w-full h-1.5 bg-brand-bg-alt rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-brand-teal-500 rounded-full"
                           style={{ width: `${feature.barPercent}%` }}
                         ></div>
                       </div>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-500 text-right">{feature.usersPercent}% of users</p>
+                      <p className="text-[10px] text-brand-text-mute text-right">{feature.usersPercent}% of users</p>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Geographic Distribution */}
-              <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl shadow-sm p-6 transition-colors">
-                <h2 className="text-base font-bold text-slate-900 dark:text-white mb-6">Geographic Distribution</h2>
+              <div className="bg-white border border-brand-line rounded-2xl shadow-sm p-4 sm:p-6">
+                <h2 className="font-manrope text-base font-bold text-brand-text mb-6">Geographic Distribution</h2>
                 <div className="space-y-4">
                   {geoDistribution.map((geo, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors border border-transparent hover:border-slate-100 dark:hover:border-[#26252D]">
-                      <div>
-                        <h4 className="font-semibold text-sm text-slate-900 dark:text-white">{geo.region}</h4>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    <div key={idx} className="flex items-center justify-between gap-3 p-3 rounded-xl hover:bg-brand-teal-50/50 transition-colors border border-transparent hover:border-brand-line">
+                      <div className="min-w-0">
+                        <h4 className="font-semibold text-sm text-brand-text truncate">{geo.region}</h4>
+                        <p className="text-[11px] text-brand-text-mute mt-0.5">
                           {geo.institutes} institutes • {geo.students} students
                         </p>
                       </div>
-                      <div className="text-right">
-                        <span className="text-lg font-bold text-slate-900 dark:text-white">{geo.percent}%</span>
+                      <div className="text-right shrink-0">
+                        <span className="text-lg font-black text-brand-text">{geo.percent}%</span>
                       </div>
                     </div>
                   ))}
@@ -177,16 +174,16 @@ export default function PlatformAnalytics() {
             </div>
 
             {/* System Health */}
-            <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl shadow-sm p-6 transition-colors">
-              <h2 className="text-base font-bold text-slate-900 dark:text-white mb-6">System Health</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="bg-white border border-brand-line rounded-2xl shadow-sm p-4 sm:p-6">
+              <h2 className="font-manrope text-base font-bold text-brand-text mb-6">System Health</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {systemHealth.map((metric, idx) => (
                   <div key={idx}>
-                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{metric.label}</p>
-                    <h3 className={`text-2xl font-bold ${
-                      metric.status === 'good' 
-                        ? 'text-emerald-600 dark:text-emerald-400' 
-                        : 'text-amber-500 dark:text-amber-400'
+                    <p className="font-jetbrains text-[10px] font-bold text-brand-text-mute uppercase tracking-[0.15em] mb-1">{metric.label}</p>
+                    <h3 className={`text-2xl font-black ${
+                      metric.status === 'good'
+                        ? 'text-emerald-600'
+                        : 'text-amber-500'
                     }`}>
                       {metric.value}
                     </h3>
@@ -195,7 +192,6 @@ export default function PlatformAnalytics() {
               </div>
             </div>
 
-          </div>
         </main>
       </div>
     </div>

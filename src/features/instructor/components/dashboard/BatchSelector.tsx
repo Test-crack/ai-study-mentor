@@ -20,8 +20,8 @@ export function BatchSelector({
   if (loading) {
     return (
       <div className="flex flex-col gap-2">
-        <div className={cn('text-[10px] font-black uppercase tracking-widest mb-0.5',
-          onGradient ? 'text-white/50' : 'text-slate-400'
+        <div className={cn('font-jetbrains text-[10px] font-black uppercase tracking-widest mb-0.5',
+          onGradient ? 'text-white/50' : 'text-brand-text-mute'
         )}>
           Batches
         </div>
@@ -31,7 +31,7 @@ export function BatchSelector({
               key={i}
               className={cn(
                 'h-8 w-32 rounded-full animate-pulse',
-                onGradient ? 'bg-white/20' : 'bg-slate-200 dark:bg-slate-700'
+                onGradient ? 'bg-white/20' : 'bg-brand-bg-alt'
               )}
             />
           ))}
@@ -45,8 +45,8 @@ export function BatchSelector({
   return (
     <div className="flex flex-col gap-2">
       <p className={cn(
-        'text-[10px] font-black uppercase tracking-widest',
-        onGradient ? 'text-white/50' : 'text-slate-400'
+        'font-jetbrains text-[10px] font-black uppercase tracking-widest',
+        onGradient ? 'text-white/50' : 'text-brand-text-mute'
       )}>
         Batches
       </p>
@@ -62,11 +62,11 @@ export function BatchSelector({
               : 'bg-white/15 text-white border-white/25 hover:bg-white/25'
             : isActive
               ? 'bg-brand-teal-600 text-white border-brand-teal-600 shadow-sm shadow-brand-teal-500/20'
-              : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-brand-teal-400';
+              : 'bg-white text-brand-text border-brand-line hover:border-brand-teal-400';
 
           const count = onGradient
             ? isActive ? 'text-brand-teal-400' : 'text-white/50'
-            : isActive ? 'text-brand-teal-200' : 'text-slate-400 dark:text-slate-500';
+            : isActive ? 'text-brand-teal-200' : 'text-brand-text-mute';
 
           return (
             <button

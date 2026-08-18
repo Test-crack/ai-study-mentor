@@ -1,13 +1,20 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { PremiumModal } from "@/features/payment/components/PremiumModal";
 import { callBackend } from "@/features/auth/services/authClient";
 import {
   ChevronDown, ChevronUp, Headphones, BookOpen, PenLine, Mic,
   Clock, Filter, BarChart2, FileText, Stethoscope, Loader2,
   AlertCircle, MessageSquare, X, CheckCircle2, ArrowRight, Target,
-  Sparkles, Zap, ListChecks,
+  Sparkles, Zap, ListChecks, Check, TrendingUp,
 } from "lucide-react";
 import StudentLayout from "./StudentLayout";
+import {
+  BandOverTimeChart, ChartLegend, AttendanceCard, SubSkillCoverageCard,
+  RecordInsightCard, MockProgressionCard, BestBandPerSkillCard,
+  ThisMonthMockCard, HowFarCard, AboutReportCard, GaugeBar,
+  type BandPoint, type SkillGaugeRow, type DeltaRow,
+} from "./assessment-history/widgets";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
@@ -95,6 +102,15 @@ const SKILL_CONFIG: Record<SkillType, { label: string; shortLabel: string; icon:
   SPEAKING:  { label: "Speaking",  shortLabel: "Speak",   icon: <Mic        className="h-4 w-4" />, color: "text-rose-600",     bg: "bg-rose-50",     border: "border-rose-200" },
 };
 
+// Left-edge accent stripe per skill — same "colored spine on a white card"
+// convention used by the How It Works chapter cards.
+const SKILL_ACCENT_BORDER: Record<SkillType, string> = {
+  LISTENING: "border-l-sky-400",
+  READING:   "border-l-brand-blue-500",
+  WRITING:   "border-l-amber-400",
+  SPEAKING:  "border-l-rose-400",
+};
+
 const MODE_CONFIG: Record<string, { label: string; badge: string }> = {
   INTERNAL_ASSESSMENT: { label: "Internal Assessment", badge: "bg-brand-teal-100 text-brand-teal-700" },
   MOCK:                { label: "Mock Test",            badge: "bg-brand-blue-100 text-brand-blue-700" },
@@ -153,6 +169,45 @@ const bandBg = (band: number) => {
   if (band >= 6.0) return "bg-sky-50 border-sky-200";
   if (band >= 5.0) return "bg-amber-50 border-amber-200";
   return "bg-rose-50 border-rose-200";
+};
+
+// Solid fill for GaugeBar — same thresholds as bandColor/bandBg, just as a bg-* class.
+const bandGaugeColor = (band: number) => {
+  if (band >= 7.5) return "bg-emerald-500";
+  if (band >= 6.0) return "bg-sky-500";
+  if (band >= 5.0) return "bg-amber-500";
+  return "bg-rose-500";
+};
+
+// Counts up from 0 to `value` on mount — used for the hero stat pills so the
+// numbers read as something that just landed, not static labels.
+const AnimatedNumber = ({ value }: { value: number }) => {
+  const [display, setDisplay] = useState(0);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setDisplay(value); return; }
+    let raf: number;
+    const start = performance.now();
+    const duration = 700;
+    const tick = (now: number) => {
+      const t = Math.min((now - start) / duration, 1);
+      setDisplay(Math.round(t * value));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value]);
+  return <>{display}</>;
+};
+
+// "Medal" badge for a band score — a tinted ring instead of bare colored text,
+// reused across every card so scores read as the visual anchor of the row.
+const BandBadge = ({ band, size = "md" }: { band: number; size?: "sm" | "md" }) => {
+  const dims = size === "sm" ? "w-11 h-11 text-base" : "w-14 h-14 sm:w-16 sm:h-16 text-xl sm:text-2xl";
+  return (
+    <div className={`shrink-0 flex items-center justify-center rounded-2xl border-2 ${bandBg(band)} ${dims}`}>
+      <span className={`font-manrope font-black leading-none ${bandColor(band)}`}>{band.toFixed(1)}</span>
+    </div>
+  );
 };
 
 const formatDate = (iso: string) =>
@@ -377,6 +432,9 @@ const IASubSkillRow = ({ score }: { score: SectionScore }) => {
             </span>
           )}
           <span className="flex-1 text-sm font-semibold text-brand-text min-w-0 break-words">{label}</span>
+          <span className="w-16 sm:w-20 shrink-0 hidden sm:block">
+            <GaugeBar value={score.band} colorClass={bandGaugeColor(score.band)} />
+          </span>
           <span className={`font-manrope text-base sm:text-lg font-black shrink-0 tabular-nums ${bandColor(score.band)}`}>
             {score.band % 1 === 0 ? score.band.toFixed(1) : score.band}
           </span>
@@ -445,7 +503,7 @@ const IASessionCard = ({ entry }: { entry: IAEntry }) => {
   const carryForward = entry.carry_forward_subskills ?? [];
 
   return (
-    <div className={`bg-white rounded-2xl border shadow-sm overflow-hidden ${isMissed ? "border-rose-200" : "border-brand-line"}`}>
+    <div className={`bg-white rounded-2xl border border-l-4 shadow-sm overflow-hidden transition-all duration-200 ${isMissed ? "border-rose-200 border-l-rose-400" : "border-brand-line border-l-brand-teal-500 hover:shadow-md hover:-translate-y-0.5"}`}>
       <button
         onClick={() => !isMissed && setExpanded((p) => !p)}
         className={`w-full flex items-start gap-3 sm:gap-4 p-3 sm:p-4 lg:p-5 text-left transition-colors ${isMissed ? "cursor-default" : "hover:bg-brand-bg-alt cursor-pointer"}`}
@@ -485,7 +543,7 @@ const IASessionCard = ({ entry }: { entry: IAEntry }) => {
               <span>{formatIADate(entry.ia_date)}</span>
             </div>
             {entry.momentum_awarded != null && (
-              <div className={`flex items-center gap-1 text-[11px] sm:text-xs font-bold ${isMissed ? "text-rose-500" : "text-amber-600"}`}>
+              <div className={`flex items-center gap-1 text-[11px] sm:text-xs font-bold rounded-full px-2 py-0.5 ${isMissed ? "bg-rose-50 text-rose-600" : "bg-amber-50 text-amber-700"}`}>
                 <Zap className={`h-3 w-3 shrink-0 ${isMissed ? "text-rose-400" : "fill-amber-400 text-amber-400"}`} />
                 {entry.momentum_awarded > 0 ? "+" : ""}{entry.momentum_awarded} Momentum
               </div>
@@ -530,7 +588,7 @@ const IASessionCard = ({ entry }: { entry: IAEntry }) => {
             </>
           ) : avgBand !== null ? (
             <>
-              <p className={`font-manrope text-2xl sm:text-3xl font-black leading-none ${bandColor(avgBand)}`}>{avgBand.toFixed(1)}</p>
+              <BandBadge band={avgBand} />
               <p className="text-[9px] sm:text-[10px] text-brand-text-mute font-semibold font-jetbrains uppercase tracking-[0.14em]">Avg Band</p>
             </>
           ) : (
@@ -581,6 +639,9 @@ const MockSubSkillRow = ({ score }: { score: MockSubSkillScore }) => {
         {/* Top row: label + band + chevron */}
         <div className="flex items-center gap-2 sm:gap-3">
           <span className="flex-1 text-sm font-semibold text-brand-text min-w-0 break-words">{label}</span>
+          <span className="w-16 sm:w-20 shrink-0 hidden sm:block">
+            <GaugeBar value={score.band} colorClass={bandGaugeColor(score.band)} />
+          </span>
           <span className={`font-manrope text-base sm:text-lg font-black shrink-0 tabular-nums ${bandColor(score.band)}`}>
             {score.band % 1 === 0 ? score.band.toFixed(1) : score.band}
           </span>
@@ -644,6 +705,9 @@ const MockSkillRow = ({ score }: { score: MockSkillScore }) => {
             <div className={`h-7 w-7 rounded-lg flex items-center justify-center shrink-0 ${cfg.bg} ${cfg.color}`}>{cfg.icon}</div>
           )}
           <span className="flex-1 text-sm font-semibold text-brand-text min-w-0 break-words">{cfg?.label ?? score.skill}</span>
+          <span className="w-16 sm:w-20 shrink-0 hidden sm:block">
+            <GaugeBar value={score.band} colorClass={bandGaugeColor(score.band)} />
+          </span>
           <span className={`font-manrope text-base sm:text-lg font-black shrink-0 tabular-nums ${bandColor(score.band)}`}>
             {score.band % 1 === 0 ? score.band.toFixed(1) : score.band}
           </span>
@@ -703,7 +767,7 @@ const MockSessionCard = ({ entry }: { entry: MockEntry }) => {
   );
 
   return (
-    <div className="bg-white rounded-2xl border border-brand-line shadow-sm overflow-hidden">
+    <div className="bg-white rounded-2xl border border-brand-line border-l-4 border-l-brand-blue-500 shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
       <button
         onClick={() => setExpanded((p) => !p)}
         className="w-full flex items-start gap-3 sm:gap-4 p-3 sm:p-4 lg:p-5 text-left hover:bg-brand-bg-alt transition-colors"
@@ -730,7 +794,7 @@ const MockSessionCard = ({ entry }: { entry: MockEntry }) => {
               </div>
             )}
             {entry.momentum_awarded != null && (
-              <div className="flex items-center gap-1 text-[11px] sm:text-xs font-bold text-amber-600">
+              <div className="flex items-center gap-1 text-[11px] sm:text-xs font-bold rounded-full px-2 py-0.5 bg-amber-50 text-amber-700">
                 <Zap className="h-3 w-3 fill-amber-400 text-amber-400 shrink-0" />
                 +{entry.momentum_awarded} Momentum
               </div>
@@ -750,7 +814,7 @@ const MockSessionCard = ({ entry }: { entry: MockEntry }) => {
           </div>
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
-          <p className={`font-manrope text-2xl sm:text-3xl font-black leading-none ${bandColor(displayBand)}`}>{displayBand.toFixed(1)}</p>
+          <BandBadge band={displayBand} />
           <p className="text-[9px] sm:text-[10px] text-brand-text-mute font-semibold font-jetbrains uppercase tracking-[0.14em] text-right leading-tight">
             {entry.real_band_score != null ? (
               <>
@@ -805,7 +869,7 @@ const AssessmentRow = ({ entry, isExpanded, onToggle, onOpenReport }: {
   const modeCfg = MODE_CONFIG[entry.mode] ?? { label: entry.mode, badge: "" };
 
   return (
-    <div className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-all duration-200 ${cfg.border}`}>
+    <div className={`bg-white rounded-2xl border border-l-4 shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${cfg.border} ${SKILL_ACCENT_BORDER[entry.skill]}`}>
       <button onClick={onToggle} className="w-full flex items-start gap-3 sm:gap-4 p-3 sm:p-4 lg:p-5 text-left hover:bg-brand-bg-alt transition-colors">
         <div className={`flex-shrink-0 h-10 w-10 rounded-xl flex items-center justify-center ${cfg.bg} ${cfg.color}`}>{cfg.icon}</div>
         <div className="flex-1 min-w-0">
@@ -818,9 +882,9 @@ const AssessmentRow = ({ entry, isExpanded, onToggle, onOpenReport }: {
             <span className="truncate">{formatDate(entry.created_at)}</span>
           </div>
         </div>
-        <div className="flex flex-col items-end shrink-0">
-          <p className={`font-manrope text-2xl sm:text-3xl font-black leading-none ${bandColor(entry.band_score)}`}>{entry.band_score.toFixed(1)}</p>
-          <p className="text-[9px] sm:text-[10px] text-brand-text-mute font-semibold font-jetbrains uppercase tracking-[0.14em] mt-1">Band</p>
+        <div className="flex flex-col items-end shrink-0 gap-1">
+          <BandBadge band={entry.band_score} />
+          <p className="text-[9px] sm:text-[10px] text-brand-text-mute font-semibold font-jetbrains uppercase tracking-[0.14em]">Band</p>
           <div className="text-brand-text-mute mt-1">{isExpanded ? <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5" /> : <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5" />}</div>
         </div>
       </button>
@@ -877,15 +941,15 @@ const DiagnosticReportTab = ({ data, onOpenReport }: { data: AssessmentEntry[]; 
           }
           const rich = entry.sub_scores ? hasRichFeedback(entry.sub_scores) : false;
           return (
-            <div key={skill} className={`bg-white rounded-2xl border ${cfg.border} p-4 sm:p-5 flex flex-col`}>
+            <div key={skill} className={`bg-white rounded-2xl border border-l-4 ${cfg.border} ${SKILL_ACCENT_BORDER[skill]} p-4 sm:p-5 flex flex-col`}>
               <div className="flex items-center justify-between gap-3 mb-4">
                 <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                   <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${cfg.bg} ${cfg.color}`}>{cfg.icon}</div>
                   <p className="font-manrope font-bold text-brand-text truncate">{cfg.label}</p>
                 </div>
-                <div className="text-right shrink-0">
-                  <p className={`font-manrope text-2xl sm:text-3xl font-black leading-none ${bandColor(entry.band_score)}`}>{entry.band_score.toFixed(1)}</p>
-                  <p className="text-[9px] sm:text-[10px] text-brand-text-mute font-semibold font-jetbrains uppercase tracking-[0.14em] mt-1">Band</p>
+                <div className="flex flex-col items-center gap-1 shrink-0">
+                  <BandBadge band={entry.band_score} size="sm" />
+                  <p className="text-[9px] sm:text-[10px] text-brand-text-mute font-semibold font-jetbrains uppercase tracking-[0.14em]">Band</p>
                 </div>
               </div>
               {entry.sub_scores && Object.keys(entry.sub_scores).length > 0 && (
@@ -917,21 +981,214 @@ const SectionLabel = ({
 const FilterChip = ({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) => (
   <button
     onClick={onClick}
-    className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all duration-150 border whitespace-nowrap ${
+    className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all duration-150 border whitespace-nowrap ${
       active
-        ? "bg-brand-teal-600 text-white border-brand-teal-600 shadow-sm"
-        : "bg-brand-bg-alt text-brand-text-mute border-brand-line hover:border-brand-teal-300 hover:text-brand-teal-600"
+        ? "bg-brand-ink text-white border-brand-ink shadow-sm"
+        : "bg-white text-brand-text-mute border-brand-line hover:border-brand-teal-300 hover:text-brand-teal-600"
     }`}
   >
     {label}
   </button>
 );
 
+// ─── DERIVED VIEW-MODEL HELPERS ───────────────────────────────────────────────
+// Pure functions computing the hero chart / sidebar widgets from data already
+// in state — no new backend calls, just new views on the same records.
+
+function avgOf(scores: { band: number }[]): number {
+  if (!scores.length) return 0;
+  return Math.round((scores.reduce((sum, s) => sum + s.band, 0) / scores.length) * 2) / 2;
+}
+
+function getBandOverTime(iaHistory: IAEntry[], mockEntries: MockEntry[]): BandPoint[] {
+  const iaPoints = iaHistory
+    .filter((e) => e.status === "COMPLETED" && (e.scores ?? []).length > 0)
+    .map((e) => ({ date: e.ia_date, label: `IA${e.ia_number}`, band: avgOf(e.scores), type: "assessment" as const }));
+  const mockPoints = mockEntries
+    .filter((e) => (e.scores ?? []).length > 0 || e.real_band_score != null)
+    .map((e) => ({
+      date: e.time_submitted_at ?? `${e.month_year}-01`,
+      label: "Mock",
+      band: e.real_band_score ?? avgOf(e.scores ?? []),
+      type: "mock" as const,
+    }));
+  return [...iaPoints, ...mockPoints]
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .slice(-8)
+    .map(({ label, band, type }) => ({ label, band, type }));
+}
+
+function getCurrentBand(iaHistory: IAEntry[], mockEntries: MockEntry[]): number | null {
+  const points = getBandOverTime(iaHistory, mockEntries);
+  return points.length > 0 ? points[points.length - 1].band : null;
+}
+
+function getAttendance(iaHistory: IAEntry[]) {
+  const total = iaHistory.length;
+  const taken = iaHistory.filter((e) => e.status === "COMPLETED").length;
+  const pct = total > 0 ? Math.round((taken / total) * 100) : 0;
+  const ticks = iaHistory
+    .slice()
+    .sort((a, b) => new Date(a.ia_date).getTime() - new Date(b.ia_date).getTime())
+    .map((e) => e.status === "COMPLETED");
+  return { pct, taken, total, ticks };
+}
+
+function getRecordInsight(iaHistory: IAEntry[], currentBand: number | null): { message: string; tone: "amber" | "teal" } {
+  const sortedDesc = iaHistory.slice().sort((a, b) => new Date(b.ia_date).getTime() - new Date(a.ia_date).getTime());
+  let missStreak = 0;
+  for (const e of sortedDesc) {
+    if (e.status === "MISSED") missStreak++;
+    else break;
+  }
+  if (missStreak >= 2) {
+    const lastScored = sortedDesc.find((e) => e.status === "COMPLETED");
+    const bandText = currentBand != null ? currentBand.toFixed(1) : "—";
+    const sinceText = lastScored ? formatIADate(lastScored.ia_date) : "your last score";
+    return {
+      message: `You have missed the last ${missStreak} assessments in a row. Your band has been frozen at ${bandText} since ${sinceText} because nothing has re-scored it.`,
+      tone: "amber",
+    };
+  }
+  if (missStreak === 1) {
+    return { message: "You missed your last assessment. Get back on schedule to keep your band moving.", tone: "amber" };
+  }
+  return { message: "You're keeping pace with every assessment as it unlocks — that's what keeps your band moving.", tone: "teal" };
+}
+
+function getSubSkillCoverage(iaHistory: IAEntry[]): SkillGaugeRow[] {
+  const latest: Partial<Record<SkillType, { band: number; sourceLabel: string }>> = {};
+  const sortedAsc = iaHistory
+    .filter((e) => e.status === "COMPLETED")
+    .slice()
+    .sort((a, b) => new Date(a.ia_date).getTime() - new Date(b.ia_date).getTime());
+  for (const entry of sortedAsc) {
+    for (const score of entry.scores ?? []) {
+      const skill = score.skill as SkillType;
+      if (SKILL_CONFIG[skill]) {
+        latest[skill] = { band: score.band, sourceLabel: `IA #${entry.ia_number} · ${formatIADate(entry.ia_date)}` };
+      }
+    }
+  }
+  return SKILL_ORDER.map((skill) => ({
+    key: skill,
+    label: SKILL_CONFIG[skill].label,
+    icon: SKILL_CONFIG[skill].icon,
+    band: latest[skill]?.band ?? null,
+    sourceLabel: latest[skill]?.sourceLabel,
+    colorClass: latest[skill] ? bandGaugeColor(latest[skill]!.band) : "bg-slate-200",
+  }));
+}
+
+function getMockProgression(mockEntries: MockEntry[]) {
+  const sorted = mockEntries
+    .filter((e) => e.time_submitted_at)
+    .slice()
+    .sort((a, b) => new Date(a.time_submitted_at!).getTime() - new Date(b.time_submitted_at!).getTime());
+  const bandOf = (e: MockEntry) => e.real_band_score ?? avgOf(e.scores ?? []);
+  const bands = sorted.map(bandOf);
+  const delta = bands.length >= 2 ? bands[bands.length - 1] - bands[0] : 0;
+
+  const bySkill: Record<string, number[]> = {};
+  for (const e of sorted) for (const s of e.scores ?? []) (bySkill[s.skill] ??= []).push(s.band);
+  const averages = Object.entries(bySkill).map(([skill, arr]) => ({ skill, avg: arr.reduce((a, b) => a + b, 0) / arr.length }));
+  averages.sort((a, b) => b.avg - a.avg);
+  const best = averages[0];
+  const worst = averages[averages.length - 1];
+
+  let narrative = `${sorted.length} sitting${sorted.length !== 1 ? "s" : ""} on record.`;
+  if (best && worst && best.skill !== worst.skill) {
+    narrative += ` ${SKILL_CONFIG[best.skill as SkillType]?.label ?? best.skill} is carrying the average, ${SKILL_CONFIG[worst.skill as SkillType]?.label ?? worst.skill} is the drag.`;
+  }
+  return { delta, bands, narrative };
+}
+
+function getBestBandPerSkillMock(mockEntries: MockEntry[]): SkillGaugeRow[] {
+  const best: Partial<Record<SkillType, number>> = {};
+  for (const entry of mockEntries) {
+    for (const score of entry.scores ?? []) {
+      const skill = score.skill as SkillType;
+      if (!SKILL_CONFIG[skill]) continue;
+      if (best[skill] == null || score.band > best[skill]!) best[skill] = score.band;
+    }
+  }
+  return SKILL_ORDER.map((skill) => ({
+    key: skill,
+    label: SKILL_CONFIG[skill].label,
+    icon: SKILL_CONFIG[skill].icon,
+    band: best[skill] ?? null,
+    colorClass: best[skill] != null ? bandGaugeColor(best[skill]!) : "bg-slate-200",
+  }));
+}
+
+function getThisMonthMockStatus(mockEntries: MockEntry[]) {
+  const now = new Date();
+  const key = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const used = mockEntries.some((e) => e.month_year === key);
+  const monthLabel = now.toLocaleDateString("en-IN", { month: "long" });
+  return { used, monthLabel };
+}
+
+function getDiagnosticComparison(diagnostic: AssessmentEntry[], iaHistory: IAEntry[], mockEntries: MockEntry[]): DeltaRow[] {
+  const coverage = getSubSkillCoverage(iaHistory);
+  const bestMock = getBestBandPerSkillMock(mockEntries);
+  const currentBySkill: Partial<Record<SkillType, number>> = {};
+  for (const row of coverage) if (row.band != null) currentBySkill[row.key as SkillType] = row.band;
+  for (const row of bestMock) if (row.band != null && currentBySkill[row.key as SkillType] == null) currentBySkill[row.key as SkillType] = row.band;
+
+  const rows: DeltaRow[] = [];
+  for (const entry of diagnostic) {
+    const current = currentBySkill[entry.skill];
+    if (current == null) continue;
+    rows.push({
+      key: entry.skill,
+      label: SKILL_CONFIG[entry.skill].label,
+      icon: SKILL_CONFIG[entry.skill].icon,
+      baseline: entry.band_score,
+      current,
+      delta: Math.round((current - entry.band_score) * 2) / 2,
+    });
+  }
+  return rows;
+}
+
+interface MonthGroup {
+  key: string;
+  label: string;
+  items: IAEntry[];
+  scored: number;
+  missed: number;
+  netMomentum: number;
+}
+
+function groupByMonth(entries: IAEntry[]): MonthGroup[] {
+  const groups = new Map<string, IAEntry[]>();
+  for (const e of entries) {
+    const key = e.ia_date.slice(0, 7);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(e);
+  }
+  return Array.from(groups.entries())
+    .sort((a, b) => (a[0] < b[0] ? 1 : -1))
+    .map(([key, items]) => {
+      const [y, m] = key.split("-");
+      const label = new Date(Number(y), Number(m) - 1, 1)
+        .toLocaleDateString("en-IN", { month: "short", year: "numeric" })
+        .toUpperCase();
+      const scored = items.filter((e) => e.status === "COMPLETED").length;
+      const missed = items.filter((e) => e.status === "MISSED").length;
+      const netMomentum = items.reduce((sum, e) => sum + (e.momentum_awarded ?? 0), 0);
+      return { key, label, items, scored, missed, netMomentum };
+    });
+}
+
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 
 const AssessmentHistoryPage = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"ia" | "mock" | "diagnostic">("ia");
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [hideMissed, setHideMissed] = useState(false);
 
   const [iaHistory, setIaHistory]   = useState<IAEntry[]>([]);
   const [iaLoading, setIaLoading]   = useState(true);
@@ -977,9 +1234,26 @@ const AssessmentHistoryPage = () => {
     fetchDiagnostic();
   }, []);
 
-  const filteredIA = filterSkillIA === "ALL"
+  const filteredIA = (filterSkillIA === "ALL"
     ? iaHistory
-    : iaHistory.filter((e) => (e.scores ?? []).some((s) => s.skill === filterSkillIA));
+    : iaHistory.filter((e) => (e.scores ?? []).some((s) => s.skill === filterSkillIA))
+  ).filter((e) => !hideMissed || e.status !== "MISSED");
+
+  const currentBand = getCurrentBand(iaHistory, mockEntries);
+  const bandOverTime = getBandOverTime(iaHistory, mockEntries);
+  const missedCount = iaHistory.filter((e) => e.status === "MISSED").length;
+  const monthGroups = groupByMonth(filteredIA);
+  const netPtsThisFilter = filteredIA.reduce((sum, e) => sum + (e.momentum_awarded ?? 0), 0);
+
+  const attendance = getAttendance(iaHistory);
+  const subSkillCoverage = getSubSkillCoverage(iaHistory);
+  const recordInsight = getRecordInsight(iaHistory, currentBand);
+
+  const mockProgression = getMockProgression(mockEntries);
+  const bestBandPerSkillMock = getBestBandPerSkillMock(mockEntries);
+  const thisMonthMock = getThisMonthMockStatus(mockEntries);
+
+  const diagnosticComparison = getDiagnosticComparison(diagnostic, iaHistory, mockEntries);
 
   const filteredMock = filterSkillMock === "ALL"
     ? mockEntries
@@ -993,16 +1267,87 @@ const AssessmentHistoryPage = () => {
     ["SPEAKING",  "Speaking"],
   ] as const;
 
+  const attendanceInsight = missedCount > 0
+    ? `${missedCount} miss${missedCount !== 1 ? "es" : ""} on record. Each missed IA costs momentum and leaves that cycle's band un-updated.`
+    : "No misses on record — every assessment window has been used.";
+
+  const HERO_CONTENT: Record<typeof activeTab, { title: string; description: string }> = {
+    ia: {
+      title: `${iaHistory.length} assessment${iaHistory.length !== 1 ? "s" : ""}, ${iaHistory.length - missedCount} scored`,
+      description: "Assessments run every third day. Scored ones move your band; missed ones cost momentum and leave a gap in the record.",
+    },
+    mock: {
+      title: `${mockEntries.length} full sitting${mockEntries.length !== 1 ? "s" : ""} on record`,
+      description: "Every mock is graded under official IELTS timing, so these bands are the closest thing to a real result you have.",
+    },
+    diagnostic: {
+      title: "Where you started",
+      description: "Your one-time diagnostic, taken before any practice. It is the line every band since is measured from.",
+    },
+  };
+  const heroContent = HERO_CONTENT[activeTab];
+
   return (
     <>
       <StudentLayout
         activeTab="assessment-history"
-        mainClassName="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6"
+        mainClassName="flex-1 p-3 sm:p-4 md:p-6 lg:p-8"
       >
-        {/* Header */}
-        <div>
-          <h1 className="font-manrope text-xl sm:text-2xl font-black text-brand-text">Assessment History</h1>
-          <p className="text-xs sm:text-sm text-brand-text-mute mt-0.5">Track your progress across all assessments</p>
+        <div className="space-y-4 sm:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        {/* Header — dark ink summary card, same family as the How It Works hero.
+            Headline/description swap per tab; the four stat boxes and the
+            band-over-time chart are shared across all three. */}
+        <div className="relative overflow-hidden rounded-3xl bg-brand-ink p-5 sm:p-7 grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-6">
+          <div className="absolute -top-16 -right-10 w-56 h-56 rounded-full bg-brand-mint/10 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-20 -left-14 w-48 h-48 rounded-full bg-brand-blue-500/10 blur-3xl pointer-events-none" />
+
+          <div className="relative">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-4 h-px bg-brand-mint" />
+              <span className="text-[11px] font-bold uppercase tracking-widest text-brand-mint">
+                Every score on record
+              </span>
+            </div>
+            <h1 className="font-manrope text-xl sm:text-2xl font-black text-white tracking-tight mb-1.5">
+              {heroContent.title}
+            </h1>
+            <p className="text-xs sm:text-sm text-white/60 max-w-md mb-5 leading-relaxed">
+              {heroContent.description}
+            </p>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className="rounded-lg bg-white/[0.04] border border-white/5 px-3 py-2.5">
+                <p className="text-[9px] font-bold uppercase tracking-wide text-white/40 mb-1">Assessments</p>
+                <p className="text-lg font-black text-white"><AnimatedNumber value={iaHistory.length} /></p>
+              </div>
+              <div className="rounded-lg bg-white/[0.04] border border-white/5 px-3 py-2.5">
+                <p className="text-[9px] font-bold uppercase tracking-wide text-white/40 mb-1">Mocks taken</p>
+                <p className="text-lg font-black text-white"><AnimatedNumber value={mockEntries.length} /></p>
+              </div>
+              <div className="rounded-lg bg-white/[0.04] border border-white/5 px-3 py-2.5">
+                <p className="text-[9px] font-bold uppercase tracking-wide text-white/40 mb-1">Current band</p>
+                <p className="text-lg font-black text-white">{currentBand != null ? currentBand.toFixed(1) : "—"}</p>
+              </div>
+              <div className="rounded-lg bg-white/[0.04] border border-white/5 px-3 py-2.5">
+                <p className="text-[9px] font-bold uppercase tracking-wide text-white/40 mb-1">Missed</p>
+                <p className={`text-lg font-black ${missedCount > 0 ? "text-rose-400" : "text-white"}`}>
+                  <AnimatedNumber value={missedCount} />
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative flex flex-col min-h-[160px]">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">
+                Band over time · last {bandOverTime.length} scored
+              </p>
+              <ChartLegend />
+            </div>
+            <div className="flex-1">
+              <BandOverTimeChart points={bandOverTime} />
+            </div>
+          </div>
         </div>
 
         {/* Tabs — full-width on mobile with horizontal scroll fallback */}
@@ -1017,7 +1362,7 @@ const AssessmentHistoryPage = () => {
               onClick={() => setActiveTab(tab as any)}
               className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all whitespace-nowrap flex-1 sm:flex-none ${
                 activeTab === tab
-                  ? "bg-white text-brand-text shadow-sm"
+                  ? "bg-brand-ink text-white shadow-sm"
                   : "text-brand-text-mute hover:text-brand-text"
               }`}
             >
@@ -1025,7 +1370,9 @@ const AssessmentHistoryPage = () => {
               <span className="hidden sm:inline">{label}</span>
               <span className="sm:hidden">{shortLabel}</span>
               {count > 0 && (
-                <span className="ml-0.5 text-[10px] font-black bg-brand-teal-100 text-brand-teal-600 px-1.5 py-0.5 rounded-full shrink-0">
+                <span className={`ml-0.5 text-[10px] font-black px-1.5 py-0.5 rounded-full shrink-0 ${
+                  activeTab === tab ? "bg-brand-mint/20 text-brand-mint" : "bg-brand-teal-100 text-brand-teal-600"
+                }`}>
                   {count}
                 </span>
               )}
@@ -1051,24 +1398,81 @@ const AssessmentHistoryPage = () => {
                     />
                   ))}
                 </div>
+                <button
+                  onClick={() => setHideMissed((v) => !v)}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold border transition-all duration-150 sm:ml-auto ${
+                    hideMissed
+                      ? "bg-brand-teal-50 border-brand-teal-300 text-brand-teal-700"
+                      : "bg-white border-brand-line text-brand-text-mute hover:border-brand-teal-300"
+                  }`}
+                >
+                  <span className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center shrink-0 ${hideMissed ? "bg-brand-teal-500 border-brand-teal-500" : "border-brand-line"}`}>
+                    {hideMissed && <Check className="w-2.5 h-2.5 text-white" />}
+                  </span>
+                  Hide missed
+                </button>
               </div>
             </div>
-            {!iaLoading && !iaError && (
-              <p className="text-xs sm:text-sm text-brand-text-mute">{filteredIA.length} IA{filteredIA.length !== 1 ? "s" : ""} found</p>
-            )}
+
             {iaLoading ? (
               <div className="flex items-center justify-center py-12 sm:py-16 gap-3 text-brand-text-mute"><Loader2 className="h-5 w-5 animate-spin" /><span className="text-sm font-medium">Loading IA history…</span></div>
             ) : iaError ? (
               <div className="flex flex-col items-center py-12 sm:py-16 gap-3 text-brand-text-mute px-4 text-center"><AlertCircle className="h-8 w-8 text-rose-400" /><p className="text-sm font-semibold text-brand-text-mute">Failed to load IA history</p><p className="text-xs">Please refresh and try again.</p></div>
-            ) : filteredIA.length === 0 ? (
-              <div className="text-center py-12 sm:py-16 text-brand-text-mute px-4">
-                <BarChart2 className="h-10 w-10 mx-auto mb-3 opacity-40" />
-                <p className="font-semibold text-brand-text-mute">{iaHistory.length === 0 ? "No completed IAs yet" : "No entries match this filter"}</p>
-                {iaHistory.length === 0 && <p className="text-sm mt-1">Complete an Internal Assessment to see your results here.</p>}
-              </div>
             ) : (
-              <div className="space-y-2.5 sm:space-y-3">
-                {filteredIA.map((entry) => <IASessionCard key={entry.id} entry={entry} />)}
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4 sm:gap-6">
+                <div className="space-y-4 sm:space-y-5 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs sm:text-sm text-brand-text-mute">
+                      {filteredIA.length} assessment{filteredIA.length !== 1 ? "s" : ""} shown
+                    </p>
+                    {netPtsThisFilter !== 0 && (
+                      <span className={`text-xs font-black ${netPtsThisFilter > 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                        {netPtsThisFilter > 0 ? "+" : ""}{netPtsThisFilter} PTS
+                      </span>
+                    )}
+                  </div>
+
+                  {filteredIA.length === 0 ? (
+                    <div className="text-center py-12 sm:py-16 text-brand-text-mute px-4">
+                      <BarChart2 className="h-10 w-10 mx-auto mb-3 opacity-40" />
+                      <p className="font-semibold text-brand-text-mute">{iaHistory.length === 0 ? "No completed IAs yet" : "No entries match this filter"}</p>
+                      {iaHistory.length === 0 && <p className="text-sm mt-1">Complete an Internal Assessment to see your results here.</p>}
+                    </div>
+                  ) : (
+                    <div className="space-y-5 sm:space-y-6">
+                      {monthGroups.map((group) => (
+                        <div key={group.key} className="space-y-2.5 sm:space-y-3">
+                          <div className="flex items-center justify-between px-1">
+                            <p className="text-[10px] font-black text-brand-text-mute font-jetbrains uppercase tracking-[0.14em]">
+                              {group.label}
+                              <span className="text-brand-text-mute/70 font-semibold normal-case ml-2">
+                                {group.scored} scored{group.missed > 0 ? ` · ${group.missed} missed` : ""}
+                              </span>
+                            </p>
+                            {group.netMomentum !== 0 && (
+                              <span className={`text-[10px] font-black ${group.netMomentum > 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                                {group.netMomentum > 0 ? "+" : ""}{group.netMomentum} PTS
+                              </span>
+                            )}
+                          </div>
+                          {group.items.map((entry) => <IASessionCard key={entry.id} entry={entry} />)}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  <AttendanceCard pct={attendance.pct} taken={attendance.taken} total={attendance.total} ticks={attendance.ticks} insight={attendanceInsight} />
+                  <SubSkillCoverageCard rows={subSkillCoverage} />
+                  <RecordInsightCard
+                    title="What the record says"
+                    message={recordInsight.message}
+                    tone={recordInsight.tone}
+                    ctaLabel="Next assessment"
+                    onCta={() => navigate("/student/internal")}
+                  />
+                </div>
               </div>
             )}
           </>
@@ -1089,22 +1493,31 @@ const AssessmentHistoryPage = () => {
                 </div>
               </div>
             </div>
-            {!mockLoading && !mockError && (
-              <p className="text-xs sm:text-sm text-brand-text-mute">{filteredMock.length} entr{filteredMock.length !== 1 ? "ies" : "y"} found</p>
-            )}
+
             {mockLoading ? (
               <div className="flex items-center justify-center py-12 sm:py-16 gap-3 text-brand-text-mute"><Loader2 className="h-5 w-5 animate-spin" /><span className="text-sm font-medium">Loading mock tests…</span></div>
             ) : mockError ? (
               <div className="flex flex-col items-center py-12 sm:py-16 gap-3 text-brand-text-mute px-4 text-center"><AlertCircle className="h-8 w-8 text-rose-400" /><p className="text-sm font-semibold text-brand-text-mute">Failed to load mock tests</p></div>
-            ) : filteredMock.length === 0 ? (
-              <div className="text-center py-12 sm:py-16 text-brand-text-mute px-4">
-                <BarChart2 className="h-10 w-10 mx-auto mb-3 opacity-40" />
-                <p className="font-semibold text-brand-text-mute">{mockEntries.length === 0 ? "No completed mock tests yet" : "No entries match this filter"}</p>
-                {mockEntries.length === 0 && <p className="text-sm mt-1">Complete a Mock Test to see your full skill breakdown here.</p>}
-              </div>
             ) : (
-              <div className="space-y-2.5 sm:space-y-3">
-                {filteredMock.map((entry) => <MockSessionCard key={entry.id} entry={entry} />)}
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4 sm:gap-6">
+                <div className="space-y-2.5 sm:space-y-3 min-w-0">
+                  <p className="text-xs sm:text-sm text-brand-text-mute">{filteredMock.length} sitting{filteredMock.length !== 1 ? "s" : ""} found</p>
+                  {filteredMock.length === 0 ? (
+                    <div className="text-center py-12 sm:py-16 text-brand-text-mute px-4">
+                      <BarChart2 className="h-10 w-10 mx-auto mb-3 opacity-40" />
+                      <p className="font-semibold text-brand-text-mute">{mockEntries.length === 0 ? "No completed mock tests yet" : "No entries match this filter"}</p>
+                      {mockEntries.length === 0 && <p className="text-sm mt-1">Complete a Mock Test to see your full skill breakdown here.</p>}
+                    </div>
+                  ) : (
+                    filteredMock.map((entry) => <MockSessionCard key={entry.id} entry={entry} />)
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  <MockProgressionCard delta={mockProgression.delta} bands={mockProgression.bands} narrative={mockProgression.narrative} />
+                  <BestBandPerSkillCard rows={bestBandPerSkillMock} />
+                  <ThisMonthMockCard used={thisMonthMock.used} monthLabel={thisMonthMock.monthLabel} onStart={() => navigate("/student/mock")} />
+                </div>
               </div>
             )}
           </>
@@ -1114,10 +1527,21 @@ const AssessmentHistoryPage = () => {
         {activeTab === "diagnostic" && (
           diagnosticLoading ? (
             <div className="flex items-center justify-center py-12 sm:py-16 gap-3 text-brand-text-mute"><Loader2 className="h-5 w-5 animate-spin" /><span className="text-sm font-medium">Loading diagnostic report…</span></div>
-          ) : (
+          ) : diagnostic.length === 0 ? (
             <DiagnosticReportTab data={diagnostic} onOpenReport={setActiveReport} />
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4 sm:gap-6">
+              <div className="min-w-0">
+                <DiagnosticReportTab data={diagnostic} onOpenReport={setActiveReport} />
+              </div>
+              <div className="space-y-4">
+                {diagnosticComparison.length > 0 && <HowFarCard rows={diagnosticComparison} />}
+                <AboutReportCard />
+              </div>
+            </div>
           )
         )}
+        </div>
       </StudentLayout>
 
       {activeReport && <FullAIReportModal report={activeReport} onClose={() => setActiveReport(null)} />}

@@ -14,7 +14,7 @@ interface Props {
 }
 
 function bandColor(band: number | null): string {
-  if (band === null) return 'text-slate-400';
+  if (band === null) return 'text-brand-text-mute';
   if (band >= 7.5) return 'text-emerald-700';
   if (band >= 6.0) return 'text-amber-700';
   return 'text-rose-700';
@@ -28,7 +28,7 @@ function bandBgBar(band: number | null): string {
 }
 
 function bandBgColor(band: number | null): string {
-  if (band === null) return 'bg-slate-100 text-slate-500';
+  if (band === null) return 'bg-slate-100 text-brand-text-mute';
   if (band >= 7.5) return 'bg-emerald-100 text-emerald-800';
   if (band >= 6.0) return 'bg-amber-100 text-amber-800';
   return 'bg-rose-100 text-rose-800';
@@ -37,7 +37,7 @@ function bandBgColor(band: number | null): string {
 function statusBadge(status: string): string {
   if (status === 'COMPLETED') return 'bg-emerald-100 text-emerald-700';
   if (status === 'MISSED') return 'bg-rose-100 text-rose-700';
-  return 'bg-slate-100 text-slate-500';
+  return 'bg-slate-100 text-brand-text-mute';
 }
 
 const SKILL_LABELS: Record<string, string> = {
@@ -99,8 +99,8 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
       className="fixed inset-0 z-[200] bg-gray-100 overflow-y-auto"
     >
       {/* Toolbar — hidden on print */}
-      <div className="print:hidden sticky top-0 z-10 bg-white border-b border-slate-200 shadow-sm px-6 py-3 flex items-center justify-between">
-        <span className="font-semibold text-slate-800 text-sm">Student Report Preview</span>
+      <div className="print:hidden sticky top-0 z-10 bg-white border-b border-brand-line shadow-sm px-6 py-3 flex items-center justify-between">
+        <span className="font-semibold text-brand-text text-sm">Student Report Preview</span>
         <div className="flex items-center gap-3">
           <button
             onClick={() => window.print()}
@@ -110,7 +110,7 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
           </button>
           <button
             onClick={onClose}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm font-medium hover:bg-slate-200 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-100 text-brand-text text-sm font-medium hover:bg-slate-200 transition-colors"
           >
             Close
           </button>
@@ -126,14 +126,14 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
               <span className="text-white font-black text-sm">TC</span>
             </div>
             <div>
-              <div className="font-bold text-slate-900 text-base leading-tight">TestCrack</div>
-              <div className="text-slate-500 text-xs">IELTS Preparation Platform</div>
+              <div className="font-bold text-brand-text text-base leading-tight">TestCrack</div>
+              <div className="text-brand-text-mute text-xs">IELTS Preparation Platform</div>
             </div>
           </div>
           <div className="text-right">
             <div className="text-[10px] font-black uppercase tracking-widest text-brand-teal-600 mb-0.5">Student Progress Report</div>
-            <div className="text-xs text-slate-500">{generatedAt}</div>
-            <div className="text-[10px] text-slate-400 font-mono">{reportId}</div>
+            <div className="text-xs text-brand-text-mute">{generatedAt}</div>
+            <div className="text-[10px] text-brand-text-mute font-mono">{reportId}</div>
           </div>
         </div>
 
@@ -151,9 +151,9 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
             </div>
           )}
           <div>
-            <h1 className="text-2xl font-black text-slate-900 mb-0.5">{student.name}</h1>
-            <div className="text-sm text-slate-500 mb-0.5">{student.email}</div>
-            <div className="text-xs text-slate-400 flex items-center gap-1.5">
+            <h1 className="text-2xl font-black text-brand-text mb-0.5">{student.name}</h1>
+            <div className="text-sm text-brand-text-mute mb-0.5">{student.email}</div>
+            <div className="text-xs text-brand-text-mute flex items-center gap-1.5">
               <span>Batch: <span className="font-medium text-slate-600">{batchName}</span></span>
               {instituteName && (
                 <>
@@ -167,7 +167,7 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
 
         {/* Progress Overview */}
         <div className="mb-8">
-          <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3">Progress Overview</h2>
+          <h2 className="text-xs font-black uppercase tracking-widest text-brand-text-mute mb-3">Progress Overview</h2>
 
           {/* 4 stat cards */}
           <div className="grid grid-cols-4 gap-4 mb-5">
@@ -177,11 +177,11 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
               { label: 'Momentum Score', value: momentum_score, accent: 'bg-amber-500' },
               { label: 'Daily Streak', value: `${daily_streak}d`, accent: 'bg-emerald-500' },
             ].map(card => (
-              <div key={card.label} className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+              <div key={card.label} className="bg-white border border-brand-line rounded-xl overflow-hidden">
                 <div className={`h-1.5 w-full ${card.accent}`} />
                 <div className="p-4">
-                  <div className="text-2xl font-black text-slate-900">{card.value}</div>
-                  <div className="text-xs text-slate-500 mt-0.5">{card.label}</div>
+                  <div className="text-2xl font-black text-brand-text">{card.value}</div>
+                  <div className="text-xs text-brand-text-mute mt-0.5">{card.label}</div>
                 </div>
               </div>
             ))}
@@ -189,7 +189,7 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
 
           {/* Band Progress Bar */}
           {current_band !== null && (
-            <div className="bg-slate-50 rounded-xl border border-slate-200 p-5 mb-3">
+            <div className="bg-slate-50 rounded-xl border border-brand-line p-5 mb-3">
               <div className="relative h-4 bg-slate-200 rounded-full mb-3">
                 {/* Current band marker */}
                 <div
@@ -204,7 +204,7 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
                   />
                 )}
               </div>
-              <div className="flex justify-between text-xs text-slate-400">
+              <div className="flex justify-between text-xs text-brand-text-mute">
                 <span>0</span>
                 {[1,2,3,4,5,6,7,8,9].map(n => (
                   <span key={n}>{n}</span>
@@ -233,7 +233,7 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
 
         {/* Skill Breakdown */}
         <div>
-          <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3">Skill Breakdown</h2>
+          <h2 className="text-xs font-black uppercase tracking-widest text-brand-text-mute mb-3">Skill Breakdown</h2>
           <div className="space-y-3">
             {skillOrder.map(skill => {
               const row = competency.find(c => c.skill.toUpperCase() === skill.toUpperCase());
@@ -241,7 +241,7 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
               const short = SKILL_LABELS[skill] ?? skill[0];
               return (
                 <div key={skill} className="flex items-center gap-4">
-                  <div className="w-24 text-xs font-semibold text-slate-700 flex-shrink-0">
+                  <div className="w-24 text-xs font-semibold text-brand-text flex-shrink-0">
                     {short} — {skill}
                   </div>
                   <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
@@ -253,7 +253,7 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
                   <div className={`w-10 text-right text-xs font-bold ${bandColor(bandScore)}`}>
                     {bandScore ?? '—'}
                   </div>
-                  <div className="w-16 text-right text-xs text-slate-400">
+                  <div className="w-16 text-right text-xs text-brand-text-mute">
                     Target: {target_band ?? '—'}
                   </div>
                 </div>
@@ -267,13 +267,13 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
       <div className="max-w-[800px] mx-auto bg-white shadow-lg my-8 p-12 print:shadow-none print:my-0 print:p-[1.5cm] print:break-before-page">
         {/* IA History */}
         <div className="mb-10">
-          <h2 className="text-lg font-black text-slate-900 mb-4">IA History</h2>
+          <h2 className="text-lg font-black text-brand-text mb-4">IA History</h2>
           {recentIAs.length > 0 ? (
             <table className="w-full text-xs border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200">
+                <tr className="bg-slate-50 border-b border-brand-line">
                   {['IA #', 'Date', 'Status', 'Sub-Skills', 'Band', 'Momentum'].map(h => (
-                    <th key={h} className="text-left text-[10px] font-black uppercase tracking-wider text-slate-400 px-3 py-2 first:pl-0 last:pr-0">
+                    <th key={h} className="text-left text-[10px] font-black uppercase tracking-wider text-brand-text-mute px-3 py-2 first:pl-0 last:pr-0">
                       {h}
                     </th>
                   ))}
@@ -286,7 +286,7 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
                     : null;
                   return (
                     <tr key={ia.id} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
-                      <td className="px-3 py-2 pl-0 font-bold text-slate-900">#{ia.ia_number}</td>
+                      <td className="px-3 py-2 pl-0 font-bold text-brand-text">#{ia.ia_number}</td>
                       <td className="px-3 py-2 text-slate-600">{ia.ia_date}</td>
                       <td className="px-3 py-2">
                         <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold ${statusBadge(ia.status)}`}>
@@ -312,7 +312,7 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
               </tbody>
             </table>
           ) : (
-            <div className="rounded-xl bg-slate-50 border border-slate-200 px-6 py-4 text-sm text-slate-500">
+            <div className="rounded-xl bg-slate-50 border border-brand-line px-6 py-4 text-sm text-brand-text-mute">
               No IA sessions yet.
             </div>
           )}
@@ -320,13 +320,13 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
 
         {/* Mock Test History */}
         <div>
-          <h2 className="text-lg font-black text-slate-900 mb-4">Mock Test History</h2>
+          <h2 className="text-lg font-black text-brand-text mb-4">Mock Test History</h2>
           {mock_sessions.length > 0 ? (
             <table className="w-full text-xs border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200">
+                <tr className="bg-slate-50 border-b border-brand-line">
                   {['Month', 'Attempt Type', 'Status', 'Real Band', 'Momentum'].map(h => (
-                    <th key={h} className="text-left text-[10px] font-black uppercase tracking-wider text-slate-400 px-3 py-2 first:pl-0 last:pr-0">
+                    <th key={h} className="text-left text-[10px] font-black uppercase tracking-wider text-brand-text-mute px-3 py-2 first:pl-0 last:pr-0">
                       {h}
                     </th>
                   ))}
@@ -335,7 +335,7 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
               <tbody>
                 {mock_sessions.map((m, i) => (
                   <tr key={m.id} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
-                    <td className="px-3 py-2 pl-0 text-slate-700">{m.month_year}</td>
+                    <td className="px-3 py-2 pl-0 text-brand-text">{m.month_year}</td>
                     <td className="px-3 py-2 text-slate-600">{m.attempt_type}</td>
                     <td className="px-3 py-2">
                       <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold ${statusBadge(m.status)}`}>
@@ -353,7 +353,7 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
               </tbody>
             </table>
           ) : (
-            <div className="rounded-xl bg-slate-50 border border-slate-200 px-6 py-4 text-sm text-slate-500">
+            <div className="rounded-xl bg-slate-50 border border-brand-line px-6 py-4 text-sm text-brand-text-mute">
               No mock tests yet.
             </div>
           )}
@@ -364,8 +364,8 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
       <div className="max-w-[800px] mx-auto bg-white shadow-lg my-8 p-12 print:shadow-none print:my-0 print:p-[1.5cm] print:break-before-page">
         {/* Drill Engagement */}
         <div className="mb-10">
-          <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3">Drill Engagement</h2>
-          <div className="bg-slate-50 rounded-xl border border-slate-200 px-6 py-4 flex items-center gap-10 flex-wrap">
+          <h2 className="text-xs font-black uppercase tracking-widest text-brand-text-mute mb-3">Drill Engagement</h2>
+          <div className="bg-slate-50 rounded-xl border border-brand-line px-6 py-4 flex items-center gap-10 flex-wrap">
             {[
               { label: 'Total Drills', value: drill_stats.total_drills_all_time },
               { label: 'Avg DCS', value: drill_stats.avg_dcs_lifetime.toFixed(1) },
@@ -373,8 +373,8 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
               { label: 'Lexigrid Games', value: lexigrid_stats.games_last_14 },
             ].map(stat => (
               <div key={stat.label}>
-                <div className="text-xl font-black text-slate-900">{stat.value}</div>
-                <div className="text-xs text-slate-500">{stat.label}</div>
+                <div className="text-xl font-black text-brand-text">{stat.value}</div>
+                <div className="text-xs text-brand-text-mute">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -383,18 +383,18 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
         {/* Diagnostic Baseline */}
         {diagnostic_results.length > 0 && (
           <div className="mb-10">
-            <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3">Diagnostic Baseline</h2>
+            <h2 className="text-xs font-black uppercase tracking-widest text-brand-text-mute mb-3">Diagnostic Baseline</h2>
             <div className="grid grid-cols-4 gap-4">
               {(['Listening', 'Reading', 'Writing', 'Speaking'] as const).map(skill => {
                 const result = diagnostic_results.find(r => r.skill === skill);
                 const short = SKILL_LABELS[skill] ?? skill[0];
                 return (
-                  <div key={skill} className="bg-white border border-slate-200 rounded-xl p-4 text-center">
-                    <div className="text-xs font-black uppercase tracking-wider text-slate-400 mb-2">{short}</div>
+                  <div key={skill} className="bg-white border border-brand-line rounded-xl p-4 text-center">
+                    <div className="text-xs font-black uppercase tracking-wider text-brand-text-mute mb-2">{short}</div>
                     <div className={`text-2xl font-black ${bandColor(result?.band_score ?? null)}`}>
                       {result?.band_score ?? '—'}
                     </div>
-                    <div className="text-xs text-slate-500 mt-0.5">{skill}</div>
+                    <div className="text-xs text-brand-text-mute mt-0.5">{skill}</div>
                   </div>
                 );
               })}
@@ -410,26 +410,26 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
                 <div className="text-[10px] font-black uppercase tracking-widest text-brand-teal-400 mb-1">Certificate of Progress</div>
                 <div className="w-12 h-0.5 bg-brand-teal-300 mx-auto" />
               </div>
-              <p className="text-sm text-slate-700 leading-relaxed text-center mb-4">
+              <p className="text-sm text-brand-text leading-relaxed text-center mb-4">
                 This report certifies that <strong>{student.name}</strong> has actively engaged in structured IELTS preparation
                 through the TestCrack platform. The scores and statistics presented reflect genuine performance data captured
                 during the preparation period.
               </p>
               <div className="text-center mb-6">
-                <span className="text-sm text-slate-500">Current IELTS Band Estimate: </span>
+                <span className="text-sm text-brand-text-mute">Current IELTS Band Estimate: </span>
                 <span className={`text-lg font-black ${bandColor(current_band)}`}>{current_band}</span>
               </div>
               <div className="border-t border-brand-teal-200 pt-4">
-                <div className="text-xs text-slate-500 mb-2">Instructor Verification:</div>
+                <div className="text-xs text-brand-text-mute mb-2">Instructor Verification:</div>
                 <div className="relative w-56">
                   {instructorName && (
-                    <div className="text-sm font-semibold text-slate-800 pb-1 font-serif italic">
+                    <div className="text-sm font-semibold text-brand-text pb-1 font-serif italic">
                       {instructorName}
                     </div>
                   )}
                   <div className="border-b border-slate-400" />
                   {instructorName && (
-                    <div className="text-[10px] text-slate-400 mt-0.5">{instructorName}</div>
+                    <div className="text-[10px] text-brand-text-mute mt-0.5">{instructorName}</div>
                   )}
                 </div>
               </div>
@@ -438,17 +438,17 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
         )}
 
         {/* Footer */}
-        <div className="border-t border-slate-200 pt-6 mt-auto">
-          <p className="text-xs text-slate-500 mb-0.5">
+        <div className="border-t border-brand-line pt-6 mt-auto">
+          <p className="text-xs text-brand-text-mute mb-0.5">
             This report was generated by TestCrack IELTS Preparation Platform.
           </p>
-          <p className="text-xs text-slate-400 mb-0.5">
+          <p className="text-xs text-brand-text-mute mb-0.5">
             Data reflects live performance as of report generation time.
           </p>
-          <p className="text-xs text-slate-400 mb-0.5 font-mono">
+          <p className="text-xs text-brand-text-mute mb-0.5 font-mono">
             Report ID: {reportId}
           </p>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-brand-text-mute">
             Confidential — For institutional use only.
           </p>
         </div>

@@ -6,10 +6,10 @@ import type { IASession, SectionScore } from './types';
 interface Props { sessions: IASession[]; }
 
 const STATUS_CONFIG = {
-  COMPLETED:   { label: 'Completed',   cls: 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' },
-  MISSED:      { label: 'Missed',      cls: 'bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400' },
-  IN_PROGRESS: { label: 'In Progress', cls: 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' },
-  PENDING:     { label: 'Pending',     cls: 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400' },
+  COMPLETED:   { label: 'Completed',   cls: 'bg-emerald-100 text-emerald-700' },
+  MISSED:      { label: 'Missed',      cls: 'bg-rose-100 text-rose-700' },
+  IN_PROGRESS: { label: 'In Progress', cls: 'bg-amber-100 text-amber-700' },
+  PENDING:     { label: 'Pending',     cls: 'bg-brand-bg-alt text-brand-text-mute' },
 } as const;
 
 function avgBand(scores: SectionScore[] | null): number | null {
@@ -20,10 +20,10 @@ function avgBand(scores: SectionScore[] | null): number | null {
 }
 
 function bandColorText(b: number | null): string {
-  if (b === null) return 'text-slate-400';
-  if (b >= 7.5) return 'text-emerald-600 dark:text-emerald-400';
-  if (b >= 6.0) return 'text-amber-600 dark:text-amber-400';
-  return 'text-rose-600 dark:text-rose-400';
+  if (b === null) return 'text-brand-text-mute';
+  if (b >= 7.5) return 'text-emerald-600';
+  if (b >= 6.0) return 'text-amber-600';
+  return 'text-rose-600';
 }
 
 function skillLabel(skill: string, subSkill: string): string {
@@ -41,13 +41,13 @@ function ScoreDetailPanel({ scores }: { scores: SectionScore[] }) {
     <div className="space-y-4">
       {/* Per-sub-skill score table */}
       <div>
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+        <p className="text-[10px] font-bold text-brand-text-mute font-jetbrains uppercase tracking-wider mb-2">
           Section Breakdown
         </p>
-        <div className="rounded-xl border border-slate-100 dark:border-slate-800 overflow-hidden">
+        <div className="rounded-xl border border-brand-line overflow-hidden">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-100 dark:border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              <tr className="border-b border-brand-line text-[10px] font-bold text-brand-text-mute font-jetbrains uppercase tracking-wider">
                 <th className="py-2 pl-3">Skill / Sub-skill</th>
                 <th className="py-2 text-center">Band</th>
                 <th className="py-2 text-center">MCQ</th>
@@ -56,8 +56,8 @@ function ScoreDetailPanel({ scores }: { scores: SectionScore[] }) {
             </thead>
             <tbody>
               {validScores.map((s, i) => (
-                <tr key={i} className="border-b border-slate-100 dark:border-slate-800 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/30">
-                  <td className="py-2 pl-3 font-semibold text-slate-700 dark:text-slate-300">
+                <tr key={i} className="border-b border-brand-line last:border-0 hover:bg-brand-bg-alt">
+                  <td className="py-2 pl-3 font-semibold text-brand-text">
                     {skillLabel(s.skill, s.sub_skill)}
                   </td>
                   <td className="py-2 text-center">
@@ -65,13 +65,13 @@ function ScoreDetailPanel({ scores }: { scores: SectionScore[] }) {
                       {s.band !== null ? s.band.toFixed(1) : '—'}
                     </span>
                   </td>
-                  <td className="py-2 text-center text-xs text-slate-500 dark:text-slate-400">
+                  <td className="py-2 text-center text-xs text-brand-text-mute">
                     {s.total > 0 ? `${s.correct}/${s.total}` : '—'}
                   </td>
                   <td className="py-2 pr-3 text-center">
                     {s.ai_graded
                       ? <Cpu className="h-3.5 w-3.5 text-brand-teal-500 mx-auto" />
-                      : <span className="text-slate-300 dark:text-slate-600 text-xs">—</span>}
+                      : <span className="text-brand-text-mute text-xs">—</span>}
                   </td>
                 </tr>
               ))}
@@ -82,22 +82,22 @@ function ScoreDetailPanel({ scores }: { scores: SectionScore[] }) {
 
       {/* AI Feedback panels — one per sub-skill that has it */}
       {validScores.filter(s => s.ai_feedback).map((s, i) => (
-        <div key={i} className="rounded-xl border border-brand-teal-100 dark:border-brand-teal-500/20 bg-brand-teal-50/50 dark:bg-brand-teal-500/5 p-3 space-y-2">
+        <div key={i} className="rounded-xl border border-brand-teal-100 bg-brand-teal-50/50 p-3 space-y-2">
           <div className="flex items-center gap-2">
             <Cpu className="h-3.5 w-3.5 text-brand-teal-500 shrink-0" />
-            <p className="text-[10px] font-bold text-brand-teal-600 dark:text-brand-teal-400 uppercase tracking-wider">
+            <p className="text-[10px] font-bold text-brand-teal-600 font-jetbrains uppercase tracking-wider">
               AI Feedback — {skillLabel(s.skill, s.sub_skill)}
             </p>
           </div>
           {s.ai_feedback!.rationale && (
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+            <p className="text-xs text-brand-text-mute leading-relaxed">
               {s.ai_feedback!.rationale}
             </p>
           )}
           {s.ai_feedback!.key_observations.length > 0 && (
             <ul className="space-y-1">
               {s.ai_feedback!.key_observations.map((obs, j) => (
-                <li key={j} className="flex items-start gap-1.5 text-xs text-slate-600 dark:text-slate-400">
+                <li key={j} className="flex items-start gap-1.5 text-xs text-brand-text-mute">
                   <CheckCircle2 className="h-3 w-3 text-brand-teal-400 shrink-0 mt-0.5" />
                   {obs}
                 </li>
@@ -122,23 +122,23 @@ function IARow({ session }: { session: IASession }) {
     <>
       <tr
         className={cn(
-          'border-b border-slate-100 dark:border-slate-800 transition-colors',
-          hasDetail ? 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/40' : '',
-          expanded && 'bg-slate-50 dark:bg-slate-800/40'
+          'border-b border-brand-line transition-colors',
+          hasDetail ? 'cursor-pointer hover:bg-brand-bg-alt' : '',
+          expanded && 'bg-brand-bg-alt'
         )}
         onClick={() => hasDetail && setExpanded(e => !e)}
       >
-        <td className="py-3 pl-5 text-sm font-bold text-slate-700 dark:text-slate-300">IA {session.ia_number}</td>
-        <td className="py-3 text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap">{session.ia_date}</td>
+        <td className="py-3 pl-5 text-sm font-bold text-brand-text">IA {session.ia_number}</td>
+        <td className="py-3 text-sm text-brand-text-mute whitespace-nowrap">{session.ia_date}</td>
         <td className="py-3">
           <span className={cn('px-2 py-0.5 rounded-full text-[11px] font-bold', cfg.cls)}>{cfg.label}</span>
         </td>
         <td className="py-3">
           {band !== null
             ? <span className={cn('text-sm font-black', bandColorText(band))}>{band.toFixed(1)}</span>
-            : <span className="text-xs text-slate-300 dark:text-slate-600">—</span>}
+            : <span className="text-xs text-brand-text-mute">—</span>}
         </td>
-        <td className="py-3 text-xs text-slate-500 dark:text-slate-400">
+        <td className="py-3 text-xs text-brand-text-mute">
           {subCount > 0 ? `${subCount} sub-skills` : '—'}
           {cfCount > 0 && <span className="ml-1 text-amber-500">({cfCount} CF)</span>}
         </td>
@@ -147,10 +147,10 @@ function IARow({ session }: { session: IASession }) {
             <span className={cn(
               'text-sm font-bold',
               (session.momentum_awarded ?? 0) > 0
-                ? 'text-emerald-600 dark:text-emerald-400'
+                ? 'text-emerald-600'
                 : (session.momentum_awarded ?? 0) < 0
-                ? 'text-rose-600 dark:text-rose-400'
-                : 'text-slate-400'
+                ? 'text-rose-600'
+                : 'text-brand-text-mute'
             )}>
               {session.momentum_awarded != null
                 ? (session.momentum_awarded > 0 ? '+' : '') + session.momentum_awarded
@@ -158,25 +158,25 @@ function IARow({ session }: { session: IASession }) {
             </span>
             {hasDetail && (
               expanded
-                ? <ChevronUp className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                : <ChevronDown className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                ? <ChevronUp className="h-3.5 w-3.5 text-brand-text-mute shrink-0" />
+                : <ChevronDown className="h-3.5 w-3.5 text-brand-text-mute shrink-0" />
             )}
           </div>
         </td>
       </tr>
 
       {expanded && session.scores && (
-        <tr className="bg-slate-50/80 dark:bg-slate-800/30 border-b border-slate-100 dark:border-slate-800">
+        <tr className="bg-brand-bg-alt/80 border-b border-brand-line">
           <td colSpan={6} className="py-4 px-5">
             <div className="space-y-2">
               {/* Carry-forward strip */}
               {session.carry_forward_subskills && session.carry_forward_subskills.length > 0 && (
                 <div className="flex items-center gap-2 flex-wrap mb-3">
-                  <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                  <span className="text-[10px] font-bold text-amber-600 font-jetbrains uppercase tracking-wider">
                     Carry Forward
                   </span>
                   {session.carry_forward_subskills.map(s => (
-                    <span key={s} className="px-1.5 py-0.5 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 rounded text-[10px] font-semibold border border-amber-200 dark:border-amber-500/30">
+                    <span key={s} className="px-1.5 py-0.5 bg-amber-50 text-amber-700 rounded text-[10px] font-semibold border border-amber-200">
                       {s}
                     </span>
                   ))}
@@ -198,8 +198,8 @@ export function IASessionsTab({ sessions }: Props) {
 
   if (sessions.length === 0) {
     return (
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-12 text-center">
-        <p className="text-slate-400 text-sm">No internal assessment sessions yet.</p>
+      <div className="bg-white rounded-2xl border border-brand-line p-12 text-center">
+        <p className="text-brand-text-mute text-sm">No internal assessment sessions yet.</p>
       </div>
     );
   }
@@ -209,27 +209,27 @@ export function IASessionsTab({ sessions }: Props) {
       {/* Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Total IAs',       value: sessions.length, cls: 'text-slate-800 dark:text-white' },
-          { label: 'Completed',       value: completed,        cls: 'text-emerald-600 dark:text-emerald-400' },
-          { label: 'Missed',          value: missed,           cls: 'text-rose-600 dark:text-rose-400' },
-          { label: 'Completion Rate', value: `${compRate}%`,   cls: compRate >= 70 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400' },
+          { label: 'Total IAs',       value: sessions.length, cls: 'text-brand-text' },
+          { label: 'Completed',       value: completed,        cls: 'text-emerald-600' },
+          { label: 'Missed',          value: missed,           cls: 'text-rose-600' },
+          { label: 'Completion Rate', value: `${compRate}%`,   cls: compRate >= 70 ? 'text-emerald-600' : 'text-amber-600' },
         ].map(c => (
-          <div key={c.label} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-3 text-center">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{c.label}</p>
+          <div key={c.label} className="bg-white rounded-xl border border-brand-line p-3 text-center">
+            <p className="text-[10px] font-bold text-brand-text-mute font-jetbrains uppercase tracking-wider">{c.label}</p>
             <p className={cn('text-2xl font-black mt-1', c.cls)}>{c.value}</p>
           </div>
         ))}
       </div>
 
       {/* Table */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-        <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800">
-          <p className="text-xs text-slate-400">Click a completed row to see scores and AI feedback</p>
+      <div className="bg-white rounded-2xl border border-brand-line shadow-sm overflow-hidden">
+        <div className="px-5 py-3 border-b border-brand-line">
+          <p className="text-xs text-brand-text-mute">Click a completed row to see scores and AI feedback</p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-slate-100 dark:border-slate-800 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              <tr className="border-b border-brand-line text-[11px] font-bold text-brand-text-mute font-jetbrains uppercase tracking-wider">
                 <th className="py-3 pl-5">IA</th>
                 <th className="py-3">Date</th>
                 <th className="py-3">Status</th>

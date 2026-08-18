@@ -26,17 +26,17 @@ interface Props {
 const SKILL_ORDER = ['LISTENING', 'READING', 'WRITING', 'SPEAKING'];
 
 function bandColorText(b: number): string {
-  if (b >= 7.5) return 'text-emerald-600 dark:text-emerald-400';
-  if (b >= 6.0) return 'text-amber-600 dark:text-amber-400';
-  if (b > 0)    return 'text-rose-600 dark:text-rose-400';
-  return 'text-slate-400';
+  if (b >= 7.5) return 'text-emerald-600';
+  if (b >= 6.0) return 'text-amber-600';
+  if (b > 0)    return 'text-rose-600';
+  return 'text-brand-text-mute';
 }
 
 function bandColorBg(b: number): string {
-  if (b >= 7.5) return 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30';
-  if (b >= 6.0) return 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/30';
-  if (b > 0)    return 'bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/30';
-  return 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800';
+  if (b >= 7.5) return 'bg-emerald-50 border-emerald-200';
+  if (b >= 6.0) return 'bg-amber-50 border-amber-200';
+  if (b > 0)    return 'bg-rose-50 border-rose-200';
+  return 'bg-brand-bg-alt border-brand-line';
 }
 
 function ScoreBar({ label, value, max = 9 }: { label: string; value: number | undefined; max?: number }) {
@@ -44,14 +44,14 @@ function ScoreBar({ label, value, max = 9 }: { label: string; value: number | un
   const pct = Math.min(100, (value / max) * 100);
   return (
     <div className="flex items-center gap-2">
-      <span className="text-[11px] text-slate-500 dark:text-slate-400 w-28 shrink-0 truncate">{label}</span>
-      <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+      <span className="text-[11px] text-brand-text-mute w-28 shrink-0 truncate">{label}</span>
+      <div className="flex-1 h-1.5 bg-brand-bg-alt rounded-full overflow-hidden">
         <div
           className={cn(
             'h-full rounded-full',
-            value >= 7   ? 'bg-emerald-400 dark:bg-emerald-500'
-            : value >= 6 ? 'bg-amber-400 dark:bg-amber-500'
-            : 'bg-rose-400 dark:bg-rose-500'
+            value >= 7   ? 'bg-emerald-400'
+            : value >= 6 ? 'bg-amber-400'
+            : 'bg-rose-400'
           )}
           style={{ width: `${pct}%` }}
         />
@@ -67,21 +67,21 @@ function LRSubScores({ ss }: { ss: DiagnosticSubScoresLR }) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between text-xs">
-        <span className="text-slate-500 dark:text-slate-400">Accuracy</span>
-        <span className="font-bold text-slate-700 dark:text-slate-300">
+        <span className="text-brand-text-mute">Accuracy</span>
+        <span className="font-bold text-brand-text">
           {ss.correct_answers}/{ss.total_questions}
-          <span className="ml-1 text-slate-400">({ss.accuracy_percentage}%)</span>
+          <span className="ml-1 text-brand-text-mute">({ss.accuracy_percentage}%)</span>
         </span>
       </div>
       {ss.by_question_type && Object.entries(ss.by_question_type).length > 0 && (
-        <div className="pt-1 space-y-1 border-t border-slate-100 dark:border-slate-800">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">By Question Type</p>
+        <div className="pt-1 space-y-1 border-t border-brand-line">
+          <p className="text-[10px] font-bold text-brand-text-mute font-jetbrains uppercase tracking-wider">By Question Type</p>
           {Object.entries(ss.by_question_type).map(([type, val]) => (
             <div key={type} className="flex items-center justify-between text-xs">
-              <span className="text-slate-500 dark:text-slate-400 capitalize">
+              <span className="text-brand-text-mute capitalize">
                 {type.replace(/_/g, ' ')}
               </span>
-              <span className="font-semibold text-slate-600 dark:text-slate-300">
+              <span className="font-semibold text-brand-text">
                 {val.correct}/{val.total}
               </span>
             </div>
@@ -97,8 +97,8 @@ function WritingSubScores({ ss }: { ss: DiagnosticSubScoresWriting }) {
     <div className="space-y-1.5">
       {ss.word_count !== undefined && (
         <div className="flex items-center justify-between text-xs mb-1">
-          <span className="text-slate-500 dark:text-slate-400">Word Count</span>
-          <span className="font-bold text-slate-700 dark:text-slate-300">{ss.word_count}</span>
+          <span className="text-brand-text-mute">Word Count</span>
+          <span className="font-bold text-brand-text">{ss.word_count}</span>
         </div>
       )}
       <ScoreBar label="Task Response"  value={ss.taskResponseScore} />
@@ -170,36 +170,36 @@ function ResetConfirmModal({ studentName, skill, otherScoredSkills, onConfirm, o
   return (
     <div className="fixed inset-0 z-[200] bg-black/40 flex items-center justify-center p-4" onClick={onCancel}>
       <div
-        className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl max-w-sm w-full p-6"
+        className="bg-white rounded-2xl border border-brand-line shadow-sm max-w-sm w-full p-6"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-start justify-between mb-3">
-          <h3 className="text-base font-black text-slate-800 dark:text-slate-100">
+          <h3 className="text-base font-black text-brand-text">
             Reset {skillLabel(skill)} diagnostic?
           </h3>
-          <button onClick={onCancel} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <button onClick={onCancel} className="text-brand-text-mute hover:text-brand-text">
             <X className="h-4 w-4" />
           </button>
         </div>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
-          This clears <strong className="text-slate-700 dark:text-slate-200">{studentName}</strong>'s {skillLabel(skill)} diagnostic score and lets them take it again. This can't be undone.
+        <p className="text-sm text-brand-text-mute mb-2">
+          This clears <strong className="text-brand-text">{studentName}</strong>'s {skillLabel(skill)} diagnostic score and lets them take it again. This can't be undone.
         </p>
         {skill !== 'ALL' && otherScoredSkills.length > 0 && (
-          <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
+          <p className="text-sm text-brand-text-mute mb-2">
             {otherScoredSkills.join(', ')} keep their current scores — only {skillLabel(skill)} is reset.
           </p>
         )}
-        <p className="text-sm text-amber-700 dark:text-amber-400 mb-4">
+        <p className="text-sm text-amber-700 mb-4">
           The student will be locked out of drills, IA, and mocks until they redo {skillLabel(skill)}.
         </p>
         {error && (
-          <p className="text-xs text-rose-600 dark:text-rose-400 font-semibold mb-4">{error}</p>
+          <p className="text-xs text-rose-600 font-semibold mb-4">{error}</p>
         )}
         <div className="flex items-center justify-end gap-2">
           <button
             onClick={onCancel}
             disabled={loading}
-            className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="px-4 py-2 rounded-xl text-sm font-semibold text-brand-text hover:bg-brand-bg-alt transition-colors"
           >
             Cancel
           </button>
@@ -245,22 +245,22 @@ function FeedbackBlock({ skill, data }: { skill: string; data: Record<string, an
   if (items.length === 0) return null;
 
   return (
-    <div className="rounded-xl border border-brand-teal-100 dark:border-brand-teal-500/20 bg-brand-teal-50/50 dark:bg-brand-teal-500/5 p-3 space-y-2.5">
+    <div className="rounded-xl border border-brand-teal-100 bg-brand-teal-50/50 p-3 space-y-2.5">
       <div className="flex items-center gap-2">
         <Cpu className="h-3.5 w-3.5 text-brand-teal-500 shrink-0" />
-        <p className="text-[10px] font-bold text-brand-teal-600 dark:text-brand-teal-400 uppercase tracking-wider">
+        <p className="text-[10px] font-bold text-brand-teal-600 font-jetbrains uppercase tracking-wider">
           AI Feedback — {skill.charAt(0) + skill.slice(1).toLowerCase()}
         </p>
       </div>
       {items.map(({ label, content }) => (
         <div key={label} className="space-y-0.5">
           {items.length > 1 && (
-            <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <p className="text-[10px] font-bold text-brand-text-mute font-jetbrains uppercase tracking-wider">
               {label}
             </p>
           )}
           {content.map((line, i) => (
-            <p key={i} className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{line}</p>
+            <p key={i} className="text-xs text-brand-text-mute leading-relaxed">{line}</p>
           ))}
         </div>
       ))}
@@ -288,14 +288,14 @@ function SkillCard({ result, history, onReset }: {
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+          <p className="text-xs font-bold text-brand-text-mute font-jetbrains uppercase tracking-wider">
             {skill.charAt(0) + skill.slice(1).toLowerCase()}
           </p>
-          <p className="text-[10px] text-slate-400 mt-0.5">{date}</p>
+          <p className="text-[10px] text-brand-text-mute mt-0.5">{date}</p>
           {onReset && (
             <button
               onClick={() => onReset(skill as ResetSkill)}
-              className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-bold text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
+              className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-bold text-brand-text-mute hover:text-rose-600 transition-colors"
             >
               <RotateCcw className="h-3 w-3" />
               Reset
@@ -306,14 +306,14 @@ function SkillCard({ result, history, onReset }: {
           <p className={cn('text-3xl font-black leading-none', bandColorText(result.band_score))}>
             {result.band_score.toFixed(1)}
           </p>
-          <p className="text-[10px] text-slate-400 mt-0.5">Band Score</p>
+          <p className="text-[10px] text-brand-text-mute mt-0.5">Band Score</p>
         </div>
       </div>
 
       {/* Sub-scores */}
       {ss && (
-        <div className="bg-white/70 dark:bg-slate-900/50 rounded-xl p-3 space-y-2">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+        <div className="bg-white/70 rounded-xl p-3 space-y-2">
+          <p className="text-[10px] font-bold text-brand-text-mute font-jetbrains uppercase tracking-wider mb-2">
             Score Breakdown
           </p>
           {(skill === 'LISTENING' || skill === 'READING') && ss.total_questions !== undefined
@@ -323,22 +323,22 @@ function SkillCard({ result, history, onReset }: {
             : skill === 'SPEAKING' && (ss.fluencyScore !== undefined || ss.grammarScore !== undefined)
             ? <SpeakingSubScores ss={ss as DiagnosticSubScoresSpeaking} />
             : (
-              <p className="text-xs text-slate-400">Score details unavailable.</p>
+              <p className="text-xs text-brand-text-mute">Score details unavailable.</p>
             )}
         </div>
       )}
 
       {/* Band over time — only shows once retakes produce more than one attempt */}
       {pastAttempts.length > 0 && (
-        <div className="bg-white/70 dark:bg-slate-900/50 rounded-xl p-3 space-y-2">
+        <div className="bg-white/70 rounded-xl p-3 space-y-2">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Band Over Time</p>
+            <p className="text-[10px] font-bold text-brand-text-mute font-jetbrains uppercase tracking-wider">Band Over Time</p>
             <Sparkline points={history} />
           </div>
-          <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
+          <div className="space-y-1 pt-1 border-t border-brand-line">
             {pastAttempts.slice(0, 4).map((h, i) => (
               <div key={i} className="flex items-center justify-between text-xs">
-                <span className="text-slate-400">
+                <span className="text-brand-text-mute">
                   {new Date(h.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                 </span>
                 <span className={cn('font-bold', bandColorText(h.band_score))}>{h.band_score.toFixed(1)}</span>
@@ -350,11 +350,11 @@ function SkillCard({ result, history, onReset }: {
 
       {/* Content assessment (speaking) — only render if it's a plain string */}
       {ss?.content_assessment && typeof ss.content_assessment === 'string' && (
-        <div className="bg-white/70 dark:bg-slate-900/50 rounded-xl p-3">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+        <div className="bg-white/70 rounded-xl p-3">
+          <p className="text-[10px] font-bold text-brand-text-mute font-jetbrains uppercase tracking-wider mb-1">
             Content Assessment
           </p>
-          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+          <p className="text-xs text-brand-text-mute leading-relaxed">
             {ss.content_assessment}
           </p>
         </div>
@@ -395,10 +395,10 @@ export function DiagnosticTab({ results, studentName, onRequestReset, perSkillRe
 
   if (results.length === 0) {
     return (
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-12 text-center space-y-3">
-        <FileSearch className="h-8 w-8 text-slate-300 dark:text-slate-600 mx-auto" />
-        <p className="text-slate-400 text-sm">No diagnostic results yet.</p>
-        <p className="text-slate-300 dark:text-slate-600 text-xs">
+      <div className="bg-white rounded-2xl border border-brand-line p-12 text-center space-y-3">
+        <FileSearch className="h-8 w-8 text-brand-text-mute mx-auto" />
+        <p className="text-brand-text-mute text-sm">No diagnostic results yet.</p>
+        <p className="text-brand-text-mute text-xs">
           The student has not completed the diagnostic assessment.
         </p>
       </div>
@@ -438,27 +438,27 @@ export function DiagnosticTab({ results, studentName, onRequestReset, perSkillRe
             label: 'Skills Diagnosed',
             value: `${latestPerSkill.length} / 4`,
             cls: latestPerSkill.length === 4
-              ? 'text-emerald-600 dark:text-emerald-400'
-              : 'text-amber-600 dark:text-amber-400',
+              ? 'text-emerald-600'
+              : 'text-amber-600',
           },
           {
             label: 'Avg Baseline Band',
             value: avgBand ?? '—',
-            cls: 'text-brand-teal-600 dark:text-brand-teal-400',
+            cls: 'text-brand-teal-600',
           },
           {
             label: 'Completed',
             value: new Date(latestPerSkill[latestPerSkill.length - 1]?.created_at ?? '').toLocaleDateString('en-IN', {
               day: 'numeric', month: 'short', year: 'numeric',
             }),
-            cls: 'text-slate-700 dark:text-slate-300',
+            cls: 'text-brand-text',
           },
         ].map(c => (
           <div
             key={c.label}
-            className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-3 text-center"
+            className="bg-white rounded-xl border border-brand-line p-3 text-center"
           >
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{c.label}</p>
+            <p className="text-[10px] font-bold text-brand-text-mute font-jetbrains uppercase tracking-wider">{c.label}</p>
             <p className={cn('text-xl font-black mt-1', c.cls)}>{c.value}</p>
           </div>
         ))}
@@ -467,7 +467,7 @@ export function DiagnosticTab({ results, studentName, onRequestReset, perSkillRe
       {/* Pending skills notice + retake request */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         {pending.length > 0 ? (
-          <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl px-4 py-3 text-xs text-amber-700 dark:text-amber-400">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-700">
             <span className="font-bold">Pending: </span>
             {pending.map(s => s.charAt(0) + s.slice(1).toLowerCase()).join(', ')} not yet diagnosed.
           </div>
@@ -476,7 +476,7 @@ export function DiagnosticTab({ results, studentName, onRequestReset, perSkillRe
         {onRequestReset && (
           <button
             onClick={() => { setRetakeError(null); setResetSkill('ALL'); }}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-800 hover:border-rose-200 dark:hover:border-rose-500/30 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-brand-text-mute hover:text-rose-600 border border-brand-line hover:border-rose-200 transition-colors"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             {perSkillReset ? 'Reset All' : 'Request Retake'}
