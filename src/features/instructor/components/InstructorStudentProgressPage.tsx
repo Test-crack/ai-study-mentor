@@ -55,8 +55,9 @@ export default function InstructorStudentProgressPage() {
 
   const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
   // Calls Shalom's retake endpoint (S-D3) — contract unconfirmed, same caveat as
-  // the batch-level Retake button in DiagnosticOverviewTab.
-  const handleRequestRetake = async () => {
+  // the batch-level Retake button in DiagnosticOverviewTab. Whole-diagnostic only,
+  // no per-skill support, so the skill arg from DiagnosticTab is ignored here.
+  const handleRequestRetake = async (_skill?: string) => {
     if (!resolvedBatchId || !resolvedStudentId) return;
     const res = await callBackend(
       `${BACKEND}/api/instructor/batches/${resolvedBatchId}/students/${resolvedStudentId}/diagnostic/retake`,
@@ -157,7 +158,8 @@ export default function InstructorStudentProgressPage() {
                 <DiagnosticTab
                   results={data.diagnostic_results ?? []}
                   studentName={data.student?.name}
-                  onRequestRetake={handleRequestRetake}
+                  onRequestReset={handleRequestRetake}
+                  perSkillReset={false}
                 />
               )}
             </div>

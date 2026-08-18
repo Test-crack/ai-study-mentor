@@ -71,6 +71,15 @@ export default function InstituteAdminStudentProgressPage() {
 
   useEffect(() => { setData(null); load(); }, [load]);
 
+  const resetDiagnostic = useCallback(async (skill: string) => {
+    const res = await callBackend(
+      `${getBackendUrl()}/api/institute-admin/students/${resolvedStudentId}/diagnostic/reset`,
+      { method: "POST", body: JSON.stringify({ skill }) }
+    );
+    if (!res?.success) throw new Error(res?.error ?? "Failed to reset diagnostic.");
+    await load();
+  }, [resolvedStudentId, load]);
+
   return (
     <InstituteAdminLayout activeTab="students">
       <button
@@ -118,7 +127,13 @@ export default function InstituteAdminStudentProgressPage() {
               streak={data.daily_streak}
             />
           )}
-          {activeTab === "diagnostic" && <DiagnosticTab results={(data as any).diagnostic_results ?? []} />}
+          {activeTab === "diagnostic" && (
+            <DiagnosticTab
+              results={(data as any).diagnostic_results ?? []}
+              studentName={(data as any).student?.name}
+              onRequestReset={resetDiagnostic}
+            />
+          )}
         </>
       ) : null}
     </InstituteAdminLayout>
