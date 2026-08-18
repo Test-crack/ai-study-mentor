@@ -57,7 +57,7 @@ function InstituteMenu({ institute, onToggleStatus, onEdit }: InstituteMenuProps
     <div ref={menuRef} className="relative" onClick={(e) => e.stopPropagation()}>
       <button
         onClick={(e) => { e.stopPropagation(); setOpen(v => !v); }}
-        className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+        className="h-10 w-10 flex items-center justify-center rounded-lg hover:bg-brand-bg-alt text-brand-text-mute hover:text-brand-text transition-colors"
         title="Options"
       >
         {loading
@@ -66,20 +66,20 @@ function InstituteMenu({ institute, onToggleStatus, onEdit }: InstituteMenuProps
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1 z-30 w-44 bg-white dark:bg-[#1E1D27] border border-slate-200 dark:border-[#2E2D3A] rounded-xl shadow-xl py-1 overflow-hidden">
+        <div className="absolute right-0 top-full mt-1 z-30 w-44 bg-white border border-brand-line rounded-xl shadow-sm py-1 overflow-hidden">
           <button
             onClick={(e) => { e.stopPropagation(); setOpen(false); onEdit(institute); }}
-            className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm font-medium transition-colors text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-white/5"
+            className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm font-medium transition-colors text-brand-text hover:bg-brand-bg-alt"
           >
             <Building2 className="w-4 h-4" /> Edit Details
           </button>
-          <div className="h-px w-full bg-slate-100 dark:bg-[#2E2D3A] my-0.5" />
+          <div className="h-px w-full bg-brand-line my-0.5" />
           <button
             onClick={handleToggle}
             className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm font-medium transition-colors ${
               institute.isActive
-                ? 'text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20'
-                : 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
+                ? 'text-rose-600 hover:bg-rose-50'
+                : 'text-emerald-600 hover:bg-emerald-50'
             }`}
           >
             {institute.isActive
@@ -140,71 +140,71 @@ function CreateInstituteModal({ onClose, onCreated }: CreateModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-[#15141B] rounded-2xl shadow-2xl w-full max-w-lg border border-slate-200 dark:border-[#26252D]">
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-[#26252D]">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-brand-teal-50 dark:bg-brand-teal-900/30 rounded-lg">
-              <Building2 className="w-5 h-5 text-brand-teal-600 dark:text-brand-teal-400" />
+      <div className="bg-white rounded-2xl shadow-sm w-full max-w-lg max-h-[90vh] overflow-y-auto border border-brand-line">
+        <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-5 border-b border-brand-line">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="p-2 bg-brand-teal-50 rounded-lg shrink-0">
+              <Building2 className="w-5 h-5 text-brand-teal-600" />
             </div>
-            <div>
-              <h2 className="font-bold text-slate-900 dark:text-white text-base">Add New Institute</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Owner will receive an invite email to set their password</p>
+            <div className="min-w-0">
+              <h2 className="font-manrope font-bold text-brand-text text-base">Add New Institute</h2>
+              <p className="text-xs text-brand-text-mute mt-0.5">Owner will receive an invite email to set their password</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-slate-400">
+          <button onClick={onClose} className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg hover:bg-brand-bg-alt transition-colors text-brand-text-mute">
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Institute Name *</label>
+            <label className="font-jetbrains text-[10px] font-bold text-brand-text-mute uppercase tracking-[0.15em]">Institute Name *</label>
             <div className="relative">
-              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-text-mute" />
               <input type="text" required value={form.instituteName} onChange={set('instituteName')} placeholder="e.g. Ace English Academy"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400" />
+                className="w-full pl-10 pr-4 py-2.5 bg-brand-bg-alt border border-brand-line rounded-lg text-sm text-brand-text focus:outline-none focus:border-brand-teal-500 placeholder-brand-text-mute" />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Address <span className="text-slate-400 normal-case font-normal">(optional)</span></label>
+            <label className="font-jetbrains text-[10px] font-bold text-brand-text-mute uppercase tracking-[0.15em]">Address <span className="text-brand-text-mute normal-case font-normal">(optional)</span></label>
             <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-text-mute" />
               <input type="text" value={form.address} onChange={set('address')} placeholder="City, State"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400" />
+                className="w-full pl-10 pr-4 py-2.5 bg-brand-bg-alt border border-brand-line rounded-lg text-sm text-brand-text focus:outline-none focus:border-brand-teal-500 placeholder-brand-text-mute" />
             </div>
           </div>
 
-          <div className="border-t border-slate-100 dark:border-[#26252D] pt-1">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">Institute Owner Account</p>
+          <div className="border-t border-brand-line pt-1">
+            <p className="font-jetbrains text-[10px] font-bold text-brand-text-mute uppercase tracking-[0.15em] mb-4">Institute Owner Account</p>
             <div className="space-y-1.5 mb-4">
-              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Owner Name *</label>
+              <label className="font-jetbrains text-[10px] font-bold text-brand-text-mute uppercase tracking-[0.15em]">Owner Name *</label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-text-mute" />
                 <input type="text" required value={form.ownerName} onChange={set('ownerName')} placeholder="Full name"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400" />
+                  className="w-full pl-10 pr-4 py-2.5 bg-brand-bg-alt border border-brand-line rounded-lg text-sm text-brand-text focus:outline-none focus:border-brand-teal-500 placeholder-brand-text-mute" />
               </div>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Owner Email *</label>
+              <label className="font-jetbrains text-[10px] font-bold text-brand-text-mute uppercase tracking-[0.15em]">Owner Email *</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-text-mute" />
                 <input type="email" required value={form.ownerEmail} onChange={set('ownerEmail')} placeholder="owner@institute.com"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400" />
+                  className="w-full pl-10 pr-4 py-2.5 bg-brand-bg-alt border border-brand-line rounded-lg text-sm text-brand-text focus:outline-none focus:border-brand-teal-500 placeholder-brand-text-mute" />
               </div>
             </div>
           </div>
 
-          <div className="flex items-start gap-2 bg-brand-teal-50 dark:bg-brand-teal-900/20 border border-brand-teal-100 dark:border-brand-teal-800/40 rounded-lg p-3">
+          <div className="flex items-start gap-2 bg-brand-teal-50 border border-brand-teal-100 rounded-lg p-3">
             <CheckCircle2 className="w-4 h-4 text-brand-teal-500 mt-0.5 shrink-0" />
-            <p className="text-xs text-brand-teal-700 dark:text-brand-teal-300 leading-relaxed">
+            <p className="text-xs text-brand-teal-700 leading-relaxed">
               An invite email will be sent to the owner's email address. They'll click the link to set their password and access the Institute Owner dashboard.
             </p>
           </div>
 
-          <div className="flex gap-3 pt-1">
+          <div className="flex flex-col sm:flex-row gap-3 pt-1">
             <button type="button" onClick={onClose}
-              className="flex-1 py-2.5 rounded-lg border border-slate-200 dark:border-[#26252D] text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+              className="flex-1 py-2.5 rounded-lg border border-brand-line text-sm font-medium text-brand-text hover:bg-brand-bg-alt transition-colors">
               Cancel
             </button>
             <button type="submit" disabled={loading}
@@ -264,44 +264,44 @@ function EditInstituteModal({ institute, onClose, onUpdated }: EditModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-[#15141B] rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-[#26252D]">
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-[#26252D]">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-brand-teal-50 dark:bg-brand-teal-900/30 rounded-lg">
-              <Building2 className="w-5 h-5 text-brand-teal-600 dark:text-brand-teal-400" />
+      <div className="bg-white rounded-2xl shadow-sm w-full max-w-lg max-h-[90vh] overflow-y-auto border border-brand-line">
+        <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-5 border-b border-brand-line">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="p-2 bg-brand-teal-50 rounded-lg shrink-0">
+              <Building2 className="w-5 h-5 text-brand-teal-600" />
             </div>
-            <div>
-              <h2 className="font-bold text-slate-900 dark:text-white text-base">Edit Institute</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Update profile information</p>
+            <div className="min-w-0">
+              <h2 className="font-manrope font-bold text-brand-text text-base">Edit Institute</h2>
+              <p className="text-xs text-brand-text-mute mt-0.5">Update profile information</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-slate-400">
+          <button onClick={onClose} className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg hover:bg-brand-bg-alt transition-colors text-brand-text-mute">
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Institute Name *</label>
+            <label className="font-jetbrains text-[10px] font-bold text-brand-text-mute uppercase tracking-[0.15em]">Institute Name *</label>
             <div className="relative">
-              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-text-mute" />
               <input type="text" required value={form.name} onChange={set('name')} placeholder="e.g. Ace English Academy"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400" />
+                className="w-full pl-10 pr-4 py-2.5 bg-brand-bg-alt border border-brand-line rounded-lg text-sm text-brand-text focus:outline-none focus:border-brand-teal-500 placeholder-brand-text-mute" />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Address</label>
+            <label className="font-jetbrains text-[10px] font-bold text-brand-text-mute uppercase tracking-[0.15em]">Address</label>
             <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-text-mute" />
               <input type="text" value={form.address} onChange={set('address')} placeholder="City, State"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:text-white placeholder-slate-400" />
+                className="w-full pl-10 pr-4 py-2.5 bg-brand-bg-alt border border-brand-line rounded-lg text-sm text-brand-text focus:outline-none focus:border-brand-teal-500 placeholder-brand-text-mute" />
             </div>
           </div>
 
-          <div className="flex gap-3 pt-4 border-t border-slate-100 dark:border-[#26252D]">
+          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-brand-line">
             <button type="button" onClick={onClose}
-              className="flex-1 py-2.5 rounded-lg border border-slate-200 dark:border-[#26252D] text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+              className="flex-1 py-2.5 rounded-lg border border-brand-line text-sm font-medium text-brand-text hover:bg-brand-bg-alt transition-colors">
               Cancel
             </button>
             <button type="submit" disabled={loading}
@@ -365,7 +365,7 @@ export default function SuperAdminInstitutes() {
   const inactiveCount = institutes.filter(i => !i.isActive).length;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0A10] font-sans text-slate-900 dark:text-slate-200 transition-colors duration-300">
+    <div className="relative min-h-screen font-plex antialiased overflow-x-hidden bg-brand-bg text-brand-text">
 
       {showCreateModal && (
         <CreateInstituteModal onClose={() => setShowCreateModal(false)} onCreated={load} />
@@ -375,60 +375,60 @@ export default function SuperAdminInstitutes() {
         <EditInstituteModal institute={editingInstitute} onClose={() => setEditingInstitute(null)} onUpdated={load} />
       )}
 
-      <div className="hidden lg:block">
-        <SuperAdminSidebar
-          activeTab="institutes"
-          isCollapsed={isSidebarCollapsed}
-          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        />
-      </div>
+      <SuperAdminSidebar
+        activeTab="institutes"
+        isCollapsed={isSidebarCollapsed}
+        toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      />
 
-      <div className={`transition-all duration-300 flex flex-col min-h-screen ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
+      <div className={`relative z-10 transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-24' : 'lg:pl-72'}`}>
         <SuperAdminTopbar />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="max-w-[1400px] mx-auto space-y-6">
+        <main className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 max-w-[90rem] mx-auto pb-16">
 
             {/* Header */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Institutes</h1>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-jetbrains text-[10px] font-bold tracking-[0.2em] uppercase text-brand-text-mute mb-1">
+                  Platform Directory
+                </p>
+                <h1 className="font-manrope text-2xl sm:text-3xl font-black tracking-tight text-brand-text">Institutes</h1>
                 {!loading && (
-                  <div className="flex items-center gap-3 mt-1">
-                    <span className="text-sm text-slate-500 dark:text-slate-400">{institutes.length} total</span>
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1">
+                    <span className="text-sm text-brand-text-mute">{institutes.length} total</span>
                     {activeCount > 0 && (
-                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                      <span className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.12em] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                         {activeCount} active
                       </span>
                     )}
                     {inactiveCount > 0 && (
-                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400">
+                      <span className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.12em] px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
                         {inactiveCount} inactive
                       </span>
                     )}
                   </div>
                 )}
               </div>
-              <button onClick={load} className="p-2 rounded-lg text-slate-400 hover:text-brand-teal-600 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors" title="Refresh">
+              <button onClick={load} className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg text-brand-text-mute hover:text-brand-teal-600 hover:bg-brand-bg-alt transition-colors" title="Refresh">
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               </button>
             </div>
 
             {/* Search + Add */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="relative w-full max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+              <div className="relative w-full max-w-full sm:max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-text-mute" />
                 <input
                   type="text"
                   placeholder="Search institutes..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-transparent border border-slate-200 dark:border-gray-800 rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 transition-all dark:text-white placeholder-slate-400 shadow-sm"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-brand-line rounded-lg text-sm text-brand-text focus:outline-none focus:border-brand-teal-500 transition-all placeholder-brand-text-mute shadow-sm"
                 />
               </div>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2.5 bg-brand-teal-600 hover:bg-brand-teal-700 dark:bg-[#185A78] dark:hover:bg-[#185A78] text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
+                className="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2.5 bg-brand-teal-600 hover:bg-brand-teal-700 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
               >
                 <Plus className="w-4 h-4" />
                 Add Institute
@@ -436,13 +436,13 @@ export default function SuperAdminInstitutes() {
             </div>
 
             {/* Table */}
-            <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-white border border-brand-line rounded-2xl shadow-sm overflow-hidden">
               {loading ? (
                 <div className="py-16 flex justify-center">
                   <Loader2 className="w-6 h-6 animate-spin text-brand-teal-500" />
                 </div>
               ) : institutes.length === 0 ? (
-                <div className="py-12 text-center text-slate-500 dark:text-gray-500 text-sm">
+                <div className="py-12 px-4 text-center text-brand-text-mute text-sm">
                   {debouncedSearch ? `No institutes matching "${debouncedSearch}"` : 'No institutes yet. Click "Add Institute" to create one.'}
                 </div>
               ) : (
@@ -450,27 +450,27 @@ export default function SuperAdminInstitutes() {
                   <table className="w-full text-sm">
                     {/* Table Header */}
                     <thead>
-                      <tr className="border-b border-slate-100 dark:border-[#26252D] bg-slate-50/70 dark:bg-white/[0.02]">
-                        <th className="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[35%]">
+                      <tr className="border-b border-brand-line bg-brand-bg-alt/80">
+                        <th className="font-jetbrains text-left px-4 sm:px-5 py-3 text-[10px] font-black text-brand-text-mute uppercase tracking-[0.12em] w-[35%]">
                           Institute
                         </th>
-                        <th className="text-left px-4 py-3 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                        <th className="font-jetbrains hidden md:table-cell text-left px-4 py-3 text-[10px] font-black text-brand-text-mute uppercase tracking-[0.12em]">
                           Owner
                         </th>
-                        <th className="text-center px-4 py-3 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                        <th className="font-jetbrains text-center px-4 py-3 text-[10px] font-black text-brand-text-mute uppercase tracking-[0.12em]">
                           <span className="flex items-center justify-center gap-1.5">
                             <GraduationCap className="w-3.5 h-3.5" /> Students
                           </span>
                         </th>
-                        <th className="text-center px-4 py-3 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                        <th className="font-jetbrains hidden sm:table-cell text-center px-4 py-3 text-[10px] font-black text-brand-text-mute uppercase tracking-[0.12em]">
                           <span className="flex items-center justify-center gap-1.5">
                             <BookOpen className="w-3.5 h-3.5" /> Instructors
                           </span>
                         </th>
-                        <th className="text-center px-4 py-3 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                        <th className="font-jetbrains text-center px-4 py-3 text-[10px] font-black text-brand-text-mute uppercase tracking-[0.12em]">
                           Status
                         </th>
-                        <th className="text-left px-4 py-3 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                        <th className="font-jetbrains hidden lg:table-cell text-left px-4 py-3 text-[10px] font-black text-brand-text-mute uppercase tracking-[0.12em]">
                           Joined
                         </th>
                         <th className="px-4 py-3 w-10" />
@@ -478,34 +478,34 @@ export default function SuperAdminInstitutes() {
                     </thead>
 
                     {/* Table Body */}
-                    <tbody className="divide-y divide-slate-100 dark:divide-[#26252D]">
+                    <tbody className="divide-y divide-brand-line">
                       {institutes.map((inst) => (
                         <tr
                           key={inst.id}
                           className={`group transition-colors ${
                             inst.isActive
-                              ? 'hover:bg-slate-50 dark:hover:bg-white/[0.025]'
-                              : 'bg-slate-50/40 dark:bg-black/10 hover:bg-slate-50 dark:hover:bg-white/[0.02]'
+                              ? 'hover:bg-brand-teal-50/50'
+                              : 'bg-brand-bg-alt/50 hover:bg-brand-teal-50/50'
                           }`}
                         >
                           {/* Institute Name + Address */}
-                          <td className="px-5 py-4">
+                          <td className="px-4 sm:px-5 py-4">
                             <div className="flex items-center gap-3">
                               {inst.logoUrl ? (
                                 <img src={inst.logoUrl} alt="" className={`w-9 h-9 rounded-lg object-cover shrink-0 ${!inst.isActive ? 'opacity-40 grayscale' : ''}`} />
                               ) : (
-                                <div className={`w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm shrink-0 ${
+                                <div className={`w-9 h-9 rounded-lg flex items-center justify-center font-black text-sm shrink-0 ${
                                   inst.isActive
-                                    ? 'bg-brand-teal-100 dark:bg-[#142B3A] text-brand-teal-700 dark:text-[#D97CFF]'
-                                    : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+                                    ? 'bg-brand-teal-100 text-brand-teal-700'
+                                    : 'bg-brand-bg-alt text-brand-text-mute'
                                 }`}>
                                   {getInitials(inst.name)}
                                 </div>
                               )}
-                              <div>
-                                <p className="font-semibold text-slate-900 dark:text-gray-100 text-[13.5px] leading-tight">{inst.name}</p>
+                              <div className="min-w-0">
+                                <p className="font-semibold text-brand-text text-[13.5px] leading-tight truncate">{inst.name}</p>
                                 {inst.address && (
-                                  <p className="text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-0.5 mt-0.5">
+                                  <p className="text-[11px] text-brand-text-mute flex items-center gap-0.5 mt-0.5">
                                     <MapPin className="w-3 h-3 shrink-0" />{inst.address}
                                   </p>
                                 )}
@@ -514,62 +514,62 @@ export default function SuperAdminInstitutes() {
                           </td>
 
                           {/* Owner */}
-                          <td className="px-4 py-4">
+                          <td className="hidden md:table-cell px-4 py-4">
                             {inst.owner ? (
                               <div className="flex items-center gap-2">
-                                <div className="w-6 h-6 rounded-full bg-brand-blue-100 dark:bg-brand-blue-900/40 flex items-center justify-center text-[9px] font-bold text-brand-blue-700 dark:text-brand-blue-300 shrink-0">
+                                <div className="w-6 h-6 rounded-full bg-brand-blue-100 flex items-center justify-center text-[9px] font-black text-brand-blue-700 shrink-0">
                                   {getInitials(inst.owner.name ?? inst.owner.email)}
                                 </div>
-                                <div>
-                                  <p className="text-[12.5px] text-slate-700 dark:text-slate-300 font-medium leading-tight">
+                                <div className="min-w-0">
+                                  <p className="text-[12.5px] text-brand-text font-medium leading-tight">
                                     {inst.owner.name ?? '—'}
                                   </p>
-                                  <p className="text-[11px] text-slate-400 dark:text-slate-500 leading-tight">{inst.owner.email}</p>
+                                  <p className="text-[11px] text-brand-text-mute leading-tight">{inst.owner.email}</p>
                                 </div>
                               </div>
                             ) : (
-                              <span className="text-[12px] text-slate-400 dark:text-slate-600 italic">No owner</span>
+                              <span className="text-[12px] text-brand-text-mute italic">No owner</span>
                             )}
                           </td>
 
                           {/* Students */}
                           <td className="px-4 py-4 text-center">
-                            <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2.5 py-1 rounded-full text-[13px] font-bold bg-brand-teal-50 text-brand-teal-700 dark:bg-brand-teal-900/30 dark:text-brand-teal-300">
+                            <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2.5 py-1 rounded-full text-[13px] font-black bg-brand-teal-50 text-brand-teal-700">
                               {inst.studentCount}
                             </span>
                           </td>
 
                           {/* Instructors */}
-                          <td className="px-4 py-4 text-center">
-                            <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2.5 py-1 rounded-full text-[13px] font-bold bg-brand-blue-50 text-brand-blue-700 dark:bg-brand-blue-900/30 dark:text-brand-blue-300">
+                          <td className="hidden sm:table-cell px-4 py-4 text-center">
+                            <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2.5 py-1 rounded-full text-[13px] font-black bg-brand-blue-50 text-brand-blue-700">
                               {inst.instructorCount}
                             </span>
                           </td>
 
                           {/* Status */}
                           <td className="px-4 py-4 text-center">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold tracking-wider ${
+                            <span className={`font-jetbrains inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold tracking-[0.12em] border ${
                               inst.isActive
-                                ? 'text-emerald-700 bg-emerald-100 dark:text-[#10B981] dark:bg-[#10B981]/10'
-                                : 'text-rose-700 bg-rose-100 dark:text-[#F43F5E] dark:bg-[#F43F5E]/10'
+                                ? 'text-emerald-700 bg-emerald-50 border-emerald-200'
+                                : 'text-rose-700 bg-rose-50 border-rose-200'
                             }`}>
                               {inst.isActive ? 'ACTIVE' : 'INACTIVE'}
                             </span>
                           </td>
 
                           {/* Joined */}
-                          <td className="px-4 py-4">
-                            <span className="text-[12px] text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                          <td className="hidden lg:table-cell px-4 py-4">
+                            <span className="text-[12px] text-brand-text-mute whitespace-nowrap">
                               {formatDate(inst.createdAt)}
                             </span>
                           </td>
 
                           {/* Actions */}
                           <td className="px-4 py-4">
-                            <InstituteMenu 
-                              institute={inst} 
-                              onToggleStatus={handleToggleStatus} 
-                              onEdit={(i) => setEditingInstitute(i)} 
+                            <InstituteMenu
+                              institute={inst}
+                              onToggleStatus={handleToggleStatus}
+                              onEdit={(i) => setEditingInstitute(i)}
                             />
                           </td>
                         </tr>
@@ -580,7 +580,6 @@ export default function SuperAdminInstitutes() {
               )}
             </div>
 
-          </div>
         </main>
       </div>
     </div>

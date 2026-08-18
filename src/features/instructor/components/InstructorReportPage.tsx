@@ -53,19 +53,19 @@ interface FullBatch {
 function TrendIcon({ trend }: { trend: 'up' | 'flat' | 'down' | null }) {
   if (trend === 'up') return <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />;
   if (trend === 'down') return <TrendingDown className="w-3.5 h-3.5 text-rose-500" />;
-  if (trend === 'flat') return <Minus className="w-3.5 h-3.5 text-slate-400" />;
-  return <span className="text-slate-300 text-xs">—</span>;
+  if (trend === 'flat') return <Minus className="w-3.5 h-3.5 text-brand-text-mute" />;
+  return <span className="text-brand-text-mute text-xs">—</span>;
 }
 
 function bandTextColor(band: number | null): string {
-  if (band === null) return 'text-slate-400';
+  if (band === null) return 'text-brand-text-mute';
   if (band >= 7.5) return 'text-emerald-700 font-bold';
   if (band >= 6.0) return 'text-amber-700 font-bold';
   return 'text-rose-700 font-bold';
 }
 
 function gapTextColor(gap: number | null): string {
-  if (gap === null) return 'text-slate-400';
+  if (gap === null) return 'text-brand-text-mute';
   if (gap <= -2) return 'text-rose-700 font-bold';
   if (gap <= -1) return 'text-amber-700 font-bold';
   return 'text-emerald-700 font-bold';
@@ -273,7 +273,7 @@ export function InstructorReportPage() {
 
   // ── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200">
+    <div className="relative min-h-screen font-plex antialiased overflow-x-hidden bg-brand-bg text-brand-text">
       <InstructorSidebar
         activeTab="report"
         isCollapsed={sidebarCollapsed}
@@ -281,19 +281,19 @@ export function InstructorReportPage() {
       />
 
       <div className={cn(
-        'transition-all duration-300 flex flex-col min-h-screen',
-        sidebarCollapsed ? 'lg:pl-[112px]' : 'lg:pl-[288px]'
+        'relative z-10 transition-all duration-300',
+        sidebarCollapsed ? 'lg:pl-24' : 'lg:pl-72'
       )}>
         <InstructorTopbar />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+        <main className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-16">
           <div className="max-w-[1100px] mx-auto space-y-5">
 
             {/* ── Page Header ── */}
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
               <div>
-                <h1 className="text-2xl font-black text-slate-900 dark:text-white">Reports & Analytics</h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                <h1 className="text-2xl font-black text-brand-text">Reports & Analytics</h1>
+                <p className="text-sm text-brand-text-mute mt-0.5">
                   Generate PDF reports for batches and individual students
                 </p>
               </div>
@@ -310,8 +310,8 @@ export function InstructorReportPage() {
             {/* ── Loading / content ── */}
             {!selectedBatchId && !batchesLoading ? (
               <div className="flex flex-col items-center justify-center py-24 text-center">
-                <FileText className="w-10 h-10 text-slate-300 dark:text-slate-700 mb-3" />
-                <p className="text-slate-400 text-sm">Select a batch to view analytics and generate reports.</p>
+                <FileText className="w-10 h-10 text-brand-text-mute mb-3" />
+                <p className="text-brand-text-mute text-sm">Select a batch to view analytics and generate reports.</p>
               </div>
             ) : summaryLoading ? (
               <div className="flex items-center justify-center py-24">
@@ -331,42 +331,42 @@ export function InstructorReportPage() {
                     { label: 'At-Risk', value: summary.at_risk.length,
                       sub: 'students flagged', accent: 'bg-rose-500' },
                   ].map(card => (
-                    <div key={card.label} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+                    <div key={card.label} className="bg-white rounded-2xl border border-brand-line overflow-hidden shadow-sm">
                       <div className={`h-1 w-full ${card.accent}`} />
                       <div className="p-4 sm:p-5">
-                        <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">{card.value}</div>
-                        <div className="text-xs font-semibold text-slate-700 dark:text-slate-300 mt-0.5">{card.label}</div>
-                        <div className="text-[11px] text-slate-400 mt-0.5 hidden sm:block">{card.sub}</div>
+                        <div className="text-2xl sm:text-3xl font-black text-brand-text">{card.value}</div>
+                        <div className="text-xs font-semibold text-brand-text mt-0.5">{card.label}</div>
+                        <div className="text-[11px] text-brand-text-mute mt-0.5 hidden sm:block">{card.sub}</div>
                       </div>
                     </div>
                   ))}
                 </div>
 
                 {/* ── Period Summary ── */}
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 px-4 sm:px-5 py-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-600 dark:text-slate-400">
-                  <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs uppercase tracking-wider">Period</span>
-                  <span className="text-slate-300 dark:text-slate-700">·</span>
+                <div className="bg-white rounded-xl border border-brand-line px-4 sm:px-5 py-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-brand-text-mute shadow-sm">
+                  <span className="font-semibold text-brand-text text-xs uppercase tracking-wider font-jetbrains">Period</span>
+                  <span className="text-brand-text-mute">·</span>
                   <span className="text-sm">
-                    IA last 7 days: <strong className="text-brand-teal-600 dark:text-brand-teal-400">
+                    IA last 7 days: <strong className="text-brand-teal-600">
                       {summary.period_summary.ia_completed_last_7_days}/{summary.period_summary.ia_total_students}
                     </strong> completed
                   </span>
-                  <span className="text-slate-300 dark:text-slate-700">·</span>
+                  <span className="text-brand-text-mute">·</span>
                   <span className="text-sm">
-                    Mock this month: <strong className="text-brand-blue-600 dark:text-brand-blue-400">
+                    Mock this month: <strong className="text-brand-blue-600">
                       {summary.period_summary.mock_completed_this_month}/{summary.period_summary.mock_total_students}
                     </strong> completed
                   </span>
                 </div>
 
                 {/* ── Batch Report bar (above table) ── */}
-                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 px-4 sm:px-5 py-4 flex items-center gap-4">
-                  <div className="w-9 h-9 rounded-xl bg-brand-teal-50 dark:bg-brand-teal-500/10 flex items-center justify-center shrink-0">
-                    <FileText className="w-4 h-4 text-brand-teal-600 dark:text-brand-teal-400" />
+                <div className="bg-white rounded-2xl border border-brand-line px-4 sm:px-5 py-4 flex items-center gap-4 shadow-sm">
+                  <div className="w-9 h-9 rounded-xl bg-brand-teal-50 flex items-center justify-center shrink-0">
+                    <FileText className="w-4 h-4 text-brand-teal-600" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-slate-800 dark:text-white leading-tight">Batch Performance Report</p>
-                    <p className="text-xs text-slate-400 mt-0.5 hidden sm:block">
+                    <p className="text-sm font-bold text-brand-text leading-tight">Batch Performance Report</p>
+                    <p className="text-xs text-brand-text-mute mt-0.5 hidden sm:block">
                       Engagement · IA &amp; Mock performance · At-risk summary · Diagnostic baseline · All students
                     </p>
                   </div>
@@ -376,7 +376,7 @@ export function InstructorReportPage() {
                     className={cn(
                       'shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition-all',
                       batchReportLoading
-                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
+                        ? 'bg-brand-bg-alt text-brand-text-mute cursor-not-allowed'
                         : 'bg-brand-teal-600 text-white hover:bg-brand-teal-700 active:scale-[0.98]'
                     )}
                   >
@@ -388,25 +388,25 @@ export function InstructorReportPage() {
                 </div>
 
                 {/* ── Student Band Overview + Report buttons ── */}
-                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+                <div className="bg-white rounded-2xl border border-brand-line overflow-hidden shadow-sm">
                   {/* Table header: title + search */}
-                  <div className="px-4 sm:px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center gap-3">
+                  <div className="px-4 sm:px-5 py-3.5 border-b border-brand-line flex flex-col sm:flex-row sm:items-center gap-3">
                     <div className="flex-1">
-                      <h2 className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+                      <h2 className="text-[11px] font-black uppercase tracking-wider text-brand-text-mute font-jetbrains">
                         Student Band Overview
-                        <span className="ml-2 text-slate-300 dark:text-slate-600 font-semibold normal-case tracking-normal">
+                        <span className="ml-2 text-brand-text-mute font-semibold normal-case tracking-normal">
                           — click a row to generate a personal report
                         </span>
                       </h2>
                     </div>
                     <div className="relative w-full sm:w-56">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-brand-text-mute" />
                       <input
                         type="text"
                         value={studentSearch}
                         onChange={e => setStudentSearch(e.target.value)}
                         placeholder="Search students…"
-                        className="w-full pl-8 pr-3 py-1.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal-500/30 placeholder:text-slate-400 text-slate-800 dark:text-slate-200"
+                        className="w-full pl-8 pr-3 py-1.5 text-sm bg-brand-bg-alt border border-brand-line rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal-500/30 placeholder:text-brand-text-mute text-brand-text"
                       />
                     </div>
                   </div>
@@ -414,7 +414,7 @@ export function InstructorReportPage() {
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm min-w-[640px]">
                       <thead>
-                        <tr className="border-b border-slate-100 dark:border-slate-800 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                        <tr className="border-b border-brand-line text-[10px] font-black uppercase tracking-wider text-brand-text-mute font-jetbrains">
                           <th className="text-left px-4 py-2.5 pl-5">Student</th>
                           <th className="text-left px-4 py-2.5">Band</th>
                           <th className="text-left px-4 py-2.5">Target</th>
@@ -425,25 +425,25 @@ export function InstructorReportPage() {
                           <th className="text-right px-4 py-2.5 pr-5">Report</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-50 dark:divide-slate-800/60">
+                      <tbody className="divide-y divide-brand-line">
                         {filteredStudents.length === 0 ? (
                           <tr>
-                            <td colSpan={8} className="py-10 text-center text-sm text-slate-400">
+                            <td colSpan={8} className="py-10 text-center text-sm text-brand-text-mute">
                               {studentSearch ? `No students match "${studentSearch}"` : 'No students in this batch.'}
                             </td>
                           </tr>
                         ) : filteredStudents.map(row => (
                           <tr
                             key={row.student_id}
-                            className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group"
+                            className="hover:bg-brand-bg-alt transition-colors group"
                           >
-                            <td className="px-4 py-3 pl-5 font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap">
+                            <td className="px-4 py-3 pl-5 font-semibold text-brand-text whitespace-nowrap">
                               {row.name}
                             </td>
                             <td className={cn('px-4 py-3 font-bold', bandTextColor(row.current_band))}>
                               {row.current_band ?? '—'}
                             </td>
-                            <td className="px-4 py-3 text-slate-500 dark:text-slate-400">
+                            <td className="px-4 py-3 text-brand-text-mute">
                               {row.target_band ?? '—'}
                             </td>
                             <td className={cn('px-4 py-3 font-bold', gapTextColor(row.gap))}>
@@ -452,16 +452,16 @@ export function InstructorReportPage() {
                             <td className="px-4 py-3 hidden md:table-cell">
                               <TrendIcon trend={row.band_trend} />
                             </td>
-                            <td className="px-4 py-3 text-xs text-slate-400 hidden lg:table-cell whitespace-nowrap">
+                            <td className="px-4 py-3 text-xs text-brand-text-mute hidden lg:table-cell whitespace-nowrap">
                               {row.last_ia_date ?? '—'}
                             </td>
                             <td className="px-4 py-3">
                               {row.is_at_risk ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 text-[10px] font-bold border border-rose-200 dark:border-rose-500/20">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 text-[10px] font-bold border border-rose-200">
                                   <AlertTriangle className="w-2.5 h-2.5" /> At Risk
                                 </span>
                               ) : (
-                                <span className="inline-flex px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold border border-emerald-200 dark:border-emerald-500/20">
+                                <span className="inline-flex px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
                                   On Track
                                 </span>
                               )}
@@ -473,8 +473,8 @@ export function InstructorReportPage() {
                                 className={cn(
                                   'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all',
                                   studentReportLoadingId === row.student_id
-                                    ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
-                                    : 'bg-brand-blue-50 dark:bg-brand-blue-500/10 text-brand-blue-700 dark:text-brand-blue-400 border border-brand-blue-200 dark:border-brand-blue-500/20 hover:bg-brand-blue-100 dark:hover:bg-brand-blue-500/20'
+                                    ? 'bg-brand-bg-alt text-brand-text-mute cursor-not-allowed'
+                                    : 'bg-brand-blue-50 text-brand-blue-700 border border-brand-blue-200 hover:bg-brand-blue-100'
                                 )}
                               >
                                 {studentReportLoadingId === row.student_id

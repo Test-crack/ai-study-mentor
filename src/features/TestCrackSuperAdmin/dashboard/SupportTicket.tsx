@@ -59,84 +59,84 @@ export default function SupportTicket() {
   // Helper for Priority Badge
   const getPriorityStyle = (priority: TicketPriority) => {
     switch(priority) {
-      case 'HIGH': return 'text-rose-600 bg-rose-50 border-rose-200 dark:text-rose-500 dark:bg-rose-500/10 dark:border-rose-500/20';
-      case 'MEDIUM': return 'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-500 dark:bg-amber-500/10 dark:border-amber-500/20';
-      case 'LOW': return 'text-slate-600 bg-slate-100 border-slate-200 dark:text-slate-400 dark:bg-slate-500/10 dark:border-slate-500/20';
+      case 'HIGH': return 'text-rose-600 bg-rose-50 border-rose-200';
+      case 'MEDIUM': return 'text-amber-600 bg-amber-50 border-amber-200';
+      case 'LOW': return 'text-brand-text-mute bg-brand-bg-alt border-brand-line';
     }
   };
 
   // Helper for Status Badge
   const getStatusStyle = (status: TicketStatus) => {
     switch(status) {
-      case 'open': return 'text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-500/10 dark:border-blue-500/20';
-      case 'in-progress': return 'text-brand-blue-600 bg-brand-blue-50 border-brand-blue-200 dark:text-brand-blue-400 dark:bg-brand-blue-500/10 dark:border-brand-blue-500/20';
-      case 'resolved': return 'text-emerald-600 bg-emerald-50 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-500/10 dark:border-emerald-500/20';
+      case 'open': return 'text-sky-600 bg-sky-50 border-sky-200';
+      case 'in-progress': return 'text-brand-blue-600 bg-brand-blue-50 border-brand-blue-200';
+      case 'resolved': return 'text-emerald-600 bg-emerald-50 border-emerald-200';
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0A10] font-sans text-slate-900 dark:text-slate-200 transition-colors duration-300">
-      
+    <div className="relative min-h-screen font-plex antialiased overflow-x-hidden bg-brand-bg text-brand-text">
+
       {/* Sidebar */}
       <div className="hidden lg:block">
-        <SuperAdminSidebar 
-          activeTab="support-tickets" 
-          isCollapsed={isSidebarCollapsed} 
-          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
+        <SuperAdminSidebar
+          activeTab="support-tickets"
+          isCollapsed={isSidebarCollapsed}
+          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         />
       </div>
 
-      <div className={`transition-all duration-300 flex flex-col min-h-screen ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
-        
+      <div className={`relative z-10 transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
+
         {/* Topbar */}
         <SuperAdminTopbar />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="max-w-[1200px] mx-auto space-y-6">
-            
+        <main className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 max-w-[90rem] mx-auto pb-16">
+          <div className="space-y-6">
+
             {/* Top Metrics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl p-5 shadow-sm transition-colors">
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Open</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="bg-white border border-brand-line rounded-2xl p-5 shadow-sm">
+                <p className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-mute mb-2">Open</p>
                 <h3 className="text-3xl font-bold text-amber-500">{openCount}</h3>
               </div>
-              <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl p-5 shadow-sm transition-colors">
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">In Progress</p>
-                <h3 className="text-3xl font-bold text-brand-teal-500 dark:text-brand-teal-400">{inProgressCount}</h3>
+              <div className="bg-white border border-brand-line rounded-2xl p-5 shadow-sm">
+                <p className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-mute mb-2">In Progress</p>
+                <h3 className="text-3xl font-bold text-brand-teal-600">{inProgressCount}</h3>
               </div>
-              <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl p-5 shadow-sm transition-colors">
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Resolved</p>
+              <div className="bg-white border border-brand-line rounded-2xl p-5 shadow-sm">
+                <p className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-mute mb-2">Resolved</p>
                 <h3 className="text-3xl font-bold text-emerald-500">{resolvedCount}</h3>
               </div>
             </div>
 
             {/* Filters and Search */}
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pt-4">
-              
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+
               {/* Search Bar */}
-              <div className="relative w-full md:max-w-md">
+              <div className="relative w-full sm:max-w-md">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-4 w-4 text-slate-400 dark:text-gray-500" />
+                  <Search className="h-4 w-4 text-brand-text-mute" />
                 </div>
                 <input
                   type="text"
                   placeholder="Search tickets..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:focus:border-[#256B8B] transition-all text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 shadow-sm"
+                  className="w-full min-h-[44px] pl-10 pr-4 py-2.5 bg-brand-bg-alt border border-brand-line rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 transition-all text-brand-text placeholder:text-brand-text-mute"
                 />
               </div>
 
               {/* Status Filters */}
-              <div className="flex items-center gap-1 bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] p-1 rounded-xl shadow-sm w-full md:w-auto overflow-x-auto">
+              <div className="flex items-center gap-1 bg-white border border-brand-line p-1 rounded-xl shadow-sm w-full sm:w-auto overflow-x-auto">
                 {(['all', 'open', 'in-progress', 'resolved'] as const).map((filter) => (
                   <button
                     key={filter}
                     onClick={() => setActiveFilter(filter)}
-                    className={`px-4 py-1.5 text-sm font-medium rounded-lg capitalize whitespace-nowrap transition-colors flex-1 md:flex-none ${
-                      activeFilter === filter 
-                        ? 'bg-brand-teal-600 dark:bg-[#185A78] text-white' 
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    className={`px-3 sm:px-4 py-2 text-sm font-bold rounded-lg capitalize whitespace-nowrap transition-colors flex-1 sm:flex-none ${
+                      activeFilter === filter
+                        ? 'bg-brand-teal-600 text-white'
+                        : 'text-brand-text-mute hover:text-brand-text hover:bg-brand-bg-alt'
                     }`}
                   >
                     {filter.replace('-', ' ')}
@@ -146,56 +146,56 @@ export default function SupportTicket() {
             </div>
 
             {/* Ticket List */}
-            <div className="space-y-3 pt-2">
+            <div className="space-y-3">
               {filteredTickets.map((ticket) => (
-                <div 
-                  key={ticket.id} 
-                  className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] p-4 sm:p-5 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors group cursor-pointer shadow-sm dark:shadow-none"
+                <div
+                  key={ticket.id}
+                  className="bg-white border border-brand-line p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-brand-bg-alt transition-colors group cursor-pointer shadow-sm"
                 >
-                  
+
                   {/* Left Side: Details */}
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{ticket.id}</span>
-                      <span className={`text-[10px] font-bold tracking-wider px-2 py-0.5 rounded border uppercase ${getPriorityStyle(ticket.priority)}`}>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <span className="font-jetbrains text-xs font-bold text-brand-text-mute">{ticket.id}</span>
+                      <span className={`font-jetbrains text-[10px] font-bold tracking-wider px-2 py-0.5 rounded border uppercase ${getPriorityStyle(ticket.priority)}`}>
                         {ticket.priority}
                       </span>
-                      <span className={`text-[10px] font-bold tracking-wider px-2 py-0.5 rounded border uppercase ${getStatusStyle(ticket.status)}`}>
+                      <span className={`font-jetbrains text-[10px] font-bold tracking-wider px-2 py-0.5 rounded border uppercase ${getStatusStyle(ticket.status)}`}>
                         {ticket.status}
                       </span>
                     </div>
-                    <h4 className="font-semibold text-base text-slate-900 dark:text-white mb-1 group-hover:text-brand-teal-600 dark:group-hover:text-[#4E8CA6] transition-colors">
+                    <h4 className="font-semibold text-base text-brand-text mb-1 group-hover:text-brand-teal-600 transition-colors break-words">
                       {ticket.title}
                     </h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-xs text-brand-text-mute">
                       {ticket.institute} • {ticket.time} • {ticket.messages} Messages
                     </p>
                   </div>
 
                   {/* Right Side: Actions */}
-                  <div className="flex items-center gap-3 shrink-0 self-start sm:self-center">
+                  <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto self-start sm:self-center">
                     {ticket.status !== 'resolved' && (
-                      <button 
+                      <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleAssign(ticket.id);
                         }}
-                        className="px-4 py-2 text-xs font-semibold text-brand-teal-700 bg-brand-teal-50 border border-brand-teal-200 hover:bg-brand-teal-100 dark:text-[#4E8CA6] dark:bg-[#185A78]/10 dark:border-[#185A78]/30 dark:hover:bg-[#185A78]/20 rounded-lg transition-colors"
+                        className="flex-1 sm:flex-none min-h-[44px] px-4 py-2 text-xs font-bold text-brand-teal-700 bg-brand-teal-50 border border-brand-teal-200 hover:bg-brand-teal-100 rounded-xl transition-colors"
                       >
                         Assign
                       </button>
                     )}
-                    <button className="px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 border border-slate-200 hover:bg-slate-200 dark:text-gray-300 dark:bg-[#26252D] dark:border-transparent dark:hover:bg-[#2E2D38] rounded-lg transition-colors">
+                    <button className="flex-1 sm:flex-none min-h-[44px] px-4 py-2 text-xs font-bold text-brand-text bg-brand-bg-alt border border-brand-line hover:bg-white rounded-xl transition-colors">
                       View
                     </button>
                   </div>
-                  
+
                 </div>
               ))}
 
               {filteredTickets.length === 0 && (
-                <div className="py-12 text-center bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl">
-                  <p className="text-slate-500 dark:text-gray-500">No tickets found matching your criteria.</p>
+                <div className="py-16 text-center bg-white border border-brand-line rounded-2xl shadow-sm">
+                  <p className="text-sm text-brand-text-mute font-medium">No tickets found matching your criteria.</p>
                 </div>
               )}
             </div>
@@ -205,9 +205,9 @@ export default function SupportTicket() {
 
         {/* Toast Notification */}
         {toast.visible && (
-          <div className="fixed bottom-6 right-6 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-3 rounded-lg shadow-xl flex items-center gap-3 animate-fade-in-up z-50">
-            <div className="bg-emerald-500/20 dark:bg-emerald-100 rounded-full p-1">
-              <Check className="w-4 h-4 text-emerald-400 dark:text-emerald-600" />
+          <div className="fixed bottom-6 right-4 left-4 sm:left-auto sm:right-6 sm:w-auto bg-brand-ink text-white px-4 py-3 rounded-xl shadow-sm flex items-center gap-3 animate-fade-in-up z-50">
+            <div className="bg-emerald-500/20 rounded-full p-1">
+              <Check className="w-4 h-4 text-emerald-400" />
             </div>
             <p className="text-sm font-medium pr-2">{toast.message}</p>
           </div>

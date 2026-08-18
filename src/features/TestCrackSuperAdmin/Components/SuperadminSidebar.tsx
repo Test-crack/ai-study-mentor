@@ -62,7 +62,7 @@ export const SuperAdminSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
   return (
     <aside 
       className={cn(
-        "fixed left-4 top-4 bottom-4 bg-white dark:bg-[#12121A] rounded-2xl shadow-xl dark:shadow-2xl flex flex-col justify-between py-6 z-40 hidden lg:flex transition-all duration-300 border border-slate-200 dark:border-[#1E1E2A]",
+        "fixed left-4 top-4 bottom-4 bg-brand-ink rounded-2xl border border-brand-line-12 shadow-xl overflow-x-hidden flex flex-col justify-between py-6 z-40 hidden lg:flex transition-all duration-300",
         isCollapsed ? "w-20 px-2" : "w-64 px-4",
         className
       )}
@@ -71,30 +71,35 @@ export const SuperAdminSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
       <div className={cn("flex items-center gap-3 mb-10", isCollapsed ? "justify-center px-0" : "px-2")}>
         <img src={testcrackLogo} alt="TestCrack" className="h-9 w-9 object-contain shrink-0" />
         {!isCollapsed && (
-          <span className="text-xl font-bold text-slate-900 dark:text-white tracking-wide animate-in fade-in duration-300">
-            TestCrack Super Admin
-          </span>
+          <div className="animate-in fade-in duration-300 min-w-0">
+            <span className="font-manrope text-base font-black tracking-tight text-brand-bg block truncate">
+              TestCrack
+            </span>
+            <p className="font-jetbrains text-[10px] font-semibold tracking-[0.12em] uppercase text-brand-on-ink-mute leading-none mt-0.5">
+              Super Admin
+            </p>
+          </div>
         )}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-2">
+      <nav className="flex-1 space-y-2 overflow-y-auto overflow-x-hidden">
         {menuItems.map((item) => (
           <button
             key={item.id}
             onClick={() => handleNavigation(item)}
             title={isCollapsed ? item.label : undefined}
             className={cn(
-              "w-full flex items-center gap-3 rounded-xl transition-all duration-200 group relative",
+              "w-full flex items-center gap-3 rounded-xl transition-colors duration-150 group relative",
               isCollapsed ? "justify-center p-3" : "px-4 py-3",
-              activeTab === item.id 
-                ? "bg-brand-teal-600 text-white shadow-md shadow-brand-teal-500/20 dark:shadow-brand-teal-900/20" 
-                : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-[#1A1A24] hover:text-brand-teal-600 dark:hover:text-white"
+              activeTab === item.id
+                ? "bg-brand-mint/15 text-brand-mint"
+                : "bg-transparent text-brand-on-ink-mute hover:bg-white/5"
             )}
           >
             <item.icon className={cn(
-              "h-5 w-5 transition-transform group-hover:scale-105 shrink-0",
-              activeTab === item.id ? "text-white" : "text-slate-400 group-hover:text-brand-teal-600 dark:group-hover:text-white"
+              "h-5 w-5 shrink-0",
+              activeTab === item.id ? "text-brand-mint" : "text-brand-on-ink-mute"
             )} />
             {!isCollapsed && (
               <span className="font-medium text-sm animate-in fade-in duration-200">{item.label}</span>
@@ -106,36 +111,23 @@ export const SuperAdminSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
       {/* Collapse Toggle */}
       <button
         onClick={toggleCollapse}
-        className="absolute -right-3 top-1/2 -translate-y-1/2 bg-brand-teal-600 text-white p-1.5 rounded-full shadow-lg hover:bg-brand-teal-700 transition-colors z-50 border-2 border-slate-50 dark:border-[#09090E]"
+        className="absolute -right-3 top-1/2 -translate-y-1/2 bg-brand-teal-600 text-white p-1.5 rounded-full shadow-md hover:bg-brand-teal-700 transition-colors z-50 border-2 border-brand-bg"
       >
         {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
       </button>
 
       {/* Bottom Actions */}
-      <div className={cn("pt-6 border-t border-slate-200 dark:border-[#1E1E2A] space-y-2", isCollapsed ? "px-0" : "px-0")}>
-        {/* Home Link */}
-        {/* <button 
-          onClick={() => navigate('/')}
-          title={isCollapsed ? "Home Page" : undefined}
-          className={cn(
-            "w-full flex items-center gap-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-[#1A1A24] hover:text-brand-teal-600 dark:hover:text-white transition-all duration-200 group",
-            isCollapsed ? "justify-center p-3" : "px-4 py-3"
-          )}
-        >
-          <Home className="h-5 w-5 group-hover:scale-105 transition-transform shrink-0" />
-          {!isCollapsed && <span className="font-medium text-sm">Home Page</span>}
-        </button> */}
-
+      <div className={cn("pt-6 border-t border-brand-line-12 space-y-2", isCollapsed ? "px-0" : "px-0")}>
         {/* Updated Logout Button */}
-        <button 
+        <button
           onClick={handleLogout}
           title={isCollapsed ? "Logout" : undefined}
           className={cn(
-            "w-full flex items-center gap-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200 group",
+            "w-full flex items-center gap-3 rounded-xl text-brand-on-ink-mute hover:bg-brand-warm-danger/10 hover:text-brand-warm-danger transition-colors duration-150 group",
             isCollapsed ? "justify-center p-3" : "px-4 py-3"
           )}
         >
-          <LogOut className="h-5 w-5 group-hover:translate-x-1 transition-transform shrink-0" />
+          <LogOut className="h-5 w-5 shrink-0" />
           {!isCollapsed && <span className="font-medium text-sm">Logout</span>}
         </button>
       </div>

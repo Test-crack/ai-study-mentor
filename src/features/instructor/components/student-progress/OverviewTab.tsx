@@ -13,14 +13,14 @@ function MiniCard({ icon, label, value, sub }: {
   icon: React.ReactNode; label: string; value: string | number; sub?: string;
 }) {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 flex items-center gap-3">
-      <div className="h-9 w-9 rounded-xl bg-brand-teal-50 dark:bg-brand-teal-500/10 flex items-center justify-center shrink-0 text-brand-teal-600 dark:text-brand-teal-400">
+    <div className="bg-white rounded-xl border border-brand-line p-4 flex items-center gap-3">
+      <div className="h-9 w-9 rounded-xl bg-brand-teal-50 flex items-center justify-center shrink-0 text-brand-teal-600">
         {icon}
       </div>
       <div className="min-w-0">
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">{label}</p>
-        <p className="text-lg font-black text-slate-900 dark:text-white leading-tight">{value}</p>
-        {sub && <p className="text-[10px] text-slate-400">{sub}</p>}
+        <p className="text-[10px] font-bold text-brand-text-mute font-jetbrains uppercase tracking-wider truncate">{label}</p>
+        <p className="text-lg font-black text-brand-text leading-tight">{value}</p>
+        {sub && <p className="text-[10px] text-brand-text-mute">{sub}</p>}
       </div>
     </div>
   );
@@ -44,8 +44,8 @@ function BaselineComparison({ baseline, competency }: {
   if (!hasBaseline && !hasCurrent) return null;
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5">
-      <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-4">
+    <div className="bg-white rounded-2xl border border-brand-line shadow-sm p-5">
+      <h3 className="text-sm font-bold text-brand-text mb-4">
         Diagnostic Baseline vs Current
       </h3>
       <div className="space-y-3">
@@ -56,41 +56,41 @@ function BaselineComparison({ baseline, competency }: {
 
           return (
             <div key={abbr} className="grid grid-cols-[80px_1fr_60px_60px_52px] items-center gap-2">
-              <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 shrink-0">{label}</span>
-              <div className="relative h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+              <span className="text-xs font-semibold text-brand-text-mute shrink-0">{label}</span>
+              <div className="relative h-2 bg-brand-bg-alt rounded-full overflow-hidden">
                 {/* baseline marker */}
                 {base !== null && (
                   <div
-                    className="absolute top-0 h-full bg-slate-300 dark:bg-slate-600 rounded-full"
+                    className="absolute top-0 h-full bg-brand-text-mute/40 rounded-full"
                     style={{ width: `${bandFillPct(base)}%` }}
                   />
                 )}
                 {/* current fill */}
                 {current !== null && current > 0 && (
                   <div
-                    className="absolute top-0 h-full bg-brand-teal-500 dark:bg-brand-teal-400 rounded-full opacity-80"
+                    className="absolute top-0 h-full bg-brand-teal-500 rounded-full opacity-80"
                     style={{ width: `${bandFillPct(current)}%` }}
                   />
                 )}
               </div>
-              <span className="text-[10px] text-slate-400 text-right">
+              <span className="text-[10px] text-brand-text-mute text-right">
                 {base !== null ? base.toFixed(1) : '—'}
               </span>
               <span className={cn(
                 'text-xs font-black text-right',
-                (current ?? 0) >= 7.5 ? 'text-emerald-600 dark:text-emerald-400'
-                : (current ?? 0) >= 6.0 ? 'text-amber-600 dark:text-amber-400'
-                : (current ?? 0) > 0    ? 'text-rose-600 dark:text-rose-400'
-                : 'text-slate-400'
+                (current ?? 0) >= 7.5 ? 'text-emerald-600'
+                : (current ?? 0) >= 6.0 ? 'text-amber-600'
+                : (current ?? 0) > 0    ? 'text-rose-600'
+                : 'text-brand-text-mute'
               )}>
                 {current !== null && current > 0 ? current.toFixed(1) : '—'}
               </span>
               <span className={cn(
                 'text-[10px] font-bold text-right',
-                delta === null ? 'text-slate-300 dark:text-slate-600'
-                : delta > 0   ? 'text-emerald-600 dark:text-emerald-400'
-                : delta < 0   ? 'text-rose-600 dark:text-rose-400'
-                : 'text-slate-400'
+                delta === null ? 'text-brand-text-mute/60'
+                : delta > 0   ? 'text-emerald-600'
+                : delta < 0   ? 'text-rose-600'
+                : 'text-brand-text-mute'
               )}>
                 {delta === null ? '—' : delta > 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1)}
               </span>
@@ -98,9 +98,9 @@ function BaselineComparison({ baseline, competency }: {
           );
         })}
       </div>
-      <div className="flex items-center gap-4 mt-4 text-[10px] text-slate-400">
+      <div className="flex items-center gap-4 mt-4 text-[10px] text-brand-text-mute">
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-1.5 rounded bg-slate-300 dark:bg-slate-600 inline-block" /> Baseline
+          <span className="w-3 h-1.5 rounded bg-brand-text-mute/40 inline-block" /> Baseline
         </span>
         <span className="flex items-center gap-1.5">
           <span className="w-3 h-1.5 rounded bg-brand-teal-500 inline-block opacity-80" /> Current
@@ -129,17 +129,17 @@ export function OverviewTab({ data }: Props) {
       <div className={cn(
         'rounded-2xl border p-4 flex items-start gap-3',
         eligOk
-          ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30'
-          : 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/30'
+          ? 'bg-emerald-50 border-emerald-200'
+          : 'bg-amber-50 border-amber-200'
       )}>
         {eligOk
-          ? <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0" />
-          : <AlertCircle  className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />}
+          ? <CheckCircle2 className="h-5 w-5 text-emerald-600 mt-0.5 shrink-0" />
+          : <AlertCircle  className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />}
         <div className="flex-1 min-w-0">
-          <p className={cn('text-sm font-bold', eligOk ? 'text-emerald-800 dark:text-emerald-300' : 'text-amber-800 dark:text-amber-300')}>
+          <p className={cn('text-sm font-bold', eligOk ? 'text-emerald-800' : 'text-amber-800')}>
             {eligOk ? 'IA Eligible — Prerequisites met' : 'Not yet IA eligible'}
           </p>
-          <p className={cn('text-xs mt-0.5', eligOk ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400')}>
+          <p className={cn('text-xs mt-0.5', eligOk ? 'text-emerald-700' : 'text-amber-700')}>
             {ia_eligibility.drills_completed} drills completed · Avg DCS {ia_eligibility.avg_dcs}%
             {ia_eligibility.next_ia_date && ` · Next IA: ${ia_eligibility.next_ia_date}`}
           </p>
@@ -148,8 +148,8 @@ export function OverviewTab({ data }: Props) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Competency Radar */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5">
-          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-4">Competency Radar</h3>
+        <div className="bg-white rounded-2xl border border-brand-line shadow-sm p-5">
+          <h3 className="text-sm font-bold text-brand-text mb-4">Competency Radar</h3>
           {radarData.length >= 3 ? (
             <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
@@ -184,19 +184,19 @@ export function OverviewTab({ data }: Props) {
             <div className="space-y-3 py-2">
               {radarData.map(r => (
                 <div key={r.skill} className="flex items-center gap-3">
-                  <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 w-20 shrink-0">{r.skill}</span>
-                  <div className="flex-1 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <span className="text-xs font-semibold text-brand-text-mute w-20 shrink-0">{r.skill}</span>
+                  <div className="flex-1 h-2 bg-brand-bg-alt rounded-full overflow-hidden">
                     <div
                       className="h-full bg-brand-teal-500 rounded-full"
                       style={{ width: `${bandFillPct(r.band)}%` }}
                     />
                   </div>
-                  <span className="text-xs font-black text-slate-700 dark:text-slate-300 w-8 text-right">{r.band.toFixed(1)}</span>
+                  <span className="text-xs font-black text-brand-text w-8 text-right">{r.band.toFixed(1)}</span>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="h-56 flex items-center justify-center text-slate-400 text-sm">
+            <div className="h-56 flex items-center justify-center text-brand-text-mute text-sm">
               No competency data yet
             </div>
           )}
@@ -204,7 +204,7 @@ export function OverviewTab({ data }: Props) {
 
         {/* LexiGrid Stats */}
         <div className="space-y-3">
-          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200">LexiGrid (last 14 days)</h3>
+          <h3 className="text-sm font-bold text-brand-text">LexiGrid (last 14 days)</h3>
           <MiniCard
             icon={<Gamepad2 className="h-4 w-4" />}
             label="Games Played"

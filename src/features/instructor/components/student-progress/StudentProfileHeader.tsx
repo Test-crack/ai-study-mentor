@@ -13,15 +13,15 @@ function getInitials(name: string): string {
 }
 
 function bandTextColor(b: number): string {
-  if (b >= 7.5) return 'text-emerald-600 dark:text-emerald-400';
-  if (b >= 6.0) return 'text-amber-600 dark:text-amber-400';
-  return 'text-rose-600 dark:text-rose-400';
+  if (b >= 7.5) return 'text-emerald-600';
+  if (b >= 6.0) return 'text-amber-600';
+  return 'text-rose-600';
 }
 
 function bandPillClass(b: number): string {
-  if (b >= 7.5) return 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/25 text-emerald-700 dark:text-emerald-400';
-  if (b >= 6.0) return 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/25 text-amber-700 dark:text-amber-400';
-  return 'bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/25 text-rose-700 dark:text-rose-400';
+  if (b >= 7.5) return 'bg-emerald-50 border-emerald-200 text-emerald-700';
+  if (b >= 6.0) return 'bg-amber-50 border-amber-200 text-amber-700';
+  return 'bg-rose-50 border-rose-200 text-rose-700';
 }
 
 const SKILL_ABBR: Record<string, string> = {
@@ -57,32 +57,32 @@ export function StudentProfileHeader({ data }: Props) {
       icon: <Target className="h-4 w-4" />,
       label: 'Target Band',
       value: target_band !== null ? target_band.toFixed(1) : '—',
-      valueClass: 'text-brand-teal-600 dark:text-brand-teal-400',
+      valueClass: 'text-brand-teal-600',
     },
     {
       icon: <Zap className="h-4 w-4" />,
       label: 'Momentum',
       value: momentum_score.toLocaleString(),
       valueClass: momentum_score >= 200
-        ? 'text-emerald-600 dark:text-emerald-400'
+        ? 'text-emerald-600'
         : momentum_score >= 100
-        ? 'text-amber-600 dark:text-amber-400'
-        : 'text-rose-600 dark:text-rose-400',
+        ? 'text-amber-600'
+        : 'text-rose-600',
     },
     {
       icon: <Flame className="h-4 w-4" />,
       label: 'Day Streak',
       value: `${daily_streak}d`,
       valueClass: daily_streak >= 7
-        ? 'text-orange-500 dark:text-orange-400'
+        ? 'text-orange-500'
         : daily_streak >= 3
-        ? 'text-amber-600 dark:text-amber-400'
-        : 'text-slate-500 dark:text-slate-400',
+        ? 'text-amber-600'
+        : 'text-brand-text-mute',
     },
   ];
 
   return (
-    <div className="rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm mb-6">
+    <div className="rounded-2xl overflow-hidden bg-white border border-brand-line shadow-sm mb-6">
 
       {/* ── Gradient banner ────────────────────────────────────────────── */}
       {/* No overflow-hidden here — outer card clips the rounded corners.
@@ -107,7 +107,7 @@ export function StudentProfileHeader({ data }: Props) {
         <div className="flex items-end justify-between -mt-14 mb-5">
           {/* Avatar — z-10 paints above gradient div; larger at h-20 w-20 */}
           <div className={cn(
-            'relative z-10 h-20 w-20 rounded-full ring-[3px] ring-white dark:ring-slate-900 shadow-2xl overflow-hidden bg-brand-teal-600 shrink-0',
+            'relative z-10 h-20 w-20 rounded-full ring-[3px] ring-white shadow-2xl overflow-hidden bg-brand-teal-600 shrink-0',
             'flex items-center justify-center'
           )}>
             {student.avatar ? (
@@ -122,10 +122,10 @@ export function StudentProfileHeader({ data }: Props) {
             <span className={cn(
               'text-xs font-bold px-3 py-1.5 rounded-xl border',
               gap <= 0
-                ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
                 : gap <= 1
-                ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/30 text-amber-700 dark:text-amber-400'
-                : 'bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-400'
+                ? 'bg-amber-50 border-amber-200 text-amber-700'
+                : 'bg-rose-50 border-rose-200 text-rose-700'
             )}>
               {gap <= 0 ? '✓ Target met' : `${gap.toFixed(1)} band gap`}
             </span>
@@ -133,12 +133,12 @@ export function StudentProfileHeader({ data }: Props) {
         </div>
 
         {/* ── Stats row ───────────────────────────────────────────────── */}
-        <div className="flex items-center gap-0 divide-x divide-slate-100 dark:divide-slate-800 border border-slate-100 dark:border-slate-800 rounded-xl overflow-hidden mb-4">
+        <div className="flex items-center gap-0 divide-x divide-brand-line border border-brand-line rounded-xl overflow-hidden mb-4">
           {stats.map((s) => (
             <div key={s.label} className="flex-1 flex items-center gap-2.5 px-4 py-3">
-              <span className="text-slate-400 dark:text-slate-500 shrink-0">{s.icon}</span>
+              <span className="text-brand-text-mute shrink-0">{s.icon}</span>
               <div className="min-w-0">
-                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider leading-tight">
+                <p className="text-[10px] font-bold text-brand-text-mute font-jetbrains uppercase tracking-wider leading-tight">
                   {s.label}
                 </p>
                 <p className={cn('text-lg font-black leading-tight', s.valueClass)}>
@@ -152,7 +152,7 @@ export function StudentProfileHeader({ data }: Props) {
         {/* ── LRSW skill band strip ────────────────────────────────────── */}
         {lrsw.length > 0 ? (
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-0.5">
+            <span className="text-[10px] font-bold text-brand-text-mute font-jetbrains uppercase tracking-widest mr-0.5">
               Skill Bands
             </span>
             {lrsw.map(({ abbr, label, band }) => (
@@ -172,7 +172,7 @@ export function StudentProfileHeader({ data }: Props) {
             ))}
           </div>
         ) : (
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-brand-text-mute">
             No skill band data yet — complete an IA to populate.
           </p>
         )}

@@ -367,7 +367,7 @@ const AppRoutes = () => {
       <Route path="/student/reading-history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><ReadingHistoryPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
       <Route path="/student/my-curriculum" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><MyCurriculum /></StudentDrillLockGuard></RoleProtectedRoute>} />
       <Route path="/student/batches" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><StudentBatchView /></StudentDrillLockGuard></RoleProtectedRoute>} />
-      <Route path="/student/assessment-history" element={<AssessmentHistoryPage />} />
+      <Route path="/student/assessment-history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><AssessmentHistoryPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
       <Route path="/student/suggestion-page" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><SuggestionsPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
       <Route path="/student/report" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><Report /></StudentDrillLockGuard></RoleProtectedRoute>} />
       <Route path="/student/suggestion" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><Suggestion /></StudentDrillLockGuard></RoleProtectedRoute>} />

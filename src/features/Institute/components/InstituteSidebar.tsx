@@ -67,9 +67,9 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
   };
 
   return (
-    <aside 
+    <aside
       className={cn(
-        "fixed left-4 top-4 bottom-4 bg-white dark:bg-[#0D0D14] rounded-2xl shadow-[0_2px_12px_-4px_rgba(15,23,42,0.08)] dark:shadow-none flex flex-col py-5 z-40 hidden lg:flex transition-all duration-300 border border-slate-200/70 dark:border-white/[0.05]",
+        "fixed left-4 top-4 bottom-4 bg-brand-ink rounded-2xl border border-brand-line-12 shadow-xl overflow-x-hidden flex flex-col py-5 z-40 hidden lg:flex transition-all duration-300",
         isCollapsed ? "w-20 px-2" : "w-64 px-4",
         className
       )}
@@ -78,30 +78,35 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
       <div className={cn("flex items-center gap-3 mb-6 shrink-0", isCollapsed ? "justify-center px-0" : "px-2")}>
         <img src={testcrackLogo} alt="TestCrack" className="h-9 w-9 object-contain shrink-0" />
         {!isCollapsed && (
-          <span className="text-xl font-bold text-slate-900 dark:text-white tracking-wide animate-in fade-in duration-300">
-            Institute Admin Portal
-          </span>
+          <div className="animate-in fade-in duration-300 min-w-0">
+            <span className="font-manrope text-base font-black tracking-tight text-brand-bg block truncate">
+              TestCrack
+            </span>
+            <p className="font-jetbrains text-[10px] font-semibold tracking-[0.12em] uppercase text-brand-on-ink-mute leading-none mt-0.5">
+              Institute Admin
+            </p>
+          </div>
         )}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1.5 overflow-y-auto overflow-x-hidden pr-2 -mr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-200 dark:[&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-track]:bg-transparent">
+      <nav className="flex-1 space-y-1.5 overflow-y-auto overflow-x-hidden pr-2 -mr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-track]:bg-transparent">
         {menuItems.map((item) => (
           <button
             key={item.id}
             onClick={() => handleNavigation(item)}
             title={isCollapsed ? item.label : undefined}
             className={cn(
-              "w-full flex items-center gap-3 rounded-xl transition-all duration-200 group relative",
+              "w-full flex items-center gap-3 rounded-xl transition-colors duration-150 group relative",
               isCollapsed ? "justify-center p-3" : "px-4 py-3",
-              activeTab === item.id 
-                ? "bg-brand-teal-600 text-white shadow-md dark:bg-brand-teal-500/15 dark:text-brand-teal-300 dark:border dark:border-brand-teal-500/20 dark:shadow-[0_0_20px_rgba(99,102,241,0.15)]" 
-                : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/[0.04] hover:text-brand-teal-600 dark:hover:text-white"
+              activeTab === item.id
+                ? "bg-brand-mint/15 text-brand-mint"
+                : "bg-transparent text-brand-on-ink-mute hover:bg-white/5"
             )}
           >
             <item.icon className={cn(
-              "h-5 w-5 transition-transform group-hover:scale-105 shrink-0",
-              activeTab === item.id ? "text-white dark:text-brand-teal-300" : "text-slate-400 group-hover:text-brand-teal-600 dark:group-hover:text-white"
+              "h-5 w-5 shrink-0",
+              activeTab === item.id ? "text-brand-mint" : "text-brand-on-ink-mute"
             )} />
             {!isCollapsed && (
               <span className="font-medium text-sm animate-in fade-in duration-200">{item.label}</span>
@@ -117,10 +122,10 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
             onClick={() => navigate('/institute-owner/dashboard')}
             title={isCollapsed ? "Back to Owner Portal" : undefined}
             className={cn(
-              "w-full flex items-center gap-3 rounded-xl transition-all duration-200 group",
+              "w-full flex items-center gap-3 rounded-xl transition-colors duration-150 group",
               isCollapsed ? "justify-center p-3" : "px-4 py-3",
-              "bg-brand-teal-50 dark:bg-brand-teal-500/15 text-brand-teal-700 dark:text-brand-teal-300",
-              "hover:bg-brand-teal-100 dark:hover:bg-brand-teal-500/20 border border-brand-teal-200 dark:border-brand-teal-500/20"
+              "bg-brand-teal-500/15 text-brand-teal-300 border border-brand-teal-500/25",
+              "hover:bg-brand-teal-500/25"
             )}
           >
             <ArrowLeftRight className="h-4 w-4 shrink-0" />
@@ -134,22 +139,22 @@ export const InstituteSidebar = ({ activeTab = 'dashboard', onTabChange, isColla
       {/* Collapse Toggle */}
       <button
         onClick={toggleCollapse}
-        className="absolute -right-3 top-1/2 -translate-y-1/2 bg-brand-teal-600 text-white p-1.5 rounded-full shadow-lg hover:bg-brand-teal-700 transition-colors z-50 border-2 border-slate-50 dark:border-[#0A0A0F]"
+        className="absolute -right-3 top-1/2 -translate-y-1/2 bg-brand-teal-600 text-white p-1.5 rounded-full shadow-md hover:bg-brand-teal-700 transition-colors z-50 border-2 border-brand-bg"
       >
         {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
       </button>
 
       {/* Bottom Actions */}
-      <div className={cn("pt-4 mt-2 border-t border-slate-200 dark:border-white/[0.06] shrink-0", isCollapsed ? "px-0" : "px-0")}>
-        <button 
+      <div className={cn("pt-4 mt-2 border-t border-brand-line-12 shrink-0", isCollapsed ? "px-0" : "px-0")}>
+        <button
           onClick={handleLogout}
           title={isCollapsed ? "Logout" : undefined}
           className={cn(
-            "w-full flex items-center gap-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200 group",
+            "w-full flex items-center gap-3 rounded-xl text-brand-on-ink-mute hover:bg-brand-warm-danger/10 hover:text-brand-warm-danger transition-colors duration-150 group",
             isCollapsed ? "justify-center p-3" : "px-4 py-3"
           )}
         >
-          <LogOut className="h-5 w-5 group-hover:translate-x-1 transition-transform shrink-0" />
+          <LogOut className="h-5 w-5 shrink-0" />
           {!isCollapsed && <span className="font-medium text-sm">Logout</span>}
         </button>
       </div>

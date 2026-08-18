@@ -31,20 +31,20 @@ interface TutorView {
 
 function TutorCard({ tutor, onRemove }: { tutor: TutorView; onRemove: () => void }) {
   return (
-    <div className="rounded-2xl bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-brand-teal-300/70 dark:hover:border-brand-teal-500/40 transition-all overflow-hidden">
-      <div className="p-5">
+    <div className="rounded-2xl bg-white border border-brand-line shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-brand-teal-300 transition-all overflow-hidden">
+      <div className="p-4 sm:p-5">
         <div className="flex items-start gap-3">
           <Avatar className="h-11 w-11 shrink-0">
             <AvatarImage src={tutor.avatar ?? ""} />
-            <AvatarFallback className="bg-brand-teal-100 dark:bg-brand-teal-500/20 text-brand-teal-700 dark:text-brand-teal-300 font-bold">
+            <AvatarFallback className="bg-brand-teal-100 text-brand-teal-700 font-bold">
               {(tutor.name ?? tutor.email).slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{tutor.name ?? tutor.email}</p>
-            <p className="text-xs text-slate-400 truncate">{tutor.email}</p>
+            <p className="text-sm font-bold text-brand-text truncate">{tutor.name ?? tutor.email}</p>
+            <p className="text-xs text-brand-text-mute truncate">{tutor.email}</p>
             {tutor.specialization && (
-              <span className="inline-flex mt-1.5 text-[11px] font-bold text-brand-teal-600 dark:text-brand-teal-400 bg-brand-teal-50 dark:bg-brand-teal-500/10 px-2 py-0.5 rounded-lg">
+              <span className="inline-flex mt-1.5 text-[11px] font-bold text-brand-teal-600 bg-brand-teal-50 px-2 py-0.5 rounded-lg">
                 {tutor.specialization}
               </span>
             )}
@@ -52,19 +52,19 @@ function TutorCard({ tutor, onRemove }: { tutor: TutorView; onRemove: () => void
           <button
             onClick={onRemove}
             aria-label={`Remove ${tutor.name ?? tutor.email}`}
-            className="p-2 rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors shrink-0"
+            className="p-2.5 min-h-[40px] min-w-[40px] inline-flex items-center justify-center rounded-lg text-brand-text-mute hover:text-rose-600 hover:bg-rose-50 transition-colors shrink-0"
           >
             <Trash2 className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="mt-4 border-t border-slate-100 dark:border-white/[0.06] pt-3">
+        <div className="mt-4 border-t border-brand-line pt-3">
           {tutor.batches.length === 0 ? (
             <StatusBadge tone="warning">No batch assigned</StatusBadge>
           ) : (
             <div className="flex flex-wrap gap-1.5">
               {tutor.batches.map((b) => (
-                <span key={b.batch_id} className="text-xs bg-slate-50 dark:bg-white/[0.04] text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-lg font-medium">
+                <span key={b.batch_id} className="text-xs bg-brand-bg-alt text-brand-text px-2 py-0.5 rounded-lg font-medium">
                   {b.batch_name} · {b.student_count}
                 </span>
               ))}
@@ -73,9 +73,9 @@ function TutorCard({ tutor, onRemove }: { tutor: TutorView; onRemove: () => void
         </div>
       </div>
 
-      <div className="bg-slate-50 dark:bg-white/[0.03] px-5 py-2.5 flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
-        <span className="inline-flex items-center gap-1.5"><Layers className="h-3.5 w-3.5" /> {tutor.batches.length} batch{tutor.batches.length !== 1 ? "es" : ""}</span>
-        <span className="inline-flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> {tutor.totalStudents} student{tutor.totalStudents !== 1 ? "s" : ""}</span>
+      <div className="font-jetbrains bg-brand-bg-alt border-t border-brand-line px-4 sm:px-5 py-2.5 flex items-center justify-between gap-2 text-xs font-bold text-brand-text-mute">
+        <span className="inline-flex items-center gap-1.5 whitespace-nowrap"><Layers className="h-3.5 w-3.5 shrink-0" /> {tutor.batches.length} batch{tutor.batches.length !== 1 ? "es" : ""}</span>
+        <span className="inline-flex items-center gap-1.5 whitespace-nowrap"><Users className="h-3.5 w-3.5 shrink-0" /> {tutor.totalStudents} student{tutor.totalStudents !== 1 ? "s" : ""}</span>
       </div>
     </div>
   );
@@ -157,12 +157,12 @@ export default function InstituteTutor() {
     <InstituteAdminLayout activeTab="tutor">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Tutor Accounts</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Every tutor in your institute, with their batches and student load.</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-brand-text">Tutor Accounts</h1>
+          <p className="text-sm text-brand-text-mute mt-0.5">Every tutor in your institute, with their batches and student load.</p>
         </div>
         <button
           onClick={() => navigate("/institute-admin/tutorOnboarding")}
-          className="inline-flex items-center gap-2 bg-brand-teal-600 hover:bg-brand-teal-700 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition-colors shadow-sm self-start sm:self-auto"
+          className="inline-flex items-center justify-center gap-2 bg-brand-teal-600 hover:bg-brand-teal-700 text-white text-sm font-bold px-4 py-2.5 min-h-[40px] rounded-xl transition-colors shadow-sm self-start sm:self-auto"
         >
           <GraduationCap className="h-4 w-4" /> Onboard Tutor
         </button>
@@ -174,7 +174,7 @@ export default function InstituteTutor() {
         <CardGridSkeleton cards={8} />
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             <KpiCard label="Total Tutors" value={tutors.length} icon={UserCheck} accent="indigo" />
             <KpiCard label="Students Covered" value={totalStudentsCovered} icon={Users} accent="blue" />
             <KpiCard label="Unassigned" value={unassignedCount}
@@ -182,13 +182,13 @@ export default function InstituteTutor() {
               icon={Layers} accent={unassignedCount > 0 ? "amber" : "emerald"} />
           </div>
 
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <div className="relative w-full sm:max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-text-mute" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, email or specialization…"
-              className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-white/[0.04] border border-slate-200/70 dark:border-white/[0.06] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 transition-all text-sm font-medium text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
+              className="w-full pl-10 pr-4 py-2.5 min-h-[40px] bg-white border border-brand-line rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 transition-all text-sm font-medium text-brand-text placeholder:text-brand-text-mute"
             />
           </div>
 
@@ -199,14 +199,14 @@ export default function InstituteTutor() {
                 hint={search ? "Try a different name or specialization." : "Onboard your first tutor to get started."}
                 action={!search ? (
                   <button onClick={() => navigate("/institute-admin/tutorOnboarding")}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-brand-teal-600 dark:text-brand-teal-400 hover:underline">
+                    className="inline-flex items-center gap-1 text-xs font-bold text-brand-teal-600 hover:underline">
                     Go to Tutor Onboarding <ChevronRight className="h-3.5 w-3.5" />
                   </button>
                 ) : undefined}
               />
             </SectionCard>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4">
               {filtered.map((t) => (
                 <TutorCard key={t.userId} tutor={t} onRemove={() => setRemoveTarget(t)} />
               ))}
@@ -216,7 +216,7 @@ export default function InstituteTutor() {
       )}
 
       <AlertDialog open={!!removeTarget} onOpenChange={(o) => !o && setRemoveTarget(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="w-[calc(100%-2rem)] max-w-md rounded-2xl border-brand-line">
           <AlertDialogHeader>
             <AlertDialogTitle>Remove {removeTarget?.name ?? removeTarget?.email}?</AlertDialogTitle>
             <AlertDialogDescription>

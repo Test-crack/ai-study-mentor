@@ -23,9 +23,9 @@ const getRoleConfig = (role: string) => {
     case 'SUPERADMIN':      return { icon: ShieldCheck, color: 'text-brand-blue-600', label: 'Super Admin' };
     case 'INSTITUTE_OWNER': return { icon: Shield,      color: 'text-brand-blue-600', label: 'Owner' };
     case 'INSTITUTE_ADMIN': return { icon: UserCog,     color: 'text-amber-600',  label: 'Institute Admin' };
-    case 'INSTRUCTOR':      return { icon: BookOpen,    color: 'text-blue-600',   label: 'Instructor' };
+    case 'INSTRUCTOR':      return { icon: BookOpen,    color: 'text-sky-600',   label: 'Instructor' };
     case 'STUDENT':         return { icon: GraduationCap, color: 'text-emerald-600', label: 'Student' };
-    default:                return { icon: UserCog,     color: 'text-slate-500',  label: role };
+    default:                return { icon: UserCog,     color: 'text-brand-text-mute',  label: role };
   }
 };
 
@@ -93,36 +93,36 @@ export default function AllUsers() {
   const totalPages = Math.ceil(total / LIMIT);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0A10] font-sans text-slate-900 dark:text-slate-200 transition-colors duration-300">
-      
-      {/* Sidebar */}
-      <div className="hidden lg:block">
-        <SuperAdminSidebar
-          activeTab="users"
-          isCollapsed={isSidebarCollapsed}
-          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        />
-      </div>
+    <div className="relative min-h-screen font-plex antialiased overflow-x-hidden bg-brand-bg text-brand-text">
 
-      <div className={`transition-all duration-300 flex flex-col min-h-screen ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
-        
+      {/* Sidebar */}
+      <SuperAdminSidebar
+        activeTab="users"
+        isCollapsed={isSidebarCollapsed}
+        toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      />
+
+      <div className={`relative z-10 transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-24' : 'lg:pl-72'}`}>
+
         {/* Topbar */}
         <SuperAdminTopbar />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="max-w-[1400px] mx-auto space-y-6">
-            
+        <main className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 max-w-[90rem] mx-auto pb-16">
+
             {/* Header */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">All Users</h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-jetbrains text-[10px] font-bold tracking-[0.2em] uppercase text-brand-text-mute mb-1">
+                  Platform Roster
+                </p>
+                <h1 className="font-manrope text-2xl sm:text-3xl font-black tracking-tight text-brand-text">All Users</h1>
+                <p className="text-sm text-brand-text-mute mt-0.5">
                   {loading ? '...' : `${total.toLocaleString()} users total`}
                 </p>
               </div>
               <button
                 onClick={loadUsers}
-                className="flex items-center gap-2 text-sm text-slate-500 hover:text-brand-teal-600 dark:hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5"
+                className="flex items-center justify-center gap-2 text-sm font-medium text-brand-text-mute hover:text-brand-teal-600 transition-colors px-3 py-2.5 rounded-lg border border-brand-line bg-white hover:bg-brand-bg-alt w-full sm:w-auto shrink-0"
               >
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                 Refresh
@@ -130,60 +130,60 @@ export default function AllUsers() {
             </div>
 
             {/* Role Tabs */}
-            <div className="flex flex-wrap items-center gap-2 sm:gap-6 border-b border-slate-200 dark:border-[#26252D] pb-2">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:gap-x-6 border-b border-brand-line pb-2 -mb-2 overflow-x-auto">
               {TABS.map((tab) => (
                 <button
                   key={tab.value}
                   onClick={() => setActiveTab(tab.value)}
-                  className={`pb-3 px-1 text-sm font-medium transition-all relative ${
+                  className={`pb-3 px-1 text-sm font-semibold transition-all relative whitespace-nowrap ${
                     activeTab === tab.value
-                      ? 'text-brand-teal-600 dark:text-white'
-                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                      ? 'text-brand-teal-600'
+                      : 'text-brand-text-mute hover:text-brand-text'
                   }`}
                 >
                   {tab.label}
                   {activeTab === tab.value && (
-                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-brand-teal-600 dark:bg-white rounded-t-full" />
+                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-brand-teal-600 rounded-t-full" />
                   )}
                 </button>
               ))}
             </div>
 
             {/* Table Card */}
-            <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl shadow-sm overflow-hidden">
-              
+            <div className="bg-white border border-brand-line rounded-2xl shadow-sm overflow-hidden">
+
               {/* Search */}
-              <div className="p-4 border-b border-slate-100 dark:border-[#26252D]">
-                <div className="relative w-full max-w-sm">
+              <div className="p-4 border-b border-brand-line">
+                <div className="relative w-full max-w-full sm:max-w-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search className="h-4 w-4 text-slate-400" />
+                    <Search className="h-4 w-4 text-brand-text-mute" />
                   </div>
                   <input
                     type="text"
                     placeholder="Search name or email..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A0A0B] border border-slate-200 dark:border-[#26252D] rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:focus:border-[#256B8B] transition-all text-slate-900 dark:text-white placeholder-slate-400"
+                    className="w-full pl-10 pr-4 py-2.5 bg-brand-bg-alt border border-brand-line rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 transition-all text-brand-text placeholder-brand-text-mute"
                   />
                 </div>
               </div>
 
               {/* Table */}
               <div className="w-full overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[700px]">
+                <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="text-slate-500 dark:text-gray-400 text-sm border-b border-slate-100 dark:border-gray-800/50">
-                      <th className="py-4 pl-6 font-medium">User</th>
-                      <th className="py-4 font-medium">Role</th>
+                    <tr className="bg-brand-bg-alt/80 border-b border-brand-line">
+                      <th className="font-jetbrains py-3 pl-4 sm:pl-6 text-[10px] font-black text-brand-text-mute uppercase tracking-[0.12em]">User</th>
+                      <th className="font-jetbrains py-3 text-[10px] font-black text-brand-text-mute uppercase tracking-[0.12em]">Role</th>
                       {activeTab !== 'SUPERADMIN' && (
-                        <th className="py-4 font-medium">Institute</th>
+                        <th className="font-jetbrains hidden md:table-cell py-3 text-[10px] font-black text-brand-text-mute uppercase tracking-[0.12em]">Institute</th>
                       )}
-                      <th className="py-4 font-medium">Joined</th>
-                      <th className="py-4 pr-6 text-right font-medium"></th>
+                      <th className="font-jetbrains hidden sm:table-cell py-3 text-[10px] font-black text-brand-text-mute uppercase tracking-[0.12em]">Joined</th>
+                      <th className="py-3 pr-4 sm:pr-6 text-right"></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-gray-800/50">
-                    
+                  <tbody className="divide-y divide-brand-line">
+
                     {loading && (
                       <tr>
                         <td colSpan={4} className="py-16 text-center">
@@ -194,7 +194,7 @@ export default function AllUsers() {
 
                     {!loading && users.length === 0 && (
                       <tr>
-                        <td colSpan={4} className="py-12 text-center text-slate-500 dark:text-gray-500 text-sm">
+                        <td colSpan={4} className="py-12 px-4 text-center text-brand-text-mute text-sm">
                           No users found{debouncedSearch ? ` for "${debouncedSearch}"` : ''}.
                         </td>
                       </tr>
@@ -204,58 +204,58 @@ export default function AllUsers() {
                       const cfg = getRoleConfig(user.role);
                       const RoleIcon = cfg.icon;
                       return (
-                        <tr key={user.id} className="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors group">
-                          
+                        <tr key={user.id} className="hover:bg-brand-teal-50/50 transition-colors group">
+
                           {/* User */}
-                          <td className="py-3 pl-6">
+                          <td className="py-3 pl-4 sm:pl-6">
                             <div className="flex items-center gap-3">
                               {user.profileImage ? (
-                                <img src={user.profileImage} alt="" className="w-9 h-9 rounded object-cover" />
+                                <img src={user.profileImage} alt="" className="w-9 h-9 rounded-lg object-cover shrink-0" />
                               ) : (
-                                <div className="w-9 h-9 rounded bg-brand-teal-50 dark:bg-[#142B3A] text-brand-teal-700 dark:text-[#4E8CA6] flex items-center justify-center text-xs font-bold shrink-0">
+                                <div className="w-9 h-9 rounded-lg bg-brand-teal-50 text-brand-teal-700 flex items-center justify-center text-xs font-black shrink-0">
                                   {getInitials(user.name, user.email)}
                                 </div>
                               )}
-                              <div>
-                                <div className="font-semibold text-sm text-slate-900 dark:text-gray-200">
+                              <div className="min-w-0">
+                                <div className="font-semibold text-sm text-brand-text truncate">
                                   {user.name ?? '—'}
                                 </div>
-                                <div className="text-[11px] text-slate-500 dark:text-gray-500">{user.email}</div>
+                                <div className="text-[11px] text-brand-text-mute truncate">{user.email}</div>
                               </div>
                             </div>
                           </td>
 
                           {/* Role */}
-                          <td className="py-3">
-                            <div className={`flex items-center gap-2 text-sm font-medium ${cfg.color}`}>
-                              <RoleIcon className="w-4 h-4" />
+                          <td className="py-3 pr-3">
+                            <div className={`flex items-center gap-2 text-sm font-semibold whitespace-nowrap ${cfg.color}`}>
+                              <RoleIcon className="w-4 h-4 shrink-0" />
                               {cfg.label}
                             </div>
                           </td>
 
                           {/* Institute */}
                           {activeTab !== 'SUPERADMIN' && (
-                            <td className="py-3">
+                            <td className="hidden md:table-cell py-3 pr-3">
                               {user.instituteName ? (
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-brand-teal-50 dark:bg-brand-teal-900/20 text-brand-teal-700 dark:text-brand-teal-300 border border-brand-teal-100 dark:border-brand-teal-800/40 max-w-[180px] truncate">
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-brand-teal-50 text-brand-teal-700 border border-brand-teal-100 max-w-[180px] truncate">
                                   {user.instituteName}
                                 </span>
                               ) : (
-                                <span className="text-slate-400 dark:text-slate-600 text-sm">—</span>
+                                <span className="text-brand-text-mute text-sm">—</span>
                               )}
                             </td>
                           )}
 
                           {/* Joined */}
-                          <td className="py-3">
-                            <span className="text-sm text-slate-600 dark:text-slate-400">
+                          <td className="hidden sm:table-cell py-3 pr-3">
+                            <span className="text-sm text-brand-text-mute whitespace-nowrap">
                               {formatDate(user.createdAt)}
                             </span>
                           </td>
 
                           {/* Actions */}
-                          <td className="py-3 pr-6 text-right">
-                            <button className="p-1.5 text-slate-400 hover:text-slate-700 dark:text-gray-500 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
+                          <td className="py-3 pr-4 sm:pr-6 text-right">
+                            <button className="h-10 w-10 inline-flex items-center justify-center text-brand-text-mute hover:text-brand-text rounded-lg hover:bg-brand-bg-alt transition-colors">
                               <MoreVertical className="w-4 h-4" />
                             </button>
                           </td>
@@ -268,22 +268,22 @@ export default function AllUsers() {
 
               {/* Pagination */}
               {!loading && totalPages > 1 && (
-                <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 dark:border-[#26252D]">
-                  <span className="text-sm text-slate-500 dark:text-slate-400">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 sm:px-6 py-4 border-t border-brand-line">
+                  <span className="font-jetbrains text-[11px] font-bold uppercase tracking-[0.12em] text-brand-text-mute">
                     Page {currentPage} of {totalPages}
                   </span>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 w-full sm:w-auto">
                     <button
                       disabled={currentPage === 1}
                       onClick={() => setCurrentPage(p => p - 1)}
-                      className="px-3 py-1.5 text-sm rounded-lg border border-slate-200 dark:border-[#26252D] disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+                      className="flex-1 sm:flex-none px-4 py-2.5 text-sm font-medium text-brand-text rounded-lg border border-brand-line disabled:opacity-40 hover:bg-brand-bg-alt transition-colors"
                     >
                       Previous
                     </button>
                     <button
                       disabled={currentPage === totalPages}
                       onClick={() => setCurrentPage(p => p + 1)}
-                      className="px-3 py-1.5 text-sm rounded-lg border border-slate-200 dark:border-[#26252D] disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+                      className="flex-1 sm:flex-none px-4 py-2.5 text-sm font-medium text-brand-text rounded-lg border border-brand-line disabled:opacity-40 hover:bg-brand-bg-alt transition-colors"
                     >
                       Next
                     </button>
@@ -291,7 +291,6 @@ export default function AllUsers() {
                 </div>
               )}
             </div>
-          </div>
         </main>
       </div>
     </div>

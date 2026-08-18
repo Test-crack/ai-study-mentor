@@ -16,21 +16,21 @@ import { fetchSummary, type InstituteSummary } from '../services/instituteOwnerS
 
 // Map API status to colours
 const STATUS = {
-  ACTIVE: { text: "text-emerald-600 dark:text-emerald-400", badge: "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 ring-emerald-600/20 dark:ring-emerald-400/25" },
-  INACTIVE: { text: "text-slate-500 dark:text-gray-400", badge: "bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 ring-slate-400/20 dark:ring-white/10" },
-  COMPLETED: { text: "text-blue-600 dark:text-blue-400", badge: "bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 ring-blue-600/20 dark:ring-blue-400/25" },
+  ACTIVE: { text: "text-emerald-600", badge: "bg-emerald-50 text-emerald-700 ring-emerald-600/20" },
+  INACTIVE: { text: "text-brand-text-mute", badge: "bg-brand-bg-alt text-brand-text-mute ring-brand-line" },
+  COMPLETED: { text: "text-sky-600", badge: "bg-sky-50 text-sky-700 ring-sky-600/20" },
 };
 
 // ─── Skeletons ────────────────────────────────────────────────────────────────
 
 function StatsSkeleton() {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
       {[1, 2, 3, 4].map(i => (
-        <div key={i} className="bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] rounded-2xl p-5 shadow-sm animate-pulse">
-          <div className="h-3 w-24 bg-slate-200 dark:bg-[#27272a] rounded mb-4"></div>
-          <div className="h-8 w-16 bg-slate-200 dark:bg-[#27272a] rounded mb-3"></div>
-          <div className="h-3 w-32 bg-slate-200 dark:bg-[#27272a] rounded"></div>
+        <div key={i} className="bg-white border border-brand-line rounded-2xl p-4 sm:p-5 shadow-sm animate-pulse">
+          <div className="h-3 w-24 bg-brand-bg-alt rounded mb-4"></div>
+          <div className="h-8 w-16 bg-brand-bg-alt rounded mb-3"></div>
+          <div className="h-3 w-32 bg-brand-bg-alt rounded"></div>
         </div>
       ))}
     </div>
@@ -39,38 +39,38 @@ function StatsSkeleton() {
 
 function BatchRowSkeleton() {
   return (
-    <div className="bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 animate-pulse">
+    <div className="bg-white border border-brand-line rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 animate-pulse">
       {/* Left Column */}
       <div className="md:w-1/4 space-y-3">
         <div className="flex items-center gap-2">
-          <div className="h-6 w-3/4 bg-slate-200 dark:bg-[#27272a] rounded"></div>
-          <div className="h-4 w-16 bg-slate-200 dark:bg-[#27272a] rounded-full"></div>
+          <div className="h-6 w-3/4 bg-brand-bg-alt rounded"></div>
+          <div className="h-4 w-16 bg-brand-bg-alt rounded-full"></div>
         </div>
-        <div className="h-4 w-1/2 bg-slate-200 dark:bg-[#27272a] rounded"></div>
-        <div className="h-3 w-full bg-slate-200 dark:bg-[#27272a] rounded"></div>
+        <div className="h-4 w-1/2 bg-brand-bg-alt rounded"></div>
+        <div className="h-3 w-full bg-brand-bg-alt rounded"></div>
       </div>
 
       {/* Middle Columns */}
       <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-4">
         {[1, 2, 3].map((i) => (
           <div key={i} className="space-y-2">
-            <div className="h-3 w-16 bg-slate-200 dark:bg-[#27272a] rounded md:mx-0"></div>
-            <div className="h-6 w-12 bg-slate-200 dark:bg-[#27272a] rounded md:mx-0"></div>
+            <div className="h-3 w-16 bg-brand-bg-alt rounded md:mx-0"></div>
+            <div className="h-6 w-12 bg-brand-bg-alt rounded md:mx-0"></div>
           </div>
         ))}
       </div>
 
       {/* Right Column */}
-      <div className="md:w-48 pt-4 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-white/[0.06] flex items-center gap-4">
+      <div className="w-full md:w-48 pt-4 md:pt-0 border-t md:border-t-0 border-brand-line flex items-center gap-4">
         <div className="flex-1 space-y-3">
           <div className="flex justify-between">
-            <div className="h-4 w-16 bg-slate-200 dark:bg-[#27272a] rounded"></div>
-            <div className="h-4 w-12 bg-slate-200 dark:bg-[#27272a] rounded"></div>
+            <div className="h-4 w-16 bg-brand-bg-alt rounded"></div>
+            <div className="h-4 w-12 bg-brand-bg-alt rounded"></div>
           </div>
-          <div className="w-full h-1.5 bg-slate-200 dark:bg-[#27272a] rounded-full"></div>
-          <div className="h-3 w-16 bg-slate-200 dark:bg-[#27272a] rounded ml-auto"></div>
+          <div className="w-full h-1.5 bg-brand-bg-alt rounded-full"></div>
+          <div className="h-3 w-16 bg-brand-bg-alt rounded ml-auto"></div>
         </div>
-        <div className="w-8 h-8 bg-slate-200 dark:bg-[#27272a] rounded-full shrink-0"></div>
+        <div className="w-8 h-8 bg-brand-bg-alt rounded-full shrink-0"></div>
       </div>
     </div>
   );
@@ -110,57 +110,48 @@ export default function BatchInsight() {
     : 0;
 
   const topMetrics = [
-    { title: 'Total Batches',   value: String(batches.length),                                    subtext: 'Across institute',                          icon: BookOpen,      accent: 'bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' },
-    { title: 'Total Students',  value: String(summary?.total_students ?? '—'),                    subtext: `${summary?.active_today ?? 0} active today`, icon: Users,         accent: 'bg-brand-teal-100 dark:bg-brand-teal-500/10 text-brand-teal-600 dark:text-brand-teal-400' },
-    { title: 'Avg Band Score',  value: summary?.avg_band != null ? summary.avg_band.toFixed(1) : '—', subtext: 'Across all students',                   icon: BarChart2,     accent: 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
-    { title: 'At Risk',         value: String(summary?.at_risk_count ?? '—'),                     subtext: `IA completion: ${iaCompRate}% (7d)`,        icon: AlertTriangle, accent: 'bg-rose-100 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400' },
+    { title: 'Total Batches',   value: String(batches.length),                                    subtext: 'Across institute',                          icon: BookOpen,      accent: 'bg-brand-blue-50 text-brand-blue-600' },
+    { title: 'Total Students',  value: String(summary?.total_students ?? '—'),                    subtext: `${summary?.active_today ?? 0} active today`, icon: Users,         accent: 'bg-brand-teal-50 text-brand-teal-600' },
+    { title: 'Avg Band Score',  value: summary?.avg_band != null ? summary.avg_band.toFixed(1) : '—', subtext: 'Across all students',                   icon: BarChart2,     accent: 'bg-emerald-50 text-emerald-600' },
+    { title: 'At Risk',         value: String(summary?.at_risk_count ?? '—'),                     subtext: `IA completion: ${iaCompRate}% (7d)`,        icon: AlertTriangle, accent: 'bg-rose-50 text-rose-600' },
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0a0a0a] font-sans text-slate-900 dark:text-white transition-colors duration-300">
-      
+    <div className="relative min-h-screen font-plex antialiased overflow-x-hidden bg-brand-bg text-brand-text">
+
       {/* Sidebar */}
-      <div className="hidden lg:block">
-        <InstituteOwnerSidebar
-          activeTab="batches"
-          isCollapsed={isSidebarCollapsed} 
-          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
-        />
-      </div>
+      <InstituteOwnerSidebar
+        activeTab="batches"
+        isCollapsed={isSidebarCollapsed}
+        toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      />
 
       {/* Main Layout Wrapper */}
-      <div className={`transition-all duration-300 flex flex-col min-h-screen ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
-        
+      <div className={`relative z-10 transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-24' : 'lg:pl-72'}`}>
+
         {/* Topbar */}
         <InstituteOwnerTopbar />
 
         {/* Main Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="max-w-[1400px] mx-auto">
+        <main className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 max-w-[90rem] mx-auto pb-16">
 
             {/* ── Hero Banner ─────────────────────────────────────────────── */}
-            <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-brand-teal-100/80 dark:border-white/[0.06] bg-gradient-to-r from-[#eff4ff] via-[#f4f1ff] to-[#f3f0ff] dark:from-[#111827] dark:via-[#161a38] dark:to-[#1e1b4b] px-5 sm:px-8 pt-6 sm:pt-8 pb-20 sm:pb-24 shadow-sm">
-              <div aria-hidden className="pointer-events-none select-none absolute inset-0">
-                <div className="absolute -top-20 -right-12 w-64 h-64 rounded-full bg-brand-teal-300/25 dark:bg-brand-teal-500/15 blur-3xl" />
-                <div className="absolute -bottom-28 left-1/3 w-72 h-72 rounded-full bg-brand-blue-300/20 dark:bg-brand-blue-500/10 blur-3xl" />
-                <div className="absolute top-8 -left-10 w-44 h-44 rounded-full bg-sky-300/20 dark:bg-sky-500/10 blur-3xl" />
-              </div>
-
+            <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-brand-line-16 bg-brand-ink-deep text-white px-5 sm:px-8 pt-6 sm:pt-8 pb-6 sm:pb-8 shadow-sm">
               <div className="relative">
-                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-brand-teal-600 dark:text-brand-teal-300 bg-white/60 dark:bg-white/[0.06] border border-white/70 dark:border-white/[0.08] backdrop-blur px-2.5 py-1 rounded-full">
-                   Owner Portal
+                <span className="inline-flex items-center gap-1.5 font-jetbrains text-[10px] font-bold uppercase tracking-[0.2em] text-brand-teal-300 bg-brand-teal-500/10 border border-brand-teal-500/25 px-2.5 py-1 rounded-full">
+                  <Sparkles className="w-3 h-3" /> Owner Portal
                 </span>
-                <h1 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                  Batch <span className="text-brand-teal-600 dark:text-brand-teal-400">Insights</span>
+                <h1 className="mt-3 font-manrope text-2xl sm:text-3xl font-black tracking-tight text-white">
+                  Batch <span className="text-brand-mint">Insights</span>
                 </h1>
-                <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
+                <p className="mt-1.5 text-sm text-brand-on-ink">
                   Overview of all your institute batches. Click a batch to view detailed analytics.
                 </p>
               </div>
             </section>
 
-            {/* ── Content (overlaps hero) ─────────────────────────────────── */}
-            <div className="relative z-10 -mt-12 sm:-mt-14 space-y-6">
+            {/* ── Content ─────────────────────────────────────────────────── */}
+            <div className="relative z-10 space-y-6">
               {loading ? (
                 <>
                   <StatsSkeleton />
@@ -173,25 +164,25 @@ export default function BatchInsight() {
               ) : (
                 <>
                   {/* Top Metric Cards */}
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     {topMetrics.map((metric, idx) => (
-                      <div key={idx} className="group rounded-2xl bg-white/85 dark:bg-[#131318]/90 backdrop-blur-xl border border-white/20 dark:border-white/[0.08] ring-1 ring-slate-900/[0.05] dark:ring-0 p-4 sm:p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+                      <div key={idx} className="group rounded-2xl bg-white border border-brand-line p-4 sm:p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
                         <div className="flex items-start justify-between gap-2 mb-3 sm:mb-4">
-                          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 pt-1">{metric.title}</p>
-                          <div className={`w-9 h-9 shrink-0 rounded-xl flex items-center justify-center shadow-inner ${metric.accent}`}>
+                          <p className="font-jetbrains text-[10px] font-bold uppercase tracking-wider text-brand-text-mute pt-1">{metric.title}</p>
+                          <div className={`w-9 h-9 shrink-0 rounded-xl flex items-center justify-center ${metric.accent}`}>
                             <metric.icon className="w-4 h-4" />
                           </div>
                         </div>
-                        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight tabular-nums text-slate-900 dark:text-white">{metric.value}</h2>
-                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1.5 truncate">{metric.subtext}</p>
+                        <h2 className="text-2xl sm:text-3xl font-black tracking-tight tabular-nums text-brand-text">{metric.value}</h2>
+                        <p className="text-xs text-brand-text-mute mt-1.5 truncate">{metric.subtext}</p>
                       </div>
                     ))}
                   </div>
 
                   {/* Batch List */}
                   {batches.length === 0 ? (
-                    <div className="text-center py-16 rounded-2xl bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] shadow-sm text-slate-500 dark:text-slate-400">
-                      <p className="text-lg font-semibold text-slate-700 dark:text-slate-200">No batches found.</p>
+                    <div className="text-center py-16 rounded-2xl bg-white border border-brand-line shadow-sm text-brand-text-mute">
+                      <p className="text-lg font-semibold text-brand-text">No batches found.</p>
                       <p className="text-sm mt-1">Create batches from the Admin portal to see them here.</p>
                     </div>
                   ) : (
@@ -211,19 +202,19 @@ export default function BatchInsight() {
                           <div
                             key={batch.id}
                             onClick={() => navigate(`/institute-owner/batches/${toSlug(batch.name)}/analytics`, { state: { batchId: batch.id } })}
-                            className="bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-brand-teal-300/70 dark:hover:border-brand-teal-500/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group"
+                            className="bg-white border border-brand-line rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-brand-teal-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group"
                           >
                             {/* Left Column: Info */}
-                            <div className="md:w-1/4">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h3 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white group-hover:text-brand-teal-600 dark:group-hover:text-brand-teal-400 transition-colors">
+                            <div className="md:w-1/4 min-w-0">
+                              <div className="flex flex-wrap items-center gap-2 mb-1">
+                                <h3 className="text-lg sm:text-xl font-black tracking-tight text-brand-text group-hover:text-brand-teal-600 transition-colors">
                                   {batch.name}
                                 </h3>
                                 <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ring-1 ring-inset ${statusStyle.badge}`}>
                                   {batch.status}
                                 </span>
                               </div>
-                              <p className="text-sm text-slate-500 dark:text-slate-400">
+                              <p className="text-sm text-brand-text-mute">
                                 {instructorNames}
                               </p>
                             </div>
@@ -231,49 +222,49 @@ export default function BatchInsight() {
                             {/* Middle Columns: Metrics Grid */}
                             <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center md:text-left">
                               <div>
-                                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">Students</p>
-                                <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-white">{enrolled}</p>
+                                <p className="font-jetbrains text-[10px] font-bold uppercase tracking-wider text-brand-text-mute mb-1">Students</p>
+                                <p className="text-2xl font-black tabular-nums text-brand-text">{enrolled}</p>
                               </div>
                               <div>
-                                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">Avg Band</p>
-                                <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-white">
+                                <p className="font-jetbrains text-[10px] font-bold uppercase tracking-wider text-brand-text-mute mb-1">Avg Band</p>
+                                <p className="text-2xl font-black tabular-nums text-brand-text">
                                   {avgBand !== null ? avgBand.toFixed(1) : '—'}
                                 </p>
                               </div>
                               <div>
-                                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">Active Today</p>
-                                <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-white">{batch.active_today ?? '—'}</p>
+                                <p className="font-jetbrains text-[10px] font-bold uppercase tracking-wider text-brand-text-mute mb-1">Active Today</p>
+                                <p className="text-2xl font-black tabular-nums text-brand-text">{batch.active_today ?? '—'}</p>
                               </div>
                               <div>
-                                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">At Risk</p>
-                                <p className={`text-2xl font-bold tabular-nums ${atRisk > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white'}`}>{atRisk}</p>
+                                <p className="font-jetbrains text-[10px] font-bold uppercase tracking-wider text-brand-text-mute mb-1">At Risk</p>
+                                <p className={`text-2xl font-black tabular-nums ${atRisk > 0 ? 'text-rose-600' : 'text-brand-text'}`}>{atRisk}</p>
                               </div>
                             </div>
 
                             {/* Right Column: Capacity + Arrow */}
-                            <div className="md:w-44 pt-4 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-white/[0.06] flex items-center gap-4">
+                            <div className="w-full md:w-44 pt-4 md:pt-0 border-t md:border-t-0 border-brand-line flex items-center gap-4">
                               {capacityPercentage !== null ? (
                                 <div className="flex-1">
                                   <div className="flex justify-between text-sm mb-2">
-                                    <span className="text-slate-500 dark:text-slate-400">Capacity</span>
-                                    <span className="font-semibold tabular-nums text-slate-900 dark:text-white">{enrolled}/{capacity}</span>
+                                    <span className="text-brand-text-mute">Capacity</span>
+                                    <span className="font-semibold tabular-nums text-brand-text">{enrolled}/{capacity}</span>
                                   </div>
-                                  <div className="w-full bg-slate-100 dark:bg-white/[0.06] rounded-full h-1.5 mb-2 overflow-hidden">
+                                  <div className="w-full bg-brand-bg-alt rounded-full h-1.5 mb-2 overflow-hidden">
                                     <div
                                       className="bg-gradient-to-r from-brand-teal-500 to-brand-blue-500 h-1.5 rounded-full transition-all"
                                       style={{ width: `${Math.min(100, capacityPercentage)}%` }}
                                     />
                                   </div>
-                                  <p className="text-right text-[10px] tabular-nums text-slate-400 dark:text-slate-500">{capacityPercentage}% filled</p>
+                                  <p className="text-right text-[10px] tabular-nums text-brand-text-mute">{capacityPercentage}% filled</p>
                                 </div>
                               ) : (
                                 <div className="flex-1">
-                                  <p className="text-sm text-slate-500 dark:text-slate-400">Unlimited capacity</p>
-                                  <p className="text-xs text-slate-400 dark:text-slate-500">{enrolled} enrolled</p>
+                                  <p className="text-sm text-brand-text-mute">Unlimited capacity</p>
+                                  <p className="text-xs text-brand-text-mute">{enrolled} enrolled</p>
                                 </div>
                               )}
-                              <div className="h-8 w-8 rounded-full bg-slate-50 dark:bg-white/[0.04] group-hover:bg-brand-teal-50 dark:group-hover:bg-brand-teal-500/15 flex items-center justify-center shrink-0 transition-colors">
-                                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-brand-teal-500 group-hover:translate-x-0.5 transition-all" />
+                              <div className="h-10 w-10 rounded-full bg-brand-bg-alt group-hover:bg-brand-teal-50 flex items-center justify-center shrink-0 transition-colors">
+                                <ChevronRight className="w-4 h-4 text-brand-text-mute group-hover:text-brand-teal-600 group-hover:translate-x-0.5 transition-all" />
                               </div>
                             </div>
                           </div>
@@ -285,7 +276,6 @@ export default function BatchInsight() {
               )}
             </div>
 
-          </div>
         </main>
       </div>
     </div>

@@ -56,12 +56,8 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
         "fixed left-4 top-4 bottom-4 z-40 hidden lg:flex flex-col justify-between py-6",
         "transition-all duration-300",
         isCollapsed ? "w-20 px-3" : "w-64 px-4",
-        // Light surface
-        "bg-white border border-slate-200/70 rounded-2xl",
-        "shadow-[0_4px_24px_-4px_rgba(15,23,42,0.08)]",
-        // Dark surface
-        "dark:bg-[#0D0D14] dark:border-white/[0.05]",
-        "dark:shadow-[0_4px_32px_rgba(0,0,0,0.5)]",
+        // Surface — brand ink rail, matches StudentSidebar
+        "bg-brand-ink rounded-2xl border border-brand-line-12 shadow-xl overflow-x-hidden",
         className
       )}
     >
@@ -70,10 +66,10 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
         <img src={testcrackLogo} alt="TestCrack" className="h-9 w-9 object-contain shrink-0" />
         {!isCollapsed && (
           <div className="animate-in fade-in duration-200">
-            <span className="text-base font-black tracking-tight text-slate-900 dark:text-white">
+            <span className="font-manrope text-base font-black tracking-tight text-brand-bg">
               TestCrack
             </span>
-            <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-slate-400 dark:text-slate-500 leading-none mt-0.5">
+            <p className="font-jetbrains text-[10px] font-semibold tracking-[0.12em] uppercase text-brand-on-ink-mute leading-none mt-0.5">
               Instructor
             </p>
           </div>
@@ -90,40 +86,21 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
               onClick={() => handleNavigation(item)}
               title={isCollapsed ? item.label : undefined}
               className={cn(
-                "w-full flex items-center gap-3 rounded-xl transition-all duration-200 group relative",
+                "w-full flex items-center gap-3 rounded-xl transition-colors duration-150 group relative",
                 isCollapsed ? "justify-center p-3" : "px-3 py-2.5",
                 isActive
-                  ? [
-                      // Light active
-                      "bg-brand-teal-600 text-white",
-                      "shadow-[0_4px_14px_-2px_rgba(99,102,241,0.5)]",
-                      // Dark active
-                      "dark:bg-brand-teal-500/15 dark:text-brand-teal-300",
-                      "dark:shadow-[0_0_20px_rgba(99,102,241,0.15)]",
-                      "dark:border dark:border-brand-teal-500/20",
-                    ].join(" ")
-                  : [
-                      // Light inactive
-                      "text-slate-600 hover:bg-slate-50 hover:text-brand-teal-600",
-                      // Dark inactive
-                      "dark:text-slate-400 dark:hover:bg-white/[0.04] dark:hover:text-slate-100",
-                    ].join(" ")
+                  ? "bg-brand-mint/15 text-brand-mint"
+                  : "bg-transparent text-brand-on-ink-mute hover:bg-white/5"
               )}
             >
               <item.icon className={cn(
-                "h-4.5 w-4.5 shrink-0 transition-transform duration-200 group-hover:scale-105",
-                isActive
-                  ? "text-white dark:text-brand-teal-300"
-                  : "text-slate-400 group-hover:text-brand-teal-500 dark:group-hover:text-slate-200"
+                "h-4.5 w-4.5 shrink-0",
+                isActive ? "text-brand-mint" : "text-brand-on-ink-mute"
               )} />
               {!isCollapsed && (
                 <span className="font-medium text-sm leading-none animate-in fade-in duration-200">
                   {item.label}
                 </span>
-              )}
-              {/* Active pill indicator in dark mode */}
-              {isActive && !isCollapsed && (
-                <span className="hidden dark:block absolute right-3 h-1.5 w-1.5 rounded-full bg-brand-teal-400" />
               )}
             </button>
           );
@@ -136,8 +113,7 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
         className={cn(
           "absolute -right-3 top-1/2 -translate-y-1/2 z-50",
           "h-6 w-6 grid place-items-center rounded-full",
-          "bg-brand-teal-600 text-white border-2",
-          "border-white dark:border-[#0D0D14]",
+          "bg-brand-teal-600 text-white border-2 border-brand-bg",
           "shadow-md hover:bg-brand-teal-700 transition-colors"
         )}
       >
@@ -145,22 +121,17 @@ export const InstructorSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
       </button>
 
       {/* ── Bottom actions ── */}
-      <div className={cn(
-        "pt-4 border-t space-y-1",
-        "border-slate-200/70 dark:border-white/[0.05]"
-      )}>
+      <div className="pt-4 border-t border-brand-line-12 space-y-1">
         <button
           onClick={handleLogout}
           title={isCollapsed ? "Logout" : undefined}
           className={cn(
-            "w-full flex items-center gap-3 rounded-xl transition-all duration-200 group",
+            "w-full flex items-center gap-3 rounded-xl transition-colors duration-150 group",
             isCollapsed ? "justify-center p-3" : "px-3 py-2.5",
-            "text-slate-500 dark:text-slate-500",
-            "hover:bg-rose-50 hover:text-rose-600",
-            "dark:hover:bg-rose-500/[0.08] dark:hover:text-rose-400"
+            "text-brand-on-ink-mute hover:bg-brand-warm-danger/10 hover:text-brand-warm-danger"
           )}
         >
-          <LogOut className="h-4.5 w-4.5 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+          <LogOut className="h-4.5 w-4.5 shrink-0" />
           {!isCollapsed && (
             <span className="font-medium text-sm animate-in fade-in duration-200">Logout</span>
           )}

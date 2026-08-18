@@ -18,6 +18,21 @@ import { cn } from '@/shared/utils';
 
 type ActiveTab = 'overview' | 'speaking' | 'reading' | 'writing';
 
+// ─── Chart palette — literal hex values of the brand tokens ───────────────────
+const CHART_PRIMARY   = '#12897C'; // brand-teal-500
+const CHART_SECONDARY = '#185A78'; // brand-blue-600
+const CHART_TERTIARY  = '#E8753D'; // brand-warm
+const CHART_BLUE_500  = '#256B8B'; // brand-blue-500
+const CHART_GRID      = '#D8E0E2'; // brand-line
+const CHART_AXIS      = '#5E6B73'; // brand-text-mute
+
+const CHART_TOOLTIP_STYLE = {
+  backgroundColor: '#fff',
+  border: `1px solid ${CHART_GRID}`,
+  borderRadius: '10px',
+  color: '#17232B',
+} as const;
+
 // ─── Reading analytics shape ──────────────────────────────────────────────────
 interface ReadingStudentRow {
   studentId: string;
@@ -49,16 +64,16 @@ interface BatchReadingAnalytics {
 }
 
 function getRankBadgeColor(rank: number) {
-  if (rank === 1) return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400';
-  if (rank === 2) return 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300';
-  if (rank === 3) return 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400';
-  return 'bg-slate-50 text-slate-500 dark:bg-slate-800 dark:text-slate-500';
+  if (rank === 1) return 'bg-amber-100 text-amber-700';
+  if (rank === 2) return 'bg-brand-bg-alt text-brand-text';
+  if (rank === 3) return 'bg-brand-warm-tint text-brand-warm-danger';
+  return 'bg-brand-bg-alt text-brand-text-mute';
 }
 
 function getScoreColor(score: number) {
-  if (score >= 80) return 'text-emerald-500';
-  if (score >= 60) return 'text-amber-500';
-  return 'text-rose-500';
+  if (score >= 80) return 'text-emerald-600';
+  if (score >= 60) return 'text-amber-600';
+  return 'text-rose-600';
 }
 
 // ─── Skeletons ────────────────────────────────────────────────────────────────
@@ -68,16 +83,16 @@ function AnalyticsSkeleton() {
     <div className="space-y-6 animate-pulse">
       {/* Header Skeleton */}
       <div className="space-y-2">
-        <div className="h-8 w-64 bg-slate-200 dark:bg-[#27272a] rounded"></div>
-        <div className="h-4 w-32 bg-slate-200 dark:bg-[#27272a] rounded"></div>
+        <div className="h-8 w-64 max-w-full bg-brand-bg-alt rounded"></div>
+        <div className="h-4 w-32 bg-brand-bg-alt rounded"></div>
       </div>
 
       {/* Top Metrics Row Skeleton */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[1, 2, 3].map(i => (
-          <div key={i} className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl p-5 shadow-sm space-y-3">
-            <div className="h-4 w-32 bg-slate-200 dark:bg-[#27272a] rounded"></div>
-            <div className="h-8 w-16 bg-slate-200 dark:bg-[#27272a] rounded"></div>
+          <div key={i} className="bg-white border border-brand-line rounded-2xl p-4 sm:p-5 shadow-sm space-y-3">
+            <div className="h-4 w-32 bg-brand-bg-alt rounded"></div>
+            <div className="h-8 w-16 bg-brand-bg-alt rounded"></div>
           </div>
         ))}
       </div>
@@ -85,45 +100,45 @@ function AnalyticsSkeleton() {
       {/* Charts Row Skeleton */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {[1, 2].map(i => (
-          <div key={i} className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl p-6 shadow-sm">
-            <div className="h-6 w-56 bg-slate-200 dark:bg-[#27272a] rounded mb-4"></div>
-            <div className="h-[300px] w-full bg-slate-100 dark:bg-[#1a1a1c] rounded"></div>
+          <div key={i} className="bg-white border border-brand-line rounded-2xl p-4 sm:p-6 shadow-sm">
+            <div className="h-6 w-56 max-w-full bg-brand-bg-alt rounded mb-4"></div>
+            <div className="h-64 sm:h-80 w-full bg-brand-bg-alt rounded"></div>
           </div>
         ))}
       </div>
 
       {/* Student Comparison Table Skeleton */}
-      <div className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl shadow-sm overflow-hidden mb-8">
-        <div className="p-5 border-b border-slate-200 dark:border-[#27272a]">
-          <div className="h-6 w-64 bg-slate-200 dark:bg-[#27272a] rounded"></div>
+      <div className="bg-white border border-brand-line rounded-2xl shadow-sm overflow-hidden mb-8">
+        <div className="p-5 border-b border-brand-line">
+          <div className="h-6 w-64 max-w-full bg-brand-bg-alt rounded"></div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 dark:bg-[#1a1a1c]">
+            <thead className="bg-brand-bg-alt">
               <tr>
                 {/* 7 columns to account for Writing Score & Actions */}
                 {[1, 2, 3, 4, 5, 6, 7].map(i => (
                   <th key={i} className="px-6 py-4">
-                    <div className="h-4 w-20 bg-slate-200 dark:bg-[#27272a] rounded"></div>
+                    <div className="h-4 w-20 bg-white rounded"></div>
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-[#27272a]">
+            <tbody className="divide-y divide-brand-line">
               {[1, 2, 3, 4].map(i => (
                 <tr key={i}>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-[#27272a]"></div>
-                      <div className="h-4 w-24 bg-slate-200 dark:bg-[#27272a] rounded"></div>
+                      <div className="w-8 h-8 rounded-full bg-brand-bg-alt"></div>
+                      <div className="h-4 w-24 bg-brand-bg-alt rounded"></div>
                     </div>
                   </td>
-                  <td className="px-6 py-4"><div className="h-4 w-12 bg-slate-200 dark:bg-[#27272a] rounded"></div></td>
-                  <td className="px-6 py-4"><div className="h-4 w-12 bg-slate-200 dark:bg-[#27272a] rounded"></div></td>
-                  <td className="px-6 py-4"><div className="h-4 w-12 bg-slate-200 dark:bg-[#27272a] rounded"></div></td>
-                  <td className="px-6 py-4"><div className="h-4 w-12 bg-slate-200 dark:bg-[#27272a] rounded"></div></td>
-                  <td className="px-6 py-4"><div className="h-6 w-16 bg-slate-200 dark:bg-[#27272a] rounded-full"></div></td>
-                  <td className="px-6 py-4"><div className="h-8 w-32 bg-slate-200 dark:bg-[#27272a] rounded-md"></div></td>
+                  <td className="px-6 py-4"><div className="h-4 w-12 bg-brand-bg-alt rounded"></div></td>
+                  <td className="px-6 py-4"><div className="h-4 w-12 bg-brand-bg-alt rounded"></div></td>
+                  <td className="px-6 py-4"><div className="h-4 w-12 bg-brand-bg-alt rounded"></div></td>
+                  <td className="px-6 py-4"><div className="h-4 w-12 bg-brand-bg-alt rounded"></div></td>
+                  <td className="px-6 py-4"><div className="h-6 w-16 bg-brand-bg-alt rounded-full"></div></td>
+                  <td className="px-6 py-4"><div className="h-8 w-32 bg-brand-bg-alt rounded-md"></div></td>
                 </tr>
               ))}
             </tbody>
@@ -198,31 +213,28 @@ export default function BatchAnalyticsView() {
 
 //   // ✅ Handle navigation to specific student's progress page
 //   const handleAnalyzeProgress = (student: any) => {
-//     navigate(`/institute-owner/students/:studentId/progress/${student.id}`, { 
-//         state: { student, batchId } 
+//     navigate(`/institute-owner/students/:studentId/progress/${student.id}`, {
+//         state: { student, batchId }
 //     });
 //   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0a0a0a] font-sans text-slate-900 dark:text-white transition-colors duration-300">
+    <div className="relative min-h-screen font-plex antialiased overflow-x-hidden bg-brand-bg text-brand-text">
       {/* Sidebar */}
-      <div className="hidden lg:block">
-        <InstituteOwnerSidebar
-          activeTab="insight"
-          isCollapsed={isSidebarCollapsed}
-          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        />
-      </div>
+      <InstituteOwnerSidebar
+        activeTab="insight"
+        isCollapsed={isSidebarCollapsed}
+        toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      />
 
-      <div className={`transition-all duration-300 flex flex-col min-h-screen ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
+      <div className={`relative z-10 transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-24' : 'lg:pl-72'}`}>
         <InstituteOwnerTopbar />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="max-w-[1400px] mx-auto space-y-6">
+        <main className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 max-w-[90rem] mx-auto pb-16">
 
             <button
               onClick={() => navigate(-1)}
-              className="flex items-center gap-2 text-sm text-slate-500 hover:text-brand-teal-600 transition-colors"
+              className="flex items-center gap-2 min-h-[40px] text-sm font-medium text-brand-text-mute hover:text-brand-teal-600 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" /> Back to Insights
             </button>
@@ -230,29 +242,29 @@ export default function BatchAnalyticsView() {
             {loading ? (
                 <AnalyticsSkeleton />
             ) : !data ? (
-              <div className="text-center py-20 text-slate-500">No analytics data found for this batch.</div>
+              <div className="text-center py-20 text-brand-text-mute">No analytics data found for this batch.</div>
             ) : (
               <>
                 {/* ── Page header ── */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <h1 className="text-2xl font-bold">{data.batchName} Analytics</h1>
-                    <p className="text-sm text-slate-500 mt-0.5 flex items-center gap-1">
+                  <div className="min-w-0">
+                    <h1 className="font-manrope text-2xl sm:text-3xl font-black tracking-tight text-brand-text">{data.batchName} Analytics</h1>
+                    <p className="text-sm text-brand-text-mute mt-0.5 flex items-center gap-1">
                       <Users className="w-3.5 h-3.5" /> {data.summary.totalStudents} Students Enrolled
                     </p>
                   </div>
 
                   {/* Tab pills */}
-                  <div className="flex bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl p-1 gap-1 shadow-sm overflow-x-auto">
+                  <div className="flex flex-wrap bg-white border border-brand-line rounded-2xl p-1 gap-1 shadow-sm">
                     {(['overview', 'speaking', 'reading', 'writing'] as ActiveTab[]).map(tab => (
                       <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
                         className={cn(
-                          "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 capitalize whitespace-nowrap",
+                          "flex items-center gap-2 min-h-[40px] px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 capitalize whitespace-nowrap",
                           activeTab === tab
                             ? "bg-brand-teal-600 text-white shadow-sm"
-                            : "text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5"
+                            : "text-brand-text-mute hover:text-brand-text hover:bg-brand-bg-alt"
                         )}
                       >
                         {tab === 'speaking' && <Mic className="w-3.5 h-3.5" />}
@@ -271,9 +283,9 @@ export default function BatchAnalyticsView() {
                 {activeTab === 'overview' && (
                   <div className="space-y-6 animate-in fade-in duration-300">
                     {/* Top Metrics */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                      <MetricCard label="Avg Speaking Score" value={data.summary.avgSpeaking != null ? Number(data.summary.avgSpeaking).toFixed(1) : '—'} icon={<Mic className="w-5 h-5 text-brand-teal-500" />} />
-                      <MetricCard label="Avg Reading Speed" value={data.summary.avgReading != null ? Math.round(Number(data.summary.avgReading)) + ' WPM' : '—'} icon={<BookOpen className="w-5 h-5 text-emerald-500" />} />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <MetricCard label="Avg Speaking Score" value={data.summary.avgSpeaking != null ? Number(data.summary.avgSpeaking).toFixed(1) : '—'} icon={<Mic className="w-5 h-5 text-brand-teal-600" />} />
+                      <MetricCard label="Avg Reading Speed" value={data.summary.avgReading != null ? Math.round(Number(data.summary.avgReading)) + ' WPM' : '—'} icon={<BookOpen className="w-5 h-5 text-brand-blue-600" />} />
                       <MetricCard label="Avg Writing Score" value={data.summary.avgWriting != null ? Number(data.summary.avgWriting).toFixed(1) : '—'} icon={<PenTool className="w-5 h-5 text-brand-blue-500" />} />
                       <MetricCard label="Avg Listening Score" value={data.summary.avgListening != null ? Number(data.summary.avgListening).toFixed(1) : '—'} icon={<Zap className="w-5 h-5 text-amber-500" />} />
                     </div>
@@ -283,13 +295,13 @@ export default function BatchAnalyticsView() {
                       <ChartCard title="Speaking Fluency & Confidence">
                         <ResponsiveContainer width="100%" height="100%">
                           <LineChart data={data.speakingTrends}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-                            <XAxis dataKey="date" stroke="#888" fontSize={12} tickMargin={10} />
-                            <YAxis stroke="#888" fontSize={12} />
-                            <RechartsTooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px', color: '#fff' }} />
+                            <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} vertical={false} />
+                            <XAxis dataKey="date" stroke={CHART_AXIS} fontSize={12} tickMargin={10} />
+                            <YAxis stroke={CHART_AXIS} fontSize={12} />
+                            <RechartsTooltip contentStyle={CHART_TOOLTIP_STYLE} />
                             <Legend />
-                            <Line type="monotone" dataKey="fluency" stroke="#12897C" strokeWidth={3} dot={{ r: 4, fill: '#12897C' }} name="Fluency" />
-                            <Line type="monotone" dataKey="confidence" stroke="#ec4899" strokeWidth={3} dot={{ r: 4, fill: '#ec4899' }} name="Confidence" />
+                            <Line type="monotone" dataKey="fluency" stroke={CHART_PRIMARY} strokeWidth={3} dot={{ r: 4, fill: CHART_PRIMARY }} name="Fluency" />
+                            <Line type="monotone" dataKey="confidence" stroke={CHART_SECONDARY} strokeWidth={3} dot={{ r: 4, fill: CHART_SECONDARY }} name="Confidence" />
                           </LineChart>
                         </ResponsiveContainer>
                       </ChartCard>
@@ -297,14 +309,14 @@ export default function BatchAnalyticsView() {
                       <ChartCard title="Reading Speed (WPM) & Accuracy">
                         <ResponsiveContainer width="100%" height="100%">
                           <LineChart data={data.readingTrends}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-                            <XAxis dataKey="date" stroke="#888" fontSize={12} tickMargin={10} />
-                            <YAxis yAxisId="left" stroke="#888" fontSize={12} />
-                            <YAxis yAxisId="right" orientation="right" stroke="#888" fontSize={12} />
-                            <RechartsTooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px', color: '#fff' }} />
+                            <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} vertical={false} />
+                            <XAxis dataKey="date" stroke={CHART_AXIS} fontSize={12} tickMargin={10} />
+                            <YAxis yAxisId="left" stroke={CHART_AXIS} fontSize={12} />
+                            <YAxis yAxisId="right" orientation="right" stroke={CHART_AXIS} fontSize={12} />
+                            <RechartsTooltip contentStyle={CHART_TOOLTIP_STYLE} />
                             <Legend />
-                            <Line yAxisId="left" type="monotone" dataKey="wpm" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#10b981' }} name="WPM" />
-                            <Line yAxisId="right" type="monotone" dataKey="accuracy" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4, fill: '#f59e0b' }} name="Accuracy %" />
+                            <Line yAxisId="left" type="monotone" dataKey="wpm" stroke={CHART_PRIMARY} strokeWidth={3} dot={{ r: 4, fill: CHART_PRIMARY }} name="WPM" />
+                            <Line yAxisId="right" type="monotone" dataKey="accuracy" stroke={CHART_TERTIARY} strokeWidth={3} dot={{ r: 4, fill: CHART_TERTIARY }} name="Accuracy %" />
                           </LineChart>
                         </ResponsiveContainer>
                       </ChartCard>
@@ -312,36 +324,36 @@ export default function BatchAnalyticsView() {
                       <ChartCard title="Writing Band Score Growth">
                         <ResponsiveContainer width="100%" height="100%">
                           <LineChart data={data.writingTrends}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-                            <XAxis dataKey="date" stroke="#888" fontSize={12} tickMargin={10} />
-                            <YAxis stroke="#888" fontSize={12} domain={[4, 9]} ticks={[4,5,6,7,8,9]} />
-                            <RechartsTooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px', color: '#fff' }} />
+                            <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} vertical={false} />
+                            <XAxis dataKey="date" stroke={CHART_AXIS} fontSize={12} tickMargin={10} />
+                            <YAxis stroke={CHART_AXIS} fontSize={12} domain={[4, 9]} ticks={[4,5,6,7,8,9]} />
+                            <RechartsTooltip contentStyle={CHART_TOOLTIP_STYLE} />
                             <Legend />
-                            <Line type="monotone" dataKey="score" stroke="#256B8B" strokeWidth={3} dot={{ r: 4, fill: '#256B8B' }} name="Writing AI Band" />
+                            <Line type="monotone" dataKey="score" stroke={CHART_BLUE_500} strokeWidth={3} dot={{ r: 4, fill: CHART_BLUE_500 }} name="Writing AI Band" />
                           </LineChart>
                         </ResponsiveContainer>
                       </ChartCard>
                     </div>
 
                     {/* Student Comparison Table */}
-                    <div className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl shadow-sm overflow-hidden">
-                      <div className="p-5 border-b border-slate-200 dark:border-[#27272a]">
-                        <h3 className="text-lg font-bold">Student Performance Comparison</h3>
+                    <div className="bg-white border border-brand-line rounded-2xl shadow-sm overflow-hidden">
+                      <div className="p-4 sm:p-5 border-b border-brand-line">
+                        <h3 className="font-jetbrains text-[11px] font-bold uppercase tracking-[0.15em] text-brand-text">Student Performance Comparison</h3>
                       </div>
                       <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
-                          <thead className="bg-slate-50 dark:bg-[#1a1a1c] text-slate-500 dark:text-slate-400">
-                            <tr>
-                              <th className="px-6 py-4 font-medium">Student</th>
-                              <th className="px-6 py-4 font-medium">Speaking Score</th>
-                              <th className="px-6 py-4 font-medium">Reading (WPM)</th>
-                              <th className="px-6 py-4 font-medium">Listening Score</th>
-                              <th className="px-6 py-4 font-medium">Writing Score</th>
-                              <th className="px-6 py-4 font-medium">Current Band</th>
-                              <th className="px-6 py-4 font-medium text-right">Actions</th> {/* ✅ Added Actions Header */}
+                          <thead className="bg-brand-bg-alt text-brand-text-mute">
+                            <tr className="font-jetbrains text-[10px] uppercase tracking-wider">
+                              <th className="px-6 py-4 font-bold">Student</th>
+                              <th className="px-6 py-4 font-bold">Speaking Score</th>
+                              <th className="px-6 py-4 font-bold">Reading (WPM)</th>
+                              <th className="px-6 py-4 font-bold">Listening Score</th>
+                              <th className="px-6 py-4 font-bold">Writing Score</th>
+                              <th className="px-6 py-4 font-bold">Current Band</th>
+                              <th className="px-6 py-4 font-bold text-right">Actions</th> {/* ✅ Added Actions Header */}
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-200 dark:divide-[#27272a]">
+                          <tbody className="divide-y divide-brand-line">
                             {data.studentComparison.map((student: any, index: number) => {
                               // Array of varied dummy scores to cycle through
                               const dummyWritingScores = ['6.0', '7.5', '5.5', '8.0', '6.5', '7.0', '8.5', '5.0'];
@@ -349,17 +361,17 @@ export default function BatchAnalyticsView() {
                               const fallbackScore = dummyWritingScores[index % dummyWritingScores.length];
 
                               return (
-                                <tr key={student.id} className="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
+                                <tr key={student.id} className="hover:bg-brand-bg-alt transition-colors">
                                   <td className="px-6 py-4">
                                     <div className="flex items-center gap-3">
                                       {student.avatar ? (
-                                        <img src={student.avatar} alt="" className="w-8 h-8 rounded-full bg-slate-200" />
+                                        <img src={student.avatar} alt="" className="w-8 h-8 rounded-full bg-brand-bg-alt" />
                                       ) : (
-                                        <div className="w-8 h-8 rounded-full bg-brand-teal-100 dark:bg-brand-teal-900/40 text-brand-teal-700 dark:text-brand-teal-400 flex items-center justify-center font-bold text-xs">
+                                        <div className="w-8 h-8 rounded-full bg-brand-teal-50 text-brand-teal-700 flex items-center justify-center font-bold text-xs">
                                           {student.name?.charAt(0)}
                                         </div>
                                       )}
-                                      <span className="font-medium text-slate-900 dark:text-white">{student.name}</span>
+                                      <span className="font-medium text-brand-text whitespace-nowrap">{student.name}</span>
                                     </div>
                                   </td>
                                   <td className="px-6 py-4 font-medium">{student.speakingScore != null ? Number(student.speakingScore).toFixed(1) : '—'}</td>
@@ -367,15 +379,15 @@ export default function BatchAnalyticsView() {
                                   <td className="px-6 py-4 font-medium">{student.listeningScore != null ? student.listeningScore : '—'}</td>
                                   <td className="px-6 py-4 font-medium">{student.writingScore != null ? Number(student.writingScore).toFixed(1) : fallbackScore}</td>
                                   <td className="px-6 py-4">
-                                    <span className="inline-flex px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs">
+                                    <span className="inline-flex px-2.5 py-1 rounded-full bg-brand-bg-alt text-brand-text font-bold text-xs">
                                       {student.overallGrade}
                                     </span>
                                   </td>
                                   {/* ✅ Added Actions Cell with the Analyze Progress button */}
                                   <td className="px-6 py-4 text-right">
-                                    <button 
+                                    <button
                                       // onClick={() => handleAnalyzeProgress(student)}
-                                      className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#12897C] hover:bg-[#087F73] text-white text-sm font-medium rounded-md transition-colors shadow-sm"
+                                      className="inline-flex items-center gap-2 min-h-[40px] px-3 py-1.5 bg-brand-teal-600 hover:bg-brand-teal-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm whitespace-nowrap"
                                     >
                                       <BarChart2 className="w-4 h-4" />
                                       Analyze Progress
@@ -396,40 +408,40 @@ export default function BatchAnalyticsView() {
                 {/* ═══════════════════════════════════════════════════════════════ */}
                 {activeTab === 'speaking' && (
                   <div className="space-y-6 animate-in fade-in duration-300">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <MetricCard label="Avg Fluency Score" value={data.summary.avgSpeaking != null ? Number(data.summary.avgSpeaking).toFixed(1) : '—'} icon={<Mic className="w-5 h-5 text-brand-teal-500" />} />
-                      <MetricCard label="Total Students" value={data.summary.totalStudents} icon={<Users className="w-5 h-5 text-slate-500" />} />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <MetricCard label="Avg Fluency Score" value={data.summary.avgSpeaking != null ? Number(data.summary.avgSpeaking).toFixed(1) : '—'} icon={<Mic className="w-5 h-5 text-brand-teal-600" />} />
+                      <MetricCard label="Total Students" value={data.summary.totalStudents} icon={<Users className="w-5 h-5 text-brand-text-mute" />} />
                     </div>
                     <ChartCard title="Speaking Fluency Trend">
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={data.speakingTrends}>
                           <defs>
                             <linearGradient id="gradSpeaking" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#12897C" stopOpacity={0.4} />
-                              <stop offset="95%" stopColor="#12897C" stopOpacity={0} />
+                              <stop offset="5%" stopColor={CHART_PRIMARY} stopOpacity={0.4} />
+                              <stop offset="95%" stopColor={CHART_PRIMARY} stopOpacity={0} />
                             </linearGradient>
                           </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                          <XAxis dataKey="date" stroke="#888" fontSize={12} />
-                          <YAxis stroke="#888" fontSize={12} />
-                          <RechartsTooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
+                          <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} vertical={false} />
+                          <XAxis dataKey="date" stroke={CHART_AXIS} fontSize={12} />
+                          <YAxis stroke={CHART_AXIS} fontSize={12} />
+                          <RechartsTooltip contentStyle={CHART_TOOLTIP_STYLE} />
                           <Legend />
-                          <Area type="monotone" dataKey="fluency" stroke="#12897C" strokeWidth={3} fill="url(#gradSpeaking)" name="Fluency" />
-                          <Line type="monotone" dataKey="confidence" stroke="#ec4899" strokeWidth={2} dot={false} name="Confidence" />
+                          <Area type="monotone" dataKey="fluency" stroke={CHART_PRIMARY} strokeWidth={3} fill="url(#gradSpeaking)" name="Fluency" />
+                          <Line type="monotone" dataKey="confidence" stroke={CHART_SECONDARY} strokeWidth={2} dot={false} name="Confidence" />
                         </AreaChart>
                       </ResponsiveContainer>
                     </ChartCard>
 
                     {/* Speaking Leaderboard */}
-                    <div className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl shadow-sm overflow-hidden">
-                      <div className="p-5 border-b border-slate-200 dark:border-[#27272a] flex items-center justify-between">
-                        <h3 className="text-lg font-bold flex items-center gap-2">
-                          <Trophy className="w-5 h-5 text-amber-500" /> Speaking Leaderboard
+                    <div className="bg-white border border-brand-line rounded-2xl shadow-sm overflow-hidden">
+                      <div className="p-4 sm:p-5 border-b border-brand-line flex items-center justify-between">
+                        <h3 className="font-jetbrains text-[11px] font-bold uppercase tracking-[0.15em] text-brand-text flex items-center gap-2">
+                          <Trophy className="w-4 h-4 text-amber-500" /> Speaking Leaderboard
                         </h3>
                       </div>
                       <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
-                          <thead className="bg-slate-50 dark:bg-[#1a1a1c] text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                          <thead className="bg-brand-bg-alt text-brand-text-mute font-jetbrains text-[10px] font-bold uppercase tracking-wider">
                             <tr>
                               <th className="px-5 py-4">Rank</th>
                               <th className="px-5 py-4">Student</th>
@@ -439,12 +451,12 @@ export default function BatchAnalyticsView() {
                               <th className="px-5 py-4 text-right pr-6">Sessions</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-200 dark:divide-[#27272a]">
+                          <tbody className="divide-y divide-brand-line">
                             {data.speakingLeaderboard?.map((student: any, i: number) => (
-                              <tr key={student.studentId} className="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
+                              <tr key={student.studentId} className="hover:bg-brand-bg-alt transition-colors">
                                 <td className="px-5 py-4">
                                   <span className={cn(
-                                    "inline-flex items-center justify-center w-7 h-7 rounded-full font-black text-xs",
+                                    "inline-flex items-center justify-center w-8 h-8 rounded-full font-black text-xs",
                                     getRankBadgeColor(i + 1)
                                   )}>
                                     {i + 1 <= 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}
@@ -455,20 +467,20 @@ export default function BatchAnalyticsView() {
                                     {student.avatar ? (
                                       <img src={student.avatar} alt="" className="w-8 h-8 rounded-full" />
                                     ) : (
-                                      <div className="w-8 h-8 rounded-full bg-brand-teal-100 dark:bg-brand-teal-900/40 text-brand-teal-700 dark:text-brand-teal-400 flex items-center justify-center font-bold text-xs">
+                                      <div className="w-8 h-8 rounded-full bg-brand-teal-50 text-brand-teal-700 flex items-center justify-center font-bold text-xs">
                                         {student.name?.charAt(0)}
                                       </div>
                                     )}
-                                    <span className="font-semibold text-slate-900 dark:text-white">{student.name}</span>
+                                    <span className="font-semibold text-brand-text whitespace-nowrap">{student.name}</span>
                                   </div>
                                 </td>
                                 <td className="px-5 py-4 text-center">
-                                  <span className="font-bold font-mono text-brand-teal-600 dark:text-brand-teal-400">
+                                  <span className="font-bold font-jetbrains text-brand-teal-600">
                                     {Math.round(student.avgFluency)}
                                   </span>
                                 </td>
                                 <td className="px-5 py-4 text-center">
-                                  <span className="inline-flex px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 font-bold text-xs text-slate-700 dark:text-slate-300">
+                                  <span className="inline-flex px-2 py-0.5 rounded-full bg-brand-bg-alt font-bold text-xs text-brand-text">
                                     {student.avgBand}
                                   </span>
                                 </td>
@@ -477,7 +489,7 @@ export default function BatchAnalyticsView() {
                                     {student.bestScore ?? '—'}
                                   </span>
                                 </td>
-                                <td className="px-5 py-4 text-right pr-6 text-slate-500 font-medium">
+                                <td className="px-5 py-4 text-right pr-6 text-brand-text-mute font-medium">
                                   {student.totalSessions}
                                 </td>
                               </tr>
@@ -498,12 +510,12 @@ export default function BatchAnalyticsView() {
                       <Loader2 className="w-8 h-8 animate-spin text-brand-teal-500" />
                     </div>
                   ) : !readingData ? (
-                    <div className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl p-16 text-center space-y-3">
-                      <div className="w-16 h-16 bg-brand-teal-50 dark:bg-brand-teal-900/20 rounded-full flex items-center justify-center mx-auto">
-                        <BookOpen className="w-8 h-8 text-brand-teal-400" />
+                    <div className="bg-white border border-brand-line rounded-2xl p-8 sm:p-16 text-center space-y-3 shadow-sm">
+                      <div className="w-16 h-16 bg-brand-teal-50 rounded-full flex items-center justify-center mx-auto">
+                        <BookOpen className="w-8 h-8 text-brand-teal-600" />
                       </div>
-                      <h3 className="font-bold text-slate-700 dark:text-slate-200">Reading Analytics Coming Soon</h3>
-                      <p className="text-slate-500 text-sm max-w-sm mx-auto">
+                      <h3 className="font-bold text-brand-text">Reading Analytics Coming Soon</h3>
+                      <p className="text-brand-text-mute text-sm max-w-sm mx-auto">
                         Reading analytics will be available once students complete reading practice sessions and the analytics endpoint is deployed.
                       </p>
                     </div>
@@ -524,38 +536,38 @@ export default function BatchAnalyticsView() {
                           <AreaChart data={readingData.wpmTrends}>
                             <defs>
                               <linearGradient id="gradWpm" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#12897C" stopOpacity={0.35} />
-                                <stop offset="95%" stopColor="#12897C" stopOpacity={0} />
+                                <stop offset="5%" stopColor={CHART_PRIMARY} stopOpacity={0.35} />
+                                <stop offset="95%" stopColor={CHART_PRIMARY} stopOpacity={0} />
                               </linearGradient>
                               <linearGradient id="gradAcc" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#10b981" stopOpacity={0.35} />
-                                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                                <stop offset="5%" stopColor={CHART_SECONDARY} stopOpacity={0.35} />
+                                <stop offset="95%" stopColor={CHART_SECONDARY} stopOpacity={0} />
                               </linearGradient>
                             </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                            <XAxis dataKey="date" stroke="#888" fontSize={12} tickMargin={8} />
-                            <YAxis yAxisId="left" stroke="#888" fontSize={12} />
-                            <YAxis yAxisId="right" orientation="right" stroke="#888" fontSize={12} />
+                            <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} vertical={false} />
+                            <XAxis dataKey="date" stroke={CHART_AXIS} fontSize={12} tickMargin={8} />
+                            <YAxis yAxisId="left" stroke={CHART_AXIS} fontSize={12} />
+                            <YAxis yAxisId="right" orientation="right" stroke={CHART_AXIS} fontSize={12} />
                             <RechartsTooltip
-                              contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px' }}
+                              contentStyle={CHART_TOOLTIP_STYLE}
                               formatter={(v: any, name: string) => [`${Math.round(v)}${name === 'avgAccuracy' ? '%' : ' WPM'}`, name === 'avgWpm' ? 'Avg WPM' : 'Avg Accuracy']}
                             />
                             <Legend formatter={(v) => v === 'avgWpm' ? 'Avg WPM' : 'Avg Accuracy %'} />
-                            <Area yAxisId="left" type="monotone" dataKey="avgWpm" stroke="#12897C" strokeWidth={3} fill="url(#gradWpm)" name="avgWpm" />
-                            <Area yAxisId="right" type="monotone" dataKey="avgAccuracy" stroke="#10b981" strokeWidth={3} fill="url(#gradAcc)" name="avgAccuracy" />
+                            <Area yAxisId="left" type="monotone" dataKey="avgWpm" stroke={CHART_PRIMARY} strokeWidth={3} fill="url(#gradWpm)" name="avgWpm" />
+                            <Area yAxisId="right" type="monotone" dataKey="avgAccuracy" stroke={CHART_SECONDARY} strokeWidth={3} fill="url(#gradAcc)" name="avgAccuracy" />
                           </AreaChart>
                         </ResponsiveContainer>
                       </ChartCard>
 
                       {/* Leaderboard */}
-                      <div className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl shadow-sm overflow-hidden">
-                        <div className="p-5 border-b border-slate-200 dark:border-[#27272a] flex items-center gap-2">
-                          <Medal className="w-5 h-5 text-amber-500" />
-                          <h3 className="text-lg font-bold">Reading Leaderboard</h3>
+                      <div className="bg-white border border-brand-line rounded-2xl shadow-sm overflow-hidden">
+                        <div className="p-4 sm:p-5 border-b border-brand-line flex items-center gap-2">
+                          <Medal className="w-4 h-4 text-amber-500" />
+                          <h3 className="font-jetbrains text-[11px] font-bold uppercase tracking-[0.15em] text-brand-text">Reading Leaderboard</h3>
                         </div>
                         <div className="overflow-x-auto">
                           <table className="w-full text-left text-sm">
-                            <thead className="bg-slate-50 dark:bg-[#1a1a1c] text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                            <thead className="bg-brand-bg-alt text-brand-text-mute font-jetbrains text-[10px] font-bold uppercase tracking-wider">
                               <tr>
                                 <th className="px-5 py-4">Rank</th>
                                 <th className="px-5 py-4">Student</th>
@@ -565,12 +577,12 @@ export default function BatchAnalyticsView() {
                                 <th className="px-5 py-4 text-right pr-6">Sessions</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-200 dark:divide-[#27272a]">
+                            <tbody className="divide-y divide-brand-line">
                               {readingData.studentLeaderboard.map((student, i) => (
-                                <tr key={student.studentId} className="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
+                                <tr key={student.studentId} className="hover:bg-brand-bg-alt transition-colors">
                                   <td className="px-5 py-4">
                                     <span className={cn(
-                                      "inline-flex items-center justify-center w-7 h-7 rounded-full font-black text-xs",
+                                      "inline-flex items-center justify-center w-8 h-8 rounded-full font-black text-xs",
                                       getRankBadgeColor(i + 1)
                                     )}>
                                       {i + 1 <= 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}
@@ -581,15 +593,15 @@ export default function BatchAnalyticsView() {
                                       {student.avatar ? (
                                         <img src={student.avatar} alt="" className="w-8 h-8 rounded-full" />
                                       ) : (
-                                        <div className="w-8 h-8 rounded-full bg-brand-teal-100 dark:bg-brand-teal-900/40 text-brand-teal-700 dark:text-brand-teal-400 flex items-center justify-center font-bold text-xs">
+                                        <div className="w-8 h-8 rounded-full bg-brand-teal-50 text-brand-teal-700 flex items-center justify-center font-bold text-xs">
                                           {student.name?.charAt(0)}
                                         </div>
                                       )}
-                                      <span className="font-semibold text-slate-900 dark:text-white">{student.name}</span>
+                                      <span className="font-semibold text-brand-text whitespace-nowrap">{student.name}</span>
                                     </div>
                                   </td>
                                   <td className="px-5 py-4 text-center">
-                                    <span className="font-bold font-mono text-brand-teal-600 dark:text-brand-teal-400">
+                                    <span className="font-bold font-jetbrains text-brand-teal-600">
                                       {Math.round(student.avgWPM)}
                                     </span>
                                   </td>
@@ -603,7 +615,7 @@ export default function BatchAnalyticsView() {
                                       {Math.round(student.bestSpeedLearningScore)}
                                     </span>
                                   </td>
-                                  <td className="px-5 py-4 text-right pr-6 text-slate-500 font-medium">
+                                  <td className="px-5 py-4 text-right pr-6 text-brand-text-mute font-medium">
                                     {student.totalSessions}
                                   </td>
                                 </tr>
@@ -621,39 +633,39 @@ export default function BatchAnalyticsView() {
                 {/* ═══════════════════════════════════════════════════════════════ */}
                 {activeTab === 'writing' && (
                   <div className="space-y-6 animate-in fade-in duration-300">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <MetricCard label="Avg Writing AI Band" value={data.summary.avgWriting != null ? Number(data.summary.avgWriting).toFixed(1) : '—'} icon={<PenTool className="w-5 h-5 text-brand-blue-500" />} />
-                      <MetricCard label="Total Students" value={data.summary.totalStudents} icon={<Users className="w-5 h-5 text-slate-500" />} />
+                      <MetricCard label="Total Students" value={data.summary.totalStudents} icon={<Users className="w-5 h-5 text-brand-text-mute" />} />
                     </div>
                     <ChartCard title="Writing Band Score Growth">
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={data.writingTrends}>
                           <defs>
                             <linearGradient id="gradWriting" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#256B8B" stopOpacity={0.4} />
-                              <stop offset="95%" stopColor="#256B8B" stopOpacity={0} />
+                              <stop offset="5%" stopColor={CHART_BLUE_500} stopOpacity={0.4} />
+                              <stop offset="95%" stopColor={CHART_BLUE_500} stopOpacity={0} />
                             </linearGradient>
                           </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                          <XAxis dataKey="date" stroke="#888" fontSize={12} />
-                          <YAxis stroke="#888" fontSize={12} domain={[4, 9]} ticks={[4, 5, 6, 7, 8, 9]} />
-                          <RechartsTooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
+                          <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} vertical={false} />
+                          <XAxis dataKey="date" stroke={CHART_AXIS} fontSize={12} />
+                          <YAxis stroke={CHART_AXIS} fontSize={12} domain={[4, 9]} ticks={[4, 5, 6, 7, 8, 9]} />
+                          <RechartsTooltip contentStyle={CHART_TOOLTIP_STYLE} />
                           <Legend />
-                          <Area type="monotone" dataKey="score" stroke="#256B8B" strokeWidth={3} fill="url(#gradWriting)" name="Writing Score" />
+                          <Area type="monotone" dataKey="score" stroke={CHART_BLUE_500} strokeWidth={3} fill="url(#gradWriting)" name="Writing Score" />
                         </AreaChart>
                       </ResponsiveContainer>
                     </ChartCard>
 
                     {/* Writing Leaderboard */}
-                    <div className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl shadow-sm overflow-hidden">
-                      <div className="p-5 border-b border-slate-200 dark:border-[#27272a] flex items-center justify-between">
-                        <h3 className="text-lg font-bold flex items-center gap-2">
-                          <Trophy className="w-5 h-5 text-amber-500" /> Writing Leaderboard
+                    <div className="bg-white border border-brand-line rounded-2xl shadow-sm overflow-hidden">
+                      <div className="p-4 sm:p-5 border-b border-brand-line flex items-center justify-between">
+                        <h3 className="font-jetbrains text-[11px] font-bold uppercase tracking-[0.15em] text-brand-text flex items-center gap-2">
+                          <Trophy className="w-4 h-4 text-amber-500" /> Writing Leaderboard
                         </h3>
                       </div>
                       <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
-                          <thead className="bg-slate-50 dark:bg-[#1a1a1c] text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                          <thead className="bg-brand-bg-alt text-brand-text-mute font-jetbrains text-[10px] font-bold uppercase tracking-wider">
                             <tr>
                               <th className="px-5 py-4">Rank</th>
                               <th className="px-5 py-4">Student</th>
@@ -663,12 +675,12 @@ export default function BatchAnalyticsView() {
                               <th className="px-5 py-4 text-right pr-6">Sessions</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-200 dark:divide-[#27272a]">
+                          <tbody className="divide-y divide-brand-line">
                             {data.writingLeaderboard?.map((student: any, i: number) => (
-                              <tr key={student.studentId} className="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
+                              <tr key={student.studentId} className="hover:bg-brand-bg-alt transition-colors">
                                 <td className="px-5 py-4">
                                   <span className={cn(
-                                    "inline-flex items-center justify-center w-7 h-7 rounded-full font-black text-xs",
+                                    "inline-flex items-center justify-center w-8 h-8 rounded-full font-black text-xs",
                                     getRankBadgeColor(i + 1)
                                   )}>
                                     {i + 1 <= 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}
@@ -679,20 +691,20 @@ export default function BatchAnalyticsView() {
                                     {student.avatar ? (
                                       <img src={student.avatar} alt="" className="w-8 h-8 rounded-full" />
                                     ) : (
-                                      <div className="w-8 h-8 rounded-full bg-brand-teal-100 dark:bg-brand-teal-900/40 text-brand-teal-700 dark:text-brand-teal-400 flex items-center justify-center font-bold text-xs">
+                                      <div className="w-8 h-8 rounded-full bg-brand-teal-50 text-brand-teal-700 flex items-center justify-center font-bold text-xs">
                                         {student.name?.charAt(0)}
                                       </div>
                                     )}
-                                    <span className="font-semibold text-slate-900 dark:text-white">{student.name}</span>
+                                    <span className="font-semibold text-brand-text whitespace-nowrap">{student.name}</span>
                                   </div>
                                 </td>
                                 <td className="px-5 py-4 text-center">
-                                  <span className="inline-flex px-2 py-0.5 rounded-full bg-brand-teal-50 dark:bg-brand-teal-900/30 font-bold text-xs text-brand-teal-700 dark:text-brand-teal-400">
+                                  <span className="inline-flex px-2 py-0.5 rounded-full bg-brand-teal-50 font-bold text-xs text-brand-teal-700">
                                     {student.avgBand}
                                   </span>
                                 </td>
                                 <td className="px-5 py-4 text-center">
-                                  <span className="font-bold text-slate-700 dark:text-slate-300">
+                                  <span className="font-bold text-brand-text whitespace-nowrap">
                                     {student.avgWordCount} words
                                   </span>
                                 </td>
@@ -701,7 +713,7 @@ export default function BatchAnalyticsView() {
                                     {student.bestScore ?? '—'}
                                   </span>
                                 </td>
-                                <td className="px-5 py-4 text-right pr-6 text-slate-500 font-medium">
+                                <td className="px-5 py-4 text-right pr-6 text-brand-text-mute font-medium">
                                   {student.totalSessions}
                                 </td>
                               </tr>
@@ -716,7 +728,6 @@ export default function BatchAnalyticsView() {
               </>
             )}
 
-          </div>
         </main>
       </div>
     </div>
@@ -726,32 +737,32 @@ export default function BatchAnalyticsView() {
 // ─── Shared sub-components ────────────────────────────────────────────────────
 
 const MetricCard = ({ label, value, icon }: { label: string; value: any; icon?: React.ReactNode }) => (
-  <div className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl p-5 shadow-sm flex items-center gap-4">
-    {icon && <div className="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-lg flex items-center justify-center flex-shrink-0">{icon}</div>}
-    <div>
-      <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">{label}</p>
-      <h2 className="text-2xl font-black text-slate-900 dark:text-white">{value}</h2>
+  <div className="bg-white border border-brand-line rounded-2xl p-4 sm:p-5 shadow-sm flex items-center gap-4">
+    {icon && <div className="w-10 h-10 bg-brand-bg-alt rounded-xl flex items-center justify-center flex-shrink-0">{icon}</div>}
+    <div className="min-w-0">
+      <p className="font-jetbrains text-[10px] font-bold text-brand-text-mute uppercase tracking-wider mb-1">{label}</p>
+      <h2 className="text-2xl font-black text-brand-text">{value}</h2>
     </div>
   </div>
 );
 
 const colorMap: Record<string, string> = {
-  indigo: 'text-brand-teal-600 dark:text-brand-teal-400 bg-brand-teal-50 dark:bg-brand-teal-900/20',
-  emerald: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20',
-  amber: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20',
-  slate: 'text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800',
+  indigo: 'text-brand-teal-700 bg-brand-teal-50',
+  emerald: 'text-emerald-700 bg-emerald-50',
+  amber: 'text-amber-700 bg-amber-50',
+  slate: 'text-brand-text bg-brand-bg-alt',
 };
 
 const MetricCardColored = ({ label, value, color }: { label: string; value: any; color: string }) => (
-  <div className={cn("rounded-xl p-5 flex flex-col", colorMap[color])}>
-    <p className="text-xs font-bold uppercase tracking-wider opacity-70 mb-2">{label}</p>
-    <p className="text-3xl font-black">{value}</p>
+  <div className={cn("rounded-2xl p-4 sm:p-5 flex flex-col shadow-sm", colorMap[color])}>
+    <p className="font-jetbrains text-[10px] font-bold uppercase tracking-wider opacity-70 mb-2">{label}</p>
+    <p className="text-2xl sm:text-3xl font-black">{value}</p>
   </div>
 );
 
 const ChartCard = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <div className="bg-white dark:bg-[#121214] border border-slate-200 dark:border-[#27272a] rounded-xl p-6 shadow-sm">
-    <h3 className="text-lg font-bold mb-5">{title}</h3>
-    <div className="h-[300px] w-full">{children}</div>
+  <div className="bg-white border border-brand-line rounded-2xl p-4 sm:p-6 shadow-sm">
+    <h3 className="font-jetbrains text-[11px] font-bold uppercase tracking-[0.15em] text-brand-text mb-5">{title}</h3>
+    <div className="h-64 sm:h-80 lg:h-96 w-full">{children}</div>
   </div>
 );
