@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { useSkillScoreFormatter, useScoreFormatter } from "@/shared/hooks/useScoreFormatter";
 import { ArrowRight } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from "recharts";
 
@@ -23,6 +24,7 @@ export interface BandPoint {
 }
 
 export function BandOverTimeChart({ points }: { points: BandPoint[] }) {
+  const score = useScoreFormatter();
   if (points.length === 0) {
     return (
       <div className="h-full flex items-center justify-center text-[11px] text-white/30 text-center px-4">
@@ -40,7 +42,7 @@ export function BandOverTimeChart({ points }: { points: BandPoint[] }) {
           contentStyle={{ background: "#0B1F26", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 8, fontSize: 11 }}
           labelStyle={{ color: "rgba(255,255,255,0.6)" }}
           itemStyle={{ color: "#fff" }}
-          formatter={(value: number) => [value.toFixed(1), "Band"]}
+          formatter={(value: number) => [score(value), score.label]}
         />
         <Bar dataKey="band" radius={[4, 4, 0, 0]} maxBarSize={28}>
           {points.map((p, i) => (
@@ -106,6 +108,7 @@ export function AttendanceCard({
 }
 
 export function SubSkillCoverageCard({ rows }: { rows: SkillGaugeRow[] }) {
+  const skillScore = useSkillScoreFormatter();
   return (
     <SidebarCard eyebrow="Sub-skill Coverage" subtitle="Latest band recorded per skill across all assessments.">
       <div className="space-y-3">
@@ -113,7 +116,7 @@ export function SubSkillCoverageCard({ rows }: { rows: SkillGaugeRow[] }) {
           <div key={r.key}>
             <div className="flex items-center justify-between mb-1">
               <span className="flex items-center gap-1.5 text-xs font-semibold text-brand-text">{r.icon}{r.label}</span>
-              <span className="text-sm font-black text-brand-text">{r.band != null ? r.band.toFixed(1) : "—"}</span>
+              <span className="text-sm font-black text-brand-text">{skillScore(r.band)}</span>
             </div>
             {r.band != null && <GaugeBar value={r.band} colorClass={r.colorClass} />}
             {r.sourceLabel && <p className="text-[10px] text-brand-text-mute mt-1">{r.sourceLabel}</p>}
@@ -169,6 +172,7 @@ export function MockProgressionCard({
 }
 
 export function BestBandPerSkillCard({ rows }: { rows: SkillGaugeRow[] }) {
+  const skillScore = useSkillScoreFormatter();
   return (
     <SidebarCard eyebrow="Best Band per Skill">
       <div className="space-y-3">
@@ -176,7 +180,7 @@ export function BestBandPerSkillCard({ rows }: { rows: SkillGaugeRow[] }) {
           <div key={r.key}>
             <div className="flex items-center justify-between mb-1">
               <span className="flex items-center gap-1.5 text-xs font-semibold text-brand-text">{r.icon}{r.label}</span>
-              <span className="text-sm font-black text-brand-text">{r.band != null ? r.band.toFixed(1) : "—"}</span>
+              <span className="text-sm font-black text-brand-text">{skillScore(r.band)}</span>
             </div>
             {r.band != null && <GaugeBar value={r.band} colorClass={r.colorClass} />}
           </div>

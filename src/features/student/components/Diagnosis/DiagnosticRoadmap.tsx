@@ -6,6 +6,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { callBackend } from "@/features/auth/services/authClient";
 import { getBackendUrl } from "@/shared/utils";
 import { StudentLayout } from "@/features/student/components/StudentLayout";
+import { useScoreFormatter, useSkillScoreFormatter } from "@/shared/hooks/useScoreFormatter";
 
 type Skill = "Listening" | "Reading" | "Writing" | "Speaking";
 
@@ -95,6 +96,8 @@ function weeksToTarget(current: number | null, target: number): number | null {
 }
 
 export default function DiagnosticRoadmap() {
+  const score = useScoreFormatter();
+  const skillScore = useSkillScoreFormatter();
   const navigate = useNavigate();
   const { profile } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -194,7 +197,7 @@ export default function DiagnosticRoadmap() {
                   key={row.skill}
                   className="inline-flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-full border border-brand-line-25 bg-white/5 text-brand-on-ink"
                 >
-                  {row.skill} · <span className="tabular-nums text-brand-mint">{row.band !== null ? row.band.toFixed(1) : "—"}</span>
+                  {row.skill} · <span className="tabular-nums text-brand-mint">{skillScore(row.band)}</span>
                 </span>
               ))}
             </div>
@@ -222,7 +225,7 @@ export default function DiagnosticRoadmap() {
                       </span>
                       <div>
                         <p className="font-manrope font-bold text-brand-ink text-[15px] tracking-[-0.01em]">{row.skill}</p>
-                        <p className="text-[12.5px] text-brand-text-mute">Current band: <span className="tabular-nums font-semibold text-brand-text">{row.band?.toFixed(1)}</span></p>
+                        <p className="text-[12.5px] text-brand-text-mute">Current {skillScore.label.toLowerCase()}: <span className="tabular-nums font-semibold text-brand-text">{skillScore(row.band)}</span></p>
                       </div>
                     </div>
                     <button
@@ -260,7 +263,7 @@ export default function DiagnosticRoadmap() {
                     </div>
                     <div className="text-right">
                       <p className="font-manrope text-[15px] font-extrabold text-brand-ink tabular-nums tracking-[-0.02em]">
-                        {row.band !== null ? row.band.toFixed(1) : "—"} <span className="text-brand-text-mute font-normal">→</span> {targetBand.toFixed(1)}
+                        {skillScore(row.band)} <span className="text-brand-text-mute font-normal">→</span> {score(targetBand)}
                       </p>
                       {gap !== null && (
                         <p className="font-jetbrains text-[10px] text-brand-text-mute uppercase tracking-[0.14em]">

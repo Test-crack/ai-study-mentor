@@ -14,6 +14,9 @@ import { RequireActiveInstitute } from "@/features/auth/components/RequireActive
 
 import { WebSocketProvider } from "@/shared/context/WebSocketContext";
 import { ExamProvider } from "@/shared/context/ExamContext";
+
+// TEMPORARY: FE-1 review harness. DEV-only, cannot ship. Delete after sign-off.
+const ScorePreview = lazy(() => import("@/features/student/components/__dev/ScorePreview"));
 import { MomentumProvider } from "@/features/student/Context/MomentumContext";
 import { NetworkStatusBanner } from "@/shared/components/NetworkStatusBanner"; // ← NEW
 import { toast } from "sonner"; // ← NEW
@@ -272,6 +275,7 @@ const AppRoutes = () => {
     <Suspense fallback={<RouteFallback />}>
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      {import.meta.env.DEV && <Route path="/dev/score-preview" element={<ScorePreview />} />}
       <Route path="/student/onboarding" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><OnboardingWalkthrough /></RoleProtectedRoute>} />
       <Route path="/student/diagnosis" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><Diagnosis /></RoleProtectedRoute>} />
       <Route path="/student/diagnostic/roadmap" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDiagnosisGuard><DiagnosticRoadmap /></StudentDiagnosisGuard></RoleProtectedRoute>} />

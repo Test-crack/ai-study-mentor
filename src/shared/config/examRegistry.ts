@@ -31,11 +31,29 @@ function toBand(raw: number): number {
   return Math.round(raw * 2) / 2;
 }
 
-function formatIeltsScore(raw: number | null | undefined): FormattedScore {
+/**
+ * Overall IELTS band: mean rounded to 0.5 (TC-04 §3).
+ */
+function formatIeltsOverall(raw: number | null | undefined): FormattedScore {
   if (raw === null || raw === undefined || Number.isNaN(raw)) {
     return { display: EMPTY, label: 'Band' };
   }
   return { display: toBand(raw).toFixed(1), label: 'Band' };
+}
+
+/**
+ * A single IELTS skill score: one decimal place, NOT rounded to 0.5.
+ *
+ * Deliberately different from `formatIeltsOverall`. Only the *overall* band is
+ * banded to 0.5 — a sub-skill mean of 6.25 is shown as "6.3", which is what
+ * every existing surface already renders via `.toFixed(1)`. Banding sub-skills
+ * would round 6.25 up to "6.5" and silently inflate displayed skill scores.
+ */
+function formatIeltsSkill(raw: number | null | undefined): FormattedScore {
+  if (raw === null || raw === undefined || Number.isNaN(raw)) {
+    return { display: EMPTY, label: 'Band' };
+  }
+  return { display: raw.toFixed(1), label: 'Band' };
 }
 
 // ─── SPOKEN · CEFR banded threshold (TC-03 D1) ────────────────────────────────
@@ -138,8 +156,8 @@ export const EXAM_REGISTRY: Record<ExamType, ExamUiConfig> = {
       'TestCrack is a preparation and coaching platform. We are not an official IELTS test provider and are not affiliated with, endorsed by, or associated with the owners of the IELTS™ mark.',
     trademarkOwner: 'British Council, IDP: IELTS Australia and Cambridge University Press & Assessment',
     shortLabel: 'IELTS',
-    formatOverall: formatIeltsScore,
-    formatSkillScore: formatIeltsScore,
+    formatOverall: formatIeltsOverall,
+    formatSkillScore: formatIeltsSkill,
     skills: ['LISTENING', 'READING', 'WRITING', 'SPEAKING'],
     speakingFormat: 'monologue',
     selfRegistration: false, // B2B (TC-03 §2.3 Q3)
