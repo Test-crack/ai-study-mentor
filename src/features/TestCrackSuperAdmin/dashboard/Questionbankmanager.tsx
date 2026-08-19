@@ -7,11 +7,14 @@ import {
 } from 'lucide-react';
 import { SuperAdminSidebar } from '../Components/SuperadminSidebar';
 import { SuperAdminTopbar } from '../Components/Superadmintopbar';
+import type { ExamType, ExamSkill } from '@/shared/types/exam';
+import { EXAM_REGISTRY, REGISTERED_EXAMS } from '@/shared/config/examRegistry';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type ExamType = 'IELTS' | 'GMAT' | 'SPOKEN_ENGLISH' | 'PTE' | 'TOEFL';
-type Skill = 'LISTENING' | 'READING' | 'WRITING' | 'SPEAKING' | 'VERBAL' | 'QUANTITATIVE' | 'INTEGRATED';
+// ExamType and the skill list now come from the registry — never redeclared
+// locally. TC-04 §0 principle 2 and TC-07: one exam vocabulary, one source.
+type Skill = ExamSkill;
 type Difficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
 type Module = 'DRILLS' | 'INTERNAL_ASSESSMENT' | 'FULL_MOCK';
 type QuestionType = 'MCQ' | 'TRUE_FALSE_NOT_GIVEN' | 'FORM' | 'ESSAY' | 'WRITING_PROMPT' | 'SPEAKING_PROMPT';
@@ -43,13 +46,11 @@ interface BankRecord {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const EXAM_SKILLS: Record<ExamType, Skill[]> = {
-  IELTS:          ['LISTENING','READING','WRITING','SPEAKING'],
-  GMAT:           ['VERBAL','QUANTITATIVE','INTEGRATED'],
-  SPOKEN_ENGLISH: ['SPEAKING','LISTENING'],
-  PTE:            ['LISTENING','READING','WRITING','SPEAKING'],
-  TOEFL:          ['LISTENING','READING','WRITING','SPEAKING'],
-};
+/** Skills per exam, read from the registry rather than duplicated here. */
+const skillsFor = (exam: ExamType): readonly Skill[] => EXAM_REGISTRY[exam].skills;
+
+/** Display label for an exam — TC-03 §5.1 Rule 2: never hand-typed or derived. */
+const examLabel = (exam: ExamType): string => EXAM_REGISTRY[exam].shortLabel;
 
 const TRAP_TYPES_IELTS = ['scope_distractor','true_but_irrelevant','extreme_language','paraphrase_confusion','temporal_distortion','inference_overreach'];
 const TRAP_TYPES_GMAT  = ['correlation_causation','necessary_vs_sufficient','scope_shift','reverse_causality','extreme_language','out_of_scope'];
@@ -70,9 +71,9 @@ const STATUS_STYLES: Record<BankStatus, string> = {
 
 const MOCK_HISTORY: BankRecord[] = [
   { id: '1', uploadedAt: '2026-05-06T09:00:00Z', examType: 'IELTS', skill: 'READING', difficulty: 'INTERMEDIATE', instituteName: 'Prestige University', batchName: 'Batch B2 — May 2026', modules: ['DRILLS','INTERNAL_ASSESSMENT'], questionCount: 47, status: 'active', uploadedBy: 'Super Admin' },
-  { id: '2', uploadedAt: '2026-05-04T14:30:00Z', examType: 'GMAT', skill: 'VERBAL', difficulty: 'ADVANCED', instituteName: 'TechBridge Institute', batchName: 'GMAT Elite — Apr 2026', modules: ['FULL_MOCK'], questionCount: 82, status: 'active', uploadedBy: 'Super Admin' },
+  { id: '2', uploadedAt: '2026-05-04T14:30:00Z', examType: 'OET', skill: 'READING', difficulty: 'ADVANCED', instituteName: 'TechBridge Institute', batchName: 'OET Nursing — Apr 2026', modules: ['FULL_MOCK'], questionCount: 82, status: 'active', uploadedBy: 'Super Admin' },
   { id: '3', uploadedAt: '2026-04-28T11:00:00Z', examType: 'IELTS', skill: 'LISTENING', difficulty: 'BEGINNER', instituteName: 'Ace English Academy', batchName: 'Batch A1 — Mar 2026', modules: ['DRILLS'], questionCount: 35, status: 'replaced', uploadedBy: 'Super Admin' },
-  { id: '4', uploadedAt: '2026-04-15T08:00:00Z', examType: 'SPOKEN_ENGLISH', skill: 'SPEAKING', difficulty: 'INTERMEDIATE', instituteName: 'SpeakWell Institute', batchName: 'Corporate Batch — Apr 2026', modules: ['DRILLS','INTERNAL_ASSESSMENT','FULL_MOCK'], questionCount: 60, status: 'archived', uploadedBy: 'Super Admin' },
+  { id: '4', uploadedAt: '2026-04-15T08:00:00Z', examType: 'SPOKEN', skill: 'SPEAKING', difficulty: 'INTERMEDIATE', instituteName: 'SpeakWell Institute', batchName: 'Corporate Batch — Apr 2026', modules: ['DRILLS','INTERNAL_ASSESSMENT','FULL_MOCK'], questionCount: 60, status: 'archived', uploadedBy: 'Super Admin' },
 ];
 
 // ─── Client-side JSON validator ───────────────────────────────────────────────
@@ -286,7 +287,7 @@ export default function QuestionBankManager() {
       setBatches([
         { id: 'b1', name: 'Batch A1 — May 2026', examType: 'IELTS', studentCount: 42 },
         { id: 'b2', name: 'Batch B2 — May 2026', examType: 'IELTS', studentCount: 38 },
-        { id: 'b3', name: 'GMAT Elite — Apr 2026', examType: 'GMAT', studentCount: 21 },
+        { id: 'b3', name: 'Spoken English — Corporate, Apr 2026', examType: 'SPOKEN', studentCount: 21 },
       ]);
       setLoadingBatches(false);
     }, 500);
@@ -424,10 +425,10 @@ export default function QuestionBankManager() {
                     <div>
                       <label className="font-jetbrains text-[10px] font-bold text-brand-text-mute uppercase tracking-[0.15em] block mb-2">Exam Type</label>
                       <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                        {(['IELTS','GMAT','SPOKEN_ENGLISH','PTE','TOEFL'] as ExamType[]).map(exam => (
+                        {REGISTERED_EXAMS.map(exam => (
                           <button key={exam} onClick={() => { setSelectedExam(exam); setSelectedSkill(''); }}
                             className={`w-full min-h-[44px] py-3 px-4 rounded-xl border-2 text-sm font-bold transition-all ${selectedExam === exam ? 'border-brand-teal-600 bg-brand-teal-50 text-brand-teal-700' : 'border-brand-line text-brand-text hover:border-brand-teal-300'}`}>
-                            {exam.replace('_',' ')}
+                            {examLabel(exam)}
                           </button>
                         ))}
                       </div>
@@ -539,7 +540,7 @@ export default function QuestionBankManager() {
                     <div>
                       <label className="font-jetbrains text-[10px] font-bold text-brand-text-mute uppercase tracking-[0.15em] block mb-2">Skill <span className="text-rose-500">*</span></label>
                       <div className="flex flex-wrap gap-2">
-                        {(selectedExam ? EXAM_SKILLS[selectedExam] : []).map(skill => (
+                        {(selectedExam ? skillsFor(selectedExam) : []).map(skill => (
                           <button key={skill} onClick={() => setSelectedSkill(skill)}
                             className={`min-h-[44px] px-4 py-2 rounded-xl border-2 text-sm font-bold transition-all ${selectedSkill === skill ? 'border-brand-teal-600 bg-brand-teal-50 text-brand-teal-700' : 'border-brand-line text-brand-text hover:border-brand-teal-300'}`}>
                             {skill}
@@ -715,7 +716,7 @@ export default function QuestionBankManager() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {[
-                        { label: 'Exam Type',   value: selectedExam.replace('_',' ') },
+                        { label: 'Exam Type',   value: selectedExam ? examLabel(selectedExam) : '' },
                         { label: 'Institute',   value: selectedInstitute?.name ?? '' },
                         { label: 'Batch',       value: selectedBatch?.name ?? '' },
                         { label: 'Skill',       value: selectedSkill },
@@ -805,7 +806,7 @@ export default function QuestionBankManager() {
                   <select value={filterExam} onChange={e => setFilterExam(e.target.value as ExamType | '')}
                     className="min-h-[44px] px-4 py-2.5 rounded-xl border border-brand-line bg-white text-sm text-brand-text outline-none focus:border-brand-teal-500 transition-colors">
                     <option value="">All Exams</option>
-                    {(['IELTS','GMAT','SPOKEN_ENGLISH','PTE','TOEFL'] as ExamType[]).map(e => <option key={e} value={e}>{e.replace('_',' ')}</option>)}
+                    {REGISTERED_EXAMS.map(e => <option key={e} value={e}>{examLabel(e)}</option>)}
                   </select>
                 </div>
 

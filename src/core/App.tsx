@@ -13,6 +13,7 @@ import { RequireActiveInstitute } from "@/features/auth/components/RequireActive
 
 
 import { WebSocketProvider } from "@/shared/context/WebSocketContext";
+import { ExamProvider } from "@/shared/context/ExamContext";
 import { MomentumProvider } from "@/features/student/Context/MomentumContext";
 import { NetworkStatusBanner } from "@/shared/components/NetworkStatusBanner"; // ← NEW
 import { toast } from "sonner"; // ← NEW
@@ -425,6 +426,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
+            <ExamProvider>
             <MomentumProvider>
               <NotificationsProvider>
                 <InstructorNotificationsProvider>
@@ -434,6 +436,7 @@ const App = () => (
                 </InstructorNotificationsProvider>
               </NotificationsProvider>
             </MomentumProvider>
+            </ExamProvider>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
