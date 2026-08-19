@@ -1018,7 +1018,16 @@ function getBandOverTime(iaHistory: IAEntry[], mockEntries: MockEntry[]): BandPo
     .map(({ label, band, type }) => ({ label, band, type }));
 }
 
-function getCurrentBand(iaHistory: IAEntry[], mockEntries: MockEntry[]): number | null {
+/**
+ * The average of the MOST RECENT scored assessment only — not the student's band.
+ *
+ * An IA often covers a single skill, so this can read 0.5 for a Speaking-only IA
+ * while Listening sits at 7.0. The authoritative overall band is the mean of the
+ * four competency-matrix scores, shown on the student dashboard
+ * (StudentDashboardPage `overallBand`) and on the instructor progress page.
+ * Do not relabel this as "current band" again.
+ */
+function getLastAssessmentBand(iaHistory: IAEntry[], mockEntries: MockEntry[]): number | null {
   const points = getBandOverTime(iaHistory, mockEntries);
   return points.length > 0 ? points[points.length - 1].band : null;
 }
@@ -1034,7 +1043,7 @@ function getAttendance(iaHistory: IAEntry[]) {
   return { pct, taken, total, ticks };
 }
 
-function getRecordInsight(iaHistory: IAEntry[], currentBand: number | null): { message: string; tone: "amber" | "teal" } {
+function getRecordInsight(iaHistory: IAEntry[], lastAssessmentBand: number | null): { message: string; tone: "amber" | "teal" } {
   const sortedDesc = iaHistory.slice().sort((a, b) => new Date(b.ia_date).getTime() - new Date(a.ia_date).getTime());
   let missStreak = 0;
   for (const e of sortedDesc) {
@@ -1043,10 +1052,12 @@ function getRecordInsight(iaHistory: IAEntry[], currentBand: number | null): { m
   }
   if (missStreak >= 2) {
     const lastScored = sortedDesc.find((e) => e.status === "COMPLETED");
-    const bandText = currentBand != null ? currentBand.toFixed(1) : "—";
+    const bandText = lastAssessmentBand != null ? lastAssessmentBand.toFixed(1) : "—";
     const sinceText = lastScored ? formatIADate(lastScored.ia_date) : "your last score";
+    // Says "last scored assessment", never "your band" — this number is one
+    // assessment's average, not an overall band. See getLastAssessmentBand.
     return {
-      message: `You have missed the last ${missStreak} assessments in a row. Your band has been frozen at ${bandText} since ${sinceText} because nothing has re-scored it.`,
+      message: `You have missed the last ${missStreak} assessments in a row. Your last scored assessment was ${bandText} on ${sinceText}, and nothing has re-scored you since.`,
       tone: "amber",
     };
   }
@@ -1239,7 +1250,7 @@ const AssessmentHistoryPage = () => {
     : iaHistory.filter((e) => (e.scores ?? []).some((s) => s.skill === filterSkillIA))
   ).filter((e) => !hideMissed || e.status !== "MISSED");
 
-  const currentBand = getCurrentBand(iaHistory, mockEntries);
+  const lastAssessmentBand = getLastAssessmentBand(iaHistory, mockEntries);
   const bandOverTime = getBandOverTime(iaHistory, mockEntries);
   const missedCount = iaHistory.filter((e) => e.status === "MISSED").length;
   const monthGroups = groupByMonth(filteredIA);
@@ -1247,7 +1258,7 @@ const AssessmentHistoryPage = () => {
 
   const attendance = getAttendance(iaHistory);
   const subSkillCoverage = getSubSkillCoverage(iaHistory);
-  const recordInsight = getRecordInsight(iaHistory, currentBand);
+  const recordInsight = getRecordInsight(iaHistory, lastAssessmentBand);
 
   const mockProgression = getMockProgression(mockEntries);
   const bestBandPerSkillMock = getBestBandPerSkillMock(mockEntries);
@@ -1325,8 +1336,8 @@ const AssessmentHistoryPage = () => {
                 <p className="text-lg font-black text-white"><AnimatedNumber value={mockEntries.length} /></p>
               </div>
               <div className="rounded-lg bg-white/[0.04] border border-white/5 px-3 py-2.5">
-                <p className="text-[9px] font-bold uppercase tracking-wide text-white/40 mb-1">Current band</p>
-                <p className="text-lg font-black text-white">{currentBand != null ? currentBand.toFixed(1) : "—"}</p>
+                <p className="text-[9px] font-bold uppercase tracking-wide text-white/40 mb-1">Last assessment</p>
+                <p className="text-lg font-black text-white">{lastAssessmentBand != null ? lastAssessmentBand.toFixed(1) : "—"}</p>
               </div>
               <div className="rounded-lg bg-white/[0.04] border border-white/5 px-3 py-2.5">
                 <p className="text-[9px] font-bold uppercase tracking-wide text-white/40 mb-1">Missed</p>

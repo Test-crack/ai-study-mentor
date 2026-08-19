@@ -1,4 +1,4 @@
-import { Flame, Target, Zap } from 'lucide-react';
+import { Flame, Gauge, Target, Zap } from 'lucide-react';
 import { cn } from '@/shared/utils';
 import type { StudentFullProgress, CompetencyRow } from './types';
 
@@ -53,6 +53,14 @@ export function StudentProfileHeader({ data }: Props) {
   const lrsw = lrswFromCompetency(competency);
 
   const stats = [
+    {
+      // Current band leads the row — it's the number an instructor scans for first,
+      // and the gap badge above is meaningless without it on screen.
+      icon: <Gauge className="h-4 w-4" />,
+      label: 'Current Band',
+      value: current_band !== null ? current_band.toFixed(1) : '—',
+      valueClass: current_band !== null ? bandTextColor(current_band) : 'text-brand-text-mute',
+    },
     {
       icon: <Target className="h-4 w-4" />,
       label: 'Target Band',
@@ -133,9 +141,11 @@ export function StudentProfileHeader({ data }: Props) {
         </div>
 
         {/* ── Stats row ───────────────────────────────────────────────── */}
-        <div className="flex items-center gap-0 divide-x divide-brand-line border border-brand-line rounded-xl overflow-hidden mb-4">
+        {/* 4 tiles: 2×2 on mobile, single row from md up. divide-y is dropped at md
+            so the wrapped-row divider doesn't linger once it's one line. */}
+        <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-brand-line border border-brand-line rounded-xl overflow-hidden mb-4">
           {stats.map((s) => (
-            <div key={s.label} className="flex-1 flex items-center gap-2.5 px-4 py-3">
+            <div key={s.label} className="flex items-center gap-2.5 px-4 py-3">
               <span className="text-brand-text-mute shrink-0">{s.icon}</span>
               <div className="min-w-0">
                 <p className="text-[10px] font-bold text-brand-text-mute font-jetbrains uppercase tracking-wider leading-tight">
