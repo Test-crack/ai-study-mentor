@@ -51,7 +51,8 @@ An `exam_configs` table holds the config, versioned. The JSON file stays in the 
 ## Progress
 - ✅ **Step 0** — schema migrated (Exam + ExamConfig tables, `exam_type`→`exam_id` on 10 models, enum dropped, provenance columns). Applied to local + committed. Migration: `s3-pre-push.sql`.
 - ✅ **B1 + B2** — `src/exam-engine/` config loader + ported validator (40+ rules) wired fail-loud into startup; config validates **0 errors / 15 expected warnings**.
-- ⏭️ Next: **B3** (strategy interface + registry) → **B4** (RawScore boundary) → **B5/B6** (band_mean / cefr_hybrid), all against `run-vectors.js`.
+- ✅ **B3–B6 + progression maths** — strategy registry (band_mean/cefr_hybrid, selected by name), RawScore boundary, scoring + momentum/trend/envelope. **`npm run exam-engine:vectors` → 74/74, 0 failures.** Pure layer, no live path touched.
+- ⏭️ Next: **API projection** (`toPublicConfig` + `/api/exams` + `/api/exams/public`, additive) → **B8/B9** (per-component envelope + provenance stamping) → **Phase 6** (route live IELTS scoring through the engine — zero behaviour change), then register Spoken English.
 
 ---
 
