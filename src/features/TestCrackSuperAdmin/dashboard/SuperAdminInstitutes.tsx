@@ -132,7 +132,7 @@ function CreateInstituteModal({ onClose, onCreated }: CreateModalProps) {
     ownerEmail: '',
     ownerPhone: '',
   });
-  const [examTypes, setExamTypes] = useState<ExamType[]>(['IELTS']);
+  const [examTypes, setExamTypes] = useState<ExamType[]>(['ielts']);
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(prev => ({ ...prev, [k]: e.target.value }));
