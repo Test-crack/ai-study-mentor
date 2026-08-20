@@ -48,6 +48,13 @@ An `exam_configs` table holds the config, versioned. The JSON file stays in the 
 
 ---
 
+## Progress
+- ✅ **Step 0** — schema migrated (Exam + ExamConfig tables, `exam_type`→`exam_id` on 10 models, enum dropped, provenance columns). Applied to local + committed. Migration: `s3-pre-push.sql`.
+- ✅ **B1 + B2** — `src/exam-engine/` config loader + ported validator (40+ rules) wired fail-loud into startup; config validates **0 errors / 15 expected warnings**.
+- ⏭️ Next: **B3** (strategy interface + registry) → **B4** (RawScore boundary) → **B5/B6** (band_mean / cefr_hybrid), all against `run-vectors.js`.
+
+---
+
 ## 4 · Step 0 — the schema migration (do this first)
 
 Safe to do now because every `exam_type` column currently holds only `'IELTS'` — nothing to reinterpret. One pre-push SQL + `prisma db push`, all additive/retype.
