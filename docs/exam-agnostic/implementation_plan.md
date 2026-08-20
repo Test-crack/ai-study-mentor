@@ -36,7 +36,9 @@
 | 3 | Batch table renames | ✅ Done — `platform/s1` | commit `0e30604` |
 | 3.5 | Super Admin: institute mgmt + exam selection | ✅ Done — see `superadmin_institute_plan.md` | `platform/s1` |
 | 4 | New tables: ~~subscriptions~~ DPDP + Viva (subscriptions pulled to 3.5) | ✅ Done — `platform/s1` (schema + DOB UI; guardian/viva scaffold-only) | `platform/s1` |
-| 5 | `packages/exam-engine` interfaces | 🔲 | `platform/s2` |
+| 5 | Exam Engine (config-as-data, v2) | 🔲 Next — see `EE-DECISIONS.md` + `phase5_implementation_plan.md` | `platform/s2` |
+
+> **⚠️ v2 revises earlier phases.** The team's Exam Engine v2 package supersedes the v1 Phase 5 plan. Decision **D2** replaces the Phase 1 `ExamType` enum with an `Exam` table + string `exam_id` (done as Phase 5 Step 0, while all `exam_type` data is still `IELTS`). `SkillType`/`SubSkillType` and the IELTS pipeline are kept. Full reasoning: `EE-DECISIONS.md`.
 | 6 | Extract IELTS logic behind interfaces | 🔲 | `platform/s3` |
 | 7 | Prove abstraction: IELTS through registry (gate) | 🔲 | `platform/s3` |
 | 8 | Register SPOKEN (CEFR) + Viva Engine backend | 🔲 | `platform/s4` |
