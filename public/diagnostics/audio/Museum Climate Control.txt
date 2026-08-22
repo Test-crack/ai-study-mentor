@@ -1,0 +1,48 @@
+[PROVISIONAL — auto-transcribed, not the author's verbatim script. Abhishek did not submit a
+transcript for this set; this was generated from the audio itself as a stopgap. Flag: the phrase
+"Finally, visitor comfort..." appears twice in a row — likely a stutter/re-take left in the recording,
+worth Abhishek double-checking. Replace this file with the real script once available.]
+
+Before we approve the upgrade, I want to settle two things: environmental zoning and sensor reliability. Daniel, your plan still uses one temperature and humidity target for the entire museum.
+
+It would certainly simplify the system.
+
+But it could be inappropriate for the collection. We have paintings, paper archives, archaeological wood, metals, and textiles. A condition can be perfectly stable and still be unsuitable for a particular material.
+
+So you wouldn't recommend one museum-wide target?
+
+No, but I wouldn't create a separate climate for every object, either. I'd group galleries according to the vulnerability of the materials they contain. Three or four zones would be manageable.
+
+Good. Now, the proposal says all 28 sensors should be replaced because some readings appeared inconsistent.
+
+I don't support replacing them yet.
+
+Why not?
+
+Because some abnormal readings may be caused by location rather than faulty equipment. One sensor is above an air vent, another is beside a sun-exposed wall, and another is close to a door that opens constantly. They may be measuring real local conditions.
+
+So what do you recommend?
+
+Test all the sensors together under identical conditions first. Any unit that still deviates significantly can then be recalibrated or replaced.
+
+What about recording frequency? At present, the system stores one reading every hour.
+
+That's enough for long-term averages. But not for short fluctuations. If a large group enters a gallery and the doors remain open, conditions can change rapidly. We could record every 10 minutes.
+
+Storage isn't the problem. My concern is that staff may overreact to every brief peak or dip.
+
+Then increase the frequency, but introduce clear intervention thresholds.
+
+Agreed. The West Wing windows are another issue. The original proposal suggested sealing them permanently. The revised plan is different. We would keep the historic windows and install secondary glazing internally.
+
+That is better, but we need to watch for condensation.
+
+Exactly. That's why I'd trial it in two representative rooms first and monitor performance during both warm and cool weather before extending it.
+
+Finally, visitor comfort. Some staff think conservation requirements are making the galleries unnecessarily uncomfortable.
+
+That's too simplistic. Comfort and preservation are different objectives. And we don't always need to change the whole gallery temperature. We can reduce drafts, improve entrance lobbies, and manage airflow more carefully.
+
+So, the final approach is: zoned environmental targets, sensor testing before replacement, 10-minute monitoring with intervention thresholds, a limited glazing trial, and separate treatment of visitor comfort and conservation.
+
+Exactly.
