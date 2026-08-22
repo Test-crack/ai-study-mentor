@@ -30,12 +30,12 @@ const TABS: Array<{ id: Tab; label: string; icon: React.ReactNode }> = [
 function PageSkeleton() {
   return (
     <div className="animate-pulse space-y-5">
-      <div className="h-36 bg-slate-200 dark:bg-white/[0.04] rounded-2xl" />
-      <div className="h-10 w-80 bg-slate-200 dark:bg-white/[0.04] rounded-xl" />
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {[1, 2, 3, 4].map(i => <div key={i} className="h-24 bg-slate-200 dark:bg-white/[0.04] rounded-2xl" />)}
+      <div className="h-36 bg-brand-bg-alt rounded-2xl" />
+      <div className="h-10 w-full max-w-xs sm:max-w-sm bg-brand-bg-alt rounded-xl" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {[1, 2, 3, 4].map(i => <div key={i} className="h-24 bg-brand-bg-alt rounded-2xl" />)}
       </div>
-      <div className="h-64 bg-slate-200 dark:bg-white/[0.04] rounded-2xl" />
+      <div className="h-64 bg-brand-bg-alt rounded-2xl" />
     </div>
   );
 }
@@ -84,7 +84,7 @@ export default function InstituteAdminStudentProgressPage() {
     <InstituteAdminLayout activeTab="students">
       <button
         onClick={() => navigate("/institute-admin/students")}
-        className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-brand-teal-600 dark:hover:text-brand-teal-400 transition-colors"
+        className="inline-flex items-center gap-1.5 min-h-[40px] text-sm font-bold text-brand-text-mute hover:text-brand-teal-600 transition-colors"
       >
         <ChevronLeft className="h-4 w-4" /> Back to Students
       </button>
@@ -106,10 +106,10 @@ export default function InstituteAdminStudentProgressPage() {
                 key={t.id}
                 onClick={() => setActiveTab(t.id)}
                 className={cn(
-                  "inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-colors",
+                  "inline-flex items-center gap-1.5 px-3.5 py-2 min-h-[40px] rounded-xl text-xs font-bold transition-colors",
                   activeTab === t.id
                     ? "bg-brand-teal-600 text-white shadow-sm"
-                    : "bg-white dark:bg-white/[0.04] text-slate-600 dark:text-slate-300 border border-slate-200/70 dark:border-white/[0.06] hover:bg-slate-50 dark:hover:bg-white/[0.08]"
+                    : "bg-white text-brand-text border border-brand-line hover:bg-brand-bg-alt"
                 )}
               >
                 {t.icon} {t.label}

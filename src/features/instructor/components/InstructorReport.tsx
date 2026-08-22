@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  TrendingUp, 
-  AlertTriangle, 
-  CheckCircle2, 
-  Copy, 
+import {
+  TrendingUp,
+  AlertTriangle,
+  CheckCircle2,
+  Copy,
   Check,
   ChevronDown
 } from 'lucide-react';
@@ -13,37 +13,37 @@ import { InstructorTopbar } from '../components/dashboard/InstructorTopbar';
 // --- Mock Data ---
 
 const struggleGroups = [
-  { 
-    count: 17, 
-    desc: "Ready for advanced material", 
-    cohort: "26%", 
-    color: "text-emerald-600 dark:text-emerald-500", 
-    bg: "bg-emerald-500", 
-    icon: <svg width="20" height="20" viewBox="0 0 24 24"><polygon points="12,4 22,20 2,20" fill="none" stroke="currentColor" strokeWidth="2.5"/></svg> 
+  {
+    count: 17,
+    desc: "Ready for advanced material",
+    cohort: "26%",
+    color: "text-emerald-600",
+    bg: "bg-emerald-500",
+    icon: <svg width="20" height="20" viewBox="0 0 24 24"><polygon points="12,4 22,20 2,20" fill="none" stroke="currentColor" strokeWidth="2.5"/></svg>
   },
-  { 
-    count: 16, 
-    desc: "Immediate intervention required", 
-    cohort: "25%", 
-    color: "text-rose-600 dark:text-rose-500", 
-    bg: "bg-rose-500", 
-    icon: <svg width="20" height="20" viewBox="0 0 24 24"><polygon points="12,20 2,4 22,4" fill="none" stroke="currentColor" strokeWidth="2.5"/></svg> 
+  {
+    count: 16,
+    desc: "Immediate intervention required",
+    cohort: "25%",
+    color: "text-rose-600",
+    bg: "bg-rose-500",
+    icon: <svg width="20" height="20" viewBox="0 0 24 24"><polygon points="12,20 2,4 22,4" fill="none" stroke="currentColor" strokeWidth="2.5"/></svg>
   },
-  { 
-    count: 16, 
-    desc: "Needs confidence & speed drills", 
-    cohort: "25%", 
-    color: "text-amber-600 dark:text-amber-500", 
-    bg: "bg-amber-500", 
-    icon: <svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="2.5"/></svg> 
+  {
+    count: 16,
+    desc: "Needs confidence & speed drills",
+    cohort: "25%",
+    color: "text-amber-600",
+    bg: "bg-amber-500",
+    icon: <svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="2.5"/></svg>
   },
-  { 
-    count: 1, 
-    desc: "Needs focus & patience training", 
-    cohort: "23%", 
-    color: "text-orange-600 dark:text-orange-500", 
-    bg: "bg-orange-500", 
-    icon: <svg width="20" height="20" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5"/></svg> 
+  {
+    count: 1,
+    desc: "Needs focus & patience training",
+    cohort: "23%",
+    color: "text-orange-600",
+    bg: "bg-orange-500",
+    icon: <svg width="20" height="20" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5"/></svg>
   }
 ];
 
@@ -86,7 +86,7 @@ export default function InstructorReport() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [copiedMsg, setCopiedMsg] = useState(false);
   const [copiedPlan, setCopiedPlan] = useState(false);
-  
+
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -108,65 +108,65 @@ export default function InstructorReport() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0A0A0A] font-sans text-slate-900 dark:text-slate-200 transition-colors duration-300">
-      
-      {/* No need for an extra wrapper div here. 
-        InstituteSidebar handles its own 'hidden lg:flex' responsive display. 
+    <div className="relative min-h-screen font-plex antialiased overflow-x-hidden bg-brand-bg text-brand-text">
+
+      {/* No need for an extra wrapper div here.
+        InstituteSidebar handles its own 'hidden lg:flex' responsive display.
         activeTab is corrected to match the id 'report' in your sidebar configuration.
       */}
-      <InstructorSidebar 
-        activeTab="report" 
-        isCollapsed={isSidebarCollapsed} 
-        toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
+      <InstructorSidebar
+        activeTab="report"
+        isCollapsed={isSidebarCollapsed}
+        toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
 
-      {/* Corrected Layout Constraints: 
+      {/* Corrected Layout Constraints:
         112px clears the collapsed sidebar (80px + 16px left-gap + 16px right-gap).
         288px clears the expanded sidebar (256px + 16px left-gap + 16px right-gap).
       */}
-      <div className={`transition-all duration-300 flex flex-col min-h-screen ${isSidebarCollapsed ? 'lg:pl-[112px]' : 'lg:pl-[288px]'}`}>
-        
+      <div className={`relative z-10 transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-24' : 'lg:pl-72'}`}>
+
         <InstructorTopbar />
 
         {/* overflow-x-hidden ensures charting SVGs do not blow out the layout width */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden">
+        <main className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 max-w-[90rem] mx-auto pb-16">
           <div className="max-w-[1400px] mx-auto space-y-6">
-            
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">Command Report</h1>
+
+            <h1 className="text-2xl sm:text-3xl font-bold text-brand-text mb-2">Command Report</h1>
 
             {/* Weekly Intelligence Brief Card */}
-            <div className="bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#222] rounded-xl p-6 shadow-sm">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Weekly Intelligence Brief</h2>
-              <p className="text-sm text-slate-600 dark:text-gray-400 mb-8 max-w-5xl leading-relaxed">
-                Across <span className="text-slate-900 dark:text-white font-semibold">64 students</span>, average accuracy is <span className="text-slate-900 dark:text-white font-semibold">61%</span>. <span className="text-slate-900 dark:text-white font-semibold">17 are sprint-ready</span>, while <span className="text-slate-900 dark:text-white font-semibold">16 need immediate intervention</span>. Critical friction point: <span className="text-rose-600 dark:text-rose-500 font-semibold">"DP (timed)"</span> with a <span className="text-slate-900 dark:text-white font-semibold">100% fail rate</span>.
+            <div className="bg-white border border-brand-line rounded-xl p-6 shadow-sm">
+              <h2 className="text-xl font-bold text-brand-text mb-2">Weekly Intelligence Brief</h2>
+              <p className="text-sm text-brand-text-mute mb-8 max-w-5xl leading-relaxed">
+                Across <span className="text-brand-text font-semibold">64 students</span>, average accuracy is <span className="text-brand-text font-semibold">61%</span>. <span className="text-brand-text font-semibold">17 are sprint-ready</span>, while <span className="text-brand-text font-semibold">16 need immediate intervention</span>. Critical friction point: <span className="text-rose-600 font-semibold">"DP (timed)"</span> with a <span className="text-brand-text font-semibold">100% fail rate</span>.
               </p>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center">
-                  <h3 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-1">61%</h3>
-                  <p className="text-xs font-bold text-slate-500 dark:text-gray-500 uppercase tracking-wider">Avg Accuracy</p>
+                  <h3 className="text-3xl font-extrabold text-brand-text mb-1">61%</h3>
+                  <p className="text-xs font-bold text-brand-text-mute uppercase tracking-wider font-jetbrains">Avg Accuracy</p>
                 </div>
-                <div className="text-center md:border-l border-slate-200 dark:border-[#222]">
-                  <h3 className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-500 mb-1">17</h3>
-                  <p className="text-xs font-bold text-slate-500 dark:text-gray-500 uppercase tracking-wider">Sprint Ready</p>
+                <div className="text-center md:border-l border-brand-line">
+                  <h3 className="text-3xl font-extrabold text-emerald-600 mb-1">17</h3>
+                  <p className="text-xs font-bold text-brand-text-mute uppercase tracking-wider font-jetbrains">Sprint Ready</p>
                 </div>
-                <div className="text-center md:border-l border-slate-200 dark:border-[#222]">
-                  <h3 className="text-3xl font-extrabold text-rose-600 dark:text-rose-500 mb-1">16</h3>
-                  <p className="text-xs font-bold text-slate-500 dark:text-gray-500 uppercase tracking-wider">Need Intervention</p>
+                <div className="text-center md:border-l border-brand-line">
+                  <h3 className="text-3xl font-extrabold text-rose-600 mb-1">16</h3>
+                  <p className="text-xs font-bold text-brand-text-mute uppercase tracking-wider font-jetbrains">Need Intervention</p>
                 </div>
-                <div className="text-center md:border-l border-slate-200 dark:border-[#222]">
+                <div className="text-center md:border-l border-brand-line">
                   <h3 className="text-3xl font-extrabold text-amber-500 mb-1">100%</h3>
-                  <p className="text-xs font-bold text-slate-500 dark:text-gray-500 uppercase tracking-wider">Top Fail Rate</p>
+                  <p className="text-xs font-bold text-brand-text-mute uppercase tracking-wider font-jetbrains">Top Fail Rate</p>
                 </div>
               </div>
             </div>
 
             {/* Struggle Distribution */}
             <div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4 mt-8">Struggle Distribution</h2>
+              <h2 className="text-xl font-bold text-brand-text mb-4 mt-8">Struggle Distribution</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {struggleGroups.map((group, idx) => (
-                  <div key={idx} className="bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#222] rounded-xl p-5 shadow-sm relative overflow-hidden">
+                  <div key={idx} className="bg-white border border-brand-line rounded-xl p-5 shadow-sm relative overflow-hidden">
                     <div className={`absolute top-0 left-0 w-full h-1 ${group.bg}`}></div>
                     <div className="flex items-center gap-2 mb-2 mt-1">
                       <div className={`${group.color}`}>
@@ -174,10 +174,10 @@ export default function InstructorReport() {
                       </div>
                       <span className={`text-2xl font-extrabold ${group.color}`}>{group.count}</span>
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-gray-400 mb-4 h-8">{group.desc}</p>
-                    <div className="flex justify-between items-center text-[11px] font-medium text-slate-500 border-t border-slate-100 dark:border-[#222] pt-3">
+                    <p className="text-xs text-brand-text-mute mb-4 h-8">{group.desc}</p>
+                    <div className="flex justify-between items-center text-[11px] font-medium text-brand-text-mute border-t border-brand-line pt-3">
                       <span>{group.cohort} of cohort</span>
-                      <button className="hover:text-slate-900 dark:hover:text-white flex items-center gap-1">Show students <ChevronDown className="w-3 h-3"/></button>
+                      <button className="hover:text-brand-text flex items-center gap-1">Show students <ChevronDown className="w-3 h-3"/></button>
                     </div>
                   </div>
                 ))}
@@ -186,34 +186,34 @@ export default function InstructorReport() {
 
             {/* Charts Row 1: Radar & Line */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-              
+
               {/* Cohort Skill Profile */}
-              <div className="bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#222] rounded-xl p-6 shadow-sm flex flex-col">
-                <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">Cohort Skill Profile</h3>
-                <p className="text-xs text-slate-500 dark:text-gray-500 mb-8">Average across all students — identifies systemic weaknesses for curriculum adjustments.</p>
+              <div className="bg-white border border-brand-line rounded-xl p-6 shadow-sm flex flex-col">
+                <h3 className="text-base font-bold text-brand-text mb-1">Cohort Skill Profile</h3>
+                <p className="text-xs text-brand-text-mute mb-8">Average across all students — identifies systemic weaknesses for curriculum adjustments.</p>
                 <div className="flex-1 flex items-center justify-center relative min-h-[250px]">
                   <svg viewBox="0 0 100 100" className="w-full max-w-[280px] h-auto overflow-visible">
                     {[20, 40, 60, 80, 100].map(r => (
-                      <polygon 
+                      <polygon
                         key={r}
                         points={`50,${50-r/2} ${50+r*0.433},${50-r*0.25} ${50+r*0.433},${50+r*0.25} 50,${50+r/2} ${50-r*0.433},${50+r*0.25} ${50-r*0.433},${50-r*0.25}`}
-                        fill="none" className="stroke-slate-200 dark:stroke-[#222]" strokeWidth="0.5"
+                        fill="none" className="stroke-brand-line" strokeWidth="0.5"
                       />
                     ))}
-                    <line x1="50" y1="50" x2="50" y2="0" className="stroke-slate-200 dark:stroke-[#222]" strokeWidth="0.5" />
-                    <line x1="50" y1="50" x2="93.3" y2="25" className="stroke-slate-200 dark:stroke-[#222]" strokeWidth="0.5" />
-                    <line x1="50" y1="50" x2="93.3" y2="75" className="stroke-slate-200 dark:stroke-[#222]" strokeWidth="0.5" />
-                    <line x1="50" y1="50" x2="50" y2="100" className="stroke-slate-200 dark:stroke-[#222]" strokeWidth="0.5" />
-                    <line x1="50" y1="50" x2="6.7" y2="75" className="stroke-slate-200 dark:stroke-[#222]" strokeWidth="0.5" />
-                    <line x1="50" y1="50" x2="6.7" y2="25" className="stroke-slate-200 dark:stroke-[#222]" strokeWidth="0.5" />
-                    
+                    <line x1="50" y1="50" x2="50" y2="0" className="stroke-brand-line" strokeWidth="0.5" />
+                    <line x1="50" y1="50" x2="93.3" y2="25" className="stroke-brand-line" strokeWidth="0.5" />
+                    <line x1="50" y1="50" x2="93.3" y2="75" className="stroke-brand-line" strokeWidth="0.5" />
+                    <line x1="50" y1="50" x2="50" y2="100" className="stroke-brand-line" strokeWidth="0.5" />
+                    <line x1="50" y1="50" x2="6.7" y2="75" className="stroke-brand-line" strokeWidth="0.5" />
+                    <line x1="50" y1="50" x2="6.7" y2="25" className="stroke-brand-line" strokeWidth="0.5" />
+
                     {/* Animated Radar Polygon */}
-                    <polygon 
-                      points="50,15 82,30 75,70 50,85 28,65 18,32" 
-                      fill="rgba(139, 92, 246, 0.2)" 
-                      stroke="#256B8B" 
-                      strokeWidth="1.5" 
-                      style={{ 
+                    <polygon
+                      points="50,15 82,30 75,70 50,85 28,65 18,32"
+                      fill="rgba(139, 92, 246, 0.2)"
+                      stroke="#256B8B"
+                      strokeWidth="1.5"
+                      style={{
                         transformOrigin: '50px 50px',
                         transform: isLoaded ? 'scale(1)' : 'scale(0)',
                         opacity: isLoaded ? 1 : 0,
@@ -221,28 +221,28 @@ export default function InstructorReport() {
                       }}
                     />
 
-                    <text x="50" y="-5" fontSize="4" textAnchor="middle" fill="currentColor" className="text-slate-500 dark:text-gray-400 font-medium">Accuracy</text>
-                    <text x="100" y="25" fontSize="4" textAnchor="start" fill="currentColor" className="text-slate-500 dark:text-gray-400 font-medium">Fluency</text>
-                    <text x="100" y="75" fontSize="4" textAnchor="start" fill="currentColor" className="text-slate-500 dark:text-gray-400 font-medium">Confidence</text>
-                    <text x="50" y="108" fontSize="4" textAnchor="middle" fill="currentColor" className="text-slate-500 dark:text-gray-400 font-medium">Pronunciation</text>
-                    <text x="0" y="75" fontSize="4" textAnchor="end" fill="currentColor" className="text-slate-500 dark:text-gray-400 font-medium">Grammar</text>
-                    <text x="0" y="25" fontSize="4" textAnchor="end" fill="currentColor" className="text-slate-500 dark:text-gray-400 font-medium">Vocabulary</text>
+                    <text x="50" y="-5" fontSize="4" textAnchor="middle" fill="currentColor" className="text-brand-text-mute font-medium">Accuracy</text>
+                    <text x="100" y="25" fontSize="4" textAnchor="start" fill="currentColor" className="text-brand-text-mute font-medium">Fluency</text>
+                    <text x="100" y="75" fontSize="4" textAnchor="start" fill="currentColor" className="text-brand-text-mute font-medium">Confidence</text>
+                    <text x="50" y="108" fontSize="4" textAnchor="middle" fill="currentColor" className="text-brand-text-mute font-medium">Pronunciation</text>
+                    <text x="0" y="75" fontSize="4" textAnchor="end" fill="currentColor" className="text-brand-text-mute font-medium">Grammar</text>
+                    <text x="0" y="25" fontSize="4" textAnchor="end" fill="currentColor" className="text-brand-text-mute font-medium">Vocabulary</text>
                   </svg>
                 </div>
               </div>
 
               {/* 6-Week Progress Trend */}
-              <div className="bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#222] rounded-xl p-6 shadow-sm flex flex-col">
-                <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">6-Week Progress Trend</h3>
-                <p className="text-xs text-slate-500 dark:text-gray-500 mb-6">Tracks whether your teaching interventions are moving the needle week-over-week.</p>
-                
+              <div className="bg-white border border-brand-line rounded-xl p-6 shadow-sm flex flex-col">
+                <h3 className="text-base font-bold text-brand-text mb-1">6-Week Progress Trend</h3>
+                <p className="text-xs text-brand-text-mute mb-6">Tracks whether your teaching interventions are moving the needle week-over-week.</p>
+
                 <div className="flex-1 relative w-full min-h-[220px]">
                   {/* Background Grid Lines */}
-                  <div className="absolute inset-0 flex flex-col justify-between text-[10px] text-slate-400 dark:text-gray-500 z-0">
+                  <div className="absolute inset-0 flex flex-col justify-between text-[10px] text-brand-text-mute z-0">
                     {[80, 60, 45, 30].map(val => (
                       <div key={val} className="w-full flex items-center gap-2">
                         <span className="w-4 text-right">{val}</span>
-                        <div className="flex-1 border-b border-slate-100 dark:border-[#222]"></div>
+                        <div className="flex-1 border-b border-brand-line"></div>
                       </div>
                     ))}
                   </div>
@@ -250,18 +250,18 @@ export default function InstructorReport() {
                   {/* Animated SVG Lines */}
                   <div className="absolute inset-0 left-6 bottom-6 right-0 top-2 z-0 pointer-events-none">
                     <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible" preserveAspectRatio="none">
-                      <path 
-                        d={`M ${trendData.map((d, i) => `${i*20},${100 - ((d.acc - 30)*2)}`).join(' L ')}`} 
+                      <path
+                        d={`M ${trendData.map((d, i) => `${i*20},${100 - ((d.acc - 30)*2)}`).join(' L ')}`}
                         fill="none" stroke="#256B8B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
                         strokeDasharray="300" strokeDashoffset={isLoaded ? 0 : 300} style={{ transition: 'stroke-dashoffset 1.5s ease-in-out' }}
                       />
-                      <path 
-                        d={`M ${trendData.map((d, i) => `${i*20},${100 - ((d.flu - 30)*2)}`).join(' L ')}`} 
+                      <path
+                        d={`M ${trendData.map((d, i) => `${i*20},${100 - ((d.flu - 30)*2)}`).join(' L ')}`}
                         fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
                         strokeDasharray="300" strokeDashoffset={isLoaded ? 0 : 300} style={{ transition: 'stroke-dashoffset 1.5s ease-in-out 0.2s' }}
                       />
-                      <path 
-                        d={`M ${trendData.map((d, i) => `${i*20},${100 - ((d.conf - 30)*2)}`).join(' L ')}`} 
+                      <path
+                        d={`M ${trendData.map((d, i) => `${i*20},${100 - ((d.conf - 30)*2)}`).join(' L ')}`}
                         fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
                         strokeDasharray="300" strokeDashoffset={isLoaded ? 0 : 300} style={{ transition: 'stroke-dashoffset 1.5s ease-in-out 0.4s' }}
                       />
@@ -276,56 +276,56 @@ export default function InstructorReport() {
                       const yFlu = 100 - ((d.flu - 30) * 2);
                       const yConf = 100 - ((d.conf - 30) * 2);
                       const highestY = Math.min(yAcc, yFlu, yConf);
-                      
+
                       // Delay for dot animations to sync roughly with line drawing
                       const animDelay = `${i * 150}ms`;
 
                       return (
                         <div key={i} className="absolute top-0 bottom-0 w-8 -ml-4 group cursor-pointer" style={{ left: `${leftPercent}%` }}>
-                          <div className="absolute inset-y-0 left-1/2 w-px bg-slate-200 dark:bg-[#333] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                          <div className="absolute inset-y-0 left-1/2 w-px bg-brand-line opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
 
-                          <div className="absolute left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-white dark:bg-[#141414] border-2 border-[#256B8B] transition-all duration-300 group-hover:scale-[1.3] pointer-events-none" style={{ top: `calc(${yAcc}% - 5px)`, opacity: isLoaded ? 1 : 0, transitionDelay: isLoaded ? animDelay : '0ms' }}></div>
-                          <div className="absolute left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-white dark:bg-[#141414] border-2 border-[#10b981] transition-all duration-300 group-hover:scale-[1.3] pointer-events-none" style={{ top: `calc(${yFlu}% - 5px)`, opacity: isLoaded ? 1 : 0, transitionDelay: isLoaded ? animDelay : '0ms' }}></div>
-                          <div className="absolute left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-white dark:bg-[#141414] border-2 border-[#f59e0b] transition-all duration-300 group-hover:scale-[1.3] pointer-events-none" style={{ top: `calc(${yConf}% - 5px)`, opacity: isLoaded ? 1 : 0, transitionDelay: isLoaded ? animDelay : '0ms' }}></div>
+                          <div className="absolute left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-white border-2 border-[#256B8B] transition-all duration-300 group-hover:scale-[1.3] pointer-events-none" style={{ top: `calc(${yAcc}% - 5px)`, opacity: isLoaded ? 1 : 0, transitionDelay: isLoaded ? animDelay : '0ms' }}></div>
+                          <div className="absolute left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-white border-2 border-[#10b981] transition-all duration-300 group-hover:scale-[1.3] pointer-events-none" style={{ top: `calc(${yFlu}% - 5px)`, opacity: isLoaded ? 1 : 0, transitionDelay: isLoaded ? animDelay : '0ms' }}></div>
+                          <div className="absolute left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-white border-2 border-[#f59e0b] transition-all duration-300 group-hover:scale-[1.3] pointer-events-none" style={{ top: `calc(${yConf}% - 5px)`, opacity: isLoaded ? 1 : 0, transitionDelay: isLoaded ? animDelay : '0ms' }}></div>
 
-                          <div 
-                            className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 pointer-events-none bg-white dark:bg-[#1e1e1e] border border-slate-200 dark:border-[#333] shadow-xl dark:shadow-2xl rounded-lg p-3 w-[120px]"
+                          <div
+                            className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 pointer-events-none bg-white border border-brand-line shadow-sm rounded-lg p-3 w-[120px]"
                             style={{
-                              top: `calc(${highestY}% - 100px)`, 
+                              top: `calc(${highestY}% - 100px)`,
                               left: i > 3 ? 'auto' : '50%',
                               right: i > 3 ? '50%' : 'auto',
                               marginLeft: i > 3 ? '0' : '8px',
                               marginRight: i > 3 ? '8px' : '0'
                             }}
                           >
-                            <p className="font-bold text-slate-900 dark:text-white mb-2 pb-1.5 border-b border-slate-100 dark:border-[#333] text-xs">{d.w}</p>
+                            <p className="font-bold text-brand-text mb-2 pb-1.5 border-b border-brand-line text-xs">{d.w}</p>
                             <div className="space-y-1.5 text-xs">
-                              <div className="flex justify-between items-center"><span className="text-[#256B8B] font-medium">Accuracy</span><span className="font-semibold text-slate-700 dark:text-gray-300"> : {d.acc}</span></div>
-                              <div className="flex justify-between items-center"><span className="text-[#10b981] font-medium">Fluency</span><span className="font-semibold text-slate-700 dark:text-gray-300"> : {d.flu}</span></div>
-                              <div className="flex justify-between items-center"><span className="text-[#f59e0b] font-medium">Confidence</span><span className="font-semibold text-slate-700 dark:text-gray-300"> : {d.conf}</span></div>
+                              <div className="flex justify-between items-center"><span className="text-[#256B8B] font-medium">Accuracy</span><span className="font-semibold text-brand-text"> : {d.acc}</span></div>
+                              <div className="flex justify-between items-center"><span className="text-[#10b981] font-medium">Fluency</span><span className="font-semibold text-brand-text"> : {d.flu}</span></div>
+                              <div className="flex justify-between items-center"><span className="text-[#f59e0b] font-medium">Confidence</span><span className="font-semibold text-brand-text"> : {d.conf}</span></div>
                             </div>
                           </div>
                         </div>
                       )
                     })}
                   </div>
-                  
-                  <div className="absolute bottom-0 left-6 right-0 flex justify-between text-[10px] text-slate-500 dark:text-gray-500 font-medium">
+
+                  <div className="absolute bottom-0 left-6 right-0 flex justify-between text-[10px] text-brand-text-mute font-medium">
                     {trendData.map(d => <span key={d.w}>{d.w}</span>)}
                   </div>
                 </div>
 
-                <div className="flex justify-center gap-6 mt-6 text-xs font-medium text-slate-600 dark:text-gray-400">
+                <div className="flex justify-center gap-6 mt-6 text-xs font-medium text-brand-text-mute">
                   <span className="flex items-center gap-1.5">
-                    <svg width="18" height="10" viewBox="0 0 18 10" className="overflow-visible"><line x1="0" y1="5" x2="18" y2="5" stroke="#256B8B" strokeWidth="1.5"/><circle cx="9" cy="5" r="3" stroke="#256B8B" strokeWidth="1.5" className="fill-white dark:fill-[#141414]"/></svg>
+                    <svg width="18" height="10" viewBox="0 0 18 10" className="overflow-visible"><line x1="0" y1="5" x2="18" y2="5" stroke="#256B8B" strokeWidth="1.5"/><circle cx="9" cy="5" r="3" stroke="#256B8B" strokeWidth="1.5" className="fill-white"/></svg>
                     Accuracy
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <svg width="18" height="10" viewBox="0 0 18 10" className="overflow-visible"><line x1="0" y1="5" x2="18" y2="5" stroke="#10b981" strokeWidth="1.5"/><circle cx="9" cy="5" r="3" stroke="#10b981" strokeWidth="1.5" className="fill-white dark:fill-[#141414]"/></svg>
+                    <svg width="18" height="10" viewBox="0 0 18 10" className="overflow-visible"><line x1="0" y1="5" x2="18" y2="5" stroke="#10b981" strokeWidth="1.5"/><circle cx="9" cy="5" r="3" stroke="#10b981" strokeWidth="1.5" className="fill-white"/></svg>
                     Fluency
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <svg width="18" height="10" viewBox="0 0 18 10" className="overflow-visible"><line x1="0" y1="5" x2="18" y2="5" stroke="#f59e0b" strokeWidth="1.5"/><circle cx="9" cy="5" r="3" stroke="#f59e0b" strokeWidth="1.5" className="fill-white dark:fill-[#141414]"/></svg>
+                    <svg width="18" height="10" viewBox="0 0 18 10" className="overflow-visible"><line x1="0" y1="5" x2="18" y2="5" stroke="#f59e0b" strokeWidth="1.5"/><circle cx="9" cy="5" r="3" stroke="#f59e0b" strokeWidth="1.5" className="fill-white"/></svg>
                     Confidence
                   </span>
                 </div>
@@ -334,96 +334,96 @@ export default function InstructorReport() {
             </div>
 
             {/* Batch Performance Comparison */}
-            <div className="bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#222] rounded-xl p-6 shadow-sm mt-8">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">Batch Performance Comparison</h3>
-              <p className="text-xs text-slate-500 dark:text-gray-500 mb-8">Compare batches to identify which tutors and curricula are producing the best outcomes.</p>
-              
-              <div className="relative w-full h-48 flex items-end justify-around border-b border-slate-200 dark:border-[#222] pb-2">
+            <div className="bg-white border border-brand-line rounded-xl p-6 shadow-sm mt-8">
+              <h3 className="text-base font-bold text-brand-text mb-1">Batch Performance Comparison</h3>
+              <p className="text-xs text-brand-text-mute mb-8">Compare batches to identify which tutors and curricula are producing the best outcomes.</p>
+
+              <div className="relative w-full h-48 flex items-end justify-around border-b border-brand-line pb-2">
                 <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
                   {[100, 75, 50, 25, 0].map(val => (
-                    <div key={val} className="w-full border-b border-slate-100 dark:border-[#222] flex items-center h-0 relative">
-                      <span className="absolute -left-6 text-[10px] text-slate-400 dark:text-gray-500 -translate-y-1/2">{val}</span>
+                    <div key={val} className="w-full border-b border-brand-line flex items-center h-0 relative">
+                      <span className="absolute -left-6 text-[10px] text-brand-text-mute -translate-y-1/2">{val}</span>
                     </div>
                   ))}
                 </div>
 
                 {batchPerformance.map((batch, idx) => (
                   <div key={idx} className="relative group w-16 sm:w-24 h-full flex items-end justify-center gap-1 z-10">
-                    <div 
-                      className="w-1/2 bg-brand-blue-600 rounded-t-sm hover:opacity-90 transition-opacity" 
-                      style={{ 
-                        height: isLoaded ? `${batch.acc}%` : '0%', 
-                        transition: 'height 1s cubic-bezier(0.16, 1, 0.3, 1)' 
+                    <div
+                      className="w-1/2 bg-brand-blue-600 rounded-t-sm hover:opacity-90 transition-opacity"
+                      style={{
+                        height: isLoaded ? `${batch.acc}%` : '0%',
+                        transition: 'height 1s cubic-bezier(0.16, 1, 0.3, 1)'
                       }}>
                     </div>
-                    <div 
-                      className="w-1/2 bg-emerald-500 rounded-t-sm hover:opacity-90 transition-opacity" 
-                      style={{ 
-                        height: isLoaded ? `${batch.imp}%` : '0%', 
-                        transition: 'height 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s' 
+                    <div
+                      className="w-1/2 bg-emerald-500 rounded-t-sm hover:opacity-90 transition-opacity"
+                      style={{
+                        height: isLoaded ? `${batch.imp}%` : '0%',
+                        transition: 'height 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s'
                       }}>
                     </div>
-                    
-                    <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white dark:bg-[#1e1e1e] border border-slate-200 dark:border-[#333] shadow-xl rounded-lg p-3 text-xs w-40 z-20">
-                      <p className="font-bold text-slate-900 dark:text-white mb-2 pb-1 border-b border-slate-100 dark:border-[#333]">{batch.name}</p>
+
+                    <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white border border-brand-line shadow-sm rounded-lg p-3 text-xs w-40 z-20">
+                      <p className="font-bold text-brand-text mb-2 pb-1 border-b border-brand-line">{batch.name}</p>
                       <div className="flex justify-between mb-1">
-                        <span className="text-slate-500 dark:text-gray-400">Accuracy %</span>
-                        <span className="font-bold text-brand-blue-600 dark:text-brand-blue-500">{batch.acc}</span>
+                        <span className="text-brand-text-mute">Accuracy %</span>
+                        <span className="font-bold text-brand-blue-600">{batch.acc}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-500 dark:text-gray-400">Improvement %</span>
-                        <span className="font-bold text-emerald-600 dark:text-emerald-400">{batch.imp}</span>
+                        <span className="text-brand-text-mute">Improvement %</span>
+                        <span className="font-bold text-emerald-600">{batch.imp}</span>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="flex justify-around mt-3 text-[10px] sm:text-xs text-slate-500 dark:text-gray-500 text-center font-medium">
+              <div className="flex justify-around mt-3 text-[10px] sm:text-xs text-brand-text-mute text-center font-medium">
                 {batchPerformance.map(b => <span key={b.name} className="w-16 sm:w-24 truncate">{b.name}</span>)}
               </div>
-              <div className="flex justify-center gap-6 mt-6 text-[11px] font-medium text-slate-600 dark:text-gray-400">
+              <div className="flex justify-center gap-6 mt-6 text-[11px] font-medium text-brand-text-mute">
                 <span className="flex items-center gap-1.5"><div className="w-3 h-3 bg-brand-blue-600 rounded-sm"></div> Accuracy %</span>
                 <span className="flex items-center gap-1.5"><div className="w-3 h-3 bg-emerald-500 rounded-sm"></div> Improvement %</span>
               </div>
             </div>
 
             {/* Topic Heatmap */}
-            <div className="bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#222] rounded-xl p-6 shadow-sm mt-8">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">Topic Heatmap</h3>
-              
-              <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/50 rounded-lg p-3 mb-6 flex items-start gap-2">
+            <div className="bg-white border border-brand-line rounded-xl p-6 shadow-sm mt-8">
+              <h3 className="text-base font-bold text-brand-text mb-2">Topic Heatmap</h3>
+
+              <div className="bg-rose-50 border border-rose-100 rounded-lg p-3 mb-6 flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                <p className="text-xs text-rose-700 dark:text-rose-300">
-                  <strong className="text-rose-600 dark:text-rose-500 font-bold">100% failed "DP (timed)"</strong> — recommend a live review. Second weakest: <strong className="text-rose-600 dark:text-rose-500 font-bold">"Graphs (timed)"</strong> at 100% fail rate.
+                <p className="text-xs text-rose-700">
+                  <strong className="text-rose-600 font-bold">100% failed "DP (timed)"</strong> — recommend a live review. Second weakest: <strong className="text-rose-600 font-bold">"Graphs (timed)"</strong> at 100% fail rate.
                 </p>
               </div>
-              
+
               <div className="space-y-3 relative">
                 <div className="absolute top-0 bottom-0 left-[120px] right-0 flex justify-between pointer-events-none">
                   {[25, 50, 75, 100].map(val => (
-                    <div key={val} className="h-full border-l border-slate-100 dark:border-[#222] relative">
-                      <span className="absolute -bottom-6 -translate-x-1/2 text-[10px] text-slate-400 dark:text-gray-500">{val}</span>
+                    <div key={val} className="h-full border-l border-brand-line relative">
+                      <span className="absolute -bottom-6 -translate-x-1/2 text-[10px] text-brand-text-mute">{val}</span>
                     </div>
                   ))}
                 </div>
 
                 {topicHeatmap.map((topic, idx) => (
                   <div key={idx} className="flex items-center group cursor-pointer relative z-10">
-                    <span className="w-[120px] text-[10px] sm:text-xs font-medium text-slate-700 dark:text-gray-300 truncate pr-2">
+                    <span className="w-[120px] text-[10px] sm:text-xs font-medium text-brand-text truncate pr-2">
                       {topic.name}
                     </span>
-                    <div className="flex-1 h-4 bg-slate-100 dark:bg-[#1a1a1a] rounded-r-md overflow-hidden relative">
+                    <div className="flex-1 h-4 bg-brand-bg-alt rounded-r-md overflow-hidden relative">
                       {/* Animated Width */}
-                      <div 
-                        className={`h-full ${topic.color}`} 
-                        style={{ 
-                          width: isLoaded ? `${topic.score}%` : '0%', 
+                      <div
+                        className={`h-full ${topic.color}`}
+                        style={{
+                          width: isLoaded ? `${topic.score}%` : '0%',
                           transition: `width 1s cubic-bezier(0.16, 1, 0.3, 1) ${idx * 0.05}s`
                         }}
                       ></div>
-                      
+
                       <div className="absolute top-0 opacity-0 group-hover:opacity-100 transition-opacity ml-2 pointer-events-none" style={{ left: `${topic.score}%` }}>
-                        <div className="bg-slate-800 dark:bg-[#222] text-white text-[10px] py-1 px-2 rounded font-medium whitespace-nowrap shadow-md -translate-y-[2px]">
+                        <div className="bg-brand-text text-white text-[10px] py-1 px-2 rounded font-medium whitespace-nowrap shadow-sm -translate-y-[2px]">
                           {topic.name} Avg Score: {topic.score}%
                         </div>
                       </div>
@@ -436,42 +436,42 @@ export default function InstructorReport() {
 
             {/* Generated Action Items */}
             <div className="mt-8">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">AI-Generated Action Items</h2>
-              
+              <h2 className="text-xl font-bold text-brand-text mb-4">AI-Generated Action Items</h2>
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
+
                 {/* Left Column Actions */}
                 <div className="space-y-4">
-                  <div className="bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#222] rounded-xl p-5 shadow-sm border-l-4 border-l-rose-500">
-                    <h3 className="text-sm font-bold text-rose-600 dark:text-rose-500 mb-2 flex items-center gap-2">
+                  <div className="bg-white border border-brand-line rounded-xl p-5 shadow-sm border-l-4 border-l-rose-500">
+                    <h3 className="text-sm font-bold text-rose-600 mb-2 flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4" /> Immediate: Foundation Group
                     </h3>
-                    <p className="text-xs text-slate-600 dark:text-gray-400 mb-2">
+                    <p className="text-xs text-brand-text-mute mb-2">
                       16 students are below 45% accuracy. Schedule 1-on-1 remediation sessions focusing on "DP (timed)" this week.
                     </p>
-                    <p className="text-[11px] font-medium text-rose-600 dark:text-rose-500">Expected impact: +12% accuracy in 2 weeks</p>
+                    <p className="text-[11px] font-medium text-rose-600">Expected impact: +12% accuracy in 2 weeks</p>
                   </div>
 
-                  <div className="bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#222] rounded-xl p-5 shadow-sm border-l-4 border-l-emerald-500">
-                    <h3 className="text-sm font-bold text-emerald-600 dark:text-emerald-500 mb-2 flex items-center gap-2">
+                  <div className="bg-white border border-brand-line rounded-xl p-5 shadow-sm border-l-4 border-l-emerald-500">
+                    <h3 className="text-sm font-bold text-emerald-600 mb-2 flex items-center gap-2">
                       <TrendingUp className="w-4 h-4" /> Accelerate: Sprint Group
                     </h3>
-                    <p className="text-xs text-slate-600 dark:text-gray-400 mb-2">
+                    <p className="text-xs text-brand-text-mute mb-2">
                       17 students are ready for advanced material. Move them to challenging modules to prevent plateau and boredom.
                     </p>
-                    <p className="text-[11px] font-medium text-emerald-600 dark:text-emerald-500">Expected impact: Maintain engagement, prevent dropout</p>
+                    <p className="text-[11px] font-medium text-emerald-600">Expected impact: Maintain engagement, prevent dropout</p>
                   </div>
 
                   {/* WhatsApp Message Component */}
-                  <div className="bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#222] rounded-xl overflow-hidden shadow-sm">
-                    <div className="bg-slate-50 dark:bg-[#1a1a1a] p-3 border-b border-slate-200 dark:border-[#222] flex justify-between items-center">
-                      <h3 className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                  <div className="bg-white border border-brand-line rounded-xl overflow-hidden shadow-sm">
+                    <div className="bg-brand-bg-alt p-3 border-b border-brand-line flex justify-between items-center">
+                      <h3 className="text-xs font-bold text-brand-text flex items-center gap-1.5">
                         <svg className="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
                         WhatsApp Message
                       </h3>
                     </div>
-                    <div className="p-4 bg-white dark:bg-[#141414] relative">
-                      <p className="text-xs text-slate-700 dark:text-gray-300 font-mono whitespace-pre-wrap break-words">
+                    <div className="p-4 bg-white relative">
+                      <p className="text-xs text-brand-text font-mono whitespace-pre-wrap break-words">
 {`*TestCrack Weekly Class Health Report*
 
 Team! Here's your progress snapshot:
@@ -483,9 +483,9 @@ Weakest point: *DP (timed)* (100% fail rate)
 
 Focus: Review DP (timed) concepts this week.`}
                       </p>
-                      <button 
+                      <button
                         onClick={() => handleCopy('msg')}
-                        className="mt-4 flex items-center justify-center gap-2 bg-white dark:bg-[#222] border border-slate-200 dark:border-[#333] hover:bg-slate-50 dark:hover:bg-[#2a2a2a] text-slate-700 dark:text-gray-300 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all w-auto"
+                        className="mt-4 flex items-center justify-center gap-2 bg-white border border-brand-line hover:bg-brand-bg-alt text-brand-text py-1.5 px-3 rounded-lg text-xs font-semibold transition-all w-auto"
                       >
                         {copiedMsg ? <><Check className="w-3.5 h-3.5 text-emerald-500" /> Copied!</> : <><Copy className="w-3.5 h-3.5" /> Copy to Clipboard</>}
                       </button>
@@ -495,36 +495,36 @@ Focus: Review DP (timed) concepts this week.`}
 
                 {/* Right Column Actions */}
                 <div className="space-y-4">
-                  <div className="bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#222] rounded-xl p-5 shadow-sm border-l-4 border-l-amber-500">
-                    <h3 className="text-sm font-bold text-amber-600 dark:text-amber-500 mb-2 flex items-center gap-2">
+                  <div className="bg-white border border-brand-line rounded-xl p-5 shadow-sm border-l-4 border-l-amber-500">
+                    <h3 className="text-sm font-bold text-amber-600 mb-2 flex items-center gap-2">
                       <ChevronDown className="w-4 h-4" /> This Week: Execution Gap
                     </h3>
-                    <p className="text-xs text-slate-600 dark:text-gray-400 mb-2">
+                    <p className="text-xs text-brand-text-mute mb-2">
                       16 students know the material but can't perform under pressure. Add timed drills with progressive difficulty.
                     </p>
-                    <p className="text-[11px] font-medium text-amber-600 dark:text-amber-500">Expected impact: +15% confidence score in 3 weeks</p>
+                    <p className="text-[11px] font-medium text-amber-600">Expected impact: +15% confidence score in 3 weeks</p>
                   </div>
 
-                  <div className="bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#222] rounded-xl p-5 shadow-sm border-l-4 border-l-rose-500">
-                    <h3 className="text-sm font-bold text-rose-600 dark:text-rose-500 mb-2 flex items-center gap-2">
+                  <div className="bg-white border border-brand-line rounded-xl p-5 shadow-sm border-l-4 border-l-rose-500">
+                    <h3 className="text-sm font-bold text-rose-600 mb-2 flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4" /> Curriculum Fix: DP (timed)
                     </h3>
-                    <p className="text-xs text-slate-600 dark:text-gray-400 mb-2">
+                    <p className="text-xs text-brand-text-mute mb-2">
                       100% fail rate suggests the teaching material needs revision. Consider adding visual aids and real-world examples.
                     </p>
-                    <p className="text-[11px] font-medium text-rose-600 dark:text-rose-500">Expected impact: -15% fail rate in 4 weeks</p>
+                    <p className="text-[11px] font-medium text-rose-600">Expected impact: -15% fail rate in 4 weeks</p>
                   </div>
 
                   {/* Zoom Lesson Plan Component */}
-                  <div className="bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#222] rounded-xl overflow-hidden shadow-sm">
-                    <div className="bg-slate-50 dark:bg-[#1a1a1a] p-3 border-b border-slate-200 dark:border-[#222] flex justify-between items-center">
-                      <h3 className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                  <div className="bg-white border border-brand-line rounded-xl overflow-hidden shadow-sm">
+                    <div className="bg-brand-bg-alt p-3 border-b border-brand-line flex justify-between items-center">
+                      <h3 className="text-xs font-bold text-brand-text flex items-center gap-1.5">
                         <svg className="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="currentColor"><path d="M4.585 13.607l-.27-.012H1.886l3.236-3.137L1.886 7.32h2.429l.27-.013h1.611c1.455 0 2.261.64 2.261 1.838 0 1.258-.87 1.815-2.036 1.847 1.341.042 2.26.657 2.26 2.001 0 1.282-.907 1.942-2.316 1.942H4.585zm1.182-3.816h-1.18v2.85h1.18c.84 0 1.328-.352 1.328-1.395 0-1.077-.488-1.455-1.328-1.455zm-1.18-1.493h1.066c.747 0 1.196-.34 1.196-1.22 0-.895-.45-1.196-1.196-1.196H4.587v2.416zm10.742 5.309c-1.848 0-3.32-1.352-3.32-3.149 0-1.808 1.472-3.15 3.32-3.15 1.859 0 3.33 1.342 3.33 3.15 0 1.797-1.471 3.149-3.33 3.149zm0-1.085c1.239 0 2.128-.918 2.128-2.064 0-1.157-.889-2.065-2.128-2.065-1.229 0-2.118.908-2.118 2.065 0 1.146.889 2.064 2.118 2.064zm7.391 1.085c-1.848 0-3.32-1.352-3.32-3.149 0-1.808 1.472-3.15 3.32-3.15 1.859 0 3.33 1.342 3.33 3.15 0 1.797-1.471 3.149-3.33 3.149zm0-1.085c1.239 0 2.128-.918 2.128-2.064 0-1.157-.889-2.065-2.128-2.065-1.229 0-2.118.908-2.118 2.065 0 1.146.889 2.064 2.118 2.064zM24 12c0 6.627-5.373 12-12 12S0 18.627 0 12 5.373 0 12 0s12 5.373 12 12z"/></svg>
                         Zoom Lesson Plan
                       </h3>
                     </div>
-                    <div className="p-4 bg-white dark:bg-[#141414] relative">
-                      <p className="text-xs text-slate-700 dark:text-gray-300 font-mono whitespace-pre-wrap break-words">
+                    <div className="p-4 bg-white relative">
+                      <p className="text-xs text-brand-text font-mono whitespace-pre-wrap break-words">
 {`*Zoom — First 10 Minutes*
 
 1. "Pulse Check" (2 min): "Rate confidence on DP (timed) 1-5"
@@ -533,9 +533,9 @@ Focus: Review DP (timed) concepts this week.`}
 
 3. "Confidence Boost" (3 min): 17 students cracked this — invite one to share`}
                       </p>
-                      <button 
+                      <button
                         onClick={() => handleCopy('plan')}
-                        className="mt-4 flex items-center justify-center gap-2 bg-white dark:bg-[#222] border border-slate-200 dark:border-[#333] hover:bg-slate-50 dark:hover:bg-[#2a2a2a] text-slate-700 dark:text-gray-300 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all w-auto"
+                        className="mt-4 flex items-center justify-center gap-2 bg-white border border-brand-line hover:bg-brand-bg-alt text-brand-text py-1.5 px-3 rounded-lg text-xs font-semibold transition-all w-auto"
                       >
                         {copiedPlan ? <><Check className="w-3.5 h-3.5 text-emerald-500" /> Copied!</> : <><Copy className="w-3.5 h-3.5" /> Copy to Clipboard</>}
                       </button>

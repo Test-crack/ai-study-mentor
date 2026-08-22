@@ -3,7 +3,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avat
 import { Button } from "@/shared/components/ui/button";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { ThemeToggle } from "@/features/theme/components/ThemeToggle";
 import { Sheet, SheetContent, SheetTrigger } from "@/shared/components/ui/sheet";
 import { useState } from "react";
 import {InstituteOwnerSidebar } from "./InstitiuteOwnerSidebar";
@@ -20,17 +19,17 @@ export const InstituteOwnerTopbar = ({ onCreateCourse }: InstituteOwnerTopbarPro
   const displayName = profile?.name || user?.email?.split('@')[0] || "Institute Owner";
 
   return (
-    <header className="flex items-center justify-between  py-4 px-4 sm:px-6 gap-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-30 lg:rounded-2xl lg:mx-4 lg:mt-4 lg:shadow-sm border-b lg:border-none border-slate-100 dark:border-slate-800 transition-colors">
-      
+    <header className="h-16 flex items-center justify-between px-4 sm:px-6 gap-3 sm:gap-4 border-b border-brand-line bg-white/95 backdrop-blur-sm sticky top-0 z-30 flex-shrink-0 w-full">
+
       {/* Mobile Menu Trigger */}
       <div className="lg:hidden">
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="text-slate-500 dark:text-slate-400">
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-brand-text-mute hover:bg-brand-bg-alt">
               <Menu className="h-6 w-6" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="p-0 bg-slate-900 border-none w-72">
+          <SheetContent side="left" className="p-0 bg-brand-ink border-r border-brand-line-12 w-72">
             <InstituteOwnerSidebar
               isCollapsed={false} 
               toggleCollapse={() => {}} 
@@ -50,37 +49,31 @@ export const InstituteOwnerTopbar = ({ onCreateCourse }: InstituteOwnerTopbarPro
           <input 
             type="text" 
             placeholder="Search students, courses, or resources..." 
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 transition-all text-sm font-medium text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
+            className="w-full pl-10 pr-4 py-2.5 bg-brand-bg-alt border border-brand-line rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 transition-all text-sm font-medium text-brand-text placeholder:text-brand-text-mute"
           />
         </div>
       </div> */}
 
       {/* Right Actions - Added ml-auto here to push content to the right edge */}
-      <div className="flex items-center gap-3 sm:gap-4 ml-auto">
-        {/* Create Course Button */}
-        
-
-        {/* Theme Toggle */}
-        <ThemeToggle />
-
+      <div className="flex items-center gap-2 sm:gap-3 ml-auto">
         {/* Notifications */}
-        {/* <button className="relative p-2 text-slate-400 hover:text-brand-teal-600 hover:bg-brand-teal-50 dark:hover:bg-slate-800 rounded-full transition-all">
+        {/* <button className="relative p-2 text-brand-text-mute hover:text-brand-teal-600 hover:bg-brand-teal-50 rounded-full transition-all">
           <Bell className="h-5 w-5" />
-          <span className="absolute top-2 right-2.5 h-2 w-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
+          <span className="absolute top-2 right-2.5 h-2 w-2 bg-red-500 rounded-full border-2 border-white"></span>
         </button> */}
 
         {/* Profile */}
-        <div className="flex items-center gap-3 pl-2 border-l border-slate-100 dark:border-slate-800">
+        <div className="flex items-center gap-2.5">
           <div className="text-right hidden md:block">
-            <p className="text-sm font-bold text-slate-700 dark:text-slate-200 leading-none">{displayName}</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 uppercase tracking-wider">Institute Owner Portal</p>
+            <p className="font-manrope text-sm font-bold text-brand-text leading-none">{displayName}</p>
+            <p className="font-jetbrains text-[10px] font-semibold tracking-[0.12em] uppercase text-brand-text-mute mt-0.5">Owner Portal</p>
           </div>
-          <Avatar 
-            className="h-9 w-9 border-2 border-white dark:border-slate-800 shadow-sm ring-1 ring-slate-100 dark:ring-slate-700 cursor-pointer hover:ring-brand-teal-100 transition-all"
+          <Avatar
+            className="h-8 w-8 ml-1 border border-brand-line cursor-pointer hover:ring-2 hover:ring-brand-teal-tint transition-all shrink-0"
             onClick={() => navigate('/profile')}
           >
             <AvatarImage src={profile?.profileImage || ""} />
-            <AvatarFallback className="bg-brand-teal-600 text-white font-bold">
+            <AvatarFallback className="bg-brand-teal-600 text-white font-bold text-xs">
               {displayName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>

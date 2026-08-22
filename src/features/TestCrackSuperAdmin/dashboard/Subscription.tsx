@@ -1,177 +1,229 @@
-import React, { useState } from 'react';
-import { Search } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Search, Loader2, RefreshCw } from 'lucide-react';
 import { SuperAdminTopbar } from '../Components/Superadmintopbar';
 import { SuperAdminSidebar } from '../Components/SuperadminSidebar';
+import {
+  fetchSubscriptions, setExamStatus,
+  SubscriptionRecord, SubscriptionSummary,
+} from '../services/superadminService';
+import {
+  EXAM_LABELS, BILLING_STATUSES, type BillingStatus,
+} from '@/shared/constants/examTypes';
+import { useToast } from '@/shared/hooks/use-toast';
 
-// --- Mock Data ---
-type Subscription = {
-  id: string;
-  institute: string;
-  plan: string;
-  planType: 'enterprise' | 'pro' | 'per-student';
-  students: number;
-  mrr: string;
-  status: 'ACTIVE' | 'TRIAL';
-  nextBilling: string;
+const STATUS_PILL: Record<BillingStatus, string> = {
+  ACTIVE:    'text-emerald-700 bg-emerald-100',
+  TRIAL:     'text-amber-700 bg-amber-100',
+  CANCELLED: 'text-brand-text-mute bg-brand-bg-alt',
 };
 
-const subscriptionsData: Subscription[] = [
-  { id: '1', institute: 'Prestige University', plan: 'Enterprise', planType: 'enterprise', students: 500, mrr: '₹450K', status: 'ACTIVE', nextBilling: '2026-03-01' },
-  { id: '2', institute: 'Ace English Academy', plan: 'Institute Pro', planType: 'pro', students: 280, mrr: '₹190K', status: 'ACTIVE', nextBilling: '2026-03-01' },
-  { id: '3', institute: 'SpeakWell Coaching', plan: 'Institute Pro', planType: 'pro', students: 200, mrr: '₹150K', status: 'ACTIVE', nextBilling: '2026-03-01' },
-  { id: '4', institute: 'TechBridge Institute', plan: 'Per Student', planType: 'per-student', students: 120, mrr: '₹300K', status: 'ACTIVE', nextBilling: '2026-03-01' },
-  { id: '5', institute: 'LearnFirst Academy', plan: 'Per Student', planType: 'per-student', students: 45, mrr: '₹113K', status: 'TRIAL', nextBilling: '2026-03-10' },
-];
+type StatusFilter = 'ALL' | BillingStatus;
+
+const formatDate = (iso: string | null) => {
+  if (!iso) return '—';
+  try { return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }); }
+  catch { return '—'; }
+};
 
 export default function Subscription() {
+  const { toast } = useToast();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
+  const [rows, setRows] = useState<SubscriptionRecord[]>([]);
+  const [summary, setSummary] = useState<SubscriptionSummary>({ total: 0, active: 0, trial: 0, cancelled: 0 });
+  const [loading, setLoading] = useState(true);
+  const [savingId, setSavingId] = useState<string | null>(null);
 
-  // Handle Search Filtering
-  const filteredSubscriptions = subscriptionsData.filter(sub => 
-    sub.institute.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchQuery), 400);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
 
-  // Helper for plan text styling
-  const getPlanColor = (type: string) => {
-    if (type === 'enterprise') return 'text-blue-500 dark:text-[#3B82F6]';
-    return 'text-brand-blue-600 dark:text-[#4E8CA6]';
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetchSubscriptions({
+        status: statusFilter === 'ALL' ? undefined : statusFilter,
+        search: debouncedSearch || undefined,
+      });
+      setRows(res.data);
+      setSummary(res.summary);
+    } catch (err: any) {
+      toast({ title: 'Failed to load subscriptions', description: err.message, variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  }, [statusFilter, debouncedSearch, toast]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const handleStatusChange = async (row: SubscriptionRecord, next: BillingStatus) => {
+    if (next === row.billingStatus) return;
+    setSavingId(row.id);
+    const prev = row.billingStatus;
+    setRows(rs => rs.map(r => r.id === row.id ? { ...r, billingStatus: next } : r));
+    try {
+      await setExamStatus(row.instituteId, row.examType, next);
+      toast({ title: '✅ Subscription updated', description: `${row.instituteName} · ${EXAM_LABELS[row.examType]} → ${next}` });
+      load(); // refresh summary counts
+    } catch (err: any) {
+      setRows(rs => rs.map(r => r.id === row.id ? { ...r, billingStatus: prev } : r));
+      toast({ title: 'Failed to update subscription', description: err.message, variant: 'destructive' });
+    } finally {
+      setSavingId(null);
+    }
   };
 
+  const metrics = [
+    { label: 'Total Subscriptions', value: summary.total, tone: 'text-brand-text' },
+    { label: 'Active', value: summary.active, tone: 'text-emerald-600' },
+    { label: 'On Trial', value: summary.trial, tone: 'text-amber-600' },
+    { label: 'Cancelled', value: summary.cancelled, tone: 'text-brand-text-mute' },
+  ];
+
+  const filterTabs: StatusFilter[] = ['ALL', 'TRIAL', 'ACTIVE', 'CANCELLED'];
+
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0A10] font-sans text-slate-900 dark:text-slate-200 transition-colors duration-300">
-      
+    <div className="relative min-h-screen font-plex antialiased overflow-x-hidden bg-brand-bg text-brand-text">
+
       {/* Sidebar */}
       <div className="hidden lg:block">
-        <SuperAdminSidebar 
-          activeTab="superadmin-subscription" 
-          isCollapsed={isSidebarCollapsed} 
-          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
+        <SuperAdminSidebar
+          activeTab="superadmin-subscription"
+          isCollapsed={isSidebarCollapsed}
+          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         />
       </div>
 
-      <div className={`transition-all duration-300 flex flex-col min-h-screen ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
-        
+      <div className={`relative z-10 transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
+
         {/* Topbar */}
         <SuperAdminTopbar />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="max-w-[1400px] mx-auto space-y-6">
-            
-            {/* Top Metrics Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl p-5 shadow-sm transition-colors">
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Total MRR</p>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white">₹12.0L</h3>
-              </div>
-              
-              <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl p-5 shadow-sm transition-colors">
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Active Subs</p>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white">4</h3>
-              </div>
+        <main className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 max-w-[90rem] mx-auto pb-16">
+          <div className="space-y-6">
 
-              <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl p-5 shadow-sm transition-colors">
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Trials</p>
-                <h3 className="text-2xl font-bold text-amber-600 dark:text-[#F59E0B]">1</h3>
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-manrope font-bold text-brand-text">Subscriptions</h1>
+                <p className="text-sm text-brand-text-mute mt-1">Exam subscriptions across all institutes</p>
               </div>
-
-              <div className="bg-white dark:bg-[#15141B] border border-slate-200 dark:border-[#26252D] rounded-xl p-5 shadow-sm transition-colors">
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">ARR Projection</p>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white">₹1.4Cr</h3>
-              </div>
+              <button onClick={load} className="p-2 rounded-lg text-brand-text-mute hover:text-brand-teal-600 hover:bg-brand-bg-alt transition-colors" title="Refresh">
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              </button>
             </div>
 
-            {/* Search Bar */}
-            <div className="relative w-full max-w-sm mt-6">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-slate-400 dark:text-gray-500" />
+            {/* Metrics */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {metrics.map((m) => (
+                <div key={m.label} className="bg-white border border-brand-line rounded-2xl p-5 shadow-sm">
+                  <p className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-mute mb-2">{m.label}</p>
+                  <h3 className={`text-2xl font-bold ${m.tone}`}>{m.value}</h3>
+                </div>
+              ))}
+            </div>
+
+            {/* Search + status filter */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="relative w-full sm:max-w-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-4 w-4 text-brand-text-mute" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search institutes..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full min-h-[44px] pl-10 pr-4 py-2.5 bg-brand-bg-alt border border-brand-line rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 transition-all text-brand-text placeholder:text-brand-text-mute"
+                />
               </div>
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-transparent border border-slate-200 dark:border-gray-800 rounded-lg text-sm focus:outline-none focus:border-brand-teal-500 dark:focus:border-[#256B8B] transition-all text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 shadow-sm"
-              />
+              <div className="flex items-center gap-1 bg-brand-bg-alt rounded-lg p-1">
+                {filterTabs.map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setStatusFilter(tab)}
+                    className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${
+                      statusFilter === tab
+                        ? 'bg-white text-brand-teal-700 shadow-sm'
+                        : 'text-brand-text-mute hover:text-brand-text'
+                    }`}
+                  >
+                    {tab === 'ALL' ? 'All' : tab.charAt(0) + tab.slice(1).toLowerCase()}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Subscriptions Table */}
-            <div className="bg-white dark:bg-transparent border border-slate-200 dark:border-transparent rounded-xl shadow-sm dark:shadow-none overflow-hidden mt-6">
-              <div className="w-full overflow-x-auto px-4 py-2">
-                <table className="w-full text-left border-collapse min-w-[900px]">
-                  <thead>
-                    <tr className="border-b border-slate-100 dark:border-gray-800 text-slate-500 dark:text-gray-400 text-sm">
-                      <th className="pb-4 font-semibold dark:font-normal pl-2">Institute</th>
-                      <th className="pb-4 font-semibold dark:font-normal">Plan</th>
-                      <th className="pb-4 font-semibold dark:font-normal text-center">Students</th>
-                      <th className="pb-4 font-semibold dark:font-normal">MRR</th>
-                      <th className="pb-4 font-semibold dark:font-normal text-center">Status</th>
-                      <th className="pb-4 font-semibold dark:font-normal">Next Billing</th>
-                      <th className="pb-4 font-semibold dark:font-normal text-right pr-4">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-gray-800/50">
-                    {filteredSubscriptions.map((sub) => (
-                      <tr key={sub.id} className="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors group">
-                        
-                        {/* Institute */}
-                        <td className="py-4 pl-2">
-                          <span className="font-semibold text-sm text-slate-900 dark:text-gray-200">{sub.institute}</span>
-                        </td>
-
-                        {/* Plan */}
-                        <td className="py-4">
-                          <span className={`text-sm font-medium ${getPlanColor(sub.planType)}`}>
-                            {sub.plan}
-                          </span>
-                        </td>
-
-                        {/* Students */}
-                        <td className="py-4 text-center">
-                          <span className="text-sm font-medium text-slate-900 dark:text-gray-200">{sub.students}</span>
-                        </td>
-
-                        {/* MRR */}
-                        <td className="py-4">
-                          <span className="text-sm font-semibold text-slate-900 dark:text-gray-200">{sub.mrr}</span>
-                        </td>
-
-                        {/* Status */}
-                        <td className="py-4 text-center">
-                          <span className={`px-2 py-1 text-[10px] font-bold tracking-wider rounded ${
-                            sub.status === 'ACTIVE' 
-                              ? 'text-emerald-700 bg-emerald-100 dark:text-[#10B981] dark:bg-[#10B981]/10' 
-                              : 'text-amber-700 bg-amber-100 dark:text-[#F59E0B] dark:bg-[#F59E0B]/10'
-                          }`}>
-                            {sub.status}
-                          </span>
-                        </td>
-
-                        {/* Next Billing */}
-                        <td className="py-4">
-                          <span className="text-sm text-slate-600 dark:text-gray-400">{sub.nextBilling}</span>
-                        </td>
-
-                        {/* Actions */}
-                        <td className="py-4 text-right pr-4">
-                          <button className="px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 dark:text-gray-300 dark:bg-transparent dark:border-gray-700 dark:hover:bg-gray-800 rounded transition-colors">
-                            Manage
-                          </button>
-                        </td>
-
+            <div className="bg-white border border-brand-line rounded-2xl shadow-sm overflow-hidden">
+              {loading ? (
+                <div className="py-16 flex justify-center">
+                  <Loader2 className="w-6 h-6 animate-spin text-brand-teal-500" />
+                </div>
+              ) : rows.length === 0 ? (
+                <div className="py-12 text-center text-brand-text-mute text-sm">
+                  {debouncedSearch ? `No subscriptions matching "${debouncedSearch}"` : 'No subscriptions yet. Create an institute with exams to get started.'}
+                </div>
+              ) : (
+                <div className="w-full overflow-x-auto">
+                  <table className="w-full text-left border-collapse min-w-[820px]">
+                    <thead>
+                      <tr className="border-b border-brand-line bg-brand-bg-alt">
+                        <th className="font-jetbrains px-5 py-3 text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-mute whitespace-nowrap">Institute</th>
+                        <th className="font-jetbrains px-4 py-3 text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-mute whitespace-nowrap">Exam</th>
+                        <th className="font-jetbrains px-4 py-3 text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-mute text-center whitespace-nowrap">Status</th>
+                        <th className="font-jetbrains px-4 py-3 text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-mute text-center whitespace-nowrap hidden md:table-cell">Students</th>
+                        <th className="font-jetbrains px-4 py-3 text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-mute whitespace-nowrap hidden lg:table-cell">Trial Ends</th>
+                        <th className="font-jetbrains px-4 py-3 text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-mute text-right pr-5 whitespace-nowrap">Manage</th>
                       </tr>
-                    ))}
-
-                    {filteredSubscriptions.length === 0 && (
-                      <tr>
-                        <td colSpan={7} className="py-8 text-center text-slate-500 dark:text-gray-500">
-                          No subscriptions found matching "{searchQuery}"
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-brand-line">
+                      {rows.map((row) => (
+                        <tr key={row.id} className="hover:bg-brand-bg-alt transition-colors group">
+                          <td className="px-5 py-4">
+                            <span className="font-semibold text-[13.5px] text-brand-text">{row.instituteName}</span>
+                            {!row.instituteActive && (
+                              <span className="font-jetbrains ml-2 text-[9px] font-bold text-rose-600">INSTITUTE INACTIVE</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className="text-sm font-medium text-brand-text">{EXAM_LABELS[row.examType]}</span>
+                          </td>
+                          <td className="px-4 py-4 text-center">
+                            <span className={`font-jetbrains inline-block px-2 py-1 text-[10px] font-bold tracking-wider rounded ${STATUS_PILL[row.billingStatus]}`}>
+                              {row.billingStatus}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4 text-center hidden md:table-cell">
+                            <span className="text-sm font-medium text-brand-text">{row.studentCount}</span>
+                          </td>
+                          <td className="px-4 py-4 hidden lg:table-cell">
+                            <span className="text-sm text-brand-text-mute whitespace-nowrap">{formatDate(row.trialEndsAt)}</span>
+                          </td>
+                          <td className="px-4 py-4 text-right pr-5">
+                            <div className="inline-flex items-center gap-2">
+                              {savingId === row.id && <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-teal-500" />}
+                              <select
+                                value={row.billingStatus}
+                                disabled={savingId === row.id}
+                                onChange={(e) => handleStatusChange(row, e.target.value as BillingStatus)}
+                                className="px-2.5 py-2 text-xs font-bold rounded-lg border border-brand-line bg-white text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 disabled:opacity-50 cursor-pointer"
+                              >
+                                {BILLING_STATUSES.map((s) => (
+                                  <option key={s} value={s}>{s.charAt(0) + s.slice(1).toLowerCase()}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
 
           </div>

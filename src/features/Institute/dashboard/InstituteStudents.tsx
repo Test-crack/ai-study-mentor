@@ -22,7 +22,7 @@ type RiskFilter = "all" | "at-risk" | "on-track";
 function TrendIcon({ trend }: { trend: StudentRow["band_trend"] }) {
   if (trend === "up")   return <TrendingUp className="h-4 w-4 text-emerald-500" />;
   if (trend === "down") return <TrendingDown className="h-4 w-4 text-rose-500" />;
-  if (trend === "flat") return <Minus className="h-4 w-4 text-slate-400" />;
+  if (trend === "flat") return <Minus className="h-4 w-4 text-brand-text-mute" />;
   return null;
 }
 
@@ -92,12 +92,12 @@ export default function InstituteStudents() {
     <InstituteAdminLayout activeTab="students">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Students</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Live band, streak and risk status for every student.</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-brand-text">Students</h1>
+          <p className="text-sm text-brand-text-mute mt-0.5">Live band, streak and risk status for every student.</p>
         </div>
         <button
           onClick={() => navigate("/institute-admin/studentOnboarding")}
-          className="inline-flex items-center gap-2 bg-brand-teal-600 hover:bg-brand-teal-700 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition-colors shadow-sm self-start sm:self-auto"
+          className="inline-flex items-center justify-center gap-2 bg-brand-teal-600 hover:bg-brand-teal-700 text-white text-sm font-bold px-4 py-2.5 min-h-[40px] rounded-xl transition-colors shadow-sm self-start sm:self-auto"
         >
           <UserPlus className="h-4 w-4" /> Onboard Student
         </button>
@@ -109,7 +109,7 @@ export default function InstituteStudents() {
         <TableSkeleton rows={10} />
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <KpiCard label="Total Students" value={students.length} icon={Users} accent="indigo" />
             <KpiCard label="Active Today" value={activeTodayCount} icon={Flame} accent="emerald" />
             <KpiCard label="At Risk" value={atRiskCount} icon={AlertTriangle} accent={atRiskCount > 0 ? "rose" : "emerald"} />
@@ -118,24 +118,24 @@ export default function InstituteStudents() {
 
           {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <div className="relative flex-1 w-full sm:max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-text-mute" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search students…"
-                className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-white/[0.04] border border-slate-200/70 dark:border-white/[0.06] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 transition-all text-sm font-medium text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
+                className="w-full pl-10 pr-4 py-2.5 min-h-[40px] bg-white border border-brand-line rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 transition-all text-sm font-medium text-brand-text placeholder:text-brand-text-mute"
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {(["all", "at-risk", "on-track"] as RiskFilter[]).map((f) => (
                 <button
                   key={f}
                   onClick={() => setRisk(f)}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-colors ${
+                  className={`px-3.5 py-2 min-h-[40px] rounded-xl text-xs font-bold transition-colors ${
                     risk === f
                       ? "bg-brand-teal-600 text-white shadow-sm"
-                      : "bg-white dark:bg-white/[0.04] text-slate-600 dark:text-slate-300 border border-slate-200/70 dark:border-white/[0.06] hover:bg-slate-50 dark:hover:bg-white/[0.08]"
+                      : "bg-white text-brand-text border border-brand-line hover:bg-brand-bg-alt"
                   }`}
                 >
                   {f === "all" ? "All" : f === "at-risk" ? "At Risk" : "On Track"}
@@ -145,7 +145,7 @@ export default function InstituteStudents() {
                 <select
                   value={batchFilter}
                   onChange={(e) => setBatchFilter(e.target.value)}
-                  className="px-3 py-2 rounded-xl text-xs font-bold bg-white dark:bg-[#131318] text-slate-600 dark:text-slate-300 border border-slate-200/70 dark:border-white/[0.06] focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20"
+                  className="px-3 py-2 min-h-[40px] rounded-xl text-xs font-bold bg-white text-brand-text border border-brand-line focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20"
                 >
                   <option value="all">All batches</option>
                   {batches.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
@@ -163,43 +163,43 @@ export default function InstituteStudents() {
               />
             </SectionCard>
           ) : (
-            <div className="rounded-2xl bg-white dark:bg-[#131318] border border-slate-200/70 dark:border-white/[0.08] shadow-sm overflow-hidden">
+            <div className="rounded-2xl bg-white border border-brand-line shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="text-[10px] uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 bg-slate-50/60 dark:bg-white/[0.02]">
-                      <th className="px-5 py-3 font-bold">Student</th>
-                      <th className="px-4 py-3 font-bold">Batch</th>
-                      <th className="px-4 py-3 font-bold">Band</th>
-                      <th className="px-4 py-3 font-bold">Target</th>
-                      <th className="px-4 py-3 font-bold">Streak</th>
-                      <th className="px-4 py-3 font-bold">Momentum</th>
-                      <th className="px-4 py-3 font-bold">Status</th>
+                    <tr className="font-jetbrains text-[10px] uppercase tracking-[0.12em] text-brand-text-mute bg-brand-bg-alt/80 border-b border-brand-line">
+                      <th className="px-4 sm:px-5 py-3 font-bold whitespace-nowrap">Student</th>
+                      <th className="px-4 py-3 font-bold whitespace-nowrap">Batch</th>
+                      <th className="px-4 py-3 font-bold whitespace-nowrap">Band</th>
+                      <th className="px-4 py-3 font-bold whitespace-nowrap">Target</th>
+                      <th className="px-4 py-3 font-bold whitespace-nowrap">Streak</th>
+                      <th className="px-4 py-3 font-bold whitespace-nowrap">Momentum</th>
+                      <th className="px-4 py-3 font-bold whitespace-nowrap">Status</th>
                       <th className="px-4 py-3" />
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50 dark:divide-white/[0.04]">
+                  <tbody className="divide-y divide-brand-line">
                     {paged.map((s) => (
                       <tr
                         key={s.student_id}
                         onClick={() => openProgress(s)}
-                        className="hover:bg-slate-50/70 dark:hover:bg-white/[0.03] cursor-pointer transition-colors"
+                        className="hover:bg-brand-teal-50/50 cursor-pointer transition-colors"
                       >
-                        <td className="px-5 py-3">
+                        <td className="px-4 sm:px-5 py-3">
                           <div className="flex items-center gap-3 min-w-[180px]">
                             <Avatar className="h-9 w-9 shrink-0">
                               <AvatarImage src={s.avatar ?? ""} />
-                              <AvatarFallback className="bg-brand-teal-100 dark:bg-brand-teal-500/20 text-brand-teal-700 dark:text-brand-teal-300 text-xs font-bold">
+                              <AvatarFallback className="bg-brand-teal-100 text-brand-teal-700 text-xs font-bold">
                                 {(s.name ?? "?").slice(0, 2).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                             <div className="min-w-0">
-                              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{s.name}</p>
-                              {s.drilled_today && <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">active today</p>}
+                              <p className="text-sm font-semibold text-brand-text truncate">{s.name}</p>
+                              {s.drilled_today && <p className="text-[11px] text-emerald-600 font-bold">active today</p>}
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap">{s.batch_name || "—"}</td>
+                        <td className="px-4 py-3 text-sm text-brand-text-mute whitespace-nowrap">{s.batch_name || "—"}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1.5">
                             <BandPill band={s.current_band} />
@@ -208,13 +208,13 @@ export default function InstituteStudents() {
                         </td>
                         <td className="px-4 py-3"><BandPill band={s.target_band} /></td>
                         <td className="px-4 py-3">
-                          <span className="inline-flex items-center gap-1 text-sm font-bold text-slate-700 dark:text-slate-300">
-                            <Flame className={`h-3.5 w-3.5 ${s.daily_streak > 0 ? "text-orange-500" : "text-slate-300 dark:text-slate-600"}`} />
+                          <span className="inline-flex items-center gap-1 text-sm font-bold text-brand-text tabular-nums">
+                            <Flame className={`h-3.5 w-3.5 ${s.daily_streak > 0 ? "text-orange-500" : "text-brand-text-mute"}`} />
                             {s.daily_streak}
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          <span className="inline-flex items-center gap-1 text-sm font-bold text-slate-700 dark:text-slate-300">
+                          <span className="inline-flex items-center gap-1 text-sm font-bold text-brand-text tabular-nums">
                             <Zap className="h-3.5 w-3.5 text-brand-teal-500" /> {s.momentum_score}
                           </span>
                         </td>
@@ -224,7 +224,7 @@ export default function InstituteStudents() {
                             : <StatusBadge tone="success">On track</StatusBadge>}
                         </td>
                         <td className="px-4 py-3 text-right">
-                          <ChevronRight className="h-4 w-4 text-slate-300 dark:text-slate-600 inline" />
+                          <ChevronRight className="h-4 w-4 text-brand-text-mute inline" />
                         </td>
                       </tr>
                     ))}
@@ -233,22 +233,22 @@ export default function InstituteStudents() {
               </div>
 
               {pageCount > 1 && (
-                <div className="px-5 py-3 border-t border-slate-100 dark:border-white/[0.06] flex items-center justify-between">
-                  <p className="text-xs text-slate-400 font-medium">
+                <div className="px-4 sm:px-5 py-3 border-t border-brand-line flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <p className="text-xs text-brand-text-mute font-medium">
                     {filtered.length} student{filtered.length !== 1 ? "s" : ""} · page {page + 1} of {pageCount}
                   </p>
                   <div className="flex gap-2">
                     <button
                       onClick={() => setPage(p => Math.max(0, p - 1))}
                       disabled={page === 0}
-                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-50 dark:bg-white/[0.04] text-slate-600 dark:text-slate-300 disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-white/[0.08] transition-colors"
+                      className="px-3 py-2 min-h-[40px] rounded-lg text-xs font-bold bg-brand-bg-alt text-brand-text disabled:opacity-40 hover:bg-brand-teal-100 hover:text-brand-teal-700 transition-colors"
                     >
                       Previous
                     </button>
                     <button
                       onClick={() => setPage(p => Math.min(pageCount - 1, p + 1))}
                       disabled={page >= pageCount - 1}
-                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-50 dark:bg-white/[0.04] text-slate-600 dark:text-slate-300 disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-white/[0.08] transition-colors"
+                      className="px-3 py-2 min-h-[40px] rounded-lg text-xs font-bold bg-brand-bg-alt text-brand-text disabled:opacity-40 hover:bg-brand-teal-100 hover:text-brand-teal-700 transition-colors"
                     >
                       Next
                     </button>

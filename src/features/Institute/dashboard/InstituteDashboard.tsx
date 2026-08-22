@@ -26,32 +26,32 @@ import { useToast } from "@/shared/hooks/use-toast";
 function HeroBanner({ summary }: { summary: InstituteSummary }) {
   const navigate = useNavigate();
   return (
-    <div className="w-full relative overflow-hidden rounded-2xl bg-brand-teal-50 dark:bg-blue-950 border border-brand-teal-100 dark:border-blue-800/60 p-6 sm:p-8 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.08)] dark:shadow-none transition-colors duration-500">
-      <div className="pointer-events-none absolute -top-10 -right-10 w-48 h-48 rounded-full bg-brand-teal-200/40 dark:bg-blue-500/20 blur-2xl"></div>
-      <div className="pointer-events-none absolute -bottom-12 left-1/4 w-40 h-40 rounded-full bg-brand-teal-200/40 dark:bg-blue-500/20 blur-2xl"></div>
+    <div className="w-full relative overflow-hidden rounded-2xl bg-brand-teal-50 border border-brand-teal-100 p-4 sm:p-6 lg:p-8 shadow-sm">
+      <div className="pointer-events-none absolute -top-10 -right-10 w-48 h-48 rounded-full bg-brand-teal-200/40 blur-2xl"></div>
+      <div className="pointer-events-none absolute -bottom-12 left-1/4 w-40 h-40 rounded-full bg-brand-teal-200/40 blur-2xl"></div>
       <div className="relative z-10 flex flex-col gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-1">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-brand-text mb-1">
             {summary.institute_name || "Institute Admin Portal"}
           </h1>
-          <p className="text-slate-600 dark:text-blue-200/70 text-sm">
-            <strong className="text-slate-900 dark:text-white font-semibold">{summary.total_students}</strong> students
-            across <strong className="text-slate-900 dark:text-white font-semibold">{summary.total_batches}</strong> batches
+          <p className="text-brand-text-mute text-sm">
+            <strong className="text-brand-text font-semibold">{summary.total_students}</strong> students
+            across <strong className="text-brand-text font-semibold">{summary.total_batches}</strong> batches
             {" · "}
-            <strong className="text-slate-900 dark:text-white font-semibold">{summary.instructor_count}</strong> tutors
-            {summary.avg_band != null && <> · average band <strong className="text-slate-900 dark:text-white font-semibold">{summary.avg_band}</strong></>}
+            <strong className="text-brand-text font-semibold">{summary.instructor_count}</strong> tutors
+            {summary.avg_band != null && <> · average band <strong className="text-brand-text font-semibold">{summary.avg_band}</strong></>}
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
           <button
             onClick={() => navigate("/institute-admin/studentOnboarding")}
-            className="inline-flex items-center gap-2 bg-brand-teal-600 hover:bg-brand-teal-700 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition-colors shadow-sm"
+            className="inline-flex items-center justify-center gap-2 bg-brand-teal-600 hover:bg-brand-teal-700 text-white text-sm font-bold px-4 py-2.5 min-h-[40px] rounded-xl transition-colors shadow-sm"
           >
             <UserPlus className="h-4 w-4" /> Onboard Students
           </button>
           <button
             onClick={() => navigate("/institute-admin/tutorOnboarding")}
-            className="inline-flex items-center gap-2 bg-white dark:bg-white/10 hover:bg-brand-teal-50 dark:hover:bg-white/20 text-brand-teal-700 dark:text-white text-sm font-bold px-4 py-2.5 rounded-xl border border-brand-teal-200 dark:border-white/20 transition-colors"
+            className="inline-flex items-center justify-center gap-2 bg-white hover:bg-brand-teal-50 text-brand-teal-700 text-sm font-bold px-4 py-2.5 min-h-[40px] rounded-xl border border-brand-teal-200 transition-colors"
           >
             <GraduationCap className="h-4 w-4" /> Onboard Tutors
           </button>
@@ -106,41 +106,41 @@ function NeedsAttentionPanel({
       ) : (
         <div className="space-y-1">
           {students.map((p) => (
-            <div key={p.userId} className="flex items-center gap-3 py-2.5 border-b border-slate-50 dark:border-white/[0.04] last:border-0">
+            <div key={p.userId} className="flex items-center gap-3 py-2.5 border-b border-brand-line last:border-0">
               <Avatar className="h-9 w-9 shrink-0">
                 <AvatarImage src={p.profileImage ?? ""} />
-                <AvatarFallback className="bg-brand-teal-100 dark:bg-brand-teal-500/20 text-brand-teal-700 dark:text-brand-teal-300 text-xs font-bold">
+                <AvatarFallback className="bg-brand-teal-100 text-brand-teal-700 text-xs font-bold">
                   {(p.name ?? p.email).slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{p.name ?? p.email}</p>
-                <p className="text-xs text-slate-400 truncate">invited {new Date(p.invitedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} · hasn't started yet</p>
+                <p className="text-sm font-semibold text-brand-text truncate">{p.name ?? p.email}</p>
+                <p className="text-xs text-brand-text-mute truncate">invited {new Date(p.invitedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} · hasn't started yet</p>
               </div>
               <button
                 onClick={() => resend(p)}
                 disabled={sending === p.userId}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-teal-600 dark:text-brand-teal-400 hover:bg-brand-teal-50 dark:hover:bg-brand-teal-500/10 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 shrink-0"
+                className="inline-flex items-center justify-center gap-1.5 text-xs font-bold text-brand-teal-600 hover:bg-brand-teal-50 px-3 py-2 min-h-[40px] rounded-lg transition-colors disabled:opacity-50 shrink-0"
               >
                 <Mail className="h-3.5 w-3.5" /> {sending === p.userId ? "Sending…" : "Resend invite"}
               </button>
             </div>
           ))}
           {tutors.map((p) => (
-            <div key={p.userId} className="flex items-center gap-3 py-2.5 border-b border-slate-50 dark:border-white/[0.04] last:border-0">
+            <div key={p.userId} className="flex items-center gap-3 py-2.5 border-b border-brand-line last:border-0">
               <Avatar className="h-9 w-9 shrink-0">
                 <AvatarImage src={p.profileImage ?? ""} />
-                <AvatarFallback className="bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-bold">
+                <AvatarFallback className="bg-amber-100 text-amber-700 text-xs font-bold">
                   {(p.name ?? p.email).slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{p.name ?? p.email}</p>
-                <p className="text-xs text-slate-400 truncate">tutor · not assigned to any batch</p>
+                <p className="text-sm font-semibold text-brand-text truncate">{p.name ?? p.email}</p>
+                <p className="text-xs text-brand-text-mute truncate">tutor · not assigned to any batch</p>
               </div>
               <button
                 onClick={() => navigate("/institute-admin/batches")}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 px-3 py-1.5 rounded-lg transition-colors shrink-0"
+                className="inline-flex items-center justify-center gap-1.5 text-xs font-bold text-amber-700 hover:bg-amber-50 px-3 py-2 min-h-[40px] rounded-lg transition-colors shrink-0"
               >
                 Assign to batch <ArrowRight className="h-3.5 w-3.5" />
               </button>
@@ -160,7 +160,7 @@ function BatchesOverview({ batches }: { batches: BatchSummary[] }) {
     <SectionCard title="Batches" icon={Layers}
       actions={
         <button onClick={() => navigate("/institute-admin/batches")}
-          className="inline-flex items-center gap-1 text-xs font-bold text-brand-teal-600 dark:text-brand-teal-400 hover:underline">
+          className="inline-flex items-center gap-1 text-xs font-bold text-brand-teal-600 hover:underline">
           Manage <ChevronRight className="h-3.5 w-3.5" />
         </button>
       }>
@@ -171,27 +171,27 @@ function BatchesOverview({ batches }: { batches: BatchSummary[] }) {
           {batches.slice(0, 5).map((b) => {
             const pct = b.maxStudents ? Math.min(100, Math.round((b.studentCount / b.maxStudents) * 100)) : null;
             return (
-              <div key={b.id} className="flex items-center gap-4 py-2 border-b border-slate-50 dark:border-white/[0.04] last:border-0">
+              <div key={b.id} className="flex items-center gap-3 sm:gap-4 py-2 border-b border-brand-line last:border-0">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{b.name}</p>
+                    <p className="text-sm font-semibold text-brand-text truncate">{b.name}</p>
                     <StatusBadge tone={b.status === "ACTIVE" ? "success" : b.status === "COMPLETED" ? "info" : "neutral"}>
                       {b.status}
                     </StatusBadge>
                   </div>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="text-xs text-brand-text-mute mt-0.5">
                     {b.studentCount}{b.maxStudents ? ` / ${b.maxStudents}` : ""} students · {b.instructorCount} tutor{b.instructorCount !== 1 ? "s" : ""}
                   </p>
                 </div>
                 {pct !== null && (
-                  <div className="w-28 shrink-0">
-                    <div className="h-2 rounded-full bg-slate-100 dark:bg-white/[0.06] overflow-hidden">
+                  <div className="w-16 sm:w-28 shrink-0">
+                    <div className="h-2 rounded-full bg-brand-bg-alt overflow-hidden">
                       <div
                         className={`h-full rounded-full ${pct >= 90 ? "bg-rose-500" : pct >= 70 ? "bg-amber-500" : "bg-brand-teal-500"}`}
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <p className="text-[10px] text-slate-400 mt-1 text-right font-bold">{pct}%</p>
+                    <p className="font-jetbrains text-[10px] text-brand-text-mute mt-1 text-right font-bold">{pct}%</p>
                   </div>
                 )}
               </div>
@@ -212,7 +212,7 @@ function TutorSnapshot({ tutors }: { tutors: InstructorRow[] }) {
     <SectionCard title="Tutors" icon={UserCheck}
       actions={
         <button onClick={() => navigate("/institute-admin/tutor")}
-          className="inline-flex items-center gap-1 text-xs font-bold text-brand-teal-600 dark:text-brand-teal-400 hover:underline">
+          className="inline-flex items-center gap-1 text-xs font-bold text-brand-teal-600 hover:underline">
           View all <ChevronRight className="h-3.5 w-3.5" />
         </button>
       }>
@@ -221,16 +221,16 @@ function TutorSnapshot({ tutors }: { tutors: InstructorRow[] }) {
       ) : (
         <div className="space-y-1">
           {top.map((t) => (
-            <div key={t.user_id} className="flex items-center gap-3 py-2.5 border-b border-slate-50 dark:border-white/[0.04] last:border-0">
+            <div key={t.user_id} className="flex items-center gap-3 py-2.5 border-b border-brand-line last:border-0">
               <Avatar className="h-9 w-9 shrink-0">
                 <AvatarImage src={t.avatar ?? ""} />
-                <AvatarFallback className="bg-brand-teal-100 dark:bg-brand-teal-500/20 text-brand-teal-700 dark:text-brand-teal-300 text-xs font-bold">
+                <AvatarFallback className="bg-brand-teal-100 text-brand-teal-700 text-xs font-bold">
                   {(t.name ?? t.email).slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{t.name}</p>
-                <p className="text-xs text-slate-400 truncate">
+                <p className="text-sm font-semibold text-brand-text truncate">{t.name}</p>
+                <p className="text-xs text-brand-text-mute truncate">
                   {t.batches.length} batch{t.batches.length !== 1 ? "es" : ""} · {t.total_students} student{t.total_students !== 1 ? "s" : ""}
                 </p>
               </div>
@@ -284,7 +284,7 @@ export default function InstituteDashboard() {
 
       {loading || !summary ? (
         <>
-          <div className="h-40 bg-slate-100 dark:bg-white/[0.04] rounded-2xl animate-pulse" />
+          <div className="h-40 bg-brand-bg-alt rounded-2xl animate-pulse" />
           <CardGridSkeleton cards={4} />
           <TableSkeleton rows={4} />
         </>
@@ -293,7 +293,7 @@ export default function InstituteDashboard() {
           <HeroBanner summary={summary} />
 
           {/* KPI row — every number is live */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
             <KpiCard label="Total Students" value={summary.total_students} icon={Users} accent="indigo" />
             <KpiCard label="Active Today" value={summary.active_today}
               sub={`${summary.platform_unlocked_today} unlocked the platform`} icon={Activity} accent="emerald" />
@@ -306,13 +306,13 @@ export default function InstituteDashboard() {
               icon={AlertTriangle} accent={needsAttention > 0 ? "amber" : "emerald"} />
           </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
             <NeedsAttentionPanel
               students={onboarding?.students_not_started ?? []}
               tutors={onboarding?.tutors_unassigned ?? []}
               onResent={() => { /* invite re-sent — list state unchanged until they start */ }}
             />
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <BatchesOverview batches={batches} />
               <TutorSnapshot tutors={tutors} />
             </div>

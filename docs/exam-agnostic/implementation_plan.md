@@ -31,11 +31,14 @@
 | Phase | Description | Status | PR |
 |-------|-------------|--------|----|
 | S0 | DB naming standardization | ✅ Done — `platform/s1` | commit `1779a31` |
-| 1 | ExamType enum + SkillType renames | 🔲 Next | `platform/s2` |
-| 2 | `exam_type` columns on existing tables | 🔲 | `platform/s2` |
-| 3 | Batch table renames | 🔲 | `platform/s2` |
-| 4 | New tables: subscriptions, DPDP, Viva | 🔲 | `platform/s2` |
-| 5 | `packages/exam-engine` interfaces | 🔲 | `platform/s2` |
+| 1 | ExamType enum + SkillType renames | ✅ Done — `platform/s1` | commit `0e30604` |
+| 2 | `exam_type` columns on existing tables | ✅ Done — `platform/s1` | commit `0e30604` |
+| 3 | Batch table renames | ✅ Done — `platform/s1` | commit `0e30604` |
+| 3.5 | Super Admin: institute mgmt + exam selection | ✅ Done — see `superadmin_institute_plan.md` | `platform/s1` |
+| 4 | New tables: ~~subscriptions~~ DPDP + Viva (subscriptions pulled to 3.5) | ✅ Done — `platform/s1` (schema + DOB UI; guardian/viva scaffold-only) | `platform/s1` |
+| 5 | Exam Engine (config-as-data, v2) | 🔲 Next — see `EE-DECISIONS.md` + `phase5_implementation_plan.md` | `platform/s2` |
+
+> **⚠️ v2 revises earlier phases.** The team's Exam Engine v2 package supersedes the v1 Phase 5 plan. Decision **D2** replaces the Phase 1 `ExamType` enum with an `Exam` table + string `exam_id` (done as Phase 5 Step 0, while all `exam_type` data is still `IELTS`). `SkillType`/`SubSkillType` and the IELTS pipeline are kept. Full reasoning: `EE-DECISIONS.md`.
 | 6 | Extract IELTS logic behind interfaces | 🔲 | `platform/s3` |
 | 7 | Prove abstraction: IELTS through registry (gate) | 🔲 | `platform/s3` |
 | 8 | Register SPOKEN (CEFR) + Viva Engine backend | 🔲 | `platform/s4` |
@@ -169,11 +172,13 @@ Raw SQL: search for `"ielts_batch"` across all SQL strings.
 
 ---
 
-## Phase 4 — New Tables: Subscriptions, DPDP, Viva
+## Phase 4 — New Tables: DPDP, Viva
 
 **TC-05 Steps 1.5–1.6 + Viva Engine**
 
-### 4.1 institute_exam_subscriptions (TC-05 Step 1.5)
+> **4.1 moved to Phase 3.5.** `InstituteExamSubscription` is created (structurally) in Phase 3.5 because institute registration + exam selection needs it. Pricing/tier semantics remain deferred. See `superadmin_institute_plan.md`. The original 4.1 spec is retained below for reference on the fields deferred to a later billing phase.
+
+### 4.1 institute_exam_subscriptions (TC-05 Step 1.5) — ⚠️ MOVED TO PHASE 3.5
 
 ```prisma
 model InstituteExamSubscription {

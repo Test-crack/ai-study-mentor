@@ -133,17 +133,34 @@ export default function StudentProfilePage() {
     name: '',
     phoneNo: '',
     bio: '',
+    dob: '', // 'YYYY-MM-DD'
   });
 
   useEffect(() => {
     if (profile) {
+      const rawDob = (profile as any).dateOfBirth;
       setFormData({
         name: profile.name || '',
         phoneNo: profile.phoneNo || '',
         bio: profile.Instructor?.bio || '',
+        // @db.Date values arrive as date-only or ISO; first 10 chars = the stored day (no TZ shift).
+        dob: rawDob ? String(rawDob).slice(0, 10) : '',
       });
     }
   }, [profile]);
+
+  // DPDP: derived client-side for live feedback; the server recomputes and is authoritative.
+  const isMinor = (() => {
+    if (!formData.dob) return false;
+    const d = new Date(formData.dob);
+    if (isNaN(d.getTime())) return false;
+    const today = new Date();
+    let age = today.getFullYear() - d.getFullYear();
+    const m = today.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+    return age < 18;
+  })();
+  const TODAY_YMD = ymdLocal(new Date());
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -195,6 +212,7 @@ export default function StudentProfilePage() {
       const payload = {
         name: formData.name || null,
         phoneNo: formData.phoneNo || null,
+        dateOfBirth: formData.dob || null,
       };
       const data = await callBackend(`${backendUrl}/api/profile`, {
         method: 'PUT',
@@ -477,6 +495,27 @@ export default function StudentProfilePage() {
                       placeholder="+1 234 567 890"
                       className="bg-brand-bg-alt border-brand-line focus:ring-brand-teal-500"
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="dob" className="text-brand-text-mute flex items-center gap-2">
+                      Date of Birth
+                      {isMinor && (
+                        <Badge variant="outline" className="text-amber-600 border-amber-200 bg-amber-50 text-[10px] font-semibold">
+                          Minor · guardian consent required
+                        </Badge>
+                      )}
+                    </Label>
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-text-mute pointer-events-none" />
+                      <Input
+                        id="dob"
+                        type="date"
+                        max={TODAY_YMD}
+                        value={formData.dob}
+                        onChange={(e) => handleInputChange('dob', e.target.value)}
+                        className="bg-brand-bg-alt border-brand-line focus:ring-brand-teal-500 pl-9"
+                      />
+                    </div>
                   </div>
                   <div className="space-y-2 md:col-span-2">
                     <Label className="text-brand-text-mute">Email Address</Label>

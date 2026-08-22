@@ -84,7 +84,7 @@ export default function Workflow() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300 overflow-x-hidden">
+    <div className="relative min-h-screen font-plex antialiased overflow-x-hidden bg-brand-bg text-brand-text">
       
       {/* Sidebar */}
       <InstructorSidebar 
@@ -103,8 +103,8 @@ export default function Workflow() {
         <main className="flex-1 p-4 sm:p-6 lg:p-8 relative">
           
           <div className="mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white transition-colors">Workflow Connectors</h1>
-            <p className="text-sm text-slate-500 dark:text-gray-400 mt-1 transition-colors">WhatsApp broadcast & Zoom classroom bridge</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-brand-text transition-colors">Workflow Connectors</h1>
+            <p className="text-sm text-brand-text-mute mt-1 transition-colors">WhatsApp broadcast & Zoom classroom bridge</p>
           </div>
 
           {/* Grid Layout */}
@@ -113,10 +113,10 @@ export default function Workflow() {
             {/* LEFT COLUMN: WhatsApp Broadcast */}
             <section className="space-y-4">
               <div className="flex items-center space-x-2 mb-6">
-                <div className="bg-green-100 dark:bg-green-500/20 p-2 rounded-lg">
-                  <MessageCircle className="text-green-600 dark:text-green-400" size={20} />
+                <div className="bg-green-100 p-2 rounded-lg">
+                  <MessageCircle className="text-green-600" size={20} />
                 </div>
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white transition-colors">WhatsApp Broadcast</h2>
+                <h2 className="text-xl font-bold text-brand-text transition-colors">WhatsApp Broadcast</h2>
               </div>
 
               <div className="space-y-3">
@@ -126,22 +126,22 @@ export default function Workflow() {
                     onClick={() => setSelectedBroadcast(broadcast)}
                     className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 ${
                       selectedBroadcast?.id === broadcast.id 
-                        ? 'bg-slate-50 dark:bg-[#1C1A24] border-brand-teal-500 dark:border-brand-teal-500/50 shadow-sm' 
-                        : 'bg-white dark:bg-[#121118] border-slate-200 dark:border-gray-800 hover:border-slate-300 dark:hover:border-gray-700'
+                        ? 'bg-brand-bg-alt border-brand-teal-500 shadow-sm' 
+                        : 'bg-white border-brand-line hover:border-brand-line'
                     }`}
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex items-center space-x-2">
                         {broadcast.icon}
-                        <h3 className="font-semibold text-slate-800 dark:text-gray-200 transition-colors">{broadcast.title}</h3>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-gray-800 text-slate-500 dark:text-gray-400 transition-colors">
+                        <h3 className="font-semibold text-brand-text transition-colors">{broadcast.title}</h3>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-brand-line text-brand-text-mute transition-colors">
                           {broadcast.tag}
                         </span>
                       </div>
                       
                       <div className="flex space-x-2">
                         <button 
-                          className="text-xs font-medium text-slate-600 dark:text-gray-300 hover:text-brand-teal-600 dark:hover:text-white transition-colors px-3 py-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-gray-800"
+                          className="text-xs font-medium text-brand-text hover:text-brand-teal-600 transition-colors px-3 py-1.5 rounded-md hover:bg-brand-line"
                         >
                           Preview
                         </button>
@@ -149,8 +149,8 @@ export default function Workflow() {
                           onClick={(e) => handleCopy(broadcast.fullText, broadcast.id, e)}
                           className={`flex items-center space-x-1 text-xs font-medium px-3 py-1.5 rounded-md transition-all ${
                             copiedId === broadcast.id 
-                            ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' 
-                            : 'bg-slate-100 dark:bg-gray-800 hover:bg-slate-200 dark:hover:bg-gray-700 text-slate-700 dark:text-gray-300'
+                            ? 'bg-emerald-100 text-emerald-600' 
+                            : 'bg-brand-line hover:bg-brand-line text-brand-text'
                           }`}
                         >
                           {copiedId === broadcast.id ? <Check size={14} /> : <Copy size={14} />}
@@ -158,7 +158,7 @@ export default function Workflow() {
                         </button>
                       </div>
                     </div>
-                    <p className="text-sm text-slate-500 dark:text-gray-400 leading-relaxed truncate transition-colors">
+                    <p className="text-sm text-brand-text-mute leading-relaxed truncate transition-colors">
                       {broadcast.previewText}
                     </p>
                   </div>
@@ -169,29 +169,29 @@ export default function Workflow() {
             {/* RIGHT COLUMN: Zoom Bridge */}
             <section className="space-y-8 lg:pl-4">
               <div className="flex items-center space-x-2 mb-2">
-                <div className="bg-blue-100 dark:bg-blue-500/20 p-2 rounded-lg">
-                  <Video className="text-blue-600 dark:text-blue-400" size={20} />
+                <div className="bg-blue-100 p-2 rounded-lg">
+                  <Video className="text-blue-600" size={20} />
                 </div>
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white transition-colors">Zoom Bridge</h2>
+                <h2 className="text-xl font-bold text-brand-text transition-colors">Zoom Bridge</h2>
               </div>
 
               {/* Friction Topics */}
               <div>
-                <h3 className="text-sm font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-4 flex items-center space-x-2 transition-colors">
+                <h3 className="text-sm font-semibold text-brand-text-mute font-jetbrains uppercase tracking-wider mb-4 flex items-center space-x-2 transition-colors">
                   <Target size={16} />
                   <span>Top Friction Topics</span>
                 </h3>
                 <div className="space-y-3">
                   {FRICTION_TOPICS.map((topic) => (
-                    <div key={topic.id} className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-[#121118] border border-slate-200 dark:border-gray-800 transition-colors">
+                    <div key={topic.id} className="flex items-center justify-between p-3 rounded-lg bg-white border border-brand-line transition-colors">
                       <div className="flex items-center space-x-4">
-                        <span className="text-xl font-bold text-slate-400 dark:text-gray-600">#{topic.id}</span>
+                        <span className="text-xl font-bold text-brand-text-mute">#{topic.id}</span>
                         <div>
-                          <p className="font-semibold text-slate-800 dark:text-gray-200 transition-colors">{topic.title}</p>
-                          <p className="text-xs text-slate-500 dark:text-gray-500 transition-colors">{topic.stats}</p>
+                          <p className="font-semibold text-brand-text transition-colors">{topic.title}</p>
+                          <p className="text-xs text-brand-text-mute transition-colors">{topic.stats}</p>
                         </div>
                       </div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/10 px-2 py-1 rounded transition-colors">
+                      <span className="text-[10px] font-bold font-jetbrains uppercase tracking-wider text-red-600 border border-red-200 bg-red-50 px-2 py-1 rounded transition-colors">
                         {topic.tag}
                       </span>
                     </div>
@@ -201,25 +201,25 @@ export default function Workflow() {
 
               {/* Classroom Agenda */}
               <div>
-                <h3 className="text-sm font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-4 flex items-center space-x-2 transition-colors">
+                <h3 className="text-sm font-semibold text-brand-text-mute font-jetbrains uppercase tracking-wider mb-4 flex items-center space-x-2 transition-colors">
                   <Clock size={16} />
                   <span>Classroom Agenda</span>
                 </h3>
-                <div className="space-y-4 border-l-2 border-slate-200 dark:border-gray-800 ml-2 pl-4">
+                <div className="space-y-4 border-l-2 border-brand-line ml-2 pl-4">
                   {AGENDA.map((item, idx) => (
                     <div key={idx} className="relative">
                       {/* Timeline Dot */}
-                      <div className={`absolute -left-[21px] top-1.5 w-2 h-2 rounded-full ${item.highlight ? 'bg-red-500 ring-4 ring-red-100 dark:ring-red-900/30' : 'bg-slate-300 dark:bg-gray-600 ring-4 ring-slate-100 dark:ring-slate-900'}`} />
+                      <div className={`absolute -left-[21px] top-1.5 w-2 h-2 rounded-full ${item.highlight ? 'bg-red-500 ring-4 ring-red-100' : 'bg-brand-line ring-4 ring-brand-line'}`} />
                       
                       <div className="flex items-start space-x-3">
-                        <span className={`text-xs font-bold mt-0.5 min-w-[50px] ${item.highlight ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                        <span className={`text-xs font-bold mt-0.5 min-w-[50px] ${item.highlight ? 'text-red-600' : 'text-emerald-600'}`}>
                           {item.time}
                         </span>
                         <div>
-                          <p className={`font-semibold text-sm transition-colors ${item.highlight ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-gray-300'}`}>
+                          <p className={`font-semibold text-sm transition-colors ${item.highlight ? 'text-brand-text' : 'text-brand-text'}`}>
                             {item.title}
                           </p>
-                          <p className="text-xs text-slate-500 dark:text-gray-500 mt-1 transition-colors">{item.desc}</p>
+                          <p className="text-xs text-brand-text-mute mt-1 transition-colors">{item.desc}</p>
                         </div>
                       </div>
                     </div>
@@ -231,38 +231,38 @@ export default function Workflow() {
 
           {/* SLIDE-IN DRAWER (PREVIEW) */}
           <div 
-            className={`fixed top-0 right-0 h-full w-full sm:w-[400px] bg-white dark:bg-[#0B0A0F] border-l border-slate-200 dark:border-gray-800 shadow-2xl transition-transform duration-300 ease-in-out z-50 p-6 flex flex-col ${
+            className={`fixed top-0 right-0 h-full w-full sm:w-[400px] bg-white border-l border-brand-line shadow-2xl transition-transform duration-300 ease-in-out z-50 p-6 flex flex-col ${
               selectedBroadcast ? 'translate-x-0' : 'translate-x-full'
             }`}
           >
             {selectedBroadcast && (
               <>
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 transition-colors">
+                  <h2 className="text-lg font-bold text-brand-text flex items-center gap-2 transition-colors">
                     {selectedBroadcast.icon} "{selectedBroadcast.title}"
                   </h2>
                   <button 
                     onClick={() => setSelectedBroadcast(null)}
-                    className="p-2 text-slate-400 hover:text-slate-600 dark:text-gray-500 dark:hover:text-white bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-full transition-colors"
+                    className="p-2 text-brand-text-mute hover:text-brand-text bg-brand-line hover:bg-brand-line rounded-full transition-colors"
                   >
                     <X size={18} />
                   </button>
                 </div>
 
                 <div className="flex-1 overflow-y-auto">
-                  <div className="bg-slate-50 dark:bg-[#121118] border border-slate-200 dark:border-gray-800 rounded-xl p-5 mb-4 transition-colors">
-                    <p className="whitespace-pre-wrap text-sm text-slate-700 dark:text-gray-300 leading-relaxed font-medium transition-colors">
+                  <div className="bg-brand-bg-alt border border-brand-line rounded-xl p-5 mb-4 transition-colors">
+                    <p className="whitespace-pre-wrap text-sm text-brand-text leading-relaxed font-medium transition-colors">
                       {selectedBroadcast.fullText}
                     </p>
                   </div>
                   
-                  <div className="flex items-center space-x-2 text-xs text-slate-500 dark:text-gray-500 font-medium transition-colors">
+                  <div className="flex items-center space-x-2 text-xs text-brand-text-mute font-medium transition-colors">
                     <Target size={14} />
                     <span>To {selectedBroadcast.studentCount} students in {selectedBroadcast.title}</span>
                   </div>
                 </div>
 
-                <div className="mt-4 pt-4 border-t border-slate-200 dark:border-gray-800">
+                <div className="mt-4 pt-4 border-t border-brand-line">
                   <button 
                     onClick={(e) => handleCopy(selectedBroadcast.fullText, 'drawer', e)}
                     className={`w-full flex items-center justify-center space-x-2 py-3 rounded-lg font-bold transition-all duration-200 ${
@@ -291,7 +291,7 @@ export default function Workflow() {
           {/* Background Overlay */}
           {selectedBroadcast && (
             <div 
-              className="fixed inset-0 bg-slate-900/20 dark:bg-black/40 z-40 transition-opacity"
+              className="fixed inset-0 bg-brand-text/20 z-40 transition-opacity"
               onClick={() => setSelectedBroadcast(null)}
             />
           )}

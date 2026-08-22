@@ -20,12 +20,12 @@ function initials(name: string) {
 }
 
 const AVATAR_PALETTES = [
-  'bg-brand-teal-100 dark:bg-brand-teal-500/20 text-brand-teal-700 dark:text-brand-teal-400',
-  'bg-brand-blue-100 dark:bg-brand-blue-500/20 text-brand-blue-700 dark:text-brand-blue-400',
-  'bg-sky-100 dark:bg-sky-500/20 text-sky-700 dark:text-sky-400',
-  'bg-teal-100 dark:bg-teal-500/20 text-teal-700 dark:text-teal-400',
-  'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400',
-  'bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400',
+  'bg-brand-teal-100 text-brand-teal-700',
+  'bg-brand-blue-100 text-brand-blue-700',
+  'bg-sky-100 text-sky-700',
+  'bg-teal-100 text-teal-700',
+  'bg-amber-100 text-amber-700',
+  'bg-rose-100 text-rose-700',
 ];
 function avatarPalette(name: string) {
   const code = name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
@@ -33,47 +33,47 @@ function avatarPalette(name: string) {
 }
 
 function bandTextColor(band: number | null) {
-  if (band === null) return 'text-slate-400';
-  if (band >= 7.5)  return 'text-emerald-600 dark:text-emerald-400';
-  if (band >= 6.0)  return 'text-sky-600 dark:text-sky-400';
-  if (band >= 5.0)  return 'text-amber-600 dark:text-amber-400';
-  return 'text-rose-600 dark:text-rose-400';
+  if (band === null) return 'text-brand-text-mute';
+  if (band >= 7.5)  return 'text-emerald-600';
+  if (band >= 6.0)  return 'text-sky-600';
+  if (band >= 5.0)  return 'text-amber-600';
+  return 'text-rose-600';
 }
 
 // Colored badge with border
 function bandBadge(band: number | null): string {
-  if (band === null) return 'bg-slate-100 dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700';
-  if (band >= 7.5)  return 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.15)]';
-  if (band >= 6.0)  return 'bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-500/30 shadow-[0_0_10px_rgba(14,165,233,0.15)]';
-  if (band >= 5.0)  return 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.15)]';
-  return 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30 shadow-[0_0_10px_rgba(244,63,94,0.15)]';
+  if (band === null) return 'bg-brand-bg-alt text-brand-text-mute border border-brand-line';
+  if (band >= 7.5)  return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+  if (band >= 6.0)  return 'bg-sky-50 text-sky-700 border border-sky-200';
+  if (band >= 5.0)  return 'bg-amber-50 text-amber-700 border border-amber-200';
+  return 'bg-rose-50 text-rose-700 border border-rose-200';
 }
 
 function gapPillColor(gap: number | null) {
-  if (gap === null) return 'bg-slate-100 dark:bg-slate-800 text-slate-500';
-  if (gap <= 0)     return 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20';
-  if (gap > 2.0)    return 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20';
-  if (gap > 1.0)    return 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20';
-  return 'bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-500/20';
+  if (gap === null) return 'bg-brand-bg-alt text-brand-text-mute';
+  if (gap <= 0)     return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+  if (gap > 2.0)    return 'bg-rose-50 text-rose-700 border border-rose-200';
+  if (gap > 1.0)    return 'bg-amber-50 text-amber-700 border border-amber-200';
+  return 'bg-sky-50 text-sky-700 border border-sky-200';
 }
 
 function TrendCell({ trend }: { trend: BandOverviewRow['band_trend'] }) {
   if (trend === 'up') return (
-    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-500/20 whitespace-nowrap">
+    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 whitespace-nowrap">
       <TrendingUp className="h-3 w-3" /> Up
     </span>
   );
   if (trend === 'down') return (
-    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-200 dark:border-rose-500/20 whitespace-nowrap">
+    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200 whitespace-nowrap">
       <TrendingDown className="h-3 w-3" /> Down
     </span>
   );
   if (trend === 'flat') return (
-    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full whitespace-nowrap">
+    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-brand-text-mute bg-brand-bg-alt px-2 py-0.5 rounded-full whitespace-nowrap">
       <Minus className="h-3 w-3" /> Flat
     </span>
   );
-  return <span className="text-[11px] text-slate-300 dark:text-slate-600">—</span>;
+  return <span className="text-[11px] text-brand-text-mute">—</span>;
 }
 
 function relativeDate(dateStr: string) {
@@ -91,18 +91,18 @@ function relativeDate(dateStr: string) {
 function RowSkeleton({ even }: { even: boolean }) {
   return (
     <tr className={cn(
-      'border-b border-slate-100 dark:border-white/[0.04] animate-pulse',
-      even ? 'bg-slate-50/50 dark:bg-white/[0.015]' : 'bg-white dark:bg-transparent'
+      'border-b border-brand-line animate-pulse',
+      even ? 'bg-brand-bg-alt/50' : 'bg-white'
     )}>
       <td className="px-5 py-3.5">
         <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-full bg-slate-200 dark:bg-white/5 shrink-0" />
-          <div className="h-3.5 w-24 bg-slate-200 dark:bg-white/5 rounded" />
+          <div className="h-8 w-8 rounded-full bg-brand-bg-alt shrink-0" />
+          <div className="h-3.5 w-24 bg-brand-bg-alt rounded" />
         </div>
       </td>
       {[1, 2, 3, 4, 5].map(i => (
         <td key={i} className="px-5 py-3.5">
-          <div className="h-3.5 w-12 bg-slate-100 dark:bg-white/5 rounded" />
+          <div className="h-3.5 w-12 bg-brand-bg-alt rounded" />
         </td>
       ))}
     </tr>
@@ -112,12 +112,12 @@ function RowSkeleton({ even }: { even: boolean }) {
 function MobileCardSkeleton() {
   return (
     <div className="px-4 py-3 flex items-center gap-3 animate-pulse">
-      <div className="h-9 w-9 rounded-full bg-slate-200 dark:bg-white/5 shrink-0" />
+      <div className="h-9 w-9 rounded-full bg-brand-bg-alt shrink-0" />
       <div className="flex-1 space-y-2">
-        <div className="h-3.5 w-28 bg-slate-200 dark:bg-white/5 rounded" />
-        <div className="h-3 w-20 bg-slate-100 dark:bg-white/5 rounded" />
+        <div className="h-3.5 w-28 bg-brand-bg-alt rounded" />
+        <div className="h-3 w-20 bg-brand-bg-alt rounded" />
       </div>
-      <div className="h-5 w-12 bg-slate-100 dark:bg-white/5 rounded-full" />
+      <div className="h-5 w-12 bg-brand-bg-alt rounded-full" />
     </div>
   );
 }
@@ -133,15 +133,15 @@ function PaginationBar({
   onPage: (i: number) => void;
 }) {
   return (
-    <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-t border-slate-100 dark:border-white/[0.05]">
+    <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-t border-brand-line">
       <button
         onClick={onPrev}
         disabled={!hasPrev}
         className={cn(
           'h-8 w-8 rounded-full flex items-center justify-center transition-all',
           hasPrev
-            ? 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-brand-teal-100 dark:hover:bg-brand-teal-500/20 hover:text-brand-teal-600 dark:hover:text-brand-teal-400'
-            : 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
+            ? 'bg-brand-bg-alt text-brand-text hover:bg-brand-teal-100 hover:text-brand-teal-600'
+            : 'text-brand-text-mute cursor-not-allowed'
         )}
         aria-label="Previous page"
       >
@@ -157,15 +157,15 @@ function PaginationBar({
               className={cn(
                 'rounded-full transition-all',
                 i === page
-                  ? 'h-2 w-5 bg-brand-teal-500 dark:bg-brand-teal-400'
-                  : 'h-2 w-2 bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20'
+                  ? 'h-2 w-5 bg-brand-teal-500'
+                  : 'h-2 w-2 bg-brand-line hover:bg-brand-text-mute'
               )}
               aria-label={`Page ${i + 1}`}
             />
           ))}
         </div>
       ) : (
-        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+        <span className="text-xs font-semibold text-brand-text-mute">
           {page + 1} / {pageCount}
         </span>
       )}
@@ -176,8 +176,8 @@ function PaginationBar({
         className={cn(
           'h-8 w-8 rounded-full flex items-center justify-center transition-all',
           hasNext
-            ? 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-brand-teal-100 dark:hover:bg-brand-teal-500/20 hover:text-brand-teal-600 dark:hover:text-brand-teal-400'
-            : 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
+            ? 'bg-brand-bg-alt text-brand-text hover:bg-brand-teal-100 hover:text-brand-teal-600'
+            : 'text-brand-text-mute cursor-not-allowed'
         )}
         aria-label="Next page"
       >
@@ -208,38 +208,38 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
   return (
     <div className="
       rounded-2xl overflow-hidden
-      bg-white dark:bg-[#0E0E16]
-      border border-slate-200/70 dark:border-white/[0.06]
-      shadow-[0_2px_12px_-4px_rgba(15,23,42,0.08)] dark:shadow-none
+      bg-white
+      border border-brand-line
+      shadow-sm
     ">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 sm:px-5 py-4 border-b border-slate-100 dark:border-white/[0.05]">
+      <div className="flex items-center justify-between px-4 sm:px-5 py-4 border-b border-brand-line">
         <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-xl bg-brand-teal-100 dark:bg-brand-teal-500/15 flex items-center justify-center shrink-0">
-            <Target className="h-4 w-4 text-brand-teal-600 dark:text-brand-teal-400" />
+          <div className="h-8 w-8 rounded-xl bg-brand-teal-100 flex items-center justify-center shrink-0">
+            <Target className="h-4 w-4 text-brand-teal-600" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-800 dark:text-white leading-tight">Band Score Overview</h3>
-            <p className="text-[11px] text-slate-400 dark:text-slate-500 leading-tight">Sorted by gap to target — widest first</p>
+            <h3 className="text-sm font-bold text-brand-text leading-tight">Band Score Overview</h3>
+            <p className="text-[11px] text-brand-text-mute leading-tight">Sorted by gap to target — widest first</p>
           </div>
         </div>
         {!loading && rows.length > 0 && (
-          <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">{rows.length} students</span>
+          <span className="text-xs text-brand-text-mute font-medium">{rows.length} students</span>
         )}
       </div>
 
       {/* ── Mobile card view ── */}
       <div className="md:hidden">
         {loading ? (
-          <div className="divide-y divide-slate-100 dark:divide-white/[0.04]">
+          <div className="divide-y divide-brand-line">
             {Array.from({ length: PAGE_SIZE }, (_, i) => <MobileCardSkeleton key={i} />)}
           </div>
         ) : rows.length === 0 ? (
-          <div className="px-5 py-12 text-center text-sm text-slate-400">
+          <div className="px-5 py-12 text-center text-sm text-brand-text-mute">
             No students enrolled in this batch yet.
           </div>
         ) : (
-          <div className="divide-y divide-slate-100 dark:divide-white/[0.04]">
+          <div className="divide-y divide-brand-line">
             {pageRows.map((row, idx) => (
               <div
                 key={row.student_id}
@@ -247,9 +247,9 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
                 className={cn(
                   'px-4 py-3 flex items-center gap-3 cursor-pointer transition-colors group',
                   idx % 2 === 0
-                    ? 'bg-white dark:bg-transparent'
-                    : 'bg-slate-50/60 dark:bg-white/[0.018]',
-                  'hover:bg-brand-teal-50/60 dark:hover:bg-brand-teal-500/[0.06]',
+                    ? 'bg-white'
+                    : 'bg-brand-bg-alt/60',
+                  'hover:bg-brand-teal-50/60',
                 )}
               >
                 <div className={cn(
@@ -263,7 +263,7 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2 mb-0.5">
-                    <p className="text-sm font-semibold text-slate-800 dark:text-white truncate">{row.name}</p>
+                    <p className="text-sm font-semibold text-brand-text truncate">{row.name}</p>
                     <TrendCell trend={row.band_trend} />
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
@@ -277,12 +277,12 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
                       </span>
                     )}
                     {row.last_ia_date
-                      ? <span className="text-[11px] text-slate-400">{relativeDate(row.last_ia_date)}</span>
-                      : <span className="text-[11px] text-slate-300 dark:text-slate-600">No IA yet</span>
+                      ? <span className="text-[11px] text-brand-text-mute">{relativeDate(row.last_ia_date)}</span>
+                      : <span className="text-[11px] text-brand-text-mute">No IA yet</span>
                     }
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 text-slate-300 dark:text-slate-600 group-hover:text-brand-teal-500 transition-colors shrink-0" />
+                <ChevronRight className="h-4 w-4 text-brand-text-mute group-hover:text-brand-teal-500 transition-colors shrink-0" />
               </div>
             ))}
           </div>
@@ -293,11 +293,11 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-slate-100 dark:border-white/[0.05] bg-slate-50/80 dark:bg-white/[0.02]">
+            <tr className="border-b border-brand-line bg-brand-bg-alt/80">
               {['Student', 'Current Band', 'Target', 'Gap', 'Last IA', 'Trend', ''].map(h => (
                 <th
                   key={h}
-                  className="px-5 py-3 text-left text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.12em] whitespace-nowrap"
+                  className="font-jetbrains px-5 py-3 text-left text-[10px] font-black text-brand-text-mute uppercase tracking-[0.12em] whitespace-nowrap"
                 >
                   {h}
                 </th>
@@ -309,7 +309,7 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
               Array.from({ length: PAGE_SIZE }, (_, i) => <RowSkeleton key={i} even={i % 2 === 1} />)
             ) : rows.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-5 py-12 text-center text-sm text-slate-400">
+                <td colSpan={7} className="px-5 py-12 text-center text-sm text-brand-text-mute">
                   No students enrolled in this batch yet.
                 </td>
               </tr>
@@ -319,14 +319,13 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
                   key={row.student_id}
                   onClick={() => goToStudent(row)}
                   className={cn(
-                    'border-b border-slate-50 dark:border-white/[0.03] cursor-pointer transition-all duration-150 group',
+                    'border-b border-brand-line cursor-pointer transition-all duration-150 group',
                     // Zebra
                     idx % 2 === 0
-                      ? 'bg-white dark:bg-transparent'
-                      : 'bg-slate-50/60 dark:bg-white/[0.018]',
-                    // Hover: subtle glow row
-                    'hover:bg-brand-teal-50/50 dark:hover:bg-brand-teal-500/[0.06]',
-                    'dark:hover:shadow-[inset_0_0_0_1px_rgba(99,102,241,0.12)]',
+                      ? 'bg-white'
+                      : 'bg-brand-bg-alt/60',
+                    // Hover
+                    'hover:bg-brand-teal-50/50',
                   )}
                 >
                   {/* Student */}
@@ -341,7 +340,7 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
                           : initials(row.name)
                         }
                       </div>
-                      <span className="font-semibold text-slate-800 dark:text-slate-100 text-sm whitespace-nowrap">
+                      <span className="font-semibold text-brand-text text-sm whitespace-nowrap">
                         {row.name}
                       </span>
                     </div>
@@ -359,7 +358,7 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
 
                   {/* Target */}
                   <td className="px-5 py-3.5">
-                    <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 tabular-nums">
+                    <span className="text-sm font-semibold text-brand-text-mute tabular-nums">
                       {row.target_band !== null ? row.target_band.toFixed(1) : '—'}
                     </span>
                   </td>
@@ -374,18 +373,18 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
                         }
                       </span>
                     ) : (
-                      <span className="text-slate-300 dark:text-slate-600 text-xs">—</span>
+                      <span className="text-brand-text-mute text-xs">—</span>
                     )}
                   </td>
 
                   {/* Last IA */}
                   <td className="px-5 py-3.5 whitespace-nowrap">
                     {row.last_ia_date ? (
-                      <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                      <span className="text-xs font-semibold text-brand-text-mute">
                         {relativeDate(row.last_ia_date)}
                       </span>
                     ) : (
-                      <span className="text-xs text-slate-300 dark:text-slate-600">No IA yet</span>
+                      <span className="text-xs text-brand-text-mute">No IA yet</span>
                     )}
                   </td>
 
@@ -396,7 +395,7 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
 
                   {/* Arrow */}
                   <td className="px-5 py-3.5">
-                    <ChevronRight className="h-4 w-4 text-slate-300 dark:text-slate-600 group-hover:text-brand-teal-500 dark:group-hover:text-brand-teal-400 transition-colors" />
+                    <ChevronRight className="h-4 w-4 text-brand-text-mute group-hover:text-brand-teal-500 transition-colors" />
                   </td>
                 </tr>
               ))

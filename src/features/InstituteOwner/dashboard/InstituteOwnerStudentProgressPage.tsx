@@ -26,12 +26,12 @@ const TABS: Array<{ id: Tab; label: string; icon: React.ReactNode }> = [
 function PageSkeleton() {
   return (
     <div className="animate-pulse space-y-5">
-      <div className="h-36 bg-slate-200 dark:bg-slate-800 rounded-2xl" />
-      <div className="h-10 w-80 bg-slate-200 dark:bg-slate-800 rounded-xl" />
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {[1, 2, 3, 4].map(i => <div key={i} className="h-24 bg-slate-200 dark:bg-slate-800 rounded-2xl" />)}
+      <div className="h-36 bg-brand-bg-alt rounded-2xl" />
+      <div className="h-10 w-full max-w-xs bg-brand-bg-alt rounded-xl" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {[1, 2, 3, 4].map(i => <div key={i} className="h-24 bg-brand-bg-alt rounded-2xl" />)}
       </div>
-      <div className="h-64 bg-slate-200 dark:bg-slate-800 rounded-2xl" />
+      <div className="h-64 bg-brand-bg-alt rounded-2xl" />
     </div>
   );
 }
@@ -86,24 +86,22 @@ export default function InstituteOwnerStudentProgressPage() {
   }, [resolvedStudentId, load]);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 flex">
-      <div className="hidden lg:block">
-        <InstituteOwnerSidebar
-          activeTab="students"
-          isCollapsed={isSidebarCollapsed}
-          toggleCollapse={() => setIsSidebarCollapsed(c => !c)}
-        />
-      </div>
+    <div className="relative min-h-screen font-plex antialiased overflow-x-hidden bg-brand-bg text-brand-text">
+      <InstituteOwnerSidebar
+        activeTab="students"
+        isCollapsed={isSidebarCollapsed}
+        toggleCollapse={() => setIsSidebarCollapsed(c => !c)}
+      />
 
       <div className={cn(
-        'transition-all duration-300 min-h-screen flex flex-col w-full',
-        isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'
+        'relative z-10 transition-all duration-300',
+        isSidebarCollapsed ? 'lg:pl-24' : 'lg:pl-72'
       )}>
-        <main className="p-4 md:p-6 max-w-6xl mx-auto w-full pt-8 space-y-0">
+        <main className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-[90rem] mx-auto w-full pb-16 space-y-0">
 
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-brand-teal-600 dark:hover:text-brand-teal-400 font-semibold mb-5 transition-colors"
+            className="flex items-center gap-1.5 min-h-[40px] text-sm text-brand-text-mute hover:text-brand-teal-600 font-semibold mb-5 transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
             Back
@@ -112,18 +110,18 @@ export default function InstituteOwnerStudentProgressPage() {
           {loading && <PageSkeleton />}
 
           {!loading && error && (
-            <div className="bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 rounded-2xl p-8 text-center">
-              <p className="text-rose-700 dark:text-rose-400 font-semibold">{error}</p>
+            <div className="bg-rose-50 border border-rose-200 rounded-2xl p-6 sm:p-8 text-center">
+              <p className="text-rose-700 font-semibold">{error}</p>
             </div>
           )}
 
           {!loading && !error && !resolvedStudentId && (
-            <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-2xl p-8 text-center space-y-3">
-              <p className="text-amber-700 dark:text-amber-400 font-semibold">Session expired or direct URL access.</p>
-              <p className="text-amber-600 dark:text-amber-500 text-sm">Please navigate to a student from the dashboard or students list.</p>
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 sm:p-8 text-center space-y-3">
+              <p className="text-amber-700 font-semibold">Session expired or direct URL access.</p>
+              <p className="text-amber-600 text-sm">Please navigate to a student from the dashboard or students list.</p>
               <button
                 onClick={() => navigate('/institute-owner/students')}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-600 text-white text-sm font-semibold hover:bg-amber-700 transition-colors"
+                className="inline-flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-xl bg-amber-600 text-white text-sm font-semibold hover:bg-amber-700 transition-colors"
               >
                 Go to Students
               </button>
@@ -134,16 +132,16 @@ export default function InstituteOwnerStudentProgressPage() {
             <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-400">
               <StudentProfileHeader data={data} />
 
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-1.5 flex gap-1 w-fit">
+              <div className="bg-white rounded-2xl border border-brand-line shadow-sm p-1.5 flex gap-1 w-full sm:w-fit overflow-x-auto">
                 {TABS.map(tab => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={cn(
-                      'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 whitespace-nowrap',
+                      'flex items-center gap-2 min-h-[40px] px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 whitespace-nowrap',
                       activeTab === tab.id
                         ? 'bg-brand-teal-600 text-white shadow-sm'
-                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                        : 'text-brand-text-mute hover:text-brand-text hover:bg-brand-bg-alt'
                     )}
                   >
                     {tab.icon}
