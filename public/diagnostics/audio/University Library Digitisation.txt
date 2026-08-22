@@ -1,0 +1,51 @@
+Professor Harris: Before we finalise the first phase of the digitisation project, I want to reconsider how we're choosing which materials to scan first. Leena, your draft gives priority to the oldest items in the archive.
+
+Leena: Age seemed like the most defensible criterion. Some of the manuscripts are more than two hundred years old, so I assumed they were automatically at greatest risk.
+
+Tom: But age and physical vulnerability aren't necessarily the same thing.
+
+Leena: No, that's fair. Some nineteenth-century volumes are remarkably stable, while much more recent newspapers are already becoming brittle.
+
+Professor Harris: Exactly. I don't want us to create a simple oldest-first queue. We need to consider physical condition, demand from researchers, and whether repeated handling is accelerating deterioration.
+
+Leena: In that case, frequently requested fragile items should probably move ahead of older material that's rarely consulted.
+
+Professor Harris: In many cases, yes.
+
+Tom: There's also a technical constraint. The initial proposal assumes we'll scan everything at the highest resolution our equipment allows.
+
+Professor Harris: Wouldn't that give us the best preservation copy?
+
+Tom: Not necessarily in any practical sense. Higher resolution produces larger files, longer processing times, and greater storage requirements. Beyond a certain point, additional detail may have no meaningful benefit for a particular type of material.
+
+Leena: So you're suggesting different specifications for different collections?
+
+Tom: Exactly. A handwritten map with fine annotations may justify a much higher resolution than a clearly printed administrative report.
+
+Professor Harris: Good. But I don't want staff deciding settings arbitrarily from item to item.
+
+Tom: Neither do I. We should establish technical standards by material category and record any exceptions.
+
+Leena: What about damaged documents? Some pages can't be fully flattened without risking further deterioration.
+
+Tom: Then they shouldn't be forced flat simply to produce a cleaner image.
+
+Professor Harris: Agreed. Preservation takes priority over visual perfection.
+
+Leena: That may mean some scans include curvature or shadow near the binding.
+
+Tom: Which is acceptable if correcting it physically would damage the original. Digital processing can compensate for some distortion later, although it shouldn't be used to invent missing text.
+
+Professor Harris: Another issue is access. The proposal says digitised material should be made publicly available immediately after scanning.
+
+Leena: I think that needs qualification. Most material can be released, but some collections contain personal information or are subject to donor restrictions.
+
+Tom: Technically, we can store everything in the repository while limiting public access to selected files.
+
+Professor Harris: So digitisation and publication should be treated as separate decisions.
+
+Leena: Exactly.
+
+Professor Harris: Then our first phase will prioritise vulnerable, heavily used material rather than simply the oldest items; apply scanning standards by material type; avoid physical manipulation that could cause damage; and review access restrictions before publication.
+
+Tom: That gives us a much more defensible workflow.
