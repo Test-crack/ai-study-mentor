@@ -60,8 +60,10 @@ Companion to [IELTS-EXTRACTION-GUIDELINE.md](./IELTS-EXTRACTION-GUIDELINE.md). T
 
 ---
 
-## Part 3 — Migrate AI-service band maths (rows 6–7)
-- **Goal:** in `ieltsWritingService` + `ieltsSpeakingService`, route the **per-criterion `toBand` + mean-of-4** through the engine. **The rubric/prompt, word-count penalties, and content-floor stay exactly as they are** (Layer B, untouched).
+## Part 3 — Migrate AI-service band maths (rows 6–7) 🟡 CODE DONE, needs dev E2E
+- **Goal:** in `ieltsWritingService` + `ieltsSpeakingService`, route the **mean-of-4** aggregation through the engine (`scoreComponentFromSubskills` → `band_mean` on `ielts_band`). **The rubric/prompt, word-count penalties, content-floor, and per-criterion clamps stay exactly as they are** (Layer B, untouched).
+- **Done:** both services now call the engine for the component band. **Locally verified:** `tsc` clean; vectors 89/89 incl. §11 `14641 criterion quads: band_mean == toBand(avg), 0 mismatches`.
+- **⏳ Dev E2E to confirm before trust:** submit one Writing + one Speaking task on dev; band + criterion breakdown must match a pre-migration snapshot. (The services now require the engine loaded at boot — it is, via `loadExamEngine()`.)
 - **Stability:** only the arithmetic that turns already-graded criteria into a band moves; the AI judgement is identical.
 - **You verify (dev):** submit one Writing and one Speaking task; the returned band + criterion breakdown match a pre-migration snapshot.
 - **New-exam status here:**
