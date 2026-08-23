@@ -250,11 +250,14 @@ function CreateInstituteModal({ onClose, onCreated }: CreateModalProps) {
                   <button
                     key={opt.id}
                     type="button"
-                    onClick={() => toggleExam(exam)}
+                    disabled={soon}
+                    onClick={() => !soon && toggleExam(exam)}
                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
-                      selected
-                        ? 'bg-brand-teal-600 border-brand-teal-600 text-white'
-                        : 'bg-brand-bg-alt border-brand-line text-brand-text hover:border-brand-teal-400'
+                      soon
+                        ? 'bg-brand-bg-alt border-brand-line text-brand-text-mute opacity-50 cursor-not-allowed'
+                        : selected
+                          ? 'bg-brand-teal-600 border-brand-teal-600 text-white'
+                          : 'bg-brand-bg-alt border-brand-line text-brand-text hover:border-brand-teal-400'
                     }`}
                   >
                     {selected && <CheckCircle2 className="w-3.5 h-3.5" />}
@@ -420,11 +423,14 @@ function EditInstituteModal({ institute, onClose, onUpdated }: EditModalProps) {
                   <button
                     key={opt.id}
                     type="button"
-                    onClick={() => toggleExam(exam)}
+                    disabled={soon}
+                    onClick={() => !soon && toggleExam(exam)}
                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
-                      selected
-                        ? 'bg-brand-teal-600 border-brand-teal-600 text-white'
-                        : 'bg-brand-bg-alt border-brand-line text-brand-text hover:border-brand-teal-400'
+                      soon
+                        ? 'bg-brand-bg-alt border-brand-line text-brand-text-mute opacity-50 cursor-not-allowed'
+                        : selected
+                          ? 'bg-brand-teal-600 border-brand-teal-600 text-white'
+                          : 'bg-brand-bg-alt border-brand-line text-brand-text hover:border-brand-teal-400'
                     }`}
                   >
                     {selected && <CheckCircle2 className="w-3.5 h-3.5" />}
