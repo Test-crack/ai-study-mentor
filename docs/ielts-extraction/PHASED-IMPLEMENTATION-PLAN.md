@@ -48,8 +48,9 @@ Companion to [IELTS-EXTRACTION-GUIDELINE.md](./IELTS-EXTRACTION-GUIDELINE.md). T
 
 ---
 
-## Part 2 — Migrate the targeting sites (rows 1–5) — *lowest risk*
+## Part 2 — Migrate the targeting sites (rows 1–5) — *lowest risk* ✅ DONE (verified)
 - **Goal:** point difficulty/level/weakness-gap **consumers** at the engine: `iaController`, `recommendationController`, `recommendationService`, `drillController`, `subskillSelector`.
+- **Done via** an examId facade (`exam-engine/proficiency.ts`: `examDifficulty`/`examWeaknessGap`). Call sites now read the cuts from `ielts` config. **Verified:** `tsc` clean; vectors 87/87 (facade resolves `ielts_band`, 107-band parity 0 mismatches).
 - **Stability:** these drive **drill/IA targeting and recommendation difficulty only — never a stored or displayed band.** Engine output is parity-proven identical (Part 1a), so targeting decisions are unchanged.
 - **You verify (dev):** for a seeded student, drills target the same sub-skills and recommendation difficulty (BEGINNER/…) reads the same as before. Quick before/after on one student.
 - **New-exam status here:**
