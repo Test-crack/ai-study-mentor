@@ -34,7 +34,7 @@ Three seams, each an interface the app depends on, so today's implementation can
 
 | Phase | Deliverable | Notes | Depends on |
 |---|---|---|---|
-| **A0** | SuperAdmin: add institute+owner, edit, subscription **ACTIVE/CANCELLED** (TRIAL≈ACTIVE, CANCELLED=deactivate). **Exam list from `GET /api/exams`** (kills the hardcoded `examTypes.ts` drift). | first releasable slice; folds in Part 5's UI item | existing models + endpoint |
+| **A0** ✅ CODE DONE (needs dev test) | SuperAdmin: add institute+owner, edit, subscriptions (CRUD already existed). **NEW:** `is_active` enforced **server-side** (`requireActiveInstitute` + `sessionContext` seam + `examAccess` rule TRIAL≈ACTIVE/CANCELLED=blocked); **exam list from `GET /api/exams`** via `useExams()` (drift killed, constant fallback). Subscription UI keeps 3 states but TRIAL is functionally ACTIVE via the access rule (cosmetic 2-state simplification optional). | first releasable slice; folds in Part 5's UI item | existing models + endpoint |
 | **A1** | Owner/Admin **exam context switch** + scoped operations/insights + isolation | uses the resolver middleware | A0, registry |
 | **A2** | Instructor **batch context switch** (dashboard / student-assessment / report) | batch carries its exam | A1 pattern |
 | **A3** | Student **batch(+exam) switch** post-login; single-exam users keep today's flow untouched | switch UI only appears when >1 context | A2 pattern |
