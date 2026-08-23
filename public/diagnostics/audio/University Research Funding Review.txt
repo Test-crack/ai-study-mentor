@@ -1,0 +1,67 @@
+Dr. Bennett: We have funding for only three of the seven proposals, so I want to be careful that we don't simply reward the projects with the most ambitious objectives.
+
+Priya: I agree. Some of the strongest-looking proposals are also the least realistic in terms of delivery.
+
+Lewis: Particularly the coastal-monitoring project. The research question is excellent, but the timetable assumes field access across six sites within eight weeks.
+
+Dr. Bennett: And the permits alone could take half that time.
+
+Priya: The applicants acknowledge that risk, but their contingency plan is vague. They say they'll substitute alternative sites if access is delayed.
+
+Lewis: Which sounds flexible, but it could undermine the comparability of the data if the replacement sites aren't equivalent.
+
+Dr. Bennett: So we're not rejecting the project because it's ambitious. The concern is that the methodology depends on conditions the team may not be able to control.
+
+Priya: Exactly.
+
+Lewis: What about the language-learning study? It's much smaller, but the design is unusually tight.
+
+Priya: I liked that one. They've limited the sample to sixty participants, which initially looked conservative, but their power calculation actually supports it.
+
+Dr. Bennett: And they already have access to the participant pool, correct?
+
+Priya: Yes. Recruitment is through an existing university programme, so they aren't relying on external advertising.
+
+Lewis: My only reservation is that they're measuring improvement over just six weeks.
+
+Dr. Bennett: That's short, but the proposal doesn't claim to measure long-term proficiency. They're testing whether one feedback method produces a measurable short-term change.
+
+Priya: So the timeframe matches the research question.
+
+Dr. Bennett: Precisely.
+
+Lewis: Then there's the artificial-intelligence ethics project. Conceptually, it's probably the most original of the seven.
+
+Priya: But the budget is heavily weighted toward software licensing and external consultancy.
+
+Dr. Bennett: Which isn't automatically a problem if those costs are necessary.
+
+Priya: True. My concern is that the proposal doesn't explain why the consultancy can't be replaced by expertise already available within the university.
+
+Lewis: So the issue is justification, not the absolute amount.
+
+Priya: Exactly.
+
+Dr. Bennett: We should be consistent here. A high budget isn't evidence of poor value, just as a low budget isn't automatically efficient.
+
+Lewis: Agreed.
+
+Priya: One more point. The community-health proposal has excellent local partnerships, but its evaluation section is weak.
+
+Dr. Bennett: In what sense?
+
+Priya: They describe the workshops in detail, but they don't specify how they'll determine whether the intervention actually changed behaviour.
+
+Lewis: They mention participant satisfaction surveys.
+
+Priya: Satisfaction isn't the same as behavioural change.
+
+Dr. Bennett: Right. If their central claim is that the programme improves health behaviour, they need an outcome measure that addresses that claim directly.
+
+Lewis: Could we fund it conditionally and require a revised evaluation plan?
+
+Dr. Bennett: Possibly. I'd rather distinguish between a correctable weakness and a flaw that affects the entire project design.
+
+Priya: So, at this stage, the language-learning study looks strongest, the community-health project may be fundable with revisions, and the coastal project needs more scrutiny.
+
+Dr. Bennett: That's my reading too. Let's score originality, feasibility, methodological coherence, and value separately before we rank the final three.
