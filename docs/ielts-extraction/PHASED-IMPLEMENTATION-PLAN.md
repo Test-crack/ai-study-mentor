@@ -72,11 +72,12 @@ Companion to [IELTS-EXTRACTION-GUIDELINE.md](./IELTS-EXTRACTION-GUIDELINE.md). T
 
 ---
 
-## Part 4 — Migrate the student-facing scorers + provenance — *highest risk, one file per checkpoint*
-Split into three sub-checkpoints, each verified independently:
-- **4a — `diagnosticController`:** component production (`fractionToBand`/`toBand` → `scoreComponent`) + `bandToLevel` → `proficiencyLevel`; stamp `provenance()` on the `assessment_history` write.
-- **4b — `mockController`:** MCQ/internal → `scoreComponent`, overall mean → `band_mean` via engine; stamp provenance on `mockSession` + `assessment_history`.
-- **4c — `iaProcessor`:** `internalToBand`/`toBand`/mean → engine (the **blend 2:1 and smoothing 0.4/0.6 stay untouched** — Layer B); stamp provenance.
+## Part 4 — Migrate the student-facing scorers + provenance — 🟡 CODE DONE, needs dev E2E
+Done as three sub-checkpoints (all `tsc` clean, vectors 89/89):
+- **4a — `diagnosticController`** ✅ code: L/R via `scoreComponent({unit:'raw'})`, `resolveLevel` via `examProficiencyLevel`, `assessment_history` stamps `provenance()`.
+- **4b — `mockController`** ✅ code: L/R via `scoreComponent`; **headline `real_band` via config-driven `scoreOverall` (band_mean)**; `assessment_history` stamps provenance. (`MockSession` has no provenance columns → not stamped; W/S blend + per-skill mean stay on `bandScale` — Layer B.)
+- **4c — `iaProcessor`** ✅ code: `assessment_history` stamps provenance; blend 2:1 + smoothing 0.4/0.6 untouched (Layer B).
+- **⏳ Dev E2E to confirm before trust:** full IELTS journey (diagnostic → drills → IA → mock) on a seeded student; every band/level/difficulty must match a pre-migration snapshot, and `engine_version`/`config_version` must now be populated on new `assessment_history` rows.
 - **Stability:** each sub-part is a pure function swap delegating to the same maths; provenance is additive (columns already exist).
 - **You verify (dev):** run the **full IELTS journey** (diagnostic → drills → IA → mock) on a seeded student; snapshot every band/level/difficulty before and after — **must match**. Confirm `engine_version`/`config_version` are now populated on new result rows.
 - **New-exam status here:**
