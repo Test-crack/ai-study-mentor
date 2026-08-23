@@ -36,8 +36,9 @@ Companion to [IELTS-EXTRACTION-GUIDELINE.md](./IELTS-EXTRACTION-GUIDELINE.md). T
 - **Stability:** pure additions; no existing call site calls the new functions yet.
 - **Verified:** `npm run exam-engine:vectors` → **84/84**, incl. `107 bands identical to bandScale, 0 mismatches`; `tsc --noEmit` → clean.
 
-### Part 1b — component & overall scoring surface
-- **Goal:** add `scoreComponent(examId, componentId, raw)` and a thin `scoreOverall` wrapper so *every* IELTS number can be produced from config. Add an **`internal` RawScore unit** (for the AI 1–10 scale) driven by each component's `raw_input` config key (writing/speaking). `band_mean`/`cefr_hybrid` already exist for overall.
+### Part 1b — component & overall scoring surface ✅ DONE (verified)
+- **Goal:** add `scoreComponent(examId, componentId, raw)` so *every* IELTS number can be produced from config. Add an **`internal` RawScore unit** (for the AI 1–10 scale) + `raw_input` config on writing/speaking. `band_mean`/`cefr_hybrid` already exist for overall.
+- **Done:** `exam-engine/component.ts` (`componentBand`/`scoreComponent`, delegates to bandScale, dispatches on unit); `internal` unit in `types.ts`/`rawScore.ts`; `raw_input` config; validator + §10 vectors. **Verified:** `tsc` clean; vectors 88/88 incl. `980 component inputs identical to bandScale, 0 mismatches`. No call sites migrated — engine surface is now complete; IELTS runtime unchanged.
 - **Touches:** `types.ts` (RawScore + `internal`), `rawScore.ts` (extractor), `scoring.ts`/new strategy fn, `registry.ts` (`consumes`), config `raw_input` on writing/speaking, `vectors.check.ts` (component parity vs `fractionToBand`/`internalToBand`/`toBand`).
 - **Stability:** still **no call site migrated** — IELTS runtime path unchanged.
 - **You verify:** `npm run exam-engine:vectors` green (new component-parity section 100%); `tsc` clean. Nothing to check on the live site — behaviour is unchanged by construction.
