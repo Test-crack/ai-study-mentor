@@ -85,10 +85,10 @@ Done as three sub-checkpoints (all `tsc` clean, vectors 89/89):
 
 ---
 
-## Part 5 — Tidy + frontend exam list from the API
-- **Goal:** drop now-dead direct `bandScale` imports (or leave `bandScale` as the delegated impl). Frontend sources the exam list from `GET /api/exams` (Phase-5 B1) instead of the hardcoded `examTypes.ts`, so the UI can't drift from the registry.
-- **You verify:** full regression green; a config-only exam appears in the UI automatically.
-- **Merge to `dev` → run the manual IELTS regression there → then `main`.** No new exam registers as `live` until this whole phase is green (hard gate).
+## Part 5 — Tidy + frontend exam list from the API ✅ (resolved)
+- **Dead imports:** none. Every `bandScale` import is still live because `bandScale` is intentionally **retained as the delegated low-level maths** (this is what keeps the extraction zero-change). Nothing to strip.
+- **Frontend exam list from `GET /api/exams`** (endpoint already exists): folded into **Track A A0** — it touches the same SuperAdmin files (`SuperAdminInstitutes`, `Subscription`, `superadminService`), so it's done once there instead of twice.
+- **Merge gate:** merge Phase 6 to `dev` → run the manual IELTS regression there → then `main`. No new exam registers as `live` until this whole phase is green.
 
 ---
 
