@@ -35,7 +35,7 @@ Three seams, each an interface the app depends on, so today's implementation can
 | Phase | Deliverable | Notes | Depends on |
 |---|---|---|---|
 | **A0** ✅ CODE DONE (needs dev test) | SuperAdmin: add institute+owner, edit, subscriptions (CRUD already existed). **NEW:** `is_active` enforced **server-side** (`requireActiveInstitute` + `sessionContext` seam + `examAccess` rule TRIAL≈ACTIVE/CANCELLED=blocked); **exam list from `GET /api/exams`** via `useExams()` (drift killed, constant fallback). Subscription UI keeps 3 states but TRIAL is functionally ACTIVE via the access rule (cosmetic 2-state simplification optional). | first releasable slice; folds in Part 5's UI item | existing models + endpoint |
-| **A1** | Owner/Admin **exam context switch** + scoped operations/insights + isolation | uses the resolver middleware | A0, registry |
+| **A1** ✅ CODE DONE (needs dev test) | Owner/Admin **exam context switch**: `attachExamContext` middleware + all owner/admin/batch queries scoped by `req.ctx.examId` (dormant until header); fixed 3 bugs (getBatchAnalytics leak, resetStudentDiagnostic scope, createBatch/addStudent set exam_id); `GET /my-exams`; frontend `ExamContextBar` selector + `X-Exam-Id` injection. Switching exam rescopes every page. | resolver middleware + existing exam_id columns | A0, registry |
 | **A2** | Instructor **batch context switch** (dashboard / student-assessment / report) | batch carries its exam | A1 pattern |
 | **A3** | Student **batch(+exam) switch** post-login; single-exam users keep today's flow untouched | switch UI only appears when >1 context | A2 pattern |
 | **A4** | SuperAdmin **exam-config pages** (guarded create/edit) | the "configs page" you want before merge | Phase 6 (config is source of truth) |
