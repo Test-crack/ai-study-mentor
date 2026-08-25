@@ -255,6 +255,34 @@ const VivaDiagnostic = () => {
                   ))}
                 </div>
               )}
+
+              {/* Per-answer AI feedback: one strength + one next step, labelled by prompt. */}
+              {result.feedback && result.feedback.length > 0 && (
+                <div className="mt-8">
+                  <h2 className="mb-3 font-dm text-sm font-bold uppercase tracking-[0.12em] text-brand-text-mute">Your feedback</h2>
+                  <div className="space-y-3">
+                    {result.feedback.map((f, i) => {
+                      const p = prompts.find((pp) => pp.id === f.promptId);
+                      return (
+                        <div key={f.promptId ?? i} className="rounded-xl border border-brand-line bg-brand-bg-alt px-4 py-3">
+                          {p && <p className="mb-2 font-jetbrains text-[10px] uppercase tracking-[0.14em] text-brand-text-mute">{p.order}. {p.type}</p>}
+                          {f.strengths && (
+                            <p className="flex gap-2 text-sm leading-relaxed text-brand-text">
+                              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand-teal-600" />{f.strengths}
+                            </p>
+                          )}
+                          {f.improvements && (
+                            <p className="mt-2 flex gap-2 text-sm leading-relaxed text-brand-text">
+                              <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />{f.improvements}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               <button onClick={() => navigate("/student/dashboard", { replace: true })} className="mt-8 w-full rounded-xl bg-brand-teal-600 px-5 py-3 font-semibold text-white hover:bg-brand-teal-700">Go to dashboard</button>
             </>
           )}
