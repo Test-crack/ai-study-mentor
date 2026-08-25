@@ -100,6 +100,7 @@ const CourseSection = lazy(() => import("@/features/student/components/CourseSec
 const Suggestion = lazy(() => import("@/features/student/components/Suggestions"));
 const SpeakingAssessment = lazy(() => import("@/features/student/components/SpeakingAssessment"));
 const Diagnosis = lazy(() => import("@/features/student/components/Diagnosis/Diagnosis"));
+const VivaDiagnostic = lazy(() => import("@/features/student/components/Diagnosis/VivaDiagnostic"));
 const DiagnosticRoadmap = lazy(() => import("@/features/student/components/Diagnosis/DiagnosticRoadmap"));
 const OnboardingWalkthrough = lazy(() => import("@/features/student/components/Onboarding/OnboardingWalkthrough"));
 const HowItWorks = lazy(() => import("@/features/student/components/HowItWorks"));
@@ -228,6 +229,16 @@ const StudentDiagnosisGuard = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// The diagnostic shape is exam-driven: viva exams (e.g. Spoken English) get the
+// record-and-submit viva page; skills exams (IELTS) get the 4-skill Diagnosis flow.
+// Config-driven — `vivaDiagnostic` comes from the profile, so a new viva exam needs
+// no change here.
+const DiagnosisDispatch = () => {
+  const { profile, loading, profileLoading } = useAuth();
+  if ((loading || profileLoading) && !profile) return null;
+  return profile?.vivaDiagnostic ? <VivaDiagnostic /> : <Diagnosis />;
+};
+
 const StudentDrillLockGuard = ({ children }: { children: React.ReactNode }) => {
   const { profile, loading, profileLoading } = useAuth();
   const [dashboardUnlocked, setDashboardUnlocked] = useState<boolean | null>(null);
@@ -273,7 +284,7 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/student/onboarding" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><OnboardingWalkthrough /></RoleProtectedRoute>} />
-      <Route path="/student/diagnosis" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><Diagnosis /></RoleProtectedRoute>} />
+      <Route path="/student/diagnosis" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><DiagnosisDispatch /></RoleProtectedRoute>} />
       <Route path="/student/diagnostic/roadmap" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDiagnosisGuard><DiagnosticRoadmap /></StudentDiagnosisGuard></RoleProtectedRoute>} />
       <Route path="/dashdemo" element={<Dashdemo />} />
       <Route path="/Contact" element={<Contactpage />} />
