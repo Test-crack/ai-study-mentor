@@ -19,11 +19,11 @@ interface VivaPrompt {
   order: number;
   type: string;
   isWarmup: boolean;
-  text: string;
+  display: "audio" | "text";      // 'audio' → listen to the question; 'text' → read the passage aloud
+  audioUrl: string | null;        // question audio (audio prompts), replayable
+  passage: string | null;         // read-aloud passage (text prompts)
   prepSeconds: number;
   speakSeconds: number;
-  listenAssetUrl: string | null;
-  passage?: string | null;   // read-aloud passage the student reads
 }
 
 interface SubskillRow { id: string; label: string; level: string; score: number; }
@@ -292,7 +292,7 @@ const VivaDiagnostic = () => {
               <button key={p.id} onClick={() => { setPhase("running"); goToPrompt(i); }} className="flex w-full items-center justify-between rounded-xl border border-brand-line bg-brand-bg-alt px-4 py-3 text-left hover:border-brand-teal-300">
                 <span className="flex items-center gap-3 min-w-0">
                   <span className="font-jetbrains text-xs font-bold text-brand-text-mute">{p.order}</span>
-                  <span className="truncate text-sm text-brand-text">{p.text}</span>
+                  <span className="truncate text-sm text-brand-text">{p.type}{p.display === "text" ? " · read aloud" : ""}</span>
                 </span>
                 {recordings[p.id]
                   ? <CheckCircle2 className="h-5 w-5 shrink-0 text-brand-teal-600" />
@@ -315,31 +315,25 @@ const VivaDiagnostic = () => {
             <span className="font-jetbrains text-xs text-brand-text-mute">Prompt {current.order} / {prompts.length}</span>
           </div>
 
-          <p className="font-dm text-xl font-semibold leading-relaxed text-brand-text">{current.text}</p>
-
-          {/* Read-aloud passage — the text the student reads out */}
-          {current.passage && (
-            <div className="mt-4 rounded-xl border border-brand-teal-200 bg-brand-teal-50/60 px-5 py-4">
-              <p className="mb-1 font-jetbrains text-[10px] uppercase tracking-[0.16em] text-brand-teal-700">Read this aloud</p>
-              <p className="text-[17px] leading-relaxed text-brand-text">{current.passage}</p>
+          {/* The question itself: read-aloud shows text only; everything else is audio
+              only (the student listens, and can replay as often as they like). */}
+          {current.display === "text" ? (
+            <div className="mt-1 rounded-xl border border-brand-teal-200 bg-brand-teal-50/60 px-5 py-4">
+              <p className="mb-1.5 font-jetbrains text-[10px] uppercase tracking-[0.16em] text-brand-teal-700">Read this aloud</p>
+              <p className="text-[19px] leading-relaxed text-brand-text">{current.passage}</p>
+            </div>
+          ) : (
+            <div className="mt-1 flex flex-col gap-3 rounded-xl border border-brand-line bg-brand-bg-alt px-5 py-4">
+              <p className="flex items-center gap-2 text-sm font-medium text-brand-text">
+                <Volume2 className="h-4 w-4 shrink-0 text-brand-teal-600" /> Listen to the question — you can replay it as many times as you like.
+              </p>
+              {current.audioUrl
+                ? <audio controls src={current.audioUrl} className="w-full" />
+                : <p className="flex items-center gap-2 text-sm text-amber-600"><AlertTriangle className="h-4 w-4" /> Question audio is unavailable — please contact support.</p>}
             </div>
           )}
 
-          {/* Prompt 6-style listen asset (reply-to-a-voice-message) */}
-          {current.listenAssetUrl !== null && (
-            current.listenAssetUrl
-              ? (
-                <div className="mt-4 flex items-center gap-3 rounded-xl border border-brand-line bg-brand-bg-alt px-4 py-3">
-                  <Volume2 className="h-5 w-5 text-brand-teal-600" />
-                  <audio controls src={current.listenAssetUrl} className="w-full" />
-                </div>
-              )
-              : (
-                <p className="mt-3 flex items-center gap-2 text-sm text-amber-600"><AlertTriangle className="h-4 w-4" /> Voice message audio is being prepared — you can still record your reply.</p>
-              )
-          )}
-
-          <p className="mt-2 text-sm text-brand-text-mute">Speaking limit: {fmt(current.speakSeconds)}{current.prepSeconds ? ` · ${current.prepSeconds}s to think first` : ""}</p>
+          <p className="mt-3 text-sm text-brand-text-mute">Speaking limit: {fmt(current.speakSeconds)}{current.prepSeconds ? ` · ${current.prepSeconds}s to think first` : ""}</p>
 
           {error && <Banner>{error}</Banner>}
 
