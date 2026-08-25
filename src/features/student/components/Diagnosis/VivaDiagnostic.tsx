@@ -3,12 +3,13 @@
 // the student records one answer per prompt, reviews, then submits all at once. Prompts
 // and the exam's scale come from the backend (GET /api/diagnostic/viva/prompts), so this
 // page is exam-agnostic — it renders whatever prompt set the student's exam serves.
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { callBackend, uploadFileToBackend } from "@/features/auth/services/authClient";
+import { cacheGetAll, cacheSet, cacheDelete, cacheClear } from "./vivaRecordingCache";
 import {
-  Mic, Square, Play, Pause, RotateCcw, ArrowRight, ArrowLeft, CheckCircle2,
+  Mic, Square, RotateCcw, ArrowRight, ArrowLeft, CheckCircle2,
   AlertTriangle, Loader2, Volume2, Trophy,
 } from "lucide-react";
 import { cn } from "@/shared/utils";
@@ -50,6 +51,7 @@ const VivaDiagnostic = () => {
 
   const [phase, setPhase] = useState<Phase>("loading");
   const [prompts, setPrompts] = useState<VivaPrompt[]>([]);
+  const [examId, setExamId] = useState<string>("spoken_english");
   const [idx, setIdx] = useState(0);
   const [recordings, setRecordings] = useState<Record<string, Blob>>({});
   const [result, setResult] = useState<VivaResult | null>(null);
@@ -57,17 +59,20 @@ const VivaDiagnostic = () => {
 
   const [recState, setRecState] = useState<RecState>("idle");
   const [remaining, setRemaining] = useState(0);   // countdown while recording
-  const [playing, setPlaying] = useState(false);
 
   const mrRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const current = prompts[idx];
   const currentBlob = current ? recordings[current.id] : undefined;
   const allRecorded = prompts.length > 0 && prompts.every((p) => recordings[p.id]);
+
+  // Stable object URL per recording — recreating it every render (as before) made the
+  // <audio> reload to 0 on the Play re-render, so playback never started.
+  const currentUrl = useMemo(() => (currentBlob ? URL.createObjectURL(currentBlob) : null), [currentBlob]);
+  useEffect(() => () => { if (currentUrl) URL.revokeObjectURL(currentUrl); }, [currentUrl]);
 
   // ── Load prompts (already-diagnosed students are bounced to the dashboard) ──
   useEffect(() => {
@@ -77,7 +82,12 @@ const VivaDiagnostic = () => {
       try {
         const data = await callBackend("/api/diagnostic/viva/prompts", { method: "GET" });
         if (cancelled) return;
+        const ex = data.examId ?? profile?.examId ?? "spoken_english";
+        setExamId(ex);
         setPrompts(data.prompts ?? []);
+        // Restore any recordings cached client-side so a refresh doesn't lose them.
+        const cached = await cacheGetAll(ex);
+        if (!cancelled && Object.keys(cached).length) setRecordings(cached);
         setPhase("intro");
       } catch (e: any) {
         if (cancelled) return;
@@ -105,7 +115,6 @@ const VivaDiagnostic = () => {
   const startRecording = async () => {
     if (!current) return;
     setError(null);
-    setPlaying(false);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
@@ -118,6 +127,7 @@ const VivaDiagnostic = () => {
       mr.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: mimeType });
         setRecordings((r) => ({ ...r, [current.id]: blob }));
+        cacheSet(examId, current.id, blob);   // persist client-side (survives refresh)
         setRecState("recorded");
         stream.getTracks().forEach((t) => t.stop());
         streamRef.current = null;
@@ -141,15 +151,8 @@ const VivaDiagnostic = () => {
   const reRecord = () => {
     if (!current) return;
     setRecordings((r) => { const next = { ...r }; delete next[current.id]; return next; });
+    cacheDelete(examId, current.id);
     setRecState("idle");
-    setPlaying(false);
-  };
-
-  const togglePlay = () => {
-    if (!currentBlob) return;
-    if (!audioRef.current) return;
-    if (playing) { audioRef.current.pause(); setPlaying(false); }
-    else { audioRef.current.play(); setPlaying(true); }
   };
 
   const goToPrompt = (i: number) => {
@@ -157,7 +160,6 @@ const VivaDiagnostic = () => {
     setIdx(i);
     setRecState(recordings[prompts[i]?.id] ? "recorded" : "idle");
     setRemaining(0);
-    setPlaying(false);
   };
 
   const submitAll = async () => {
@@ -172,6 +174,7 @@ const VivaDiagnostic = () => {
     try {
       const data = await uploadFileToBackend("/api/diagnostic/viva/submit", fd, "POST");
       setResult(data.result as VivaResult);
+      cacheClear(examId);   // diagnostic is done — drop the client-side cache
       setPhase("result");
     } catch (e: any) {
       const code = e?.statusCode;
@@ -346,12 +349,9 @@ const VivaDiagnostic = () => {
               </>
             ) : currentBlob ? (
               <>
-                {currentBlob && <audio ref={audioRef} src={URL.createObjectURL(currentBlob)} onEnded={() => setPlaying(false)} className="hidden" />}
-                <div className="flex items-center gap-2 text-brand-teal-700"><CheckCircle2 className="h-5 w-5" /><span className="text-sm font-semibold">Recorded</span></div>
-                <div className="flex gap-3">
-                  <button onClick={togglePlay} className="inline-flex items-center gap-2 rounded-xl border border-brand-line px-4 py-2.5 font-medium text-brand-text hover:border-brand-teal-300">{playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}{playing ? "Pause" : "Play"}</button>
-                  <button onClick={reRecord} className="inline-flex items-center gap-2 rounded-xl border border-brand-line px-4 py-2.5 font-medium text-brand-text hover:border-brand-teal-300"><RotateCcw className="h-4 w-4" /> Re-record</button>
-                </div>
+                <div className="flex items-center gap-2 text-brand-teal-700"><CheckCircle2 className="h-5 w-5" /><span className="text-sm font-semibold">Recorded — play it back to check</span></div>
+                {currentUrl && <audio controls src={currentUrl} className="w-full max-w-md" />}
+                <button onClick={reRecord} className="inline-flex items-center gap-2 rounded-xl border border-brand-line px-4 py-2.5 font-medium text-brand-text hover:border-brand-teal-300"><RotateCcw className="h-4 w-4" /> Re-record</button>
               </>
             ) : (
               <button onClick={startRecording} className="inline-flex items-center gap-2 rounded-xl bg-brand-teal-600 px-6 py-3 font-semibold text-white hover:bg-brand-teal-700"><Mic className="h-4 w-4" /> Record answer</button>
