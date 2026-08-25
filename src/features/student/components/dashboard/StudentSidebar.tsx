@@ -8,7 +8,7 @@ import testcrackLogo from '@/assets/testcrack-logo.svg';
 import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { callBackend } from "@/features/auth/services/authClient";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
 const RAIL_BREAKPOINT = 768;
@@ -39,6 +39,7 @@ export const StudentSidebar = ({
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { examSlug } = useParams();
 
   // Self-fetch lock state only when the parent hasn't supplied it.
   // Default true (locked) prevents a flash of unlocked sidebar while loading.
@@ -130,9 +131,13 @@ export const StudentSidebar = ({
     return group;
   }).filter(group => group.items.length > 0);
 
+  // Nav item paths are authored as /student/*; rewrite the prefix to the current exam
+  // slug so the primary nav goes straight to /{exam}/* (no /student/* → redirect flash).
+  const toExamPath = (p: string) => (examSlug ? p.replace(/^\/student(?=\/|$)/, `/${examSlug}`) : p);
+
   const handleNavigation = (item: any) => {
     if (isItemDisabled(item.id)) return;
-    navigate(item.path);
+    navigate(toExamPath(item.path));
     if (onTabChange) onTabChange(item.id);
     if (window.innerWidth < RAIL_BREAKPOINT) closeSidebar();
   };

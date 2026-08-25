@@ -5,7 +5,8 @@ import { ThemeProvider } from "@/features/theme/ThemeProvider";
 import { Toaster as Sonner } from "@/shared/components/ui/sonner";
 import { TooltipProvider } from "@/shared/components/ui/tooltip";
 import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from "@tanstack/react-query"; // ← CHANGED
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useParams, useLocation } from "react-router-dom";
+import { setSelectedExamId } from "@/shared/state/examContext";
 import { AuthProvider, useAuth } from "@/features/auth/hooks/useAuth";
 import { callBackend } from "@/features/auth/services/authClient";
 import { RoleProtectedRoute } from "@/shared/components/auth/ProtectedRoute";
@@ -276,6 +277,42 @@ const StudentDrillLockGuard = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Student workspace routes are exam-prefixed: /{examSlug}/dashboard, /{examSlug}/diagnosis,
+// etc. This layout sits at /:examSlug, validates the slug against the student's enrolled
+// exam, sets the client exam context (X-Exam-Id), and rewrites any wrong/legacy first
+// segment — including the old /student/* URLs — to the correct exam. Existing navigation
+// that still points at /student/* therefore lands transparently on /{examSlug}/*.
+const StudentExamLayout = () => {
+  const { profile, loading, profileLoading } = useAuth();
+  const { examSlug } = useParams();
+  const location = useLocation();
+
+  const examId = profile?.examId ?? null;
+
+  useEffect(() => {
+    // Drive the exam-context header from the URL once the slug is the student's exam.
+    if (examSlug && examId && examSlug === examId) setSelectedExamId(examSlug);
+  }, [examSlug, examId]);
+
+  if ((loading || profileLoading) && !profile) return null;
+
+  // Legacy /student/* or a slug that isn't this student's exam → keep the sub-path, swap
+  // the first segment to their real exam. (Not-enrolled students have no examId and keep
+  // their own explicit route, so they never reach this branch.)
+  if (profile?.role === "STUDENT" && examId && examSlug !== examId) {
+    const rest = location.pathname.replace(/^\/[^/]+/, "");
+    return <Navigate to={`/${examId}${rest}${location.search}`} replace />;
+  }
+
+  return <Outlet />;
+};
+
+// Redirect to a sibling page under the current exam slug (e.g. index → dashboard).
+const ExamNavigate = ({ to }: { to: string }) => {
+  const { examSlug } = useParams();
+  return <Navigate to={`/${examSlug}/${to}`} replace />;
+};
+
 const AppRoutes = () => {
   const { user } = useAuth();
 
@@ -283,9 +320,6 @@ const AppRoutes = () => {
     <Suspense fallback={<RouteFallback />}>
     <Routes>
       <Route path="/" element={<LandingPage />} />
-      <Route path="/student/onboarding" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><OnboardingWalkthrough /></RoleProtectedRoute>} />
-      <Route path="/student/diagnosis" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><DiagnosisDispatch /></RoleProtectedRoute>} />
-      <Route path="/student/diagnostic/roadmap" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDiagnosisGuard><DiagnosticRoadmap /></StudentDiagnosisGuard></RoleProtectedRoute>} />
       <Route path="/dashdemo" element={<Dashdemo />} />
       <Route path="/Contact" element={<Contactpage />} />
 
@@ -351,50 +385,59 @@ const AppRoutes = () => {
       <Route path="/dashboard" element={<ManualDashboardAccess />} />
       <Route path="/dashboard/:tab" element={<ManualDashboardAccess />} />
 
+      {/* Not-enrolled has no exam context, so it stays a plain (non-prefixed) route. */}
       <Route path="/student/not-enrolled" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentNotEnrolledPage /></RoleProtectedRoute>} />
 
-      <Route
-        path="/student/dashboard"
-        element={
-          <RoleProtectedRoute allowedRoles={['STUDENT']}>
-            <StudentDiagnosisGuard>
-              <StudentDashboardPage />
-            </StudentDiagnosisGuard>
-          </RoleProtectedRoute>
-        }
-      />
-      <Route path="/student/settings" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentProfilePage /></RoleProtectedRoute>} />
+      {/* ── Student workspace, exam-prefixed: /{examSlug}/… ─────────────────────── */}
+      <Route path="/:examSlug" element={<StudentExamLayout />}>
+        <Route index element={<ExamNavigate to="dashboard" />} />
+        <Route path="onboarding" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><OnboardingWalkthrough /></RoleProtectedRoute>} />
+        <Route path="diagnosis" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><DiagnosisDispatch /></RoleProtectedRoute>} />
+        <Route path="diagnostic/roadmap" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDiagnosisGuard><DiagnosticRoadmap /></StudentDiagnosisGuard></RoleProtectedRoute>} />
 
-      <Route path="/student/courses" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><StudentCoursesPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
-      <Route path="/student/schedule" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><StudentSchedulePage /></StudentDrillLockGuard></RoleProtectedRoute>} />
-      <Route path="/student/voice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><VoiceLab /></StudentDrillLockGuard></RoleProtectedRoute>} />
-      <Route path="/student/speed" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><SpeedReading /></StudentDrillLockGuard></RoleProtectedRoute>} />
-      <Route path="/student/speaking-assessment" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><StudentReadingAssessmentPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
-      <Route path="/student/writing" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><IeltsWriting /></StudentDrillLockGuard></RoleProtectedRoute>} />
-      <Route path="/student/listening" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><ListeningPractice /></StudentDrillLockGuard></RoleProtectedRoute>} />
-      <Route path="/student/asess" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><SpeakingAssessment /></StudentDrillLockGuard></RoleProtectedRoute>} />
-      <Route path="/student/reading" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><ReadingPractice /></StudentDrillLockGuard></RoleProtectedRoute>} />
-      <Route path="/student/courses-section" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><CourseSection /></StudentDrillLockGuard></RoleProtectedRoute>} />
-      <Route path="/student/reading-assessment/history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><StudentAssessmentHistoryPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
-      <Route path="/student/speaking-history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><StudentSpeakingHistoryPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
-      <Route path="/student/reading-history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><ReadingHistoryPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
-      <Route path="/student/my-curriculum" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><MyCurriculum /></StudentDrillLockGuard></RoleProtectedRoute>} />
-      <Route path="/student/batches" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><StudentBatchView /></StudentDrillLockGuard></RoleProtectedRoute>} />
-      <Route path="/student/assessment-history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><AssessmentHistoryPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
-      <Route path="/student/suggestion-page" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><SuggestionsPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
-      <Route path="/student/report" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><Report /></StudentDrillLockGuard></RoleProtectedRoute>} />
-      <Route path="/student/suggestion" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><Suggestion /></StudentDrillLockGuard></RoleProtectedRoute>} />
-      <Route path="/student/speaking-practice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><SpeakingPractice /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route
+          path="dashboard"
+          element={
+            <RoleProtectedRoute allowedRoles={['STUDENT']}>
+              <StudentDiagnosisGuard>
+                <StudentDashboardPage />
+              </StudentDiagnosisGuard>
+            </RoleProtectedRoute>
+          }
+        />
+        <Route path="settings" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentProfilePage /></RoleProtectedRoute>} />
 
-      <Route path="/student/drill" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><DrillScreen /></RoleProtectedRoute>} />
-      <Route path="/student/lexigrid" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><LexiGrid /></RoleProtectedRoute>} />
+        <Route path="courses" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><StudentCoursesPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route path="schedule" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><StudentSchedulePage /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route path="voice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><VoiceLab /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route path="speed" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><SpeedReading /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route path="speaking-assessment" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><StudentReadingAssessmentPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route path="writing" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><IeltsWriting /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route path="listening" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><ListeningPractice /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route path="asess" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><SpeakingAssessment /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route path="reading" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><ReadingPractice /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route path="courses-section" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><CourseSection /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route path="reading-assessment/history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><StudentAssessmentHistoryPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route path="speaking-history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><StudentSpeakingHistoryPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route path="reading-history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><ReadingHistoryPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route path="my-curriculum" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><MyCurriculum /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route path="batches" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><StudentBatchView /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route path="assessment-history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><AssessmentHistoryPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route path="suggestion-page" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><SuggestionsPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route path="report" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><Report /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route path="suggestion" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><Suggestion /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route path="speaking-practice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><SpeakingPractice /></StudentDrillLockGuard></RoleProtectedRoute>} />
 
-      <Route path="/student/internal" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><InternalAssessmentPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
-      <Route path="/student/assessment" element={<Navigate to="/student/internal" replace />} />
-      <Route path="/student/mock" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><FullMockAssessment /></StudentDrillLockGuard></RoleProtectedRoute>} />
-      {/* Deliberately NOT wrapped in StudentDrillLockGuard: How It Works must stay
-          reachable even while the platform is drill-locked. */}
-      <Route path="/student/how-it-works" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><HowItWorks /></RoleProtectedRoute>} />
+        <Route path="drill" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><DrillScreen /></RoleProtectedRoute>} />
+        <Route path="lexigrid" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><LexiGrid /></RoleProtectedRoute>} />
+
+        <Route path="internal" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><InternalAssessmentPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route path="assessment" element={<ExamNavigate to="internal" />} />
+        <Route path="mock" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><FullMockAssessment /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        {/* Deliberately NOT wrapped in StudentDrillLockGuard: How It Works must stay
+            reachable even while the platform is drill-locked. */}
+        <Route path="how-it-works" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><HowItWorks /></RoleProtectedRoute>} />
+      </Route>
 
       <Route
         path="/instructor/dashboard"
