@@ -23,6 +23,7 @@ interface VivaPrompt {
   prepSeconds: number;
   speakSeconds: number;
   listenAssetUrl: string | null;
+  passage?: string | null;   // read-aloud passage the student reads
 }
 
 interface SubskillRow { id: string; label: string; level: string; score: number; }
@@ -315,6 +316,14 @@ const VivaDiagnostic = () => {
           </div>
 
           <p className="font-dm text-xl font-semibold leading-relaxed text-brand-text">{current.text}</p>
+
+          {/* Read-aloud passage — the text the student reads out */}
+          {current.passage && (
+            <div className="mt-4 rounded-xl border border-brand-teal-200 bg-brand-teal-50/60 px-5 py-4">
+              <p className="mb-1 font-jetbrains text-[10px] uppercase tracking-[0.16em] text-brand-teal-700">Read this aloud</p>
+              <p className="text-[17px] leading-relaxed text-brand-text">{current.passage}</p>
+            </div>
+          )}
 
           {/* Prompt 6-style listen asset (reply-to-a-voice-message) */}
           {current.listenAssetUrl !== null && (
