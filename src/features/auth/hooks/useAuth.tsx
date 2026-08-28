@@ -28,6 +28,10 @@ export interface UserProfile {
   recommendationSeeded?: boolean;
   targetBand?: number | null;
   isEnrolled?: boolean;
+  examId?: string | null;
+  examLabel?: string | null;
+  batchName?: string | null;
+  vivaDiagnostic?: boolean;
 }
 
 interface AuthContextType {

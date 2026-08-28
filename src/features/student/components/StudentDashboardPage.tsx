@@ -369,6 +369,26 @@ const StudentDashboardPage = () => {
             <div className="absolute inset-0 z-40 bg-brand-bg-alt/60 backdrop-blur-md rounded-3xl" />
           )}
 
+          {/* ── Current exam · batch context ──────────────────────────────────── */}
+          {/* Interim, minimal context indicator so the student can see which exam
+              and batch this dashboard is scoped to. The full config-driven student
+              UI comes later; this at least surfaces the active context today. */}
+          {profile?.examLabel && (
+            <div className="relative z-50 flex flex-wrap items-center gap-2 text-[12px]">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-bg-alt px-3 py-1 font-medium text-brand-text">
+                <Compass className="h-3.5 w-3.5 text-brand-teal-600" />
+                <span className="text-brand-text-mute">Exam</span>
+                <span className="font-semibold">{profile.examLabel}</span>
+              </span>
+              {profile.batchName && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-bg-alt px-3 py-1 font-medium text-brand-text">
+                  <span className="text-brand-text-mute">Batch</span>
+                  <span className="font-semibold">{profile.batchName}</span>
+                </span>
+              )}
+            </div>
+          )}
+
           {/* ── Hero Banner — "The Climb" ─────────────────────────────────────── */}
           <ClimbHero
             displayName={displayName}

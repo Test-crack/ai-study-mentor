@@ -9,7 +9,8 @@ import {
   ChevronRight,
   Home,
   Activity,
-  CreditCard
+  CreditCard,
+  SlidersHorizontal
 } from "lucide-react";
 import testcrackLogo from '@/assets/testcrack-logo.svg';
 import { cn } from "@/shared/utils";
@@ -32,6 +33,7 @@ export const SuperAdminSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
   { id: 'superadmin-dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/superadmin/dashboard' },
   { id: 'institutes', icon: Building2, label: 'Institutes', path: '/superadmin/institutes' },
   { id: 'superadmin-subscription', icon: CreditCard, label: 'Subscription', path: '/superadmin/subscription' },
+  { id: 'exam-configs', icon: SlidersHorizontal, label: 'Exam Configs', path: '/superadmin/examconfigs' },
   // { id: 'question-bank', icon: CreditCard, label: 'Question Bank', path: '/superadmin/question' },
   { id: 'pricing-config', icon: Coins, label: 'Pricing-Config', path: '/superadmin/priceconfig' },
   { id: 'support-tickets', icon: LifeBuoy, label: 'Support Tickets', path: '/superadmin/supportickets' },

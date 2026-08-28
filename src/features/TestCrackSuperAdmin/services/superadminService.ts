@@ -145,6 +145,24 @@ export async function fetchSubscriptions(params?: {
     return callBackend(url);
 }
 
+// ─── Exam config explorer (read-only; scoring config is file-sourced + code-reviewed) ──
+
+export interface ExamConfigSummary {
+    exam_id: string;
+    status: string;
+    label: string;
+}
+
+/** GET /api/superadmin/exams — list exams (status/label) for the config explorer. */
+export async function fetchExamsForConfig(): Promise<{ data: ExamConfigSummary[] }> {
+    return callBackend(`${getBackendUrl()}/api/superadmin/exams`);
+}
+
+/** GET /api/superadmin/exams/:id/config — the full config entry (read-only) for viewing/drafting. */
+export async function fetchExamConfig(examId: string): Promise<{ data: any }> {
+    return callBackend(`${getBackendUrl()}/api/superadmin/exams/${examId}/config`);
+}
+
 /**
  * GET /api/superadmin/users
  * Fetch all platform users — SUPERADMIN only.

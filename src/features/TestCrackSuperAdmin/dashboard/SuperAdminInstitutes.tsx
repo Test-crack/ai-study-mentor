@@ -12,8 +12,9 @@ import {
   InstituteRecord, InstituteExamRecord
 } from '../services/superadminService';
 import {
-  EXAM_TYPES, EXAM_LABELS, EXAM_AVAILABILITY, type ExamType, type BillingStatus,
+  EXAM_LABELS, type ExamType, type BillingStatus,
 } from '@/shared/constants/examTypes';
+import { useExams } from '@/shared/hooks/useExams';
 import { useToast } from '@/shared/hooks/use-toast';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -133,6 +134,7 @@ function CreateInstituteModal({ onClose, onCreated }: CreateModalProps) {
     ownerPhone: '',
   });
   const [examTypes, setExamTypes] = useState<ExamType[]>(['ielts']);
+  const { exams } = useExams();
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(prev => ({ ...prev, [k]: e.target.value }));
@@ -240,22 +242,26 @@ function CreateInstituteModal({ onClose, onCreated }: CreateModalProps) {
           <div className="border-t border-brand-line pt-4">
             <p className="font-jetbrains text-[10px] font-bold text-brand-text-mute uppercase tracking-[0.15em] mb-3">Exams Offered *</p>
             <div className="flex flex-wrap gap-2">
-              {EXAM_TYPES.map((exam) => {
+              {exams.map((opt) => {
+                const exam = opt.id as ExamType;
                 const selected = examTypes.includes(exam);
-                const soon = EXAM_AVAILABILITY[exam] === 'soon';
+                const soon = opt.availability === 'soon';
                 return (
                   <button
-                    key={exam}
+                    key={opt.id}
                     type="button"
-                    onClick={() => toggleExam(exam)}
+                    disabled={soon}
+                    onClick={() => !soon && toggleExam(exam)}
                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
-                      selected
-                        ? 'bg-brand-teal-600 border-brand-teal-600 text-white'
-                        : 'bg-brand-bg-alt border-brand-line text-brand-text hover:border-brand-teal-400'
+                      soon
+                        ? 'bg-brand-bg-alt border-brand-line text-brand-text-mute opacity-50 cursor-not-allowed'
+                        : selected
+                          ? 'bg-brand-teal-600 border-brand-teal-600 text-white'
+                          : 'bg-brand-bg-alt border-brand-line text-brand-text hover:border-brand-teal-400'
                     }`}
                   >
                     {selected && <CheckCircle2 className="w-3.5 h-3.5" />}
-                    {EXAM_LABELS[exam]}
+                    {opt.label}
                     {soon && <span className="text-[9px] font-medium opacity-70">soon</span>}
                   </button>
                 );
@@ -309,6 +315,7 @@ function EditInstituteModal({ institute, onClose, onUpdated }: EditModalProps) {
   const [offered, setOffered] = useState<Set<ExamType>>(
     () => new Set(institute.exams.filter(e => e.billingStatus !== 'CANCELLED').map(e => e.examType))
   );
+  const { exams } = useExams();
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(prev => ({ ...prev, [k]: e.target.value }));
@@ -408,22 +415,26 @@ function EditInstituteModal({ institute, onClose, onUpdated }: EditModalProps) {
           <div className="border-t border-brand-line pt-4">
             <p className="font-jetbrains text-[10px] font-bold text-brand-text-mute uppercase tracking-[0.15em] mb-3">Exams Offered *</p>
             <div className="flex flex-wrap gap-2">
-              {EXAM_TYPES.map((exam) => {
+              {exams.map((opt) => {
+                const exam = opt.id as ExamType;
                 const selected = offered.has(exam);
-                const soon = EXAM_AVAILABILITY[exam] === 'soon';
+                const soon = opt.availability === 'soon';
                 return (
                   <button
-                    key={exam}
+                    key={opt.id}
                     type="button"
-                    onClick={() => toggleExam(exam)}
+                    disabled={soon}
+                    onClick={() => !soon && toggleExam(exam)}
                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
-                      selected
-                        ? 'bg-brand-teal-600 border-brand-teal-600 text-white'
-                        : 'bg-brand-bg-alt border-brand-line text-brand-text hover:border-brand-teal-400'
+                      soon
+                        ? 'bg-brand-bg-alt border-brand-line text-brand-text-mute opacity-50 cursor-not-allowed'
+                        : selected
+                          ? 'bg-brand-teal-600 border-brand-teal-600 text-white'
+                          : 'bg-brand-bg-alt border-brand-line text-brand-text hover:border-brand-teal-400'
                     }`}
                   >
                     {selected && <CheckCircle2 className="w-3.5 h-3.5" />}
-                    {EXAM_LABELS[exam]}
+                    {opt.label}
                     {soon && <span className="text-[9px] font-medium opacity-70">soon</span>}
                   </button>
                 );
