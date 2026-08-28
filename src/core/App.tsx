@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/shared/components/ui/tooltip";
 import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from "@tanstack/react-query"; // ← CHANGED
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useParams, useLocation } from "react-router-dom";
 import { setSelectedExamId } from "@/shared/state/examContext";
+import { isSpokenEnglish } from "@/features/student/utils/exam";
 import { AuthProvider, useAuth } from "@/features/auth/hooks/useAuth";
 import { callBackend } from "@/features/auth/services/authClient";
 import { RoleProtectedRoute } from "@/shared/components/auth/ProtectedRoute";
@@ -102,6 +103,7 @@ const Suggestion = lazy(() => import("@/features/student/components/Suggestions"
 const SpeakingAssessment = lazy(() => import("@/features/student/components/SpeakingAssessment"));
 const Diagnosis = lazy(() => import("@/features/student/components/Diagnosis/Diagnosis"));
 const VivaDiagnostic = lazy(() => import("@/features/student/components/Diagnosis/VivaDiagnostic"));
+const SpokenEnglishDashboardPage = lazy(() => import("@/features/student/components/SpokenEnglishDashboardPage"));
 const DiagnosticRoadmap = lazy(() => import("@/features/student/components/Diagnosis/DiagnosticRoadmap"));
 const OnboardingWalkthrough = lazy(() => import("@/features/student/components/Onboarding/OnboardingWalkthrough"));
 const HowItWorks = lazy(() => import("@/features/student/components/HowItWorks"));
@@ -246,7 +248,8 @@ const StudentDrillLockGuard = ({ children }: { children: React.ReactNode }) => {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    if (!profile || profile.role !== 'STUDENT') {
+    // Spoken English has no IELTS drills — never drill-lock it; skip the check entirely.
+    if (!profile || profile.role !== 'STUDENT' || isSpokenEnglish(profile.examId)) {
       setChecking(false);
       return;
     }
@@ -269,12 +272,20 @@ const StudentDrillLockGuard = ({ children }: { children: React.ReactNode }) => {
   if ((loading || profileLoading) && !profile) return null;
   if (!profile) return <Navigate to="/login" replace />;
 
-  if (profile.role === 'STUDENT') {
+  if (profile.role === 'STUDENT' && !isSpokenEnglish(profile.examId)) {
     if (checking) return null;
     if (!dashboardUnlocked) return <Navigate to="/student/dashboard" replace />;
   }
 
   return <>{children}</>;
+};
+
+// Dashboard by exam: Spoken English gets its own CEFR home; IELTS keeps StudentDashboardPage
+// completely untouched.
+const StudentDashboardDispatch = () => {
+  const { profile, loading, profileLoading } = useAuth();
+  if ((loading || profileLoading) && !profile) return null;
+  return isSpokenEnglish(profile?.examId) ? <SpokenEnglishDashboardPage /> : <StudentDashboardPage />;
 };
 
 // Student workspace routes are exam-prefixed: /{examSlug}/dashboard, /{examSlug}/diagnosis,
@@ -400,7 +411,7 @@ const AppRoutes = () => {
           element={
             <RoleProtectedRoute allowedRoles={['STUDENT']}>
               <StudentDiagnosisGuard>
-                <StudentDashboardPage />
+                <StudentDashboardDispatch />
               </StudentDiagnosisGuard>
             </RoleProtectedRoute>
           }
