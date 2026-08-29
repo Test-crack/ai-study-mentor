@@ -8,7 +8,9 @@ import {
   Home,
   Activity,
   CreditCard,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Coins,
+  LifeBuoy
 } from "lucide-react";
 import testcrackLogo from '@/assets/testcrack-logo.svg';
 import { cn } from "@/shared/utils";
@@ -27,11 +29,7 @@ export const SuperAdminSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
   const { signOut } = useAuth();
   const navigate = useNavigate();
   
- // Only sections backed by a real superadmin endpoint. superadminRoutes.ts
- // exposes /users, /institutes (+exams) and /subscriptions and nothing else, so
- // Pricing-Config, Support Tickets, Platform Analytics and Question Bank were
- // removed (21 Aug 2026) — every one ran on hardcoded data with no route behind
- // it. Re-add an item only once its endpoint exists.
+ // Question Bank has no backend route yet — left commented out below until one exists.
  const menuItems = [
   { id: 'superadmin-dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/superadmin/dashboard' },
   { id: 'institutes', icon: Building2, label: 'Institutes', path: '/superadmin/institutes' },
