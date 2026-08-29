@@ -22,7 +22,10 @@ export function ExamContextBar() {
     let alive = true;
     (async () => {
       try {
-        const res = await callBackend(`${getBackendUrl()}/api/${base}/my-exams`);
+        // Silent: this endpoint doesn't exist on every backend deploy yet, and
+        // the fallback below (unscoped data) is a deliberate, working default —
+        // not an error the user needs to see.
+        const res = await callBackend(`${getBackendUrl()}/api/${base}/my-exams`, undefined, { silent: true });
         const list: ExamOpt[] = res?.data ?? [];
         if (!alive) return;
         setExams(list);

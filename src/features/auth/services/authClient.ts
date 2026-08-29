@@ -46,7 +46,7 @@ async function getAccessToken(): Promise<string> {
 
 // ─── Core fetch wrapper with global error interception ──────────────
 
-function handleNetworkError(err: unknown): never {
+function handleNetworkError(err: unknown, silent?: boolean): never {
   if (!navigator.onLine) {
     // Banner already visible — don't toast, just throw
     const offlineErr = new Error("You're offline — please check your internet connection");
@@ -54,13 +54,13 @@ function handleNetworkError(err: unknown): never {
     (offlineErr as any)._toasted = true; // signal QueryCache to skip
     throw offlineErr;
   }
-  dedupeToast('Unable to reach the server — please try again');
+  if (!silent) dedupeToast('Unable to reach the server — please try again');
   const netErr = err instanceof Error ? err : new Error('Network error');
   (netErr as any)._toasted = true;
   throw netErr;
 }
 
-async function handleHttpError(res: Response): Promise<never> {
+async function handleHttpError(res: Response, silent?: boolean): Promise<never> {
   if (res.status === 401) {
     window.dispatchEvent(new CustomEvent('auth:unauthorized'));
   }
@@ -68,9 +68,11 @@ async function handleHttpError(res: Response): Promise<never> {
   const errorData = await res.json().catch(() => ({}));
   const msg = friendlyMessage(res.status, errorData?.error);
 
-  // Don't toast 401 if we're dispatching the auth event (redirect handles it)
-  // Still toast for 403+ so user knows what happened
-  if (res.status !== 401) {
+  // Don't toast 401 if we're dispatching the auth event (redirect handles it).
+  // Also skip for calls the caller has marked best-effort/silent — they already
+  // handle the failure themselves (e.g. falling back to unscoped data) and
+  // don't want a user-facing error for something that isn't one.
+  if (res.status !== 401 && !silent) {
     dedupeToast(msg);
   }
 
@@ -83,7 +85,7 @@ async function handleHttpError(res: Response): Promise<never> {
 
 // ─── Public API (unchanged signatures) ──────────────────────────────
 
-export async function callBackend(path: string, options: RequestInit = {}): Promise<any> {
+export async function callBackend(path: string, options: RequestInit = {}, config?: { silent?: boolean }): Promise<any> {
   // Pre-flight: if already offline, fail fast
   if (!navigator.onLine) {
     const err = new Error("You're offline — please check your internet connection");
@@ -108,11 +110,11 @@ export async function callBackend(path: string, options: RequestInit = {}): Prom
       },
     });
   } catch (err) {
-    handleNetworkError(err);
+    handleNetworkError(err, config?.silent);
   }
 
   if (!res.ok) {
-    await handleHttpError(res);
+    await handleHttpError(res, config?.silent);
   }
 
   return res.json();
