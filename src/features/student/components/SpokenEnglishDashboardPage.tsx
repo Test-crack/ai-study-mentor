@@ -78,13 +78,18 @@ const SpokenEnglishDashboardPage = () => {
     return () => { cancelled = true; };
   }, []);
 
-  // Weakest DRILLABLE subskill = lowest-scoring one that has MCQ drills (interaction has none).
-  const weakest = (result?.subskillProfile ?? [])
+  // Drillable subskills, weakest first. A drill can only be taken once per subskill per day
+  // (the drill engine resumes today's completed session), so the 3 gate drills must each
+  // target a DIFFERENT subskill — rotate by how many drills are done today.
+  const drillableSorted = (result?.subskillProfile ?? [])
     .filter((s) => seSubskill(s.id)?.drillable)
-    .slice().sort((a, b) => a.score - b.score)[0];
+    .slice().sort((a, b) => a.score - b.score);
+  const priorityDrill = drillableSorted.length
+    ? drillableSorted[Math.min(drillsToday, drillableSorted.length - 1)]
+    : undefined;
 
   const startDrill = useCallback((subskillId?: string) => {
-    const ss = seSubskill(subskillId ?? weakest?.id ?? "range");
+    const ss = seSubskill(subskillId ?? priorityDrill?.id ?? "range");
     if (!ss) return;
     const params = new URLSearchParams({
       skill: "SPEAKING",
@@ -92,7 +97,7 @@ const SpokenEnglishDashboardPage = () => {
       level: cefrToDrillLevel(result?.cefrLevel),
     });
     navigate(`/${examId}/drill?${params.toString()}`);
-  }, [navigate, examId, weakest, result]);
+  }, [navigate, examId, priorityDrill, result]);
 
   const seUnlocked = drillsToday >= DRILLS_TO_UNLOCK;
   const displayName = profile?.name || "there";
@@ -166,13 +171,13 @@ const SpokenEnglishDashboardPage = () => {
                 <section className="rounded-3xl border border-brand-teal-200 bg-brand-teal-wash p-6">
                   <p className="font-jetbrains text-[11px] uppercase tracking-[0.16em] text-brand-teal-700">Today · {drillsToday} / {DRILLS_TO_UNLOCK} drills</p>
                   <h2 className="mt-1 font-dm text-xl font-bold text-brand-teal-950">Warm up with {DRILLS_TO_UNLOCK} quick drills</h2>
-                  <p className="mt-1 text-sm text-brand-teal-800/80">Finish {DRILLS_TO_UNLOCK} short MCQ drills to open the full dashboard. Today's focus: <strong>{weakest ? (seSubskill(weakest.id)?.label ?? weakest.label) : "your weakest subskill"}</strong>.</p>
+                  <p className="mt-1 text-sm text-brand-teal-800/80">Finish {DRILLS_TO_UNLOCK} short MCQ drills to open the full dashboard. Next up: <strong>{priorityDrill ? (seSubskill(priorityDrill.id)?.label ?? priorityDrill.label) : "your weakest subskill"}</strong>.</p>
                   <div className="mt-4 flex gap-2">
                     {Array.from({ length: DRILLS_TO_UNLOCK }).map((_, i) => (
                       <div key={i} className={cn("h-2 flex-1 rounded-full", i < drillsToday ? "bg-brand-teal-500" : "bg-brand-teal-200")} />
                     ))}
                   </div>
-                  <button onClick={() => startDrill(weakest?.id)} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-brand-teal-600 px-6 py-3 font-semibold text-white hover:bg-brand-teal-700">
+                  <button onClick={() => startDrill(priorityDrill?.id)} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-brand-teal-600 px-6 py-3 font-semibold text-white hover:bg-brand-teal-700">
                     <Dumbbell className="h-4 w-4" /> Start drill {Math.min(drillsToday + 1, DRILLS_TO_UNLOCK)} <ArrowRight className="h-4 w-4" />
                   </button>
                 </section>
