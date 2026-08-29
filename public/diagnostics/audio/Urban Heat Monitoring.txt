@@ -1,0 +1,61 @@
+Dr. Morgan: Before we approve the deployment schedule, I want to revisit the site-selection strategy. Elena, your proposal identifies twelve monitoring locations, but I'm concerned that they're too heavily concentrated near major roads.
+
+Elena: That was deliberate. I assumed traffic density would be one of the strongest contributors to elevated local temperatures, so I prioritised roadside locations.
+
+Dr. Morgan: Traffic matters, but that approach could compromise the comparison. If nearly every sensor is exposed to similar transport-related conditions, we won't be able to distinguish the influence of road infrastructure from the effects of vegetation, building density, or surface materials. I'd rather see the twelve locations divided among contrasting urban environments.
+
+Elena: So perhaps four roadside sites, four predominantly residential areas, and four sites close to parks?
+
+Dr. Morgan: Broadly, yes, although I wouldn't impose equal numbers simply for symmetry. What matters is that we capture meaningful contrasts. A shaded residential street with mature trees may tell us more than a second park site that has almost identical characteristics to the first.
+
+Marcus: There's another issue before you finalise the locations. The sensors need to be calibrated together. We tested three units individually last week, but that isn't sufficient.
+
+Elena: Because the instruments might have systematic differences?
+
+Marcus: Exactly. A sensor can be internally consistent and still read, say, three-tenths of a degree higher than another unit. If we deploy them without cross-calibration, a difference we later attribute to the environment might actually be an instrument effect.
+
+Dr. Morgan: How long would the cross-calibration take?
+
+Marcus: Forty-eight hours should be adequate. I'd place every unit in the same controlled room, record them simultaneously, and calculate the offset of each sensor relative to the group mean. I would not simply adjust them all to whichever instrument happens to produce the median reading.
+
+Elena: That pushes field deployment back by two days.
+
+Marcus: It does, but losing two days now is preferable to collecting six weeks of data that we can't confidently compare.
+
+Dr. Morgan: Agreed. Now, Elena, your draft protocol says measurements will be recorded every thirty minutes. Why thirty?
+
+Elena: Mainly to reduce the volume of data. With twelve sensors running continuously, five-minute readings would generate a much larger dataset, and I wasn't sure the additional resolution would justify the processing time.
+
+Dr. Morgan: Storage isn't really our constraint. The more serious question is whether a thirty-minute interval could conceal short-lived temperature changes. For example, cloud cover or sudden shading from nearby buildings can alter conditions quite rapidly.
+
+Marcus: The devices can comfortably record every five minutes. Battery consumption increases slightly, but not enough to threaten the six-week deployment.
+
+Elena: In that case, I'll change the interval to five minutes.
+
+Dr. Morgan: Good, but remember that higher temporal resolution does not automatically mean better evidence. You'll eventually need to aggregate some of those readings when you analyse broader patterns.
+
+Elena: Understood.
+
+Marcus: I also noticed the field sheet records temperature, humidity, and coordinates, but there's no dedicated section for temporary environmental changes.
+
+Elena: Such as construction?
+
+Marcus: Construction, parked delivery vehicles, temporary shade structures, irrigation, even a market stall positioned beside a sensor. Those events may not last long enough to appear on a conventional land-use map, but they can influence individual readings.
+
+Dr. Morgan: That metadata could become crucial when you encounter an unexplained anomaly.
+
+Elena: I'll add a free-text observation field to the inspection log.
+
+Dr. Morgan: Make it structured where possible. Free text is useful, but if everyone describes the same condition differently, you create another problem during analysis. Use standard categories for recurring events and leave free text for genuinely unusual circumstances.
+
+Elena: Right. I'll develop a short coding system.
+
+Dr. Morgan: Finally, I want to be very clear about how we interpret the results. Suppose the park-adjacent sensors record lower average temperatures than the roadside units. That would be consistent with a cooling effect from vegetation, but it would not, by itself, prove that vegetation caused the entire difference.
+
+Elena: Because other variables could still differ between the sites.
+
+Dr. Morgan: Precisely. Building height, wind exposure, surface reflectivity, traffic intensity, and time spent in direct sunlight could all contribute. The study can identify robust associations. Causal claims would require a stronger design or additional modelling.
+
+Marcus: So the report shouldn't say, "Trees reduced temperatures by two degrees," even if that's the average difference?
+
+Dr. Morgan: Not unless we can isolate the effect of the trees. We could say that tree-rich sites were associated with lower temperatures under the observed conditions. That distinction may sound cautious, but scientifically it is essential.

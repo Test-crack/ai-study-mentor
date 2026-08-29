@@ -51,6 +51,9 @@ interface DiagnosticStatus {
   writing_scored: boolean;
   speaking_scored: boolean;
   overall_complete: boolean;
+  // Changes whenever an admin resets this student's diagnostic server-side.
+  // Compared against SK.resetMarker to detect a reset and drop stale cached progress.
+  reset_marker?: string;
 }
 
 interface AllResults {
@@ -190,6 +193,7 @@ const SK = {
   speakingResult:     "tc_speaking_result",
   speakingSubmitting: "tc_speaking_submitting",
   activeTabLock:      "tc_active_tab",
+  resetMarker:        "tc_reset_marker",
 };
 
 // Per-student namespace so diagnostic progress on a shared device never leaks
@@ -305,8 +309,10 @@ async function submitSpeaking(
   try {
     data = await uploadFileToBackend(`/api/diagnostic/submit/speaking`, formData, "POST");
   } catch (httpErr: any) {
-    // 422 → server detected no usable speech; responseData is attached by uploadFileToBackend
-    if (httpErr?.responseData?.can_retry) {
+    // 422 → server detected no usable speech; responseData is attached by uploadFileToBackend.
+    // Only this specific error code should discard the recording — ai_grading_failed
+    // (a real server/AI failure) also sets can_retry but must keep the blob for resubmit.
+    if (httpErr?.responseData?.error === 'no_speech_detected') {
       const retryErr = new Error(httpErr.responseData.message ?? 'No speech detected. Please re-record.');
       (retryErr as any).canRetry = true;
       throw retryErr;
@@ -1259,7 +1265,9 @@ function ReadingPhase({
                   return (
                     <label
                       key={val}
-                      className={`px-4 py-2 rounded-xl border cursor-pointer text-[13.5px] font-semibold transition-colors duration-150 ${
+                      className={`px-4 py-2 rounded-xl border text-[13.5px] font-semibold transition-colors duration-150 ${
+                        timeLeft <= 0 ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+                      } ${
                         isSelected
                           ? 'border-transparent bg-brand-teal-700 text-white'
                           : 'border-brand-line text-brand-text-mute hover:border-brand-teal-300 hover:text-brand-text'
@@ -1271,6 +1279,7 @@ function ReadingPhase({
                         name={q.id}
                         value={val}
                         checked={isSelected}
+                        disabled={timeLeft <= 0}
                         onChange={() => setAnswers(prev => ({ ...prev, [q.id]: val }))}
                         className="sr-only"
                       />
@@ -1284,7 +1293,9 @@ function ReadingPhase({
                   return (
                     <label
                       key={letter}
-                      className={`px-4 py-2 rounded-xl border cursor-pointer text-[13.5px] font-semibold transition-colors duration-150 ${
+                      className={`px-4 py-2 rounded-xl border text-[13.5px] font-semibold transition-colors duration-150 ${
+                        timeLeft <= 0 ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+                      } ${
                         isSelected
                           ? 'border-transparent bg-brand-teal-700 text-white'
                           : 'border-brand-line text-brand-text-mute hover:border-brand-teal-300 hover:text-brand-text'
@@ -1296,6 +1307,7 @@ function ReadingPhase({
                         name={q.id}
                         value={letter}
                         checked={isSelected}
+                        disabled={timeLeft <= 0}
                         onChange={() => setAnswers(prev => ({ ...prev, [q.id]: letter }))}
                         className="sr-only"
                       />
@@ -2527,19 +2539,32 @@ function DiagnosisInner() {
     let pollingInterval: ReturnType<typeof setInterval>;
 
     const checkStatus = async () => {
-      const currentSavedPhase = storageLoad<Phase>(SK.phase);
-      
+      let currentSavedPhase = storageLoad<Phase>(SK.phase);
+
       if (currentSavedPhase === "summary" || currentSavedPhase === "speaking_result") {
           clearInterval(pollingInterval);
           return;
       }
 
-      const savedResults = storageLoad<AllResults>(SK.results);
-      if (savedResults) setResults(savedResults);
-
       try {
         const status = await fetchDiagnosticStatus(studentId);
         if (!isMounted) return;
+
+        // An admin reset can happen entirely server-side — this is how the browser
+        // finds out. If the marker changed since we last saw it, our cached phase/
+        // answers/timers are stale (they describe a diagnostic attempt that no longer
+        // exists), so drop them instead of resuming into a section that's been wiped.
+        const cachedMarker = storageLoad<string>(SK.resetMarker);
+        if (status.reset_marker) {
+          if (cachedMarker && cachedMarker !== status.reset_marker) {
+            storageClear(SK.phase, SK.results, SK.listeningAnswers, SK.listeningAudioPlayed, SK.readingAnswers, SK.readingTimeLeft, SK.writingText, SK.speakingResult);
+            currentSavedPhase = null;
+          }
+          storageSave(SK.resetMarker, status.reset_marker);
+        }
+
+        const savedResults = storageLoad<AllResults>(SK.results);
+        if (savedResults) setResults(savedResults);
 
         if (status.overall_complete) {
           clearInterval(pollingInterval);

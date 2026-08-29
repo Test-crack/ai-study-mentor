@@ -21,6 +21,11 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [status, setStatus] = useState<ConnectionStatus>('CLOSED');
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Fires ~5s after a socket opens; only then do we treat the connection as "stable"
+  // and reset the retry counter. Without this, a socket that opens then immediately
+  // closes (server-side drop) would reset the counter every cycle and reconnect every
+  // 1s forever — the backoff and MAX_RETRIES cap would never take effect.
+  const stableTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const retryCountRef = useRef(0);
   const profileRef = useRef(profile);
 
@@ -33,8 +38,16 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, []);
 
+  const clearStableTimer = useCallback(() => {
+    if (stableTimeoutRef.current) {
+      clearTimeout(stableTimeoutRef.current);
+      stableTimeoutRef.current = null;
+    }
+  }, []);
+
   const cleanup = useCallback(() => {
     clearReconnectTimer();
+    clearStableTimer();
     if (wsRef.current) {
       wsRef.current.onopen = null;
       wsRef.current.onclose = null;
@@ -42,7 +55,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       wsRef.current.close();
       wsRef.current = null;
     }
-  }, [clearReconnectTimer]);
+  }, [clearReconnectTimer, clearStableTimer]);
 
   const connect = useCallback(() => {
     const p = profileRef.current;
@@ -79,13 +92,17 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     ws.onopen = () => {
       console.log('🟢 WS: Connected');
       setStatus('OPEN');
-      retryCountRef.current = 0;
+      // Only reset the backoff once the connection proves stable (survives 5s). A
+      // socket that drops immediately keeps its accumulated retry count → real backoff.
+      clearStableTimer();
+      stableTimeoutRef.current = setTimeout(() => { retryCountRef.current = 0; }, 5000);
     };
 
     ws.onclose = () => {
       console.log('🔴 WS: Closed');
       setStatus('CLOSED');
       wsRef.current = null;
+      clearStableTimer();
 
       if (!profileRef.current || !navigator.onLine) return;
 

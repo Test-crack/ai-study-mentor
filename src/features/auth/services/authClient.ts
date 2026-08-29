@@ -2,6 +2,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { getSelectedExamId } from '@/shared/state/examContext';
 
 // ─── Human-friendly messages per HTTP status ────────────────────────
 const HTTP_MESSAGES: Record<number, string> = {
@@ -92,6 +93,7 @@ export async function callBackend(path: string, options: RequestInit = {}): Prom
   }
 
   const token = await getAccessToken();
+  const examId = getSelectedExamId();
 
   let res: Response;
   try {
@@ -101,6 +103,8 @@ export async function callBackend(path: string, options: RequestInit = {}): Prom
         ...(options.headers || {}),
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
+        // Owner/Admin exam context; backend ignores it on non-owner/admin routes.
+        ...(examId ? { 'X-Exam-Id': examId } : {}),
       },
     });
   } catch (err) {

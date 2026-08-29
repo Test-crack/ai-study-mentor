@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "@/shared/components/ui/sheet";
 import { useState } from "react";
 import {InstituteOwnerSidebar } from "./InstitiuteOwnerSidebar";
+import { ExamContextBar } from "@/features/Institute/components/ExamContextBar";
 
 interface InstituteOwnerTopbarProps {
   onCreateCourse?: () => void;
@@ -57,6 +58,9 @@ export const InstituteOwnerTopbar = ({ onCreateCourse }: InstituteOwnerTopbarPro
 
       {/* Right Actions - Added ml-auto here to push content to the right edge */}
       <div className="flex items-center gap-2 sm:gap-3 ml-auto">
+        {/* Exam context switch (owner) — scopes every page to the selected exam */}
+        <ExamContextBar />
+
         {/* Notifications — real feed from user_notifications, same component the
             admin portal uses. Replaces the commented-out decorative bell (a
             hardcoded red dot with no data behind it).

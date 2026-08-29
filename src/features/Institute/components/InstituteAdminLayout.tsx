@@ -6,6 +6,7 @@
 import { ReactNode, useState } from "react";
 import { InstituteSidebar } from "./InstituteSidebar";
 import { InstituteTopbar } from "./InstituteTopbar";
+import { ExamContextBar } from "./ExamContextBar";
 
 interface InstituteAdminLayoutProps {
   children: ReactNode;
@@ -30,7 +31,10 @@ export const InstituteAdminLayout = ({ children, activeTab }: InstituteAdminLayo
       <div className={`relative z-10 transition-all duration-300 flex flex-col min-h-screen ${isSidebarCollapsed ? "lg:pl-24" : "lg:pl-72"}`}>
         <InstituteTopbar />
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="max-w-[1600px] mx-auto space-y-6">{children}</div>
+          <div className="max-w-[1600px] mx-auto space-y-6">
+            <div className="flex justify-end"><ExamContextBar /></div>
+            {children}
+          </div>
         </main>
       </div>
     </div>

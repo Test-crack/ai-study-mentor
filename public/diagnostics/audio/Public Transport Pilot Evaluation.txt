@@ -1,0 +1,49 @@
+Dr. Collins: Before we recommend expanding the bus-priority scheme, I want to be careful about how we interpret the pilot results. Aisha, the headline figure says average journey times fell by nine percent.
+
+Aisha: That's correct, but the improvement wasn't evenly distributed. Most of the reduction occurred during the morning peak. Outside peak hours, the change was much smaller.
+
+Mark: Which makes sense. The bus lanes matter most when general traffic is congested.
+
+Dr. Collins: True, but the report shouldn't imply that every passenger experienced a nine-percent improvement throughout the day.
+
+Aisha: Agreed. There's another complication. Passenger numbers rose by twelve percent during the pilot.
+
+Mark: That's encouraging.
+
+Aisha: It is, but we can't attribute the entire increase to the scheme. Two major employers opened offices along the corridor during the same period, so underlying demand was already changing.
+
+Dr. Collins: Exactly. We can say ridership increased while the pilot was operating, but establishing causation is harder.
+
+Mark: What about service reliability? Drivers reported fewer severe delays.
+
+Aisha: The data support that, although the average delay figure is slightly misleading.
+
+Dr. Collins: How so?
+
+Aisha: A small number of extremely late services used to inflate the average. Those extreme delays became much less common during the pilot. The typical service improved, but the biggest change was really in the worst-performing journeys.
+
+Mark: So the scheme reduced variability more than it reduced ordinary delays.
+
+Aisha: That's a fair summary.
+
+Dr. Collins: And what did the passenger survey show?
+
+Aisha: Satisfaction increased, particularly for punctuality. But satisfaction with crowding fell.
+
+Mark: Because more people were using the service.
+
+Aisha: Probably, although the survey doesn't prove why passengers felt more crowded.
+
+Dr. Collins: Important distinction.
+
+Mark: We could respond by increasing frequency if the pilot becomes permanent.
+
+Aisha: Perhaps, but that would change the economics. The current cost-benefit analysis assumes the existing timetable.
+
+Dr. Collins: Which means we shouldn't claim that expansion is financially justified until we've modelled the additional operating cost.
+
+Mark: So you're not recommending against expansion?
+
+Dr. Collins: No. I'm saying the pilot provides strong evidence of better peak journey times and fewer extreme delays. Ridership growth is promising but partly confounded, and any permanent expansion needs a revised cost model if we increase service frequency.
+
+Aisha: That seems defensible.
