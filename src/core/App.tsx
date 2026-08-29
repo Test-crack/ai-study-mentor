@@ -69,7 +69,10 @@ const InstituteSettings = lazy(() => import("@/features/Institute/dashboard/Inst
 const SuperAdminDashboard = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/SuperAdminDashboard"));
 const SuperAdminInstitutes = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/SuperAdminInstitutes"));
 const Subscription = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/Subscription"));
+const PricingConfig = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/PricingConfig"));
 const ExamConfigs = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/ExamConfigs"));
+const SupportTicket = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/SupportTicket"));
+const PlatformAnalytics = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/PlatformAnalytics"));
 const AllUsers = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/AllUsers"));
 const InstituteOwnerDashboard = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteOwnerDashboard"));
 const Performance = lazy(() => import("@/features/InstituteOwner/dashboard/Performance"));
@@ -368,7 +371,10 @@ const AppRoutes = () => {
       <Route path="/superadmin/dashboard" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SuperAdminDashboard /></RoleProtectedRoute>} />
       <Route path="/superadmin/institutes" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SuperAdminInstitutes /></RoleProtectedRoute>} />
       <Route path="/superadmin/subscription" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><Subscription /></RoleProtectedRoute>} />
+      <Route path="/superadmin/priceconfig" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><PricingConfig /></RoleProtectedRoute>} />
       <Route path="/superadmin/examconfigs" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><ExamConfigs /></RoleProtectedRoute>} />
+      <Route path="/superadmin/supportickets" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SupportTicket /></RoleProtectedRoute>} />
+      <Route path="/superadmin/platform" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><PlatformAnalytics /></RoleProtectedRoute>} />
       <Route path="/superadmin/allusers" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><AllUsers /></RoleProtectedRoute>} />
 
       <Route path="/login" element={user ? <LoginRedirect /> : <LoginPage />} />
