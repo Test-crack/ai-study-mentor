@@ -4,17 +4,20 @@ export interface SeSubskill {
   id: string;            // CEFR subskill id (matches sub_scores.subskillProfile[].id)
   label: string;         // student-facing label
   drillSubskill: string; // SubSkillType enum value used by the drill API
+  drillable: boolean;    // whether MCQ drills exist for it (interaction is speaking-only, no MCQs)
 }
 
 // range→VOCABULARY, accuracy→GRAMMAR, fluency→FLUENCY, interaction→TASK_RESPONSE,
 // coherence→COHERENCE, phonology→PRONUNCIATION (existing enum values — no migration).
+// `interaction` (Responsiveness) has no MCQ drills — it's only assessed in the speaking
+// diagnostic/IA/mock, so it isn't offered as a drill.
 export const SE_SUBSKILLS: SeSubskill[] = [
-  { id: "range",       label: "Range",                drillSubskill: "VOCABULARY" },
-  { id: "accuracy",    label: "Accuracy",             drillSubskill: "GRAMMAR" },
-  { id: "fluency",     label: "Fluency",              drillSubskill: "FLUENCY" },
-  { id: "interaction", label: "Responsiveness",       drillSubskill: "TASK_RESPONSE" },
-  { id: "coherence",   label: "Coherence",            drillSubskill: "COHERENCE" },
-  { id: "phonology",   label: "Phonological Control", drillSubskill: "PRONUNCIATION" },
+  { id: "range",       label: "Range",                drillSubskill: "VOCABULARY",    drillable: true },
+  { id: "accuracy",    label: "Accuracy",             drillSubskill: "GRAMMAR",       drillable: true },
+  { id: "fluency",     label: "Fluency",              drillSubskill: "FLUENCY",       drillable: true },
+  { id: "interaction", label: "Responsiveness",       drillSubskill: "TASK_RESPONSE", drillable: false },
+  { id: "coherence",   label: "Coherence",            drillSubskill: "COHERENCE",     drillable: true },
+  { id: "phonology",   label: "Phonological Control", drillSubskill: "PRONUNCIATION", drillable: true },
 ];
 
 export const seSubskill = (id: string) => SE_SUBSKILLS.find((s) => s.id === id);

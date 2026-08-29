@@ -72,8 +72,10 @@ const SpokenEnglishDashboardPage = () => {
     return () => { cancelled = true; };
   }, []);
 
-  // Weakest subskill = lowest-scoring in the profile (what practice should target first).
-  const weakest = (result?.subskillProfile ?? []).slice().sort((a, b) => a.score - b.score)[0];
+  // Weakest DRILLABLE subskill = lowest-scoring one that has MCQ drills (interaction has none).
+  const weakest = (result?.subskillProfile ?? [])
+    .filter((s) => seSubskill(s.id)?.drillable)
+    .slice().sort((a, b) => a.score - b.score)[0];
 
   const startDrill = useCallback((subskillId?: string) => {
     const ss = seSubskill(subskillId ?? weakest?.id ?? "range");
@@ -208,7 +210,9 @@ const SpokenEnglishDashboardPage = () => {
                               <div className={cn("h-full rounded-full", barColor(s.level))} style={{ width: `${Math.max(4, Math.min(100, s.score))}%` }} />
                             </div>
                           </div>
-                          <button onClick={() => startDrill(s.id)} className="shrink-0 rounded-lg border border-brand-line px-3 py-1.5 text-xs font-semibold text-brand-teal-700 hover:border-brand-teal-300">Practice</button>
+                          {seSubskill(s.id)?.drillable
+                            ? <button onClick={() => startDrill(s.id)} className="shrink-0 rounded-lg border border-brand-line px-3 py-1.5 text-xs font-semibold text-brand-teal-700 hover:border-brand-teal-300">Practice</button>
+                            : <span className="shrink-0 text-[11px] text-brand-text-mute">Speaking only</span>}
                         </div>
                       ))}
                     </div>
