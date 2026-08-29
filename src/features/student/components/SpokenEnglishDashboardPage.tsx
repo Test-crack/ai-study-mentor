@@ -38,6 +38,40 @@ const barColor = (level?: string) => {
   return "bg-amber-300";
 };
 
+// "This week" streak strip — parity with the IELTS WeeklyRhythmIndicator (streak-driven).
+const WeeklyRhythm = ({ streak }: { streak: number }) => {
+  const days = ["M", "T", "W", "T", "F", "S", "S"];
+  const todayIdx = (new Date().getDay() + 6) % 7; // Mon=0 … Sun=6
+  return (
+    <section className="rounded-2xl border border-brand-line bg-brand-bg-alt p-5 sm:p-6">
+      <p className="font-jetbrains text-[10px] uppercase tracking-[0.16em] text-brand-text-mute">This week</p>
+      <div className="mt-1 mb-3 flex items-baseline gap-2">
+        <span className="font-dm text-2xl font-bold text-brand-text">{streak}</span>
+        <span className="text-sm text-brand-text-mute">day streak · {Math.max(0, 7 - streak)} more to your 7-day goal</span>
+      </div>
+      <div className="grid grid-cols-7 gap-1.5">
+        {days.map((d, i) => (
+          <div key={i} className={cn(
+            "flex h-9 items-center justify-center rounded-lg font-jetbrains text-xs font-bold",
+            i === todayIdx ? "bg-brand-ink-deep text-white"
+              : i < todayIdx && todayIdx - i <= streak ? "bg-brand-mint text-brand-ink-deep"
+              : "bg-brand-line text-brand-text-mute",
+          )}>{d}</div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+// Momentum wallet — parity with the IELTS MomentumWalletCard (momentum is exam-agnostic).
+const MomentumWallet = ({ momentum }: { momentum: number }) => (
+  <section className="rounded-2xl border border-brand-line bg-brand-bg-alt p-5 sm:p-6">
+    <p className="font-jetbrains text-[10px] uppercase tracking-[0.16em] text-brand-text-mute">Momentum Wallet</p>
+    <p className="mt-1 font-dm text-3xl font-bold text-brand-text tabular-nums">{momentum} <span className="text-sm font-medium text-brand-text-mute">points</span></p>
+    <p className="mt-2 text-sm leading-relaxed text-brand-text-mute">Earned from drills &amp; streaks. Spend it on extra practice once you've used today's free drills.</p>
+  </section>
+);
+
 const SpokenEnglishDashboardPage = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
@@ -225,6 +259,12 @@ const SpokenEnglishDashboardPage = () => {
                     </div>
                   </section>
                 )}
+
+                {/* Weekly rhythm + momentum wallet (parity with IELTS) */}
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                  <WeeklyRhythm streak={meta.streak} />
+                  <MomentumWallet momentum={meta.momentum} />
+                </div>
 
                 {/* Coaching notes */}
                 {result.feedback && result.feedback.length > 0 && (
