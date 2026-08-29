@@ -11,6 +11,7 @@ import { StudentSidebar } from "./dashboard/StudentSidebar";
 import { StudentTopbar } from "./dashboard/StudentTopbar";
 import { PremiumModal } from "@/features/payment/components/PremiumModal";
 import { examDisplay } from "@/features/student/config/examDisplay";
+import { useMomentum } from "@/features/student/Context/MomentumContext";
 import { SE_SUBSKILLS, seSubskill, nextCefr, withinLevelProgress, cefrToDrillLevel } from "@/features/student/config/spokenEnglishSubskills";
 import { cn } from "@/shared/utils";
 import { Mic, CheckCircle2, ArrowRight, AlertTriangle, Loader2, Compass, Flame, Zap, Lock, Puzzle, Dumbbell } from "lucide-react";
@@ -40,6 +41,7 @@ const barColor = (level?: string) => {
 const SpokenEnglishDashboardPage = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
+  const { syncMomentum, updateStreak } = useMomentum();
   const cfg = examDisplay(profile?.examId);
   const examId = profile?.examId ?? "spoken_english";
 
@@ -63,6 +65,10 @@ const SpokenEnglishDashboardPage = () => {
         setResult((speaking?.sub_scores as CefrResult) ?? null);
         setMeta({ momentum: comp.momentum_score ?? 0, streak: comp.daily_streak ?? 0 });
         setDrillsToday(drillState?.drills_completed_today ?? 0);
+        // Feed the shared MomentumContext so the topbar shows the right momentum/streak
+        // (it starts at 0 and only updates via syncMomentum — the IELTS dashboard does this too).
+        syncMomentum(comp.momentum_score ?? 0);
+        updateStreak(comp.daily_streak ?? 0);
       } catch {
         if (!cancelled) setResult(null);
       } finally {
