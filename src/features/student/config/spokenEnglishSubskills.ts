@@ -7,15 +7,15 @@ export interface SeSubskill {
   drillable: boolean;    // whether MCQ drills exist for it (interaction is speaking-only, no MCQs)
 }
 
-// range→VOCABULARY, accuracy→GRAMMAR, fluency→FLUENCY, interaction→TASK_RESPONSE,
-// coherence→COHERENCE, phonology→PRONUNCIATION (existing enum values — no migration).
-// `interaction` (Responsiveness) has no MCQ drills — it's only assessed in the speaking
-// diagnostic/IA/mock, so it isn't offered as a drill.
+// range→VOCABULARY, accuracy→GRAMMAR, fluency→FLUENCY, coherence→COHERENCE,
+// phonology→PRONUNCIATION reuse existing enum values; interaction→INTERACTION is its own
+// value (added by the SubSkillType migration — see backend prisma/sql/add_interaction_subskill.sql).
+// `drillable: true` for interaction requires that migration + the 24 interaction drills imported.
 export const SE_SUBSKILLS: SeSubskill[] = [
   { id: "range",       label: "Range",                drillSubskill: "VOCABULARY",    drillable: true },
   { id: "accuracy",    label: "Accuracy",             drillSubskill: "GRAMMAR",       drillable: true },
   { id: "fluency",     label: "Fluency",              drillSubskill: "FLUENCY",       drillable: true },
-  { id: "interaction", label: "Responsiveness",       drillSubskill: "TASK_RESPONSE", drillable: false },
+  { id: "interaction", label: "Responsiveness",       drillSubskill: "INTERACTION",   drillable: true },
   { id: "coherence",   label: "Coherence",            drillSubskill: "COHERENCE",     drillable: true },
   { id: "phonology",   label: "Phonological Control", drillSubskill: "PRONUNCIATION", drillable: true },
 ];
