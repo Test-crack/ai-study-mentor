@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { InstituteSidebar } from '../components/InstituteSidebar';
 import { InstituteTopbar } from '../components/InstituteTopbar';
+import { PageHero, HeroAction } from '../components/shared/primitives';
 
 // --- Tutors Data ---
 const availableTutors = [
@@ -278,20 +279,16 @@ export default function InstituteBatches() {
           <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
 
             {/* Page Header & Create Button */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-brand-text">Batch Management</h1>
-              </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={openCreateModal}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 min-h-[40px] bg-brand-teal-600 hover:bg-brand-teal-700 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
-                >
-                  <Plus className="w-4 h-4" />
-                  Create Batch
-                </button>
-              </div>
-            </div>
+            <PageHero
+              eyebrow="Admin Portal"
+              title="Batch Management"
+              subtitle="Every batch in your institute, with capacity and tutor assignment."
+              actions={
+                <HeroAction onClick={openCreateModal}>
+                  <Plus className="w-3.5 h-3.5" /> Create Batch
+                </HeroAction>
+              }
+            />
 
             {/* Top Metrics */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -396,7 +393,7 @@ export default function InstituteBatches() {
                       </div>
                     </div>
 
-                    <h2 className="text-lg sm:text-xl font-bold text-brand-text mb-4">{batch.name}</h2>
+                    <h2 className="font-manrope text-lg sm:text-xl font-bold text-brand-text mb-4">{batch.name}</h2>
 
                     <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm text-brand-text-mute mb-6">
                       <div className="flex items-center gap-1.5">
@@ -505,7 +502,7 @@ export default function InstituteBatches() {
           <div className="bg-white rounded-2xl border border-brand-line shadow-sm w-full max-w-lg max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
 
             <div className="flex items-center justify-between p-4 sm:p-6 border-b border-brand-line">
-              <h2 className="text-lg sm:text-xl font-bold text-brand-text">
+              <h2 className="font-manrope text-lg sm:text-xl font-bold text-brand-text">
                 {editingBatchId ? 'Edit Batch' : 'Create New Batch'}
               </h2>
               <button
@@ -628,7 +625,7 @@ export default function InstituteBatches() {
           <div className="bg-white rounded-2xl border border-brand-line shadow-sm w-full max-w-sm max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
 
             <div className="flex items-center justify-between p-4 sm:p-6 border-b border-brand-line">
-              <h2 className="text-lg sm:text-xl font-bold text-brand-text">Add Student to Batch</h2>
+              <h2 className="font-manrope text-lg sm:text-xl font-bold text-brand-text">Add Student to Batch</h2>
               <button
                 onClick={() => setIsAddStudentModalOpen(false)}
                 className="p-2 text-brand-text-mute hover:text-brand-text rounded-lg hover:bg-brand-bg-alt transition-colors"

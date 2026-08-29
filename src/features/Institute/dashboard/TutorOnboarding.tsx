@@ -109,7 +109,7 @@ function AddTutorModal({ onClose, onAdded }: { onClose: () => void; onAdded: () 
               <BookOpen className="w-5 h-5 text-brand-blue-600" />
             </div>
             <div>
-              <h2 className="font-bold text-brand-text text-base">Onboard New Tutor</h2>
+              <h2 className="font-manrope font-bold text-brand-text text-base">Onboard New Tutor</h2>
               <p className="text-xs text-brand-text-mute mt-0.5">Tutor will receive an email invite to set their password</p>
             </div>
           </div>
@@ -192,7 +192,7 @@ function ConfirmRemoveDialog({ tutor, onConfirm, onCancel, loading }: {
             <Trash2 className="w-5 h-5 text-rose-600" />
           </div>
           <div>
-            <h3 className="font-bold text-brand-text">Remove Tutor?</h3>
+            <h3 className="font-manrope font-bold text-brand-text">Remove Tutor?</h3>
             <p className="text-xs text-brand-text-mute mt-0.5">{tutor.name ?? tutor.email}</p>
           </div>
         </div>

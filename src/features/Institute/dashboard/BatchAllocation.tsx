@@ -5,6 +5,7 @@ import {
   UserMinus, UserPlus, Edit2, Check,
 } from 'lucide-react';
 import { InstituteAdminLayout } from '../components/InstituteAdminLayout';
+import { PageHero, HeroAction } from '../components/shared/primitives';
 import {
   fetchBatches, fetchBatchDetail, createBatch, updateBatch, deleteBatch,
   addInstructor as batchAddInstructor,
@@ -85,7 +86,7 @@ function BatchFormModal({ initial, onClose, onSaved }: BatchFormModalProps) {
               <Layers className="w-5 h-5 text-brand-teal-600" />
             </div>
             <div>
-              <h2 className="font-bold text-brand-text">{isEdit ? 'Edit Batch' : 'New Batch'}</h2>
+              <h2 className="font-manrope font-bold text-brand-text">{isEdit ? 'Edit Batch' : 'New Batch'}</h2>
               <p className="text-xs text-brand-text-mute mt-0.5">
                 {isEdit ? 'Update batch details' : 'Create a new student batch'}
               </p>
@@ -247,7 +248,7 @@ function AddMemberModal({ label, candidates, onAdd, adding }: AddMemberModalProp
                 <div className="p-2 bg-brand-teal-50 rounded-lg shrink-0">
                   <UserPlus className="w-5 h-5 text-brand-teal-600" />
                 </div>
-                <h2 className="font-bold text-brand-text">{label}</h2>
+                <h2 className="font-manrope font-bold text-brand-text">{label}</h2>
               </div>
               <button onClick={() => setOpen(false)} className="p-2 rounded-lg hover:bg-brand-bg-alt text-brand-text-mute hover:text-brand-text transition-colors">
                 <X className="w-4 h-4" />
@@ -381,7 +382,7 @@ function BatchDetailPanel({ batchId, batchName, onClose, allTutors, allStudents 
       {/* Header */}
       <div className="flex items-center justify-between gap-2 px-4 sm:px-5 py-4 border-b border-brand-line shrink-0">
         <div className="min-w-0">
-          <h3 className="font-bold text-brand-text text-base truncate">{batchName}</h3>
+          <h3 className="font-manrope font-bold text-brand-text text-base truncate">{batchName}</h3>
           <p className="text-xs text-brand-text-mute mt-0.5">Manage members</p>
         </div>
         <button onClick={onClose} className="p-2 rounded-lg hover:bg-brand-bg-alt text-brand-text-mute hover:text-brand-text transition-colors shrink-0">
@@ -390,7 +391,7 @@ function BatchDetailPanel({ batchId, batchName, onClose, allTutors, allStudents 
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 px-4 sm:px-5 pt-3 pb-0 border-b border-brand-line shrink-0">
+      <div className="flex gap-1 px-4 sm:px-5 pt-3 pb-0 border-b border-brand-line shrink-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {([
           { key: 'instructors', label: 'Instructors', icon: Users, count: detail?.instructors.length ?? 0 },
           { key: 'students', label: 'Students', icon: GraduationCap, count: detail?.students.length ?? 0 },
@@ -565,7 +566,7 @@ export default function BatchAllocation() {
                 <Trash2 className="w-5 h-5 text-rose-600" />
               </div>
               <div className="min-w-0">
-                <h3 className="font-bold text-brand-text">Delete Batch?</h3>
+                <h3 className="font-manrope font-bold text-brand-text">Delete Batch?</h3>
                 <p className="text-xs text-brand-text-mute mt-0.5 truncate">{deleteTarget.name}</p>
               </div>
             </div>
@@ -603,23 +604,21 @@ export default function BatchAllocation() {
           <div className="max-w-[1200px] mx-auto space-y-6">
 
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-brand-text">Batch Allocation</h1>
-                <p className="text-sm text-brand-text-mute mt-0.5">
-                  {loading ? '…' : `${batches.length} batch${batches.length !== 1 ? 'es' : ''} · Click a row to manage members`}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button onClick={load} className="p-2 min-h-[40px] min-w-[40px] flex items-center justify-center rounded-lg text-brand-text-mute hover:text-brand-teal-600 hover:bg-brand-bg-alt transition-colors" title="Refresh">
-                  <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                </button>
-                <button onClick={() => setShowForm(true)}
-                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 min-h-[40px] bg-brand-teal-600 hover:bg-brand-teal-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
-                  <Plus className="w-4 h-4" /> New Batch
-                </button>
-              </div>
-            </div>
+            <PageHero
+              eyebrow="Admin Portal"
+              title="Batch Allocation"
+              subtitle={loading ? '…' : `${batches.length} batch${batches.length !== 1 ? 'es' : ''} · Click a row to manage members`}
+              actions={
+                <>
+                  <HeroAction onClick={load} disabled={loading}>
+                    <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Refresh
+                  </HeroAction>
+                  <HeroAction onClick={() => setShowForm(true)}>
+                    <Plus className="w-3.5 h-3.5" /> New Batch
+                  </HeroAction>
+                </>
+              }
+            />
 
             {/* Stats Row */}
             {!loading && batches.length > 0 && (

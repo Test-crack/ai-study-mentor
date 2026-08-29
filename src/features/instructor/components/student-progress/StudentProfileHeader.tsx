@@ -1,4 +1,4 @@
-import { Flame, Gauge, Target, Zap } from 'lucide-react';
+import { CalendarClock, Flame, Gauge, Target, Zap } from 'lucide-react';
 import { cn } from '@/shared/utils';
 import type { StudentFullProgress, CompetencyRow } from './types';
 
@@ -24,6 +24,20 @@ function bandPillClass(b: number): string {
   return 'bg-rose-50 border-rose-200 text-rose-700';
 }
 
+/**
+ * Whole days from today (local midnight) to an exam date. Both sides are
+ * normalised to midnight so the count is a calendar-day difference and does not
+ * flip based on the time of day the page happens to be opened.
+ * Negative means the exam has already passed.
+ */
+function daysUntil(dateStr: string): number | null {
+  const target = new Date(`${dateStr}T00:00:00`);
+  if (isNaN(target.getTime())) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.round((target.getTime() - today.getTime()) / 86400000);
+}
+
 const SKILL_ABBR: Record<string, string> = {
   listening: 'L', reading: 'R', speaking: 'S', writing: 'W',
 };
@@ -44,7 +58,12 @@ function lrswFromCompetency(rows: CompetencyRow[]): Array<{ abbr: string; label:
 // ── component ─────────────────────────────────────────────────────────────────
 
 export function StudentProfileHeader({ data }: Props) {
-  const { student, target_band, momentum_score, daily_streak, competency, current_band } = data;
+  const { student, target_band, momentum_score, daily_streak, competency, current_band, exam_date } = data;
+
+  // Exam proximity is the context that makes the band gap actionable: a 1.5 gap
+  // with eight months left and the same gap with three weeks left call for
+  // completely different intervention, and staff could not see the difference.
+  const examDays = exam_date ? daysUntil(exam_date) : null;
 
   const gap = current_band !== null && target_band !== null
     ? Math.round((target_band - current_band) * 10) / 10
@@ -87,6 +106,30 @@ export function StudentProfileHeader({ data }: Props) {
         ? 'text-amber-600'
         : 'text-brand-text-mute',
     },
+    {
+      icon: <CalendarClock className="h-4 w-4" />,
+      label: examDays !== null && examDays < 0 ? 'Exam Was' : 'Exam In',
+      // "Not set" is a distinct, actionable state from "0 days" — a student who
+      // never declared an exam date needs asking, not revising.
+      value: exam_date === null
+        ? 'Not set'
+        : examDays === null
+        ? '—'
+        : examDays < 0
+        ? `${Math.abs(examDays)}d ago`
+        : examDays === 0
+        ? 'Today'
+        : `${examDays}d`,
+      valueClass: exam_date === null || examDays === null
+        ? 'text-brand-text-mute'
+        : examDays < 0
+        ? 'text-brand-text-mute'
+        : examDays <= 30
+        ? 'text-rose-600'
+        : examDays <= 90
+        ? 'text-amber-600'
+        : 'text-brand-text',
+    },
   ];
 
   return (
@@ -96,26 +139,31 @@ export function StudentProfileHeader({ data }: Props) {
       {/* No overflow-hidden here — outer card clips the rounded corners.
           Keeping this open lets the avatar z-index stack above it correctly. */}
       {/* h-40 gives room; name is offset right by ml-[100px] to sit beside the avatar's footprint */}
-      <div className="relative h-40 bg-gradient-to-br from-brand-teal-700 via-brand-teal-600 to-brand-blue-700 flex flex-col justify-end px-6 pb-6">
+      <div className="relative h-40 bg-gradient-to-br from-brand-teal-700 via-brand-teal-600 to-brand-blue-700 flex flex-col justify-end px-4 sm:px-6 pb-6">
         {/* Decorative blobs */}
         <div className="absolute -top-10 -right-10 w-52 h-52 rounded-full bg-white/5 pointer-events-none" />
         <div className="absolute top-6 right-24 w-24 h-24 rounded-full bg-white/5 pointer-events-none" />
         <div className="absolute -bottom-6 right-8 w-36 h-36 rounded-full bg-brand-blue-600/30 pointer-events-none" />
 
-        {/* Name — ml-[100px] clears the avatar (w-20=80px + 20px gap) */}
-        <h2 className="relative z-10 text-2xl font-black text-white leading-tight tracking-tight ml-[100px]">
+        {/* Name — ml-[100px] clears the avatar (w-20=80px + 20px gap).
+            Truncates rather than overflowing: at 390px the offset leaves only
+            ~240px, which a full name at text-2xl exceeds. */}
+        <h2 className="relative z-10 text-xl sm:text-2xl font-black text-white leading-tight tracking-tight ml-[100px] truncate pr-2">
           {student.name}
         </h2>
       </div>
 
       {/* ── White body ─────────────────────────────────────────────────── */}
-      <div className="px-6 pb-5">
+      <div className="px-4 sm:px-6 pb-5">
 
-        {/* Avatar + gap badge row — avatar pulled up -mt-14 so it sits half in gradient */}
-        <div className="flex items-end justify-between -mt-14 mb-5">
+        {/* Avatar + gap badge row.
+            The -mt-14 is on the avatar alone, not the row: applying it to the
+            row dragged the badge up with it, so the badge rendered on top of
+            the gradient banner instead of in the white body. */}
+        <div className="flex items-start justify-between gap-3 mb-5">
           {/* Avatar — z-10 paints above gradient div; larger at h-20 w-20 */}
           <div className={cn(
-            'relative z-10 h-20 w-20 rounded-full ring-[3px] ring-white shadow-2xl overflow-hidden bg-brand-teal-600 shrink-0',
+            'relative z-10 -mt-14 h-20 w-20 rounded-full ring-[3px] ring-white shadow-2xl overflow-hidden bg-brand-teal-600 shrink-0',
             'flex items-center justify-center'
           )}>
             {student.avatar ? (
@@ -128,7 +176,7 @@ export function StudentProfileHeader({ data }: Props) {
           {/* Gap badge */}
           {gap !== null && (
             <span className={cn(
-              'text-xs font-bold px-3 py-1.5 rounded-xl border',
+              'text-xs font-bold px-3 py-1.5 rounded-xl border shrink-0 whitespace-nowrap',
               gap <= 0
                 ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
                 : gap <= 1
@@ -143,7 +191,9 @@ export function StudentProfileHeader({ data }: Props) {
         {/* ── Stats row ───────────────────────────────────────────────── */}
         {/* 4 tiles: 2×2 on mobile, single row from md up. divide-y is dropped at md
             so the wrapped-row divider doesn't linger once it's one line. */}
-        <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-brand-line border border-brand-line rounded-xl overflow-hidden mb-4">
+        {/* 5 tiles — md:grid-cols-5 so the Exam tile joins the row rather than
+            orphaning onto a second line with dangling dividers. */}
+        <div className="grid grid-cols-2 md:grid-cols-5 divide-x divide-y md:divide-y-0 divide-brand-line border border-brand-line rounded-xl overflow-hidden mb-4">
           {stats.map((s) => (
             <div key={s.label} className="flex items-center gap-2.5 px-4 py-3">
               <span className="text-brand-text-mute shrink-0">{s.icon}</span>

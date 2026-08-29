@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Building2, MapPin, Image as ImageIcon, Save, ShieldCheck } from "lucide-react";
 import { InstituteAdminLayout } from "../components/InstituteAdminLayout";
-import { SectionCard, StatusBadge, ErrorBanner } from "../components/shared/primitives";
+import { SectionCard, StatusBadge, ErrorBanner, PageHero } from "../components/shared/primitives";
 import {
   fetchInstituteProfile, updateInstituteProfile, InstituteProfile,
 } from "../services/instituteAdminService";
@@ -69,10 +69,11 @@ export default function InstituteSettings() {
 
   return (
     <InstituteAdminLayout activeTab="settings">
-      <div>
-        <h1 className="text-xl sm:text-2xl font-bold text-brand-text">Institute Settings</h1>
-        <p className="text-sm text-brand-text-mute mt-0.5">Your institute's identity across the platform and invite emails.</p>
-      </div>
+      <PageHero
+        eyebrow="Admin Portal"
+        title="Institute Settings"
+        subtitle="Your institute's identity across the platform and invite emails."
+      />
 
       {error && <ErrorBanner message={error} onRetry={load} />}
 

@@ -78,7 +78,15 @@ export const NotificationBell = () => {
  </button>
 
  {open && (
- <div className="absolute right-0 mt-2 w-[min(24rem,calc(100vw-2rem))] bg-white border border-brand-line rounded-2xl shadow-xl z-50 overflow-hidden">
+ <div /* Mobile: viewport-anchored. `absolute right-0` anchored the panel to the
+   bell, which sits ~60px inside the right edge (avatar beside it), so a
+   ~358px panel spilled off the LEFT of a 390px screen and the header was
+   clipped. Insets are resolved against the topbar, which is w-full and
+   sticky top-0 (its backdrop-blur makes it the containing block for
+   fixed children) — so left/right-3 land on the viewport edges and
+   top-16 clears the h-16 bar. max-w is a belt-and-braces cap in case
+   that containing block ever changes. Unchanged from sm: up. */
+        className="fixed left-3 right-3 top-16 w-auto max-w-[calc(100vw-1.5rem)] sm:absolute sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-[min(24rem,calc(100vw-2rem))] sm:max-w-none bg-white border border-brand-line rounded-2xl shadow-xl z-50 overflow-hidden">
  <div className="px-4 py-3 border-b border-brand-line flex items-center justify-between">
  <h3 className="font-manrope text-sm font-bold text-brand-text ">Notifications</h3>
  {unreadCount > 0 ? (

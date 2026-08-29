@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { callBackend } from '@/features/auth/services/authClient';
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
@@ -30,6 +32,41 @@ export const MomentumProvider = ({ children }: { children: ReactNode }) => {
     const stored = localStorage.getItem('testcrack_applied_penalties');
     return stored ? new Set(JSON.parse(stored)) : new Set();
   });
+
+  // ── Initial load ─────────────────────────────────────────────────────────────
+  // These values used to be populated only as a SIDE EFFECT of visiting a page
+  // that happened to fetch drill state — the dashboard, drills, LexiGrid,
+  // assessments. Nothing on Reports, Profile or Assessment History calls
+  // syncMomentum, so landing on (or reloading) one of those showed the topbar as
+  // "0 momentum / 0 day streak" until the student navigated via the dashboard.
+  // The context now owns its own data, so every route is correct regardless of
+  // how it was reached.
+  //
+  // Gated to authenticated students: this provider wraps the whole app,
+  // including the landing page and the instructor/institute/superadmin portals,
+  // and /api/student/* would 401 or 403 for all of those.
+  const { user, profile } = useAuth();
+  const isStudent = !!user && profile?.role === 'STUDENT';
+
+  useEffect(() => {
+    if (!isStudent) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+        const res = await callBackend(`${backendUrl}/api/student/daily-drill-state`);
+        if (cancelled || !res?.success) return;
+        // Only overwrite with values the server actually sent — a missing field
+        // must not reset a score that an in-page action already synced.
+        if (typeof res.momentum_score === 'number') setTotalMomentum(res.momentum_score);
+        if (typeof res.daily_streak === 'number') setStreak(res.daily_streak);
+      } catch (err) {
+        // Non-fatal: the topbar keeps whatever it has rather than blanking.
+        console.warn('[Momentum] initial fetch failed:', err);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isStudent]);
 
   // ── Persistence Side-Effects ─────────────────────────────────────────────────
 

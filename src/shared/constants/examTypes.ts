@@ -3,7 +3,8 @@
  * Keep this list in sync with prisma/schema.prisma `enum ExamType`.
  *
  * This is the ONE place the frontend defines exam identity. Do not hand-type
- * exam strings elsewhere (e.g. the old ad-hoc list in Questionbankmanager.tsx).
+ * exam strings elsewhere. (The conflicting ad-hoc union in Questionbankmanager.tsx
+ * is gone — that file was unrouted dead code and was deleted on 21 Aug 2026.)
  */
 
 export const EXAM_TYPES = ['IELTS', 'SPOKEN', 'OET', 'GRE', 'TOEFL', 'PTE'] as const;

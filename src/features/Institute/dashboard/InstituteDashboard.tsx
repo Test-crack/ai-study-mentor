@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { InstituteAdminLayout } from "../components/InstituteAdminLayout";
 import {
-  KpiCard, SectionCard, StatusBadge, TableSkeleton, CardGridSkeleton, EmptyState, ErrorBanner,
+  KpiCard, SectionCard, StatusBadge, TableSkeleton, CardGridSkeleton, EmptyState, ErrorBanner, PageHero, HeroAction,
 } from "../components/shared/primitives";
 import {
   fetchSummary, fetchOnboardingStatus, fetchInstructorsOverview, resendStudentInvite,
@@ -23,41 +23,38 @@ import { useToast } from "@/shared/hooks/use-toast";
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 
-function HeroBanner({ summary }: { summary: InstituteSummary }) {
+/**
+ * Renders unconditionally — including while loading and on error — so the page
+ * always has a header rather than a headless skeleton. Matches the owner portal.
+ */
+function HeroBanner({ summary }: { summary: InstituteSummary | null }) {
   const navigate = useNavigate();
   return (
-    <div className="w-full relative overflow-hidden rounded-2xl bg-brand-teal-50 border border-brand-teal-100 p-4 sm:p-6 lg:p-8 shadow-sm">
-      <div className="pointer-events-none absolute -top-10 -right-10 w-48 h-48 rounded-full bg-brand-teal-200/40 blur-2xl"></div>
-      <div className="pointer-events-none absolute -bottom-12 left-1/4 w-40 h-40 rounded-full bg-brand-teal-200/40 blur-2xl"></div>
-      <div className="relative z-10 flex flex-col gap-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-brand-text mb-1">
-            {summary.institute_name || "Institute Admin Portal"}
-          </h1>
-          <p className="text-brand-text-mute text-sm">
-            <strong className="text-brand-text font-semibold">{summary.total_students}</strong> students
-            across <strong className="text-brand-text font-semibold">{summary.total_batches}</strong> batches
-            {" · "}
-            <strong className="text-brand-text font-semibold">{summary.instructor_count}</strong> tutors
-            {summary.avg_band != null && <> · average band <strong className="text-brand-text font-semibold">{summary.avg_band}</strong></>}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <button
-            onClick={() => navigate("/institute-admin/studentOnboarding")}
-            className="inline-flex items-center justify-center gap-2 bg-brand-teal-600 hover:bg-brand-teal-700 text-white text-sm font-bold px-4 py-2.5 min-h-[40px] rounded-xl transition-colors shadow-sm"
-          >
-            <UserPlus className="h-4 w-4" /> Onboard Students
-          </button>
-          <button
-            onClick={() => navigate("/institute-admin/tutorOnboarding")}
-            className="inline-flex items-center justify-center gap-2 bg-white hover:bg-brand-teal-50 text-brand-teal-700 text-sm font-bold px-4 py-2.5 min-h-[40px] rounded-xl border border-brand-teal-200 transition-colors"
-          >
-            <GraduationCap className="h-4 w-4" /> Onboard Tutors
-          </button>
-        </div>
-      </div>
-    </div>
+    <PageHero
+      eyebrow="Admin Portal"
+      title={
+        summary?.institute_name
+          ? <>Great to see you, <span className="text-brand-mint">{summary.institute_name}</span></>
+          : "Institute Admin Portal"
+      }
+      subtitle={
+        summary
+          ? `${summary.total_students} students across ${summary.total_batches} batches · ` +
+            `${summary.instructor_count} tutors` +
+            (summary.avg_band != null ? ` · average band ${summary.avg_band}` : "")
+          : "Live operational overview across all batches"
+      }
+      actions={
+        <>
+          <HeroAction onClick={() => navigate("/institute-admin/studentOnboarding")}>
+            <UserPlus className="h-3.5 w-3.5" /> Onboard Students
+          </HeroAction>
+          <HeroAction onClick={() => navigate("/institute-admin/tutorOnboarding")}>
+            <GraduationCap className="h-3.5 w-3.5" /> Onboard Tutors
+          </HeroAction>
+        </>
+      }
+    />
   );
 }
 
@@ -280,18 +277,17 @@ export default function InstituteDashboard() {
 
   return (
     <InstituteAdminLayout activeTab="dashboard">
+      <HeroBanner summary={summary} />
+
       {error && <ErrorBanner message={error} onRetry={load} />}
 
       {loading || !summary ? (
         <>
-          <div className="h-40 bg-brand-bg-alt rounded-2xl animate-pulse" />
           <CardGridSkeleton cards={4} />
           <TableSkeleton rows={4} />
         </>
       ) : (
         <>
-          <HeroBanner summary={summary} />
-
           {/* KPI row — every number is live */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
             <KpiCard label="Total Students" value={summary.total_students} icon={Users} accent="indigo" />

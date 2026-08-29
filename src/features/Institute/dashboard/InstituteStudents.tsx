@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { InstituteAdminLayout } from "../components/InstituteAdminLayout";
 import {
-  KpiCard, StatusBadge, BandPill, TableSkeleton, EmptyState, ErrorBanner, SectionCard,
+  KpiCard, StatusBadge, BandPill, TableSkeleton, EmptyState, ErrorBanner, SectionCard, PageHero, HeroAction,
 } from "../components/shared/primitives";
 import { fetchStudentsOverview } from "../services/instituteAdminService";
 import type { StudentRow } from "@/features/InstituteOwner/services/instituteOwnerService";
@@ -90,18 +90,16 @@ export default function InstituteStudents() {
 
   return (
     <InstituteAdminLayout activeTab="students">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-brand-text">Students</h1>
-          <p className="text-sm text-brand-text-mute mt-0.5">Live band, streak and risk status for every student.</p>
-        </div>
-        <button
-          onClick={() => navigate("/institute-admin/studentOnboarding")}
-          className="inline-flex items-center justify-center gap-2 bg-brand-teal-600 hover:bg-brand-teal-700 text-white text-sm font-bold px-4 py-2.5 min-h-[40px] rounded-xl transition-colors shadow-sm self-start sm:self-auto"
-        >
-          <UserPlus className="h-4 w-4" /> Onboard Student
-        </button>
-      </div>
+      <PageHero
+        eyebrow="Admin Portal"
+        title="Students"
+        subtitle="Live band, streak and risk status for every student."
+        actions={
+          <HeroAction onClick={() => navigate("/institute-admin/studentOnboarding")}>
+            <UserPlus className="h-3.5 w-3.5" /> Onboard Student
+          </HeroAction>
+        }
+      />
 
       {error && <ErrorBanner message={error} onRetry={load} />}
 

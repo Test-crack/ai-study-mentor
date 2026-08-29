@@ -7,6 +7,13 @@ import type { IAOverviewRow } from './types';
 interface Props {
   rows:    IAOverviewRow[];
   batchId: string;
+  /**
+   * Where the row's "open student" action navigates. Defaults to the instructor
+   * route. The institute-owner portal renders this same table from the same
+   * shared handler but has its own progress route, so the path cannot be
+   * hardcoded here.
+   */
+  progressPathFor?: (userId: string) => string;
 }
 
 type SortKey = 'name' | 'ia_completed' | 'ia_missed' | 'avg_ia_band' | 'last_ia_date';
@@ -37,7 +44,7 @@ function SortIcon({ col, active, dir }: { col: SortKey; active: SortKey; dir: 'a
     : <ArrowDown className="h-3 w-3 text-brand-teal-500 ml-1 shrink-0" />;
 }
 
-export function IAOverviewTab({ rows, batchId }: Props) {
+export function IAOverviewTab({ rows, batchId, progressPathFor }: Props) {
   const navigate = useNavigate();
   const [search,  setSearch]  = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('ia_missed');
@@ -81,7 +88,10 @@ export function IAOverviewTab({ rows, batchId }: Props) {
   }, [rows, search, sortKey, sortDir]);
 
   const goToStudent = (row: IAOverviewRow) => {
-    navigate(`/instructor/batches/${batchId}/students/${row.user_id}/progress`, { state: { studentId: row.user_id } });
+    const path = progressPathFor
+      ? progressPathFor(row.user_id)
+      : `/instructor/batches/${batchId}/students/${row.user_id}/progress`;
+    navigate(path, { state: { studentId: row.user_id } });
   };
 
   const thClass = 'py-3 text-[10px] font-bold text-brand-text-mute uppercase tracking-wider whitespace-nowrap font-jetbrains';

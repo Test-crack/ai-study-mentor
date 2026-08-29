@@ -1,6 +1,6 @@
 // src/features/Institute/components/InstituteTopbar.tsx
 import { Search, Menu } from "lucide-react";
-import { AdminNotificationBell } from "./AdminNotificationBell";
+import { StaffNotificationBell } from "@/shared/components/notifications/StaffNotificationBell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { Button } from "@/shared/components/ui/button";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -58,7 +58,7 @@ export const InstituteTopbar = ({ onCreateCourse }: InstituteTopbarProps) => {
       {/* Right Actions */}
       <div className="flex items-center gap-2 sm:gap-3">
         {/* Notifications — real feed from user_notifications */}
-        <AdminNotificationBell />
+        <StaffNotificationBell scope="institute-admin" />
 
         {/* Divider */}
         <div className="h-7 w-px bg-brand-line" />

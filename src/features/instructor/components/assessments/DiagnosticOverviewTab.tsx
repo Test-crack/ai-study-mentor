@@ -3,19 +3,29 @@ import { useNavigate } from 'react-router-dom';
 import {
   Search, ExternalLink, AlertCircle,
   ArrowUpDown, ArrowUp, ArrowDown,
-  Users, TrendingUp, AlertTriangle, Clock, RotateCcw, X,
+  Users, TrendingUp, AlertTriangle, Clock,
 } from 'lucide-react';
 import { cn } from '@/shared/utils';
-import { callBackend } from '@/features/auth/services/authClient';
 import type { DiagnosticOverviewRow } from './types';
-
-const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
 
 interface Props {
   rows:     DiagnosticOverviewRow[];
   batchId:  string;
   refetch?: () => void;
+  /** See IAOverviewTab — defaults to the instructor route. */
+  progressPathFor?: (userId: string) => string;
 }
+
+// REMOVED: the per-row "Retake" control and its confirmation modal.
+//
+// It POSTed to `/api/instructor/batches/:batchId/students/:id/diagnostic/retake`,
+// a route that does not exist in the backend — every click 404'd. It was never a
+// working feature.
+//
+// Not reinstated for owner/admin either: they already reset a diagnostic from the
+// Diagnostic tab of the student progress page (`onRequestReset` →
+// POST /students/:id/diagnostic/reset), which is the one real implementation. A
+// second entry point here would only be a duplicate path to the same action.
 
 type SkillKey = 'L' | 'R' | 'W' | 'S';
 const SKILLS: { key: SkillKey; label: string }[] = [
@@ -123,58 +133,13 @@ function BandDistribution({ rows, skillFilter }: { rows: DiagnosticOverviewRow[]
   );
 }
 
-function RetakeConfirmModal({ studentName, onConfirm, onCancel, loading }: {
-  studentName: string;
-  onConfirm:   () => void;
-  onCancel:    () => void;
-  loading:     boolean;
-}) {
-  return (
-    <div className="fixed inset-0 z-[200] bg-black/40 flex items-center justify-center p-4" onClick={onCancel}>
-      <div
-        className="bg-white rounded-2xl border border-brand-line shadow-xl max-w-sm w-full p-6"
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="flex items-start justify-between mb-3">
-          <h3 className="text-base font-black text-brand-text">Retake Diagnostic?</h3>
-          <button onClick={onCancel} className="text-brand-text-mute hover:text-brand-text">
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-        <p className="text-sm text-brand-text-mute mb-5">
-          This clears <strong className="text-brand-text">{studentName}</strong>'s current diagnostic baseline and lets them take it again. This can't be undone.
-        </p>
-        <div className="flex items-center justify-end gap-2">
-          <button
-            onClick={onCancel}
-            disabled={loading}
-            className="px-4 py-2 rounded-xl text-sm font-semibold text-brand-text hover:bg-brand-bg-alt transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            disabled={loading}
-            className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 disabled:opacity-60 transition-colors"
-          >
-            {loading ? 'Requesting…' : 'Confirm Retake'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function DiagnosticOverviewTab({ rows, batchId, refetch }: Props) {
+export function DiagnosticOverviewTab({ rows, batchId, refetch, progressPathFor }: Props) {
   const navigate = useNavigate();
   const [search,        setSearch]        = useState('');
   const [sortKey,       setSortKey]       = useState<SortKey>('status');
   const [sortDir,       setSortDir]       = useState<'asc' | 'desc'>('asc');
   const [atRiskOnly,    setAtRiskOnly]    = useState(false);
   const [skillFilter,   setSkillFilter]   = useState<SkillFilter>('overall');
-  const [retakeTarget,  setRetakeTarget]  = useState<DiagnosticOverviewRow | null>(null);
-  const [retakeLoading, setRetakeLoading] = useState(false);
-  const [retakeError,   setRetakeError]   = useState<string | null>(null);
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -224,34 +189,12 @@ export function DiagnosticOverviewTab({ rows, batchId, refetch }: Props) {
   }, [enriched, search, sortKey, sortDir]);
 
   const goToStudent = (row: DiagnosticOverviewRow) => {
-    navigate(`/instructor/batches/${batchId}/students/${row.user_id}/progress`, {
-      state: { studentId: row.user_id, initialTab: 'diagnostic' },
-    });
+    const path = progressPathFor
+      ? progressPathFor(row.user_id)
+      : `/instructor/batches/${batchId}/students/${row.user_id}/progress`;
+    navigate(path, { state: { studentId: row.user_id, initialTab: 'diagnostic' } });
   };
 
-  // Calls Shalom's retake endpoint (S-D3). Contract unconfirmed as of writing —
-  // check with him before relying on this actually resetting the baseline server-side.
-  const handleRetakeConfirm = async () => {
-    if (!retakeTarget) return;
-    setRetakeLoading(true);
-    setRetakeError(null);
-    try {
-      const res = await callBackend(
-        `${BACKEND}/api/instructor/batches/${batchId}/students/${retakeTarget.user_id}/diagnostic/retake`,
-        { method: 'POST' }
-      );
-      if (res?.success) {
-        setRetakeTarget(null);
-        refetch?.();
-      } else {
-        setRetakeError(res?.error ?? 'Failed to request retake.');
-      }
-    } catch (e: any) {
-      setRetakeError(e?.message ?? 'Network error.');
-    } finally {
-      setRetakeLoading(false);
-    }
-  };
 
   const thClass = 'py-3 text-[10px] font-bold text-brand-text-mute uppercase tracking-wider whitespace-nowrap font-jetbrains';
   const sortTh = (label: string, key: SortKey, cls?: string) => (
@@ -373,13 +316,6 @@ export function DiagnosticOverviewTab({ rows, batchId, refetch }: Props) {
         </div>
       </div>
 
-      {retakeError && (
-        <div className="flex items-center justify-between gap-2 text-xs text-rose-700 font-semibold bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-xl">
-          <span>{retakeError}</span>
-          <button onClick={() => setRetakeError(null)} className="underline hover:no-underline">Dismiss</button>
-        </div>
-      )}
-
       {/* Table */}
       <div className="bg-white rounded-2xl border border-brand-line shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
@@ -451,16 +387,6 @@ export function DiagnosticOverviewTab({ rows, batchId, refetch }: Props) {
                     </td>
                     <td className="py-3 pr-5 text-right">
                       <div className="flex items-center justify-end gap-3">
-                        {row.is_diagnosed && (
-                          <button
-                            onClick={() => setRetakeTarget(row)}
-                            className="inline-flex items-center gap-1 text-xs font-bold text-brand-text-mute hover:text-rose-600 transition-colors"
-                            title="Request a diagnostic retake"
-                          >
-                            <RotateCcw className="h-3.5 w-3.5" />
-                            Retake
-                          </button>
-                        )}
                         <button
                           onClick={() => goToStudent(row)}
                           disabled={!row.is_diagnosed}
@@ -484,14 +410,6 @@ export function DiagnosticOverviewTab({ rows, batchId, refetch }: Props) {
         </div>
       </div>
 
-      {retakeTarget && (
-        <RetakeConfirmModal
-          studentName={retakeTarget.name}
-          loading={retakeLoading}
-          onConfirm={handleRetakeConfirm}
-          onCancel={() => { if (!retakeLoading) { setRetakeTarget(null); setRetakeError(null); } }}
-        />
-      )}
     </div>
   );
 }

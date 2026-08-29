@@ -47,6 +47,96 @@ const SKILL_LABELS: Record<string, string> = {
   Speaking: 'S',
 };
 
+
+// ─── Diagnostic report helpers ────────────────────────────────────────────────
+// Skill keys arrive UPPERCASE from the diagnostic endpoint (see SKILL_ORDER in
+// DiagnosticTab). All matching here is case-insensitive — the previous version
+// of this section compared against title-case literals, so every lookup missed
+// and the whole block rendered four dashes.
+
+const DIAG_SKILLS = ['LISTENING', 'READING', 'WRITING', 'SPEAKING'] as const;
+
+const titleCase = (s: string) => s.charAt(0) + s.slice(1).toLowerCase();
+
+const fmtDiagDate = (iso: string) => {
+  const d = new Date(iso);
+  return isNaN(d.getTime())
+    ? '—'
+    : d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+};
+
+/** One row of a sub-score, print-safe (no animated bars). */
+function SubScoreRow({ label, value }: { label: string; value?: number }) {
+  if (value === undefined || value === null) return null;
+  return (
+    <div className="flex items-center justify-between text-[11px] leading-5">
+      <span className="text-brand-text-mute">{label}</span>
+      <span className="font-bold text-brand-text">{value.toFixed(1)}</span>
+    </div>
+  );
+}
+
+/** Renders whichever sub_scores shape this skill carries. */
+function DiagSubScores({ skill, ss }: { skill: string; ss: any }) {
+  if (!ss) return <p className="text-[11px] text-brand-text-mute">Score details unavailable.</p>;
+
+  if (skill === 'LISTENING' || skill === 'READING') {
+    const qt = ss.by_question_type && Object.entries(ss.by_question_type);
+    return (
+      <div className="space-y-1">
+        {ss.correct_answers !== undefined && (
+          <div className="flex items-center justify-between text-[11px] leading-5">
+            <span className="text-brand-text-mute">Accuracy</span>
+            <span className="font-bold text-brand-text">
+              {ss.correct_answers}/{ss.total_questions}
+              {ss.accuracy_percentage !== undefined && (
+                <span className="ml-1 font-normal text-brand-text-mute">({ss.accuracy_percentage}%)</span>
+              )}
+            </span>
+          </div>
+        )}
+        {qt && qt.length > 0 && (
+          <div className="pt-1 mt-1 border-t border-slate-200 space-y-0.5">
+            <p className="text-[9px] font-black uppercase tracking-wider text-brand-text-mute">By question type</p>
+            {qt.map(([type, val]: [string, any]) => (
+              <div key={type} className="flex items-center justify-between text-[11px] leading-5">
+                <span className="text-brand-text-mute capitalize">{type.replace(/_/g, ' ')}</span>
+                <span className="font-semibold text-brand-text">{val.correct}/{val.total}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (skill === 'WRITING') {
+    return (
+      <div className="space-y-1">
+        {ss.word_count !== undefined && (
+          <div className="flex items-center justify-between text-[11px] leading-5">
+            <span className="text-brand-text-mute">Word count</span>
+            <span className="font-bold text-brand-text">{ss.word_count}</span>
+          </div>
+        )}
+        <SubScoreRow label="Task Response" value={ss.taskResponseScore} />
+        <SubScoreRow label="Coherence"     value={ss.coherenceScore} />
+        <SubScoreRow label="Grammar"       value={ss.grammarScore} />
+        <SubScoreRow label="Vocabulary"    value={ss.vocabularyScore} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-1">
+      <SubScoreRow label="Fluency"       value={ss.fluencyScore} />
+      <SubScoreRow label="Vocabulary"    value={ss.vocabularyScore} />
+      <SubScoreRow label="Grammar"       value={ss.grammarScore} />
+      <SubScoreRow label="Pronunciation" value={ss.pronunciationScore} />
+    </div>
+  );
+}
+
 export function StudentReportTemplate({ data, batchName, instituteName, instructorName, generatedAt, reportId, onClose }: Props) {
   useEffect(() => {
     const style = document.createElement('style');
@@ -96,7 +186,7 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
   return createPortal(
     <div
       id="tc-student-report"
-      className="fixed inset-0 z-[200] bg-gray-100 overflow-y-auto"
+      className="fixed inset-0 z-[200] bg-gray-100 overflow-auto print:overflow-visible"
     >
       {/* Toolbar — hidden on print */}
       <div className="print:hidden sticky top-0 z-10 bg-white border-b border-brand-line shadow-sm px-6 py-3 flex items-center justify-between">
@@ -380,27 +470,159 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
           </div>
         </div>
 
-        {/* Diagnostic Baseline */}
-        {diagnostic_results.length > 0 && (
-          <div className="mb-10">
-            <h2 className="text-xs font-black uppercase tracking-widest text-brand-text-mute mb-3">Diagnostic Baseline</h2>
-            <div className="grid grid-cols-4 gap-4">
-              {(['Listening', 'Reading', 'Writing', 'Speaking'] as const).map(skill => {
-                const result = diagnostic_results.find(r => r.skill === skill);
-                const short = SKILL_LABELS[skill] ?? skill[0];
-                return (
-                  <div key={skill} className="bg-white border border-brand-line rounded-xl p-4 text-center">
-                    <div className="text-xs font-black uppercase tracking-wider text-brand-text-mute mb-2">{short}</div>
-                    <div className={`text-2xl font-black ${bandColor(result?.band_score ?? null)}`}>
-                      {result?.band_score ?? '—'}
-                    </div>
-                    <div className="text-xs text-brand-text-mute mt-0.5">{skill}</div>
+        {/* ── Diagnostic Baseline ──────────────────────────────────────────
+            The diagnostic is the line every later band is measured from, so the
+            report now carries the same detail the instructor sees on the
+            Diagnostic tab: per-skill band, when it was sat, the score breakdown
+            and the movement since.
+
+            Previously this rendered four band numbers — and in practice four
+            dashes, because the lookup compared UPPERCASE skill keys against
+            title-case literals and never matched. */}
+        {diagnostic_results.length > 0 && (() => {
+          // Oldest result per skill, case-insensitive — the baseline.
+          // studentProgressQueries already sends one entry per skill (ordered
+          // created_at asc, first-seen wins), so this is normally a no-op; it
+          // keeps the *baseline* semantics if that ever sends more than one.
+          const bySkill = new Map<string, typeof diagnostic_results[number]>();
+          for (const r of diagnostic_results) {
+            const key = r.skill.toUpperCase();
+            const prev = bySkill.get(key);
+            if (!prev || new Date(r.created_at) < new Date(prev.created_at)) bySkill.set(key, r);
+          }
+          const scored = DIAG_SKILLS.map(k => bySkill.get(k)).filter(Boolean) as typeof diagnostic_results;
+          const avgBaseline = scored.length
+            ? scored.reduce((a, r) => a + r.band_score, 0) / scored.length
+            : null;
+          // The diagnostic can be sat per skill, so report the most recent sitting.
+          const completedAt = scored.length
+            ? scored.reduce(
+                (latest, r) => (new Date(r.created_at) > new Date(latest) ? r.created_at : latest),
+                scored[0].created_at
+              )
+            : null;
+          const currentBySkill = new Map(competency.map(c => [c.skill.toUpperCase(), c.band_score]));
+
+          return (
+            <div className="mb-10">
+              <h2 className="text-xs font-black uppercase tracking-widest text-brand-text-mute mb-3">
+                Diagnostic Baseline
+              </h2>
+
+              {/* Summary strip — mirrors the tiles on the Diagnostic tab. */}
+              <div className="grid grid-cols-3 gap-4 mb-5">
+                <div className="bg-white border border-brand-line rounded-xl p-3 text-center">
+                  <div className="text-[9px] font-black uppercase tracking-wider text-brand-text-mute mb-1">Skills diagnosed</div>
+                  <div className="text-xl font-black text-brand-text">{scored.length} / {DIAG_SKILLS.length}</div>
+                </div>
+                <div className="bg-white border border-brand-line rounded-xl p-3 text-center">
+                  <div className="text-[9px] font-black uppercase tracking-wider text-brand-text-mute mb-1">Avg baseline band</div>
+                  <div className={`text-xl font-black ${bandColor(avgBaseline)}`}>
+                    {avgBaseline === null ? '—' : avgBaseline.toFixed(1)}
                   </div>
-                );
-              })}
+                </div>
+                <div className="bg-white border border-brand-line rounded-xl p-3 text-center">
+                  <div className="text-[9px] font-black uppercase tracking-wider text-brand-text-mute mb-1">Completed</div>
+                  <div className="text-sm font-black text-brand-text pt-1">
+                    {completedAt ? fmtDiagDate(completedAt) : '—'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Baseline vs current — the growth story, which is the reason a
+                  baseline belongs in a report at all. Change = current minus
+                  baseline, the same definition the instructor BaselineComparison
+                  uses on the Overview tab. */}
+              <table className="w-full border-collapse mb-5">
+                <thead>
+                  <tr className="text-[9px] font-black uppercase tracking-wider text-brand-text-mute border-b border-brand-line">
+                    <th className="text-left py-1.5">Skill</th>
+                    <th className="text-right py-1.5">Baseline</th>
+                    <th className="text-right py-1.5">Current</th>
+                    <th className="text-right py-1.5">Change</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {DIAG_SKILLS.map(key => {
+                    const r = bySkill.get(key);
+                    const base = r?.band_score ?? null;
+                    const cur = currentBySkill.get(key) ?? null;
+                    const delta =
+                      base !== null && cur !== null ? Math.round((cur - base) * 10) / 10 : null;
+                    return (
+                      <tr key={key} className="border-b border-slate-100">
+                        <td className="py-1.5 text-[11px] font-semibold text-brand-text">
+                          {SKILL_LABELS[titleCase(key)] ?? key[0]} — {titleCase(key)}
+                        </td>
+                        <td className={`py-1.5 text-right text-[11px] font-bold ${bandColor(base)}`}>
+                          {base ?? '—'}
+                        </td>
+                        <td className={`py-1.5 text-right text-[11px] font-bold ${bandColor(cur)}`}>
+                          {cur ?? '—'}
+                        </td>
+                        <td className="py-1.5 text-right text-[11px] font-bold">
+                          {/* A missing baseline or current band means unmeasured,
+                              which is not the same fact as zero change. */}
+                          {delta === null ? (
+                            <span className="text-brand-text-mute">—</span>
+                          ) : delta === 0 ? (
+                            <span className="text-brand-text-mute">0.0</span>
+                          ) : (
+                            <span className={delta > 0 ? 'text-emerald-700' : 'text-rose-700'}>
+                              {delta > 0 ? '+' : ''}{delta.toFixed(1)}
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+
+              {/* Per-skill breakdown — the detail that was only on screen before. */}
+              <div className="grid grid-cols-2 gap-4">
+                {DIAG_SKILLS.map(key => {
+                  const r = bySkill.get(key);
+                  if (!r) return null;
+                  const fb = r.feedback_json;
+                  return (
+                    <div
+                      key={key}
+                      className="bg-white border border-brand-line rounded-xl p-3 print:break-inside-avoid"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <div className="text-[10px] font-black uppercase tracking-wider text-brand-text">
+                            {titleCase(key)}
+                          </div>
+                          <div className="text-[9px] text-brand-text-mute">{fmtDiagDate(r.created_at)}</div>
+                        </div>
+                        <div className={`text-lg font-black ${bandColor(r.band_score)}`}>
+                          {r.band_score.toFixed(1)}
+                        </div>
+                      </div>
+                      <DiagSubScores skill={key} ss={r.sub_scores} />
+                      {fb?.rationale && (
+                        <p className="mt-2 pt-2 border-t border-slate-200 text-[10px] leading-4 text-brand-text-mute">
+                          {fb.rationale}
+                        </p>
+                      )}
+                      {fb?.key_observations && fb.key_observations.length > 0 && (
+                        <ul className="mt-1.5 space-y-0.5">
+                          {fb.key_observations.slice(0, 3).map((o, i) => (
+                            <li key={i} className="text-[10px] leading-4 text-brand-text-mute pl-2 relative">
+                              <span className="absolute left-0">·</span>{o}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Certificate of Progress */}
         {current_band !== null && (

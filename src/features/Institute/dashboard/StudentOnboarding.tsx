@@ -132,7 +132,7 @@ function AddStudentModal({ onClose, onAdded }: { onClose: () => void; onAdded: (
               <UserCheck className="w-5 h-5 text-brand-teal-600" />
             </div>
             <div>
-              <h2 className="font-bold text-brand-text text-base">Enroll New Student</h2>
+              <h2 className="font-manrope font-bold text-brand-text text-base">Enroll New Student</h2>
               <p className="text-xs text-brand-text-mute mt-0.5">Student will receive an email invite to set their password</p>
             </div>
           </div>
@@ -205,7 +205,7 @@ function ConfirmRemoveDialog({ student, onConfirm, onCancel, loading }: {
             <Trash2 className="w-5 h-5 text-rose-600" />
           </div>
           <div>
-            <h3 className="font-bold text-brand-text">Remove Student?</h3>
+            <h3 className="font-manrope font-bold text-brand-text">Remove Student?</h3>
             <p className="text-xs text-brand-text-mute mt-0.5">{student.name ?? student.email}</p>
           </div>
         </div>

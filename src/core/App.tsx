@@ -68,15 +68,13 @@ const InstituteSettings = lazy(() => import("@/features/Institute/dashboard/Inst
 const SuperAdminDashboard = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/SuperAdminDashboard"));
 const SuperAdminInstitutes = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/SuperAdminInstitutes"));
 const Subscription = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/Subscription"));
-const PricingConfig = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/PricingConfig"));
-const SupportTicket = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/SupportTicket"));
-const PlatformAnalytics = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/PlatformAnalytics"));
 const AllUsers = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/AllUsers"));
 const InstituteOwnerDashboard = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteOwnerDashboard"));
 const Performance = lazy(() => import("@/features/InstituteOwner/dashboard/Performance"));
 const BatchInsight = lazy(() => import("@/features/InstituteOwner/dashboard/BatchInsight"));
 const InstituteAdmins = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteAdmins"));
 const InstituteStudentsPage = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteStudentsPage"));
+const InstituteAssessments = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteAssessments"));
 const InstituteInstructorsPage = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteInstructorsPage"));
 const InstituteBatchDetailPage = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteBatchDetailPage"));
 const InstituteOwnerStudentProgressPage = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteOwnerStudentProgressPage"));
@@ -300,6 +298,7 @@ const AppRoutes = () => {
         <Route path="/institute-owner/insight"      element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><BatchInsight /></RoleProtectedRoute>} />
         <Route path="/institute-owner/students"     element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteStudentsPage /></RoleProtectedRoute>} />
         <Route path="/institute-owner/instructors"  element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteInstructorsPage /></RoleProtectedRoute>} />
+        <Route path="/institute-owner/assessments"  element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteAssessments /></RoleProtectedRoute>} />
         <Route path="/institute-owner/performance"  element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><Performance /></RoleProtectedRoute>} />
         <Route path="/institute-owner/admins"       element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteAdmins /></RoleProtectedRoute>} />
         <Route path="/institute-owner/roi"          element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><RoiAnalyticsPage /></RoleProtectedRoute>} />
@@ -323,9 +322,6 @@ const AppRoutes = () => {
       <Route path="/superadmin/dashboard" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SuperAdminDashboard /></RoleProtectedRoute>} />
       <Route path="/superadmin/institutes" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SuperAdminInstitutes /></RoleProtectedRoute>} />
       <Route path="/superadmin/subscription" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><Subscription /></RoleProtectedRoute>} />
-      <Route path="/superadmin/priceconfig" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><PricingConfig /></RoleProtectedRoute>} />
-      <Route path="/superadmin/supportickets" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SupportTicket /></RoleProtectedRoute>} />
-      <Route path="/superadmin/platform" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><PlatformAnalytics /></RoleProtectedRoute>} />
       <Route path="/superadmin/allusers" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><AllUsers /></RoleProtectedRoute>} />
 
       <Route path="/login" element={user ? <LoginRedirect /> : <LoginPage />} />

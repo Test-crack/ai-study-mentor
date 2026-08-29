@@ -130,7 +130,7 @@ export function BatchReportTemplate({ data, onClose }: Props) {
   return createPortal(
     <div
       id="tc-batch-report"
-      className="fixed inset-0 z-[200] bg-gray-100 overflow-y-auto"
+      className="fixed inset-0 z-[200] bg-gray-100 overflow-auto print:overflow-visible"
     >
       {/* Toolbar — hidden on print */}
       <div className="print:hidden sticky top-0 z-10 bg-white border-b border-brand-line shadow-sm px-6 py-3 flex items-center justify-between">

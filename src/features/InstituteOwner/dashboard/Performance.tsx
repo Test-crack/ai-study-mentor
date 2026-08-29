@@ -14,14 +14,15 @@ import { InstituteOwnerTopbar } from '../components/InstituteOwnerTopbar';
 import { useToast } from '@/shared/hooks/use-toast';
 import {
   fetchBatchComparison, fetchEngagementTrends, fetchGoalAchievement,
-  fetchCohortProgress, fetchSubskillHeatmap,
+  fetchCohortProgress, fetchSubskillHeatmap, fetchInstructorEffectiveness,
   type BatchComparisonRow, type EngagementWeek, type GoalAchievementData,
-  type CohortProgressData, type SubskillHeatmapRow,
+  type CohortProgressData, type SubskillHeatmapRow, type InstructorEffectivenessRow,
 } from '../services/instituteOwnerService';
+import { InstructorEffectivenessTable } from '@/shared/components/analytics/InstructorEffectivenessTable';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-type Tab = 'overview' | 'batches' | 'engagement' | 'goals' | 'heatmap';
+type Tab = 'overview' | 'batches' | 'engagement' | 'goals' | 'heatmap' | 'instructors';
 
 const TABS: { key: Tab; label: string }[] = [
   { key: 'overview',    label: 'Cohort Progress' },
@@ -29,6 +30,10 @@ const TABS: { key: Tab; label: string }[] = [
   { key: 'engagement',  label: 'Engagement Trends' },
   { key: 'goals',       label: 'Goal Achievement' },
   { key: 'heatmap',     label: 'Subskill Heatmap' },
+  // The owner is the role that governs tutor performance, yet this was the one
+  // analytics endpoint with no owner UI — /analytics/instructor-effectiveness
+  // has been authorised for this role all along.
+  { key: 'instructors', label: 'Instructor Effectiveness' },
 ];
 
 // Chart palette — literal hex values of the brand tokens (chart libs need hex)
@@ -322,27 +327,43 @@ export default function Performance() {
   const [weeks, setWeeks]           = useState<EngagementWeek[]>([]);
   const [goals, setGoals]           = useState<GoalAchievementData | null>(null);
   const [heatmap, setHeatmap]       = useState<SubskillHeatmapRow[]>([]);
+  const [instructors, setInstructors] = useState<InstructorEffectivenessRow[]>([]);
 
   const loadAll = useCallback(async () => {
     setLoading(true);
-    try {
-      const [cohortRes, batchRes, engRes, goalRes, heatRes] = await Promise.all([
-        fetchCohortProgress(),
-        fetchBatchComparison(),
-        fetchEngagementTrends(),
-        fetchGoalAchievement(),
-        fetchSubskillHeatmap(),
-      ]);
-      setCohort(cohortRes.data);
-      setBatches(batchRes.data ?? []);
-      setWeeks(engRes.data ?? []);
-      setGoals(goalRes.data);
-      setHeatmap(heatRes.data ?? []);
-    } catch (err: any) {
-      toast({ title: 'Failed to load analytics', description: err.message, variant: 'destructive' });
-    } finally {
-      setLoading(false);
+
+    // allSettled, not all: these are six independent panels. Promise.all rejects
+    // on the first failure and skips every setState, so one flaky endpoint
+    // blanked the entire page. Same fix the admin Reports page already carries.
+    const results = await Promise.allSettled([
+      fetchCohortProgress(),
+      fetchBatchComparison(),
+      fetchEngagementTrends(),
+      fetchGoalAchievement(),
+      fetchSubskillHeatmap(),
+      fetchInstructorEffectiveness(),
+    ]);
+
+    const dataAt = (i: number): any =>
+      results[i].status === 'fulfilled' ? (results[i] as PromiseFulfilledResult<any>).value?.data ?? null : null;
+
+    setCohort(dataAt(0));
+    setBatches(dataAt(1) ?? []);
+    setWeeks(dataAt(2) ?? []);
+    setGoals(dataAt(3));
+    setHeatmap(dataAt(4) ?? []);
+    setInstructors(dataAt(5) ?? []);
+
+    const failedCount = results.filter(r => r.status === 'rejected').length;
+    if (failedCount > 0) {
+      toast({
+        title: `${failedCount} of ${results.length} reports failed to load`,
+        description: 'The panels that did load are showing live data. Use Refresh to retry.',
+        variant: 'destructive',
+      });
     }
+
+    setLoading(false);
   }, [toast]);
 
   useEffect(() => { loadAll(); }, [loadAll]);
@@ -417,6 +438,18 @@ export default function Performance() {
                   {activeTab === 'engagement' && <EngagementPanel weeks={weeks} />}
                   {activeTab === 'goals'      && <GoalsPanel data={goals} />}
                   {activeTab === 'heatmap'    && <HeatmapPanel rows={heatmap} />}
+                  {activeTab === 'instructors' && (
+                    instructors.length === 0
+                      ? <div className="bg-white border border-brand-line rounded-2xl p-8 text-center">
+                          <p className="text-sm font-semibold text-brand-text">No instructor data yet</p>
+                          <p className="text-xs text-brand-text-mute mt-1">
+                            Appears once tutors are assigned batches and their students complete assessments.
+                          </p>
+                        </div>
+                      : <div className="bg-white border border-brand-line rounded-2xl p-5">
+                          <InstructorEffectivenessTable rows={instructors} />
+                        </div>
+                  )}
                 </>
               )}
             </div>

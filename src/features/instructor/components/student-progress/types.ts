@@ -81,6 +81,19 @@ export interface StreakDay {
   active: boolean;
 }
 
+/**
+ * A student's own written reflection from the drill "apply" step.
+ * Newest first, capped at 10 by the server.
+ */
+export interface DrillReflection {
+  id:                 string;
+  skill:              string;
+  sub_skill:          string;
+  reflection_text:    string;
+  created_at:         string;
+  apply_completed_at: string | null;
+}
+
 // sub_scores shape varies by skill — typed loosely, components narrow as needed
 export interface DiagnosticSubScoresLR {
   total_questions:    number;
@@ -131,6 +144,8 @@ export interface StudentFullProgress {
   };
   competency:     CompetencyRow[];
   target_band:    number | null;
+  /** "YYYY-MM-DD" — the student's own declared exam date, null if they haven't set one. */
+  exam_date:      string | null;
   current_band:   number | null;
   momentum_score: number;
   daily_streak:   number;
@@ -150,6 +165,7 @@ export interface StudentFullProgress {
     avg_words_solved: number;
     bonus_rate:       number;
   };
+  recent_reflections: DrillReflection[];
   ia_eligibility: {
     prerequisites_met: boolean;
     avg_dcs:           number;

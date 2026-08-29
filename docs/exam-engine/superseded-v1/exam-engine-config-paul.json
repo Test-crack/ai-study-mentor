@@ -1,0 +1,267 @@
+{
+  "engine_version": "1.0.0",
+  "_note": "Single source of truth. No exam name, legal text, skill, or scoring rule is ever hand-typed in the UI or backend code. Everything reads from here. Adding a new exam = a new object under 'exams' + (only if its scoring differs) a new strategy in exam-engine-spec.md. See that spec for the scoring algorithms referenced by 'scoring.strategy'.",
+
+  "exams": {
+
+    "ielts": {
+      "exam_id": "ielts",
+      "config_version": "1.0.0",
+      "status": "live",
+
+      "naming": {
+        "public_display_name": "IELTS Preparation",
+        "legal_display_name": "IELTS Preparation",
+        "short_code": "IELTS"
+      },
+
+      "legal": {
+        "jurisdictions": ["IN", "US"],
+        "trademark_owner": "British Council, IDP: IELTS Australia, and Cambridge University Press & Assessment",
+        "disclaimer_short": "IELTS Preparation provides practice materials only and is not affiliated with, endorsed by, or connected to the owners of the IELTS trademark. IELTS is a registered trademark of its respective owners.",
+        "disclaimer_full": "IELTS Preparation provides practice and preparation materials only. It is not affiliated with, endorsed by, or connected to the owners of the IELTS trademark (British Council, IDP: IELTS Australia, and Cambridge University Press & Assessment). IELTS is a registered trademark of its respective owners. Scores shown are practice estimates and are not official IELTS results.",
+        "display_rules": {
+          "show_full_at_onboarding": true,
+          "show_short_in_footer": true
+        },
+        "_status": "DRAFT_FOR_COUNSEL — wording approved by founder, pending lawyer ratification. Editable here without a code change."
+      },
+
+      "skills": [
+        {
+          "id": "listening",
+          "label": "Listening",
+          "scored_subskills": [],
+          "item_tags": ["multiple_choice", "matching", "plan_map_diagram_labelling", "form_note_table_completion", "sentence_completion", "short_answer"]
+        },
+        {
+          "id": "reading",
+          "label": "Reading",
+          "scored_subskills": [],
+          "item_tags": ["multiple_choice", "identifying_information", "matching_headings", "matching_features", "sentence_completion", "summary_completion", "short_answer"]
+        },
+        {
+          "id": "writing",
+          "label": "Writing",
+          "speaking_mode": null,
+          "scored_subskills": [
+            { "id": "task_response", "label": "Task Response / Achievement" },
+            { "id": "coherence_cohesion", "label": "Coherence & Cohesion" },
+            { "id": "lexical_resource", "label": "Lexical Resource" },
+            { "id": "grammatical_range_accuracy", "label": "Grammatical Range & Accuracy" }
+          ]
+        },
+        {
+          "id": "speaking",
+          "label": "Speaking",
+          "speaking_mode": "ielts_speaking",
+          "scored_subskills": [
+            { "id": "fluency_coherence", "label": "Fluency & Coherence" },
+            { "id": "lexical_resource", "label": "Lexical Resource" },
+            { "id": "grammatical_range_accuracy", "label": "Grammatical Range & Accuracy" },
+            { "id": "pronunciation", "label": "Pronunciation" }
+          ]
+        }
+      ],
+
+      "scoring": {
+        "strategy": "band_mean",
+        "params": {
+          "scale_min": 0.0,
+          "scale_max": 9.0,
+          "report_floor": 4.0,
+          "step": 0.5,
+          "rounding": "half_up_to_nearest_step",
+          "overall_formula": "mean_of_skills",
+          "skills_in_overall": ["listening", "reading", "writing", "speaking"]
+        }
+      },
+
+      "target": {
+        "enabled": true,
+        "type": "band",
+        "min": 4.0,
+        "max": 9.0,
+        "step": 0.5
+      },
+
+      "progression": {
+        "enabled": true,
+        "baseline": {
+          "source": "diagnostic",
+          "style": "challenge",
+          "zero_based": true,
+          "disclose_as": "Challenge Baseline",
+          "note_to_student": "Your diagnostic is intentionally tough — it's your starting benchmark, not your ceiling. Everything from here is real, earned improvement."
+        },
+        "display": {
+          "mode": "personal_best_relative",
+          "never_inflate_assessed_score": true,
+          "show_next_rung": true,
+          "show_trajectory": true,
+          "show_improvement_since_baseline": true,
+          "trend_window_sessions": 3
+        },
+        "_note": "Rungs are derived from this exam's own scale (report_floor 4.0 → 9.0, step 0.5). See exam-engine-spec.md §7. The 'placebo' is honest framing (hard baseline + personal-best-relative progress + trajectory), never inflating the assessed band."
+      },
+
+      "modules": {
+        "diagnostic":          { "enabled": true },
+        "daily_drills":        { "enabled": true },
+        "lexigrid":            { "enabled": true },
+        "internal_assessment": { "enabled": true, "speaking_mode": "ielts_speaking" },
+        "full_mock":           { "enabled": true, "speaking_mode": "ielts_speaking" }
+      },
+
+      "viva": { "enabled": false },
+
+      "rules": {
+        "practice_attempts": "unlimited",
+        "graded_attempts_per_cycle": null,
+        "time_limits_minutes": { "listening": 30, "reading": 60, "writing": 60, "speaking": 14 },
+        "retakes": "TBD_FOUNDER",
+        "minimum_attempts": "TBD_FOUNDER"
+      }
+    },
+
+    "spoken_english": {
+      "exam_id": "spoken_english",
+      "config_version": "1.0.0",
+      "status": "live",
+
+      "naming": {
+        "public_display_name": "Spoken English (CEFR-aligned)",
+        "legal_display_name": "Spoken English (CEFR-aligned)",
+        "short_code": "SPK-EN"
+      },
+
+      "legal": {
+        "jurisdictions": ["IN", "US"],
+        "trademark_owner": "Council of Europe (CEFR framework author)",
+        "disclaimer_short": "CEFR level results shown are estimates aligned to the framework and are not official CEFR certifications.",
+        "disclaimer_full": "This Spoken English assessment is aligned to the Common European Framework of Reference for Languages (CEFR). It is not affiliated with, endorsed by, or connected to the Council of Europe. CEFR level results shown are estimates aligned to the framework and are not official CEFR certifications.",
+        "display_rules": {
+          "show_full_at_onboarding": true,
+          "show_short_in_footer": true
+        },
+        "_status": "DRAFT_FOR_COUNSEL — wording approved by founder, pending lawyer ratification. Editable here without a code change."
+      },
+
+      "skills": [
+        {
+          "id": "listening",
+          "label": "Listening",
+          "surface_only": true,
+          "scored_subskills": [],
+          "item_tags": ["comprehension", "gist", "detail", "inference"]
+        },
+        {
+          "id": "reading",
+          "label": "Reading",
+          "surface_only": true,
+          "scored_subskills": [],
+          "item_tags": ["comprehension", "gist", "detail", "inference"]
+        },
+        {
+          "id": "writing",
+          "label": "Writing",
+          "surface_only": true,
+          "scored_subskills": []
+        },
+        {
+          "id": "speaking",
+          "label": "Speaking",
+          "surface_only": false,
+          "speaking_mode": "viva",
+          "scored_subskills": [
+            { "id": "range",       "label": "Range" },
+            { "id": "accuracy",    "label": "Accuracy" },
+            { "id": "fluency",     "label": "Fluency" },
+            { "id": "interaction", "label": "Interaction" },
+            { "id": "coherence",   "label": "Coherence" },
+            { "id": "phonology",   "label": "Phonological Control (Pronunciation)" }
+          ]
+        }
+      ],
+
+      "scoring": {
+        "strategy": "cefr_hybrid",
+        "params": {
+          "score_input": "percent_0_100",
+          "levels": ["below_a1", "a1", "a2", "b1", "b2", "c1", "c2"],
+          "level_labels": {
+            "below_a1": "Below A1",
+            "a1": "A1", "a2": "A2", "b1": "B1", "b2": "B2", "c1": "C1", "c2": "C2"
+          },
+          "subskills": ["range", "accuracy", "fluency", "interaction", "coherence", "phonology"],
+          "level_thresholds_min_pct": {
+            "below_a1": 0,
+            "a1": 14,
+            "a2": 24,
+            "b1": 41,
+            "b2": 59,
+            "c1": 79,
+            "c2": 93
+          },
+          "overall_rule": "average_then_map",
+          "skills_in_overall": ["speaking"],
+          "show_per_subskill_profile": true,
+          "within_band_progress": true,
+          "_threshold_provenance": "GSE-anchored (Pearson Global Scale of English 10–90) converted to 0–100%. Placeholder pending calibration against ~30 examiner-rated sample vivas."
+        }
+      },
+
+      "target": {
+        "enabled": true,
+        "type": "cefr_level",
+        "allowed_levels": ["a1", "a2", "b1", "b2", "c1", "c2"]
+      },
+
+      "progression": {
+        "enabled": true,
+        "baseline": {
+          "source": "diagnostic",
+          "style": "challenge",
+          "zero_based": true,
+          "disclose_as": "Challenge Baseline",
+          "note_to_student": "Your diagnostic is intentionally tough — it's your starting benchmark, not your ceiling. Everything from here is real, earned improvement."
+        },
+        "display": {
+          "mode": "personal_best_relative",
+          "never_inflate_assessed_score": true,
+          "show_next_rung": true,
+          "show_trajectory": true,
+          "show_improvement_since_baseline": true,
+          "trend_window_sessions": 3
+        },
+        "_note": "Rungs are derived from this exam's CEFR ladder (below_a1 → c2) and the within-band % math already used for scoring. See exam-engine-spec.md §7."
+      },
+
+      "modules": {
+        "diagnostic":          { "enabled": true },
+        "daily_drills":        { "enabled": true },
+        "lexigrid":            { "enabled": true },
+        "internal_assessment": { "enabled": true, "speaking_mode": "viva" },
+        "full_mock":           { "enabled": true, "speaking_mode": "viva" }
+      },
+
+      "viva": {
+        "enabled": true,
+        "max_questions": 10,
+        "min_questions": 5,
+        "question_bank": "shared_speaking_bank",
+        "required_tag": "cefr",
+        "applies_to_modules": ["internal_assessment", "full_mock"]
+      },
+
+      "rules": {
+        "practice_attempts": "unlimited",
+        "graded_attempts_per_cycle": null,
+        "time_limits_minutes": { "viva_session": 15 },
+        "retakes": "TBD_FOUNDER",
+        "minimum_attempts": "TBD_FOUNDER"
+      }
+    }
+
+  }
+}

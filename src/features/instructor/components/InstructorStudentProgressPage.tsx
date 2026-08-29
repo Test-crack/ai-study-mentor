@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { ChevronLeft, BarChart3, ClipboardList, BookOpen, Activity, FileSearch } from 'lucide-react';
+import { ChevronLeft, BarChart3, ClipboardList, BookOpen, Activity, FileSearch, Dumbbell } from 'lucide-react';
 import { InstructorSidebar } from '../components/dashboard/InstructorSidebar';
 import { cn } from '@/shared/utils';
 import { callBackend } from '@/features/auth/services/authClient';
@@ -11,8 +11,9 @@ import { IASessionsTab }        from './student-progress/IASessionsTab';
 import { MockSessionsTab }      from './student-progress/MockSessionsTab';
 import { DrillsTab }            from './student-progress/DrillsTab';
 import { DiagnosticTab }        from './student-progress/DiagnosticTab';
+import { PracticeHistoryTab }   from './student-progress/PracticeHistoryTab';
 
-type Tab = 'overview' | 'ia' | 'mock' | 'drills' | 'diagnostic';
+type Tab = 'overview' | 'ia' | 'mock' | 'drills' | 'diagnostic' | 'practice';
 
 const TABS: Array<{ id: Tab; label: string; icon: React.ReactNode }> = [
   { id: 'overview',    label: 'Overview',    icon: <BarChart3     className="h-4 w-4" /> },
@@ -20,6 +21,7 @@ const TABS: Array<{ id: Tab; label: string; icon: React.ReactNode }> = [
   { id: 'mock',        label: 'Mock Tests',  icon: <BookOpen      className="h-4 w-4" /> },
   { id: 'drills',      label: 'Drills',      icon: <Activity      className="h-4 w-4" /> },
   { id: 'diagnostic',  label: 'Diagnostic',  icon: <FileSearch    className="h-4 w-4" /> },
+  { id: 'practice',    label: 'Practice',    icon: <Dumbbell      className="h-4 w-4" /> },
 ];
 
 function PageSkeleton() {
@@ -124,8 +126,12 @@ export default function InstructorStudentProgressPage() {
               {/* Profile header */}
               <StudentProfileHeader data={data} />
 
-              {/* Tab bar */}
-              <div className="bg-white rounded-2xl border border-brand-line shadow-sm p-1.5 flex gap-1 w-fit">
+              {/* Tab bar — six tabs with whitespace-nowrap overflow a phone
+                  viewport, and w-fit alone gave no scroll affordance, so the
+                  last tabs were simply unreachable. Scrolls horizontally below
+                  the break, unchanged once it fits. */}
+              <div className="max-w-full overflow-x-auto -mx-1 px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="bg-white rounded-2xl border border-brand-line shadow-sm p-1.5 flex gap-1 w-fit min-w-max">
                 {TABS.map(tab => (
                   <button
                     key={tab.id}
@@ -142,6 +148,7 @@ export default function InstructorStudentProgressPage() {
                   </button>
                 ))}
               </div>
+              </div>
 
               {/* Tab content */}
               {activeTab === 'overview'   && <OverviewTab data={data} />}
@@ -152,7 +159,11 @@ export default function InstructorStudentProgressPage() {
                   drillStats={data.drill_stats}
                   lexiStats={data.lexigrid_stats}
                   streak={data.daily_streak}
+                  reflections={data.recent_reflections}
                 />
+              )}
+              {activeTab === 'practice'   && resolvedStudentId && (
+                <PracticeHistoryTab studentId={resolvedStudentId} />
               )}
               {activeTab === 'diagnostic' && (
                 <DiagnosticTab

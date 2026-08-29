@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { ChevronLeft, BarChart3, ClipboardList, BookOpen, Activity, FileSearch } from 'lucide-react';
+import { ChevronLeft, BarChart3, ClipboardList, BookOpen, Activity, FileSearch, Dumbbell } from 'lucide-react';
 import { InstituteOwnerSidebar } from '../components/InstitiuteOwnerSidebar';
 import { cn } from '@/shared/utils';
 import { callBackend } from '@/features/auth/services/authClient';
@@ -11,9 +11,10 @@ import { IASessionsTab }        from '@/features/instructor/components/student-p
 import { MockSessionsTab }      from '@/features/instructor/components/student-progress/MockSessionsTab';
 import { DrillsTab }            from '@/features/instructor/components/student-progress/DrillsTab';
 import { DiagnosticTab }        from '@/features/instructor/components/student-progress/DiagnosticTab';
+import { PracticeHistoryTab }  from '@/features/instructor/components/student-progress/PracticeHistoryTab';
 import type { StudentFullProgress } from '@/features/instructor/components/student-progress/types';
 
-type Tab = 'overview' | 'ia' | 'mock' | 'drills' | 'diagnostic';
+type Tab = 'overview' | 'ia' | 'mock' | 'drills' | 'diagnostic' | 'practice';
 
 const TABS: Array<{ id: Tab; label: string; icon: React.ReactNode }> = [
   { id: 'overview',    label: 'Overview',    icon: <BarChart3     className="h-4 w-4" /> },
@@ -21,6 +22,9 @@ const TABS: Array<{ id: Tab; label: string; icon: React.ReactNode }> = [
   { id: 'mock',        label: 'Mock Tests',  icon: <BookOpen      className="h-4 w-4" /> },
   { id: 'drills',      label: 'Drills',      icon: <Activity      className="h-4 w-4" /> },
   { id: 'diagnostic',  label: 'Diagnostic',  icon: <FileSearch    className="h-4 w-4" /> },
+  // The practice work behind the results — instructor-only until the three
+  // history endpoints were given institute-scoped equivalents.
+  { id: 'practice',    label: 'Practice',    icon: <Dumbbell      className="h-4 w-4" /> },
 ];
 
 function PageSkeleton() {
@@ -158,6 +162,7 @@ export default function InstituteOwnerStudentProgressPage() {
                   drillStats={data.drill_stats}
                   lexiStats={data.lexigrid_stats}
                   streak={data.daily_streak}
+                  reflections={data.recent_reflections}
                 />
               )}
               {activeTab === 'diagnostic' && (
@@ -166,6 +171,9 @@ export default function InstituteOwnerStudentProgressPage() {
                   studentName={(data as any).student?.name}
                   onRequestReset={resetDiagnostic}
                 />
+              )}
+              {activeTab === 'practice' && resolvedStudentId && (
+                <PracticeHistoryTab studentId={resolvedStudentId} scope="institute-owner" />
               )}
             </div>
           )}
