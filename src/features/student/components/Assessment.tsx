@@ -238,9 +238,78 @@ const CircleTimer: React.FC<{ timeLeft: number; total: number; size?: number }> 
 
 export default function Assessment() {
   const navigate = useNavigate();
-  const { profile } = useAuth() as any; 
+  const { profile } = useAuth() as any;
   const { totalMomentum, addPoints, syncMomentum } = useMomentum();
-  
+
+  // Single-tab lock — a second tab of the same browser opening the IA while one is
+  // already active gets blocked instead of racing it for section/answer writes.
+  // Scoped per-student and namespaced "ia" so it never collides with diagnostic's
+  // own lock. Does NOT span devices/browsers (localStorage + BroadcastChannel are
+  // both device-local), so switching from laptop to phone is unaffected.
+  const [tabConflict, setTabConflict] = useState(false);
+  const tabIdRef = useRef(Math.random().toString(36).substring(2, 15));
+  const studentIdForLock = profile?.id || profile?.student_id || "unknown-student";
+
+  useEffect(() => {
+    const tabId = tabIdRef.current;
+    const lockKey = `ia_active_tab:${studentIdForLock}`;
+    const channel = new BroadcastChannel(`tc_ia_sync:${studentIdForLock}`);
+    let deadLockTimeout: ReturnType<typeof setTimeout>;
+
+    const attemptClaim = () => {
+      const currentLock = localStorage.getItem(lockKey);
+      if (!currentLock || currentLock === tabId) {
+        localStorage.setItem(lockKey, tabId);
+        channel.postMessage({ type: "CLAIMED", tabId });
+        setTabConflict(false);
+      } else {
+        setTabConflict(true);
+        channel.postMessage({ type: "PING", tabId });
+        deadLockTimeout = setTimeout(() => {
+          localStorage.setItem(lockKey, tabId);
+          channel.postMessage({ type: "CLAIMED", tabId });
+          setTabConflict(false);
+        }, 1000);
+      }
+    };
+
+    channel.onmessage = (e) => {
+      const data = e.data;
+      if (data.type === "CLAIMED") {
+        if (data.tabId !== tabId) {
+          clearTimeout(deadLockTimeout);
+          if (localStorage.getItem(lockKey) !== tabId) {
+            setTabConflict(true);
+          }
+        }
+      } else if (data.type === "PING") {
+        if (localStorage.getItem(lockKey) === tabId) {
+          channel.postMessage({ type: "CLAIMED", tabId });
+        }
+      } else if (data.type === "RELEASED") {
+        attemptClaim();
+      }
+    };
+
+    attemptClaim();
+
+    const handleUnload = () => {
+      if (localStorage.getItem(lockKey) === tabId) {
+        localStorage.removeItem(lockKey);
+        channel.postMessage({ type: "RELEASED", tabId });
+      }
+    };
+
+    window.addEventListener("beforeunload", handleUnload);
+
+    return () => {
+      clearTimeout(deadLockTimeout);
+      window.removeEventListener("beforeunload", handleUnload);
+      handleUnload();
+      channel.close();
+    };
+  }, [studentIdForLock]);
+
   // IA status (schedule + eligibility + DCS)
   const [eligibilityLoading, setEligibilityLoading] = useState(true);
   const [iaStatus, setIaStatus]                     = useState<IAStatusResponse | null>(null);
@@ -1499,11 +1568,28 @@ export default function Assessment() {
     );
   };
 
+  if (tabConflict) {
+    return (
+      <div className="min-h-screen bg-brand-bg font-sans text-brand-text selection:bg-brand-teal-200">
+        <TopNavBar hideMomentum totalMomentum={totalMomentum} />
+        <div className="min-h-screen flex items-center justify-center p-4">
+          <div className="bg-white p-8 md:p-10 rounded-2xl border border-brand-line shadow-sm max-w-md text-center animate-fade-in">
+            <div className="text-4xl mb-4">⚠️</div>
+            <h2 className="font-manrope text-[22px] font-extrabold text-brand-ink mb-2 tracking-[-0.02em]">Session already active</h2>
+            <p className="text-brand-text-mute text-[14px] leading-[1.7]">
+              You are already taking this assessment in another tab. Please close this tab or return to the active one to continue.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-brand-bg font-sans text-brand-text selection:bg-brand-teal-200">
       <TopNavBar hideMomentum={phase === 'session'} totalMomentum={totalMomentum} />
       <div className="fixed inset-0 pointer-events-none z-0" style={{ backgroundImage: 'radial-gradient(circle, #e2e8f0 1px, transparent 1px)', backgroundSize: '24px 24px', opacity: 0.4 }} />
-      
+
       <div className="relative z-10 pt-16">
         {phase === "gate" && (() => {
           if (!iaStatus?.has_schedule || !iaStatus?.prerequisites_met) return renderNotEligible();
