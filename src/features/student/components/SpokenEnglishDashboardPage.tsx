@@ -12,7 +12,7 @@ import { StudentTopbar } from "./dashboard/StudentTopbar";
 import { PremiumModal } from "@/features/payment/components/PremiumModal";
 import { examDisplay } from "@/features/student/config/examDisplay";
 import { useMomentum } from "@/features/student/Context/MomentumContext";
-import { SE_SUBSKILLS, seSubskill, nextCefr, withinLevelProgress, cefrToDrillLevel } from "@/features/student/config/spokenEnglishSubskills";
+import { seSubskill, seSubskillByEnum, nextCefr, withinLevelProgress, cefrToDrillLevel } from "@/features/student/config/spokenEnglishSubskills";
 import { cn } from "@/shared/utils";
 import { Mic, CheckCircle2, ArrowRight, AlertTriangle, Loader2, Compass, Flame, Zap, Lock, Puzzle, Dumbbell } from "lucide-react";
 
@@ -51,20 +51,26 @@ const SpokenEnglishDashboardPage = () => {
   const [result, setResult] = useState<CefrResult | null>(null);
   const [meta, setMeta] = useState<{ momentum: number; streak: number }>({ momentum: 0, streak: 0 });
   const [drillsToday, setDrillsToday] = useState(0);
+  // The next drill to do — from the shared recommendation engine (getNextActionDrill), the
+  // same one IELTS uses. It picks the weakest not-done-today subskill (rotates correctly).
+  const [nextDrill, setNextDrill] = useState<{ subEnum: string; label: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const [comp, drillState] = await Promise.all([
+        const [comp, drillState, nextAction] = await Promise.all([
           callBackend("/api/student/competency-scores"),
           callBackend("/api/student/daily-drill-state").catch(() => null),
+          callBackend("/api/student/next-action-drill").catch(() => null),
         ]);
         if (cancelled) return;
         const speaking = (comp.data ?? []).find((r: any) => r.skill === "SPEAKING");
         setResult((speaking?.sub_scores as CefrResult) ?? null);
         setMeta({ momentum: comp.momentum_score ?? 0, streak: comp.daily_streak ?? 0 });
         setDrillsToday(drillState?.drills_completed_today ?? 0);
+        const rec = nextAction?.recommended_drills?.[0];
+        setNextDrill(rec ? { subEnum: rec.sub_skill, label: seSubskillByEnum(rec.sub_skill)?.label ?? rec.sub_skill } : null);
         // Feed the shared MomentumContext so the topbar shows the right momentum/streak
         // (it starts at 0 and only updates via syncMomentum — the IELTS dashboard does this too).
         syncMomentum(comp.momentum_score ?? 0);
@@ -78,26 +84,16 @@ const SpokenEnglishDashboardPage = () => {
     return () => { cancelled = true; };
   }, []);
 
-  // Drillable subskills, weakest first. A drill can only be taken once per subskill per day
-  // (the drill engine resumes today's completed session), so the 3 gate drills must each
-  // target a DIFFERENT subskill — rotate by how many drills are done today.
-  const drillableSorted = (result?.subskillProfile ?? [])
-    .filter((s) => seSubskill(s.id)?.drillable)
-    .slice().sort((a, b) => a.score - b.score);
-  const priorityDrill = drillableSorted.length
-    ? drillableSorted[Math.min(drillsToday, drillableSorted.length - 1)]
-    : undefined;
-
-  const startDrill = useCallback((subskillId?: string) => {
-    const ss = seSubskill(subskillId ?? priorityDrill?.id ?? "range");
-    if (!ss) return;
+  // Launch the shared DrillScreen for a given SubSkillType enum value (from the engine or a card).
+  const startDrill = useCallback((subEnum?: string) => {
+    if (!subEnum) return;
     const params = new URLSearchParams({
       skill: "SPEAKING",
-      sub_skill: ss.drillSubskill,
+      sub_skill: subEnum,
       level: cefrToDrillLevel(result?.cefrLevel),
     });
     navigate(`/${examId}/drill?${params.toString()}`);
-  }, [navigate, examId, priorityDrill, result]);
+  }, [navigate, examId, result]);
 
   const seUnlocked = drillsToday >= DRILLS_TO_UNLOCK;
   const displayName = profile?.name || "there";
@@ -171,13 +167,13 @@ const SpokenEnglishDashboardPage = () => {
                 <section className="rounded-3xl border border-brand-teal-200 bg-brand-teal-wash p-6">
                   <p className="font-jetbrains text-[11px] uppercase tracking-[0.16em] text-brand-teal-700">Today · {drillsToday} / {DRILLS_TO_UNLOCK} drills</p>
                   <h2 className="mt-1 font-dm text-xl font-bold text-brand-teal-950">Warm up with {DRILLS_TO_UNLOCK} quick drills</h2>
-                  <p className="mt-1 text-sm text-brand-teal-800/80">Finish {DRILLS_TO_UNLOCK} short MCQ drills to open the full dashboard. Next up: <strong>{priorityDrill ? (seSubskill(priorityDrill.id)?.label ?? priorityDrill.label) : "your weakest subskill"}</strong>.</p>
+                  <p className="mt-1 text-sm text-brand-teal-800/80">Finish {DRILLS_TO_UNLOCK} short MCQ drills to open the full dashboard. Next up: <strong>{nextDrill ? nextDrill.label : "your weakest subskill"}</strong>.</p>
                   <div className="mt-4 flex gap-2">
                     {Array.from({ length: DRILLS_TO_UNLOCK }).map((_, i) => (
                       <div key={i} className={cn("h-2 flex-1 rounded-full", i < drillsToday ? "bg-brand-teal-500" : "bg-brand-teal-200")} />
                     ))}
                   </div>
-                  <button onClick={() => startDrill(priorityDrill?.id)} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-brand-teal-600 px-6 py-3 font-semibold text-white hover:bg-brand-teal-700">
+                  <button onClick={() => startDrill(nextDrill?.subEnum)} disabled={!nextDrill} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-brand-teal-600 px-6 py-3 font-semibold text-white hover:bg-brand-teal-700 disabled:opacity-50">
                     <Dumbbell className="h-4 w-4" /> Start drill {Math.min(drillsToday + 1, DRILLS_TO_UNLOCK)} <ArrowRight className="h-4 w-4" />
                   </button>
                 </section>
@@ -222,7 +218,7 @@ const SpokenEnglishDashboardPage = () => {
                             </div>
                           </div>
                           {seSubskill(s.id)?.drillable
-                            ? <button onClick={() => startDrill(s.id)} className="shrink-0 rounded-lg border border-brand-line px-3 py-1.5 text-xs font-semibold text-brand-teal-700 hover:border-brand-teal-300">Practice</button>
+                            ? <button onClick={() => startDrill(seSubskill(s.id)?.drillSubskill)} className="shrink-0 rounded-lg border border-brand-line px-3 py-1.5 text-xs font-semibold text-brand-teal-700 hover:border-brand-teal-300">Practice</button>
                             : <span className="shrink-0 text-[11px] text-brand-text-mute">Speaking only</span>}
                         </div>
                       ))}

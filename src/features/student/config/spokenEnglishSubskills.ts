@@ -22,6 +22,10 @@ export const SE_SUBSKILLS: SeSubskill[] = [
 
 export const seSubskill = (id: string) => SE_SUBSKILLS.find((s) => s.id === id);
 
+/** Find an SE subskill by its SubSkillType enum value (e.g. the drill engine returns "FLUENCY"). */
+export const seSubskillByEnum = (drillSubskill: string) =>
+  SE_SUBSKILLS.find((s) => s.drillSubskill === drillSubskill);
+
 // CEFR level (e.g. "b1", "B2") → the drill RecommendationLevel bucket.
 export const cefrToDrillLevel = (level?: string): "BEGINNER" | "INTERMEDIATE" | "ADVANCED" => {
   const l = (level || "").toLowerCase();
