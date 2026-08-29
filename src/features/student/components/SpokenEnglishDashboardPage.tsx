@@ -11,8 +11,11 @@ import { StudentSidebar } from "./dashboard/StudentSidebar";
 import { StudentTopbar } from "./dashboard/StudentTopbar";
 import { PremiumModal } from "@/features/payment/components/PremiumModal";
 import { examDisplay } from "@/features/student/config/examDisplay";
+import { nextCefr, withinLevelProgress, cefrToDrillLevel } from "@/features/student/config/spokenEnglishSubskills";
 import { cn } from "@/shared/utils";
-import { Mic, CheckCircle2, ArrowRight, AlertTriangle, Loader2, Trophy, Compass, Flame } from "lucide-react";
+import { Mic, CheckCircle2, ArrowRight, AlertTriangle, Loader2, Compass, Flame, Zap } from "lucide-react";
+
+const LEVEL_LABEL: Record<string, string> = { BEGINNER: "Beginner", INTERMEDIATE: "Intermediate", ADVANCED: "Advanced" };
 
 interface SubskillRow { id: string; label: string; level: string; score: number; }
 interface CefrResult {
@@ -113,18 +116,35 @@ const SpokenEnglishDashboardPage = () => {
             </div>
           ) : (
             <>
-              {/* Headline CEFR level */}
-              <section className="rounded-3xl border border-brand-teal-200 bg-brand-teal-wash p-6 sm:p-8">
-                <div className="flex items-center gap-5">
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-brand-teal-100 border border-brand-teal-200">
-                    <Trophy className="h-8 w-8 text-brand-teal-600" />
-                  </div>
+              {/* THE CLIMB — CEFR analogue of the IELTS band climb */}
+              <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-brand-ink-deep p-6 sm:p-8 text-white">
+                <div className="absolute top-0 right-0 h-40 w-40 bg-brand-mint/10 blur-[60px]" />
+                <div className="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
                   <div>
-                    <p className="font-jetbrains text-[11px] uppercase tracking-[0.16em] text-brand-teal-700">{cfg.headlineLabel}</p>
-                    <p className="font-dm text-4xl font-bold leading-none text-brand-teal-950">{result.cefrLabel}</p>
+                    <p className="font-jetbrains text-[11px] uppercase tracking-[0.18em] text-brand-mint">The Climb</p>
+                    <div className="mt-2 flex items-end gap-3">
+                      <span className="font-dm text-5xl font-bold leading-none">{result.cefrLabel}</span>
+                      {nextCefr(result.cefrLabel) && (
+                        <span className="pb-1 text-sm text-brand-mint">{nextCefr(result.cefrLabel)} is your next level</span>
+                      )}
+                    </div>
+                    {/* within-level progress */}
+                    <div className="mt-4 h-2 w-full max-w-md overflow-hidden rounded-full bg-white/10">
+                      <div className="h-full rounded-full bg-brand-mint transition-all" style={{ width: `${withinLevelProgress(result.cefrLabel, result.meanScore)}%` }} />
+                    </div>
                     {result.scoredPromptCount != null && (
-                      <p className="mt-1 text-sm text-brand-teal-800/80">Based on {result.scoredPromptCount} graded {result.scoredPromptCount === 1 ? "answer" : "answers"}</p>
+                      <p className="mt-2 text-xs text-white/50">Based on {result.scoredPromptCount} graded {result.scoredPromptCount === 1 ? "answer" : "answers"}</p>
                     )}
+                  </div>
+                  <div className="flex gap-8">
+                    <div>
+                      <p className="font-jetbrains text-[10px] uppercase tracking-[0.16em] text-white/50">Level</p>
+                      <p className="mt-1 font-dm text-lg font-bold">{LEVEL_LABEL[cefrToDrillLevel(result.cefrLevel)]}</p>
+                    </div>
+                    <div>
+                      <p className="font-jetbrains text-[10px] uppercase tracking-[0.16em] text-white/50">Momentum</p>
+                      <p className="mt-1 flex items-center gap-1 font-dm text-lg font-bold text-brand-mint"><Zap className="h-4 w-4" />{meta.momentum}</p>
+                    </div>
                   </div>
                 </div>
               </section>
