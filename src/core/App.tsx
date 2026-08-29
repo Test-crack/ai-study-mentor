@@ -81,6 +81,7 @@ const InstituteAdmins = lazy(() => import("@/features/InstituteOwner/dashboard/I
 const InstituteStudentsPage = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteStudentsPage"));
 const InstituteAssessments = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteAssessments"));
 const InstituteInstructorsPage = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteInstructorsPage"));
+const InstituteAdminAssessments = lazy(() => import("@/features/Institute/dashboard/InstituteAssessments"));
 const InstituteBatchDetailPage = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteBatchDetailPage"));
 const InstituteOwnerStudentProgressPage = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteOwnerStudentProgressPage"));
 const InstituteAdminStudentProgressPage = lazy(() => import("@/features/Institute/dashboard/InstituteAdminStudentProgressPage"));
@@ -363,6 +364,7 @@ const AppRoutes = () => {
         <Route path="/institute-admin/students/:studentSlug/progress" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteAdminStudentProgressPage /></RoleProtectedRoute>} />
         <Route path="/institute-admin/billings" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteBillings /></RoleProtectedRoute>} />
         <Route path="/institute-admin/reports" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteReports /></RoleProtectedRoute>} />
+        <Route path="/institute-admin/assessments" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteAdminAssessments /></RoleProtectedRoute>} />
         <Route path="/institute-admin/studentOnboarding" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><StudentOnboarding /></RoleProtectedRoute>} />
         <Route path="/institute-admin/tutorOnboarding" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><TutorOnboarding /></RoleProtectedRoute>} />
         <Route path="/institute-admin/Setting" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteSettings /></RoleProtectedRoute>} />

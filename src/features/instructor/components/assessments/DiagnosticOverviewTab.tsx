@@ -14,6 +14,9 @@ interface Props {
   refetch?: () => void;
   /** See IAOverviewTab — defaults to the instructor route. */
   progressPathFor?: (userId: string) => string;
+  /** Hides the built-in stat cards + band-distribution chart — used when a
+   *  parent shell (e.g. AssessmentInsights) already renders that summary. */
+  compact?: boolean;
 }
 
 // REMOVED: the per-row "Retake" control and its confirmation modal.
@@ -133,7 +136,7 @@ function BandDistribution({ rows, skillFilter }: { rows: DiagnosticOverviewRow[]
   );
 }
 
-export function DiagnosticOverviewTab({ rows, batchId, refetch, progressPathFor }: Props) {
+export function DiagnosticOverviewTab({ rows, batchId, refetch, progressPathFor, compact = false }: Props) {
   const navigate = useNavigate();
   const [search,        setSearch]        = useState('');
   const [sortKey,       setSortKey]       = useState<SortKey>('status');
@@ -233,6 +236,8 @@ export function DiagnosticOverviewTab({ rows, batchId, refetch, progressPathFor 
   return (
     <div className="space-y-4">
       {/* Summary stat cards */}
+      {!compact && (
+      <>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {stats.map(s => {
           const isAtRisk = s.label === 'At Risk';
@@ -294,6 +299,8 @@ export function DiagnosticOverviewTab({ rows, batchId, refetch, progressPathFor 
         </div>
         <BandDistribution rows={rows} skillFilter={skillFilter} />
       </div>
+      </>
+      )}
 
       {/* Search + warning */}
       <div className="flex items-center justify-between gap-4">
