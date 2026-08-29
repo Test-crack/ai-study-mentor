@@ -5,6 +5,9 @@ import { CheckCircle2, PlayCircle, Lock, ExternalLink, MessageSquare, Flame, Zap
 import { toast } from 'sonner';
 import { useMomentum } from "@/features/student/Context/MomentumContext";
 import { callBackend } from "@/features/auth/services/authClient";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { isSpokenEnglish } from "@/features/student/utils/exam";
+import { ArrowRight } from 'lucide-react';
 
 interface ResultCardProps {
   skill:           string;
@@ -46,6 +49,7 @@ export default function DrillResultCard({
   skill, subSkill, momentumScore, feedback, answerResults = [], drillSessionId, onUnlockNext,
 }: ResultCardProps) {
   const navigate = useNavigate();
+  const { profile } = useAuth();
   const [videoWatched,        setVideoWatched]        = useState(false);
   const [reflection,          setReflection]          = useState('');
   const [error,               setError]               = useState('');
@@ -153,6 +157,58 @@ export default function DrillResultCard({
       ? "It's open now — solve today's grid to keep your streak moving."
       : 'LexiGrid opens once today’s gate chain reaches it.';
   const goLexiGrid = () => navigate(isLexiOpen ? '/student/lexigrid?mode=gate' : '/student/lexigrid');
+
+  // ── Spoken English: clean completion. No video-watch gate, no reflection, no LexiGrid
+  //    "next session" (its gate is 3 drills, LexiGrid is standalone). Just bank momentum and
+  //    return to the dashboard, which shows the next drill / unlocks at 3.
+  if (isSpokenEnglish(profile?.examId)) {
+    return (
+      <div className="space-y-3.5 animate-in fade-in slide-in-from-bottom-8">
+        <div className="flex justify-end">
+          <button onClick={onUnlockNext} className="flex items-center gap-2 text-sm font-semibold text-brand-text-mute hover:text-brand-teal-600 transition-colors">
+            <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+          </button>
+        </div>
+
+        <div className="relative overflow-hidden rounded-3xl bg-brand-ink-deep" style={DARK_HERO_GRID}>
+          <div className="relative z-10 grid grid-cols-1 sm:grid-cols-[1.25fr_0.75fr]">
+            <div className="p-8 border-b sm:border-b-0 sm:border-r border-brand-line-16">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="h-px w-6 bg-brand-mint" aria-hidden="true" />
+                <span className="font-jetbrains text-[10.5px] font-medium uppercase tracking-[0.14em] text-brand-mint">Drill Complete</span>
+              </div>
+              <h2 className="font-dm text-2xl sm:text-[28px] leading-[1.15] font-bold text-white mb-2">{doneTitle}</h2>
+              <p className="text-brand-on-ink-mute text-sm leading-[1.6] max-w-md mb-5">Momentum is banked and your sub-score updates at the next internal assessment.</p>
+              {answerResults.length > 0 && (
+                <div className="flex gap-[7px]">
+                  {answerResults.map((ok, i) => (
+                    <div key={i} className={`w-[30px] h-[30px] rounded-lg flex items-center justify-center font-jetbrains text-sm font-bold ${ok ? 'bg-brand-mint text-brand-ink-deep' : 'bg-brand-warm-danger text-white'}`}>{ok ? '✓' : '×'}</div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="p-8 flex flex-col justify-center gap-5">
+              <div>
+                <p className="font-jetbrains text-[9.5px] tracking-[0.12em] text-brand-on-ink-mute">MOMENTUM EARNED</p>
+                <p className="font-jetbrains text-[36px] font-bold text-brand-mint leading-none mt-2">+{momentumScore}</p>
+              </div>
+              <div className="flex items-center gap-5 pt-4 border-t border-brand-line-16">
+                <div><p className="font-jetbrains text-[9.5px] tracking-[0.12em] text-brand-on-ink-mute flex items-center gap-1"><Zap className="w-3.5 h-3.5 text-amber-400" /> Total</p><p className="font-jetbrains text-lg font-bold text-white mt-1 tabular-nums">{totalMomentum}</p></div>
+                <div><p className="font-jetbrains text-[9.5px] tracking-[0.12em] text-brand-on-ink-mute flex items-center gap-1"><Flame className="w-3.5 h-3.5 text-orange-400" /> Streak</p><p className="font-jetbrains text-lg font-bold text-white mt-1 tabular-nums">Day {streak}</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white border border-brand-line rounded-3xl p-6 shadow-sm flex flex-col items-center gap-4 text-center sm:flex-row sm:justify-between sm:text-left">
+          <p className="text-sm font-medium text-brand-text-mute">Nice work — keep going to unlock your full dashboard.</p>
+          <button onClick={onUnlockNext} className="inline-flex items-center gap-2 rounded-xl bg-brand-teal-600 px-6 py-3 font-bold text-white transition-colors hover:bg-brand-teal-700">
+            Continue <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3.5 animate-in fade-in slide-in-from-bottom-8">
