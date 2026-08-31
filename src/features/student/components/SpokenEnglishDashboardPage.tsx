@@ -104,6 +104,33 @@ const PredictedReadiness = ({ cefrLabel, meanScore, examDate }: { cefrLabel?: st
   );
 };
 
+// Internal-assessment card — reads the shared IA schedule (getIAStatus, exam-agnostic).
+const IACard = ({ status, onStart }: { status: any; onStart: () => void }) => {
+  if (!status?.success) return null;
+  const next = status.next_ia;
+  return (
+    <section className="rounded-2xl border border-brand-line bg-brand-bg-alt p-5 sm:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="font-jetbrains text-[10px] uppercase tracking-[0.16em] text-brand-text-mute">Internal assessment</p>
+          {status.can_start_test ? (
+            <p className="mt-1 text-sm font-medium text-brand-text">Your assessment is ready — a few speaking prompts that update your CEFR sub-scores.</p>
+          ) : status.is_ia_day ? (
+            <p className="mt-1 text-sm text-brand-text-mute">Assessment day — finish today's drills to unlock it.</p>
+          ) : next ? (
+            <p className="mt-1 text-sm text-brand-text-mute">Next assessment: <span className="font-semibold text-brand-text">{next.date_formatted}</span> · in {next.days_away} day{next.days_away === 1 ? "" : "s"}</p>
+          ) : (
+            <p className="mt-1 text-sm text-brand-text-mute">Keep practising — assessments unlock as you build a streak.</p>
+          )}
+        </div>
+        {status.can_start_test && (
+          <button onClick={onStart} className="inline-flex items-center gap-2 self-start rounded-xl bg-brand-teal-600 px-5 py-2.5 font-semibold text-white hover:bg-brand-teal-700 sm:self-auto">Start assessment <ArrowRight className="h-4 w-4" /></button>
+        )}
+      </div>
+    </section>
+  );
+};
+
 const SpokenEnglishDashboardPage = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
@@ -121,16 +148,19 @@ const SpokenEnglishDashboardPage = () => {
   // The next drill to do — from the shared recommendation engine (getNextActionDrill), the
   // same one IELTS uses. It picks the weakest not-done-today subskill (rotates correctly).
   const [nextDrill, setNextDrill] = useState<{ subEnum: string; label: string } | null>(null);
+  const [iaStatus, setIaStatus] = useState<any>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const [comp, drillState, nextAction] = await Promise.all([
+        const [comp, drillState, nextAction, ia] = await Promise.all([
           callBackend("/api/student/competency-scores"),
           callBackend("/api/student/daily-drill-state").catch(() => null),
           callBackend("/api/student/next-action-drill").catch(() => null),
+          callBackend("/api/ia/status").catch(() => null),
         ]);
+        if (!cancelled) setIaStatus(ia);
         if (cancelled) return;
         const speaking = (comp.data ?? []).find((r: any) => r.skill === "SPEAKING");
         setResult((speaking?.sub_scores as CefrResult) ?? null);
@@ -300,6 +330,8 @@ const SpokenEnglishDashboardPage = () => {
                   <PredictedReadiness cefrLabel={result.cefrLabel} meanScore={result.meanScore} examDate={examDate} />
                 </div>
                 <MomentumWallet momentum={meta.momentum} />
+
+                <IACard status={iaStatus} onStart={() => navigate(`/${examId}/internal`)} />
 
                 {/* Coaching notes */}
                 {result.feedback && result.feedback.length > 0 && (
