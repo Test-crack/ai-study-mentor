@@ -104,6 +104,7 @@ const SpeakingAssessment = lazy(() => import("@/features/student/components/Spea
 const Diagnosis = lazy(() => import("@/features/student/components/Diagnosis/Diagnosis"));
 const VivaDiagnostic = lazy(() => import("@/features/student/components/Diagnosis/VivaDiagnostic"));
 const SpokenEnglishDashboardPage = lazy(() => import("@/features/student/components/SpokenEnglishDashboardPage"));
+const SpokenEnglishIAPage = lazy(() => import("@/features/student/components/SpokenEnglishIAPage"));
 const DiagnosticRoadmap = lazy(() => import("@/features/student/components/Diagnosis/DiagnosticRoadmap"));
 const OnboardingWalkthrough = lazy(() => import("@/features/student/components/Onboarding/OnboardingWalkthrough"));
 const HowItWorks = lazy(() => import("@/features/student/components/HowItWorks"));
@@ -288,6 +289,13 @@ const StudentDashboardDispatch = () => {
   return isSpokenEnglish(profile?.examId) ? <SpokenEnglishDashboardPage /> : <StudentDashboardPage />;
 };
 
+// Internal Assessment by exam: Spoken English gets its viva-graded IA; IELTS keeps Assessment.
+const InternalAssessmentDispatch = () => {
+  const { profile, loading, profileLoading } = useAuth();
+  if ((loading || profileLoading) && !profile) return null;
+  return isSpokenEnglish(profile?.examId) ? <SpokenEnglishIAPage /> : <InternalAssessmentPage />;
+};
+
 // Student workspace routes are exam-prefixed: /{examSlug}/dashboard, /{examSlug}/diagnosis,
 // etc. This layout sits at /:examSlug, validates the slug against the student's enrolled
 // exam, sets the client exam context (X-Exam-Id), and rewrites any wrong/legacy first
@@ -442,7 +450,7 @@ const AppRoutes = () => {
         <Route path="drill" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><DrillScreen /></RoleProtectedRoute>} />
         <Route path="lexigrid" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><LexiGrid /></RoleProtectedRoute>} />
 
-        <Route path="internal" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><InternalAssessmentPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route path="internal" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><InternalAssessmentDispatch /></StudentDrillLockGuard></RoleProtectedRoute>} />
         <Route path="assessment" element={<ExamNavigate to="internal" />} />
         <Route path="mock" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><FullMockAssessment /></StudentDrillLockGuard></RoleProtectedRoute>} />
         {/* Deliberately NOT wrapped in StudentDrillLockGuard: How It Works must stay
