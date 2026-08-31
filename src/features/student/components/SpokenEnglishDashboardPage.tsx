@@ -72,6 +72,38 @@ const MomentumWallet = ({ momentum }: { momentum: number }) => (
   </section>
 );
 
+const StatRow = ({ label, value }: { label: string; value: string }) => (
+  <div className="flex items-center justify-between text-sm">
+    <span className="text-brand-text-mute">{label}</span>
+    <span className="font-semibold text-brand-text">{value}</span>
+  </div>
+);
+
+// CEFR analogue of the IELTS Predicted Readiness: current level, the next level as the target,
+// within-level progress, and (if an exam date is set) days remaining.
+const PredictedReadiness = ({ cefrLabel, meanScore, examDate }: { cefrLabel?: string; meanScore?: number; examDate: string | null }) => {
+  const next = nextCefr(cefrLabel);
+  const progress = withinLevelProgress(cefrLabel, meanScore);
+  const daysLeft = examDate ? Math.ceil((new Date(examDate).getTime() - Date.now()) / 86400000) : null;
+  return (
+    <section className="rounded-2xl border border-brand-line bg-brand-bg-alt p-5 sm:p-6">
+      <p className="font-jetbrains text-[10px] uppercase tracking-[0.16em] text-brand-text-mute">Predicted readiness</p>
+      <div className="mt-3 space-y-2">
+        <StatRow label="Current level" value={cefrLabel ?? "—"} />
+        <StatRow label="Target (next level)" value={next ?? "Top of scale"} />
+        {daysLeft != null && daysLeft > 0 && <StatRow label="Days to target date" value={String(daysLeft)} />}
+        {examDate && <StatRow label="Target date" value={examDate} />}
+      </div>
+      <div className="mt-3 h-2 overflow-hidden rounded-full bg-brand-line">
+        <div className="h-full rounded-full bg-brand-mint transition-all" style={{ width: `${progress}%` }} />
+      </div>
+      <p className="mt-2 text-sm leading-relaxed text-brand-text-mute">
+        {next ? `Keep drilling and completing assessments to move from ${cefrLabel} toward ${next}.` : "You're at the top of the scale — keep practising to stay sharp."}
+      </p>
+    </section>
+  );
+};
+
 const SpokenEnglishDashboardPage = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
@@ -84,6 +116,7 @@ const SpokenEnglishDashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState<CefrResult | null>(null);
   const [meta, setMeta] = useState<{ momentum: number; streak: number }>({ momentum: 0, streak: 0 });
+  const [examDate, setExamDate] = useState<string | null>(null);
   const [drillsToday, setDrillsToday] = useState(0);
   // The next drill to do — from the shared recommendation engine (getNextActionDrill), the
   // same one IELTS uses. It picks the weakest not-done-today subskill (rotates correctly).
@@ -102,6 +135,7 @@ const SpokenEnglishDashboardPage = () => {
         const speaking = (comp.data ?? []).find((r: any) => r.skill === "SPEAKING");
         setResult((speaking?.sub_scores as CefrResult) ?? null);
         setMeta({ momentum: comp.momentum_score ?? 0, streak: comp.daily_streak ?? 0 });
+        setExamDate(comp.exam_date ?? null);
         setDrillsToday(drillState?.drills_completed_today ?? 0);
         const rec = nextAction?.recommended_drills?.[0];
         setNextDrill(rec ? { subEnum: rec.sub_skill, label: seSubskillByEnum(rec.sub_skill)?.label ?? rec.sub_skill } : null);
@@ -260,11 +294,12 @@ const SpokenEnglishDashboardPage = () => {
                   </section>
                 )}
 
-                {/* Weekly rhythm + momentum wallet (parity with IELTS) */}
+                {/* Weekly rhythm + predicted readiness + momentum wallet (parity with IELTS) */}
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                   <WeeklyRhythm streak={meta.streak} />
-                  <MomentumWallet momentum={meta.momentum} />
+                  <PredictedReadiness cefrLabel={result.cefrLabel} meanScore={result.meanScore} examDate={examDate} />
                 </div>
+                <MomentumWallet momentum={meta.momentum} />
 
                 {/* Coaching notes */}
                 {result.feedback && result.feedback.length > 0 && (
