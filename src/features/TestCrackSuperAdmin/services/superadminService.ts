@@ -1,4 +1,4 @@
-import { callBackend } from '@/features/auth/services/authClient';
+import { callBackend, uploadFileToBackend, downloadFileFromBackend } from '@/features/auth/services/authClient';
 import { getBackendUrl } from '@/shared/utils';
 import type { ExamType, BillingStatus } from '@/shared/constants/examTypes';
 
@@ -161,6 +161,157 @@ export async function fetchExamsForConfig(): Promise<{ data: ExamConfigSummary[]
 /** GET /api/superadmin/exams/:id/config — the full config entry (read-only) for viewing/drafting. */
 export async function fetchExamConfig(examId: string): Promise<{ data: any }> {
     return callBackend(`${getBackendUrl()}/api/superadmin/exams/${examId}/config`);
+}
+
+// ─── Question-bank verification panel ───────────────────────────────────────
+// Thin wrapper around /api/superadmin/verification/*. Backend is forked per
+// exam/bank-type the same way the CLI tooling is (see CLAUDE.md) — only
+// ielts/drill is wired up server-side today.
+
+export interface CoverageSkill {
+    skill: string;
+    count: number;
+}
+
+export interface CoverageEntry {
+    examId: string;
+    label: string;
+    bankType: string;
+    skills: CoverageSkill[];
+}
+
+export async function fetchVerificationCoverage(): Promise<{ data: CoverageEntry[] }> {
+    return callBackend(`${getBackendUrl()}/api/superadmin/verification/coverage`);
+}
+
+export interface Layer1Finding {
+    code: string;
+    severity: 'pass' | 'warn' | 'fail';
+    message: string;
+    line: number | null;
+}
+
+export interface Layer1FileResult {
+    fileName: string;
+    outcome: 'pass' | 'warn' | 'fail';
+    findings: Layer1Finding[];
+}
+
+function buildBatchForm(examId: string, bankType: string, files: File[], extra?: Record<string, string>): FormData {
+    const form = new FormData();
+    form.append('examId', examId);
+    form.append('bankType', bankType);
+    for (const [k, v] of Object.entries(extra ?? {})) form.append(k, v);
+    for (const file of files) form.append('files', file);
+    return form;
+}
+
+export async function runLayer1Verification(
+    examId: string,
+    bankType: string,
+    files: File[],
+): Promise<{ data: Layer1FileResult[] }> {
+    const form = buildBatchForm(examId, bankType, files);
+    return uploadFileToBackend(`${getBackendUrl()}/api/superadmin/verification/layer1`, form, 'POST');
+}
+
+export async function startLayer2Verification(
+    examId: string,
+    bankType: string,
+    files: File[],
+): Promise<{ data: { jobId: string } }> {
+    const form = buildBatchForm(examId, bankType, files);
+    return uploadFileToBackend(`${getBackendUrl()}/api/superadmin/verification/layer2`, form, 'POST');
+}
+
+/**
+ * POST /api/superadmin/verification/layer1/report — the CLI's colored .xlsx
+ * (Summary sheet with per-file answer-letter distribution, one sheet per
+ * file with every finding), not just the plain findings JSON runLayer1Verification returns.
+ */
+export async function downloadLayer1Report(
+    examId: string,
+    bankType: string,
+    files: File[],
+): Promise<{ blob: Blob; filename: string }> {
+    const form = buildBatchForm(examId, bankType, files);
+    return downloadFileFromBackend(`${getBackendUrl()}/api/superadmin/verification/layer1/report`, form);
+}
+
+/**
+ * GET /api/superadmin/verification/layer2/:jobId/report — the CLI's colored
+ * .xlsx for a completed judge run (green/amber/red/grey per row, blind-solve
+ * + adjudicator reasoning). Built from the job already held server-side —
+ * never triggers a fresh (paid) judge run.
+ */
+export async function downloadLayer2Report(jobId: string): Promise<{ blob: Blob; filename: string }> {
+    return downloadFileFromBackend(`${getBackendUrl()}/api/superadmin/verification/layer2/${jobId}/report`, undefined, 'GET');
+}
+
+export interface Layer2JobStatus {
+    status: 'pending' | 'done' | 'error';
+    startedAt: number;
+    result: unknown | null;
+    error: string | null;
+}
+
+export async function getLayer2JobStatus(jobId: string): Promise<{ data: Layer2JobStatus }> {
+    return callBackend(`${getBackendUrl()}/api/superadmin/verification/layer2/${jobId}`);
+}
+
+export interface ImportPlanFile {
+    fileName: string;
+    gateBlocked: string | null;
+    toInsert: number;
+    toUpdate: number;
+    unchanged: number;
+    errors: string[];
+    updates: { source_key: string; changed: string[] }[];
+}
+
+export async function planImportBatch(
+    examId: string,
+    bankType: string,
+    files: File[],
+): Promise<{ data: ImportPlanFile[] }> {
+    const form = buildBatchForm(examId, bankType, files);
+    return uploadFileToBackend(`${getBackendUrl()}/api/superadmin/verification/import/plan`, form, 'POST');
+}
+
+export interface ImportConfirmFile {
+    fileName: string;
+    gateBlocked: string | null;
+    inserted: number;
+    updated: number;
+    unchanged: number;
+    failed: number;
+    errors: string[];
+}
+
+/**
+ * POST /api/superadmin/verification/tag — stamps source_key onto each row
+ * (reusing already-issued keys from the DB, allocating new ones for the
+ * rest) and returns one combined tagged CSV, same as the CLI's
+ * key-assignment-tool output. Pass one file for a single-file download, or
+ * the whole selected batch for one combined "all" file.
+ */
+export async function tagBatchFiles(
+    examId: string,
+    bankType: string,
+    files: File[],
+): Promise<{ blob: Blob; filename: string }> {
+    const form = buildBatchForm(examId, bankType, files);
+    return downloadFileFromBackend(`${getBackendUrl()}/api/superadmin/verification/tag`, form);
+}
+
+export async function confirmImportBatch(
+    examId: string,
+    bankType: string,
+    files: File[],
+    layer2Reviewed: boolean,
+): Promise<{ data: ImportConfirmFile[] }> {
+    const form = buildBatchForm(examId, bankType, files, { layer2Reviewed: String(layer2Reviewed) });
+    return uploadFileToBackend(`${getBackendUrl()}/api/superadmin/verification/import/confirm`, form, 'POST');
 }
 
 /**

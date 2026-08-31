@@ -151,3 +151,46 @@ export async function uploadFileToBackend(
 
   return res.json();
 }
+
+/**
+ * Send a FormData body (POST) or a plain GET and get back a raw file (not
+ * JSON) — e.g. a CSV/xlsx export. Reads the filename from
+ * Content-Disposition when the server sets one, falling back to a generic
+ * name otherwise. Pass method: 'GET' with formData omitted for a bodyless
+ * download (GET requests cannot carry a body).
+ */
+export async function downloadFileFromBackend(
+  path: string,
+  formData?: FormData,
+  method: 'POST' | 'GET' = 'POST'
+): Promise<{ blob: Blob; filename: string }> {
+  if (!navigator.onLine) {
+    const err = new Error("You're offline — please check your internet connection");
+    (err as any).isOffline = true;
+    (err as any)._toasted = true;
+    throw err;
+  }
+
+  const token = await getAccessToken();
+
+  let res: Response;
+  try {
+    res = await fetch(path, {
+      method,
+      headers: { Authorization: `Bearer ${token}` },
+      ...(method === 'POST' ? { body: formData } : {}),
+    });
+  } catch (err) {
+    handleNetworkError(err);
+  }
+
+  if (!res.ok) {
+    await handleHttpError(res);
+  }
+
+  const disposition = res.headers.get('Content-Disposition') ?? '';
+  const match = /filename="?([^";]+)"?/.exec(disposition);
+  const filename = match?.[1] ?? 'download';
+
+  return { blob: await res.blob(), filename };
+}
