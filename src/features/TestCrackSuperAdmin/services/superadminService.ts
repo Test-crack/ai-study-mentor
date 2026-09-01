@@ -165,8 +165,8 @@ export async function fetchExamConfig(examId: string): Promise<{ data: any }> {
 
 // ─── Question-bank verification panel ───────────────────────────────────────
 // Thin wrapper around /api/superadmin/verification/*. Backend is forked per
-// exam/bank-type the same way the CLI tooling is (see CLAUDE.md) — only
-// ielts/drill is wired up server-side today.
+// exam/bank-type the same way the CLI tooling is (see CLAUDE.md) —
+// ielts/drill and ielts/diagnostic are wired up server-side.
 
 export interface CoverageSkill {
     skill: string;
@@ -178,6 +178,8 @@ export interface CoverageEntry {
     label: string;
     bankType: string;
     skills: CoverageSkill[];
+    /** Diagnostic only — content lives in fixed sets (import updates one in place, never creates new). */
+    setCount?: number;
 }
 
 export async function fetchVerificationCoverage(): Promise<{ data: CoverageEntry[] }> {
@@ -312,6 +314,107 @@ export async function confirmImportBatch(
 ): Promise<{ data: ImportConfirmFile[] }> {
     const form = buildBatchForm(examId, bankType, files, { layer2Reviewed: String(layer2Reviewed) });
     return uploadFileToBackend(`${getBackendUrl()}/api/superadmin/verification/import/confirm`, form, 'POST');
+}
+
+// ─── Diagnostic import (update-in-place — genuinely different shape from
+// drills' upsert-by-source_key; see backend CLAUDE.md and the controller's
+// own comments). One staging file per request, matched 1:1 by sequence
+// against an EXISTING set_id — never inserts, never creates a new set.
+
+export interface DiagnosticRowDiff {
+    sequence: number;
+    before: { question_type: string; prompt_text: string; correct_answer: string | null };
+    after: {
+        question_type: string;
+        prompt_text: string;
+        options: unknown;
+        correct_answer: string | null;
+        min_words: number | null;
+        passage_text: string | null;
+        audio_url: string | null;
+        created_at: string;
+    };
+}
+
+export interface DiagnosticImportPlanResult {
+    fileName: string;
+    setId: string;
+    gateBlocked: string | null;
+    updates: DiagnosticRowDiff[];
+}
+
+export interface DiagnosticImportConfirmResult {
+    fileName: string;
+    setId: string;
+    updated: number;
+    backupFile: string;
+}
+
+function buildDiagnosticImportForm(
+    file: File,
+    setId: string,
+    sourceSetId: string | undefined,
+    audioUrlPrefix: string,
+    extra?: Record<string, string>,
+): FormData {
+    const form = new FormData();
+    form.append('examId', 'ielts');
+    form.append('bankType', 'diagnostic');
+    form.append('setId', setId);
+    if (sourceSetId) form.append('sourceSetId', sourceSetId);
+    form.append('audioUrlPrefix', audioUrlPrefix);
+    for (const [k, v] of Object.entries(extra ?? {})) form.append(k, v);
+    form.append('files', file);
+    return form;
+}
+
+export async function planDiagnosticImportBatch(
+    file: File,
+    setId: string,
+    sourceSetId: string | undefined,
+    audioUrlPrefix: string,
+): Promise<{ data: DiagnosticImportPlanResult }> {
+    const form = buildDiagnosticImportForm(file, setId, sourceSetId, audioUrlPrefix);
+    return uploadFileToBackend(`${getBackendUrl()}/api/superadmin/verification/import/plan`, form, 'POST');
+}
+
+export async function confirmDiagnosticImportBatch(
+    file: File,
+    setId: string,
+    sourceSetId: string | undefined,
+    audioUrlPrefix: string,
+    layer2Reviewed: boolean,
+): Promise<{ data: DiagnosticImportConfirmResult }> {
+    const form = buildDiagnosticImportForm(file, setId, sourceSetId, audioUrlPrefix, { layer2Reviewed: String(layer2Reviewed) });
+    return uploadFileToBackend(`${getBackendUrl()}/api/superadmin/verification/import/confirm`, form, 'POST');
+}
+
+export interface DiagnosticBackup {
+    fileName: string;
+    modifiedAt: string;
+    rowCount: number;
+}
+
+export async function fetchDiagnosticBackups(setId: string): Promise<{ data: DiagnosticBackup[] }> {
+    const qs = new URLSearchParams({ setId });
+    return callBackend(`${getBackendUrl()}/api/superadmin/verification/import/backups?${qs.toString()}`);
+}
+
+export interface DiagnosticRestoreResult {
+    setId: string;
+    rowCount: number;
+    wouldRestore: boolean;
+    written: boolean;
+}
+
+export async function restoreDiagnosticBackup(
+    backupFile: string,
+    confirm: boolean,
+): Promise<{ data: DiagnosticRestoreResult }> {
+    return callBackend(`${getBackendUrl()}/api/superadmin/verification/import/restore`, {
+        method: 'POST',
+        body: JSON.stringify({ backupFile, confirm }),
+    });
 }
 
 /**

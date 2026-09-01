@@ -19,10 +19,17 @@ import {
     tagBatchFiles,
     downloadLayer1Report,
     downloadLayer2Report,
+    planDiagnosticImportBatch,
+    confirmDiagnosticImportBatch,
+    fetchDiagnosticBackups,
+    restoreDiagnosticBackup,
     type CoverageEntry,
     type Layer1FileResult,
     type ImportPlanFile,
     type ImportConfirmFile,
+    type DiagnosticImportPlanResult,
+    type DiagnosticImportConfirmResult,
+    type DiagnosticBackup,
 } from '../services/superadminService';
 import {
     ShieldCheck,
@@ -37,10 +44,14 @@ import {
     Lock,
     Unlock,
     X,
+    RotateCcw,
 } from 'lucide-react';
 
 const EXAM_OPTIONS = [{ id: 'ielts', label: 'IELTS Preparation' }];
-const BANK_TYPE_OPTIONS = [{ id: 'drill', label: 'Drill' }];
+const BANK_TYPE_OPTIONS = [
+    { id: 'drill', label: 'Drill' },
+    { id: 'diagnostic', label: 'Diagnostic' },
+];
 
 type Stage = 'idle' | 'layer1' | 'layer2' | 'plan' | 'confirm';
 
@@ -124,6 +135,24 @@ export default function QuestionVerification() {
     const [importPlan, setImportPlan] = useState<ImportPlanFile[] | null>(null);
     const [importResult, setImportResult] = useState<ImportConfirmFile[] | null>(null);
 
+    // Diagnostic-only: update-in-place needs setId/sourceSetId/audioUrlPrefix
+    // instead of drills' upsert-by-source_key, and its plan/confirm responses
+    // are a per-row before/after diff, not per-file insert/update counts.
+    const [diagnosticSetId, setDiagnosticSetId] = useState('');
+    const [diagnosticSourceSetId, setDiagnosticSourceSetId] = useState('');
+    const [diagnosticAudioUrlPrefix, setDiagnosticAudioUrlPrefix] = useState('/diagnostics/audio/');
+    const [diagnosticPlan, setDiagnosticPlan] = useState<DiagnosticImportPlanResult | null>(null);
+    const [diagnosticConfirmResult, setDiagnosticConfirmResult] = useState<DiagnosticImportConfirmResult | null>(null);
+
+    // Diagnostic-only: restore a set from one of import/confirm's automatic
+    // backups. Deliberately its own section, separate from the normal
+    // verify/import flow — this is a rollback action, not a step in it.
+    const [restoreSetId, setRestoreSetId] = useState('');
+    const [backups, setBackups] = useState<DiagnosticBackup[] | null>(null);
+    const [loadingBackups, setLoadingBackups] = useState(false);
+    const [selectedBackup, setSelectedBackup] = useState<string | null>(null);
+    const [restoring, setRestoring] = useState(false);
+
     const [showLayer2Raw, setShowLayer2Raw] = useState(false);
     const [taggingFile, setTaggingFile] = useState<string | null>(null);
     const [taggingAll, setTaggingAll] = useState(false);
@@ -162,6 +191,8 @@ export default function QuestionVerification() {
         setImportPlan(null);
         setImportResult(null);
         setShowLayer2Raw(false);
+        setDiagnosticPlan(null);
+        setDiagnosticConfirmResult(null);
     };
 
     const onFilesChosen = (list: FileList | null) => {
@@ -303,6 +334,68 @@ export default function QuestionVerification() {
         }
     };
 
+    const runDiagnosticPlan = async () => {
+        if (importFiles.length === 0 || !diagnosticSetId.trim()) return;
+        setStage('plan');
+        try {
+            const r = await planDiagnosticImportBatch(importFiles[0], diagnosticSetId.trim(), diagnosticSourceSetId.trim() || undefined, diagnosticAudioUrlPrefix);
+            setDiagnosticPlan(r.data);
+        } catch (err: any) {
+            toast({ title: 'Import plan failed', description: err?.message, variant: 'destructive' });
+        } finally {
+            setStage('idle');
+        }
+    };
+
+    const runDiagnosticConfirm = async () => {
+        if (importFiles.length === 0 || !diagnosticSetId.trim()) return;
+        setStage('confirm');
+        try {
+            const r = await confirmDiagnosticImportBatch(
+                importFiles[0],
+                diagnosticSetId.trim(),
+                diagnosticSourceSetId.trim() || undefined,
+                diagnosticAudioUrlPrefix,
+                layer2Reviewed,
+            );
+            setDiagnosticConfirmResult(r.data);
+            toast({ title: 'Import complete', description: `${r.data.updated} row(s) updated in "${r.data.setId}". Backup: ${r.data.backupFile}` });
+        } catch (err: any) {
+            toast({ title: 'Import failed', description: err?.message, variant: 'destructive' });
+        } finally {
+            setStage('idle');
+        }
+    };
+
+    const loadBackups = async () => {
+        if (!restoreSetId.trim()) return;
+        setLoadingBackups(true);
+        setSelectedBackup(null);
+        try {
+            const r = await fetchDiagnosticBackups(restoreSetId.trim());
+            setBackups(r.data);
+        } catch (err: any) {
+            toast({ title: 'Failed to list backups', description: err?.message, variant: 'destructive' });
+        } finally {
+            setLoadingBackups(false);
+        }
+    };
+
+    const runRestore = async () => {
+        if (!selectedBackup) return;
+        setRestoring(true);
+        try {
+            const r = await restoreDiagnosticBackup(selectedBackup, true);
+            toast({ title: 'Restore complete', description: `${r.data.rowCount} row(s) restored in "${r.data.setId}".` });
+            loadBackups();
+        } catch (err: any) {
+            toast({ title: 'Restore failed', description: err?.message, variant: 'destructive' });
+        } finally {
+            setRestoring(false);
+        }
+    };
+
+    const isDiagnostic = bankType === 'diagnostic';
     const layer1Clean = layer1Results !== null && layer1Results.every(f => f.outcome !== 'fail');
     const planPending = importPlan?.some(f => f.toInsert + f.toUpdate > 0) ?? false;
 
@@ -326,8 +419,9 @@ export default function QuestionVerification() {
                         <div className="flex items-start gap-3 rounded-xl border border-brand-teal-100 bg-brand-teal-50 p-4">
                             <ShieldCheck className="w-5 h-5 text-brand-teal-600 shrink-0 mt-0.5" />
                             <p className="text-[13px] text-brand-text">
-                                Import remains locked until both layers pass cleanly. Only <b>IELTS / Drill</b> is wired up here today — the
-                                pipeline is deliberately forked per exam/bank-type, the same way the CLI tooling is.
+                                Import remains locked until both layers pass cleanly. Only <b>IELTS / Drill</b> and <b>IELTS / Diagnostic</b> are
+                                wired up here today — the pipeline is deliberately forked per exam/bank-type, the same way the CLI tooling is.
+                                Diagnostic has no tagging step and updates an existing set in place rather than inserting.
                             </p>
                         </div>
 
@@ -340,7 +434,9 @@ export default function QuestionVerification() {
                                 {coverage.map(c => (
                                     <div key={`${c.examId}-${c.bankType}`} className="rounded-lg border border-brand-line p-3">
                                         <p className="font-semibold text-sm">{c.label}</p>
-                                        <p className="text-[11px] text-brand-text-mute uppercase tracking-wide mb-2">{c.bankType}</p>
+                                        <p className="text-[11px] text-brand-text-mute uppercase tracking-wide mb-2">
+                                            {c.bankType}{c.setCount !== undefined ? ` · ${c.setCount} sets` : ''}
+                                        </p>
                                         <div className="flex flex-wrap gap-1.5">
                                             {c.skills.map(s => (
                                                 <span key={s.skill} className="px-2 py-0.5 rounded-md bg-brand-bg text-[11px] font-medium border border-brand-line">
@@ -411,7 +507,7 @@ export default function QuestionVerification() {
                                         <div className="flex items-center justify-between gap-2 flex-wrap">
                                             <p className="text-[11px] font-semibold uppercase tracking-wide text-brand-text-mute">Layer 1 — structural</p>
                                             <div className="flex items-center gap-3">
-                                                {layer1Clean && files.length > 1 && (
+                                                {!isDiagnostic && layer1Clean && files.length > 1 && (
                                                     <button
                                                         onClick={downloadTaggedCsvAll}
                                                         disabled={taggingAll}
@@ -442,7 +538,7 @@ export default function QuestionVerification() {
                                                         [{finding.severity}] {finding.message}
                                                     </p>
                                                 ))}
-                                                {f.outcome !== 'fail' && (
+                                                {!isDiagnostic && f.outcome !== 'fail' && (
                                                     <button
                                                         onClick={() => downloadTaggedCsv(f.fileName)}
                                                         disabled={taggingFile === f.fileName}
@@ -545,22 +641,54 @@ export default function QuestionVerification() {
                                 <div className="rounded-xl border border-brand-line bg-brand-bg-alt p-4 space-y-3">
                                     <p className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-mute">Import gate</p>
                                     <p className="text-[12px] text-brand-text-mute">
-                                        Upload the <b>tagged</b> CSV(s) — downloaded above — not the raw batch. Import reruns the Layer 1 gate
-                                        server-side; a previous result is never trusted as authorization to write.
+                                        {isDiagnostic
+                                            ? 'Upload the verified staging CSV. This UPDATES an existing set_id in place, row by row by sequence — it never creates a new set. A backup is taken automatically before writing.'
+                                            : <>Upload the <b>tagged</b> CSV(s) — downloaded above — not the raw batch. Import reruns the Layer 1 gate server-side; a previous result is never trusted as authorization to write.</>}
                                     </p>
+
+                                    {isDiagnostic && (
+                                        <div className="space-y-2">
+                                            <div>
+                                                <label className="text-[11px] text-brand-text-mute">Set ID (existing, required)</label>
+                                                <input
+                                                    value={diagnosticSetId}
+                                                    onChange={e => { setDiagnosticSetId(e.target.value); setDiagnosticPlan(null); setDiagnosticConfirmResult(null); }}
+                                                    placeholder="e.g. RD_B_01"
+                                                    className="w-full mt-1 rounded-lg border border-brand-line bg-brand-bg px-3 py-2 text-sm"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-[11px] text-brand-text-mute">Source set ID (optional — when the file bundles more than one set)</label>
+                                                <input
+                                                    value={diagnosticSourceSetId}
+                                                    onChange={e => { setDiagnosticSourceSetId(e.target.value); setDiagnosticPlan(null); setDiagnosticConfirmResult(null); }}
+                                                    placeholder="e.g. RD_BATCH1_01"
+                                                    className="w-full mt-1 rounded-lg border border-brand-line bg-brand-bg px-3 py-2 text-sm"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-[11px] text-brand-text-mute">Audio URL prefix</label>
+                                                <input
+                                                    value={diagnosticAudioUrlPrefix}
+                                                    onChange={e => setDiagnosticAudioUrlPrefix(e.target.value)}
+                                                    className="w-full mt-1 rounded-lg border border-brand-line bg-brand-bg px-3 py-2 text-sm"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
 
                                     <button
                                         onClick={() => importFileInputRef.current?.click()}
                                         className="w-full flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-brand-line py-4 text-brand-text-mute hover:border-brand-teal-400 hover:text-brand-teal-600 transition-colors text-xs font-medium"
                                     >
                                         <Upload className="w-4 h-4" />
-                                        Choose tagged CSV file(s)
+                                        {isDiagnostic ? 'Choose staging CSV' : 'Choose tagged CSV file(s)'}
                                     </button>
                                     <input
                                         ref={importFileInputRef}
                                         type="file"
                                         accept=".csv"
-                                        multiple
+                                        multiple={!isDiagnostic}
                                         className="hidden"
                                         onChange={e => onImportFilesChosen(e.target.files)}
                                     />
@@ -584,15 +712,15 @@ export default function QuestionVerification() {
                                     )}
 
                                     <button
-                                        onClick={runPlan}
-                                        disabled={importFiles.length === 0 || stage !== 'idle'}
+                                        onClick={isDiagnostic ? runDiagnosticPlan : runPlan}
+                                        disabled={importFiles.length === 0 || stage !== 'idle' || (isDiagnostic && !diagnosticSetId.trim())}
                                         className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-brand-line text-sm font-semibold py-2 hover:border-brand-teal-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                     >
                                         {stage === 'plan' && <Loader2 className="w-4 h-4 animate-spin" />}
                                         Dry run (plan import)
                                     </button>
 
-                                    {importPlan && (
+                                    {!isDiagnostic && importPlan && (
                                         <div className="space-y-1.5">
                                             {importPlan.map(f => (
                                                 <div key={f.fileName} className="text-[11px] rounded-lg border border-brand-line p-2">
@@ -610,6 +738,25 @@ export default function QuestionVerification() {
                                         </div>
                                     )}
 
+                                    {isDiagnostic && diagnosticPlan && (
+                                        <div className="space-y-1.5">
+                                            {diagnosticPlan.gateBlocked ? (
+                                                <p className="text-[11px] text-brand-warm-danger rounded-lg border border-brand-line p-2">{diagnosticPlan.gateBlocked}</p>
+                                            ) : (
+                                                <>
+                                                    <p className="text-[11px] text-brand-text-mute">{diagnosticPlan.updates.length} row(s) to update in "{diagnosticPlan.setId}":</p>
+                                                    {diagnosticPlan.updates.map(u => (
+                                                        <div key={u.sequence} className="text-[11px] rounded-lg border border-brand-line p-2 space-y-0.5">
+                                                            <p className="font-medium">seq {u.sequence}: {u.before.question_type} → {u.after.question_type}</p>
+                                                            <p className="text-brand-text-mute truncate">old: {u.before.prompt_text}</p>
+                                                            <p className="text-brand-text-mute truncate">new: {u.after.prompt_text}</p>
+                                                        </div>
+                                                    ))}
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
+
                                     <label className="flex items-start gap-2 text-[12px] text-brand-text cursor-pointer">
                                         <input
                                             type="checkbox"
@@ -622,8 +769,12 @@ export default function QuestionVerification() {
                                     </label>
 
                                     <button
-                                        onClick={runConfirm}
-                                        disabled={!layer2Reviewed || !importPlan || !planPending || stage !== 'idle'}
+                                        onClick={isDiagnostic ? runDiagnosticConfirm : runConfirm}
+                                        disabled={
+                                            !layer2Reviewed ||
+                                            stage !== 'idle' ||
+                                            (isDiagnostic ? !diagnosticPlan || diagnosticPlan.updates.length === 0 : !importPlan || !planPending)
+                                        }
                                         className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-brand-ink text-brand-bg text-sm font-semibold py-2.5 hover:bg-brand-ink/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                     >
                                         {stage === 'confirm' ? (
@@ -636,7 +787,7 @@ export default function QuestionVerification() {
                                         {layer2Reviewed ? 'Confirm import (writes to DB)' : 'Import locked'}
                                     </button>
 
-                                    {importResult && (
+                                    {!isDiagnostic && importResult && (
                                         <div className="space-y-1.5">
                                             {importResult.map(f => (
                                                 <div key={f.fileName} className="text-[11px] rounded-lg border border-brand-line p-2">
@@ -653,7 +804,73 @@ export default function QuestionVerification() {
                                             ))}
                                         </div>
                                     )}
+
+                                    {isDiagnostic && diagnosticConfirmResult && (
+                                        <div className="text-[11px] rounded-lg border border-brand-line p-2">
+                                            <p className="text-brand-text-mute">
+                                                {diagnosticConfirmResult.updated} row(s) updated in "{diagnosticConfirmResult.setId}".
+                                                Backup: {diagnosticConfirmResult.backupFile}
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
+
+                                {/* Restore — diagnostic only, deliberately separate from the flow above */}
+                                {isDiagnostic && (
+                                    <div className="rounded-xl border border-brand-line bg-brand-bg-alt p-4 space-y-3">
+                                        <p className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-mute flex items-center gap-1.5">
+                                            <RotateCcw className="w-3.5 h-3.5" /> Restore (rollback)
+                                        </p>
+                                        <p className="text-[12px] text-brand-text-mute">
+                                            Undo a previous import/confirm using the automatic backup it left behind.
+                                        </p>
+                                        <div className="flex gap-2">
+                                            <input
+                                                value={restoreSetId}
+                                                onChange={e => setRestoreSetId(e.target.value)}
+                                                placeholder="Set ID, e.g. RD_B_01"
+                                                className="flex-1 rounded-lg border border-brand-line bg-brand-bg px-3 py-2 text-sm"
+                                            />
+                                            <button
+                                                onClick={loadBackups}
+                                                disabled={!restoreSetId.trim() || loadingBackups}
+                                                className="shrink-0 px-3 rounded-lg border border-brand-line text-xs font-semibold hover:border-brand-teal-400 disabled:opacity-50"
+                                            >
+                                                {loadingBackups ? <Loader2 className="w-4 h-4 animate-spin" /> : 'List backups'}
+                                            </button>
+                                        </div>
+
+                                        {backups && (
+                                            <div className="space-y-1.5">
+                                                {backups.length === 0 && <p className="text-[11px] text-brand-text-mute">No backups found for this set.</p>}
+                                                {backups.map(b => (
+                                                    <label
+                                                        key={b.fileName}
+                                                        className={`flex items-center gap-2 text-[11px] rounded-lg border p-2 cursor-pointer ${selectedBackup === b.fileName ? 'border-brand-teal-400 bg-brand-teal-50' : 'border-brand-line'}`}
+                                                    >
+                                                        <input
+                                                            type="radio"
+                                                            name="backup"
+                                                            checked={selectedBackup === b.fileName}
+                                                            onChange={() => setSelectedBackup(b.fileName)}
+                                                        />
+                                                        <span className="flex-1 truncate">{b.fileName}</span>
+                                                        <span className="text-brand-text-mute shrink-0">{b.rowCount} rows · {new Date(b.modifiedAt).toLocaleString()}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        <button
+                                            onClick={runRestore}
+                                            disabled={!selectedBackup || restoring}
+                                            className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-brand-warm-danger text-white text-sm font-semibold py-2.5 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                            {restoring ? <Loader2 className="w-4 h-4 animate-spin" /> : <RotateCcw className="w-4 h-4" />}
+                                            Restore from backup (writes to DB)
+                                        </button>
+                                    </div>
+                                )}
                             </section>
                         </div>
                     </div>
