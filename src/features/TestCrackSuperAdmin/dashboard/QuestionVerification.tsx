@@ -51,6 +51,7 @@ const EXAM_OPTIONS = [{ id: 'ielts', label: 'IELTS Preparation' }];
 const BANK_TYPE_OPTIONS = [
     { id: 'drill', label: 'Drill' },
     { id: 'diagnostic', label: 'Diagnostic' },
+    { id: 'ia', label: 'Internal Assessment' },
 ];
 
 type Stage = 'idle' | 'layer1' | 'layer2' | 'plan' | 'confirm';
@@ -115,6 +116,12 @@ export default function QuestionVerification() {
 
     const [files, setFiles] = useState<File[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Drill buckets are a fixed 200 rows; Diagnostic doesn't use this at all
+    // (it verifies each file against its own row count — see isDiagnostic
+    // branches below); IA buckets are much smaller (10-13 rows) and vary by
+    // content, so this needs to be user-editable rather than hardcoded.
+    const [expectedRows, setExpectedRows] = useState(200);
 
     // Import Gate's own upload — deliberately separate from the batch above.
     // Plan/Confirm need the *tagged* CSVs (source_key column), which are a
@@ -220,7 +227,7 @@ export default function QuestionVerification() {
         resetDownstream();
         setStage('layer1');
         try {
-            const r = await runLayer1Verification(examId, bankType, files);
+            const r = await runLayer1Verification(examId, bankType, files, expectedRows);
             setLayer1Results(r.data);
             const anyFail = r.data.some(f => f.outcome === 'fail');
             if (anyFail) {
@@ -245,7 +252,7 @@ export default function QuestionVerification() {
         if (!file) return;
         setTaggingFile(fileName);
         try {
-            const { blob, filename } = await tagBatchFiles(examId, bankType, [file]);
+            const { blob, filename } = await tagBatchFiles(examId, bankType, [file], expectedRows);
             saveBlob(blob, filename);
         } catch (err: any) {
             toast({ title: 'Tagging failed', description: err?.message, variant: 'destructive' });
@@ -257,7 +264,7 @@ export default function QuestionVerification() {
     const downloadTaggedCsvAll = async () => {
         setTaggingAll(true);
         try {
-            const { blob, filename } = await tagBatchFiles(examId, bankType, files);
+            const { blob, filename } = await tagBatchFiles(examId, bankType, files, expectedRows);
             saveBlob(blob, filename);
         } catch (err: any) {
             toast({ title: 'Tagging failed', description: err?.message, variant: 'destructive' });
@@ -269,7 +276,7 @@ export default function QuestionVerification() {
     const downloadLayer1ReportFile = async () => {
         setDownloadingLayer1Report(true);
         try {
-            const { blob, filename } = await downloadLayer1Report(examId, bankType, files);
+            const { blob, filename } = await downloadLayer1Report(examId, bankType, files, expectedRows);
             saveBlob(blob, filename);
         } catch (err: any) {
             toast({ title: 'Report failed', description: err?.message, variant: 'destructive' });
@@ -308,7 +315,7 @@ export default function QuestionVerification() {
     const runPlan = async () => {
         setStage('plan');
         try {
-            const r = await planImportBatch(examId, bankType, importFiles);
+            const r = await planImportBatch(examId, bankType, importFiles, expectedRows);
             setImportPlan(r.data);
         } catch (err: any) {
             toast({ title: 'Import plan failed', description: err?.message, variant: 'destructive' });
@@ -320,7 +327,7 @@ export default function QuestionVerification() {
     const runConfirm = async () => {
         setStage('confirm');
         try {
-            const r = await confirmImportBatch(examId, bankType, importFiles, layer2Reviewed);
+            const r = await confirmImportBatch(examId, bankType, importFiles, layer2Reviewed, expectedRows);
             setImportResult(r.data);
             const totalWritten = r.data.reduce((n, f) => n + f.inserted + f.updated, 0);
             toast({
@@ -630,12 +637,36 @@ export default function QuestionVerification() {
                                         <label className="text-[11px] text-brand-text-mute">Bank type</label>
                                         <select
                                             value={bankType}
-                                            onChange={e => { setBankType(e.target.value); resetDownstream(); }}
+                                            onChange={e => {
+                                                const next = e.target.value;
+                                                setBankType(next);
+                                                // Drill buckets are a fixed 200 rows; IA buckets are much
+                                                // smaller (10-13) and vary by content — nudge the default
+                                                // so switching bank types doesn't silently fail Layer 1's
+                                                // row-count gate on real IA content.
+                                                if (next === 'ia' && expectedRows === 200) setExpectedRows(10);
+                                                if (next === 'drill' && expectedRows === 10) setExpectedRows(200);
+                                                resetDownstream();
+                                            }}
                                             className="w-full mt-1 rounded-lg border border-brand-line bg-brand-bg px-3 py-2 text-sm"
                                         >
                                             {BANK_TYPE_OPTIONS.map(b => <option key={b.id} value={b.id}>{b.label}</option>)}
                                         </select>
                                     </div>
+                                    {!isDiagnostic && (
+                                        <div>
+                                            <label className="text-[11px] text-brand-text-mute">
+                                                Expected rows per file (Drills buckets are 200; IA buckets are typically 10-13 — check the batch before running)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                min={1}
+                                                value={expectedRows}
+                                                onChange={e => { setExpectedRows(Math.max(1, Number(e.target.value) || 1)); resetDownstream(); }}
+                                                className="w-full mt-1 rounded-lg border border-brand-line bg-brand-bg px-3 py-2 text-sm"
+                                            />
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="rounded-xl border border-brand-line bg-brand-bg-alt p-4 space-y-3">

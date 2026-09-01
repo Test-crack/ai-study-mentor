@@ -212,8 +212,9 @@ export async function runLayer1Verification(
     examId: string,
     bankType: string,
     files: File[],
+    expected?: number,
 ): Promise<{ data: Layer1FileResult[] }> {
-    const form = buildBatchForm(examId, bankType, files);
+    const form = buildBatchForm(examId, bankType, files, expected ? { expected: String(expected) } : undefined);
     return uploadFileToBackend(`${getBackendUrl()}/api/superadmin/verification/layer1`, form, 'POST');
 }
 
@@ -235,8 +236,9 @@ export async function downloadLayer1Report(
     examId: string,
     bankType: string,
     files: File[],
+    expected?: number,
 ): Promise<{ blob: Blob; filename: string }> {
-    const form = buildBatchForm(examId, bankType, files);
+    const form = buildBatchForm(examId, bankType, files, expected ? { expected: String(expected) } : undefined);
     return downloadFileFromBackend(`${getBackendUrl()}/api/superadmin/verification/layer1/report`, form);
 }
 
@@ -275,8 +277,9 @@ export async function planImportBatch(
     examId: string,
     bankType: string,
     files: File[],
+    expected?: number,
 ): Promise<{ data: ImportPlanFile[] }> {
-    const form = buildBatchForm(examId, bankType, files);
+    const form = buildBatchForm(examId, bankType, files, expected ? { expected: String(expected) } : undefined);
     return uploadFileToBackend(`${getBackendUrl()}/api/superadmin/verification/import/plan`, form, 'POST');
 }
 
@@ -301,8 +304,9 @@ export async function tagBatchFiles(
     examId: string,
     bankType: string,
     files: File[],
+    expected?: number,
 ): Promise<{ blob: Blob; filename: string }> {
-    const form = buildBatchForm(examId, bankType, files);
+    const form = buildBatchForm(examId, bankType, files, expected ? { expected: String(expected) } : undefined);
     return downloadFileFromBackend(`${getBackendUrl()}/api/superadmin/verification/tag`, form);
 }
 
@@ -311,8 +315,12 @@ export async function confirmImportBatch(
     bankType: string,
     files: File[],
     layer2Reviewed: boolean,
+    expected?: number,
 ): Promise<{ data: ImportConfirmFile[] }> {
-    const form = buildBatchForm(examId, bankType, files, { layer2Reviewed: String(layer2Reviewed) });
+    const form = buildBatchForm(examId, bankType, files, {
+        layer2Reviewed: String(layer2Reviewed),
+        ...(expected ? { expected: String(expected) } : {}),
+    });
     return uploadFileToBackend(`${getBackendUrl()}/api/superadmin/verification/import/confirm`, form, 'POST');
 }
 
