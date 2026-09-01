@@ -1,9 +1,6 @@
 // SuperAdmin — Question-Bank Verification panel.
-// Web front end for the CLI verification/import pipeline (see backend
-// CLAUDE.md): Layer 1 (structural, free/fast) → Layer 2 (LLM answer/
-// difficulty audit, slow/costly, runs as a background job) → import dry-run
-// (insert/update/unchanged counts) → gated real write. Which exam/bank-type
-// combinations are wired up is decided server-side (SUPPORTED_FORKS).
+// Front end for the CLI verification/import pipeline (see backend CLAUDE.md).
+// Wired exam/bank-type combinations are decided server-side (SUPPORTED_FORKS).
 import { useEffect, useRef, useState } from 'react';
 import { SuperAdminSidebar } from '../Components/SuperadminSidebar';
 import { SuperAdminTopbar } from '../Components/Superadmintopbar';
@@ -54,6 +51,7 @@ const BANK_TYPE_OPTIONS = [
     { id: 'drill', label: 'Drill' },
     { id: 'diagnostic', label: 'Diagnostic' },
     { id: 'ia', label: 'Internal Assessment' },
+    { id: 'mock', label: 'Mock Test' },
 ];
 // Spoken English only has Drill wired up — Diagnostic/IA would otherwise
 // show as pickable and then fail with "no verification pipeline" on submit.
@@ -124,16 +122,12 @@ export default function QuestionVerification() {
     const [files, setFiles] = useState<File[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Drill buckets are a fixed 200 rows; Diagnostic doesn't use this at all
-    // (it verifies each file against its own row count — see isDiagnostic
-    // branches below); IA buckets are much smaller (10-13 rows) and vary by
-    // content, so this needs to be user-editable rather than hardcoded.
-    const [expectedRows, setExpectedRows] = useState(200);
+    // String, not number — coercing on every keystroke means the field can
+    // never be empty, so backspacing jumps straight to "1".
+    const [expectedRowsInput, setExpectedRowsInput] = useState('200');
+    const expectedRows = Math.max(1, Number(expectedRowsInput) || 1);
 
-    // Import Gate's own upload — deliberately separate from the batch above.
-    // Plan/Confirm need the *tagged* CSVs (source_key column), which are a
-    // different file than whatever was verified — downloaded from "Tagged
-    // CSV" above, then picked here.
+    // Separate from the batch above — Import needs the tagged CSVs, not the raw ones.
     const [importFiles, setImportFiles] = useState<File[]>([]);
     const importFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -149,18 +143,14 @@ export default function QuestionVerification() {
     const [importPlan, setImportPlan] = useState<ImportPlanFile[] | null>(null);
     const [importResult, setImportResult] = useState<ImportConfirmFile[] | null>(null);
 
-    // Diagnostic-only: update-in-place needs setId/sourceSetId/audioUrlPrefix
-    // instead of drills' upsert-by-source_key, and its plan/confirm responses
-    // are a per-row before/after diff, not per-file insert/update counts.
+    // Diagnostic-only: update-in-place, not upsert-by-source_key.
     const [diagnosticSetId, setDiagnosticSetId] = useState('');
     const [diagnosticSourceSetId, setDiagnosticSourceSetId] = useState('');
     const [diagnosticAudioUrlPrefix, setDiagnosticAudioUrlPrefix] = useState('/diagnostics/audio/');
     const [diagnosticPlan, setDiagnosticPlan] = useState<DiagnosticImportPlanResult | null>(null);
     const [diagnosticConfirmResult, setDiagnosticConfirmResult] = useState<DiagnosticImportConfirmResult | null>(null);
 
-    // Diagnostic-only: restore a set from one of import/confirm's automatic
-    // backups. Deliberately its own section, separate from the normal
-    // verify/import flow — this is a rollback action, not a step in it.
+    // Diagnostic-only: rollback to a prior import/confirm backup.
     const [restoreSetId, setRestoreSetId] = useState('');
     const [backups, setBackups] = useState<DiagnosticBackup[] | null>(null);
     const [loadingBackups, setLoadingBackups] = useState(false);
@@ -217,12 +207,8 @@ export default function QuestionVerification() {
 
     const removeFile = (name: string) => {
         setFiles(prev => prev.filter(f => f.name !== name));
-        // The removed file may have already been verified — those results no
-        // longer describe the current batch, so drop them rather than show a
-        // stale pass/fail for a file that isn't part of it anymore.
-        resetDownstream();
-        // Clear the native input too, or re-choosing the exact same file later
-        // won't fire a change event (browsers dedupe by identical FileList).
+        resetDownstream(); // old results no longer describe this batch
+        // re-choosing the same file later needs the input cleared, or no change event fires
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
@@ -637,9 +623,7 @@ export default function QuestionVerification() {
                                             onChange={e => {
                                                 const next = e.target.value;
                                                 setExamId(next);
-                                                // Spoken English only has one bank type wired up — avoid
-                                                // landing on a dead "no pipeline for this combination" error
-                                                // by switching away from Diagnostic/IA automatically.
+                                                // avoid landing on Diagnostic/IA, which aren't wired up for it
                                                 if (next === 'spoken_english' && bankType !== 'drill') setBankType('drill');
                                                 resetDownstream();
                                             }}
@@ -655,12 +639,9 @@ export default function QuestionVerification() {
                                             onChange={e => {
                                                 const next = e.target.value;
                                                 setBankType(next);
-                                                // Drill buckets are a fixed 200 rows; IA buckets are much
-                                                // smaller (10-13) and vary by content — nudge the default
-                                                // so switching bank types doesn't silently fail Layer 1's
-                                                // row-count gate on real IA content.
-                                                if (next === 'ia' && expectedRows === 200) setExpectedRows(10);
-                                                if (next === 'drill' && expectedRows === 10) setExpectedRows(200);
+                                                // nudge the default row count — Drill is 200, IA is ~10-13
+                                                if (next === 'ia' && expectedRowsInput === '200') setExpectedRowsInput('10');
+                                                if (next === 'drill' && expectedRowsInput === '10') setExpectedRowsInput('200');
                                                 resetDownstream();
                                             }}
                                             className="w-full mt-1 rounded-lg border border-brand-line bg-brand-bg px-3 py-2 text-sm"
@@ -676,8 +657,8 @@ export default function QuestionVerification() {
                                             <input
                                                 type="number"
                                                 min={1}
-                                                value={expectedRows}
-                                                onChange={e => { setExpectedRows(Math.max(1, Number(e.target.value) || 1)); resetDownstream(); }}
+                                                value={expectedRowsInput}
+                                                onChange={e => { setExpectedRowsInput(e.target.value); resetDownstream(); }}
                                                 className="w-full mt-1 rounded-lg border border-brand-line bg-brand-bg px-3 py-2 text-sm"
                                             />
                                         </div>
