@@ -124,7 +124,7 @@ export const StudentSidebar = ({
 
   // Spoken English (cohort 1): hide the IELTS-only surfaces. Keep Dashboard, LexiGrid
   // (a standalone feature for SE), and How It Works.
-  const SE_ALLOWED = new Set(['dashboard', 'games', 'how-it-works']);
+  const SE_ALLOWED = new Set(['dashboard', 'games', 'internal', 'how-it-works']);
 
   const filteredGroups = menuGroups.map(group => {
     if (isSpokenEnglish(examSlug)) {

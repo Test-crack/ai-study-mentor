@@ -8,6 +8,9 @@ import type { McqDrillResult } from './McqDrill';
 import DrillResultCard from './DrillResultCard';
 import { callBackend } from '@/features/auth/services/authClient';
 import { useMomentum } from '@/features/student/Context/MomentumContext';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { isSpokenEnglish } from '@/features/student/utils/exam';
+import { seSubskill, seSubskillByEnum } from '@/features/student/config/spokenEnglishSubskills';
 import { ArrowLeft, Headphones, BookOpen, PenLine, Mic, Loader2, AlertTriangle } from 'lucide-react';
 
 interface DrillAnswer {
@@ -80,7 +83,8 @@ const DARK_HERO_GRID: React.CSSProperties = {
 interface QueueEntry {
   name: string;
   skill: string;
-  score: number;
+  score: number;         // numeric, for sorting (band for IELTS, subskill % for SE)
+  display?: string;      // shown instead of score when set (e.g. a CEFR level "B1" for SE)
   isCurrent: boolean;
 }
 
@@ -111,7 +115,7 @@ const FocusQueueRow = ({ entry, pos, large }: { entry: QueueEntry; pos: number; 
       <div className={`${large ? 'text-[12.5px]' : 'text-[11.5px]'} text-brand-text-mute/70 mt-0.5`}>{toTitleCase(entry.skill)}</div>
     </div>
     <span className={`font-jetbrains font-bold ${large ? 'text-base' : 'text-sm'} ${entry.isCurrent ? 'text-brand-teal-600' : 'text-brand-text-mute'}`}>
-      {entry.score.toFixed(1)}
+      {entry.display ?? entry.score.toFixed(1)}
     </span>
   </div>
 );
@@ -120,6 +124,8 @@ export default function DrillScreen() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { syncMomentum, updateStreak } = useMomentum();
+  const { profile } = useAuth();
+  const isSE = isSpokenEnglish(profile?.examId);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
   const skill    = searchParams.get('skill')     || 'SPEAKING';
@@ -149,6 +155,7 @@ export default function DrillScreen() {
   const [showBrief, setShowBrief]                     = useState(true);
   const [queueEntries, setQueueEntries]               = useState<QueueEntry[]>([]);
   const [currentSubScore, setCurrentSubScore]         = useState<number | null>(null);
+  const [currentSubDisplay, setCurrentSubDisplay]     = useState<string | null>(null); // CEFR level for SE
 
   // ── Per-question correctness, in answer order — powers the sidebar tally ──
   const [answerResults, setAnswerResults]             = useState<boolean[]>([]);
@@ -280,6 +287,32 @@ export default function DrillScreen() {
         const res = await callBackend(`${backendUrl}/api/student/competency-scores`);
         if (!res.success || !res.data) return;
 
+        // Spoken English: the SPEAKING row's sub_scores is CEFR-shaped (subskillProfile
+        // array + levels), not the IELTS numeric band shape. Build the focus queue from it
+        // with the SE labels and CEFR levels.
+        if (isSE) {
+          const speaking = res.data.find((r: any) => r.skill === 'SPEAKING');
+          const prof: any[] = speaking?.sub_scores?.subskillProfile ?? [];
+          const seEntries: QueueEntry[] = [];
+          for (const p of prof) {
+            const se = seSubskill(p.id);
+            if (!se) continue;
+            seEntries.push({
+              name: se.label,
+              skill: 'Speaking',
+              score: Number(p.score ?? 0),
+              display: (p.level || '').toUpperCase(),
+              isCurrent: se.drillSubskill === subSkill.toUpperCase(),
+            });
+          }
+          seEntries.sort((a, b) => a.score - b.score);
+          setQueueEntries(seEntries.slice(0, 4));
+          const cur = seEntries.find((e) => e.isCurrent);
+          setCurrentSubScore(cur?.score ?? null);
+          setCurrentSubDisplay(cur?.display ?? null);
+          return;
+        }
+
         const targetSkillUp = skill.toUpperCase();
         const targetSubNorm = normaliseSubSkillKey(subSkill);
         const entries: QueueEntry[] = [];
@@ -308,7 +341,7 @@ export default function DrillScreen() {
       }
     };
     fetchScores();
-  }, [skill, subSkill]);
+  }, [skill, subSkill, isSE]);
 
   const saveProgress = (currentAnswers: Record<string, string>) => {
     if (!sessionId || Object.keys(currentAnswers).length === 0) return;
@@ -451,7 +484,7 @@ export default function DrillScreen() {
                     </span>
                   </div>
                   <h1 className="font-dm text-[32px] sm:text-[42px] leading-[1.1] font-bold text-white mb-4">
-                    {toTitleCase(skill)} · {toTitleCase(subSkill)}
+                    {toTitleCase(skill)} · {isSE ? (seSubskillByEnum(subSkill)?.label ?? toTitleCase(subSkill)) : toTitleCase(subSkill)}
                   </h1>
                   <p className="text-[16px] sm:text-[17px] leading-[1.65] text-brand-on-ink-mute max-w-xl mb-9">
                     This is your lowest sub-score right now. {totalPrompts} questions, and every answer moves the number you see below.
@@ -459,7 +492,7 @@ export default function DrillScreen() {
                   <div className="flex gap-3.5 flex-wrap mb-9">
                     <BriefStatTile
                       label="CURRENT SUB-SCORE"
-                      value={currentSubScore !== null ? currentSubScore.toFixed(1) : '—'}
+                      value={currentSubDisplay ?? (currentSubScore !== null ? currentSubScore.toFixed(1) : '—')}
                       color="text-amber-400"
                     />
                     <BriefStatTile label="QUESTIONS" value={String(totalPrompts)} color="text-white" />
