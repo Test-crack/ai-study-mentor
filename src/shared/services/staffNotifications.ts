@@ -35,7 +35,12 @@ export interface StaffNotificationsResponse {
 }
 
 export async function fetchStaffNotifications(scope: StaffScope): Promise<StaffNotificationsResponse> {
-    return callBackend(`${BASE(scope)}/notifications`);
+    // silent: the caller's try/catch swallows the rejection but NOT the toast —
+    // callBackend fires that before the promise rejects, so catching in the bell
+    // was never enough. Without this flag the unmounted owner route produced
+    // "That resource wasn't found" on every institute-owner page load, which is
+    // exactly what the note above says must not happen.
+    return callBackend(`${BASE(scope)}/notifications`, undefined, { silent: true });
 }
 
 export async function markStaffNotificationsRead(

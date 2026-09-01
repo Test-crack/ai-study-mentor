@@ -303,8 +303,8 @@ export function DiagnosticOverviewTab({ rows, batchId, refetch, progressPathFor,
       )}
 
       {/* Search + warning */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+        <div className="flex items-center gap-2 min-w-0">
           {pendingCount > 0 && (
             <div className="flex items-center gap-1.5 text-xs text-amber-600 font-semibold bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl">
               <AlertCircle className="h-3.5 w-3.5 shrink-0" />
@@ -312,7 +312,7 @@ export function DiagnosticOverviewTab({ rows, batchId, refetch, progressPathFor,
             </div>
           )}
         </div>
-        <div className="relative w-64">
+        <div className="relative w-full sm:w-64 shrink-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-brand-text-mute" />
           <input
             value={search}
@@ -325,7 +325,66 @@ export function DiagnosticOverviewTab({ rows, batchId, refetch, progressPathFor,
 
       {/* Table */}
       <div className="bg-white rounded-2xl border border-brand-line shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile: card per student. The table below needs 780px — the widest of
+            the three tabs — which meant constant horizontal scrolling. */}
+        <ul className="md:hidden divide-y divide-brand-line">
+          {filtered.length === 0 ? (
+            <li className="py-10 text-center text-sm text-brand-text-mute">No students match "{search}"</li>
+          ) : (
+            filtered.map(row => (
+              <li key={row.student_id} className={cn('p-4', !row.is_diagnosed && 'bg-amber-50/40')}>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Avatar name={row.name} avatar={row.avatar} />
+                    <span className="text-sm font-semibold text-brand-text truncate">{row.name}</span>
+                  </div>
+                  {row.is_diagnosed ? (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 border border-emerald-200 text-emerald-700 shrink-0">
+                      Diagnosed
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 border border-amber-200 text-amber-700 shrink-0">
+                      Pending
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 mt-3">
+                  <span className="font-jetbrains text-[9px] font-bold uppercase tracking-wider text-brand-text-mute">Overall</span>
+                  {bandPill(row.overall)}
+                </div>
+
+                <dl className="grid grid-cols-4 gap-x-2 gap-y-2 mt-3">
+                  {SKILLS.map(s => (
+                    <div key={s.key}>
+                      <dt className="font-jetbrains text-[9px] font-bold uppercase tracking-wider text-brand-text-mute truncate">{s.label}</dt>
+                      <dd className="mt-0.5">{bandPill(row.baseline_bands[s.key])}</dd>
+                    </div>
+                  ))}
+                </dl>
+
+                <div className="flex items-center justify-between gap-3 mt-3 pt-3 border-t border-brand-line">
+                  <span className="text-xs text-brand-text-mute">{row.diagnosed_at ?? '—'}</span>
+                  <button
+                    onClick={() => goToStudent(row)}
+                    disabled={!row.is_diagnosed}
+                    className={cn(
+                      'inline-flex items-center gap-1 text-xs font-bold transition-colors shrink-0',
+                      row.is_diagnosed
+                        ? 'text-brand-teal-600 hover:text-brand-teal-700'
+                        : 'text-brand-text-mute cursor-not-allowed'
+                    )}
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    View Report
+                  </button>
+                </div>
+              </li>
+            ))
+          )}
+        </ul>
+
+        <div className="overflow-x-auto hidden md:block">
           <table className="w-full text-left min-w-[780px]">
             <thead className="border-b border-brand-line">
               <tr>

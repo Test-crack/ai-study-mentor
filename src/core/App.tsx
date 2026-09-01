@@ -108,6 +108,7 @@ const VivaDiagnostic = lazy(() => import("@/features/student/components/Diagnosi
 const SpokenEnglishDashboardPage = lazy(() => import("@/features/student/components/SpokenEnglishDashboardPage"));
 const DiagnosticRoadmap = lazy(() => import("@/features/student/components/Diagnosis/DiagnosticRoadmap"));
 const OnboardingWalkthrough = lazy(() => import("@/features/student/components/Onboarding/OnboardingWalkthrough"));
+const SpokenEnglishOnboarding = lazy(() => import("@/features/student/components/Onboarding/SpokenEnglishOnboarding"));
 const HowItWorks = lazy(() => import("@/features/student/components/HowItWorks"));
 const AssessmentHistoryPage = lazy(() => import("@/features/student/components/AssessmentHistoryPage"));
 const SuggestionsPage = lazy(() => import("@/features/student/components/SuggestionsPage"));
@@ -290,6 +291,16 @@ const StudentDashboardDispatch = () => {
   return isSpokenEnglish(profile?.examId) ? <SpokenEnglishDashboardPage /> : <StudentDashboardPage />;
 };
 
+// Onboarding by exam, same shape as the dashboard dispatch above. Spoken English
+// students were being shown the IELTS walkthrough verbatim — four skills, a
+// vocabulary gate, "your baseline band" — none of which exists in their course.
+// IELTS keeps OnboardingWalkthrough completely untouched.
+const OnboardingDispatch = () => {
+  const { profile, loading, profileLoading } = useAuth();
+  if ((loading || profileLoading) && !profile) return null;
+  return isSpokenEnglish(profile?.examId) ? <SpokenEnglishOnboarding /> : <OnboardingWalkthrough />;
+};
+
 // Student workspace routes are exam-prefixed: /{examSlug}/dashboard, /{examSlug}/diagnosis,
 // etc. This layout sits at /:examSlug, validates the slug against the student's enrolled
 // exam, sets the client exam context (X-Exam-Id), and rewrites any wrong/legacy first
@@ -406,7 +417,7 @@ const AppRoutes = () => {
       {/* ── Student workspace, exam-prefixed: /{examSlug}/… ─────────────────────── */}
       <Route path="/:examSlug" element={<StudentExamLayout />}>
         <Route index element={<ExamNavigate to="dashboard" />} />
-        <Route path="onboarding" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><OnboardingWalkthrough /></RoleProtectedRoute>} />
+        <Route path="onboarding" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><OnboardingDispatch /></RoleProtectedRoute>} />
         <Route path="diagnosis" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><DiagnosisDispatch /></RoleProtectedRoute>} />
         <Route path="diagnostic/roadmap" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDiagnosisGuard><DiagnosticRoadmap /></StudentDiagnosisGuard></RoleProtectedRoute>} />
 

@@ -56,8 +56,10 @@ export const InstituteOwnerTopbar = ({ onCreateCourse }: InstituteOwnerTopbarPro
         </div>
       </div> */}
 
-      {/* Right Actions - Added ml-auto here to push content to the right edge */}
-      <div className="flex items-center gap-2 sm:gap-3 ml-auto">
+      {/* Right Actions - Added ml-auto here to push content to the right edge.
+          min-w-0 lets the exam selector shrink instead of pushing the bell and
+          avatar off the edge on a phone. */}
+      <div className="flex items-center gap-2 sm:gap-3 ml-auto min-w-0">
         {/* Exam context switch (owner) — scopes every page to the selected exam */}
         <ExamContextBar />
 
@@ -72,7 +74,7 @@ export const InstituteOwnerTopbar = ({ onCreateCourse }: InstituteOwnerTopbarPro
         <StaffNotificationBell scope="institute-owner" />
 
         {/* Profile */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 shrink-0">
           <div className="text-right hidden md:block">
             <p className="font-manrope text-sm font-bold text-brand-text leading-none">{displayName}</p>
             <p className="font-jetbrains text-[10px] font-semibold tracking-[0.12em] uppercase text-brand-text-mute mt-0.5">Owner Portal</p>

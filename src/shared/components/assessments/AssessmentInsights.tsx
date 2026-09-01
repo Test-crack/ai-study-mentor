@@ -209,7 +209,7 @@ export function AssessmentInsights({ data, loading, error, batches, batchFilter,
             <h2 className="font-manrope text-xl sm:text-2xl font-black tracking-tight">{heroTitle}</h2>
             <p className="text-sm text-white/60 mt-1.5 max-w-2xl">{heroSubtitle}</p>
 
-            <div className="grid grid-cols-3 gap-2.5 mt-4 max-w-md">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mt-4 max-w-md">
               {activeTab === 'diagnostic' && (
                 <>
                   <StatTile dark label="Diagnosed" value={`${diagnosedCount} of ${totalStudents}`} />
@@ -253,7 +253,7 @@ export function AssessmentInsights({ data, loading, error, batches, batchFilter,
                   ))}
                 </div>
               </div>
-              <div className="flex items-end gap-3 justify-between h-24 bg-white/5 rounded-xl px-4 py-3">
+              <div className="flex items-end gap-1.5 sm:gap-3 justify-between h-24 bg-white/5 rounded-xl px-3 sm:px-4 py-3">
                 {BAND_RANGES.map((r, i) => (
                   <div key={r.label} className="flex flex-col items-center gap-1 flex-1">
                     <span className="text-[11px] font-black">{distCounts[i]}</span>
@@ -277,8 +277,12 @@ export function AssessmentInsights({ data, loading, error, batches, batchFilter,
 
       {/* Tab bar + sub-filters + search/export */}
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="bg-white rounded-xl border border-brand-line shadow-sm p-1 flex gap-1">
+        <div className="flex flex-wrap items-center gap-2 min-w-0">
+          {/* Each pill group scrolls on its own below sm. Previously these sat in
+              a flex-wrap row with no inner scroll, so wide groups were clipped
+              by the page's overflow-x-hidden root and became unreachable. */}
+          <div className="-mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto no-scrollbar max-w-full">
+          <div className="bg-white rounded-xl border border-brand-line shadow-sm p-1 flex gap-1 w-fit">
             {TABS.map(tab => (
               <button
                 key={tab.id}
@@ -295,8 +299,10 @@ export function AssessmentInsights({ data, loading, error, batches, batchFilter,
               </button>
             ))}
           </div>
+          </div>
 
-          <div className="bg-white rounded-xl border border-brand-line shadow-sm p-1 flex gap-1">
+          <div className="-mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto no-scrollbar max-w-full">
+          <div className="bg-white rounded-xl border border-brand-line shadow-sm p-1 flex gap-1 w-fit">
             {([
               { id: 'all', label: `All diagnosed`, sub: diagRows.length },
               { id: 'below5', label: 'Below band 5.0', sub: below5Count },
@@ -315,41 +321,46 @@ export function AssessmentInsights({ data, loading, error, batches, batchFilter,
               </button>
             ))}
           </div>
+          </div>
 
-          {batches.length > 0 && (
-            <select
-              value={batchFilter}
-              onChange={e => onBatchChange(e.target.value)}
-              className="min-h-[38px] rounded-xl border border-brand-line bg-white px-3 text-sm font-semibold text-brand-text"
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            {batches.length > 0 && (
+              <select
+                value={batchFilter}
+                onChange={e => onBatchChange(e.target.value)}
+                aria-label="Filter by batch"
+                className="min-h-[38px] rounded-xl border border-brand-line bg-white px-3 text-sm font-semibold text-brand-text flex-1 sm:flex-none min-w-0"
+              >
+                <option value="">All batches</option>
+                {batches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+              </select>
+            )}
+
+            <button
+              onClick={onRefresh}
+              aria-label="Refresh"
+              className="inline-flex items-center gap-2 min-h-[38px] px-3 rounded-xl border border-brand-line bg-white text-sm font-semibold hover:bg-brand-bg-alt shrink-0"
             >
-              <option value="">All batches</option>
-              {batches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-            </select>
-          )}
-
-          <button
-            onClick={onRefresh}
-            className="inline-flex items-center gap-2 min-h-[38px] px-3 rounded-xl border border-brand-line bg-white text-sm font-semibold hover:bg-brand-bg-alt"
-          >
-            <RefreshCw className="h-4 w-4" />
-          </button>
+              <RefreshCw className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="relative w-56">
+          <div className="relative flex-1 sm:flex-none sm:w-56 min-w-0">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-brand-text-mute" />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search students…"
-              className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-brand-line rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-teal-500/30 text-brand-text placeholder:text-brand-text-mute"
+              className="w-full pl-9 pr-3 min-h-[38px] py-2 text-sm bg-white border border-brand-line rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-teal-500/30 text-brand-text placeholder:text-brand-text-mute"
             />
           </div>
           <button
             onClick={exportCsv}
-            className="inline-flex items-center gap-2 min-h-[38px] px-3 rounded-xl border border-brand-line bg-white text-sm font-semibold hover:bg-brand-bg-alt"
+            className="inline-flex items-center gap-2 min-h-[38px] px-3 rounded-xl border border-brand-line bg-white text-sm font-semibold hover:bg-brand-bg-alt shrink-0"
           >
-            <Download className="h-4 w-4" /> Export
+            <Download className="h-4 w-4" /> <span className="hidden sm:inline">Export</span>
           </button>
         </div>
       </div>
