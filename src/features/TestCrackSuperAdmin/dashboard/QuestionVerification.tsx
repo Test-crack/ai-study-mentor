@@ -2,9 +2,8 @@
 // Web front end for the CLI verification/import pipeline (see backend
 // CLAUDE.md): Layer 1 (structural, free/fast) → Layer 2 (LLM answer/
 // difficulty audit, slow/costly, runs as a background job) → import dry-run
-// (insert/update/unchanged counts) → gated real write. Only the IELTS
-// drills fork is wired up server-side today (SUPPORTED_FORKS on the
-// backend) — this page reflects that scope rather than hiding it.
+// (insert/update/unchanged counts) → gated real write. Which exam/bank-type
+// combinations are wired up is decided server-side (SUPPORTED_FORKS).
 import { useEffect, useRef, useState } from 'react';
 import { SuperAdminSidebar } from '../Components/SuperadminSidebar';
 import { SuperAdminTopbar } from '../Components/Superadmintopbar';
@@ -47,12 +46,20 @@ import {
     RotateCcw,
 } from 'lucide-react';
 
-const EXAM_OPTIONS = [{ id: 'ielts', label: 'IELTS Preparation' }];
+const EXAM_OPTIONS = [
+    { id: 'ielts', label: 'IELTS Preparation' },
+    { id: 'spoken_english', label: 'Spoken English' },
+];
 const BANK_TYPE_OPTIONS = [
     { id: 'drill', label: 'Drill' },
     { id: 'diagnostic', label: 'Diagnostic' },
     { id: 'ia', label: 'Internal Assessment' },
 ];
+// Spoken English only has Drill wired up — Diagnostic/IA would otherwise
+// show as pickable and then fail with "no verification pipeline" on submit.
+const BANK_TYPES_BY_EXAM: Record<string, typeof BANK_TYPE_OPTIONS> = {
+    spoken_english: BANK_TYPE_OPTIONS.filter(b => b.id === 'drill'),
+};
 
 type Stage = 'idle' | 'layer1' | 'layer2' | 'plan' | 'confirm';
 
@@ -627,7 +634,15 @@ export default function QuestionVerification() {
                                         <label className="text-[11px] text-brand-text-mute">Active exam</label>
                                         <select
                                             value={examId}
-                                            onChange={e => { setExamId(e.target.value); resetDownstream(); }}
+                                            onChange={e => {
+                                                const next = e.target.value;
+                                                setExamId(next);
+                                                // Spoken English only has one bank type wired up — avoid
+                                                // landing on a dead "no pipeline for this combination" error
+                                                // by switching away from Diagnostic/IA automatically.
+                                                if (next === 'spoken_english' && bankType !== 'drill') setBankType('drill');
+                                                resetDownstream();
+                                            }}
                                             className="w-full mt-1 rounded-lg border border-brand-line bg-brand-bg px-3 py-2 text-sm"
                                         >
                                             {EXAM_OPTIONS.map(e => <option key={e.id} value={e.id}>{e.label}</option>)}
@@ -650,7 +665,7 @@ export default function QuestionVerification() {
                                             }}
                                             className="w-full mt-1 rounded-lg border border-brand-line bg-brand-bg px-3 py-2 text-sm"
                                         >
-                                            {BANK_TYPE_OPTIONS.map(b => <option key={b.id} value={b.id}>{b.label}</option>)}
+                                            {(BANK_TYPES_BY_EXAM[examId] ?? BANK_TYPE_OPTIONS).map(b => <option key={b.id} value={b.id}>{b.label}</option>)}
                                         </select>
                                     </div>
                                     {!isDiagnostic && (
