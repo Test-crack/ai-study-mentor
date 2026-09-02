@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PremiumModal } from "@/features/payment/components/PremiumModal";
 import {
   LineChart,
@@ -29,8 +29,11 @@ import {
   BarChart2,
   Loader2,
   Inbox,
+  ArrowRight,
+  Trophy,
 } from "lucide-react";
 import StudentLayout from "./StudentLayout";
+import { GaugeBar } from "./assessment-history/widgets";
 
 import { useCompetencyScores } from "@/features/student/hooks/useCompetencyScores";
 import { useIAHistory } from "@/features/student/hooks/useIAHistory";
@@ -48,6 +51,14 @@ import {
   type TrajectoryPoint,
   type DatedSitting,
 } from "@/features/student/utils/reportData";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { callBackend } from "@/features/auth/services/authClient";
+import { isSpokenEnglish } from "@/features/student/utils/exam";
+import { examDisplay } from "@/features/student/config/examDisplay";
+import { SE_SUBSKILLS } from "@/features/student/config/spokenEnglishSubskills";
+import { cefrColor, cefrGaugeColor } from "@/features/student/config/cefrDisplay";
+
+const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
@@ -84,9 +95,12 @@ const NoData = ({ title, hint }: { title: string; hint: string }) => (
   </div>
 );
 
-// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
+// ─── MAIN COMPONENT (IELTS) ───────────────────────────────────────────────────
+// Untouched IELTS band-arc/radar/trajectory report. Never branch isSpokenEnglish
+// checks into this component — the Spoken English variant is a separate
+// composition below (SpokenEnglishReport), dispatched at the bottom of this file.
 
-const Report = () => {
+const IeltsReport = () => {
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [reportTab, setReportTab] = useState<TabId>("bandarc");
 
@@ -516,5 +530,204 @@ const PerformanceTable = ({ rows }: { rows: PerfRow[] }) => (
     </div>
   </div>
 );
+
+// ─── SPOKEN ENGLISH (CEFR) REPORT ─────────────────────────────────────────────
+// SE's "results" surface is simpler than IELTS's — no tabs, no band arc/radar/
+// trajectory. It renders the CEFR headline + 6-subskill profile + per-answer
+// feedback from the DIAGNOSTIC-mode sub_scores, using the shared CEFR display
+// primitives so every SE surface (this page, AssessmentHistoryPage) agrees on
+// level -> color mapping.
+
+interface SeSubskillRow { id: string; label: string; level: string; score: number; }
+interface SeDiagnosticResult {
+  cefrLevel?: string;
+  cefrLabel?: string;
+  meanScore?: number;
+  subskillProfile?: SeSubskillRow[];
+  feedback?: Array<{ promptId: string; strengths: string; improvements: string }>;
+  scoredPromptCount?: number;
+  noResponseCount?: number;
+}
+interface DiagnosticEntry {
+  id: string;
+  mode: string;
+  sub_scores: SeDiagnosticResult | null;
+  created_at: string;
+}
+
+const SpokenEnglishReport = () => {
+  const [entries, setEntries] = useState<DiagnosticEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await callBackend(`${BACKEND}/api/student/diagnostic-report`);
+        if (cancelled) return;
+        if (res.success) setEntries(res.data ?? []);
+        else setError(true);
+      } catch {
+        if (!cancelled) setError(true);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Only the DIAGNOSTIC-mode row is this page's data source — IA/mock CEFR
+  // history lives on Assessment History, not here.
+  const diagnostic = entries.filter((e) => e.mode === "DIAGNOSTIC");
+  const latest = diagnostic.length > 0 ? diagnostic[diagnostic.length - 1] : null;
+  const result = latest?.sub_scores ?? null;
+  const disclaimer = examDisplay("spoken_english").disclaimer;
+
+  return (
+    <StudentLayout activeTab="Report" mainClassName="flex-1 p-4 sm:p-6 lg:p-8 space-y-6">
+      <div>
+        <div className="flex items-center gap-2">
+          <BarChart2 className="h-6 w-6 text-brand-teal-500" />
+          <h1 className="font-manrope text-2xl font-black text-brand-text">Reports</h1>
+        </div>
+        <p className="text-sm text-brand-text-mute mt-0.5">
+          Your CEFR level and speaking sub-skill breakdown from your diagnostic.
+        </p>
+      </div>
+
+      {loading ? (
+        <Panel>
+          <div className="py-14 flex items-center justify-center gap-3 text-brand-text-mute">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <span className="text-sm font-medium">Loading your report…</span>
+          </div>
+        </Panel>
+      ) : error ? (
+        <Panel>
+          <NoData
+            title="Couldn't load your report"
+            hint="Something went wrong fetching your diagnostic report. Please try again shortly."
+          />
+        </Panel>
+      ) : !latest ? (
+        <Panel>
+          <NoData
+            title="Take your diagnostic to see your report"
+            hint="Complete your Spoken English diagnostic viva and your CEFR level and sub-skill breakdown will appear here."
+          />
+        </Panel>
+      ) : !result ? (
+        <Panel>
+          <NoData
+            title="Diagnostic incomplete — retake"
+            hint="We couldn't score enough of your diagnostic answers. Please retake it so your report can be generated."
+          />
+        </Panel>
+      ) : (
+        <>
+          {/* CEFR headline — the label only, never the raw mean score as a
+              standalone number. */}
+          <div className="relative overflow-hidden rounded-3xl bg-brand-ink p-6 sm:p-8">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 opacity-[0.06]"
+              style={{
+                backgroundImage:
+                  'linear-gradient(to right, #3EE0A0 1px, transparent 1px), linear-gradient(to bottom, #3EE0A0 1px, transparent 1px)',
+                backgroundSize: '48px 48px',
+              }}
+            />
+            <div className="relative flex flex-col items-center gap-3 text-center">
+              <div className="w-12 h-12 rounded-xl bg-white/10 border border-brand-line-12 flex items-center justify-center">
+                <Trophy className="h-6 w-6 text-brand-mint" />
+              </div>
+              <p className="font-jetbrains text-brand-mint text-[10.5px] uppercase tracking-[0.18em]">
+                Speaking · Diagnostic Report
+              </p>
+              <div className="font-manrope text-[48px] sm:text-[56px] font-extrabold text-brand-mint tabular-nums leading-none tracking-[-0.03em]">
+                {result.cefrLabel ?? "—"}
+              </div>
+              {typeof result.scoredPromptCount === "number" && (
+                <p className="text-brand-on-ink text-[13px]">
+                  Based on {result.scoredPromptCount} graded {result.scoredPromptCount === 1 ? "answer" : "answers"}.
+                </p>
+              )}
+            </div>
+          </div>
+
+          {disclaimer && (
+            <p className="text-[11px] text-brand-text-mute leading-relaxed italic">{disclaimer}</p>
+          )}
+
+          {/* 6-subskill profile */}
+          {result.subskillProfile && result.subskillProfile.length > 0 && (
+            <Panel>
+              <div className="mb-5">
+                <h2 className="font-manrope text-base font-black text-brand-text flex items-center gap-2">
+                  <Target className="h-5 w-5 text-brand-teal-500" /> Sub-skill Profile
+                </h2>
+                <p className="text-xs text-brand-text-mute mt-1">Your CEFR level across six speaking sub-skills</p>
+              </div>
+              <div className="space-y-4">
+                {SE_SUBSKILLS.map((cfg) => {
+                  const row = result.subskillProfile!.find((p) => p.id === cfg.id);
+                  if (!row) return null;
+                  return (
+                    <div key={cfg.id}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-semibold text-brand-text">{cfg.label}</span>
+                        <span className={`text-sm font-black ${cefrColor(row.level)}`}>{row.level?.toUpperCase()}</span>
+                      </div>
+                      <GaugeBar value={row.score} max={100} colorClass={cefrGaugeColor(row.level)} />
+                    </div>
+                  );
+                })}
+              </div>
+            </Panel>
+          )}
+
+          {/* Per-answer feedback */}
+          {result.feedback && result.feedback.length > 0 && (
+            <Panel>
+              <div className="mb-5">
+                <h2 className="font-manrope text-base font-black text-brand-text flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-brand-teal-500" /> Your Feedback
+                </h2>
+                <p className="text-xs text-brand-text-mute mt-1">One strength and one next step per prompt</p>
+              </div>
+              <div className="space-y-3">
+                {result.feedback.map((f, i) => (
+                  <div key={f.promptId ?? i} className="rounded-xl border border-brand-line bg-brand-bg-alt px-4 py-3">
+                    {f.strengths && (
+                      <p className="flex gap-2 text-sm leading-relaxed text-brand-text">
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand-teal-700" />{f.strengths}
+                      </p>
+                    )}
+                    {f.improvements && (
+                      <p className="mt-2 flex gap-2 text-sm leading-relaxed text-brand-text">
+                        <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-brand-warm" />{f.improvements}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Panel>
+          )}
+        </>
+      )}
+    </StudentLayout>
+  );
+};
+
+// ─── DISPATCH ──────────────────────────────────────────────────────────────────
+// Branch at the top level: IELTS renders the original, unmodified page; Spoken
+// English renders its own CEFR composition built from shared pieces. Never mix
+// isSpokenEnglish checks into the IELTS JSX above.
+
+const Report = () => {
+  const { profile } = useAuth();
+  return isSpokenEnglish(profile?.examId) ? <SpokenEnglishReport /> : <IeltsReport />;
+};
 
 export default Report;

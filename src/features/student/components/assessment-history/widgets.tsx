@@ -22,7 +22,18 @@ export interface BandPoint {
   type: "assessment" | "mock";
 }
 
-export function BandOverTimeChart({ points }: { points: BandPoint[] }) {
+// `yDomain`/`yTickFormatter`/`tooltipFormatter`/`tooltipLabel` are optional and default to the
+// original IELTS 0-9 band behaviour — pass them (e.g. from the Spoken English CEFR view) to
+// reuse this same chart on a different scale without touching the IELTS render path.
+export function BandOverTimeChart({
+  points, yDomain = [0, 9], yTickFormatter, tooltipFormatter, tooltipLabel = "Band",
+}: {
+  points: BandPoint[];
+  yDomain?: [number, number];
+  yTickFormatter?: (v: number) => string;
+  tooltipFormatter?: (v: number) => string;
+  tooltipLabel?: string;
+}) {
   if (points.length === 0) {
     return (
       <div className="h-full flex items-center justify-center text-[11px] text-white/30 text-center px-4">
@@ -34,13 +45,13 @@ export function BandOverTimeChart({ points }: { points: BandPoint[] }) {
     <ResponsiveContainer width="100%" height="100%">
       <BarChart data={points} margin={{ top: 8, right: 4, left: -20, bottom: 0 }}>
         <XAxis dataKey="label" tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 9 }} axisLine={false} tickLine={false} />
-        <YAxis domain={[0, 9]} tick={{ fill: "rgba(255,255,255,0.25)", fontSize: 9 }} axisLine={false} tickLine={false} width={20} />
+        <YAxis domain={yDomain} tickFormatter={yTickFormatter} tick={{ fill: "rgba(255,255,255,0.25)", fontSize: 9 }} axisLine={false} tickLine={false} width={20} />
         <Tooltip
           cursor={{ fill: "rgba(255,255,255,0.06)" }}
           contentStyle={{ background: "#0B1F26", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 8, fontSize: 11 }}
           labelStyle={{ color: "rgba(255,255,255,0.6)" }}
           itemStyle={{ color: "#fff" }}
-          formatter={(value: number) => [value.toFixed(1), "Band"]}
+          formatter={(value: number) => [tooltipFormatter ? tooltipFormatter(value) : value.toFixed(1), tooltipLabel]}
         />
         <Bar dataKey="band" radius={[4, 4, 0, 0]} maxBarSize={28}>
           {points.map((p, i) => (

@@ -108,6 +108,7 @@ const VivaDiagnostic = lazy(() => import("@/features/student/components/Diagnosi
 const SpokenEnglishDashboardPage = lazy(() => import("@/features/student/components/SpokenEnglishDashboardPage"));
 const DiagnosticRoadmap = lazy(() => import("@/features/student/components/Diagnosis/DiagnosticRoadmap"));
 const OnboardingWalkthrough = lazy(() => import("@/features/student/components/Onboarding/OnboardingWalkthrough"));
+const SpokenEnglishOnboarding = lazy(() => import("@/features/student/components/Onboarding/SpokenEnglishOnboarding"));
 const HowItWorks = lazy(() => import("@/features/student/components/HowItWorks"));
 const AssessmentHistoryPage = lazy(() => import("@/features/student/components/AssessmentHistoryPage"));
 const SuggestionsPage = lazy(() => import("@/features/student/components/SuggestionsPage"));
@@ -192,6 +193,9 @@ const LoginRedirect = () => {
     if (!profile.isDiagnosed) {
       return <Navigate to="/student/onboarding" replace />;
     }
+    if (profile.examId) {
+      return <Navigate to={`/${profile.examId}/dashboard`} replace />;
+    }
   }
   return <Navigate to="/student/dashboard" replace />;
 };
@@ -213,6 +217,7 @@ const ManualDashboardAccess = () => {
   if (profile.role === 'STUDENT') {
     if (profile.isEnrolled === false) return <Navigate to="/student/not-enrolled" replace />;
     if (!profile.isDiagnosed)        return <Navigate to="/student/onboarding" replace />;
+    if (profile.examId)              return <Navigate to={`/${profile.examId}/dashboard`} replace />;
   }
   return <Navigate to="/student/dashboard" replace />;
 };
@@ -288,6 +293,15 @@ const StudentDashboardDispatch = () => {
   const { profile, loading, profileLoading } = useAuth();
   if ((loading || profileLoading) && !profile) return null;
   return isSpokenEnglish(profile?.examId) ? <SpokenEnglishDashboardPage /> : <StudentDashboardPage />;
+};
+
+// Onboarding by exam: Spoken English gets its own CEFR walkthrough (with the
+// full CEFR disclaimer, no target-band step); IELTS keeps OnboardingWalkthrough
+// completely untouched.
+const OnboardingDispatch = () => {
+  const { profile, loading, profileLoading } = useAuth();
+  if ((loading || profileLoading) && !profile) return null;
+  return isSpokenEnglish(profile?.examId) ? <SpokenEnglishOnboarding /> : <OnboardingWalkthrough />;
 };
 
 // Student workspace routes are exam-prefixed: /{examSlug}/dashboard, /{examSlug}/diagnosis,
@@ -406,7 +420,7 @@ const AppRoutes = () => {
       {/* ── Student workspace, exam-prefixed: /{examSlug}/… ─────────────────────── */}
       <Route path="/:examSlug" element={<StudentExamLayout />}>
         <Route index element={<ExamNavigate to="dashboard" />} />
-        <Route path="onboarding" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><OnboardingWalkthrough /></RoleProtectedRoute>} />
+        <Route path="onboarding" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><OnboardingDispatch /></RoleProtectedRoute>} />
         <Route path="diagnosis" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><DiagnosisDispatch /></RoleProtectedRoute>} />
         <Route path="diagnostic/roadmap" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDiagnosisGuard><DiagnosticRoadmap /></StudentDiagnosisGuard></RoleProtectedRoute>} />
 

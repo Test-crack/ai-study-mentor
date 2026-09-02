@@ -1,20 +1,29 @@
 ﻿import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  ChevronLeft, Activity, Target, Clock, Zap, 
-  TrendingUp, Award, AlertTriangle, Loader2 
+import {
+  ChevronLeft, ChevronDown, ChevronUp, Activity, Target, Clock, Zap,
+  TrendingUp, Award, AlertTriangle, Loader2, Stethoscope, ListChecks
 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { StudentSidebar } from './dashboard/StudentSidebar';
 import { StudentTopbar } from './dashboard/StudentTopbar';
+import StudentLayout from './StudentLayout';
 import { cn } from "@/shared/utils";
 import { fetchSpeakingHistory } from '../services/ieltsReadingService';
+import { callBackend } from '@/features/auth/services/authClient';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { toast } from 'sonner';
-import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area
 } from 'recharts';
+import { isSpokenEnglish } from '@/features/student/utils/exam';
+import { examDisplay } from '@/features/student/config/examDisplay';
+import { SE_SUBSKILLS } from '@/features/student/config/spokenEnglishSubskills';
+import { cefrColor, cefrGaugeColor, CefrBadge } from '@/features/student/config/cefrDisplay';
+import { GaugeBar } from './assessment-history/widgets';
+
+const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
 
 // â”€â”€â”€ Skeletons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -92,7 +101,7 @@ function HistorySkeleton() {
 
 // â”€â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-export default function StudentSpeakingHistoryPage() {
+function IeltsSpeakingHistoryPage() {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
@@ -315,3 +324,215 @@ const StatCard = ({ icon, label, value, color, bg }: any) => (
     <div className={cn("text-3xl font-black", color)}>{value}</div>
   </div>
 );
+
+// ─── SPOKEN ENGLISH (CEFR) SPEAKING HISTORY ────────────────────────────────────
+// Separate composition — SE cohort 1 has no free-practice speaking-drill feature,
+// so this reads viva diagnostic + IA sessions (CEFR + subskills) instead of the
+// WPM/fluency/filler data above. The IELTS body above stays untouched.
+
+interface SeCefrResult {
+  cefrLevel?: string;
+  cefrLabel?: string;
+  meanScore?: number;
+  subskillProfile?: Array<{ id: string; label: string; level: string; score: number }>;
+  feedback?: Array<{ promptId: string; strengths: string; improvements: string }>;
+  scoredPromptCount?: number;
+  noResponseCount?: number;
+}
+
+interface SeAssessmentEntry {
+  id: string;
+  skill: string;
+  mode: "INTERNAL_ASSESSMENT" | "MOCK" | "DIAGNOSTIC";
+  band_score: number;
+  sub_scores: SeCefrResult | null;
+  feedback_json: Record<string, any> | null;
+  created_at: string;
+}
+
+interface SeSession {
+  id: string;
+  kind: "diagnostic" | "ia";
+  iaNumber?: number;
+  createdAt: string;
+  result: SeCefrResult;
+}
+
+const formatSeDate = (iso: string) =>
+  new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+
+const SeSessionCard = ({ session }: { session: SeSession }) => {
+  const [expanded, setExpanded] = useState(false);
+  const { result } = session;
+  const profile = result.subskillProfile ?? [];
+  const title = session.kind === "diagnostic" ? "Diagnostic" : `Internal Assessment #${session.iaNumber}`;
+  const icon = session.kind === "diagnostic" ? <Stethoscope className="h-5 w-5" /> : <ListChecks className="h-5 w-5" />;
+
+  return (
+    <div className="bg-white rounded-2xl border border-l-4 border-brand-line border-l-brand-teal-500 shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+      <button
+        onClick={() => setExpanded((p) => !p)}
+        className="w-full flex items-start gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-brand-bg-alt transition-colors"
+      >
+        <div className="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-brand-teal-100 flex items-center justify-center text-brand-teal-600">
+          {icon}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-manrope font-bold text-brand-text text-sm sm:text-base">{title}</p>
+          <div className="flex items-center gap-1 mt-1 text-[11px] sm:text-xs text-brand-text-mute">
+            <Clock className="h-3 w-3 shrink-0" />
+            <span>{formatSeDate(session.createdAt)}</span>
+          </div>
+        </div>
+        <div className="flex flex-col items-center gap-1 shrink-0">
+          <CefrBadge label={result.cefrLabel} size="sm" />
+          <p className="text-[9px] sm:text-[10px] text-brand-text-mute font-semibold font-jetbrains uppercase tracking-[0.14em]">CEFR</p>
+        </div>
+        <div className="text-brand-text-mute mt-1 shrink-0">
+          {expanded ? <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5" /> : <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5" />}
+        </div>
+      </button>
+      {expanded && (
+        <div className="border-t border-brand-line p-4 sm:p-5 bg-brand-bg-alt/50 space-y-4">
+          {profile.length > 0 ? (
+            <div className="space-y-3">
+              {SE_SUBSKILLS.map((cfg) => {
+                const row = profile.find((p) => p.id === cfg.id);
+                if (!row) return null;
+                return (
+                  <div key={cfg.id}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-semibold text-brand-text">{cfg.label}</span>
+                      <span className={cn("text-sm font-black", cefrColor(row.level))}>{row.level?.toUpperCase()}</span>
+                    </div>
+                    <GaugeBar value={row.score} max={100} colorClass={cefrGaugeColor(row.level)} />
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-sm text-brand-text-mute italic">No detailed subskill breakdown available.</p>
+          )}
+          {result.feedback && result.feedback.length > 0 && (
+            <div className="pt-3 border-t border-brand-line space-y-2">
+              <p className="text-[10px] font-black text-brand-text-mute font-jetbrains uppercase tracking-[0.16em]">Feedback</p>
+              {result.feedback.map((f, i) => (
+                <div key={f.promptId ?? i} className="bg-white rounded-xl p-3 text-sm text-brand-text space-y-1 border border-brand-line">
+                  {f.strengths && <p><span className="font-semibold text-emerald-600">Strengths: </span>{f.strengths}</p>}
+                  {f.improvements && <p><span className="font-semibold text-amber-600">To improve: </span>{f.improvements}</p>}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+function SpokenEnglishSpeakingHistoryPage() {
+  const navigate = useNavigate();
+  const [sessions, setSessions] = useState<SeSession[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const disclaimer = examDisplay("spoken_english").disclaimer;
+
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      setHasError(false);
+      try {
+        const [historyRes, diagnosticRes] = await Promise.all([
+          callBackend(`${BACKEND}/api/student/assessment-history`),
+          callBackend(`${BACKEND}/api/student/diagnostic-report`),
+        ]);
+
+        const iaRows: SeAssessmentEntry[] = historyRes?.success
+          ? (historyRes.data ?? []).filter((r: SeAssessmentEntry) => r.mode === "INTERNAL_ASSESSMENT")
+          : [];
+        const diagnosticRows: SeAssessmentEntry[] = diagnosticRes?.success ? (diagnosticRes.data ?? []) : [];
+
+        if (!historyRes?.success) toast.error("Failed to load history data.");
+
+        // Number IA sessions in chronological order (oldest first), then combine
+        // with diagnostic entries and sort newest-first for display.
+        const iaChrono = [...iaRows].sort(
+          (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+
+        const iaSessions: SeSession[] = iaChrono.map((entry, i) => ({
+          id: entry.id,
+          kind: "ia",
+          iaNumber: i + 1,
+          createdAt: entry.created_at,
+          result: entry.sub_scores ?? {},
+        }));
+
+        const diagnosticSessions: SeSession[] = diagnosticRows.map((entry) => ({
+          id: entry.id,
+          kind: "diagnostic",
+          createdAt: entry.created_at,
+          result: entry.sub_scores ?? {},
+        }));
+
+        const combined = [...diagnosticSessions, ...iaSessions].sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+
+        setSessions(combined);
+      } catch {
+        setHasError(true);
+        toast.error("Could not fetch history.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  return (
+    <StudentLayout activeTab="speaking-history" mainClassName="p-6 md:p-8 max-w-4xl mx-auto space-y-8 w-full">
+      <div>
+        <Button variant="ghost" className="mb-4 -ml-4 text-brand-text-mute hover:text-brand-text" onClick={() => navigate('/student/dashboard')}>
+          <ChevronLeft className="w-4 h-4 mr-1" /> Back
+        </Button>
+        <h1 className="text-3xl font-manrope font-bold text-brand-text flex items-center gap-3">
+          <Activity className="w-8 h-8 text-brand-blue-500" />
+          Speaking History
+        </h1>
+        <p className="text-brand-text-mute mt-1">Your CEFR level and subskill breakdown across every viva and internal assessment.</p>
+        {disclaimer && <p className="text-[11px] text-brand-text-mute leading-relaxed italic mt-2">{disclaimer}</p>}
+      </div>
+
+      {isLoading ? (
+        <HistorySkeleton />
+      ) : hasError ? (
+        <div className="bg-white border border-brand-line rounded-3xl p-12 text-center">
+          <AlertTriangle className="w-10 h-10 text-rose-400 mx-auto mb-4" />
+          <p className="font-semibold text-brand-text-mute">Failed to load speaking history.</p>
+        </div>
+      ) : sessions.length === 0 ? (
+        <div className="bg-white border border-brand-line rounded-3xl p-12 text-center">
+          <div className="w-20 h-20 bg-brand-bg-alt rounded-full flex items-center justify-center mx-auto mb-4">
+            <Target className="w-10 h-10 text-brand-text-mute" />
+          </div>
+          <h2 className="text-2xl font-manrope font-bold text-brand-text mb-2">No Sessions Yet</h2>
+          <p className="text-brand-text-mute mb-6">Complete a diagnostic viva or internal assessment to see your speaking history here.</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {sessions.map((s) => <SeSessionCard key={s.id} session={s} />)}
+        </div>
+      )}
+    </StudentLayout>
+  );
+}
+
+// ─── DISPATCH ──────────────────────────────────────────────────────────────────
+// Branch at the top level: IELTS renders the original, unmodified free-practice
+// analytics page; Spoken English renders its own CEFR viva/IA history composition.
+
+export default function StudentSpeakingHistoryPage() {
+  const { profile } = useAuth();
+  return isSpokenEnglish(profile?.examId) ? <SpokenEnglishSpeakingHistoryPage /> : <IeltsSpeakingHistoryPage />;
+}

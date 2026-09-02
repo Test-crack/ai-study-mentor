@@ -51,7 +51,7 @@ const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "
 
 // ─── Component ────────────────────────────────────────────────────────────────
 const VivaDiagnostic = () => {
-  const { profile } = useAuth();
+  const { profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
 
   const [phase, setPhase] = useState<Phase>("loading");
@@ -64,6 +64,9 @@ const VivaDiagnostic = () => {
 
   const [recState, setRecState] = useState<RecState>("idle");
   const [remaining, setRemaining] = useState(0);   // countdown while recording
+  // Purely decorative bar heights for the recording waveform — visual only,
+  // mirrors Diagnosis.tsx's SpeakingPhase `animBars`.
+  const [waveBars] = useState(() => Array.from({ length: 12 }, () => Math.random()));
 
   const mrRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -180,6 +183,10 @@ const VivaDiagnostic = () => {
       const data = await uploadFileToBackend("/api/diagnostic/viva/submit", fd, "POST");
       setResult(data.result as VivaResult);
       cacheClear(examId);   // diagnostic is done — drop the client-side cache
+      // The route guards (StudentDiagnosisGuard etc.) gate on profile.isDiagnosed —
+      // without this refetch the cached profile still reads false and "Go to
+      // dashboard" bounces the student straight back to onboarding.
+      await refreshProfile();
       setPhase("result");
     } catch (e: any) {
       const code = e?.statusCode;
@@ -209,23 +216,69 @@ const VivaDiagnostic = () => {
   }
 
   if (phase === "intro") {
+    // Same 3 bullets the previous version showed, re-housed as step cards —
+    // no new claims, just Diagnosis.tsx's DiagnosticGate visual structure.
+    const introSteps = [
+      { icon: "🎧", label: "Listen or read the prompt", desc: "Some prompts play audio, others show a passage to read aloud." },
+      { icon: "🎤", label: "Record your answer", desc: "Speak naturally — each prompt has a time limit and stops automatically." },
+      { icon: "✅", label: "Review & submit", desc: "Re-record any prompt before you submit. This is a one-time diagnostic." },
+    ];
     return (
       <Shell>
-        <div className="mx-auto max-w-xl text-center">
-          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-teal-50 border border-brand-teal-200">
-            <Mic className="h-8 w-8 text-brand-teal-700" />
+        <div className="flex flex-col items-center text-center gap-8 max-w-xl mx-auto py-2">
+          {/* Dark intro panel with faint blueprint grid, matching the platform's other diagnostic */}
+          <div className="relative w-full overflow-hidden rounded-2xl border border-brand-line-12 bg-brand-ink-deep px-6 py-9">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 opacity-[0.06]"
+              style={{
+                backgroundImage:
+                  'linear-gradient(to right, #3EE0A0 1px, transparent 1px), linear-gradient(to bottom, #3EE0A0 1px, transparent 1px)',
+                backgroundSize: '56px 56px',
+              }}
+            />
+            <div className="relative space-y-4">
+              <div className="inline-flex items-center gap-3">
+                <span className="h-px w-6 shrink-0 bg-brand-mint" aria-hidden="true" />
+                <span className="font-jetbrains text-[10.5px] uppercase tracking-[0.2em] text-brand-mint">
+                  Speaking Diagnostic{profile?.examLabel ? ` · ${profile.examLabel}` : ""}
+                </span>
+              </div>
+              <h1 className="font-manrope text-[34px] sm:text-[40px] font-extrabold text-white leading-[1.08] tracking-[-0.03em]">
+                Begin your <span className="text-brand-mint">speaking diagnostic.</span>
+              </h1>
+              <p className="text-brand-on-ink text-[15px] leading-[1.75] max-w-md mx-auto">
+                You'll answer <strong className="text-white">{prompts.length} short prompts</strong> by recording your voice. Speak naturally — there's no single right answer. You can re-record any prompt before you submit.
+              </p>
+            </div>
           </div>
-          <h1 className="font-manrope text-2xl font-extrabold tracking-[-0.02em] text-brand-text">Speaking diagnostic{profile?.examLabel ? ` — ${profile.examLabel}` : ""}</h1>
-          <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-brand-text-mute">
-            You'll answer <strong>{prompts.length} short prompts</strong> by recording your voice. Speak naturally — there's no single right answer. You can re-record any prompt before you submit.
-          </p>
-          <ul className="mx-auto mt-6 max-w-sm space-y-2 text-left text-sm text-brand-text-mute">
-            <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 shrink-0 text-brand-teal-700" /> Each prompt has a speaking time limit; recording stops automatically.</li>
-            <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 shrink-0 text-brand-teal-700" /> Find a quiet spot and allow microphone access when asked.</li>
-            <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 shrink-0 text-brand-teal-700" /> This is a one-time diagnostic.</li>
-          </ul>
-          <button onClick={() => { setPhase("running"); goToPrompt(0); }} className="mt-8 inline-flex items-center gap-2 rounded-xl bg-brand-teal-700 px-6 py-3 font-semibold text-white hover:bg-brand-teal-600">
-            Start <ArrowRight className="h-4 w-4" />
+
+          <div className="w-full space-y-2.5">
+            {introSteps.map((step) => (
+              <div
+                key={step.label}
+                className="bg-white border border-brand-line rounded-2xl p-4 flex items-center gap-4 text-left hover:border-brand-teal-200 transition-colors duration-150"
+              >
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-teal-wash text-xl">{step.icon}</span>
+                <div className="flex-1">
+                  <p className="font-manrope text-brand-ink font-bold text-[15px] tracking-[-0.01em]">{step.label}</p>
+                  <p className="text-brand-text-mute text-[13px] mt-0.5 leading-[1.6]">{step.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-jetbrains text-brand-text-mute text-[10.5px] uppercase tracking-[0.14em]">
+            <span className="flex items-center gap-1.5">🎙 {prompts.length} prompts</span>
+            <span className="flex items-center gap-1.5">🔒 One-time</span>
+            <span className="flex items-center gap-1.5">💡 Autosaved</span>
+          </div>
+
+          <button
+            onClick={() => { setPhase("running"); goToPrompt(0); }}
+            className="w-full py-4 bg-brand-teal-700 hover:bg-brand-teal-600 text-white font-semibold text-[15.5px] rounded-xl transition-colors duration-150 active:scale-[0.99]"
+          >
+            Start Diagnostic →
           </button>
         </div>
       </Shell>
@@ -385,23 +438,28 @@ const VivaDiagnostic = () => {
             </button>
           </div>
         ) : current ? (
-          <div className="mx-auto max-w-xl">
-            <div className="mb-3 flex items-center justify-between">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-teal-200 bg-brand-teal-50 px-3 py-1 font-jetbrains text-[10.5px] font-bold uppercase tracking-wide text-brand-teal-700">
-                <span className="h-1.5 w-1.5 rounded-full bg-brand-teal-500" />{current.type}
-              </span>
-              <span className="font-jetbrains text-xs text-brand-text-mute">Prompt {current.order} / {prompts.length}</span>
+          <div className="mx-auto max-w-xl space-y-6">
+            {/* header — icon badge + title/subtitle, matches Diagnosis.tsx's SpeakingPhase */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-brand-teal-wash border border-brand-teal-tint rounded-xl flex items-center justify-center text-xl shrink-0">🎤</div>
+              <div className="min-w-0">
+                <p className="font-manrope text-brand-ink font-bold text-[16px] tracking-[-0.02em] truncate">{current.type}</p>
+                <p className="text-brand-text-mute text-[13.5px] leading-[1.6]">
+                  Prompt {current.order} of {prompts.length} · Speaking limit {fmt(current.speakSeconds)}{current.prepSeconds ? ` · ${current.prepSeconds}s to think first` : ""}
+                </p>
+              </div>
             </div>
 
             {/* The question itself: read-aloud shows text only; everything else is audio
                 only (the student listens, and can replay as often as they like). */}
             {current.display === "text" ? (
-              <div className="mt-1 rounded-xl border border-brand-teal-200 bg-brand-teal-50/60 px-5 py-4">
+              <div className="rounded-2xl border border-brand-teal-200 bg-brand-teal-50/60 px-5 py-4">
                 <p className="mb-1.5 font-jetbrains text-[10px] uppercase tracking-[0.16em] text-brand-teal-700">Read this aloud</p>
                 <p className="text-[19px] leading-relaxed text-brand-text">{current.passage}</p>
               </div>
             ) : (
-              <div className="mt-1 flex flex-col gap-3 rounded-xl border border-brand-line bg-brand-bg-alt px-5 py-4">
+              <div className="flex flex-col gap-3 rounded-2xl border border-brand-line bg-brand-bg px-5 py-4">
+                <p className="font-jetbrains text-brand-text-mute text-[10px] uppercase tracking-[0.16em]">Your Speaking Prompt</p>
                 <p className="flex items-center gap-2 text-sm font-medium text-brand-text">
                   <Volume2 className="h-4 w-4 shrink-0 text-brand-teal-700" /> Listen to the question — you can replay it as many times as you like.
                 </p>
@@ -411,25 +469,91 @@ const VivaDiagnostic = () => {
               </div>
             )}
 
-            <p className="mt-3 text-sm text-brand-text-mute">Speaking limit: {fmt(current.speakSeconds)}{current.prepSeconds ? ` · ${current.prepSeconds}s to think first` : ""}</p>
-
             {error && <Banner>{error}</Banner>}
 
+            {/* idle-state tips — shown only before the student starts recording */}
+            {recState === "idle" && (
+              <div className="bg-brand-teal-wash border border-brand-teal-tint rounded-2xl p-4">
+                <ul className="text-brand-text text-[14px] space-y-2 leading-[1.6]">
+                  <li className="flex gap-2"><span className="text-brand-teal-600 font-bold">→</span>Read or listen to the prompt carefully before recording.</li>
+                  <li className="flex gap-2"><span className="text-brand-teal-600 font-bold">→</span>Tap the button below to start — you have {fmt(current.speakSeconds)}.</li>
+                  <li className="flex gap-2"><span className="text-brand-teal-600 font-bold">→</span>Recording stops automatically when the time limit is reached.</li>
+                  <li className="flex gap-2"><span className="text-brand-teal-600 font-bold">→</span>Speak naturally — you can re-record before you submit.</li>
+                </ul>
+              </div>
+            )}
+
             {/* recorder controls */}
-            <div className="mt-6 flex flex-col items-center gap-4 rounded-2xl border border-brand-line bg-brand-bg-alt p-6">
+            <div className="flex flex-col items-center gap-5 py-4">
+              {recState === "recording" && (
+                <div className="flex items-center gap-1 h-12">
+                  {waveBars.map((h, i) => (
+                    <div
+                      key={i}
+                      className="w-1.5 bg-rose-500 rounded-full"
+                      style={{
+                        height: `${20 + h * 30}px`,
+                        animation: `waveform 0.${5 + (i % 5)}s ease-in-out infinite alternate`,
+                        animationDelay: `${i * 0.06}s`,
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {recState === "recording" && (
+                <div className="w-full space-y-2">
+                  <div className="flex justify-between font-jetbrains text-[12px] text-brand-text-mute font-semibold tabular-nums">
+                    <span>{fmt(current.speakSeconds - remaining)}</span>
+                    <span className={remaining <= 10 ? "text-amber-600" : ""}>{fmt(remaining)} remaining</span>
+                  </div>
+                  <div className="h-1.5 bg-brand-bg-alt rounded-full overflow-hidden">
+                    <div
+                      className={cn("h-full rounded-full transition-all duration-1000", remaining <= 10 ? "bg-amber-500" : "bg-rose-500")}
+                      style={{ width: `${current.speakSeconds ? ((current.speakSeconds - remaining) / current.speakSeconds) * 100 : 0}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
               {recState === "recording" ? (
-                <>
-                  <div className="flex items-center gap-2 text-brand-warm"><span className="h-2.5 w-2.5 animate-pulse rounded-full bg-brand-warm" /><span className="font-jetbrains text-sm font-bold">Recording · {fmt(remaining)} left</span></div>
-                  <button onClick={stopRecording} className="inline-flex items-center gap-2 rounded-xl bg-brand-warm px-6 py-3 font-semibold text-white hover:opacity-90"><Square className="h-4 w-4" /> Stop</button>
-                </>
+                <button
+                  onClick={stopRecording}
+                  aria-label="Stop recording"
+                  className="w-20 h-20 rounded-2xl flex items-center justify-center text-white shadow-sm bg-rose-500 hover:bg-rose-600 animate-pulse transition-colors duration-150"
+                >
+                  <Square className="h-7 w-7" />
+                </button>
               ) : currentBlob ? (
-                <>
-                  <div className="flex items-center gap-2 text-brand-teal-700"><CheckCircle2 className="h-5 w-5" /><span className="text-sm font-semibold">Recorded — play it back to check</span></div>
-                  {currentUrl && <audio controls src={currentUrl} className="w-full max-w-md" />}
-                  <button onClick={reRecord} className="inline-flex items-center gap-2 rounded-xl border border-brand-line px-4 py-2.5 font-medium text-brand-text hover:border-brand-teal-300"><RotateCcw className="h-4 w-4" /> Re-record</button>
-                </>
+                <div className="w-20 h-20 rounded-2xl flex items-center justify-center bg-brand-ink text-white shadow-sm">
+                  <CheckCircle2 className="h-8 w-8" />
+                </div>
               ) : (
-                <button onClick={startRecording} className="inline-flex items-center gap-2 rounded-xl bg-brand-teal-700 px-6 py-3 font-semibold text-white hover:bg-brand-teal-600"><Mic className="h-4 w-4" /> Record answer</button>
+                <button
+                  onClick={startRecording}
+                  aria-label="Start recording"
+                  className="w-20 h-20 rounded-2xl flex items-center justify-center text-white shadow-sm bg-brand-teal-700 hover:bg-brand-teal-600 transition-colors duration-150"
+                >
+                  <Mic className="h-7 w-7" />
+                </button>
+              )}
+
+              <p className="text-brand-text-mute text-[13.5px] text-center leading-[1.6]">
+                {recState === "idle" && "Tap to start recording"}
+                {recState === "recording" && "Recording… stops automatically when time's up"}
+                {recState === "recorded" && `Recorded — play it back to check, or re-record below.`}
+              </p>
+
+              {currentBlob && recState !== "recording" && (
+                <div className="flex flex-col items-center gap-3 w-full">
+                  {currentUrl && <audio controls src={currentUrl} className="w-full max-w-md" />}
+                  <button
+                    onClick={reRecord}
+                    className="inline-flex items-center gap-2 rounded-xl border border-brand-line px-4 py-2.5 font-medium text-brand-text hover:border-brand-teal-300"
+                  >
+                    <RotateCcw className="h-4 w-4" /> Re-record
+                  </button>
+                </div>
               )}
             </div>
 
