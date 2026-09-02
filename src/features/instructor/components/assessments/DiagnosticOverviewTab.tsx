@@ -64,6 +64,20 @@ function cefrLevelLabel(ordinal: number | null): string | null {
   return CEFR_ORDER[i];
 }
 
+// AssessmentHistory.sub_scores for a Spoken English diagnostic is the viva
+// scorer's raw output (see scoreVivaSession in services/viva/scoring.ts) —
+// { cefrLabel, subskillProfile: [{ id, label, level, score }], ... }. Untyped
+// end-to-end (DiagnosticOverviewRow.sub_scores is `unknown`), so this only
+// reads it defensively for a hover tooltip — no new UI surface, just exposing
+// the per-subskill breakdown that already exists on the row.
+function subskillTooltip(subScores: unknown): string | undefined {
+  const profile = (subScores as any)?.subskillProfile;
+  if (!Array.isArray(profile) || profile.length === 0) return undefined;
+  return profile
+    .map((p: any) => `${p?.label ?? p?.id ?? '?'}: ${p?.level ?? '—'}`)
+    .join('\n');
+}
+
 function cefrPill(ordinal: number | null) {
   const label = cefrLevelLabel(ordinal);
   if (label === null) return <span className="text-brand-text-mute text-xs">—</span>;
@@ -605,7 +619,7 @@ export function DiagnosticOverviewTab({ rows, batchId, refetch, progressPathFor,
                           </span>
                         </div>
                       </td>
-                      <td className="py-3">{cefrPill(row.baseline_bands.S)}</td>
+                      <td className="py-3" title={subskillTooltip(row.sub_scores)}>{cefrPill(row.baseline_bands.S)}</td>
                       <td className="py-3 text-sm text-brand-text-mute">{row.diagnosed_at ?? '—'}</td>
                       <td className="py-3 pr-5 text-right">
                         <button

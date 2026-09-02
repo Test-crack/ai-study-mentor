@@ -204,6 +204,7 @@ export function InstructorReportPage() {
           band_trend: row.band_trend,
           last_ia_date: row.last_ia_date,
           is_at_risk: row.is_at_risk,
+          exam_id: row.exam_id,
         })),
         ia_summary: {
           avg_band: overview.batch_ia_summary.avg_band,

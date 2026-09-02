@@ -9,6 +9,8 @@ import { InstituteOwnerSidebar } from '../components/InstitiuteOwnerSidebar';
 import { InstituteOwnerTopbar } from '../components/InstituteOwnerTopbar';
 import { fetchStudents, StudentRow } from '../services/instituteOwnerService';
 import { useToast } from '@/shared/hooks/use-toast';
+import { isSpokenEnglish } from '@/features/student/utils/exam';
+import { CEFR_ORDER, cefrBg, cefrColor } from '@/features/student/config/cefrDisplay';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/shared/components/ui/select';
@@ -26,6 +28,26 @@ function bandPill(band: number | null) {
   else if (b >= 5) cls += 'bg-amber-50 text-amber-700 ring-amber-600/20';
   else             cls += 'bg-rose-50 text-rose-700 ring-rose-600/20';
   return <span className={cls}>{b.toFixed(1)}</span>;
+}
+
+// current_band for a Spoken English row is a CEFR ordinal (0-6), not an IELTS
+// band (0-9) — see computeCurrentBand in batchDashboardQueries.ts. CEFR_ORDINAL
+// (backend) and CEFR_ORDER (frontend) are the same ladder in the same order, so
+// rounding the ordinal and indexing CEFR_ORDER recovers the real level label.
+function cefrLevelLabel(ordinal: number | null): string | null {
+  if (ordinal === null) return null;
+  const i = Math.max(0, Math.min(CEFR_ORDER.length - 1, Math.round(ordinal)));
+  return CEFR_ORDER[i];
+}
+
+function cefrPill(ordinal: number | null) {
+  const label = cefrLevelLabel(ordinal);
+  if (label === null) return <span className="text-xs text-brand-text-mute">—</span>;
+  return (
+    <span className={`inline-flex items-center justify-center text-xs font-bold px-2.5 py-0.5 rounded-full border ${cefrBg(label)} ${cefrColor(label)}`}>
+      {label}
+    </span>
+  );
 }
 
 function trendIcon(trend: 'up' | 'flat' | 'down' | null) {
@@ -240,19 +262,23 @@ export default function InstituteStudentsPage() {
                           <td className="px-4 py-3 whitespace-nowrap">
                             <span className="text-brand-text-mute text-xs">{row.batch_name}</span>
                           </td>
-                          <td className="px-4 py-3 whitespace-nowrap">{bandPill(row.current_band)}</td>
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <span className="text-brand-text-mute text-xs tabular-nums">{row.target_band ?? '—'}</span>
+                            {isSpokenEnglish(row.exam_id) ? cefrPill(row.current_band) : bandPill(row.current_band)}
+                          </td>
+                          <td className="px-4 py-3 whitespace-nowrap">
+                            <span className="text-brand-text-mute text-xs tabular-nums">
+                              {!isSpokenEnglish(row.exam_id) ? (row.target_band ?? '—') : '—'}
+                            </span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             <div className="flex items-center gap-1">
-                              {trendIcon(row.band_trend)}
+                              {!isSpokenEnglish(row.exam_id) && trendIcon(row.band_trend)}
                               <span className={`text-xs font-semibold tabular-nums ${
-                                row.gap !== null
+                                !isSpokenEnglish(row.exam_id) && row.gap !== null
                                   ? row.gap <= 0 ? 'text-emerald-600' : 'text-rose-600'
                                   : 'text-brand-text-mute'
                               }`}>
-                                {row.gap !== null ? (row.gap > 0 ? `+${row.gap.toFixed(1)}` : row.gap.toFixed(1)) : '—'}
+                                {!isSpokenEnglish(row.exam_id) && row.gap !== null ? (row.gap > 0 ? `+${row.gap.toFixed(1)}` : row.gap.toFixed(1)) : '—'}
                               </span>
                             </div>
                           </td>

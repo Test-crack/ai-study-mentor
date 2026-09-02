@@ -4,6 +4,8 @@ import { TrendingUp, TrendingDown, Minus, ChevronRight, ChevronLeft, Target } fr
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/shared/utils';
 import type { BandOverviewRow } from './types';
+import { isSpokenEnglish } from '@/features/student/utils/exam';
+import { CEFR_ORDER, cefrBg, cefrColor } from '@/features/student/config/cefrDisplay';
 
 interface BandOverviewTableProps {
   rows:    BandOverviewRow[];
@@ -47,6 +49,20 @@ function bandBadge(band: number | null): string {
   if (band >= 6.0)  return 'bg-sky-50 text-sky-700 border border-sky-200';
   if (band >= 5.0)  return 'bg-amber-50 text-amber-700 border border-amber-200';
   return 'bg-rose-50 text-rose-700 border border-rose-200';
+}
+
+// current_band for a Spoken English row is a CEFR ordinal (0-6, computed
+// server-side from CEFR_ORDINAL, see batchDashboardQueries.computeCurrentBand)
+// stamped into the same numeric column an IELTS band (0-9) uses — it must never
+// be shown with IELTS thresholds/colors or the "Band" framing. CEFR_ORDINAL
+// (backend) and CEFR_ORDER (frontend) are the same ladder in the same order, so
+// rounding the ordinal and indexing CEFR_ORDER recovers the real level label
+// (e.g. 2.5 -> "B1") without any extra backend field — same rounding convention
+// as DiagnosticOverviewTab/BatchReportTemplate's cefrLevelLabel.
+function cefrLevelLabel(ordinal: number | null): string | null {
+  if (ordinal === null) return null;
+  const i = Math.max(0, Math.min(CEFR_ORDER.length - 1, Math.round(ordinal)));
+  return CEFR_ORDER[i];
 }
 
 function gapPillColor(gap: number | null) {
@@ -267,11 +283,17 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
                     <TrendCell trend={row.band_trend} />
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    {/* Band badge */}
-                    <span className={cn('text-xs font-black px-2 py-0.5 rounded-full tabular-nums', bandBadge(row.current_band))}>
-                      {row.current_band !== null ? row.current_band.toFixed(1) : '—'}
-                    </span>
-                    {row.gap !== null && (
+                    {/* Band badge — CEFR level for Spoken English, IELTS band otherwise */}
+                    {isSpokenEnglish(row.exam_id) ? (
+                      <span className={cn('text-xs font-black px-2 py-0.5 rounded-full border', cefrBg(cefrLevelLabel(row.current_band) ?? undefined), cefrColor(cefrLevelLabel(row.current_band) ?? undefined))}>
+                        {cefrLevelLabel(row.current_band) ?? '—'}
+                      </span>
+                    ) : (
+                      <span className={cn('text-xs font-black px-2 py-0.5 rounded-full tabular-nums', bandBadge(row.current_band))}>
+                        {row.current_band !== null ? row.current_band.toFixed(1) : '—'}
+                      </span>
+                    )}
+                    {!isSpokenEnglish(row.exam_id) && row.gap !== null && (
                       <span className={cn('text-xs font-bold px-1.5 py-0.5 rounded-full', gapPillColor(row.gap))}>
                         {row.gap <= 0 ? `+${Math.abs(row.gap).toFixed(1)}` : `−${row.gap.toFixed(1)}`}
                       </span>
@@ -346,26 +368,36 @@ export function BandOverviewTable({ rows, batchId, loading }: BandOverviewTableP
                     </div>
                   </td>
 
-                  {/* Current Band — colored badge */}
+                  {/* Current Band — CEFR level for Spoken English, IELTS band badge otherwise */}
                   <td className="px-5 py-3.5">
-                    <span className={cn(
-                      'inline-block text-sm font-black tabular-nums px-2.5 py-0.5 rounded-full',
-                      bandBadge(row.current_band)
-                    )}>
-                      {row.current_band !== null ? row.current_band.toFixed(1) : '—'}
-                    </span>
+                    {isSpokenEnglish(row.exam_id) ? (
+                      <span className={cn(
+                        'inline-block text-sm font-black px-2.5 py-0.5 rounded-full border',
+                        cefrBg(cefrLevelLabel(row.current_band) ?? undefined),
+                        cefrColor(cefrLevelLabel(row.current_band) ?? undefined)
+                      )}>
+                        {cefrLevelLabel(row.current_band) ?? '—'}
+                      </span>
+                    ) : (
+                      <span className={cn(
+                        'inline-block text-sm font-black tabular-nums px-2.5 py-0.5 rounded-full',
+                        bandBadge(row.current_band)
+                      )}>
+                        {row.current_band !== null ? row.current_band.toFixed(1) : '—'}
+                      </span>
+                    )}
                   </td>
 
-                  {/* Target */}
+                  {/* Target — IELTS-only concept; Spoken English has no numeric target band here */}
                   <td className="px-5 py-3.5">
                     <span className="text-sm font-semibold text-brand-text-mute tabular-nums">
-                      {row.target_band !== null ? row.target_band.toFixed(1) : '—'}
+                      {!isSpokenEnglish(row.exam_id) && row.target_band !== null ? row.target_band.toFixed(1) : '—'}
                     </span>
                   </td>
 
                   {/* Gap */}
                   <td className="px-5 py-3.5">
-                    {row.gap !== null ? (
+                    {!isSpokenEnglish(row.exam_id) && row.gap !== null ? (
                       <span className={cn('text-xs font-bold px-2 py-0.5 rounded-full', gapPillColor(row.gap))}>
                         {row.gap <= 0
                           ? `+${Math.abs(row.gap).toFixed(1)}`

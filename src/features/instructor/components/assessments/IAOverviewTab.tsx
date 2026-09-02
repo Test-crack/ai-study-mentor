@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Search, ArrowUpDown, ArrowUp, ArrowDown, ExternalLink } from 'lucide-react';
 import { cn } from '@/shared/utils';
 import type { IAOverviewRow } from './types';
+import { isSpokenEnglish } from '@/features/student/utils/exam';
+import { CEFR_ORDER, cefrBg, cefrColor } from '@/features/student/config/cefrDisplay';
 
 interface Props {
   rows:    IAOverviewRow[];
@@ -44,11 +46,39 @@ function SortIcon({ col, active, dir }: { col: SortKey; active: SortKey; dir: 'a
     : <ArrowDown className="h-3 w-3 text-brand-teal-500 ml-1 shrink-0" />;
 }
 
-export function IAOverviewTab({ rows, batchId, progressPathFor }: Props) {
+// avg_ia_band/best_ia_band for a Spoken English row is a CEFR ordinal (0-6), not
+// an IELTS band (0-9) — see the matching note in BandOverviewTable.tsx.
+// CEFR_ORDINAL (backend) and CEFR_ORDER (frontend) are the same ladder in the
+// same order, so rounding the ordinal and indexing CEFR_ORDER recovers the
+// level label.
+function cefrLevelLabel(ordinal: number | null): string | null {
+  if (ordinal === null) return null;
+  const i = Math.max(0, Math.min(CEFR_ORDER.length - 1, Math.round(ordinal)));
+  return CEFR_ORDER[i];
+}
+
+function CefrLevelPill({ ordinal }: { ordinal: number | null }) {
+  const label = cefrLevelLabel(ordinal);
+  if (label === null) return <span className="text-brand-text-mute text-xs">—</span>;
+  return (
+    <span className={cn('inline-block px-2 py-0.5 rounded-lg text-xs font-black border', cefrBg(label), cefrColor(label))}>
+      {label}
+    </span>
+  );
+}
+
+export function IAOverviewTab({ rows: allRows, batchId, progressPathFor }: Props) {
   const navigate = useNavigate();
   const [search,  setSearch]  = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('ia_missed');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+
+  // A batch can genuinely mix IELTS and Spoken English students. avg_ia_band /
+  // best_ia_band is a CEFR ordinal for SE rows, not an IELTS band, so SE rows
+  // are shown in their own compact section below rather than in this
+  // band-colored, band-sorted table.
+  const rows   = useMemo(() => allRows.filter(r => !isSpokenEnglish(r.exam_id)), [allRows]);
+  const seRows = useMemo(() => allRows.filter(r => isSpokenEnglish(r.exam_id)), [allRows]);
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -107,7 +137,7 @@ export function IAOverviewTab({ rows, batchId, progressPathFor }: Props) {
     </th>
   );
 
-  if (rows.length === 0) {
+  if (allRows.length === 0) {
     return (
       <div className="bg-white rounded-2xl border border-brand-line p-16 text-center">
         <p className="text-brand-text-mute text-sm">No students in this batch yet.</p>
@@ -116,6 +146,47 @@ export function IAOverviewTab({ rows, batchId, progressPathFor }: Props) {
   }
 
   const eligibleCount = rows.filter(r => r.ia_eligible).length;
+
+  const seSection = seRows.length > 0 && (
+    <div className="bg-white rounded-2xl border border-brand-line shadow-sm overflow-hidden">
+      <div className="px-4 sm:px-5 py-3 border-b border-brand-line">
+        <p className="text-xs font-bold text-brand-text">Spoken English · {seRows.length} student{seRows.length === 1 ? '' : 's'}</p>
+        <p className="text-[11px] text-brand-text-mute mt-0.5">CEFR level, not an IELTS band — shown separately.</p>
+      </div>
+      <ul className="divide-y divide-brand-line">
+        {seRows.map(row => (
+          <li key={row.student_id} className="p-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <Avatar name={row.name} avatar={row.avatar} />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-brand-text truncate">{row.name}</p>
+                <p className="text-[11px] text-brand-text-mute">
+                  {row.ia_completed} completed · {row.ia_missed} missed · {row.last_ia_date ?? 'No IA yet'}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <CefrLevelPill ordinal={row.avg_ia_band} />
+              <button
+                onClick={() => {
+                  const path = progressPathFor ? progressPathFor(row.user_id) : `/instructor/batches/${batchId}/students/${row.user_id}/progress`;
+                  navigate(path, { state: { studentId: row.user_id } });
+                }}
+                className="inline-flex items-center gap-1 text-xs font-bold text-brand-text-mute hover:text-brand-teal-600 transition-colors"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                View
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+
+  if (rows.length === 0) {
+    return <div className="space-y-3">{seSection}</div>;
+  }
 
   return (
     <div className="space-y-3">
@@ -299,6 +370,8 @@ export function IAOverviewTab({ rows, batchId, progressPathFor }: Props) {
           </table>
         </div>
       </div>
+
+      {seSection}
     </div>
   );
 }
