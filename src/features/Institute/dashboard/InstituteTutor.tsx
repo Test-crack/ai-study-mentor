@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { Search, UserCheck, Users, Layers, Trash2, GraduationCap, ChevronRight } from "lucide-react";
 import { InstituteAdminLayout } from "../components/InstituteAdminLayout";
 import {
-  KpiCard, SectionCard, StatusBadge, CardGridSkeleton, EmptyState, ErrorBanner,
+  KpiCard, SectionCard, StatusBadge, CardGridSkeleton, EmptyState, ErrorBanner, PageHero, HeroAction,
 } from "../components/shared/primitives";
 import { fetchTutors, removeTutor, TutorRecord, fetchInstructorsOverview } from "../services/instituteAdminService";
 import type { InstructorRow } from "@/features/InstituteOwner/services/instituteOwnerService";
@@ -155,18 +155,16 @@ export default function InstituteTutor() {
 
   return (
     <InstituteAdminLayout activeTab="tutor">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-brand-text">Tutor Accounts</h1>
-          <p className="text-sm text-brand-text-mute mt-0.5">Every tutor in your institute, with their batches and student load.</p>
-        </div>
-        <button
-          onClick={() => navigate("/institute-admin/tutorOnboarding")}
-          className="inline-flex items-center justify-center gap-2 bg-brand-teal-600 hover:bg-brand-teal-700 text-white text-sm font-bold px-4 py-2.5 min-h-[40px] rounded-xl transition-colors shadow-sm self-start sm:self-auto"
-        >
-          <GraduationCap className="h-4 w-4" /> Onboard Tutor
-        </button>
-      </div>
+      <PageHero
+        eyebrow="Admin Portal"
+        title="Tutor Accounts"
+        subtitle="Every tutor in your institute, with their batches and student load."
+        actions={
+          <HeroAction onClick={() => navigate("/institute-admin/tutorOnboarding")}>
+            <GraduationCap className="h-3.5 w-3.5" /> Onboard Tutor
+          </HeroAction>
+        }
+      />
 
       {error && <ErrorBanner message={error} onRetry={load} />}
 

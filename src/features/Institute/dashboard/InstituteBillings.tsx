@@ -132,7 +132,7 @@ export default function InstituteBillings() {
               <div className="font-jetbrains inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-teal-100 text-brand-teal-700 text-xs font-bold tracking-wider uppercase mb-2">
                 <Building2 className="w-3.5 h-3.5" /> For Institutes &amp; Universities
               </div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-brand-text tracking-tight leading-tight">
+              <h1 className="font-manrope text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-brand-text tracking-tight leading-tight">
                 Transform how Your Institute Delivers English Training
               </h1>
               <p className="text-base sm:text-lg text-brand-text-mute">
@@ -145,7 +145,7 @@ export default function InstituteBillings() {
 
               {/* Per Student Card */}
               <div className="bg-white rounded-2xl border border-brand-line p-6 sm:p-8 shadow-sm flex flex-col">
-                <h3 className="text-xl font-bold text-brand-text mb-2">Per Student</h3>
+                <h3 className="font-manrope text-xl font-bold text-brand-text mb-2">Per Student</h3>
                 <div className="flex flex-wrap items-end gap-1 mb-4">
                   <span className="text-3xl sm:text-4xl font-extrabold text-brand-text">₹2,500</span>
                   <span className="text-brand-text-mute text-sm mb-1">per student / month</span>
@@ -171,7 +171,7 @@ export default function InstituteBillings() {
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-brand-teal-600 text-white px-4 py-1 rounded-full text-xs font-bold tracking-wider flex items-center gap-1.5 shadow-sm whitespace-nowrap">
                   <Sparkles className="w-3.5 h-3.5" /> Most Popular
                 </div>
-                <h3 className="text-xl font-bold text-brand-text mb-2 mt-2">Institute Pro</h3>
+                <h3 className="font-manrope text-xl font-bold text-brand-text mb-2 mt-2">Institute Pro</h3>
                 <div className="flex flex-wrap items-end gap-1 mb-4">
                   <span className="text-3xl sm:text-4xl font-extrabold text-brand-text">₹50,000</span>
                   <span className="text-brand-text-mute text-sm mb-1">/ month + ₹500 per student</span>
@@ -197,7 +197,7 @@ export default function InstituteBillings() {
             {/* Cost Calculator */}
             <div className="bg-white rounded-2xl border border-brand-line p-4 sm:p-6 md:p-10 shadow-sm">
               <div className="mb-8">
-                <h2 className="text-xl sm:text-2xl font-bold text-brand-text">Cost Calculator</h2>
+                <h2 className="font-manrope text-xl sm:text-2xl font-bold text-brand-text">Cost Calculator</h2>
                 <p className="text-brand-text-mute mt-1 text-sm sm:text-base">Slide to see which plan is best for your institute size.</p>
               </div>
 
@@ -253,7 +253,7 @@ export default function InstituteBillings() {
 
               {/* Quick Reference Table */}
               <div>
-                <h3 className="text-sm font-bold text-brand-text mb-4">Quick Reference</h3>
+                <h3 className="font-manrope text-sm font-bold text-brand-text mb-4">Quick Reference</h3>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm whitespace-nowrap min-w-[520px]">
                     <thead className="font-jetbrains text-[11px] text-brand-text-mute uppercase tracking-wider border-b border-brand-line">
@@ -297,14 +297,14 @@ export default function InstituteBillings() {
 
             {/* Features Grid */}
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-brand-text mb-6 sm:mb-8 text-center">What Your Institute Gets</h2>
+              <h2 className="font-manrope text-xl sm:text-2xl font-bold text-brand-text mb-6 sm:mb-8 text-center">What Your Institute Gets</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {featuresGrid.map((feat, idx) => (
                   <div key={idx} className="bg-white p-5 sm:p-6 rounded-xl border border-brand-line shadow-sm">
                     <div className="w-12 h-12 bg-brand-teal-50 rounded-lg flex items-center justify-center mb-4 border border-brand-teal-100">
                       <feat.icon className="w-6 h-6 text-brand-teal-600" />
                     </div>
-                    <h3 className="text-lg font-bold text-brand-text mb-2">{feat.title}</h3>
+                    <h3 className="font-manrope text-lg font-bold text-brand-text mb-2">{feat.title}</h3>
                     <p className="text-sm text-brand-text-mute leading-relaxed">{feat.desc}</p>
                   </div>
                 ))}
@@ -313,11 +313,11 @@ export default function InstituteBillings() {
 
             {/* FAQs */}
             <div className="max-w-3xl mx-auto pb-12">
-              <h2 className="text-xl sm:text-2xl font-bold text-brand-text mb-6 sm:mb-8 text-center">Frequently Asked Questions</h2>
+              <h2 className="font-manrope text-xl sm:text-2xl font-bold text-brand-text mb-6 sm:mb-8 text-center">Frequently Asked Questions</h2>
               <div className="space-y-4">
                 {faqs.map((faq, idx) => (
                   <div key={idx} className="bg-white p-5 sm:p-6 rounded-xl border border-brand-line shadow-sm">
-                    <h3 className="font-bold text-brand-text mb-2 text-base">{faq.q}</h3>
+                    <h3 className="font-manrope font-bold text-brand-text mb-2 text-base">{faq.q}</h3>
                     <p className="text-sm text-brand-text-mute leading-relaxed">{faq.a}</p>
                   </div>
                 ))}

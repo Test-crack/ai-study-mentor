@@ -4,7 +4,7 @@
 // GET /api/institute-admin/students/:studentId/full-progress.
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import { ChevronLeft, BarChart3, ClipboardList, BookOpen, Activity, FileSearch } from "lucide-react";
+import { ChevronLeft, BarChart3, ClipboardList, BookOpen, Activity, FileSearch, Dumbbell } from "lucide-react";
 import { InstituteAdminLayout } from "../components/InstituteAdminLayout";
 import { ErrorBanner } from "../components/shared/primitives";
 import { cn, getBackendUrl } from "@/shared/utils";
@@ -15,9 +15,11 @@ import { IASessionsTab }   from "@/features/instructor/components/student-progre
 import { MockSessionsTab } from "@/features/instructor/components/student-progress/MockSessionsTab";
 import { DrillsTab }       from "@/features/instructor/components/student-progress/DrillsTab";
 import { DiagnosticTab }   from "@/features/instructor/components/student-progress/DiagnosticTab";
+import { PracticeHistoryTab } from "@/features/instructor/components/student-progress/PracticeHistoryTab";
 import type { StudentFullProgress } from "@/features/instructor/components/student-progress/types";
+import { isSpokenEnglish } from "@/features/student/utils/exam";
 
-type Tab = "overview" | "ia" | "mock" | "drills" | "diagnostic";
+type Tab = "overview" | "ia" | "mock" | "drills" | "diagnostic" | "practice";
 
 const TABS: Array<{ id: Tab; label: string; icon: React.ReactNode }> = [
   { id: "overview",   label: "Overview",    icon: <BarChart3     className="h-4 w-4" /> },
@@ -25,6 +27,9 @@ const TABS: Array<{ id: Tab; label: string; icon: React.ReactNode }> = [
   { id: "mock",       label: "Mock Tests",  icon: <BookOpen      className="h-4 w-4" /> },
   { id: "drills",     label: "Drills",      icon: <Activity      className="h-4 w-4" /> },
   { id: "diagnostic", label: "Diagnostic",  icon: <FileSearch    className="h-4 w-4" /> },
+  // The practice work behind the results — instructor-only until the three
+  // history endpoints were given institute-scoped equivalents.
+  { id: "practice",   label: "Practice",    icon: <Dumbbell      className="h-4 w-4" /> },
 ];
 
 function PageSkeleton() {
@@ -51,6 +56,12 @@ export default function InstituteAdminStudentProgressPage() {
   const [data, setData] = useState<StudentFullProgress | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Practice (Reading/Speaking/Writing free-practice history) isn't a feature
+  // Spoken English students have — SE_ALLOWED in StudentSidebar.tsx doesn't
+  // include it, so an SE student can never reach it themselves.
+  const isSE = isSpokenEnglish(data?.student?.exam_id);
+  const visibleTabs = isSE ? TABS.filter(t => t.id !== "practice") : TABS;
 
   const load = useCallback(async () => {
     if (!resolvedStudentId) return;
@@ -101,7 +112,7 @@ export default function InstituteAdminStudentProgressPage() {
           <StudentProfileHeader data={data} />
 
           <div className="flex gap-1.5 flex-wrap">
-            {TABS.map((t) => (
+            {visibleTabs.map((t) => (
               <button
                 key={t.id}
                 onClick={() => setActiveTab(t.id)}
@@ -118,21 +129,26 @@ export default function InstituteAdminStudentProgressPage() {
           </div>
 
           {activeTab === "overview"   && <OverviewTab data={data} />}
-          {activeTab === "ia"         && <IASessionsTab sessions={data.ia_sessions} />}
-          {activeTab === "mock"       && <MockSessionsTab sessions={data.mock_sessions} />}
+          {activeTab === "ia"         && <IASessionsTab sessions={data.ia_sessions} examId={data.student?.exam_id} />}
+          {activeTab === "mock"       && <MockSessionsTab sessions={data.mock_sessions} examId={data.student?.exam_id} />}
           {activeTab === "drills"     && (
             <DrillsTab
               drillStats={data.drill_stats}
               lexiStats={data.lexigrid_stats}
               streak={data.daily_streak}
+              reflections={data.recent_reflections}
             />
           )}
           {activeTab === "diagnostic" && (
             <DiagnosticTab
               results={(data as any).diagnostic_results ?? []}
               studentName={(data as any).student?.name}
+              examId={(data as any).student?.exam_id}
               onRequestReset={resetDiagnostic}
             />
+          )}
+          {activeTab === "practice" && !isSE && resolvedStudentId && (
+            <PracticeHistoryTab studentId={resolvedStudentId} scope="institute-admin" />
           )}
         </>
       ) : null}

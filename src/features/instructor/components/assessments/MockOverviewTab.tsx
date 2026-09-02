@@ -7,6 +7,8 @@ import type { MockOverviewRow } from './types';
 interface Props {
   rows:    MockOverviewRow[];
   batchId: string;
+  /** See IAOverviewTab — defaults to the instructor route. */
+  progressPathFor?: (userId: string) => string;
 }
 
 type SortKey = 'name' | 'mock_count' | 'latest_real_band' | 'best_real_band' | 'gap';
@@ -44,7 +46,7 @@ function SortIcon({ col, active, dir }: { col: SortKey; active: SortKey; dir: 'a
     : <ArrowDown className="h-3 w-3 text-brand-teal-500 ml-1 shrink-0" />;
 }
 
-export function MockOverviewTab({ rows, batchId }: Props) {
+export function MockOverviewTab({ rows, batchId, progressPathFor }: Props) {
   const navigate = useNavigate();
   const [search,  setSearch]  = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('latest_real_band');
@@ -90,7 +92,10 @@ export function MockOverviewTab({ rows, batchId }: Props) {
   }, [enriched, search, sortKey, sortDir]);
 
   const goToStudent = (row: MockOverviewRow) => {
-    navigate(`/instructor/batches/${batchId}/students/${row.user_id}/progress`, { state: { studentId: row.user_id } });
+    const path = progressPathFor
+      ? progressPathFor(row.user_id)
+      : `/instructor/batches/${batchId}/students/${row.user_id}/progress`;
+    navigate(path, { state: { studentId: row.user_id } });
   };
 
   const thClass = 'py-3 text-[10px] font-bold text-brand-text-mute uppercase tracking-wider whitespace-nowrap font-jetbrains';
@@ -119,8 +124,8 @@ export function MockOverviewTab({ rows, batchId }: Props) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4 text-xs text-brand-text-mute">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-brand-text-mute">
           <span className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
             {atTargetCount} at or above target
@@ -132,7 +137,7 @@ export function MockOverviewTab({ rows, batchId }: Props) {
             </span>
           )}
         </div>
-        <div className="relative w-64">
+        <div className="relative w-full sm:w-64 shrink-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-brand-text-mute" />
           <input
             value={search}
@@ -144,7 +149,72 @@ export function MockOverviewTab({ rows, batchId }: Props) {
       </div>
 
       <div className="bg-white rounded-2xl border border-brand-line shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile: card per student. The table below needs 680px, which meant
+            constant horizontal scrolling on a phone. */}
+        <ul className="md:hidden divide-y divide-brand-line">
+          {filtered.length === 0 ? (
+            <li className="py-10 text-center text-sm text-brand-text-mute">No students match "{search}"</li>
+          ) : (
+            filtered.map(row => (
+              <li key={row.student_id} className="p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Avatar name={row.name} avatar={row.avatar} />
+                    <span className="text-sm font-semibold text-brand-text truncate">{row.name}</span>
+                  </div>
+                  <button
+                    onClick={() => goToStudent(row)}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-brand-text-mute hover:text-brand-teal-600 transition-colors shrink-0"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    View
+                  </button>
+                </div>
+
+                <dl className="grid grid-cols-3 gap-x-3 gap-y-2 mt-3">
+                  <div>
+                    <dt className="font-jetbrains text-[9px] font-bold uppercase tracking-wider text-brand-text-mute">Latest</dt>
+                    <dd className={cn('text-sm font-black', bandColor(row.latest_real_band))}>
+                      {row.latest_real_band !== null ? row.latest_real_band.toFixed(1) : '—'}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="font-jetbrains text-[9px] font-bold uppercase tracking-wider text-brand-text-mute">Best</dt>
+                    <dd className={cn('text-sm font-black', bandColor(row.best_real_band))}>
+                      {row.best_real_band !== null ? row.best_real_band.toFixed(1) : '—'}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="font-jetbrains text-[9px] font-bold uppercase tracking-wider text-brand-text-mute">Target</dt>
+                    <dd className="text-sm font-semibold text-brand-text-mute">
+                      {row.target_band !== null ? row.target_band.toFixed(1) : '—'}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="font-jetbrains text-[9px] font-bold uppercase tracking-wider text-brand-text-mute">Mocks</dt>
+                    <dd className={cn('text-sm font-bold', row.mock_count === 0 ? 'text-brand-text-mute' : 'text-brand-text')}>
+                      {row.mock_count === 0 ? '—' : row.mock_count}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="font-jetbrains text-[9px] font-bold uppercase tracking-wider text-brand-text-mute">Gap</dt>
+                    <dd>
+                      {row.gap !== null ? (
+                        <span className={cn('text-sm font-black', gapColor(row.gap))}>
+                          {row.gap <= 0 ? '✓ Met' : `+${row.gap.toFixed(1)}`}
+                        </span>
+                      ) : (
+                        <span className="text-brand-text-mute text-sm">—</span>
+                      )}
+                    </dd>
+                  </div>
+                </dl>
+              </li>
+            ))
+          )}
+        </ul>
+
+        <div className="overflow-x-auto hidden md:block">
           <table className="w-full text-left min-w-[680px]">
             <thead className="border-b border-brand-line">
               <tr>

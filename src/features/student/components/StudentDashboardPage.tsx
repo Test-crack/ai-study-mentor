@@ -10,6 +10,23 @@ import IAScheduleWidget  from "./dashboard/IAScheduleWidget";
 import MockStatusWidget  from "./dashboard/MockStatusWidget";
 import { DailyNotices }  from "./dashboard/DailyNotices";
 import { useMomentum } from "@/features/student/Context/MomentumContext";
+import { useIAHistory } from "@/features/student/hooks/useIAHistory";
+import { useMockHistory, bandPointsFromMocks } from "@/features/student/hooks/useMockHistory";
+import {
+  resolvePace,
+  projectBand,
+  toDisplayBand,
+} from "@/features/student/utils/readinessProjection";
+import { useDiagnosticBaseline } from "@/features/student/hooks/useDiagnosticBaseline";
+import { baselineBySkill } from "@/features/student/utils/diagnosticBaseline";
+import {
+  getMissStreak,
+  getMissedCount,
+  getCarryForwardSubSkills,
+  getMissStreakDates,
+  formatDateList,
+  observedPacePerWeek,
+} from "@/features/student/utils/iaAttendance";
 import { cn } from "@/shared/utils";
 import { bandFillPct } from "@/shared/utils/bandScale";
 import {
@@ -42,8 +59,9 @@ const SKILL_BANDS: SkillBand[] = [
 ];
 
 // ─── PREDICTED READINESS (frontend-only model) ────────────────────────────────
-// Base improvement pace: ≈ 0.5 band per 4 weeks of consistent practice.
-const BASE_PACE_PER_WEEK = 0.125;
+// Pace is the student's own observed slope where there is enough history for
+// one, falling back to the assumed constant otherwise. See readinessProjection
+// for the two floors: never below current band, never a negative pace.
 
 // Consistency multiplier — misses/streak directly scale the projected pace:
 // less login, less output.
@@ -69,7 +87,8 @@ const computeReadiness = (
   target: number,
   examDate: string | null,
   misses: number,
-  streak: number
+  streak: number,
+  observedPacePerWeek: number | null
 ): Readiness => {
   if (!examDate) {
     return {
@@ -94,9 +113,13 @@ const computeReadiness = (
   }
   const weeksLeft = daysLeft / 7;
   const factor = consistencyFactor(misses, streak);
-  const projectedRaw = Math.min(9.0, current + BASE_PACE_PER_WEEK * factor * weeksLeft);
-  const projected = Math.round(projectedRaw * 2) / 2;
+  const { pace, source } = resolvePace(observedPacePerWeek, factor);
+  const projectedRaw = projectBand(current, pace, weeksLeft);
+  const projected = toDisplayBand(projectedRaw);
   const gap = target - projectedRaw;
+  // A stalled student projects flat, not down — so the copy must not promise
+  // movement that the pace does not support.
+  const stalled = source === 'observed' && pace === 0;
 
   let status: ReadinessStatus;
   let trajectory: string;
@@ -106,6 +129,11 @@ const computeReadiness = (
   } else if (gap <= 0) {
     status = "on-track";
     trajectory = `At current pace: Band ${projected.toFixed(1)} by ${examDate} — on track.`;
+  } else if (stalled) {
+    // Observed pace is flat: the projection equals the current band. Saying
+    // "at current pace" is the honest framing — no invented improvement.
+    status = gap <= 0.5 ? "warn" : "catchup";
+    trajectory = `Your band hasn't moved across your recent mocks, so at this pace you stay near ${projected.toFixed(1)}. Picking the drills back up is what changes it.`;
   } else if (gap <= 0.5) {
     status = "warn";
     trajectory = misses === 1
@@ -208,24 +236,63 @@ const StudentDashboardPage = () => {
 
   const { syncMomentum, updateStreak, totalMomentum } = useMomentum();
 
+  const { history: iaHistory } = useIAHistory();
+  const { entries: diagnosticEntries } = useDiagnosticBaseline();
+  const { entries: mockEntries } = useMockHistory();
+
   // Missed-IA state is authoritative on the server (getIAStatus deducts momentum and
-  // records misses). Until that feed is surfaced here, show no fabricated misses — the
-  // previous hard-coded MOCK_MISSED_STATE=1 shipped a fake "behind schedule" banner,
-  // a fake client-side −20/week penalty that fought syncMomentum, and could lock the
-  // dashboard for every student.
-  const missedData = { misses: 0, subSkills: [] as string[] };
+  // records misses) and now reaches the dashboard through /api/student/ia-history —
+  // the same feed AssessmentHistoryPage uses. It replaces a hard-coded
+  // `{ misses: 0 }`, which made the catch-up branches below unreachable.
+  //
+  // `misses` is the CONSECUTIVE miss streak, not the lifetime total. The gates here
+  // are recoverable states ("you have drifted, come back"), and a lifetime count
+  // never decreases — it would trap a student in catch-up permanently.
+  // Lifetime total stays available as missedTotal for display.
+  //
+  // While the fetch is in flight, history is [] → misses 0, so the dashboard opens
+  // in its normal layout and never flashes a catch-up banner it then retracts.
+  const missedData = {
+    misses: getMissStreak(iaHistory),
+    subSkills: getCarryForwardSubSkills(iaHistory),
+    dates: getMissStreakDates(iaHistory),
+  };
+  const missedTotal = getMissedCount(iaHistory);
 
   const displayName = profile?.name || user?.email?.split("@")[0] || "Student";
   const overall = overallBand(skillBands);
 
+  // Growth since the diagnostic. Derived at render rather than written into
+  // skillBands state because competency-scores and diagnostic-report resolve
+  // independently — whichever lands second would otherwise clobber the other.
+  //
+  // delta stays 0 when there is no baseline for a skill, so a card without a
+  // diagnostic shows no growth chip rather than a misleading "+0.0".
+  const baselines = baselineBySkill(diagnosticEntries);
+  const skillBandsWithDelta = skillBands.map((b) => {
+    const base = baselines[b.skill.toUpperCase()];
+    return base == null ? b : { ...b, delta: Number((b.score - base).toFixed(1)) };
+  });
+  const baselineOverall = Object.keys(baselines).length
+    ? overallBand(
+        skillBands.map((b) => ({ ...b, score: baselines[b.skill.toUpperCase()] ?? b.score }))
+      )
+    : null;
+
   // Real frontend-only readiness calculation — current band, target, exam
   // date, and consistency (misses + streak) all feed the projection.
+  // The student's own improvement slope, from their scored mocks. Null until
+  // there are two sittings more than a week apart, in which case the projection
+  // falls back to the assumed pace rather than claiming a trend from one point.
+  const observedPace = observedPacePerWeek(bandPointsFromMocks(mockEntries));
+
   const dynamicReadiness = computeReadiness(
     overall,
     targetBand,
     examDate,
     missedData.misses,
-    dailyDrillState?.daily_streak ?? 0
+    dailyDrillState?.daily_streak ?? 0,
+    observedPace
   );
 
   const milestone = getNextMilestone(overall, dynamicReadiness.targetBand);
@@ -406,7 +473,9 @@ const StudentDashboardPage = () => {
 
           {/* ── Daily Notices ────────────────────────────────────────────────── */}
           <div className={cn("transition-all duration-500", isLocked && "relative z-50")}>
-            <DailyNotices isLocked={isLocked} />
+            {/* The catch-up banner below names every missed date in one block, so
+                the per-IA notices would just repeat it. They stay in the bell. */}
+            <DailyNotices isLocked={isLocked} suppressIaMissed={missedData.misses >= 2} />
           </div>
 
           {/* ── Gentle Catch-Up Banner (2+ misses) — Option 1 neutral slate ───── */}
@@ -420,10 +489,48 @@ const StudentDashboardPage = () => {
                   Let's pick things back up
  </h3>
  <p className="text-sm font-medium text-brand-text-mute mt-0.5">
- Looks like a couple of sessions slipped by — no worries, it happens to everyone.
- Your momentum will climb right back as soon as you start a drill, and your tutor
- is looped in to help.
+ {/* Carries the real dates, because this banner replaces the per-IA
+     notices on the dashboard and must not be less informative than them.
+     The exact per-miss momentum figure is deliberately not restated —
+     ia-history does not carry it, and the bell sources it correctly. */}
+ {missedData.dates.length > 0 ? (
+ <>
+ You've missed {missedData.misses} assessment{missedData.misses !== 1 ? "s" : ""}{" "}
+ — {formatDateList(missedData.dates)}. Your momentum dipped for now, and
+ you'll earn it right back the moment you complete your next drill. Your
+ tutor is looped in to help.
+ </>
+ ) : (
+ <>
+ Looks like a couple of sessions slipped by — no worries, it happens to
+ everyone. Your momentum will climb right back as soon as you start a drill,
+ and your tutor is looped in to help.
+ </>
+ )}
  </p>
+
+ {/* Sub-skills the missed assessments deferred — from carry_forward_subskills,
+     so the banner names what to start on instead of just saying "come back". */}
+ {missedData.subSkills.length > 0 && (
+ <div className="mt-3 flex flex-wrap items-center gap-2">
+ <span className="text-xs font-semibold uppercase tracking-wide text-brand-text-mute">
+ Waiting on you
+ </span>
+ {missedData.subSkills.slice(0, 4).map((s) => (
+ <span
+ key={s}
+ className="text-xs font-medium px-2.5 py-1 rounded-full bg-white border border-brand-line text-brand-text"
+ >
+ {s}
+ </span>
+ ))}
+ {missedData.subSkills.length > 4 && (
+ <span className="text-xs font-medium text-brand-text-mute">
+ +{missedData.subSkills.length - 4} more
+ </span>
+ )}
+ </div>
+ )}
  </div>
  <button
  onClick={() => navigate("/student/drill")}
@@ -644,8 +751,23 @@ const StudentDashboardPage = () => {
               )}
             >
               <section>
+                {/* Growth headline — the student's own baseline, which until now
+                    only their tutor could see (instructor BaselineComparison). */}
+                {baselineOverall != null && overall > 0 && (
+                  <p className="text-sm font-medium text-brand-text-mute mb-3">
+                    You started at{" "}
+                    <span className="font-jetbrains font-bold text-brand-text">
+                      {baselineOverall.toFixed(1)}
+                    </span>
+                    . You're at{" "}
+                    <span className="font-jetbrains font-bold text-brand-text">
+                      {overall.toFixed(1)}
+                    </span>
+                    .
+                  </p>
+                )}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  {skillBands.map((band) => (
+                  {skillBandsWithDelta.map((band) => (
                     <SkillBandCard
                       key={band.skill}
                       band={band}
@@ -669,7 +791,7 @@ const StudentDashboardPage = () => {
 
               <DashboardCard title="Skill Modules" subtitle="Tap any module to continue">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                  {skillBands.map((band) => (
+                  {skillBandsWithDelta.map((band) => (
                     <ModuleNavCard
                       key={band.skill}
                       band={band}
@@ -1390,11 +1512,32 @@ const SkillBandCard = ({
             {band.icon}
           </div>
         </div>
-        <p className="font-jetbrains text-3xl font-bold text-brand-text tracking-tight">
-          {band.score.toFixed(1)}
-        </p>
+        <div className="flex items-baseline gap-2">
+          <p className="font-jetbrains text-3xl font-bold text-brand-text tracking-tight">
+            {band.score.toFixed(1)}
+          </p>
+          {/* Growth since the diagnostic baseline. Rendered only when there is
+              real movement — a "+0.0" chip is noise, and a missing baseline
+              must not read as "no progress". */}
+          {band.delta !== 0 && (
+            <span
+              className={cn(
+                "font-jetbrains text-xs font-bold px-1.5 py-0.5 rounded-md",
+                band.delta > 0
+                  ? "text-brand-teal-600 bg-brand-teal-50"
+                  : "text-amber-700 bg-amber-50"
+              )}
+              title="Change since your diagnostic assessment"
+            >
+              {band.delta > 0 ? "↑" : "↓"} {Math.abs(band.delta).toFixed(1)}
+            </span>
+          )}
+        </div>
         <p className="text-sm font-medium text-brand-text-mute mt-1 mb-4">
           {band.skill}
+          {band.delta !== 0 && (
+            <span className="text-brand-text-mute/70"> · since diagnostic</span>
+          )}
         </p>
         <div className="h-1.5 w-full rounded-full bg-brand-bg-alt overflow-hidden mb-4">
           <div

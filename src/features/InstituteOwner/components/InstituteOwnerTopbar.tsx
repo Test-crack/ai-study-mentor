@@ -1,4 +1,5 @@
-import { Search, Bell, Menu, Plus } from "lucide-react";
+import { Search, Menu, Plus } from "lucide-react";
+import { StaffNotificationBell } from "@/shared/components/notifications/StaffNotificationBell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { Button } from "@/shared/components/ui/button";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -55,19 +56,25 @@ export const InstituteOwnerTopbar = ({ onCreateCourse }: InstituteOwnerTopbarPro
         </div>
       </div> */}
 
-      {/* Right Actions - Added ml-auto here to push content to the right edge */}
-      <div className="flex items-center gap-2 sm:gap-3 ml-auto">
+      {/* Right Actions - Added ml-auto here to push content to the right edge.
+          min-w-0 lets the exam selector shrink instead of pushing the bell and
+          avatar off the edge on a phone. */}
+      <div className="flex items-center gap-2 sm:gap-3 ml-auto min-w-0">
         {/* Exam context switch (owner) — scopes every page to the selected exam */}
         <ExamContextBar />
 
-        {/* Notifications */}
-        {/* <button className="relative p-2 text-brand-text-mute hover:text-brand-teal-600 hover:bg-brand-teal-50 rounded-full transition-all">
-          <Bell className="h-5 w-5" />
-          <span className="absolute top-2 right-2.5 h-2 w-2 bg-red-500 rounded-full border-2 border-white"></span>
-        </button> */}
+        {/* Notifications — real feed from user_notifications, same component the
+            admin portal uses. Replaces the commented-out decorative bell (a
+            hardcoded red dot with no data behind it).
+
+            NOTE: /api/institute-owner/notifications is not mounted yet
+            (BACKEND_REQUEST_dropout_risk_notifications.md Request 2), so this
+            renders an empty "all caught up" bell until it lands, then starts
+            working with no further frontend change. */}
+        <StaffNotificationBell scope="institute-owner" />
 
         {/* Profile */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 shrink-0">
           <div className="text-right hidden md:block">
             <p className="font-manrope text-sm font-bold text-brand-text leading-none">{displayName}</p>
             <p className="font-jetbrains text-[10px] font-semibold tracking-[0.12em] uppercase text-brand-text-mute mt-0.5">Owner Portal</p>

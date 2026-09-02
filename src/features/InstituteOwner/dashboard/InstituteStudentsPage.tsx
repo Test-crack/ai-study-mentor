@@ -9,6 +9,9 @@ import { InstituteOwnerSidebar } from '../components/InstitiuteOwnerSidebar';
 import { InstituteOwnerTopbar } from '../components/InstituteOwnerTopbar';
 import { fetchStudents, StudentRow } from '../services/instituteOwnerService';
 import { useToast } from '@/shared/hooks/use-toast';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/shared/components/ui/select';
 
 const toSlug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
@@ -167,17 +170,24 @@ export default function InstituteStudentsPage() {
                 />
               </div>
 
-              {/* Batch */}
-              <select
-                value={batchFilter}
-                onChange={e => setBatchFilter(e.target.value)}
-                className="flex-1 sm:flex-none min-h-[44px] text-sm bg-brand-bg-alt border border-brand-line rounded-xl px-3 py-2.5 text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-teal-500/30 transition-colors"
-              >
-                <option value="">All Batches</option>
-                {batchOptions.map(([id, name]) => (
-                  <option key={id} value={id}>{name}</option>
-                ))}
-              </select>
+              {/* Batch — Radix Select, not a native <select>: a native select's popup
+                  is drawn by the browser at the width of its longest option and
+                  ignores CSS, overflowing narrow mobile viewports. Radix renders the
+                  panel in a portal with collision detection, so it stays on screen. */}
+              <Select value={batchFilter || '__all__'} onValueChange={v => setBatchFilter(v === '__all__' ? '' : v)}>
+                <SelectTrigger
+                  aria-label="Filter by batch"
+                  className="flex-1 sm:flex-none w-auto min-h-[44px] h-auto text-sm bg-brand-bg-alt border border-brand-line rounded-xl px-3 py-2.5 text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-teal-500/30 transition-colors"
+                >
+                  <SelectValue placeholder="All Batches" />
+                </SelectTrigger>
+                <SelectContent collisionPadding={12} className="max-w-[calc(100vw-2rem)]">
+                  <SelectItem value="__all__">All Batches</SelectItem>
+                  {batchOptions.map(([id, name]) => (
+                    <SelectItem key={id} value={id}>{name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
               {/* At-risk toggle */}
               <button

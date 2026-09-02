@@ -1,7 +1,5 @@
 import {
   LayoutDashboard,
-  Coins,
-  LifeBuoy,
   Users,
   Building2,
   LogOut,
@@ -11,7 +9,9 @@ import {
   Activity,
   CreditCard,
   SlidersHorizontal,
-  ShieldCheck
+  ShieldCheck,
+  Coins,
+  LifeBuoy
 } from "lucide-react";
 import testcrackLogo from '@/assets/testcrack-logo.svg';
 import { cn } from "@/shared/utils";
@@ -30,6 +30,7 @@ export const SuperAdminSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
   const { signOut } = useAuth();
   const navigate = useNavigate();
   
+ // Question Bank has no backend route yet — left commented out below until one exists.
  const menuItems = [
   { id: 'superadmin-dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/superadmin/dashboard' },
   { id: 'institutes', icon: Building2, label: 'Institutes', path: '/superadmin/institutes' },

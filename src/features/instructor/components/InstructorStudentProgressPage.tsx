@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { ChevronLeft, BarChart3, ClipboardList, BookOpen, Activity, FileSearch } from 'lucide-react';
+import { ChevronLeft, BarChart3, ClipboardList, BookOpen, Activity, FileSearch, Dumbbell } from 'lucide-react';
 import { InstructorSidebar } from '../components/dashboard/InstructorSidebar';
 import { cn } from '@/shared/utils';
 import { callBackend } from '@/features/auth/services/authClient';
@@ -11,8 +11,10 @@ import { IASessionsTab }        from './student-progress/IASessionsTab';
 import { MockSessionsTab }      from './student-progress/MockSessionsTab';
 import { DrillsTab }            from './student-progress/DrillsTab';
 import { DiagnosticTab }        from './student-progress/DiagnosticTab';
+import { PracticeHistoryTab }   from './student-progress/PracticeHistoryTab';
+import { isSpokenEnglish } from '@/features/student/utils/exam';
 
-type Tab = 'overview' | 'ia' | 'mock' | 'drills' | 'diagnostic';
+type Tab = 'overview' | 'ia' | 'mock' | 'drills' | 'diagnostic' | 'practice';
 
 const TABS: Array<{ id: Tab; label: string; icon: React.ReactNode }> = [
   { id: 'overview',    label: 'Overview',    icon: <BarChart3     className="h-4 w-4" /> },
@@ -20,6 +22,7 @@ const TABS: Array<{ id: Tab; label: string; icon: React.ReactNode }> = [
   { id: 'mock',        label: 'Mock Tests',  icon: <BookOpen      className="h-4 w-4" /> },
   { id: 'drills',      label: 'Drills',      icon: <Activity      className="h-4 w-4" /> },
   { id: 'diagnostic',  label: 'Diagnostic',  icon: <FileSearch    className="h-4 w-4" /> },
+  { id: 'practice',    label: 'Practice',    icon: <Dumbbell      className="h-4 w-4" /> },
 ];
 
 function PageSkeleton() {
@@ -52,6 +55,15 @@ export default function InstructorStudentProgressPage() {
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
 
   const { data, loading, error, refetch } = useStudentFullProgress(resolvedBatchId, resolvedStudentId);
+
+  // Practice (Reading/Speaking/Writing free-practice history) isn't a feature
+  // Spoken English students have at all — SE_ALLOWED in StudentSidebar.tsx
+  // doesn't include it, so an SE student can never reach it themselves. Showing
+  // the tab here would describe a feature that doesn't exist for them, not
+  // just one that's currently empty (unlike Mock, which is a real future SE
+  // feature that's intentionally empty for cohort 1).
+  const isSE = isSpokenEnglish(data?.student?.exam_id);
+  const visibleTabs = isSE ? TABS.filter(t => t.id !== 'practice') : TABS;
 
   const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
   // Calls Shalom's retake endpoint (S-D3) — contract unconfirmed, same caveat as
@@ -124,9 +136,13 @@ export default function InstructorStudentProgressPage() {
               {/* Profile header */}
               <StudentProfileHeader data={data} />
 
-              {/* Tab bar */}
-              <div className="bg-white rounded-2xl border border-brand-line shadow-sm p-1.5 flex gap-1 w-fit">
-                {TABS.map(tab => (
+              {/* Tab bar — six tabs with whitespace-nowrap overflow a phone
+                  viewport, and w-fit alone gave no scroll affordance, so the
+                  last tabs were simply unreachable. Scrolls horizontally below
+                  the break, unchanged once it fits. */}
+              <div className="max-w-full overflow-x-auto -mx-1 px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="bg-white rounded-2xl border border-brand-line shadow-sm p-1.5 flex gap-1 w-fit min-w-max">
+                {visibleTabs.map(tab => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
@@ -142,17 +158,22 @@ export default function InstructorStudentProgressPage() {
                   </button>
                 ))}
               </div>
+              </div>
 
               {/* Tab content */}
               {activeTab === 'overview'   && <OverviewTab data={data} />}
-              {activeTab === 'ia'         && <IASessionsTab sessions={data.ia_sessions} />}
-              {activeTab === 'mock'       && <MockSessionsTab sessions={data.mock_sessions} />}
+              {activeTab === 'ia'         && <IASessionsTab sessions={data.ia_sessions} examId={data.student?.exam_id} />}
+              {activeTab === 'mock'       && <MockSessionsTab sessions={data.mock_sessions} examId={data.student?.exam_id} />}
               {activeTab === 'drills'     && (
                 <DrillsTab
                   drillStats={data.drill_stats}
                   lexiStats={data.lexigrid_stats}
                   streak={data.daily_streak}
+                  reflections={data.recent_reflections}
                 />
+              )}
+              {activeTab === 'practice'   && !isSE && resolvedStudentId && (
+                <PracticeHistoryTab studentId={resolvedStudentId} />
               )}
               {activeTab === 'diagnostic' && (
                 <DiagnosticTab
@@ -160,6 +181,7 @@ export default function InstructorStudentProgressPage() {
                   studentName={data.student?.name}
                   onRequestReset={handleRequestRetake}
                   perSkillReset={false}
+                  examId={data.student?.exam_id}
                 />
               )}
             </div>

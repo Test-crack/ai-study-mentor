@@ -1,9 +1,70 @@
 // Shared UI primitives for the Institute Admin portal — extracted from the
 // owner-portal design language so every admin page composes the same pieces:
-// rounded-2xl white cards, brand-teal accent, semantic badges, skeleton-first
-// loading. Light-only — matches the student/instructor dashboard design system.
+// dark ink page hero, rounded-2xl white cards, brand-teal accent, semantic
+// badges, skeleton-first loading. Matches the student/instructor/owner system.
+//
+// Typography follows the brand system: font-manrope for display headings,
+// font-jetbrains for uppercase eyebrow/meta labels, font-plex for body (set
+// once on the layout wrapper, inherited from there).
 import { ReactNode } from "react";
 import { LucideIcon, Inbox } from "lucide-react";
+
+// ─── Page hero (dark ink banner — the top of every admin page) ────────────────
+
+export function PageHero({
+  eyebrow,
+  title,
+  subtitle,
+  actions,
+}: {
+  /** Uppercase mono label in the pill above the title. */
+  eyebrow: string;
+  title: ReactNode;
+  subtitle?: string;
+  actions?: ReactNode;
+}) {
+  return (
+    <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-brand-line-16 bg-brand-ink-deep text-white p-6 sm:p-8 shadow-sm">
+      <div className="pointer-events-none absolute -top-16 -right-12 w-56 h-56 rounded-full bg-brand-teal-600/20 blur-3xl" />
+      <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div className="min-w-0">
+          <span className="font-jetbrains inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-on-ink-mute bg-white/5 border border-brand-line-12 px-2.5 py-1 rounded-full">
+            {eyebrow}
+          </span>
+          <h1 className="font-manrope mt-3 text-2xl sm:text-3xl font-black tracking-tight text-white">
+            {title}
+          </h1>
+          {subtitle && <p className="mt-1.5 text-sm text-brand-on-ink">{subtitle}</p>}
+        </div>
+        {actions && <div className="self-start shrink-0 flex flex-wrap gap-2">{actions}</div>}
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Button styled for placement inside `PageHero` — translucent on the dark
+ * surface, unlike the solid teal buttons used on light content cards.
+ */
+export function HeroAction({
+  onClick,
+  children,
+  disabled,
+}: {
+  onClick?: () => void;
+  children: ReactNode;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="inline-flex items-center gap-1.5 min-h-[40px] text-xs font-bold text-brand-on-ink bg-white/5 hover:bg-white/10 border border-brand-line-12 px-4 py-2 rounded-full transition-all disabled:opacity-60"
+    >
+      {children}
+    </button>
+  );
+}
 
 // ─── KPI card (dashboard stat grid) ───────────────────────────────────────────
 
@@ -38,7 +99,7 @@ export function KpiCard({
           {label}
         </p>
       </div>
-      <p className="mt-3 text-2xl sm:text-3xl font-black text-brand-text leading-none">{value}</p>
+      <p className="font-manrope mt-3 text-2xl sm:text-3xl font-black tracking-tight text-brand-text leading-none">{value}</p>
       {sub && <p className="mt-2 text-[11px] sm:text-xs text-brand-text-mute font-medium leading-snug">{sub}</p>}
     </div>
   );

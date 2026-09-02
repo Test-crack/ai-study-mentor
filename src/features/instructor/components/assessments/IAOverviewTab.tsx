@@ -7,6 +7,13 @@ import type { IAOverviewRow } from './types';
 interface Props {
   rows:    IAOverviewRow[];
   batchId: string;
+  /**
+   * Where the row's "open student" action navigates. Defaults to the instructor
+   * route. The institute-owner portal renders this same table from the same
+   * shared handler but has its own progress route, so the path cannot be
+   * hardcoded here.
+   */
+  progressPathFor?: (userId: string) => string;
 }
 
 type SortKey = 'name' | 'ia_completed' | 'ia_missed' | 'avg_ia_band' | 'last_ia_date';
@@ -37,7 +44,7 @@ function SortIcon({ col, active, dir }: { col: SortKey; active: SortKey; dir: 'a
     : <ArrowDown className="h-3 w-3 text-brand-teal-500 ml-1 shrink-0" />;
 }
 
-export function IAOverviewTab({ rows, batchId }: Props) {
+export function IAOverviewTab({ rows, batchId, progressPathFor }: Props) {
   const navigate = useNavigate();
   const [search,  setSearch]  = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('ia_missed');
@@ -81,7 +88,10 @@ export function IAOverviewTab({ rows, batchId }: Props) {
   }, [rows, search, sortKey, sortDir]);
 
   const goToStudent = (row: IAOverviewRow) => {
-    navigate(`/instructor/batches/${batchId}/students/${row.user_id}/progress`, { state: { studentId: row.user_id } });
+    const path = progressPathFor
+      ? progressPathFor(row.user_id)
+      : `/instructor/batches/${batchId}/students/${row.user_id}/progress`;
+    navigate(path, { state: { studentId: row.user_id } });
   };
 
   const thClass = 'py-3 text-[10px] font-bold text-brand-text-mute uppercase tracking-wider whitespace-nowrap font-jetbrains';
@@ -109,12 +119,12 @@ export function IAOverviewTab({ rows, batchId }: Props) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-2 text-xs text-brand-text-mute">
-          <span className="h-2 w-2 rounded-full bg-emerald-500" />
+          <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
           {eligibleCount} of {rows.length} students eligible for next IA
         </div>
-        <div className="relative w-64">
+        <div className="relative w-full sm:w-64 shrink-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-brand-text-mute" />
           <input
             value={search}
@@ -126,7 +136,75 @@ export function IAOverviewTab({ rows, batchId }: Props) {
       </div>
 
       <div className="bg-white rounded-2xl border border-brand-line shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile: card per student. The table below needs 720px, which meant
+            constant horizontal scrolling on a phone. */}
+        <ul className="md:hidden divide-y divide-brand-line">
+          {filtered.length === 0 ? (
+            <li className="py-10 text-center text-sm text-brand-text-mute">No students match "{search}"</li>
+          ) : (
+            filtered.map(row => (
+              <li key={row.student_id} className="p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Avatar name={row.name} avatar={row.avatar} />
+                    <span className="text-sm font-semibold text-brand-text truncate">{row.name}</span>
+                  </div>
+                  <span className={cn(
+                    'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0',
+                    row.ia_eligible
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                      : 'bg-brand-bg-alt border-brand-line text-brand-text-mute'
+                  )}>
+                    {row.ia_eligible ? 'Eligible' : 'Not yet'}
+                  </span>
+                </div>
+
+                <dl className="grid grid-cols-3 gap-x-3 gap-y-2 mt-3">
+                  <div>
+                    <dt className="font-jetbrains text-[9px] font-bold uppercase tracking-wider text-brand-text-mute">Completed</dt>
+                    <dd className="text-sm font-bold text-emerald-600">{row.ia_completed}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-jetbrains text-[9px] font-bold uppercase tracking-wider text-brand-text-mute">Missed</dt>
+                    <dd className={cn(
+                      'text-sm font-bold',
+                      row.ia_missed === 0 ? 'text-brand-text-mute' : row.ia_missed >= 2 ? 'text-rose-600' : 'text-amber-600'
+                    )}>
+                      {row.ia_missed}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="font-jetbrains text-[9px] font-bold uppercase tracking-wider text-brand-text-mute">Last IA</dt>
+                    <dd className="text-sm text-brand-text-mute">{row.last_ia_date ?? '—'}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-jetbrains text-[9px] font-bold uppercase tracking-wider text-brand-text-mute">Avg band</dt>
+                    <dd className={cn('text-sm font-black', bandColor(row.avg_ia_band))}>
+                      {row.avg_ia_band !== null ? row.avg_ia_band.toFixed(1) : '—'}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="font-jetbrains text-[9px] font-bold uppercase tracking-wider text-brand-text-mute">Best band</dt>
+                    <dd className={cn('text-sm font-black', bandColor(row.best_ia_band))}>
+                      {row.best_ia_band !== null ? row.best_ia_band.toFixed(1) : '—'}
+                    </dd>
+                  </div>
+                  <div className="flex items-end">
+                    <button
+                      onClick={() => goToStudent(row)}
+                      className="inline-flex items-center gap-1 text-xs font-bold text-brand-text-mute hover:text-brand-teal-600 transition-colors"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      View
+                    </button>
+                  </div>
+                </dl>
+              </li>
+            ))
+          )}
+        </ul>
+
+        <div className="overflow-x-auto hidden md:block">
           <table className="w-full text-left min-w-[720px]">
             <thead className="border-b border-brand-line">
               <tr>

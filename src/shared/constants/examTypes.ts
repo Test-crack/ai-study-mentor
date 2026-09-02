@@ -8,7 +8,8 @@
  * backend config. Until then, keep this in sync with the seed in the migration.
  *
  * This is the ONE place the frontend defines exam identity. Do not hand-type
- * exam strings elsewhere (e.g. the old ad-hoc list in Questionbankmanager.tsx).
+ * exam strings elsewhere. (The conflicting ad-hoc union in Questionbankmanager.tsx
+ * is gone — that file was unrouted dead code and was deleted on 21 Aug 2026.)
  */
 
 export const EXAM_TYPES = ['ielts', 'spoken_english', 'oet', 'gre', 'gmat'] as const;

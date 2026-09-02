@@ -1,5 +1,9 @@
 import { callBackend } from '@/features/auth/services/authClient';
 import { getBackendUrl } from '@/shared/utils';
+import type { StudentFullProgress } from '@/features/instructor/components/student-progress/types';
+import type {
+    IAOverviewRow, MockOverviewRow, DiagnosticOverviewRow,
+} from '@/features/instructor/components/assessments/types';
 
 const BASE = () => `${getBackendUrl()}/api/institute-owner`;
 
@@ -40,9 +44,15 @@ export async function fetchBatchDashboardSummary(batchId: string): Promise<{ suc
     return callBackend(`${BASE()}/batches/${batchId}/dashboard-summary`);
 }
 
-export async function fetchStudents(params?: { batchId?: string; at_risk?: boolean }): Promise<{ success: boolean; data: StudentRow[]; total: number }> {
+/**
+ * The batch filter param is `batch_id` — that is what getInstituteStudents reads
+ * (`req.query.batch_id`). This sent `batchId`, so the server never saw a filter
+ * and silently returned every student in the institute; the page's batch
+ * dropdown appeared to do nothing.
+ */
+export async function fetchStudents(params?: { batchId?: string; at_risk?: boolean }): Promise<{ success: boolean; data: StudentRow[] }> {
     const q = new URLSearchParams();
-    if (params?.batchId)    q.set('batchId', params.batchId);
+    if (params?.batchId)    q.set('batch_id', params.batchId);
     if (params?.at_risk)    q.set('at_risk', 'true');
     const qs = q.toString() ? `?${q}` : '';
     return callBackend(`${BASE()}/students${qs}`);
@@ -156,35 +166,40 @@ export interface AtRiskRow {
     current_band: number | null; target_band: number | null;
 }
 
+/**
+ * Mirrors getInstituteStudents in instituteOwnerController.ts.
+ *
+ * Previously declared `drills_count_today`, which that endpoint has never sent,
+ * and omitted `email` / `is_diagnosed`, which it always has. `batch_id` was
+ * declared but genuinely missing from the response until the controller was
+ * corrected — the students page keys its batch filter by it, so the dropdown
+ * was building options from `undefined`. Keep this aligned with the controller.
+ */
 export interface StudentRow {
     student_id: string; user_id: string; name: string; avatar: string | null;
+    email: string;
+    /** Empty string when the student is not assigned to any batch. */
     batch_id: string; batch_name: string;
     current_band: number | null; target_band: number | null; gap: number | null;
     band_trend: 'up' | 'flat' | 'down' | null;
-    daily_streak: number; drilled_today: boolean; drills_count_today: number;
+    daily_streak: number; drilled_today: boolean;
     momentum_score: number; is_at_risk: boolean; primary_flag: string | null;
     last_active: string | null;
+    is_diagnosed: boolean;
+    /** "YYYY-MM-DD" — the student's own declared exam date, or null if unset. */
+    exam_date: string | null;
 }
 
-export interface StudentFullProgress {
-    student: { id: string; name: string; email: string; avatar: string | null };
-    competency: { skill: string; band_score: number }[];
-    target_band: number | null;
-    current_band: number | null;
-    momentum_score: number;
-    daily_streak: number;
-    ia_sessions: any[];
-    mock_sessions: any[];
-    drill_stats: {
-        last_14_days: { date: string; dcs: number | null; count: number }[];
-        sub_skill_counts: { skill: string; sub_skill: string; count: number; avg_accuracy: number }[];
-        streak_calendar: { date: string; active: boolean }[];
-        total_drills_all_time: number;
-        avg_dcs_lifetime: number;
-    };
-    lexigrid_stats: { games_last_14: number; avg_words_solved: number; bonus_rate: number };
-    ia_eligibility: { prerequisites_met: boolean; avg_dcs: number; drills_completed: number; next_ia_date: string | null };
-}
+/**
+ * Owner and instructor read the SAME payload — both endpoints delegate to
+ * computeStudentFullProgress in src/lib/studentProgressQueries.ts. This file
+ * used to redeclare it, and the copy had drifted: it was missing
+ * `diagnostic_baseline` and `diagnostic_results`, so the baseline-vs-current
+ * comparison looked like owner-unavailable data when the endpoint had been
+ * returning it all along. Re-exported instead of redeclared so it cannot
+ * drift again.
+ */
+export type { StudentFullProgress };
 
 export interface InstructorRow {
     user_id: string; name: string; email: string; avatar: string | null;
@@ -192,11 +207,19 @@ export interface InstructorRow {
     total_students: number;
 }
 
+/**
+ * Institute-wide assessment overview.
+ *
+ * Row shapes are identical to the instructor's per-batch endpoint — the two
+ * handlers compute the same fields — so the row types are reused rather than
+ * re-declared as `any[]`. Only the summary keys differ: the owner endpoint sends
+ * `institute_*` where the instructor sends `batch_*`.
+ */
 export interface AssessmentOverview {
-    ia_overview: any[];
-    mock_overview: any[];
-    diagnostic_overview: any[];
-    institute_ia_summary: { avg_band: number; completion_rate: number; high_miss_count: number };
+    ia_overview:         IAOverviewRow[];
+    mock_overview:       MockOverviewRow[];
+    diagnostic_overview: DiagnosticOverviewRow[];
+    institute_ia_summary:   { avg_band: number; completion_rate: number; high_miss_count: number };
     institute_mock_summary: { avg_real_band: number; at_or_above_target: number; no_mock_yet: number };
 }
 
@@ -211,10 +234,20 @@ export interface BatchComparisonRow {
     at_risk_pct: number;
 }
 
+/**
+ * Mirrors getAnalyticsInstructorEffectiveness in instituteOwnerController.ts.
+ *
+ * This interface previously declared `at_risk_students`, which the endpoint has
+ * never sent — the field is `at_risk_count`. Nothing consumed this type, so the
+ * mismatch went unnoticed until the admin Reports page rendered it and the
+ * column came out blank. Keep it aligned with the controller.
+ */
 export interface InstructorEffectivenessRow {
     user_id: string; name: string; avatar: string | null;
     batch_count: number; student_count: number; avg_band_improvement: number | null;
-    ia_completion_rate: number; at_risk_students: number;
+    /** Percent, 0..100 — completed IAs / scheduled IAs. */
+    ia_completion_rate: number;
+    at_risk_count: number;
     students_at_target: number; avg_student_streak: number;
 }
 

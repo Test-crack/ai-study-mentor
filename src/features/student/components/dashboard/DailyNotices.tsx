@@ -80,7 +80,22 @@ function NotificationBanner({
  * CTAs have no DB row, so they dismiss per-session via sessionStorage — they
  * are transient by nature and will resolve or expire on their own.
  */
-export const DailyNotices = ({ isLocked = false }: { isLocked?: boolean }) => {
+export const DailyNotices = ({
+ isLocked = false,
+ suppressIaMissed = false,
+}: {
+ isLocked?: boolean;
+ /**
+  * Hide per-IA missed notices from the dashboard. Set when the catch-up banner
+  * is showing, because that banner already names every missed date in one
+  * block — four banners saying the same thing is noise.
+  *
+  * These are only hidden from the dashboard, never lost: the bell keeps the
+  * full per-IA history, including the exact momentum figure for each miss,
+  * which this summary deliberately does not restate.
+  */
+ suppressIaMissed?: boolean;
+}) => {
  const { cta, events, loading, dismiss } = useNotifications();
 
  // Session-scoped dismissals for CTAs only (no DB identity to dismiss against).
@@ -100,15 +115,23 @@ export const DailyNotices = ({ isLocked = false }: { isLocked?: boolean }) => {
  const visibleCtas = (cta as Notification[]).filter(
  (n) => !dismissedCtas.has(ctaKey(n)) && sessionStorage.getItem(ctaKey(n)) !=='true'
  );
- const visibleEvents = events
+ const allEvents = events
  .filter((e) => !e.dismissed_at)
  .map(eventToNotification);
 
+ const suppressed = suppressIaMissed
+ ? allEvents.filter((n) => n.type === 'IA_MISSED')
+ : [];
+ const visibleEvents = allEvents.filter((n) => !suppressed.includes(n));
+
  const all = [...visibleCtas, ...visibleEvents];
  const shown = all.slice(0, MAX_BANNERS);
- const overflow = all.length - shown.length;
+ // Suppressed notices still count toward the bell pointer — they are hidden
+ // from the dashboard, not discarded, and the student needs to know where the
+ // per-miss detail went.
+ const overflow = all.length - shown.length + suppressed.length;
 
- if (shown.length === 0) return null;
+ if (shown.length === 0 && overflow === 0) return null;
 
  return (
  <div className="space-y-4">

@@ -1,4 +1,4 @@
-import { Flame, Target, Zap, Gamepad2 } from 'lucide-react';
+import { Flame, Target, Zap, Gamepad2, MessageSquareQuote } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell,
@@ -10,6 +10,50 @@ interface Props {
   drillStats:  StudentFullProgress['drill_stats'];
   lexiStats:   StudentFullProgress['lexigrid_stats'];
   streak:      number;
+  /** Optional so existing callers that don't pass it still compile. */
+  reflections?: StudentFullProgress['recent_reflections'];
+}
+
+const titleCase = (s: string) => s.charAt(0) + s.slice(1).toLowerCase();
+
+/**
+ * The student's own words from the drill "apply" step.
+ *
+ * This is qualitative data the platform already collects and previously showed
+ * to nobody but the student. It is the only place a student explains *why* a
+ * sub-skill is hard, which is the context a DCS percentage cannot carry.
+ */
+function ReflectionsPanel({ reflections }: { reflections: StudentFullProgress['recent_reflections'] }) {
+  return (
+    <div className="bg-white rounded-2xl border border-brand-line shadow-sm overflow-hidden">
+      <div className="px-5 py-3 border-b border-brand-line flex items-center gap-2">
+        <MessageSquareQuote className="h-4 w-4 text-brand-teal-600" />
+        <h3 className="text-sm font-bold text-brand-text">
+          Student Reflections
+          <span className="ml-2 text-[11px] font-normal text-brand-text-mute">
+            in their own words · {reflections.length} most recent
+          </span>
+        </h3>
+      </div>
+      <ul className="divide-y divide-brand-line">
+        {reflections.map((r) => (
+          <li key={r.id} className="px-5 py-4">
+            <div className="flex flex-wrap items-center gap-2 mb-1.5">
+              <span className="text-xs font-bold text-brand-text">{titleCase(r.sub_skill)}</span>
+              <span className="text-[10px] font-medium text-brand-text-mute">{titleCase(r.skill)}</span>
+              <span className="text-[10px] text-brand-text-mute ml-auto tabular-nums">
+                {new Date(r.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+              </span>
+            </div>
+            {/* whitespace-pre-line: student-authored free text, newlines are meaningful */}
+            <p className="text-sm text-brand-text leading-relaxed whitespace-pre-line border-l-2 border-brand-teal-200 pl-3">
+              {r.reflection_text}
+            </p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
 function StatCard({ icon, label, value, sub }: {
@@ -54,7 +98,7 @@ function StreakCalendar({ days }: { days: Array<{ date: string; active: boolean 
   );
 }
 
-export function DrillsTab({ drillStats, lexiStats, streak }: Props) {
+export function DrillsTab({ drillStats, lexiStats, streak, reflections }: Props) {
   const { last_14_days, sub_skill_counts, streak_calendar, total_drills_all_time, avg_dcs_lifetime } = drillStats;
 
   const chartData = last_14_days.map(d => ({
@@ -176,6 +220,10 @@ export function DrillsTab({ drillStats, lexiStats, streak }: Props) {
             </table>
           </div>
         </div>
+      )}
+
+      {reflections && reflections.length > 0 && (
+        <ReflectionsPanel reflections={reflections} />
       )}
     </div>
   );

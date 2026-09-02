@@ -24,6 +24,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui/
 import { Calendar as DayCalendar } from '@/shared/components/ui/calendar';
 import { format } from 'date-fns';
 import StudentLayout from './StudentLayout';
+import { isSpokenEnglish } from '@/features/student/utils/exam';
 
 // ─── Band scale (IELTS): 4.0 → 9.0 in 0.5 steps ─────────────────────────────
 const BAND_MIN = 4.0;
@@ -569,7 +570,12 @@ export default function StudentProfilePage() {
 
         {/* Right Column: Stats / Info */}
         <div className="space-y-6">
-          {/* Goal Tracking — Target Band + Exam Date */}
+          {/* Goal Tracking — Target Band + Exam Date. IELTS only: a target band
+              drives real downstream logic (pace projection, readiness), and SE
+              cohort 1 has no CEFR-target field or readiness feature to attach
+              to (see product spec §7.6/§8) — hidden rather than replaced with a
+              dropdown that nothing would read. */}
+          {!isSpokenEnglish(profile?.examId) && (
           <Card className="border border-brand-line shadow-sm bg-white">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
               <CardTitle className="font-jetbrains text-xs font-bold text-brand-text-mute uppercase tracking-[0.14em] flex items-center gap-2">
@@ -711,6 +717,7 @@ export default function StudentProfilePage() {
               )}
             </CardContent>
           </Card>
+          )}
 
           <Card className="border-none shadow-sm bg-brand-teal-700 text-white overflow-hidden relative">
             <div className="absolute top-0 right-0 p-8 opacity-10">

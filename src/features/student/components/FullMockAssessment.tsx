@@ -10,7 +10,7 @@ import * as mockTimerStore from "@/features/student/utils/mockTimerStore";
 import {
   ArrowRight, CheckCircle2, AlertCircle, Mic, PlayCircle,
   Zap, Loader2, Lock, XCircle, Trophy, Calendar, BookOpen, ArrowLeft, Flame,
-  ChevronDown, Clock, Play,
+  ChevronDown, Clock, Play, RotateCcw, AlertTriangle,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -283,7 +283,11 @@ export default function FullMockAssessment() {
 
   // Audio / Passage
   const audioRef                            = useRef<HTMLAudioElement>(null);
-  const [audioState, setAudioState]         = useState<"idle" | "playing" | "played">("idle");
+  const [audioState, setAudioState]         = useState<"idle" | "playing" | "played" | "error">("idle");
+  // Reachable only from "error" (a real media error or a rejected play()), and capped,
+  // so a load failure is recoverable without weakening "audio plays once".
+  const MAX_AUDIO_RETRIES = 2;
+  const [audioRetries, setAudioRetries]     = useState(0);
   const [showPassage, setShowPassage]       = useState(false);
   const [animBars]                          = useState(() => Array.from({ length: 12 }, () => Math.random()));
 
@@ -488,6 +492,7 @@ export default function FullMockAssessment() {
     setCurrentIdx(0);
     setAnswers(res.saved_answers ?? {});
     setAudioState("idle");
+    setAudioRetries(0); // fresh retry budget per section
     setShowPassage(false);
     setIsRecording(false);
     setGradingRetryPending(false);
@@ -1006,16 +1011,43 @@ export default function FullMockAssessment() {
           <div className="w-full lg:w-1/2 flex flex-col gap-4">
             {activeSection.section_type === "AUDIO" && activeSection.audio_url ? (
               <div className="bg-brand-teal-wash border border-brand-teal-200 rounded-2xl p-8 text-center flex flex-col items-center shadow-sm">
-                <button onClick={() => { if (audioState === "idle" && audioRef.current) { audioRef.current.play(); setAudioState("playing"); } }}
-                  disabled={audioState !== "idle"}
-                  className={`w-24 h-24 rounded-full flex items-center justify-center text-white mb-6 shadow-md transition-colors ${audioState === "idle" ? "bg-brand-teal-700 hover:bg-brand-teal-600" : audioState === "playing" ? "bg-amber-500" : "bg-emerald-500"}`}>
+                <button onClick={() => {
+                    const el = audioRef.current;
+                    if (!el) return;
+                    const retrying = audioState === "error";
+                    if (audioState !== "idle" && !retrying) return;
+                    if (retrying) {
+                      if (audioRetries >= MAX_AUDIO_RETRIES) return;
+                      setAudioRetries(n => n + 1);
+                      el.load(); // a failed element won't re-request on its own
+                    }
+                    setAudioState("playing");
+                    // play() rejects on autoplay policy or network/decode failure —
+                    // uncaught, the bars animate forever over silence.
+                    void el.play().catch(() => setAudioState("error"));
+                  }}
+                  disabled={audioState === "playing" || audioState === "played" || (audioState === "error" && audioRetries >= MAX_AUDIO_RETRIES)}
+                  className={`w-24 h-24 rounded-full flex items-center justify-center text-white mb-6 shadow-md transition-colors ${audioState === "idle" ? "bg-brand-teal-700 hover:bg-brand-teal-600" : audioState === "playing" ? "bg-amber-500" : audioState === "error" ? "bg-rose-600 hover:bg-rose-700" : "bg-emerald-500"}`}>
                   {audioState === "idle" && <PlayCircle className="w-12 h-12 ml-1" />}
                   {audioState === "playing" && <div className="flex items-center gap-1.5 h-10">{animBars.slice(0,4).map((h,i) => <div key={i} className="w-2 bg-white rounded-full animate-pulse" style={{ height: `${20+h*40}px`, animationDelay: `${i*0.15}s` }} />)}</div>}
                   {audioState === "played" && <CheckCircle2 className="w-12 h-12" />}
+                  {audioState === "error" && (audioRetries >= MAX_AUDIO_RETRIES ? <AlertTriangle className="w-12 h-12" /> : <RotateCcw className="w-11 h-11" />)}
                 </button>
                 <p className="text-brand-text font-semibold text-lg uppercase tracking-wide mb-2">Listening Audio</p>
-                <p className="text-brand-text-mute font-medium text-sm">{audioState === "played" ? "Playback complete — answer the questions." : "Listen carefully. Audio plays once."}</p>
-                <audio ref={audioRef} src={activeSection.audio_url} preload="auto" onEnded={() => setAudioState("played")} />
+                {audioState === "error" ? (
+                  <p className="text-rose-600 font-semibold text-sm max-w-xs">
+                    {audioRetries >= MAX_AUDIO_RETRIES
+                      ? "The audio still won't load. Report this to your instructor before continuing — don't refresh, your answers are saved."
+                      : "The audio didn't load. Tap to try again — your answers so far are safe."}
+                  </p>
+                ) : (
+                  <p className="text-brand-text-mute font-medium text-sm">{audioState === "played" ? "Playback complete — answer the questions." : "Listen carefully. Audio plays once."}</p>
+                )}
+                <audio ref={audioRef} src={activeSection.audio_url} preload="auto"
+                  onEnded={() => setAudioState("played")}
+                  // A missing/404/corrupt file fires only this. Without it the player sits
+                  // dead while the mock timer keeps running.
+                  onError={() => setAudioState("error")} />
               </div>
             ) : activeSection.section_type === "PASSAGE" && activeSection.passage_text ? (
               <div className="bg-white border border-brand-line rounded-2xl flex flex-col max-h-[700px] shadow-sm">

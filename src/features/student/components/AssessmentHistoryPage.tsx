@@ -15,6 +15,11 @@ import {
   ThisMonthMockCard, HowFarCard, AboutReportCard, GaugeBar,
   type BandPoint, type SkillGaugeRow, type DeltaRow,
 } from "./assessment-history/widgets";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { isSpokenEnglish } from "@/features/student/utils/exam";
+import { examDisplay } from "@/features/student/config/examDisplay";
+import { SE_SUBSKILLS } from "@/features/student/config/spokenEnglishSubskills";
+import { CEFR_ORDER, cefrOrdinal, cefrColor, cefrGaugeColor, CefrBadge } from "@/features/student/config/cefrDisplay";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
@@ -1018,7 +1023,16 @@ function getBandOverTime(iaHistory: IAEntry[], mockEntries: MockEntry[]): BandPo
     .map(({ label, band, type }) => ({ label, band, type }));
 }
 
-function getCurrentBand(iaHistory: IAEntry[], mockEntries: MockEntry[]): number | null {
+/**
+ * The average of the MOST RECENT scored assessment only — not the student's band.
+ *
+ * An IA often covers a single skill, so this can read 0.5 for a Speaking-only IA
+ * while Listening sits at 7.0. The authoritative overall band is the mean of the
+ * four competency-matrix scores, shown on the student dashboard
+ * (StudentDashboardPage `overallBand`) and on the instructor progress page.
+ * Do not relabel this as "current band" again.
+ */
+function getLastAssessmentBand(iaHistory: IAEntry[], mockEntries: MockEntry[]): number | null {
   const points = getBandOverTime(iaHistory, mockEntries);
   return points.length > 0 ? points[points.length - 1].band : null;
 }
@@ -1034,7 +1048,7 @@ function getAttendance(iaHistory: IAEntry[]) {
   return { pct, taken, total, ticks };
 }
 
-function getRecordInsight(iaHistory: IAEntry[], currentBand: number | null): { message: string; tone: "amber" | "teal" } {
+function getRecordInsight(iaHistory: IAEntry[], lastAssessmentBand: number | null): { message: string; tone: "amber" | "teal" } {
   const sortedDesc = iaHistory.slice().sort((a, b) => new Date(b.ia_date).getTime() - new Date(a.ia_date).getTime());
   let missStreak = 0;
   for (const e of sortedDesc) {
@@ -1043,10 +1057,12 @@ function getRecordInsight(iaHistory: IAEntry[], currentBand: number | null): { m
   }
   if (missStreak >= 2) {
     const lastScored = sortedDesc.find((e) => e.status === "COMPLETED");
-    const bandText = currentBand != null ? currentBand.toFixed(1) : "—";
+    const bandText = lastAssessmentBand != null ? lastAssessmentBand.toFixed(1) : "—";
     const sinceText = lastScored ? formatIADate(lastScored.ia_date) : "your last score";
+    // Says "last scored assessment", never "your band" — this number is one
+    // assessment's average, not an overall band. See getLastAssessmentBand.
     return {
-      message: `You have missed the last ${missStreak} assessments in a row. Your band has been frozen at ${bandText} since ${sinceText} because nothing has re-scored it.`,
+      message: `You have missed the last ${missStreak} assessments in a row. Your last scored assessment was ${bandText} on ${sinceText}, and nothing has re-scored you since.`,
       tone: "amber",
     };
   }
@@ -1184,7 +1200,7 @@ function groupByMonth(entries: IAEntry[]): MonthGroup[] {
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 
-const AssessmentHistoryPage = () => {
+const IeltsAssessmentHistoryPage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"ia" | "mock" | "diagnostic">("ia");
   const [showPremiumModal, setShowPremiumModal] = useState(false);
@@ -1239,7 +1255,7 @@ const AssessmentHistoryPage = () => {
     : iaHistory.filter((e) => (e.scores ?? []).some((s) => s.skill === filterSkillIA))
   ).filter((e) => !hideMissed || e.status !== "MISSED");
 
-  const currentBand = getCurrentBand(iaHistory, mockEntries);
+  const lastAssessmentBand = getLastAssessmentBand(iaHistory, mockEntries);
   const bandOverTime = getBandOverTime(iaHistory, mockEntries);
   const missedCount = iaHistory.filter((e) => e.status === "MISSED").length;
   const monthGroups = groupByMonth(filteredIA);
@@ -1247,7 +1263,7 @@ const AssessmentHistoryPage = () => {
 
   const attendance = getAttendance(iaHistory);
   const subSkillCoverage = getSubSkillCoverage(iaHistory);
-  const recordInsight = getRecordInsight(iaHistory, currentBand);
+  const recordInsight = getRecordInsight(iaHistory, lastAssessmentBand);
 
   const mockProgression = getMockProgression(mockEntries);
   const bestBandPerSkillMock = getBestBandPerSkillMock(mockEntries);
@@ -1325,8 +1341,8 @@ const AssessmentHistoryPage = () => {
                 <p className="text-lg font-black text-white"><AnimatedNumber value={mockEntries.length} /></p>
               </div>
               <div className="rounded-lg bg-white/[0.04] border border-white/5 px-3 py-2.5">
-                <p className="text-[9px] font-bold uppercase tracking-wide text-white/40 mb-1">Current band</p>
-                <p className="text-lg font-black text-white">{currentBand != null ? currentBand.toFixed(1) : "—"}</p>
+                <p className="text-[9px] font-bold uppercase tracking-wide text-white/40 mb-1">Last assessment</p>
+                <p className="text-lg font-black text-white">{lastAssessmentBand != null ? lastAssessmentBand.toFixed(1) : "—"}</p>
               </div>
               <div className="rounded-lg bg-white/[0.04] border border-white/5 px-3 py-2.5">
                 <p className="text-[9px] font-bold uppercase tracking-wide text-white/40 mb-1">Missed</p>
@@ -1548,6 +1564,250 @@ const AssessmentHistoryPage = () => {
       <PremiumModal isOpen={showPremiumModal} onClose={() => setShowPremiumModal(false)} />
     </>
   );
+};
+
+// ─── SPOKEN ENGLISH (CEFR) ASSESSMENT HISTORY ─────────────────────────────────
+// Separate composition built from shared pieces (StudentLayout, GaugeBar, sidebar
+// cards, BandOverTimeChart with a CEFR scale) so the IELTS view/JSX above is never
+// touched. sub_scores shape for SE differs entirely from IELTS (see spokenEnglishSubskills.ts).
+
+const SeDisclaimer = ({ examId }: { examId?: string | null }) => {
+  const disclaimer = examDisplay(examId).disclaimer;
+  if (!disclaimer) return null;
+  return <p className="text-[11px] text-brand-text-mute leading-relaxed italic">{disclaimer}</p>;
+};
+
+interface SeSubskillRow { id: string; label: string; level: string; score: number; }
+interface SeCefrResult {
+  cefrLevel?: string;
+  cefrLabel?: string;
+  meanScore?: number;
+  subskillProfile?: SeSubskillRow[];
+  feedback?: Array<{ promptId: string; strengths: string; improvements: string }>;
+  scoredPromptCount?: number;
+  noResponseCount?: number;
+}
+
+const SeSubskillProfile = ({ profile }: { profile: SeSubskillRow[] }) => (
+  <div className="space-y-3">
+    {SE_SUBSKILLS.map((cfg) => {
+      const row = profile.find((p) => p.id === cfg.id);
+      if (!row) return null;
+      return (
+        <div key={cfg.id}>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-semibold text-brand-text">{cfg.label}</span>
+            <span className={`text-sm font-black ${cefrColor(row.level)}`}>{row.level?.toUpperCase()}</span>
+          </div>
+          <GaugeBar value={row.score} max={100} colorClass={cefrGaugeColor(row.level)} />
+        </div>
+      );
+    })}
+  </div>
+);
+
+const SeResultCard = ({ entry, title, dateLabel }: { entry: AssessmentEntry; title: string; dateLabel: string }) => {
+  const result = (entry.sub_scores ?? {}) as SeCefrResult;
+  const profile = result.subskillProfile ?? [];
+  return (
+    <div className="bg-white rounded-2xl border border-l-4 border-brand-line border-l-brand-teal-500 shadow-sm p-4 sm:p-5">
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div className="min-w-0">
+          <p className="font-manrope font-bold text-brand-text text-sm sm:text-base">{title}</p>
+          <div className="flex items-center gap-1 mt-1 text-[11px] sm:text-xs text-brand-text-mute">
+            <Clock className="h-3 w-3 shrink-0" /><span>{dateLabel}</span>
+          </div>
+        </div>
+        <div className="flex flex-col items-center gap-1 shrink-0">
+          <CefrBadge label={result.cefrLabel} size="sm" />
+          <p className="text-[9px] sm:text-[10px] text-brand-text-mute font-semibold font-jetbrains uppercase tracking-[0.14em]">CEFR</p>
+        </div>
+      </div>
+      {profile.length > 0 && (
+        <div className="pt-3 border-t border-brand-line">
+          <SeSubskillProfile profile={profile} />
+        </div>
+      )}
+      {result.feedback && result.feedback.length > 0 && (
+        <div className="pt-3 mt-3 border-t border-brand-line space-y-2">
+          <p className="text-[10px] font-black text-brand-text-mute font-jetbrains uppercase tracking-[0.16em]">Feedback</p>
+          {result.feedback.map((f, i) => (
+            <div key={f.promptId ?? i} className="bg-brand-bg-alt rounded-xl p-3 text-sm text-brand-text space-y-1">
+              {f.strengths && <p><span className="font-semibold text-emerald-600">Strengths: </span>{f.strengths}</p>}
+              {f.improvements && <p><span className="font-semibold text-amber-600">To improve: </span>{f.improvements}</p>}
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="mt-3">
+        <SeDisclaimer examId="spoken_english" />
+      </div>
+    </div>
+  );
+};
+
+const SpokenEnglishAssessmentHistoryPage = () => {
+  const [activeTab, setActiveTab] = useState<"ia" | "mock" | "diagnostic">("ia");
+  const [iaEntries, setIaEntries] = useState<AssessmentEntry[]>([]);
+  const [mockEntries, setMockEntries] = useState<AssessmentEntry[]>([]);
+  const [diagnostic, setDiagnostic] = useState<AssessmentEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const res = await callBackend(`${BACKEND}/api/student/assessment-history`);
+        if (res.success) {
+          const rows = (res.data ?? []) as AssessmentEntry[];
+          setIaEntries(rows.filter((r) => r.mode === "INTERNAL_ASSESSMENT"));
+          setMockEntries(rows.filter((r) => r.mode === "MOCK"));
+        } else setError(true);
+      } catch { setError(true); }
+      finally { setLoading(false); }
+    };
+    const fetchDiagnostic = async () => {
+      try {
+        const res = await callBackend(`${BACKEND}/api/student/diagnostic-report`);
+        if (res.success) setDiagnostic(res.data ?? []);
+      } catch { /* silent */ }
+    };
+    fetchHistory();
+    fetchDiagnostic();
+  }, []);
+
+  const bandOverTime: BandPoint[] = iaEntries
+    .filter((e) => e.sub_scores)
+    .map((e) => ({
+      label: formatDate(e.created_at).split(",")[0],
+      band: cefrOrdinal((e.sub_scores as SeCefrResult)?.cefrLabel),
+      type: "assessment" as const,
+    }))
+    .slice(-8);
+
+  const latestLabel = iaEntries.length > 0
+    ? (iaEntries[iaEntries.length - 1].sub_scores as SeCefrResult)?.cefrLabel
+    : undefined;
+
+  const TABS: ReadonlyArray<readonly ["ia" | "mock" | "diagnostic", React.ReactNode, string, number]> = [
+    ["ia", <ListChecks className="h-4 w-4 shrink-0" />, "Internal Assessments", iaEntries.length],
+    ["mock", <FileText className="h-4 w-4 shrink-0" />, "Mock Tests", mockEntries.length],
+    ["diagnostic", <Stethoscope className="h-4 w-4 shrink-0" />, "Diagnostic Report", diagnostic.length],
+  ] as const;
+
+  return (
+    <StudentLayout activeTab="assessment-history" mainClassName="flex-1 p-3 sm:p-4 md:p-6 lg:p-8">
+      <div className="space-y-4 sm:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="relative overflow-hidden rounded-3xl bg-brand-ink p-5 sm:p-7 grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-6">
+          <div className="absolute -top-16 -right-10 w-56 h-56 rounded-full bg-brand-mint/10 blur-3xl pointer-events-none" />
+          <div className="relative">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-4 h-px bg-brand-mint" />
+              <span className="text-[11px] font-bold uppercase tracking-widest text-brand-mint">Every score on record</span>
+            </div>
+            <h1 className="font-manrope text-xl sm:text-2xl font-black text-white tracking-tight mb-1.5">
+              {iaEntries.length} assessment{iaEntries.length !== 1 ? "s" : ""} on record
+            </h1>
+            <p className="text-xs sm:text-sm text-white/60 max-w-md mb-5 leading-relaxed">
+              Your Spoken English level is tracked on the CEFR scale (A1–C2) across six speaking sub-skills.
+            </p>
+            <div className="rounded-lg bg-white/[0.04] border border-white/5 px-3 py-2.5 inline-flex items-center gap-2">
+              <p className="text-[9px] font-bold uppercase tracking-wide text-white/40">Current level</p>
+              <p className="text-lg font-black text-white">{latestLabel ?? "—"}</p>
+            </div>
+          </div>
+          <div className="relative flex flex-col min-h-[160px]">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">CEFR level over time</p>
+              <ChartLegend />
+            </div>
+            <div className="flex-1">
+              <BandOverTimeChart
+                points={bandOverTime}
+                yDomain={[0, 6]}
+                yTickFormatter={(v) => CEFR_ORDER[Math.round(v)] ?? ""}
+                tooltipFormatter={(v) => CEFR_ORDER[Math.round(v)] ?? ""}
+                tooltipLabel="Level"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-1 p-1 bg-brand-bg-alt rounded-xl w-full sm:w-fit overflow-x-auto no-scrollbar">
+          {TABS.map(([tab, icon, label, count]) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all whitespace-nowrap flex-1 sm:flex-none ${
+                activeTab === tab ? "bg-brand-ink text-white shadow-sm" : "text-brand-text-mute hover:text-brand-text"
+              }`}
+            >
+              {icon}<span>{label}</span>
+              {count > 0 && (
+                <span className={`ml-0.5 text-[10px] font-black px-1.5 py-0.5 rounded-full shrink-0 ${activeTab === tab ? "bg-brand-mint/20 text-brand-mint" : "bg-brand-teal-100 text-brand-teal-600"}`}>{count}</span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-12 sm:py-16 gap-3 text-brand-text-mute"><Loader2 className="h-5 w-5 animate-spin" /><span className="text-sm font-medium">Loading history…</span></div>
+        ) : error ? (
+          <div className="flex flex-col items-center py-12 sm:py-16 gap-3 text-brand-text-mute px-4 text-center"><AlertCircle className="h-8 w-8 text-rose-400" /><p className="text-sm font-semibold text-brand-text-mute">Failed to load assessment history</p></div>
+        ) : activeTab === "ia" ? (
+          iaEntries.length === 0 ? (
+            <div className="text-center py-12 sm:py-16 text-brand-text-mute px-4">
+              <BarChart2 className="h-10 w-10 mx-auto mb-3 opacity-40" />
+              <p className="font-semibold text-brand-text-mute">No completed assessments yet</p>
+              <p className="text-sm mt-1">Complete an Internal Assessment to see your CEFR level here.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {iaEntries.slice().reverse().map((e) => (
+                <SeResultCard key={e.id} entry={e} title="Internal Assessment" dateLabel={formatDate(e.created_at)} />
+              ))}
+            </div>
+          )
+        ) : activeTab === "mock" ? (
+          mockEntries.length === 0 ? (
+            <div className="text-center py-12 sm:py-16 text-brand-text-mute px-4">
+              <FileText className="h-10 w-10 mx-auto mb-3 opacity-40" />
+              <p className="font-semibold text-brand-text-mute">No mock tests yet</p>
+              <p className="text-sm mt-1">Mock tests for Spoken English aren't available for your cohort yet.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {mockEntries.slice().reverse().map((e) => (
+                <SeResultCard key={e.id} entry={e} title="Mock Test" dateLabel={formatDate(e.created_at)} />
+              ))}
+            </div>
+          )
+        ) : diagnostic.length === 0 ? (
+          <div className="text-center py-12 sm:py-16 text-brand-text-mute px-4">
+            <Stethoscope className="h-10 w-10 mx-auto mb-3 opacity-40" />
+            <p className="font-semibold text-brand-text-mute">No diagnostic report found</p>
+            <p className="text-sm mt-1">Complete your diagnostic viva to see your baseline CEFR level here.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {diagnostic.map((e) => (
+              <SeResultCard key={e.id} entry={e} title="Diagnostic Report" dateLabel={formatDate(e.created_at)} />
+            ))}
+          </div>
+        )}
+      </div>
+    </StudentLayout>
+  );
+};
+
+// ─── DISPATCH ──────────────────────────────────────────────────────────────────
+// Branch at the top level: IELTS renders the original, unmodified page; Spoken
+// English renders its own CEFR composition built from shared pieces. Never mix
+// isSpokenEnglish checks into the IELTS JSX above.
+
+const AssessmentHistoryPage = () => {
+  const { profile } = useAuth();
+  return isSpokenEnglish(profile?.examId) ? <SpokenEnglishAssessmentHistoryPage /> : <IeltsAssessmentHistoryPage />;
 };
 
 export default AssessmentHistoryPage;

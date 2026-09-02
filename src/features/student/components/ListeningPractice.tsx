@@ -1280,7 +1280,22 @@ export default function ListeningPractice() {
   const [elapsed, setElapsed] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => { window.speechSynthesis.getVoices(); }, []);
+  const [speechError, setSpeechError] = useState<string | null>(null);
+  const [speechRetries, setSpeechRetries] = useState(0);
+  const MAX_SPEECH_RETRIES = 2;
+
+  // getVoices() populates ASYNCHRONOUSLY. Calling it once on mount and throwing the
+  // result away meant speak() could still read an empty list and silently fall back
+  // to the browser default voice. Keep the list warm and re-read it on
+  // 'voiceschanged', which is the only reliable signal that it's populated.
+  const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
+  useEffect(() => {
+    if (!('speechSynthesis' in window)) return;
+    const load = () => { voicesRef.current = window.speechSynthesis.getVoices(); };
+    load();
+    window.speechSynthesis.addEventListener?.('voiceschanged', load);
+    return () => window.speechSynthesis.removeEventListener?.('voiceschanged', load);
+  }, []);
 
   useEffect(() => {
     let fixInterval: ReturnType<typeof setInterval>;
@@ -1305,6 +1320,8 @@ export default function ListeningPractice() {
       setIsPlaying(false);
       setCurrentBoundaryIndex(-1);
       setScriptVisible(false);
+      setSpeechError(null);
+      setSpeechRetries(0); // fresh budget for the next task
     }
   }, [screen]);
 
@@ -1333,10 +1350,25 @@ export default function ListeningPractice() {
 
   const speak = useCallback(() => {
     if (!selectedTask) return;
+    if (!('speechSynthesis' in window)) {
+      setSpeechError("This browser can't play the audio. Try Chrome or Edge.");
+      return;
+    }
+    // A retry is only reachable from an error state, and capped — so a genuine
+    // failure is recoverable without turning "listen once" into unlimited replays.
+    if (speechError) {
+      if (speechRetries >= MAX_SPEECH_RETRIES) return;
+      setSpeechRetries(n => n + 1);
+    }
+    setSpeechError(null);
     window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(selectedTask.script);
     (window as any)._speechBugFix = utter;
-    const availableVoices = window.speechSynthesis.getVoices();
+    // Prefer the warm list; fall back to a fresh read in case 'voiceschanged'
+    // never fired on this browser.
+    const availableVoices = voicesRef.current.length
+      ? voicesRef.current
+      : window.speechSynthesis.getVoices();
     const localEnglishVoice = availableVoices.find(v => v.lang.startsWith('en') && v.localService);
     if (localEnglishVoice) {
       utter.voice = localEnglishVoice;
@@ -1348,10 +1380,24 @@ export default function ListeningPractice() {
     utter.pitch = 1;
     utter.onstart = () => { setIsPlaying(true); setHasPlayed(true); setCurrentBoundaryIndex(0); setScriptVisible(true); };
     utter.onend = () => { setIsPlaying(false); setCurrentBoundaryIndex(-1); setScriptVisible(false); };
-    utter.onerror = () => { setIsPlaying(false); setCurrentBoundaryIndex(-1); setScriptVisible(false); };
+    utter.onerror = (event) => {
+      setIsPlaying(false);
+      setCurrentBoundaryIndex(-1);
+      setScriptVisible(false);
+      // cancel()/stop fires onerror as 'canceled' or 'interrupted'. Those are the
+      // student pressing stop or navigating away — not failures. Reporting them
+      // would show an error every time someone leaves the page.
+      const reason = (event as SpeechSynthesisErrorEvent).error;
+      if (reason === 'canceled' || reason === 'interrupted') return;
+      setSpeechError(
+        reason === 'not-allowed'
+          ? 'Your browser blocked audio playback. Press play again to allow it.'
+          : "The audio stopped unexpectedly and didn't finish."
+      );
+    };
     utter.onboundary = (event) => { setCurrentBoundaryIndex(event.charIndex); };
     window.speechSynthesis.speak(utter);
-  }, [selectedTask]);
+  }, [selectedTask, speechError, speechRetries]);
 
   const stopAudio = () => {
     window.speechSynthesis.cancel();
@@ -1612,7 +1658,7 @@ export default function ListeningPractice() {
                 {/* TTS Controls */}
                 <div className="bg-brand-bg-alt p-4 rounded-xl border border-brand-line">
                   <div className="flex items-center gap-3 flex-wrap">
-                    {!isPlaying && !hasPlayed && (
+                    {!isPlaying && !hasPlayed && !speechError && (
                       <Button onClick={speak} className="bg-brand-teal-400 hover:bg-brand-teal-500 text-white gap-2 flex-1 sm:flex-none">
                         <Play className="w-4 h-4" /> Play Audio
                       </Button>
@@ -1623,9 +1669,19 @@ export default function ListeningPractice() {
                         Playing Audio...
                       </Button>
                     )}
-                    {!isPlaying && hasPlayed && (
+                    {!isPlaying && hasPlayed && !speechError && (
                       <Button disabled className="bg-brand-bg-alt text-brand-text-mute gap-2 flex-1 sm:flex-none cursor-not-allowed">
                         <CheckCircle2 className="w-4 h-4" /> Audio Finished
+                      </Button>
+                    )}
+                    {!isPlaying && speechError && speechRetries < MAX_SPEECH_RETRIES && (
+                      <Button onClick={speak} className="bg-rose-600 hover:bg-rose-700 text-white gap-2 flex-1 sm:flex-none">
+                        <RotateCcw className="w-4 h-4" /> Try Again
+                      </Button>
+                    )}
+                    {!isPlaying && speechError && speechRetries >= MAX_SPEECH_RETRIES && (
+                      <Button disabled className="bg-brand-bg-alt text-brand-text-mute gap-2 flex-1 sm:flex-none cursor-not-allowed">
+                        <XCircle className="w-4 h-4" /> Audio Unavailable
                       </Button>
                     )}
                     {isPlaying && (
@@ -1635,7 +1691,14 @@ export default function ListeningPractice() {
                       </div>
                     )}
                   </div>
-                  {!hasPlayed && (
+                  {speechError ? (
+                    <p className="text-xs text-rose-600 font-semibold mt-3">
+                      {speechError}
+                      {speechRetries >= MAX_SPEECH_RETRIES
+                        ? ' Try a different browser, or tell your instructor.'
+                        : ' Your answers so far are saved.'}
+                    </p>
+                  ) : !hasPlayed && (
                     <p className="text-xs text-brand-text-mute mt-3">
                       👆 Press <strong>Play Audio</strong> to hear the recording. You can only listen to it once.
                     </p>

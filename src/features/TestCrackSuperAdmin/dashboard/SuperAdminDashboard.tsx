@@ -3,15 +3,15 @@ import {
   Building2,
   Users,
   CreditCard,
-  Headphones,
   ChevronRight,
-  Activity,
-  Ticket,
   Loader2
 } from 'lucide-react';
 import { SuperAdminSidebar } from '../Components/SuperadminSidebar';
 import { SuperAdminTopbar } from '../Components/Superadmintopbar';
-import { fetchInstitutes, InstituteRecord } from '../services/superadminService';
+import {
+  fetchInstitutes, fetchSubscriptions,
+  type InstituteRecord, type SubscriptionSummary,
+} from '../services/superadminService';
 
 // --- Static Data ---
 const COLORS = [
@@ -24,77 +24,26 @@ const COLORS = [
 ];
 
 const getInitials = (name: string) => name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
-const activities = [
-  {
-    text: <><span className="font-semibold text-brand-text">New institute signed up</span> — LearnFirst Academy (Trial)</>,
-    time: '3 hours ago',
-    dotColor: 'bg-emerald-500'
-  },
-  {
-    text: <><span className="font-semibold text-brand-text">Subscription upgraded</span> — SpeakWell — Institute Pro</>,
-    time: 'Yesterday',
-    dotColor: 'bg-brand-teal-500'
-  },
-  {
-    text: <><span className="font-semibold text-brand-text">Support ticket resolved</span> — Prestige University — API rate limit</>,
-    time: 'Yesterday',
-    dotColor: 'bg-brand-teal-500'
-  },
-  {
-    text: <><span className="font-semibold text-brand-text">Invoice paid</span> — ₹4,50,000 — Prestige University</>,
-    time: '2 days ago',
-    dotColor: 'bg-emerald-500'
-  },
-  {
-    text: <><span className="font-semibold text-brand-text">Churn risk detected</span> — TechBridge Institute — usage down 40%</>,
-    time: '2 days ago',
-    dotColor: 'bg-rose-500'
-  }
-];
-
-const tickets = [
-  {
-    title: 'Bulk import failing for CSV > 500 rows',
-    institute: 'TechBridge Institute',
-    time: '2h ago',
-    priority: 'HIGH',
-    status: 'open',
-    priorityColor: 'text-rose-600 bg-rose-50 border-rose-200',
-    statusColor: 'text-sky-600 bg-sky-50 border-sky-200'
-  },
-  {
-    title: 'White-label domain SSL not resolving',
-    institute: 'Ace English Academy',
-    time: '1d ago',
-    priority: 'MEDIUM',
-    status: 'in-progress',
-    priorityColor: 'text-amber-600 bg-amber-50 border-amber-200',
-    statusColor: 'text-brand-blue-600 bg-brand-blue-50 border-brand-blue-200'
-  },
-  {
-    title: 'Trial extension request — 7 more days',
-    institute: 'LearnFirst Academy',
-    time: '2h ago',
-    priority: 'LOW',
-    status: 'open',
-    priorityColor: 'text-brand-text-mute bg-brand-bg-alt border-brand-line',
-    statusColor: 'text-sky-600 bg-sky-50 border-sky-200'
-  }
-];
 
 export default function SuperAdminDashboard() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [institutes, setInstitutes] = useState<InstituteRecord[]>([]);
+  const [subs, setSubs] = useState<SubscriptionSummary | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchInstitutes().then(res => {
-      setInstitutes(res.data || []);
-      setLoading(false);
-    }).catch(err => {
-      console.error(err);
-      setLoading(false);
-    });
+    // allSettled: the subscription summary is supplementary — if it fails the
+    // institute list must still render rather than the page going blank.
+    Promise.allSettled([fetchInstitutes(), fetchSubscriptions()])
+      .then(([instRes, subRes]) => {
+        if (instRes.status === 'fulfilled') setInstitutes(instRes.value.data || []);
+        else console.error('[SuperAdmin] fetchInstitutes failed:', instRes.reason);
+
+        if (subRes.status === 'fulfilled') setSubs(subRes.value.summary ?? null);
+        else console.error('[SuperAdmin] fetchSubscriptions failed:', subRes.reason);
+
+        setLoading(false);
+      });
   }, []);
 
   const totalStudents = institutes.reduce((acc, inst) => acc + inst.studentCount, 0);
@@ -127,7 +76,7 @@ export default function SuperAdminDashboard() {
                   Super Admin Console
                 </h1>
                 <p className="text-brand-on-ink text-sm sm:text-base">
-                  <strong className="text-white font-semibold">{loading ? '...' : institutes.length} institutes</strong> onboarded. <strong className="text-white font-semibold">{loading ? '...' : totalStudents.toLocaleString()} total students</strong>. <strong className="text-white font-semibold">₹12.0L MRR</strong>. 2 open support tickets.
+                  <strong className="text-white font-semibold">{loading ? '...' : institutes.length} institutes</strong> onboarded. <strong className="text-white font-semibold">{loading ? '...' : totalStudents.toLocaleString()} total students</strong>. <strong className="text-white font-semibold">{loading ? '...' : totalTutors.toLocaleString()} tutors</strong>.
                 </p>
               </div>
             </div>
@@ -138,7 +87,9 @@ export default function SuperAdminDashboard() {
                 <div className="min-w-0">
                   <p className="font-jetbrains text-[10px] font-bold text-brand-text-mute uppercase tracking-[0.15em] mb-1">Institutes</p>
                   <h3 className="text-2xl font-black text-brand-text">{loading ? '...' : institutes.length}</h3>
-                  <p className="text-[10px] text-brand-text-mute mt-1">1 on trial</p>
+                  <p className="text-[10px] text-brand-text-mute mt-1">
+                    {subs ? `${subs.trial} on trial` : `${institutes.filter(i => i.isActive).length} active`}
+                  </p>
                 </div>
                 <div className="w-10 h-10 rounded-full bg-brand-teal-50 flex items-center justify-center shrink-0">
                   <Building2 className="w-5 h-5 text-brand-teal-600" />
@@ -156,34 +107,29 @@ export default function SuperAdminDashboard() {
                 </div>
               </div>
 
+              {/* Subscriptions — real counts from /api/superadmin/subscriptions.
+                  Replaces the former MRR and Open Tickets tiles: there is no
+                  revenue field on any superadmin endpoint (pricing existed only
+                  in the deleted PricingConfig hardcode) and no tickets table at
+                  all, so both were invented numbers. */}
               <div className="bg-white border border-brand-line rounded-2xl p-4 sm:p-6 shadow-sm flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="font-jetbrains text-[10px] font-bold text-brand-text-mute uppercase tracking-[0.15em] mb-1">MRR</p>
-                  <h3 className="text-2xl font-black text-brand-text">₹1203K</h3>
-                  <p className="text-[10px] text-emerald-600 mt-1">+12% this month</p>
+                  <p className="font-jetbrains text-[10px] font-bold text-brand-text-mute uppercase tracking-[0.15em] mb-1">Active Subscriptions</p>
+                  <h3 className="text-2xl font-black text-brand-text">{loading ? '...' : subs ? subs.active : '—'}</h3>
+                  <p className="text-[10px] text-brand-text-mute mt-1">
+                    {subs ? `${subs.total} total · ${subs.cancelled} cancelled` : 'Unavailable'}
+                  </p>
                 </div>
                 <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
                   <CreditCard className="w-5 h-5 text-emerald-600" />
                 </div>
               </div>
-
-              <div className="bg-white border border-brand-line rounded-2xl p-4 sm:p-6 shadow-sm flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="font-jetbrains text-[10px] font-bold text-brand-text-mute uppercase tracking-[0.15em] mb-1">Open Tickets</p>
-                  <h3 className="text-2xl font-black text-brand-text">2</h3>
-                  <p className="text-[10px] text-brand-text-mute mt-1">5 total</p>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-sky-50 flex items-center justify-center shrink-0">
-                  <Headphones className="w-5 h-5 text-sky-600" />
-                </div>
-              </div>
             </div>
 
-            {/* Main Content Split */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-              {/* Left Column - Institutes */}
-              <div className="lg:col-span-2 space-y-4">
+            {/* Institutes — the only real list on this page, so it runs full
+                width now that the hardcoded Platform Activity column is gone. */}
+            <div>
+              <div className="space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Building2 className="w-5 h-5 text-brand-teal-600 shrink-0" />
                   <div>
@@ -223,75 +169,6 @@ export default function SuperAdminDashboard() {
                 </div>
               </div>
 
-              {/* Right Column - Platform Activity */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Activity className="w-5 h-5 text-emerald-600 shrink-0" />
-                  <h2 className="font-manrope text-lg font-bold text-brand-text">Platform Activity</h2>
-                </div>
-
-                <div className="bg-white border border-brand-line rounded-2xl shadow-sm p-4 sm:p-6">
-                  <div className="relative border-l border-brand-line ml-2 space-y-6 pb-2">
-                    {activities.map((act, idx) => (
-                      <div key={idx} className="relative pl-5">
-                        <div className={`absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full ring-4 ring-white ${act.dotColor}`}></div>
-                        <p className="text-[13px] text-brand-text leading-snug">
-                          {act.text}
-                        </p>
-                        <p className="text-[11px] text-brand-text-mute mt-1">{act.time}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-            {/* Support Tickets Section */}
-            <div className="space-y-4 pt-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <Ticket className="w-5 h-5 text-amber-500 shrink-0" />
-                <h2 className="font-manrope text-lg font-bold text-brand-text">Support Tickets</h2>
-                <span className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.12em] text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md">2 open</span>
-              </div>
-
-              <div className="grid grid-cols-1 gap-3">
-                {tickets.map((ticket, idx) => (
-                  <div key={idx} className="bg-white border border-brand-line p-4 sm:p-6 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-brand-teal-50/50 transition-colors cursor-pointer shadow-sm">
-                    <div className="min-w-0">
-                      <h4 className="font-semibold text-sm text-brand-text">{ticket.title}</h4>
-                      <p className="text-xs text-brand-text-mute mt-1">{ticket.institute} • {ticket.time}</p>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className={`font-jetbrains text-[10px] font-bold tracking-[0.12em] px-2 py-0.5 rounded border uppercase ${ticket.priorityColor}`}>
-                        {ticket.priority}
-                      </span>
-                      <span className={`font-jetbrains text-[10px] font-bold tracking-[0.12em] px-2 py-0.5 rounded border uppercase ${ticket.statusColor}`}>
-                        {ticket.status}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Bottom Overall Metrics */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 pt-6 mt-4 border-t border-brand-line">
-              <div>
-                <p className="font-jetbrains text-[10px] font-bold text-brand-text-mute uppercase tracking-[0.15em] mb-1">Total Revenue (MTD)</p>
-                <h3 className="text-3xl font-black text-brand-text">₹1203K</h3>
-                <p className="text-xs text-emerald-600 font-medium mt-1">+12% vs last month</p>
-              </div>
-              <div>
-                <p className="font-jetbrains text-[10px] font-bold text-brand-text-mute uppercase tracking-[0.15em] mb-1">Avg Revenue per Institute</p>
-                <h3 className="text-3xl font-black text-brand-text">₹241K</h3>
-                <p className="text-xs text-brand-text-mute mt-1">{loading ? '...' : institutes.filter(i => i.isActive).length} active institutes</p>
-              </div>
-              <div>
-                <p className="font-jetbrains text-[10px] font-bold text-brand-text-mute uppercase tracking-[0.15em] mb-1">Platform Health Score</p>
-                <h3 className="text-3xl font-black text-emerald-600">83%</h3>
-                <p className="text-xs text-brand-text-mute mt-1">Avg across all institutes</p>
-              </div>
             </div>
 
         </main>

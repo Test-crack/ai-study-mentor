@@ -93,28 +93,6 @@ export interface ReadingAssessmentHistoryItem {
   createdAt: string;
 }
 
-/** Batch-level reading analytics returned for instructors / institute owners */
-export interface BatchReadingAnalytics {
-  batchName: string;
-  summary: {
-    totalStudents: number;
-    avgWPM: number;
-    avgAccuracy: number;
-    avgSpeedLearningScore: number;
-    totalSessions: number;
-  };
-  wpmTrends: Array<{ date: string; avgWpm: number; avgAccuracy: number }>;
-  studentLeaderboard: Array<{
-    studentId: string;
-    name: string;
-    avatar?: string;
-    avgWPM: number;
-    avgAccuracy: number;
-    bestSpeedLearningScore: number;
-    totalSessions: number;
-  }>;
-}
-
 // ─── API Calls ────────────────────────────────────────────────────────────────
 
 /**
@@ -201,23 +179,3 @@ export const fetchStudentReadingHistoryForInstructor = async (
   }
 };
 
-/**
- * Fetch batch-level Reading Practice analytics.
- * Role-aware: uses different base paths for INSTRUCTOR vs INSTITUTE_OWNER.
- */
-export const fetchBatchReadingAnalytics = async (
-  batchId: string,
-  role: 'INSTRUCTOR' | 'INSTITUTE_OWNER'
-): Promise<BatchReadingAnalytics | null> => {
-  const backendUrl = getBackendUrl();
-  const base = role === 'INSTITUTE_OWNER' ? 'institute-owner' : 'instructor';
-  try {
-    const response = await callBackend(
-      `${backendUrl}/api/${base}/batches/${batchId}/reading-analytics`
-    );
-    return response.data as BatchReadingAnalytics;
-  } catch (err: any) {
-    console.warn('Batch reading analytics endpoint not available:', err.message);
-    return null;
-  }
-};

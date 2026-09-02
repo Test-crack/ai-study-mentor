@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/shared/components/ui/tooltip";
 import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from "@tanstack/react-query"; // ← CHANGED
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useParams, useLocation } from "react-router-dom";
 import { setSelectedExamId } from "@/shared/state/examContext";
+import { isSpokenEnglish } from "@/features/student/utils/exam";
 import { AuthProvider, useAuth } from "@/features/auth/hooks/useAuth";
 import { callBackend } from "@/features/auth/services/authClient";
 import { RoleProtectedRoute } from "@/shared/components/auth/ProtectedRoute";
@@ -80,7 +81,9 @@ const Performance = lazy(() => import("@/features/InstituteOwner/dashboard/Perfo
 const BatchInsight = lazy(() => import("@/features/InstituteOwner/dashboard/BatchInsight"));
 const InstituteAdmins = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteAdmins"));
 const InstituteStudentsPage = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteStudentsPage"));
+const InstituteAssessments = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteAssessments"));
 const InstituteInstructorsPage = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteInstructorsPage"));
+const InstituteAdminAssessments = lazy(() => import("@/features/Institute/dashboard/InstituteAssessments"));
 const InstituteBatchDetailPage = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteBatchDetailPage"));
 const InstituteOwnerStudentProgressPage = lazy(() => import("@/features/InstituteOwner/dashboard/InstituteOwnerStudentProgressPage"));
 const InstituteAdminStudentProgressPage = lazy(() => import("@/features/Institute/dashboard/InstituteAdminStudentProgressPage"));
@@ -103,8 +106,10 @@ const Suggestion = lazy(() => import("@/features/student/components/Suggestions"
 const SpeakingAssessment = lazy(() => import("@/features/student/components/SpeakingAssessment"));
 const Diagnosis = lazy(() => import("@/features/student/components/Diagnosis/Diagnosis"));
 const VivaDiagnostic = lazy(() => import("@/features/student/components/Diagnosis/VivaDiagnostic"));
+const SpokenEnglishDashboardPage = lazy(() => import("@/features/student/components/SpokenEnglishDashboardPage"));
 const DiagnosticRoadmap = lazy(() => import("@/features/student/components/Diagnosis/DiagnosticRoadmap"));
 const OnboardingWalkthrough = lazy(() => import("@/features/student/components/Onboarding/OnboardingWalkthrough"));
+const SpokenEnglishOnboarding = lazy(() => import("@/features/student/components/Onboarding/SpokenEnglishOnboarding"));
 const HowItWorks = lazy(() => import("@/features/student/components/HowItWorks"));
 const AssessmentHistoryPage = lazy(() => import("@/features/student/components/AssessmentHistoryPage"));
 const SuggestionsPage = lazy(() => import("@/features/student/components/SuggestionsPage"));
@@ -189,6 +194,9 @@ const LoginRedirect = () => {
     if (!profile.isDiagnosed) {
       return <Navigate to="/student/onboarding" replace />;
     }
+    if (profile.examId) {
+      return <Navigate to={`/${profile.examId}/dashboard`} replace />;
+    }
   }
   return <Navigate to="/student/dashboard" replace />;
 };
@@ -210,6 +218,7 @@ const ManualDashboardAccess = () => {
   if (profile.role === 'STUDENT') {
     if (profile.isEnrolled === false) return <Navigate to="/student/not-enrolled" replace />;
     if (!profile.isDiagnosed)        return <Navigate to="/student/onboarding" replace />;
+    if (profile.examId)              return <Navigate to={`/${profile.examId}/dashboard`} replace />;
   }
   return <Navigate to="/student/dashboard" replace />;
 };
@@ -247,7 +256,8 @@ const StudentDrillLockGuard = ({ children }: { children: React.ReactNode }) => {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    if (!profile || profile.role !== 'STUDENT') {
+    // Spoken English has no IELTS drills — never drill-lock it; skip the check entirely.
+    if (!profile || profile.role !== 'STUDENT' || isSpokenEnglish(profile.examId)) {
       setChecking(false);
       return;
     }
@@ -270,12 +280,29 @@ const StudentDrillLockGuard = ({ children }: { children: React.ReactNode }) => {
   if ((loading || profileLoading) && !profile) return null;
   if (!profile) return <Navigate to="/login" replace />;
 
-  if (profile.role === 'STUDENT') {
+  if (profile.role === 'STUDENT' && !isSpokenEnglish(profile.examId)) {
     if (checking) return null;
     if (!dashboardUnlocked) return <Navigate to="/student/dashboard" replace />;
   }
 
   return <>{children}</>;
+};
+
+// Dashboard by exam: Spoken English gets its own CEFR home; IELTS keeps StudentDashboardPage
+// completely untouched.
+const StudentDashboardDispatch = () => {
+  const { profile, loading, profileLoading } = useAuth();
+  if ((loading || profileLoading) && !profile) return null;
+  return isSpokenEnglish(profile?.examId) ? <SpokenEnglishDashboardPage /> : <StudentDashboardPage />;
+};
+
+// Onboarding by exam: Spoken English gets its own CEFR walkthrough (with the
+// full CEFR disclaimer, no target-band step); IELTS keeps OnboardingWalkthrough
+// completely untouched.
+const OnboardingDispatch = () => {
+  const { profile, loading, profileLoading } = useAuth();
+  if ((loading || profileLoading) && !profile) return null;
+  return isSpokenEnglish(profile?.examId) ? <SpokenEnglishOnboarding /> : <OnboardingWalkthrough />;
 };
 
 // Student workspace routes are exam-prefixed: /{examSlug}/dashboard, /{examSlug}/diagnosis,
@@ -347,6 +374,7 @@ const AppRoutes = () => {
         <Route path="/institute-owner/insight"      element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><BatchInsight /></RoleProtectedRoute>} />
         <Route path="/institute-owner/students"     element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteStudentsPage /></RoleProtectedRoute>} />
         <Route path="/institute-owner/instructors"  element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteInstructorsPage /></RoleProtectedRoute>} />
+        <Route path="/institute-owner/assessments"  element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteAssessments /></RoleProtectedRoute>} />
         <Route path="/institute-owner/performance"  element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><Performance /></RoleProtectedRoute>} />
         <Route path="/institute-owner/admins"       element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><InstituteAdmins /></RoleProtectedRoute>} />
         <Route path="/institute-owner/roi"          element={<RoleProtectedRoute allowedRoles={['INSTITUTE_OWNER']}><RoiAnalyticsPage /></RoleProtectedRoute>} />
@@ -362,6 +390,7 @@ const AppRoutes = () => {
         <Route path="/institute-admin/students/:studentSlug/progress" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteAdminStudentProgressPage /></RoleProtectedRoute>} />
         <Route path="/institute-admin/billings" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteBillings /></RoleProtectedRoute>} />
         <Route path="/institute-admin/reports" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteReports /></RoleProtectedRoute>} />
+        <Route path="/institute-admin/assessments" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteAdminAssessments /></RoleProtectedRoute>} />
         <Route path="/institute-admin/studentOnboarding" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><StudentOnboarding /></RoleProtectedRoute>} />
         <Route path="/institute-admin/tutorOnboarding" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><TutorOnboarding /></RoleProtectedRoute>} />
         <Route path="/institute-admin/Setting" element={<RoleProtectedRoute allowedRoles={['INSTITUTE_ADMIN', 'INSTITUTE_OWNER']}><InstituteSettings /></RoleProtectedRoute>} />
@@ -393,7 +422,7 @@ const AppRoutes = () => {
       {/* ── Student workspace, exam-prefixed: /{examSlug}/… ─────────────────────── */}
       <Route path="/:examSlug" element={<StudentExamLayout />}>
         <Route index element={<ExamNavigate to="dashboard" />} />
-        <Route path="onboarding" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><OnboardingWalkthrough /></RoleProtectedRoute>} />
+        <Route path="onboarding" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><OnboardingDispatch /></RoleProtectedRoute>} />
         <Route path="diagnosis" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><DiagnosisDispatch /></RoleProtectedRoute>} />
         <Route path="diagnostic/roadmap" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDiagnosisGuard><DiagnosticRoadmap /></StudentDiagnosisGuard></RoleProtectedRoute>} />
 
@@ -402,7 +431,7 @@ const AppRoutes = () => {
           element={
             <RoleProtectedRoute allowedRoles={['STUDENT']}>
               <StudentDiagnosisGuard>
-                <StudentDashboardPage />
+                <StudentDashboardDispatch />
               </StudentDiagnosisGuard>
             </RoleProtectedRoute>
           }

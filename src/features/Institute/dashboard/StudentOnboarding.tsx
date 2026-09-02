@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Search, Plus, X, Check, Loader2, RefreshCw, Trash2,
-  MoreVertical, CheckCircle2, Mail, User, UserCheck,
+  MoreVertical, CheckCircle2, Mail, User, UserCheck, Info,
 } from 'lucide-react';
 import { InstituteAdminLayout } from '../components/InstituteAdminLayout';
 import {
@@ -9,6 +9,8 @@ import {
   StudentRecord,
 } from '../services/instituteAdminService';
 import { useToast } from '@/shared/hooks/use-toast';
+import { getSelectedExamId } from '@/shared/state/examContext';
+import { EXAM_LABELS, type ExamType } from '@/shared/constants/examTypes';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -76,6 +78,14 @@ function AddStudentModal({ onClose, onAdded }: { onClose: () => void; onAdded: (
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(prev => ({ ...prev, [k]: e.target.value }));
 
+  // The backend has no per-enrollment exam field — it resolves exam_id purely
+  // from the X-Exam-Id header (this institute's currently-selected exam, set by
+  // ExamContextBar). Surfacing that here makes the otherwise-silent assumption
+  // visible before submit, so an admin doesn't enroll into the wrong exam by
+  // forgetting the topbar toggle was left switched.
+  const selectedExamId = getSelectedExamId() as ExamType | null;
+  const selectedExamLabel = selectedExamId ? (EXAM_LABELS[selectedExamId] ?? selectedExamId) : null;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.studentName.trim() || !form.studentEmail.trim()) return;
@@ -132,7 +142,7 @@ function AddStudentModal({ onClose, onAdded }: { onClose: () => void; onAdded: (
               <UserCheck className="w-5 h-5 text-brand-teal-600" />
             </div>
             <div>
-              <h2 className="font-bold text-brand-text text-base">Enroll New Student</h2>
+              <h2 className="font-manrope font-bold text-brand-text text-base">Enroll New Student</h2>
               <p className="text-xs text-brand-text-mute mt-0.5">Student will receive an email invite to set their password</p>
             </div>
           </div>
@@ -164,6 +174,15 @@ function AddStudentModal({ onClose, onAdded }: { onClose: () => void; onAdded: (
               />
             </div>
           </div>
+
+          {selectedExamLabel && (
+            <div className="flex items-start gap-2 bg-amber-50 border border-amber-100 rounded-lg p-3">
+              <Info className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+              <p className="text-xs text-amber-700 leading-relaxed">
+                Enrolling into <strong>{selectedExamLabel}</strong> — this follows the Exam selector in the topbar. Switch it there first if this isn't the right exam for this student.
+              </p>
+            </div>
+          )}
 
           <div className="flex items-start gap-2 bg-brand-teal-50 border border-brand-teal-100 rounded-lg p-3">
             <CheckCircle2 className="w-4 h-4 text-brand-teal-500 mt-0.5 shrink-0" />
@@ -205,7 +224,7 @@ function ConfirmRemoveDialog({ student, onConfirm, onCancel, loading }: {
             <Trash2 className="w-5 h-5 text-rose-600" />
           </div>
           <div>
-            <h3 className="font-bold text-brand-text">Remove Student?</h3>
+            <h3 className="font-manrope font-bold text-brand-text">Remove Student?</h3>
             <p className="text-xs text-brand-text-mute mt-0.5">{student.name ?? student.email}</p>
           </div>
         </div>

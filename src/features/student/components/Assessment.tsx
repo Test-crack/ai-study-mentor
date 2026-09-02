@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, CheckCircle2, AlertCircle, Target, BookOpen, Headphones, PenLine, Mic, BrainCircuit, PlayCircle, Zap, Loader2, Lock, XCircle, CalendarClock, ArrowLeft, Flame } from "lucide-react";
+import { ArrowRight, CheckCircle2, AlertCircle, Target, BookOpen, Headphones, PenLine, Mic, BrainCircuit, PlayCircle, Zap, Loader2, Lock, XCircle, CalendarClock, ArrowLeft, Flame, RotateCcw, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useMomentum } from "@/features/student/Context/MomentumContext";
 import { callBackend } from "@/features/auth/services/authClient";
@@ -337,7 +337,12 @@ export default function Assessment() {
 
   // Audio / passage UI state
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [audioState, setAudioState]           = useState<'idle' | 'playing' | 'played'>('idle');
+  const [audioState, setAudioState]           = useState<'idle' | 'playing' | 'played' | 'error'>('idle');
+  // Retries are only reachable from the 'error' state (a real media error or a
+  // rejected play()), and capped — so a genuine load failure is recoverable
+  // without turning "the audio plays once" into "play it as often as you like".
+  const MAX_AUDIO_RETRIES = 2;
+  const [audioRetries, setAudioRetries]       = useState(0);
   const [showPassage, setShowPassage]         = useState(false);
   const [isRecording, setIsRecording]         = useState(false);
   const [animBars] = useState(() => Array.from({ length: 12 }, () => Math.random()));
@@ -501,6 +506,7 @@ export default function Assessment() {
       setCurrentIdx(0);
       setAnswers(res.saved_answers ?? {});
       setAudioState('idle');
+      setAudioRetries(0); // fresh retry budget per section
       setShowPassage(false);
       setIsRecording(false);
       setTimeLeft(Math.floor((res.time_remaining_ms ?? 20 * 60 * 1000) / 1000));
@@ -566,6 +572,7 @@ export default function Assessment() {
     setAnswers({});
     setTimeLeft(20 * 60);   // reset to full 20 min for new section
     setAudioState('idle');
+      setAudioRetries(0); // fresh retry budget per section
     setShowPassage(false);
     setIsRecording(false);
     setPhase("session");
@@ -1353,28 +1360,62 @@ export default function Assessment() {
             {currentSection.section_type === 'AUDIO' && currentSection.audio_url ? (
               <div className="bg-brand-teal-50 border border-brand-teal-200 rounded-2xl p-8 text-center flex flex-col items-center shadow-sm">
                 <button
-                  onClick={() => { 
-                    if (audioState === 'idle' && audioRef.current) { 
-                      audioRef.current.play(); 
-                      setAudioState('playing'); 
-                    } 
+                  onClick={() => {
+                    const el = audioRef.current;
+                    if (!el) return;
+                    const retrying = audioState === 'error';
+                    if (audioState !== 'idle' && !retrying) return;
+                    if (retrying) {
+                      if (audioRetries >= MAX_AUDIO_RETRIES) return;
+                      setAudioRetries(n => n + 1);
+                      el.load(); // force a fresh fetch; a failed element won't re-request on its own
+                    }
+                    setAudioState('playing');
+                    // play() rejects on autoplay policy or a network/decode failure.
+                    // Without this catch the bars animate forever over silence.
+                    void el.play().catch(() => setAudioState('error'));
                   }}
-                  disabled={audioState !== 'idle'}
+                  disabled={
+                    audioState === 'playing' ||
+                    audioState === 'played' ||
+                    (audioState === 'error' && audioRetries >= MAX_AUDIO_RETRIES)
+                  }
                   className={`w-24 h-24 rounded-full flex items-center justify-center text-white mb-6 transition-colors shadow-md ${
-                    audioState === 'idle' ? 'bg-brand-teal-600 hover:bg-brand-teal-700' : audioState === 'playing' ? 'bg-amber-500' : 'bg-emerald-500'
+                    audioState === 'idle' ? 'bg-brand-teal-600 hover:bg-brand-teal-700'
+                      : audioState === 'playing' ? 'bg-amber-500'
+                      : audioState === 'error' ? 'bg-rose-600 hover:bg-rose-700'
+                      : 'bg-emerald-500'
                   }`}
                 >
                   {audioState === 'idle' && <PlayCircle className="w-12 h-12 ml-1" />}
                   {audioState === 'playing' && <div className="flex items-center gap-1.5 h-10">{animBars.slice(0,4).map((h,i) => <div key={i} className="w-2 bg-white rounded-full animate-pulse" style={{ height: `${20 + h*40}px`, animationDelay: `${i*0.15}s` }} />)}</div>}
                   {audioState === 'played' && <CheckCircle2 className="w-12 h-12" />}
+                  {audioState === 'error' && (
+                    audioRetries >= MAX_AUDIO_RETRIES
+                      ? <AlertTriangle className="w-12 h-12" />
+                      : <RotateCcw className="w-11 h-11" />
+                  )}
                 </button>
                 <p className="text-brand-text font-semibold text-lg uppercase tracking-wide mb-2">Listening Audio</p>
-                <p className="text-brand-text-mute font-medium text-sm">{audioState === 'played' ? 'Playback complete — answer the questions.' : 'Listen carefully. The audio plays once.'}</p>
-                <audio 
-                  ref={audioRef} 
-                  src={currentSection.audio_url} 
-                  preload="auto" 
+                {audioState === 'error' ? (
+                  <p className="text-rose-600 font-semibold text-sm max-w-xs">
+                    {audioRetries >= MAX_AUDIO_RETRIES
+                      ? "The audio still won't load. Report this to your instructor before continuing — don't refresh, your answers are saved."
+                      : "The audio didn't load. Tap to try again — your answers so far are safe."}
+                  </p>
+                ) : (
+                  <p className="text-brand-text-mute font-medium text-sm">
+                    {audioState === 'played' ? 'Playback complete — answer the questions.' : 'Listen carefully. The audio plays once.'}
+                  </p>
+                )}
+                <audio
+                  ref={audioRef}
+                  src={currentSection.audio_url}
+                  preload="auto"
                   onEnded={() => setAudioState('played')}
+                  // A missing/404/corrupt file fires this and nothing else. Without it the
+                  // player sits dead while a timed section keeps counting down.
+                  onError={() => setAudioState('error')}
                 />
               </div>
             ) : currentSection.section_type === 'PASSAGE' && currentSection.passage_text ? (

@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, BookOpen, Users, UserCheck,
+  LayoutDashboard, BookOpen, Users, UserCheck, ClipboardList,
   BarChart2, ShieldCheck, LogOut,
   ChevronLeft, ChevronRight,
   Lock, ArrowLeftRight, DollarSign, Megaphone, Rocket,
@@ -25,6 +25,7 @@ const OPERATIONS = [
 ];
 
 const INSIGHTS = [
+  { id: 'assessments',     icon: ClipboardList,    label: 'Assessments',  path: '/institute-owner/assessments' },
   { id: 'performance',     icon: BarChart2,        label: 'Analytics',    path: '/institute-owner/performance' },
 ];
 

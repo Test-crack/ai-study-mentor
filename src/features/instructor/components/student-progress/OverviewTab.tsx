@@ -5,7 +5,10 @@ import {
 } from 'recharts';
 import { cn } from '@/shared/utils';
 import { bandFillPct } from '@/shared/utils/bandScale';
-import type { StudentFullProgress } from './types';
+import { isSpokenEnglish } from '@/features/student/utils/exam';
+import { cefrColor, cefrGaugeColor, CEFR_ORDER, cefrOrdinal } from '@/features/student/config/cefrDisplay';
+import { SE_SUBSKILLS } from '@/features/student/config/spokenEnglishSubskills';
+import type { StudentFullProgress, CompetencyRow } from './types';
 
 interface Props { data: StudentFullProgress; }
 
@@ -111,7 +114,7 @@ function BaselineComparison({ baseline, competency }: {
   );
 }
 
-export function OverviewTab({ data }: Props) {
+export function IeltsOverviewTab({ data }: Props) {
   const competency          = data.competency         ?? [];
   const diagnostic_baseline = data.diagnostic_baseline ?? { L: null, R: null, W: null, S: null };
   const lexigrid_stats      = data.lexigrid_stats      ?? { games_last_14: 0, avg_words_solved: 0, bonus_rate: 0 };
@@ -230,4 +233,71 @@ export function OverviewTab({ data }: Props) {
       <BaselineComparison baseline={diagnostic_baseline} competency={competency} />
     </div>
   );
+}
+
+// ── Spoken English (CEFR) ──────────────────────────────────────────────────
+// Cohort 1 hides IA/mock/lexigrid/drills for spoken_english (see
+// EXAM_DISPLAY.spoken_english.showTiles) — those instructor sections would
+// describe features the SE student can't even access yet, so this variant
+// shows only the one thing that exists for SE today: the 6-subskill profile.
+
+// SE has one competency row (SPEAKING); the 6 subskills live inside its
+// sub_scores.subskillProfile array, not as separate competency rows — same
+// shape used by AssessmentHistoryPage/Report/VivaDiagnostic on the student side.
+function subskillRows(competency: CompetencyRow[]) {
+  const speaking = competency.find(r => r.skill.toUpperCase() === 'SPEAKING');
+  const profile: Array<{ id: string; label: string; level: string; score: number }> =
+    Array.isArray((speaking?.sub_scores as any)?.subskillProfile)
+      ? (speaking!.sub_scores as any).subskillProfile
+      : [];
+  const byId = new Map(profile.map(p => [p.id, p]));
+  return SE_SUBSKILLS.map(s => ({ sub: s, row: byId.get(s.id) }));
+}
+
+export function SpokenEnglishOverviewTab({ data }: Props) {
+  const rows = subskillRows(data.competency ?? []);
+  const scored = rows.filter(r => !!r.row?.level);
+
+  return (
+    <div className="space-y-5">
+      <div className="bg-white rounded-2xl border border-brand-line shadow-sm p-5">
+        <h3 className="text-sm font-bold text-brand-text mb-4">Subskill Profile (CEFR)</h3>
+        {scored.length === 0 ? (
+          <div className="h-40 flex items-center justify-center text-brand-text-mute text-sm">
+            No subskill data yet
+          </div>
+        ) : (
+          <div className="space-y-3 py-2">
+            {rows.map(({ sub, row }) => {
+              const label = row?.level ?? null;
+              const pct = label ? (cefrOrdinal(label) / (CEFR_ORDER.length - 1)) * 100 : 0;
+              return (
+                <div key={sub.id} className="flex items-center gap-3">
+                  <span className="text-xs font-semibold text-brand-text-mute w-32 shrink-0 truncate" title={sub.label}>
+                    {sub.label}
+                  </span>
+                  <div className="flex-1 h-2 bg-brand-bg-alt rounded-full overflow-hidden">
+                    {label && (
+                      <div className={cn('h-full rounded-full', cefrGaugeColor(label))} style={{ width: `${pct}%` }} />
+                    )}
+                  </div>
+                  <span className={cn('text-xs font-black w-8 text-right', label ? cefrColor(label) : 'text-brand-text-mute')}>
+                    {label?.toUpperCase() ?? '—'}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── dispatcher ────────────────────────────────────────────────────────────────
+
+export function OverviewTab({ data }: Props) {
+  return isSpokenEnglish(data.student.exam_id)
+    ? <SpokenEnglishOverviewTab data={data} />
+    : <IeltsOverviewTab data={data} />;
 }

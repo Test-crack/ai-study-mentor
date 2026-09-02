@@ -9,6 +9,7 @@ import { cn } from "@/shared/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { callBackend } from "@/features/auth/services/authClient";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
+import { isSpokenEnglish } from "@/features/student/utils/exam";
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
 const RAIL_BREAKPOINT = 768;
@@ -106,6 +107,7 @@ export const StudentSidebar = ({
         { id: 'reading', icon: BookOpen, label: 'Reading', path: '/student/reading' },
         { id: 'writing', icon: PenTool, label: 'Writing', path: '/student/writing' },
         { id: 'speaking-assessment', icon: Mic, label: 'Speaking', path: '/student/speaking-assessment' },
+        { id: 'speaking-history', icon: History, label: 'Speaking History', path: '/student/speaking-history' },
         { id: 'speed', icon: Timer, label: 'Speed Reading', path: '/student/speed' },
       ]
     },
@@ -121,7 +123,14 @@ export const StudentSidebar = ({
     }
   ];
 
+  // Spoken English (cohort 1): hide the IELTS-only surfaces. Keep Dashboard, LexiGrid
+  // (a standalone feature for SE), and How It Works.
+  const SE_ALLOWED = new Set(['dashboard', 'games', 'internal', 'how-it-works', 'speaking-history']);
+
   const filteredGroups = menuGroups.map(group => {
+    if (isSpokenEnglish(examSlug)) {
+      return { ...group, items: group.items.filter(item => SE_ALLOWED.has(item.id)) };
+    }
     if (isNewStudent) {
       return {
         ...group,

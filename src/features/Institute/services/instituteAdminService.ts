@@ -1,6 +1,6 @@
 import { callBackend } from '@/features/auth/services/authClient';
 import { getBackendUrl } from '@/shared/utils';
-import type { InstituteSummary, StudentRow, InstructorRow } from '@/features/InstituteOwner/services/instituteOwnerService';
+import type { InstituteSummary, StudentRow, InstructorRow, AssessmentOverview } from '@/features/InstituteOwner/services/instituteOwnerService';
 
 const BASE = () => `${getBackendUrl()}/api/institute-admin`;
 
@@ -170,4 +170,14 @@ export async function markAdminNotificationsRead(body: { all?: boolean; ids?: st
 
 export async function dismissAdminNotification(id: string): Promise<{ success: boolean }> {
     return callBackend(`${BASE()}/notifications/${id}/dismiss`, { method: 'POST' });
+}
+
+// ─── Assessment overview (diagnostic / IA / mock, whole institute) ────────────
+// Same shared handler as the Owner portal's fetchAssessmentOverview.
+
+export async function fetchAssessmentOverview(params?: { batch_id?: string }): Promise<{ success: boolean; data: AssessmentOverview }> {
+    const q = new URLSearchParams();
+    if (params?.batch_id) q.set('batch_id', params.batch_id);
+    const qs = q.toString() ? `?${q}` : '';
+    return callBackend(`${BASE()}/assessment-overview${qs}`);
 }

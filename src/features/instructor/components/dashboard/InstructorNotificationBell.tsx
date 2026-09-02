@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, Inbox, UserX } from "lucide-react";
+import { Bell, Inbox } from "lucide-react";
 import {
   useInstructorNotifications,
   InstructorEventNotification,
 } from "@/features/instructor/Context/InstructorNotificationsContext";
+import { describeEvent } from "@/shared/notifications/staffEvents";
 
 /** "2h ago" / "3d ago" style relative timestamp for the dropdown rows. */
 function timeAgo(iso?: string): string {
@@ -20,34 +21,13 @@ function timeAgo(iso?: string): string {
   return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 }
 
-/**
- * Per-type curated display. Each entry renders one dropdown row and knows
- * where clicking it should take the instructor. New event types = one new
- * entry here, nothing else.
- */
-const EVENT_DISPLAY: Record<string, {
-  icon: JSX.Element;
-  iconBg: string;
-  title: (p: Record<string, any>) => string;
-  body: (p: Record<string, any>) => string;
-  route: (p: Record<string, any>) => string | null;
-}> = {
-  STUDENT_IA_MISSED: {
-    icon:   <UserX className="w-4 h-4 text-rose-600" />,
-    iconBg: "bg-rose-50",
-    title:  (p) => `${p.student_name ?? "A student"} missed an assessment`,
-    body:   (p) => {
-      const date = p.ia_date
-        ? new Date(p.ia_date + "T12:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short" })
-        : "recently";
-      return `IA #${p.ia_number ?? "?"} scheduled for ${date} slipped by — their momentum dipped by ${p.momentum_deducted ?? 20} pts. A quick check-in could help.`;
-    },
-    // Deep-link into the student's full-progress page (batch-scoped route).
-    route:  (p) => (p.batch_id && p.student_user_id
-      ? `/instructor/batches/${p.batch_id}/students/${p.student_user_id}/progress`
-      : null),
-  },
-};
+// Event copy, icons and route targets now come from
+// shared/notifications/staffEvents. This bell previously carried its own
+// EVENT_DISPLAY map while the admin bell carried a separate `renderEvent`
+// switch, so the same event could read differently depending on the portal and
+// adding a type meant editing both. The shared registry is scope-aware, so this
+// bell keeps its instructor-specific batch-scoped deep links.
+const SCOPE = "instructor" as const;
 
 /**
  * Instructor topbar bell: unread badge + dropdown over user_notifications.
@@ -77,12 +57,17 @@ export const InstructorNotificationBell = () => {
     };
   }, [open]);
 
-  const handleClick = (e: InstructorEventNotification) => {
+  // Rows this portal can render. Unknown types describe to null and are dropped,
+  // so the "all caught up" state stays truthful rather than showing a header
+  // above zero rendered rows.
+  const visible = events
+    .map((event) => ({ event, view: describeEvent(event.type, event.payload, SCOPE) }))
+    .filter((r): r is { event: InstructorEventNotification; view: NonNullable<typeof r.view> } => r.view !== null);
+
+  const handleClick = (e: InstructorEventNotification, route: string | null, state?: Record<string, unknown>) => {
     if (!e.read_at) markRead(e.id);
     setOpen(false);
-    const display = EVENT_DISPLAY[e.type];
-    const route = display?.route(e.payload);
-    if (route) navigate(route);
+    if (route) navigate(route, { state });
   };
 
   return (
@@ -101,7 +86,15 @@ export const InstructorNotificationBell = () => {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-[min(24rem,calc(100vw-2rem))] bg-white border border-brand-line rounded-2xl shadow-xl z-50 overflow-hidden">
+        <div /* Mobile: viewport-anchored. `absolute right-0` anchored the panel to the
+   bell, which sits ~60px inside the right edge (avatar beside it), so a
+   ~358px panel spilled off the LEFT of a 390px screen and the header was
+   clipped. Insets are resolved against the topbar, which is w-full and
+   sticky top-0 (its backdrop-blur makes it the containing block for
+   fixed children) — so left/right-3 land on the viewport edges and
+   top-16 clears the h-16 bar. max-w is a belt-and-braces cap in case
+   that containing block ever changes. Unchanged from sm: up. */
+        className="fixed left-3 right-3 top-16 w-auto max-w-[calc(100vw-1.5rem)] sm:absolute sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-[min(24rem,calc(100vw-2rem))] sm:max-w-none bg-white border border-brand-line rounded-2xl shadow-xl z-50 overflow-hidden">
           <div className="px-4 py-3 border-b border-brand-line flex items-center justify-between">
             <h3 className="text-sm font-bold text-brand-text">Notifications</h3>
             {unreadCount > 0 ? (
@@ -112,46 +105,39 @@ export const InstructorNotificationBell = () => {
                 Mark all read
               </button>
             ) : (
-              events.length > 0 && <span className="text-xs text-brand-text-mute">{events.length} total</span>
+              visible.length > 0 && <span className="text-xs text-brand-text-mute">{visible.length} total</span>
             )}
           </div>
 
           <div className="max-h-[26rem] overflow-y-auto">
-            {events.length === 0 ? (
+            {visible.length === 0 ? (
               <div className="py-10 flex flex-col items-center gap-2 text-brand-text-mute">
                 <Inbox className="w-8 h-8" />
                 <p className="text-sm font-medium">You're all caught up</p>
               </div>
             ) : (
-              events.map((e) => {
-                const display = EVENT_DISPLAY[e.type];
-                if (!display) return null;
-                return (
-                  <button
-                    key={e.id}
-                    onClick={() => handleClick(e)}
-                    className="w-full text-left px-4 py-3 flex gap-3 hover:bg-brand-bg-alt transition-colors border-b border-brand-line last:border-0"
-                  >
-                    <div className={`${display.iconBg} p-2 rounded-xl shrink-0 self-start`}>
-                      {display.icon}
+              visible.map(({ event, view }) => (
+                <button
+                  key={event.id}
+                  onClick={() => handleClick(event, view.route, view.state)}
+                  className="w-full text-left px-4 py-3 flex gap-3 hover:bg-brand-bg-alt transition-colors border-b border-brand-line last:border-0"
+                >
+                  <div className={`${view.iconBg} p-2 rounded-xl shrink-0 self-start`}>
+                    {view.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-semibold text-brand-text truncate">{view.title}</p>
+                      {!event.read_at && <span className="w-2 h-2 rounded-full bg-brand-teal-500 shrink-0" />}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-brand-text truncate">
-                          {display.title(e.payload)}
-                        </p>
-                        {!e.read_at && <span className="w-2 h-2 rounded-full bg-brand-teal-500 shrink-0" />}
-                      </div>
-                      <p className="text-xs text-brand-text-mute mt-0.5 line-clamp-2">
-                        {display.body(e.payload)}
-                      </p>
-                      <p className="text-[11px] text-brand-text-mute mt-1">
-                        {timeAgo(e.created_at)}
-                      </p>
-                    </div>
-                  </button>
-                );
-              })
+                    {view.meta && (
+                      <p className="text-[11px] font-semibold text-brand-teal-700 mt-0.5 truncate">{view.meta}</p>
+                    )}
+                    <p className="text-xs text-brand-text-mute mt-0.5 line-clamp-2">{view.body}</p>
+                    <p className="text-[11px] text-brand-text-mute mt-1">{timeAgo(event.created_at)}</p>
+                  </div>
+                </button>
+              ))
             )}
           </div>
         </div>
