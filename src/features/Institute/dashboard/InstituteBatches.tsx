@@ -17,6 +17,9 @@ import {
 import { InstituteSidebar } from '../components/InstituteSidebar';
 import { InstituteTopbar } from '../components/InstituteTopbar';
 import { PageHero, HeroAction } from '../components/shared/primitives';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/shared/components/ui/select';
 
 // --- Tutors Data ---
 const availableTutors = [
@@ -38,7 +41,6 @@ const availableStudents = [
 const INITIAL_BATCHES = [
   {
     id: 1,
-    category: "IELTS",
     name: "IELTS Band 7+ Prep",
     students: 28,
     capacity: 30,
@@ -56,7 +58,6 @@ const INITIAL_BATCHES = [
   },
   {
     id: 2,
-    category: "IELTS",
     name: "IELTS Evening Batch",
     students: 22,
     capacity: 30,
@@ -74,7 +75,6 @@ const INITIAL_BATCHES = [
   },
   {
     id: 3,
-    category: "Spoken English",
     name: "Spoken English - Morning",
     students: 35,
     capacity: 40,
@@ -92,7 +92,6 @@ const INITIAL_BATCHES = [
   },
   {
     id: 4,
-    category: "Spoken English",
     name: "Foundation English",
     students: 18,
     capacity: 25,
@@ -110,7 +109,6 @@ const INITIAL_BATCHES = [
   },
   {
     id: 5,
-    category: "Tech Prep",
     name: "Tech Interview Prep",
     students: 20,
     capacity: 25,
@@ -128,11 +126,8 @@ const INITIAL_BATCHES = [
   }
 ];
 
-const categories = ["All", "IELTS", "Spoken English", "Tech Prep"];
-
 export default function InstituteBatches() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [activeCategory, setActiveCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
 
   const [batches, setBatches] = useState(INITIAL_BATCHES);
@@ -148,7 +143,6 @@ export default function InstituteBatches() {
 
   const [formData, setFormData] = useState({
     name: '',
-    category: 'IELTS',
     capacity: '',
     startDate: '',
     endDate: '',
@@ -171,7 +165,7 @@ export default function InstituteBatches() {
 
   const openCreateModal = () => {
     setEditingBatchId(null);
-    setFormData({ name: '', category: 'IELTS', capacity: '', startDate: '', endDate: '', tutor: '' });
+    setFormData({ name: '', capacity: '', startDate: '', endDate: '', tutor: '' });
     setIsBatchModalOpen(true);
   };
 
@@ -179,7 +173,6 @@ export default function InstituteBatches() {
     setEditingBatchId(batch.id);
     setFormData({
       name: batch.name,
-      category: batch.category,
       capacity: batch.capacity,
       startDate: batch.startDate,
       endDate: batch.endDate,
@@ -198,6 +191,11 @@ export default function InstituteBatches() {
 
   const handleSaveBatch = (e) => {
     e.preventDefault();
+
+    // Radix Select doesn't participate in native HTML5 `required` validation
+    // (there's no underlying <select> for the browser to check), so this is
+    // a manual stand-in for the `required` the old native <select> had.
+    if (!formData.tutor) return;
 
     if (editingBatchId) {
       // Update existing batch
@@ -229,6 +227,10 @@ export default function InstituteBatches() {
   const handleAddStudentSubmit = (e) => {
     e.preventDefault();
 
+    // Same manual required-check rationale as handleSaveBatch above —
+    // Radix Select has no native <select> for the form to validate.
+    if (!selectedStudent) return;
+
     // Increment the student count for the selected batch
     setBatches(batches.map(batch => {
       if (batch.id === editingBatchId) {
@@ -244,20 +246,9 @@ export default function InstituteBatches() {
 
   // Filter Logic
   const filteredBatches = batches.filter(batch => {
-    const matchesCategory = activeCategory === "All" || batch.category === activeCategory;
-    const matchesSearch = batch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          (batch.tutor && batch.tutor.toLowerCase().includes(searchTerm.toLowerCase()));
-    return matchesCategory && matchesSearch;
+    return batch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (batch.tutor && batch.tutor.toLowerCase().includes(searchTerm.toLowerCase()));
   });
-
-  const getCategoryColor = (category) => {
-    switch (category) {
-      case 'IELTS': return 'bg-brand-blue-50 text-brand-blue-700 border-brand-blue-200';
-      case 'Spoken English': return 'bg-brand-teal-50 text-brand-teal-700 border-brand-teal-200';
-      case 'Tech Prep': return 'bg-sky-50 text-sky-700 border-sky-200';
-      default: return 'bg-brand-bg-alt text-brand-text border-brand-line';
-    }
-  };
 
   return (
     <div className="min-h-screen bg-brand-bg font-plex text-brand-text">
@@ -309,24 +300,8 @@ export default function InstituteBatches() {
               ))}
             </div>
 
-            {/* Filters & Search */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-brand-line shadow-sm">
-              <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setActiveCategory(cat)}
-                    className={`px-4 py-2 min-h-[40px] rounded-full text-sm font-semibold transition-all whitespace-nowrap ${
-                      activeCategory === cat
-                        ? 'bg-brand-teal-600 text-white shadow-sm border border-brand-teal-600'
-                        : 'bg-brand-bg-alt text-brand-text hover:bg-brand-teal-50 border border-brand-line'
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-
+            {/* Search */}
+            <div className="flex flex-col md:flex-row md:items-center justify-end gap-4 bg-white p-4 rounded-xl border border-brand-line shadow-sm">
               <div className="relative w-full md:w-72 shrink-0">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-text-mute" />
                 <input
@@ -348,9 +323,6 @@ export default function InstituteBatches() {
                   <div className="p-4 sm:p-6 lg:w-3/5 border-b lg:border-b-0 lg:border-r border-brand-line">
                     <div className="flex items-start justify-between gap-2 mb-3">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className={`font-jetbrains px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold rounded border ${getCategoryColor(batch.category)}`}>
-                          {batch.category}
-                        </span>
                         {batch.status && (
                           <span className={`font-jetbrains px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold rounded border ${batch.status === 'New' ? 'bg-brand-teal-50 text-brand-teal-700 border-brand-teal-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}>
                             {batch.status}
@@ -527,33 +499,18 @@ export default function InstituteBatches() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-brand-text mb-1.5">Category</label>
-                  <select
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 min-h-[40px] bg-brand-bg-alt border border-brand-line rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 text-sm text-brand-text"
-                  >
-                    <option value="IELTS">IELTS</option>
-                    <option value="Spoken English">Spoken English</option>
-                    <option value="Tech Prep">Tech Prep</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-brand-text mb-1.5">Capacity</label>
-                  <input
-                    type="number"
-                    name="capacity"
-                    min="1"
-                    required
-                    value={formData.capacity}
-                    onChange={handleInputChange}
-                    placeholder="e.g. 30"
-                    className="w-full px-4 py-2 min-h-[40px] bg-brand-bg-alt border border-brand-line rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 text-sm text-brand-text"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-semibold text-brand-text mb-1.5">Capacity</label>
+                <input
+                  type="number"
+                  name="capacity"
+                  min="1"
+                  required
+                  value={formData.capacity}
+                  onChange={handleInputChange}
+                  placeholder="e.g. 30"
+                  className="w-full px-4 py-2 min-h-[40px] bg-brand-bg-alt border border-brand-line rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 text-sm text-brand-text"
+                />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -583,20 +540,29 @@ export default function InstituteBatches() {
 
               <div>
                 <label className="block text-sm font-semibold text-brand-text mb-1.5">Assign Tutor</label>
-                <select
-                  name="tutor"
-                  required
+                {/* Radix Select, not a native <select>: a native select's popup is
+                    drawn by the browser at the width of its longest option and
+                    ignores CSS, overflowing narrow mobile viewports. Radix renders
+                    the panel in a portal with collision detection, so it stays on
+                    screen and its width/positioning are CSS-controllable. */}
+                <Select
                   value={formData.tutor}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 min-h-[40px] bg-brand-bg-alt border border-brand-line rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 text-sm text-brand-text"
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, tutor: value }))}
                 >
-                  <option value="" disabled>Select a tutor...</option>
-                  {availableTutors.map((tutorName, idx) => (
-                    <option key={idx} value={tutorName}>
-                      {tutorName}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger
+                    aria-label="Assign tutor"
+                    className="w-full px-4 py-2 min-h-[40px] bg-brand-bg-alt border border-brand-line rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 text-sm text-brand-text"
+                  >
+                    <SelectValue placeholder="Select a tutor..." />
+                  </SelectTrigger>
+                  <SelectContent className="max-w-[calc(100vw-2rem)]">
+                    {availableTutors.map((tutorName, idx) => (
+                      <SelectItem key={idx} value={tutorName}>
+                        {tutorName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="pt-4 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 border-t border-brand-line mt-6">
@@ -637,19 +603,22 @@ export default function InstituteBatches() {
             <form onSubmit={handleAddStudentSubmit} className="p-4 sm:p-6 space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-brand-text mb-1.5">Select Student</label>
-                <select
-                  required
-                  value={selectedStudent}
-                  onChange={(e) => setSelectedStudent(e.target.value)}
-                  className="w-full px-4 py-2 min-h-[40px] bg-brand-bg-alt border border-brand-line rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 text-sm text-brand-text"
-                >
-                  <option value="" disabled>Select from institute roster...</option>
-                  {availableStudents.map((studentName, idx) => (
-                    <option key={idx} value={studentName}>
-                      {studentName}
-                    </option>
-                  ))}
-                </select>
+                {/* Radix Select — see rationale in the "Assign Tutor" select above. */}
+                <Select value={selectedStudent} onValueChange={setSelectedStudent}>
+                  <SelectTrigger
+                    aria-label="Select student"
+                    className="w-full px-4 py-2 min-h-[40px] bg-brand-bg-alt border border-brand-line rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 text-sm text-brand-text"
+                  >
+                    <SelectValue placeholder="Select from institute roster..." />
+                  </SelectTrigger>
+                  <SelectContent className="max-w-[calc(100vw-2rem)]">
+                    {availableStudents.map((studentName, idx) => (
+                      <SelectItem key={idx} value={studentName}>
+                        {studentName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="pt-4 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 border-t border-brand-line mt-6">

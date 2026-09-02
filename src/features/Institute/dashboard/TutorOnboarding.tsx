@@ -9,6 +9,9 @@ import {
   TutorRecord,
 } from '../services/instituteAdminService';
 import { useToast } from '@/shared/hooks/use-toast';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/shared/components/ui/select';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -143,13 +146,25 @@ function AddTutorModal({ onClose, onAdded }: { onClose: () => void; onAdded: () 
           </div>
           <div className="space-y-1.5">
             <label className="font-jetbrains text-xs font-semibold text-brand-text uppercase tracking-wider">Specialization</label>
-            <select
-              value={form.specialization} onChange={set('specialization')}
-              className="w-full bg-brand-bg-alt border border-brand-line rounded-lg px-3 py-3 text-sm text-brand-text transition-all focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500"
+            {/* Radix Select, not a native <select>: a native select's popup is
+                drawn by the browser at the width of its longest option and
+                ignores CSS, overflowing narrow mobile viewports. Radix renders
+                the panel in a portal with collision detection, so it stays on
+                screen and its width/positioning are CSS-controllable. */}
+            <Select
+              value={form.specialization}
+              onValueChange={(value) => setForm(prev => ({ ...prev, specialization: value }))}
             >
-              <option value="">Select specialization (optional)</option>
-              {SPECIALIZATIONS.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+              <SelectTrigger
+                aria-label="Specialization"
+                className="w-full bg-brand-bg-alt border border-brand-line rounded-lg px-3 py-3 text-sm text-brand-text transition-all focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 focus:border-brand-teal-500"
+              >
+                <SelectValue placeholder="Select specialization (optional)" />
+              </SelectTrigger>
+              <SelectContent className="max-w-[calc(100vw-2rem)]">
+                {SPECIALIZATIONS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex items-start gap-2 bg-brand-blue-50 border border-brand-blue-100 rounded-lg p-3">

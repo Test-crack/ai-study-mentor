@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Search, Loader2, RefreshCw, ChevronDown, Download, Menu } from 'lucide-react';
+import { Search, Loader2, RefreshCw, Download, Menu } from 'lucide-react';
 import { SuperAdminSidebar } from '../Components/SuperadminSidebar';
 import { Sheet, SheetContent, SheetTrigger } from '@/shared/components/ui/sheet';
 import { Button } from '@/shared/components/ui/button';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/shared/components/ui/select';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { cn } from '@/shared/utils';
 import {
@@ -160,27 +163,37 @@ export default function Subscription() {
   ];
 
   // Shared by the desktop table and the mobile card list below, so the billing
-  // status control behaves identically on both.
+  // status control behaves identically on both. Radix Select, not a native
+  // <select>: a native select's popup is drawn by the browser at the width of
+  // its longest option and ignores CSS, overflowing narrow mobile viewports —
+  // this control renders in the mobile card list too, so that bug was live
+  // here. Radix renders the panel in a portal with collision detection, so it
+  // stays on screen regardless of which context (table row / card) renders it.
   const renderStatusSelect = (row: SubscriptionRecord) => (
     <div className="inline-flex items-center gap-2">
       {savingId === row.id && <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-teal-500" />}
-      <div className="relative">
-        <select
-          value={row.billingStatus}
-          disabled={savingId === row.id}
-          onChange={(e) => handleStatusChange(row, e.target.value as BillingStatus)}
+      <Select
+        value={row.billingStatus}
+        onValueChange={(v) => handleStatusChange(row, v as BillingStatus)}
+        disabled={savingId === row.id}
+      >
+        <SelectTrigger
           aria-label={`Billing status for ${row.instituteName}`}
           className={cn(
-            'appearance-none pl-2.5 pr-6 py-1.5 text-xs font-bold rounded-lg border focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 disabled:opacity-50 cursor-pointer',
+            'h-auto w-auto gap-1 pl-2.5 pr-2 py-1.5 text-xs font-bold rounded-lg border shadow-none ring-offset-0 focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 disabled:opacity-50 cursor-pointer [&>svg]:h-3 [&>svg]:w-3 [&>svg]:opacity-60',
             SELECT_PILL[row.billingStatus]
           )}
         >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent align="end" collisionPadding={12}>
           {BILLING_STATUSES.map((s) => (
-            <option key={s} value={s}>{s.charAt(0) + s.slice(1).toLowerCase()}</option>
+            <SelectItem key={s} value={s} className="text-xs font-bold">
+              {s.charAt(0) + s.slice(1).toLowerCase()}
+            </SelectItem>
           ))}
-        </select>
-        <ChevronDown className="h-3 w-3 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-60" />
-      </div>
+        </SelectContent>
+      </Select>
     </div>
   );
 

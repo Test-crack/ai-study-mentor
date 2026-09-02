@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/shared/utils';
 import type { DiagnosticOverviewRow } from './types';
+import { CEFR_ORDER, cefrBg, cefrColor, cefrGaugeColor } from '@/features/student/config/cefrDisplay';
 
 interface Props {
   rows:     DiagnosticOverviewRow[];
@@ -44,6 +45,33 @@ function overallBand(bands: DiagnosticOverviewRow['baseline_bands']): number | n
   const vals = [bands.L, bands.R, bands.W, bands.S].filter((v): v is number => v !== null);
   if (vals.length === 0) return null;
   return Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10;
+}
+
+// The backend's diagnostic-overview endpoint doesn't tag rows with an exam id, so
+// IELTS vs Spoken English can't be told apart by a dedicated field — but it can be
+// told apart structurally: a diagnosed Spoken English row only ever has its S field
+// populated (L/R/W stay null, since SE has exactly one skill), while a diagnosed
+// IELTS row always has all four. See AssessmentInsights.tsx for the fuller
+// rationale — same signature, reused here so this table never plots an SE
+// student's CEFR ordinal on the 0-9 band scale below.
+function isSpokenEnglishShape(bands: DiagnosticOverviewRow['baseline_bands']): boolean {
+  return bands.S !== null && bands.L === null && bands.R === null && bands.W === null;
+}
+
+function cefrLevelLabel(ordinal: number | null): string | null {
+  if (ordinal === null) return null;
+  const i = Math.max(0, Math.min(CEFR_ORDER.length - 1, Math.round(ordinal)));
+  return CEFR_ORDER[i];
+}
+
+function cefrPill(ordinal: number | null) {
+  const label = cefrLevelLabel(ordinal);
+  if (label === null) return <span className="text-brand-text-mute text-xs">—</span>;
+  return (
+    <span className={cn('inline-block px-2 py-0.5 rounded-lg text-xs font-black border', cefrBg(label), cefrColor(label))}>
+      {label}
+    </span>
+  );
 }
 
 function bandPill(b: number | null) {
@@ -153,10 +181,24 @@ export function DiagnosticOverviewTab({ rows, batchId, refetch, progressPathFor,
     }
   };
 
-  const enriched = useMemo(() => rows.map(r => ({
+  // Split off diagnosed Spoken English rows (see isSpokenEnglishShape) so their CEFR
+  // ordinal never lands in the IELTS band table/stats/distribution below. A row that
+  // isn't yet diagnosed has every band null and can't be told apart by shape, so it
+  // stays in mainRows (same as before this split existed) until it's diagnosed. When
+  // an institute has no SE students, mainRows === rows and everything below is
+  // unchanged.
+  const mainRows          = useMemo(() => rows.filter(r => !(r.is_diagnosed && isSpokenEnglishShape(r.baseline_bands))), [rows]);
+  const seDiagnosedRows   = useMemo(() => rows.filter(r => r.is_diagnosed && isSpokenEnglishShape(r.baseline_bands)), [rows]);
+  const hasSE             = seDiagnosedRows.length > 0;
+
+  const seOrdinals    = seDiagnosedRows.map(r => r.baseline_bands.S).filter((v): v is number => v !== null);
+  const seLevelCounts = CEFR_ORDER.map((_, i) => seOrdinals.filter(v => Math.round(v) === i).length);
+  const seLevelMax    = Math.max(...seLevelCounts, 1);
+
+  const enriched = useMemo(() => mainRows.map(r => ({
     ...r,
     overall: overallBand(r.baseline_bands),
-  })), [rows]);
+  })), [mainRows]);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -220,14 +262,19 @@ export function DiagnosticOverviewTab({ rows, batchId, refetch, progressPathFor,
     );
   }
 
+  // "Completed"/"Pending" are whole-batch counts (every exam type); the SE-diagnosed
+  // rows split out of mainRows above are still diagnosed students, just not counted
+  // toward the IELTS band stats below.
+  const diagnosedAllCount = rows.filter(r => r.is_diagnosed).length;
+  const pendingCount      = rows.length - diagnosedAllCount;
+
   const diagnosed    = enriched.filter(r => r.is_diagnosed);
-  const pendingCount = enriched.length - diagnosed.length;
   const diagBands    = diagnosed.map(r => r.overall).filter((v): v is number => v !== null);
   const avgBand      = diagBands.length > 0 ? diagBands.reduce((a, b) => a + b, 0) / diagBands.length : null;
   const atRiskCount  = diagBands.filter(b => b < 5.5).length;
 
   const stats = [
-    { label: 'Completed',  value: `${diagnosed.length}/${enriched.length}`, icon: Users,          color: 'text-emerald-600', bg: 'bg-emerald-50', clickable: false },
+    { label: 'Completed',  value: `${diagnosedAllCount}/${rows.length}`, icon: Users,          color: 'text-emerald-600', bg: 'bg-emerald-50', clickable: false },
     { label: 'Avg Band',   value: avgBand !== null ? avgBand.toFixed(1) : '—', icon: TrendingUp,  color: avgBand !== null && avgBand >= 7.0 ? 'text-emerald-600' : avgBand !== null && avgBand >= 5.5 ? 'text-amber-600' : 'text-brand-text-mute', bg: 'bg-brand-bg-alt', clickable: false },
     { label: 'At Risk',    value: String(atRiskCount), icon: AlertTriangle,    color: atRiskCount > 0 ? 'text-rose-600' : 'text-brand-text-mute', bg: atRiskCount > 0 ? 'bg-rose-50' : 'bg-brand-bg-alt', clickable: atRiskCount > 0 },
     { label: 'Pending',    value: String(pendingCount), icon: Clock,           color: pendingCount > 0 ? 'text-amber-600' : 'text-brand-text-mute', bg: pendingCount > 0 ? 'bg-amber-50' : 'bg-brand-bg-alt', clickable: false },
@@ -297,7 +344,7 @@ export function DiagnosticOverviewTab({ rows, batchId, refetch, progressPathFor,
             ))}
           </div>
         </div>
-        <BandDistribution rows={rows} skillFilter={skillFilter} />
+        <BandDistribution rows={mainRows} skillFilter={skillFilter} />
       </div>
       </>
       )}
@@ -475,6 +522,108 @@ export function DiagnosticOverviewTab({ rows, batchId, refetch, progressPathFor,
           </table>
         </div>
       </div>
+
+      {/* Spoken English (CEFR) diagnosed students — kept in its own section/table so a
+          CEFR ordinal is never plotted on the IELTS 0-9 band scale above. Additive:
+          only appears when this batch genuinely has SE-shaped diagnosed rows. */}
+      {hasSE && (
+        <>
+          {!compact && (
+            <div className="bg-white rounded-xl border border-brand-line px-4 py-3">
+              <p className="text-[10px] font-bold text-brand-text-mute uppercase tracking-wider font-jetbrains mb-2">
+                Spoken English · CEFR Distribution
+              </p>
+              <div className="flex items-end gap-2 justify-center h-16">
+                {CEFR_ORDER.map((label, i) => {
+                  const count = seLevelCounts[i];
+                  const pct = (count / seLevelMax) * 100;
+                  return (
+                    <div key={label} className="flex flex-col items-center gap-1 min-w-[36px]">
+                      <span className="text-[10px] font-black text-brand-text">{count}</span>
+                      <div
+                        className={cn('w-6 rounded-t-sm transition-all', cefrGaugeColor(label))}
+                        style={{ height: `${Math.max(pct, 4)}%` }}
+                      />
+                      <span className="text-[9px] font-bold text-brand-text-mute whitespace-nowrap">{label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div className="bg-white rounded-2xl border border-brand-line shadow-sm overflow-hidden">
+            <div className="px-4 sm:px-5 py-3 border-b border-brand-line">
+              <p className="text-[10px] font-bold text-brand-text-mute uppercase tracking-wider font-jetbrains">
+                Spoken English · {seDiagnosedRows.length} diagnosed (CEFR)
+              </p>
+            </div>
+
+            {/* Mobile: card per student, mirrors the main list above. */}
+            <ul className="md:hidden divide-y divide-brand-line">
+              {seDiagnosedRows.map(row => (
+                <li key={row.student_id} className="p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <Avatar name={row.name} avatar={row.avatar} />
+                      <span className="text-sm font-semibold text-brand-text truncate">{row.name}</span>
+                    </div>
+                    {cefrPill(row.baseline_bands.S)}
+                  </div>
+                  <div className="flex items-center justify-between gap-3 mt-3 pt-3 border-t border-brand-line">
+                    <span className="text-xs text-brand-text-mute">{row.diagnosed_at ?? '—'}</span>
+                    <button
+                      onClick={() => goToStudent(row)}
+                      className="inline-flex items-center gap-1 text-xs font-bold text-brand-teal-600 hover:text-brand-teal-700 shrink-0"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      View Report
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            <div className="overflow-x-auto hidden md:block">
+              <table className="w-full text-left">
+                <thead className="border-b border-brand-line">
+                  <tr>
+                    <th className={cn(thClass, 'pl-5 w-48')}>Student</th>
+                    <th className={thClass}>CEFR Level</th>
+                    <th className={thClass}>Diagnosed On</th>
+                    <th className={cn(thClass, 'pr-5 text-right')}>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {seDiagnosedRows.map(row => (
+                    <tr key={row.student_id} className="border-b border-brand-line hover:bg-brand-bg-alt transition-colors">
+                      <td className="py-3 pl-5">
+                        <div className="flex items-center gap-2.5">
+                          <Avatar name={row.name} avatar={row.avatar} />
+                          <span className="text-sm font-semibold text-brand-text truncate max-w-[130px]">
+                            {row.name}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3">{cefrPill(row.baseline_bands.S)}</td>
+                      <td className="py-3 text-sm text-brand-text-mute">{row.diagnosed_at ?? '—'}</td>
+                      <td className="py-3 pr-5 text-right">
+                        <button
+                          onClick={() => goToStudent(row)}
+                          className="inline-flex items-center gap-1 text-xs font-bold text-brand-teal-600 hover:text-brand-teal-700"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          View Report
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
 
     </div>
   );

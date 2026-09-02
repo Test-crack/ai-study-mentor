@@ -8,10 +8,14 @@
 import { useMemo, useState } from 'react';
 import { ClipboardList, BookOpen, FileSearch, RefreshCw, Loader2, Download, Search } from 'lucide-react';
 import { cn } from '@/shared/utils';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/shared/components/ui/select';
 import { DiagnosticOverviewTab } from '@/features/instructor/components/assessments/DiagnosticOverviewTab';
 import { IAOverviewTab } from '@/features/instructor/components/assessments/IAOverviewTab';
 import { MockOverviewTab } from '@/features/instructor/components/assessments/MockOverviewTab';
 import type { DiagnosticOverviewRow, IAOverviewRow, MockOverviewRow } from '@/features/instructor/components/assessments/types';
+import { CEFR_ORDER, cefrGaugeColor } from '@/features/student/config/cefrDisplay';
 
 export interface AssessmentOverviewData {
   ia_overview:         IAOverviewRow[];
@@ -61,6 +65,21 @@ function overallBand(bands: DiagnosticOverviewRow['baseline_bands']): number | n
   return Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10;
 }
 
+// The backend's diagnostic-overview endpoint doesn't tag rows with an exam id (it
+// blends every institute exam's students into one array — see the report for the
+// full gap), so IELTS vs Spoken English can't be told apart by a dedicated field.
+// It CAN be told apart structurally, though: a Spoken English exam's diagnostic only
+// assesses Speaking (checkAndMarkDiagnosed marks a student diagnosed once THEIR exam's
+// own components are scored — [speaking] only for Spoken English), so a diagnosed SE
+// row always has L/R/W null and only S populated. A diagnosed IELTS row always has all
+// four populated, because IELTS needs all four to flip is_diagnosed. This is a real,
+// backend-behaviour-derived signature, not a guess — and for that S value, "band_score"
+// is actually a CEFR ordinal (0–6, half-steps) stamped in by the viva grader, never a
+// real IELTS band, so it must never be plotted on the band-shaped (0–9) UI below.
+function isSpokenEnglishShape(bands: DiagnosticOverviewRow['baseline_bands']): boolean {
+  return bands.S !== null && bands.L === null && bands.R === null && bands.W === null;
+}
+
 function StatTile({ label, value, sub, dark }: { label: string; value: string | number; sub?: string; dark?: boolean }) {
   return (
     <div className={cn('rounded-xl px-4 py-3', dark ? 'bg-white/5 border border-white/10' : 'bg-white border border-brand-line')}>
@@ -88,15 +107,23 @@ export function AssessmentInsights({ data, loading, error, batches, batchFilter,
   );
   const diagnosed = diagEnriched.filter(r => r.is_diagnosed);
   const diagnosedCount = diagnosed.length;
-  const diagBands = diagnosed.map(r => r.overall).filter((v): v is number => v !== null);
+
+  // Split diagnosed rows by exam shape (see isSpokenEnglishShape) so an SE student's
+  // CEFR ordinal never lands inside an IELTS band average/bucket. When the institute
+  // has no SE students, ieltsDiagnosed === diagnosed and every calc below is identical
+  // to before this split existed.
+  const ieltsDiagnosed = diagnosed.filter(r => !isSpokenEnglishShape(r.baseline_bands));
+  const seDiagnosed    = diagnosed.filter(r => isSpokenEnglishShape(r.baseline_bands));
+
+  const diagBands = ieltsDiagnosed.map(r => r.overall).filter((v): v is number => v !== null);
   const avgBand = diagBands.length > 0 ? diagBands.reduce((a, b) => a + b, 0) / diagBands.length : null;
   const atRiskCount = diagBands.filter(b => b < 5.0).length;
 
   // Band distribution — driven by skillFilter, always sourced from diagnostic data
-  // (the only rows with a per-skill breakdown).
+  // (the only rows with a per-skill breakdown). IELTS-only, per the split above.
   const distBands = skillFilter === 'overall'
     ? diagBands
-    : diagnosed.map(r => r.baseline_bands[skillFilter]).filter((v): v is number => v !== null);
+    : ieltsDiagnosed.map(r => r.baseline_bands[skillFilter]).filter((v): v is number => v !== null);
   const distCounts = BAND_RANGES.map(r => distBands.filter(r.test).length);
   const distMax = Math.max(...distCounts, 1);
 
@@ -106,9 +133,19 @@ export function AssessmentInsights({ data, loading, error, batches, batchFilter,
     { label: 'Writing',   key: 'W', value: null },
     { label: 'Speaking',  key: 'S', value: null },
   ].map(s => {
-    const vals = diagnosed.map(r => r.baseline_bands[s.key as SkillKey]).filter((v): v is number => v !== null);
+    const vals = ieltsDiagnosed.map(r => r.baseline_bands[s.key as SkillKey]).filter((v): v is number => v !== null);
     return { ...s, value: vals.length ? Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10 : null };
   });
+
+  // Spoken English (CEFR) diagnostic stats — computed only from rows genuinely
+  // shaped like an SE result, so this section is empty (and hidden) when the
+  // institute has no SE students.
+  const seOrdinals = seDiagnosed.map(r => r.baseline_bands.S).filter((v): v is number => v !== null);
+  const seLevelCounts = CEFR_ORDER.map((_, i) => seOrdinals.filter(v => Math.round(v) === i).length);
+  const seLevelMax = Math.max(...seLevelCounts, 1);
+  const seModalIdx = seLevelCounts.reduce((best, c, i) => (c > seLevelCounts[best] ? i : best), 0);
+  const seModalLabel = seOrdinals.length > 0 ? CEFR_ORDER[seModalIdx] : null;
+  const seNeedsSupportCount = seOrdinals.filter(v => Math.round(v) <= 2).length; // Below A1 / A1 / A2
 
   const missing2PlusIAs = data?.institute_ia_summary.high_miss_count ?? 0;
   const pendingDiagnostics = totalStudents - diagnosedCount;
@@ -119,6 +156,9 @@ export function AssessmentInsights({ data, loading, error, batches, batchFilter,
   const filteredDiagRows = useMemo(() => {
     if (bandFilter === 'all') return diagRows;
     return diagRows.filter(r => {
+      // "Below band 5.0" / "Band 6.0+" are IELTS band language — a Spoken English
+      // (CEFR) row's overall would just be its S ordinal, which isn't a band at all.
+      if (isSpokenEnglishShape(r.baseline_bands)) return false;
       const b = overallBand(r.baseline_bands);
       if (b === null) return false;
       return bandFilter === 'below5' ? b < 5.0 : b >= 6.0;
@@ -265,14 +305,46 @@ export function AssessmentInsights({ data, loading, error, batches, batchFilter,
                   </div>
                 ))}
               </div>
-              {diagnosedCount > 0 && below5Count > 0 && (
+              {ieltsDiagnosed.length > 0 && below5Count > 0 && (
                 <p className="text-[11px] text-white/40 mt-2">
-                  {below5Count} of {diagnosedCount} diagnosed students sit under band 6.0.
+                  {below5Count} of {ieltsDiagnosed.length} diagnosed students sit under band 6.0.
                 </p>
               )}
             </div>
           )}
         </div>
+
+        {/* Spoken English (CEFR) diagnostic summary — additive, only appears when
+            the institute genuinely has SE-shaped diagnosed rows (see
+            isSpokenEnglishShape). The IELTS section above is untouched either way. */}
+        {activeTab === 'diagnostic' && seDiagnosed.length > 0 && (
+          <div className="mt-5 pt-5 border-t border-white/10">
+            <p className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.15em] text-white/40 mb-2">
+              Spoken English · {seDiagnosed.length} diagnosed (CEFR)
+            </p>
+            <div className="flex flex-col lg:flex-row lg:items-start gap-6">
+              <div className="grid grid-cols-2 gap-2.5 max-w-md flex-1">
+                <StatTile dark label="Most common level" value={seModalLabel ?? '—'} />
+                <StatTile dark label="Needs support" value={seNeedsSupportCount} sub="below B1" />
+              </div>
+              <div className="lg:w-[360px] shrink-0">
+                <p className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.15em] text-white/40 mb-2">CEFR distribution</p>
+                <div className="flex items-end gap-1 sm:gap-2 justify-between h-24 bg-white/5 rounded-xl px-3 sm:px-4 py-3">
+                  {CEFR_ORDER.map((label, i) => (
+                    <div key={label} className="flex flex-col items-center gap-1 flex-1">
+                      <span className="text-[11px] font-black">{seLevelCounts[i]}</span>
+                      <div
+                        className={cn('w-full max-w-[24px] rounded-t-sm transition-all', cefrGaugeColor(label))}
+                        style={{ height: `${Math.max((seLevelCounts[i] / seLevelMax) * 100, 4)}%` }}
+                      />
+                      <span className="text-[9px] font-bold text-white/50 whitespace-nowrap">{label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Tab bar + sub-filters + search/export */}
@@ -325,15 +397,27 @@ export function AssessmentInsights({ data, loading, error, batches, batchFilter,
 
           <div className="flex items-center gap-2 w-full sm:w-auto">
             {batches.length > 0 && (
-              <select
-                value={batchFilter}
-                onChange={e => onBatchChange(e.target.value)}
-                aria-label="Filter by batch"
-                className="min-h-[38px] rounded-xl border border-brand-line bg-white px-3 text-sm font-semibold text-brand-text flex-1 sm:flex-none min-w-0"
+              // Radix Select, not a native <select>: a native select's popup is drawn
+              // by the browser at the width of its longest option and ignores CSS,
+              // overflowing narrow mobile viewports. This component is shared across
+              // the Institute Owner and Institute Admin portals, so that bug reached
+              // both. Radix renders the panel in a portal with collision detection,
+              // so it stays on screen, and its width is ours to cap.
+              <Select
+                value={batchFilter || '__all__'}
+                onValueChange={v => onBatchChange(v === '__all__' ? '' : v)}
               >
-                <option value="">All batches</option>
-                {batches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-              </select>
+                <SelectTrigger
+                  aria-label="Filter by batch"
+                  className="min-h-[38px] h-auto rounded-xl border border-brand-line bg-white px-3 text-sm font-semibold text-brand-text flex-1 sm:flex-none min-w-0 w-auto shadow-none ring-offset-0"
+                >
+                  <SelectValue placeholder="All batches" />
+                </SelectTrigger>
+                <SelectContent collisionPadding={12} className="max-w-[calc(100vw-2rem)]">
+                  <SelectItem value="__all__">All batches</SelectItem>
+                  {batches.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
             )}
 
             <button
@@ -390,7 +474,7 @@ export function AssessmentInsights({ data, loading, error, batches, batchFilter,
             <p className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-mute mb-2">Needs your attention</p>
             <p className="text-sm text-brand-text leading-snug">
               {pendingDiagnostics > 0
-                ? `${pendingDiagnostics} students still have no baseline, and ${atRiskCount} of the ${diagnosedCount} diagnosed sit below band 5.0.`
+                ? `${pendingDiagnostics} students still have no baseline, and ${atRiskCount} of the ${ieltsDiagnosed.length} diagnosed sit below band 5.0.`
                 : `All students have a baseline. ${atRiskCount} sit below band 5.0.`}
             </p>
             <div className="mt-3 space-y-1.5">
@@ -398,6 +482,7 @@ export function AssessmentInsights({ data, loading, error, batches, batchFilter,
                 { label: 'Chase pending diagnostics', value: pendingDiagnostics },
                 { label: 'Review at-risk students', value: atRiskCount },
                 { label: 'Students missing 2+ IAs', value: missing2PlusIAs },
+                ...(seDiagnosed.length > 0 ? [{ label: 'Spoken English: below B1', value: seNeedsSupportCount }] : []),
               ].map(item => (
                 <button
                   key={item.label}
@@ -413,7 +498,7 @@ export function AssessmentInsights({ data, loading, error, batches, batchFilter,
 
           <div className="bg-white rounded-2xl border border-brand-line p-4">
             <p className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-mute mb-1">Average band by skill</p>
-            <p className="text-[11px] text-brand-text-mute mb-3">Across the {diagnosedCount} diagnosed students.</p>
+            <p className="text-[11px] text-brand-text-mute mb-3">Across the {ieltsDiagnosed.length} diagnosed students.</p>
             <div className="space-y-2.5">
               {avgBySkill.map(s => (
                 <div key={s.key}>
@@ -431,6 +516,29 @@ export function AssessmentInsights({ data, loading, error, batches, batchFilter,
               ))}
             </div>
           </div>
+
+          {seDiagnosed.length > 0 && (
+            <div className="bg-white rounded-2xl border border-brand-line p-4">
+              <p className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-mute mb-1">CEFR distribution — Spoken English</p>
+              <p className="text-[11px] text-brand-text-mute mb-3">Across the {seDiagnosed.length} diagnosed students.</p>
+              <div className="space-y-2.5">
+                {CEFR_ORDER.map((label, i) => (
+                  <div key={label}>
+                    <div className="flex items-center justify-between text-xs mb-1">
+                      <span className="font-semibold text-brand-text">{label}</span>
+                      <span className="font-black tabular-nums text-brand-text">{seLevelCounts[i]}</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-brand-bg-alt overflow-hidden">
+                      <div
+                        className={cn('h-full rounded-full', cefrGaugeColor(label))}
+                        style={{ width: `${Math.min((seLevelCounts[i] / seLevelMax) * 100, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="bg-white rounded-2xl border border-brand-line p-4">
             <p className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-mute mb-2">Coverage</p>

@@ -12,6 +12,7 @@ import { MockSessionsTab }      from './student-progress/MockSessionsTab';
 import { DrillsTab }            from './student-progress/DrillsTab';
 import { DiagnosticTab }        from './student-progress/DiagnosticTab';
 import { PracticeHistoryTab }   from './student-progress/PracticeHistoryTab';
+import { isSpokenEnglish } from '@/features/student/utils/exam';
 
 type Tab = 'overview' | 'ia' | 'mock' | 'drills' | 'diagnostic' | 'practice';
 
@@ -54,6 +55,15 @@ export default function InstructorStudentProgressPage() {
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
 
   const { data, loading, error, refetch } = useStudentFullProgress(resolvedBatchId, resolvedStudentId);
+
+  // Practice (Reading/Speaking/Writing free-practice history) isn't a feature
+  // Spoken English students have at all — SE_ALLOWED in StudentSidebar.tsx
+  // doesn't include it, so an SE student can never reach it themselves. Showing
+  // the tab here would describe a feature that doesn't exist for them, not
+  // just one that's currently empty (unlike Mock, which is a real future SE
+  // feature that's intentionally empty for cohort 1).
+  const isSE = isSpokenEnglish(data?.student?.exam_id);
+  const visibleTabs = isSE ? TABS.filter(t => t.id !== 'practice') : TABS;
 
   const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
   // Calls Shalom's retake endpoint (S-D3) — contract unconfirmed, same caveat as
@@ -132,7 +142,7 @@ export default function InstructorStudentProgressPage() {
                   the break, unchanged once it fits. */}
               <div className="max-w-full overflow-x-auto -mx-1 px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <div className="bg-white rounded-2xl border border-brand-line shadow-sm p-1.5 flex gap-1 w-fit min-w-max">
-                {TABS.map(tab => (
+                {visibleTabs.map(tab => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
@@ -152,8 +162,8 @@ export default function InstructorStudentProgressPage() {
 
               {/* Tab content */}
               {activeTab === 'overview'   && <OverviewTab data={data} />}
-              {activeTab === 'ia'         && <IASessionsTab sessions={data.ia_sessions} />}
-              {activeTab === 'mock'       && <MockSessionsTab sessions={data.mock_sessions} />}
+              {activeTab === 'ia'         && <IASessionsTab sessions={data.ia_sessions} examId={data.student?.exam_id} />}
+              {activeTab === 'mock'       && <MockSessionsTab sessions={data.mock_sessions} examId={data.student?.exam_id} />}
               {activeTab === 'drills'     && (
                 <DrillsTab
                   drillStats={data.drill_stats}
@@ -162,7 +172,7 @@ export default function InstructorStudentProgressPage() {
                   reflections={data.recent_reflections}
                 />
               )}
-              {activeTab === 'practice'   && resolvedStudentId && (
+              {activeTab === 'practice'   && !isSE && resolvedStudentId && (
                 <PracticeHistoryTab studentId={resolvedStudentId} />
               )}
               {activeTab === 'diagnostic' && (
@@ -171,6 +181,7 @@ export default function InstructorStudentProgressPage() {
                   studentName={data.student?.name}
                   onRequestReset={handleRequestRetake}
                   perSkillReset={false}
+                  examId={data.student?.exam_id}
                 />
               )}
             </div>

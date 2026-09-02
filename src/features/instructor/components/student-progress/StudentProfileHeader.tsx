@@ -1,5 +1,8 @@
 import { CalendarClock, Flame, Gauge, Target, Zap } from 'lucide-react';
 import { cn } from '@/shared/utils';
+import { isSpokenEnglish } from '@/features/student/utils/exam';
+import { cefrColor, cefrBg } from '@/features/student/config/cefrDisplay';
+import { SE_SUBSKILLS } from '@/features/student/config/spokenEnglishSubskills';
 import type { StudentFullProgress, CompetencyRow } from './types';
 
 interface Props {
@@ -55,15 +58,114 @@ function lrswFromCompetency(rows: CompetencyRow[]): Array<{ abbr: string; label:
   return order.filter(a => found.has(a)).map(a => ({ abbr: a, label: SKILL_LABEL[a], band: found.get(a)! }));
 }
 
-// ── component ─────────────────────────────────────────────────────────────────
+/** Exam proximity tile — shared by both exam variants; unaffected by scale. */
+function useExamDaysStat(exam_date: string | null) {
+  const examDays = exam_date ? daysUntil(exam_date) : null;
+  return {
+    icon: <CalendarClock className="h-4 w-4" />,
+    label: examDays !== null && examDays < 0 ? 'Exam Was' : 'Exam In',
+    value: exam_date === null
+      ? 'Not set'
+      : examDays === null
+      ? '—'
+      : examDays < 0
+      ? `${Math.abs(examDays)}d ago`
+      : examDays === 0
+      ? 'Today'
+      : `${examDays}d`,
+    valueClass: exam_date === null || examDays === null
+      ? 'text-brand-text-mute'
+      : examDays < 0
+      ? 'text-brand-text-mute'
+      : examDays <= 30
+      ? 'text-rose-600'
+      : examDays <= 90
+      ? 'text-amber-600'
+      : 'text-brand-text',
+  };
+}
 
-export function StudentProfileHeader({ data }: Props) {
+// ── shared shell ──────────────────────────────────────────────────────────────
+
+function HeaderShell({ student, stats, skillStrip }: {
+  student: StudentFullProgress['student'];
+  stats: Array<{ icon: React.ReactNode; label: string; value: string; valueClass: string }>;
+  skillStrip: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-2xl overflow-hidden bg-white border border-brand-line shadow-sm mb-6">
+
+      {/* ── Gradient banner ────────────────────────────────────────────── */}
+      {/* No overflow-hidden here — outer card clips the rounded corners.
+          Keeping this open lets the avatar z-index stack above it correctly. */}
+      {/* h-40 gives room; name is offset right by ml-[100px] to sit beside the avatar's footprint */}
+      <div className="relative h-40 bg-gradient-to-br from-brand-teal-700 via-brand-teal-600 to-brand-blue-700 flex flex-col justify-end px-4 sm:px-6 pb-6">
+        {/* Decorative blobs */}
+        <div className="absolute -top-10 -right-10 w-52 h-52 rounded-full bg-white/5 pointer-events-none" />
+        <div className="absolute top-6 right-24 w-24 h-24 rounded-full bg-white/5 pointer-events-none" />
+        <div className="absolute -bottom-6 right-8 w-36 h-36 rounded-full bg-brand-blue-600/30 pointer-events-none" />
+
+        {/* Name — ml-[100px] clears the avatar (w-20=80px + 20px gap).
+            Truncates rather than overflowing: at 390px the offset leaves only
+            ~240px, which a full name at text-2xl exceeds. */}
+        <h2 className="relative z-10 text-xl sm:text-2xl font-black text-white leading-tight tracking-tight ml-[100px] truncate pr-2">
+          {student.name}
+        </h2>
+      </div>
+
+      {/* ── White body ─────────────────────────────────────────────────── */}
+      <div className="px-4 sm:px-6 pb-5">
+
+        {/* Avatar row.
+            The -mt-14 is on the avatar alone, not the row: applying it to the
+            row dragged the badge up with it, so the badge rendered on top of
+            the gradient banner instead of in the white body. */}
+        <div className="flex items-start justify-between gap-3 mb-5">
+          {/* Avatar — z-10 paints above gradient div; larger at h-20 w-20 */}
+          <div className={cn(
+            'relative z-10 -mt-14 h-20 w-20 rounded-full ring-[3px] ring-white shadow-2xl overflow-hidden bg-brand-teal-600 shrink-0',
+            'flex items-center justify-center'
+          )}>
+            {student.avatar ? (
+              <img src={student.avatar} alt={student.name} className="h-full w-full object-cover" />
+            ) : (
+              <span className="text-2xl font-black text-white select-none">{getInitials(student.name)}</span>
+            )}
+          </div>
+        </div>
+
+        {/* ── Stats row ───────────────────────────────────────────────── */}
+        <div className={cn(
+          'grid grid-cols-2 divide-x divide-y md:divide-y-0 divide-brand-line border border-brand-line rounded-xl overflow-hidden mb-4',
+          stats.length >= 5 ? 'md:grid-cols-5' : 'md:grid-cols-4'
+        )}>
+          {stats.map((s) => (
+            <div key={s.label} className="flex items-center gap-2.5 px-4 py-3">
+              <span className="text-brand-text-mute shrink-0">{s.icon}</span>
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold text-brand-text-mute font-jetbrains uppercase tracking-wider leading-tight">
+                  {s.label}
+                </p>
+                <p className={cn('text-lg font-black leading-tight', s.valueClass)}>
+                  {s.value}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {skillStrip}
+      </div>
+    </div>
+  );
+}
+
+// ── IELTS (unchanged body, just extracted) ────────────────────────────────────
+
+export function IeltsStudentProfileHeader({ data }: Props) {
   const { student, target_band, momentum_score, daily_streak, competency, current_band, exam_date } = data;
 
-  // Exam proximity is the context that makes the band gap actionable: a 1.5 gap
-  // with eight months left and the same gap with three weeks left call for
-  // completely different intervention, and staff could not see the difference.
-  const examDays = exam_date ? daysUntil(exam_date) : null;
+  const examDaysStat = useExamDaysStat(exam_date);
 
   const gap = current_band !== null && target_band !== null
     ? Math.round((target_band - current_band) * 10) / 10
@@ -73,8 +175,6 @@ export function StudentProfileHeader({ data }: Props) {
 
   const stats = [
     {
-      // Current band leads the row — it's the number an instructor scans for first,
-      // and the gap badge above is meaningless without it on screen.
       icon: <Gauge className="h-4 w-4" />,
       label: 'Current Band',
       value: current_band !== null ? current_band.toFixed(1) : '—',
@@ -106,62 +206,22 @@ export function StudentProfileHeader({ data }: Props) {
         ? 'text-amber-600'
         : 'text-brand-text-mute',
     },
-    {
-      icon: <CalendarClock className="h-4 w-4" />,
-      label: examDays !== null && examDays < 0 ? 'Exam Was' : 'Exam In',
-      // "Not set" is a distinct, actionable state from "0 days" — a student who
-      // never declared an exam date needs asking, not revising.
-      value: exam_date === null
-        ? 'Not set'
-        : examDays === null
-        ? '—'
-        : examDays < 0
-        ? `${Math.abs(examDays)}d ago`
-        : examDays === 0
-        ? 'Today'
-        : `${examDays}d`,
-      valueClass: exam_date === null || examDays === null
-        ? 'text-brand-text-mute'
-        : examDays < 0
-        ? 'text-brand-text-mute'
-        : examDays <= 30
-        ? 'text-rose-600'
-        : examDays <= 90
-        ? 'text-amber-600'
-        : 'text-brand-text',
-    },
+    examDaysStat,
   ];
 
   return (
     <div className="rounded-2xl overflow-hidden bg-white border border-brand-line shadow-sm mb-6">
-
-      {/* ── Gradient banner ────────────────────────────────────────────── */}
-      {/* No overflow-hidden here — outer card clips the rounded corners.
-          Keeping this open lets the avatar z-index stack above it correctly. */}
-      {/* h-40 gives room; name is offset right by ml-[100px] to sit beside the avatar's footprint */}
       <div className="relative h-40 bg-gradient-to-br from-brand-teal-700 via-brand-teal-600 to-brand-blue-700 flex flex-col justify-end px-4 sm:px-6 pb-6">
-        {/* Decorative blobs */}
         <div className="absolute -top-10 -right-10 w-52 h-52 rounded-full bg-white/5 pointer-events-none" />
         <div className="absolute top-6 right-24 w-24 h-24 rounded-full bg-white/5 pointer-events-none" />
         <div className="absolute -bottom-6 right-8 w-36 h-36 rounded-full bg-brand-blue-600/30 pointer-events-none" />
-
-        {/* Name — ml-[100px] clears the avatar (w-20=80px + 20px gap).
-            Truncates rather than overflowing: at 390px the offset leaves only
-            ~240px, which a full name at text-2xl exceeds. */}
         <h2 className="relative z-10 text-xl sm:text-2xl font-black text-white leading-tight tracking-tight ml-[100px] truncate pr-2">
           {student.name}
         </h2>
       </div>
 
-      {/* ── White body ─────────────────────────────────────────────────── */}
       <div className="px-4 sm:px-6 pb-5">
-
-        {/* Avatar + gap badge row.
-            The -mt-14 is on the avatar alone, not the row: applying it to the
-            row dragged the badge up with it, so the badge rendered on top of
-            the gradient banner instead of in the white body. */}
         <div className="flex items-start justify-between gap-3 mb-5">
-          {/* Avatar — z-10 paints above gradient div; larger at h-20 w-20 */}
           <div className={cn(
             'relative z-10 -mt-14 h-20 w-20 rounded-full ring-[3px] ring-white shadow-2xl overflow-hidden bg-brand-teal-600 shrink-0',
             'flex items-center justify-center'
@@ -173,7 +233,6 @@ export function StudentProfileHeader({ data }: Props) {
             )}
           </div>
 
-          {/* Gap badge */}
           {gap !== null && (
             <span className={cn(
               'text-xs font-bold px-3 py-1.5 rounded-xl border shrink-0 whitespace-nowrap',
@@ -188,11 +247,6 @@ export function StudentProfileHeader({ data }: Props) {
           )}
         </div>
 
-        {/* ── Stats row ───────────────────────────────────────────────── */}
-        {/* 4 tiles: 2×2 on mobile, single row from md up. divide-y is dropped at md
-            so the wrapped-row divider doesn't linger once it's one line. */}
-        {/* 5 tiles — md:grid-cols-5 so the Exam tile joins the row rather than
-            orphaning onto a second line with dangling dividers. */}
         <div className="grid grid-cols-2 md:grid-cols-5 divide-x divide-y md:divide-y-0 divide-brand-line border border-brand-line rounded-xl overflow-hidden mb-4">
           {stats.map((s) => (
             <div key={s.label} className="flex items-center gap-2.5 px-4 py-3">
@@ -209,7 +263,6 @@ export function StudentProfileHeader({ data }: Props) {
           ))}
         </div>
 
-        {/* ── LRSW skill band strip ────────────────────────────────────── */}
         {lrsw.length > 0 ? (
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[10px] font-bold text-brand-text-mute font-jetbrains uppercase tracking-widest mr-0.5">
@@ -239,4 +292,108 @@ export function StudentProfileHeader({ data }: Props) {
       </div>
     </div>
   );
+}
+
+// ── Spoken English (CEFR) ──────────────────────────────────────────────────
+// showTargetAndReadiness is false for spoken_english (see examDisplay config),
+// so there is no target/gap tile — the headline is the CEFR level itself.
+
+// SE has one competency row (SPEAKING); the 6 subskills live inside its
+// sub_scores.subskillProfile array, not as separate competency rows — same
+// shape used by AssessmentHistoryPage/Report/VivaDiagnostic on the student side.
+function speakingSubScores(competency: CompetencyRow[]): any {
+  const row = competency.find(r => r.skill.toUpperCase() === 'SPEAKING');
+  return (row?.sub_scores as any) ?? null;
+}
+
+function cefrSubskillStrip(competency: CompetencyRow[]) {
+  const ss = speakingSubScores(competency);
+  const profile: Array<{ id: string; label: string; level: string; score: number }> =
+    Array.isArray(ss?.subskillProfile) ? ss.subskillProfile : [];
+
+  if (profile.length === 0) {
+    return (
+      <p className="text-xs text-brand-text-mute">
+        No subskill data yet — complete a diagnostic to populate.
+      </p>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      <span className="text-[10px] font-bold text-brand-text-mute font-jetbrains uppercase tracking-widest mr-0.5">
+        Subskill Levels
+      </span>
+      {profile.map((sub) => (
+        <div
+          key={sub.id}
+          title={sub.label}
+          className={cn(
+            'flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold',
+            cefrBg(sub.level)
+          )}
+        >
+          <span className="opacity-70 font-semibold">{sub.label}</span>
+          <span className={cn('font-black', cefrColor(sub.level))}>
+            {sub.level?.toUpperCase()}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function SpokenEnglishStudentProfileHeader({ data }: Props) {
+  const { student, momentum_score, daily_streak, competency, current_cefr_label, exam_date } = data;
+
+  const examDaysStat = useExamDaysStat(exam_date);
+  // current_cefr_label isn't populated by the backend today — derive it the
+  // same way the subskill strip does, from the SPEAKING row's sub_scores.
+  const cefrLabel = current_cefr_label ?? speakingSubScores(competency)?.cefrLabel ?? null;
+
+  const stats = [
+    {
+      icon: <Gauge className="h-4 w-4" />,
+      label: 'CEFR Level',
+      value: cefrLabel ?? '—',
+      valueClass: cefrLabel ? cefrColor(cefrLabel) : 'text-brand-text-mute',
+    },
+    {
+      icon: <Zap className="h-4 w-4" />,
+      label: 'Momentum',
+      value: momentum_score.toLocaleString(),
+      valueClass: momentum_score >= 200
+        ? 'text-emerald-600'
+        : momentum_score >= 100
+        ? 'text-amber-600'
+        : 'text-rose-600',
+    },
+    {
+      icon: <Flame className="h-4 w-4" />,
+      label: 'Day Streak',
+      value: `${daily_streak}d`,
+      valueClass: daily_streak >= 7
+        ? 'text-orange-500'
+        : daily_streak >= 3
+        ? 'text-amber-600'
+        : 'text-brand-text-mute',
+    },
+    examDaysStat,
+  ];
+
+  return (
+    <HeaderShell
+      student={student}
+      stats={stats}
+      skillStrip={cefrSubskillStrip(competency)}
+    />
+  );
+}
+
+// ── dispatcher ────────────────────────────────────────────────────────────────
+
+export function StudentProfileHeader({ data }: Props) {
+  return isSpokenEnglish(data.student.exam_id)
+    ? <SpokenEnglishStudentProfileHeader data={data} />
+    : <IeltsStudentProfileHeader data={data} />;
 }

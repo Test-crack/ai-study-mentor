@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { isSpokenEnglish } from '@/features/student/utils/exam';
+import { CEFR_ORDER, cefrBg, cefrColor } from '@/features/student/config/cefrDisplay';
 
 export interface BatchReportData {
   generatedAt: string;
@@ -34,6 +36,17 @@ export interface BatchReportData {
     band_trend: 'up' | 'flat' | 'down' | null;
     last_ia_date: string | null;
     is_at_risk: boolean;
+    /**
+     * Not currently returned by GET .../dashboard-summary (batchDashboardQueries
+     * doesn't select or compute exam_id). Declared here — following the same
+     * isSpokenEnglish(examId) pattern as StudentReportTemplate — so this template
+     * can section IELTS vs Spoken English students the moment the backend sends
+     * it. Institute batches have no exam-type field constraining them to a single
+     * exam, so a batch can genuinely mix both; until exam_id arrives, every row
+     * is treated as IELTS (matching the DB column's own default), which is exactly
+     * today's — unchanged — behavior.
+     */
+    exam_id?: string | null;
   }>;
   ia_summary: {
     avg_band: number;
@@ -100,6 +113,23 @@ function trendColor(trend: 'up' | 'flat' | 'down' | null): string {
   return 'text-brand-text-mute';
 }
 
+// The diagnostic_overview endpoint behind this table doesn't tag rows with an exam
+// id either (a separate gap from band_overview's exam_id above — see the note on
+// that field), but a diagnosed Spoken English row has the same structural tell used
+// throughout this codebase's other SE fixes: only S is populated, L/R/W stay null,
+// because SE has exactly one skill. A row that isn't yet diagnosed has every band
+// null and can't be told apart by shape, so it's left in the IELTS-shaped table
+// (same as before this split existed) until it's diagnosed.
+function isSpokenEnglishShape(bands: { L: number | null; R: number | null; W: number | null; S: number | null }): boolean {
+  return bands.S !== null && bands.L === null && bands.R === null && bands.W === null;
+}
+
+function cefrLevelLabel(ordinal: number | null): string | null {
+  if (ordinal === null) return null;
+  const i = Math.max(0, Math.min(CEFR_ORDER.length - 1, Math.round(ordinal)));
+  return CEFR_ORDER[i];
+}
+
 export function BatchReportTemplate({ data, onClose }: Props) {
   useEffect(() => {
     const style = document.createElement('style');
@@ -124,6 +154,22 @@ export function BatchReportTemplate({ data, onClose }: Props) {
     const gapB = b.gap ?? 0;
     return gapA - gapB;
   });
+
+  // A batch has no exam-type field constraining it to one exam, so it can genuinely
+  // mix IELTS and Spoken English students. Section by exam rather than ever blending
+  // a CEFR ordinal into an IELTS band average. exam_id isn't sent by the backend yet
+  // (see the note on BatchReportData.band_overview), so seRows is always empty today
+  // and this renders exactly as before.
+  const ieltsRows = sortedBandOverview.filter(r => !isSpokenEnglish(r.exam_id));
+  const seRows    = sortedBandOverview.filter(r => isSpokenEnglish(r.exam_id));
+  const hasSE     = seRows.length > 0;
+  const allSE     = hasSE && ieltsRows.length === 0;
+
+  // Diagnostic Status (below) pulls from diagnostic_overview, a different data source
+  // from band_overview above — it has no exam_id at all (see isSpokenEnglishShape),
+  // so it's split structurally instead of by the exam_id field used for band_overview.
+  const diagIeltsRows = data.diagnostic_overview.filter(d => !isSpokenEnglishShape(d.baseline_bands));
+  const diagSeRows    = data.diagnostic_overview.filter(d => isSpokenEnglishShape(d.baseline_bands));
 
   const iaMap = new Map(data.ia_overview.map(r => [r.student_id, r]));
 
@@ -161,7 +207,13 @@ export function BatchReportTemplate({ data, onClose }: Props) {
             </div>
             <div>
               <div className="font-bold text-brand-text text-base leading-tight">TestCrack</div>
-              <div className="text-brand-text-mute text-xs">IELTS Preparation Platform</div>
+              <div className="text-brand-text-mute text-xs">
+                {allSE
+                  ? 'Spoken English Practice Platform'
+                  : hasSE
+                    ? 'IELTS & Spoken English Practice Platform'
+                    : 'IELTS Preparation Platform'}
+              </div>
             </div>
           </div>
           <div className="text-right">
@@ -279,48 +331,107 @@ export function BatchReportTemplate({ data, onClose }: Props) {
       {/* ===== PAGE 2 ===== */}
       <div className="max-w-[800px] mx-auto bg-white shadow-lg my-8 p-12 print:shadow-none print:my-0 print:p-[1.5cm] print:break-before-page">
         <h2 className="text-lg font-black text-brand-text mb-6">Student Performance Overview</h2>
-        <table className="w-full text-xs border-collapse">
-          <thead>
-            <tr className="bg-slate-50 border-b border-brand-line">
-              {['Student', 'Band', 'Target', 'Gap', 'IAs Done', 'Missed', 'Last IA', 'Status'].map(h => (
-                <th key={h} className="text-left text-[10px] font-black uppercase tracking-wider text-brand-text-mute px-3 py-2 first:pl-0 last:pr-0">
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {sortedBandOverview.map((row, i) => {
-              const ia = iaMap.get(row.student_id);
-              return (
-                <tr key={row.user_id} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
-                  <td className="px-3 py-2 pl-0 font-medium text-brand-text">{row.name}</td>
-                  <td className={`px-3 py-2 font-bold ${bandColor(row.current_band)}`}>
-                    {row.current_band ?? '—'}
-                  </td>
-                  <td className="px-3 py-2 text-slate-600">{row.target_band ?? '—'}</td>
-                  <td className={`px-3 py-2 font-bold ${gapColor(row.gap)}`}>
-                    {row.gap !== null ? (row.gap > 0 ? `+${row.gap}` : row.gap) : '—'}
-                  </td>
-                  <td className="px-3 py-2 text-brand-text">{ia?.ia_completed ?? '—'}</td>
-                  <td className="px-3 py-2 text-rose-600">{ia?.ia_missed ?? '—'}</td>
-                  <td className="px-3 py-2 text-brand-text-mute">{row.last_ia_date ?? '—'}</td>
-                  <td className="px-3 py-2 pr-0">
-                    {row.is_at_risk ? (
-                      <span className="inline-flex px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[10px] font-bold">
-                        At Risk
-                      </span>
-                    ) : (
-                      <span className="inline-flex px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">
-                        On Track
-                      </span>
-                    )}
-                  </td>
+
+        {/* IELTS students — band-scale table, unchanged from before this table was
+            sectioned by exam. Hidden only in the (currently unreachable, since
+            exam_id isn't sent yet) all-SE case, so an SE-only batch doesn't show
+            an empty IELTS table. */}
+        {!allSE && (
+          <>
+            {hasSE && (
+              <h3 className="text-[11px] font-black uppercase tracking-wider text-brand-text-mute mb-2">IELTS Students</h3>
+            )}
+            <table className="w-full text-xs border-collapse mb-8">
+              <thead>
+                <tr className="bg-slate-50 border-b border-brand-line">
+                  {['Student', 'Band', 'Target', 'Gap', 'IAs Done', 'Missed', 'Last IA', 'Status'].map(h => (
+                    <th key={h} className="text-left text-[10px] font-black uppercase tracking-wider text-brand-text-mute px-3 py-2 first:pl-0 last:pr-0">
+                      {h}
+                    </th>
+                  ))}
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                {ieltsRows.map((row, i) => {
+                  const ia = iaMap.get(row.student_id);
+                  return (
+                    <tr key={row.user_id} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
+                      <td className="px-3 py-2 pl-0 font-medium text-brand-text">{row.name}</td>
+                      <td className={`px-3 py-2 font-bold ${bandColor(row.current_band)}`}>
+                        {row.current_band ?? '—'}
+                      </td>
+                      <td className="px-3 py-2 text-slate-600">{row.target_band ?? '—'}</td>
+                      <td className={`px-3 py-2 font-bold ${gapColor(row.gap)}`}>
+                        {row.gap !== null ? (row.gap > 0 ? `+${row.gap}` : row.gap) : '—'}
+                      </td>
+                      <td className="px-3 py-2 text-brand-text">{ia?.ia_completed ?? '—'}</td>
+                      <td className="px-3 py-2 text-rose-600">{ia?.ia_missed ?? '—'}</td>
+                      <td className="px-3 py-2 text-brand-text-mute">{row.last_ia_date ?? '—'}</td>
+                      <td className="px-3 py-2 pr-0">
+                        {row.is_at_risk ? (
+                          <span className="inline-flex px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[10px] font-bold">
+                            At Risk
+                          </span>
+                        ) : (
+                          <span className="inline-flex px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">
+                            On Track
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </>
+        )}
+
+        {/* Spoken English students — CEFR scale, kept in a separate section/table so
+            a CEFR ordinal is never averaged or sorted together with an IELTS band.
+            No CEFR-shaped data reaches this component yet (dashboard-summary only
+            computes IELTS bands), so band/gap read as "—" rather than a fabricated
+            number; the split itself is what matters for when that data arrives. */}
+        {hasSE && (
+          <>
+            <h3 className="text-[11px] font-black uppercase tracking-wider text-brand-text-mute mb-2">Spoken English Students</h3>
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-50 border-b border-brand-line">
+                  {['Student', 'CEFR Level', 'IAs Done', 'Missed', 'Last IA', 'Status'].map(h => (
+                    <th key={h} className="text-left text-[10px] font-black uppercase tracking-wider text-brand-text-mute px-3 py-2 first:pl-0 last:pr-0">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {seRows.map((row, i) => {
+                  const ia = iaMap.get(row.student_id);
+                  return (
+                    <tr key={row.user_id} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
+                      <td className="px-3 py-2 pl-0 font-medium text-brand-text">{row.name}</td>
+                      <td className="px-3 py-2 text-brand-text-mute">—</td>
+                      <td className="px-3 py-2 text-brand-text">{ia?.ia_completed ?? '—'}</td>
+                      <td className="px-3 py-2 text-rose-600">{ia?.ia_missed ?? '—'}</td>
+                      <td className="px-3 py-2 text-brand-text-mute">{row.last_ia_date ?? '—'}</td>
+                      <td className="px-3 py-2 pr-0">
+                        {row.is_at_risk ? (
+                          <span className="inline-flex px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[10px] font-bold">
+                            At Risk
+                          </span>
+                        ) : (
+                          <span className="inline-flex px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">
+                            On Track
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </>
+        )}
       </div>
 
       {/* ===== PAGE 3 ===== */}
@@ -371,7 +482,9 @@ export function BatchReportTemplate({ data, onClose }: Props) {
         {/* Diagnostic Status */}
         <div className="mb-10">
           <h2 className="text-lg font-black text-brand-text mb-4">Diagnostic Status</h2>
-          <table className="w-full text-xs border-collapse">
+          {/* IELTS-shaped rows (pending rows included — see isSpokenEnglishShape) —
+              unchanged table, so an SE-free batch renders exactly as before. */}
+          <table className={`w-full text-xs border-collapse${diagSeRows.length > 0 ? ' mb-6' : ''}`}>
             <thead>
               <tr className="bg-slate-50 border-b border-brand-line">
                 {['Name', 'L', 'R', 'W', 'S', 'Status'].map(h => (
@@ -382,7 +495,7 @@ export function BatchReportTemplate({ data, onClose }: Props) {
               </tr>
             </thead>
             <tbody>
-              {data.diagnostic_overview.map((d, i) => (
+              {diagIeltsRows.map((d, i) => (
                 <tr key={d.name + i} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
                   <td className="px-3 py-2 pl-0 font-medium text-brand-text">{d.name}</td>
                   {(['L', 'R', 'W', 'S'] as const).map(skill => {
@@ -414,12 +527,61 @@ export function BatchReportTemplate({ data, onClose }: Props) {
               ))}
             </tbody>
           </table>
+
+          {/* Spoken English (CEFR) diagnosed rows — kept in a separate table so a CEFR
+              ordinal is never rendered as if it were an IELTS band. Additive: only
+              appears when this batch genuinely has SE-shaped diagnosed rows. */}
+          {diagSeRows.length > 0 && (
+            <>
+              <h3 className="text-[11px] font-black uppercase tracking-wider text-brand-text-mute mb-2">Spoken English Students (CEFR)</h3>
+              <table className="w-full text-xs border-collapse">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-brand-line">
+                    {['Name', 'CEFR Level', 'Status'].map(h => (
+                      <th key={h} className="text-left text-[10px] font-black uppercase tracking-wider text-brand-text-mute px-3 py-2 first:pl-0 last:pr-0">
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {diagSeRows.map((d, i) => {
+                    const label = cefrLevelLabel(d.baseline_bands.S);
+                    return (
+                      <tr key={d.name + i} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
+                        <td className="px-3 py-2 pl-0 font-medium text-brand-text">{d.name}</td>
+                        <td className="px-3 py-2">
+                          {label !== null ? (
+                            <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold ${cefrBg(label)} ${cefrColor(label)}`}>
+                              {label}
+                            </span>
+                          ) : (
+                            <span className="text-slate-300">—</span>
+                          )}
+                        </td>
+                        <td className="px-3 py-2 pr-0">
+                          <span className="inline-flex px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">
+                            Diagnosed
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </>
+          )}
         </div>
 
         {/* Footer */}
         <div className="border-t border-brand-line pt-6 mt-auto">
           <p className="text-xs text-brand-text-mute mb-0.5">
-            This report was generated by TestCrack IELTS Preparation Platform.
+            This report was generated by TestCrack{' '}
+            {allSE
+              ? 'Spoken English Practice Platform'
+              : hasSE
+                ? 'IELTS & Spoken English Practice Platform'
+                : 'IELTS Preparation Platform'}.
           </p>
           <p className="text-xs text-brand-text-mute mb-0.5">
             Data reflects live performance as of report generation time.

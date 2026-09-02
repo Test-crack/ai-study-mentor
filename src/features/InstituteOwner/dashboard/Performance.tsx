@@ -19,6 +19,10 @@ import {
   type CohortProgressData, type SubskillHeatmapRow, type InstructorEffectivenessRow,
 } from '../services/instituteOwnerService';
 import { InstructorEffectivenessTable } from '@/shared/components/analytics/InstructorEffectivenessTable';
+import { getSelectedExamId } from '@/shared/state/examContext';
+import { isSpokenEnglish } from '@/features/student/utils/exam';
+import { CEFR_ORDER } from '@/features/student/config/cefrDisplay';
+import { seSubskillByEnum } from '@/features/student/config/spokenEnglishSubskills';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -53,9 +57,24 @@ function Skeleton({ h = 'h-64' }: { h?: string }) {
   return <div className={`${h} bg-white border border-brand-line rounded-2xl animate-pulse`} />;
 }
 
+// These endpoints (cohort-progress, batch-comparison, subskill-heatmap; see
+// instituteOwnerController.ts) DO scope every query by req.ctx.examId (the
+// X-Exam-Id header the owner/admin exam switcher sets — see ExamContextBar and
+// shared/state/examContext.ts), so whichever exam is currently selected is the
+// only exam whose rows come back here. That makes the selected exam id a real,
+// non-guessed signal for which scale this page's numbers are on — unlike
+// AssessmentInsights's diagnostic-overview endpoint, which does NOT apply that
+// filter (see that component's report note), these panels never receive a
+// blended IELTS+SE result set to begin with.
+const CEFR_TICKS = [0, 1, 2, 3, 4, 5, 6];
+function cefrOrdinalToLabel(ordinal: number): string {
+  const i = Math.max(0, Math.min(CEFR_ORDER.length - 1, Math.round(ordinal)));
+  return CEFR_ORDER[i];
+}
+
 // ─── Sub-panels ───────────────────────────────────────────────────────────────
 
-function CohortPanel({ data }: { data: CohortProgressData | null }) {
+function CohortPanel({ data, isSE }: { data: CohortProgressData | null; isSE: boolean }) {
   if (!data) return <Skeleton />;
   const chartData = (data.monthly_points ?? []).map(m => ({
     name: m.month,
@@ -65,18 +84,38 @@ function CohortPanel({ data }: { data: CohortProgressData | null }) {
 
   return (
     <div className="bg-white border border-brand-line rounded-2xl p-4 sm:p-6 shadow-sm">
-      <h3 className="font-jetbrains text-[11px] font-bold uppercase tracking-[0.15em] text-brand-text mb-1">6-Month Band Progress</h3>
-      <p className="text-xs text-brand-text-mute mb-5">Average band scores across all batches, tracked by IA sessions.</p>
+      <h3 className="font-jetbrains text-[11px] font-bold uppercase tracking-[0.15em] text-brand-text mb-1">
+        {isSE ? '6-Month CEFR Progress' : '6-Month Band Progress'}
+      </h3>
+      <p className="text-xs text-brand-text-mute mb-5">
+        {isSE
+          ? 'Average CEFR level across all batches, tracked by IA sessions.'
+          : 'Average band scores across all batches, tracked by IA sessions.'}
+      </p>
       <div className="h-64 sm:h-80 lg:h-96 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={CHART_GRID} strokeOpacity={0.8} />
             <XAxis dataKey="name" tick={{ fontSize: 11, fill: CHART_AXIS }} axisLine={false} tickLine={false} />
-            <YAxis domain={[4, 9]} tick={{ fontSize: 11, fill: CHART_AXIS }} axisLine={false} tickLine={false} />
-            <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
+            {isSE ? (
+              <YAxis
+                domain={[0, 6]}
+                ticks={CEFR_TICKS}
+                tickFormatter={cefrOrdinalToLabel}
+                tick={{ fontSize: 11, fill: CHART_AXIS }}
+                axisLine={false}
+                tickLine={false}
+              />
+            ) : (
+              <YAxis domain={[4, 9]} tick={{ fontSize: 11, fill: CHART_AXIS }} axisLine={false} tickLine={false} />
+            )}
+            <Tooltip
+              contentStyle={CHART_TOOLTIP_STYLE}
+              formatter={isSE ? ((v: any) => cefrOrdinalToLabel(Number(v))) : undefined}
+            />
             <Legend wrapperStyle={{ fontSize: 12 }} />
-            <Line type="monotone" dataKey="avg"  name="IA Avg Band"   stroke={CHART_PRIMARY} strokeWidth={3} dot={{ r: 4 }} connectNulls />
-            <Line type="monotone" dataKey="mock" name="Mock Avg Band" stroke={CHART_SECONDARY} strokeWidth={2} dot={{ r: 3 }} strokeDasharray="4 2" connectNulls />
+            <Line type="monotone" dataKey="avg"  name={isSE ? 'IA Avg CEFR' : 'IA Avg Band'}   stroke={CHART_PRIMARY} strokeWidth={3} dot={{ r: 4 }} connectNulls />
+            <Line type="monotone" dataKey="mock" name={isSE ? 'Mock Avg CEFR' : 'Mock Avg Band'} stroke={CHART_SECONDARY} strokeWidth={2} dot={{ r: 3 }} strokeDasharray="4 2" connectNulls />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -84,7 +123,7 @@ function CohortPanel({ data }: { data: CohortProgressData | null }) {
   );
 }
 
-function BatchCompPanel({ rows }: { rows: BatchComparisonRow[] }) {
+function BatchCompPanel({ rows, isSE }: { rows: BatchComparisonRow[]; isSE: boolean }) {
   const [expanded, setExpanded] = useState<string | null>(null);
 
   if (rows.length === 0) {
@@ -103,15 +142,31 @@ function BatchCompPanel({ rows }: { rows: BatchComparisonRow[] }) {
   return (
     <div className="space-y-4">
       <div className="bg-white border border-brand-line rounded-2xl p-4 sm:p-6 shadow-sm">
-        <h3 className="font-jetbrains text-[11px] font-bold uppercase tracking-[0.15em] text-brand-text mb-4">Avg Band by Batch</h3>
+        <h3 className="font-jetbrains text-[11px] font-bold uppercase tracking-[0.15em] text-brand-text mb-4">
+          {isSE ? 'Avg CEFR by Batch' : 'Avg Band by Batch'}
+        </h3>
         <div className="h-64 sm:h-80 lg:h-96 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={CHART_GRID} strokeOpacity={0.8} />
               <XAxis dataKey="name" tick={{ fontSize: 10, fill: CHART_AXIS }} axisLine={false} tickLine={false} />
-              <YAxis domain={[4, 9]} tick={{ fontSize: 11, fill: CHART_AXIS }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
-              <Bar dataKey="band" name="Avg Band" fill={CHART_PRIMARY} radius={[4, 4, 0, 0]} />
+              {isSE ? (
+                <YAxis
+                  domain={[0, 6]}
+                  ticks={CEFR_TICKS}
+                  tickFormatter={cefrOrdinalToLabel}
+                  tick={{ fontSize: 11, fill: CHART_AXIS }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+              ) : (
+                <YAxis domain={[4, 9]} tick={{ fontSize: 11, fill: CHART_AXIS }} axisLine={false} tickLine={false} />
+              )}
+              <Tooltip
+                contentStyle={CHART_TOOLTIP_STYLE}
+                formatter={isSE ? ((v: any, name: any) => [cefrOrdinalToLabel(Number(v)), name]) : undefined}
+              />
+              <Bar dataKey="band" name={isSE ? 'Avg CEFR' : 'Avg Band'} fill={CHART_PRIMARY} radius={[4, 4, 0, 0]} />
               <Bar dataKey="imp" name="Improvement" fill={CHART_SECONDARY} radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -128,7 +183,7 @@ function BatchCompPanel({ rows }: { rows: BatchComparisonRow[] }) {
               <tr className="font-jetbrains text-[10px] uppercase tracking-[0.12em] text-brand-text-mute border-b border-brand-line bg-brand-bg-alt">
                 <th className="px-4 sm:px-6 py-2.5 text-left font-bold">Batch</th>
                 <th className="px-4 py-2.5 text-center font-bold">Students</th>
-                <th className="px-4 py-2.5 text-center font-bold">Avg Band</th>
+                <th className="px-4 py-2.5 text-center font-bold">{isSE ? 'Avg CEFR' : 'Avg Band'}</th>
                 <th className="px-4 py-2.5 text-center font-bold">Improvement</th>
                 <th className="px-4 py-2.5 text-center font-bold">IA Rate</th>
                 <th className="px-4 py-2.5 text-center font-bold">At Risk</th>
@@ -150,7 +205,7 @@ function BatchCompPanel({ rows }: { rows: BatchComparisonRow[] }) {
                     <td className="px-4 py-3 text-center font-bold tabular-nums text-brand-text">{b.student_count}</td>
                     <td className="px-4 py-3 text-center">
                       <span className="inline-flex items-center justify-center text-xs font-bold tabular-nums px-2.5 py-0.5 rounded-full bg-brand-teal-50 text-brand-teal-700 ring-1 ring-inset ring-brand-teal-600/20">
-                        {b.avg_band !== null ? b.avg_band.toFixed(1) : '—'}
+                        {b.avg_band !== null ? (isSE ? cefrOrdinalToLabel(b.avg_band) : b.avg_band.toFixed(1)) : '—'}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">
@@ -276,7 +331,7 @@ function GoalsPanel({ data }: { data: GoalAchievementData | null }) {
   );
 }
 
-function HeatmapPanel({ rows }: { rows: SubskillHeatmapRow[] }) {
+function HeatmapPanel({ rows, isSE }: { rows: SubskillHeatmapRow[]; isSE: boolean }) {
   if (rows.length === 0) return <div className="bg-white border border-brand-line rounded-2xl p-12 text-center text-brand-text-mute shadow-sm">No drill data yet.</div>;
 
   const bySkill = rows.reduce<Record<string, SubskillHeatmapRow[]>>((acc, r) => {
@@ -290,9 +345,16 @@ function HeatmapPanel({ rows }: { rows: SubskillHeatmapRow[] }) {
         <div key={skill} className="bg-white border border-brand-line rounded-2xl p-4 sm:p-6 shadow-sm">
           <h3 className="font-jetbrains text-[11px] font-bold uppercase tracking-[0.15em] text-brand-text mb-4">{skill.toLowerCase()}</h3>
           <div className="space-y-2.5">
-            {subrows.map(r => (
+            {subrows.map(r => {
+              // SE's drills key on the same SubSkillType enum as IELTS (see
+              // spokenEnglishSubskills.ts) — swap in the student-facing SE label
+              // ("Responsiveness", "Phonological Control", …) instead of the raw
+              // enum value when this exam is selected. The accuracy % itself is
+              // exam-agnostic (0-100), so it needs no branching.
+              const subLabel = isSE ? (seSubskillByEnum(r.sub_skill)?.label ?? r.sub_skill) : r.sub_skill;
+              return (
               <div key={r.sub_skill} className="flex items-center gap-2 sm:gap-3">
-                <span className="text-xs text-brand-text-mute w-24 sm:w-40 shrink-0 truncate" title={r.sub_skill}>{r.sub_skill}</span>
+                <span className="text-xs text-brand-text-mute w-24 sm:w-40 shrink-0 truncate" title={subLabel}>{subLabel}</span>
                 <div className="flex-1 min-w-0 bg-brand-bg-alt rounded-full h-2.5 relative overflow-hidden">
                   <div
                     className={`h-2.5 rounded-full transition-all ${
@@ -306,7 +368,8 @@ function HeatmapPanel({ rows }: { rows: SubskillHeatmapRow[] }) {
                 <span className="text-xs font-bold tabular-nums w-10 text-right text-brand-text">{r.avg_accuracy}%</span>
                 <span className="hidden sm:inline text-xs tabular-nums text-brand-text-mute w-16 text-right">{r.drill_count} drills</span>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       ))}
@@ -318,6 +381,9 @@ function HeatmapPanel({ rows }: { rows: SubskillHeatmapRow[] }) {
 
 export default function Performance() {
   const { toast } = useToast();
+  // Selected exam context switch reloads the page (see ExamContextBar), so a
+  // plain render-time read is always fresh — no state/subscription needed.
+  const isSE = isSpokenEnglish(getSelectedExamId());
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [loading, setLoading] = useState(true);
@@ -433,11 +499,11 @@ export default function Performance() {
                 </div>
               ) : (
                 <>
-                  {activeTab === 'overview'   && <CohortPanel data={cohort} />}
-                  {activeTab === 'batches'    && <BatchCompPanel rows={batches} />}
+                  {activeTab === 'overview'   && <CohortPanel data={cohort} isSE={isSE} />}
+                  {activeTab === 'batches'    && <BatchCompPanel rows={batches} isSE={isSE} />}
                   {activeTab === 'engagement' && <EngagementPanel weeks={weeks} />}
                   {activeTab === 'goals'      && <GoalsPanel data={goals} />}
-                  {activeTab === 'heatmap'    && <HeatmapPanel rows={heatmap} />}
+                  {activeTab === 'heatmap'    && <HeatmapPanel rows={heatmap} isSE={isSE} />}
                   {activeTab === 'instructors' && (
                     instructors.length === 0
                       ? <div className="bg-white border border-brand-line rounded-2xl p-8 text-center">

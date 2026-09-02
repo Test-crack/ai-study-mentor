@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Search, Plus, X, Check, Loader2, RefreshCw, Trash2,
-  MoreVertical, CheckCircle2, Mail, User, UserCheck,
+  MoreVertical, CheckCircle2, Mail, User, UserCheck, Info,
 } from 'lucide-react';
 import { InstituteAdminLayout } from '../components/InstituteAdminLayout';
 import {
@@ -9,6 +9,8 @@ import {
   StudentRecord,
 } from '../services/instituteAdminService';
 import { useToast } from '@/shared/hooks/use-toast';
+import { getSelectedExamId } from '@/shared/state/examContext';
+import { EXAM_LABELS, type ExamType } from '@/shared/constants/examTypes';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -75,6 +77,14 @@ function AddStudentModal({ onClose, onAdded }: { onClose: () => void; onAdded: (
   const [form, setForm] = useState({ studentName: '', studentEmail: '' });
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(prev => ({ ...prev, [k]: e.target.value }));
+
+  // The backend has no per-enrollment exam field — it resolves exam_id purely
+  // from the X-Exam-Id header (this institute's currently-selected exam, set by
+  // ExamContextBar). Surfacing that here makes the otherwise-silent assumption
+  // visible before submit, so an admin doesn't enroll into the wrong exam by
+  // forgetting the topbar toggle was left switched.
+  const selectedExamId = getSelectedExamId() as ExamType | null;
+  const selectedExamLabel = selectedExamId ? (EXAM_LABELS[selectedExamId] ?? selectedExamId) : null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -164,6 +174,15 @@ function AddStudentModal({ onClose, onAdded }: { onClose: () => void; onAdded: (
               />
             </div>
           </div>
+
+          {selectedExamLabel && (
+            <div className="flex items-start gap-2 bg-amber-50 border border-amber-100 rounded-lg p-3">
+              <Info className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+              <p className="text-xs text-amber-700 leading-relaxed">
+                Enrolling into <strong>{selectedExamLabel}</strong> — this follows the Exam selector in the topbar. Switch it there first if this isn't the right exam for this student.
+              </p>
+            </div>
+          )}
 
           <div className="flex items-start gap-2 bg-brand-teal-50 border border-brand-teal-100 rounded-lg p-3">
             <CheckCircle2 className="w-4 h-4 text-brand-teal-500 mt-0.5 shrink-0" />

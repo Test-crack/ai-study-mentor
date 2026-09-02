@@ -16,6 +16,9 @@ import {
 import { fetchStudentsOverview } from "../services/instituteAdminService";
 import type { StudentRow } from "@/features/InstituteOwner/services/instituteOwnerService";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/shared/components/ui/select";
 
 type RiskFilter = "all" | "at-risk" | "on-track";
 
@@ -140,14 +143,23 @@ export default function InstituteStudents() {
                 </button>
               ))}
               {batches.length > 0 && (
-                <select
-                  value={batchFilter}
-                  onChange={(e) => setBatchFilter(e.target.value)}
-                  className="px-3 py-2 min-h-[40px] rounded-xl text-xs font-bold bg-white text-brand-text border border-brand-line focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20"
-                >
-                  <option value="all">All batches</option>
-                  {batches.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
-                </select>
+                // Radix Select, not a native <select>: a native select's popup is
+                // drawn by the browser at the width of its longest option and
+                // ignores CSS, overflowing narrow mobile viewports. Radix renders
+                // the panel in a portal with collision detection, so it stays on
+                // screen and its width/positioning are CSS-controllable.
+                <Select value={batchFilter} onValueChange={setBatchFilter}>
+                  <SelectTrigger
+                    aria-label="Filter by batch"
+                    className="px-3 py-2 min-h-[40px] w-auto rounded-xl text-xs font-bold bg-white text-brand-text border border-brand-line focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="max-w-[calc(100vw-2rem)]">
+                    <SelectItem value="all">All batches</SelectItem>
+                    {batches.map((b) => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               )}
             </div>
           </div>
