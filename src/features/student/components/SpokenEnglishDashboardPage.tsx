@@ -7,8 +7,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { callBackend } from "@/features/auth/services/authClient";
-import { StudentSidebar } from "./dashboard/StudentSidebar";
-import { StudentTopbar } from "./dashboard/StudentTopbar";
+import StudentLayout from "./StudentLayout";
 import { PremiumModal } from "@/features/payment/components/PremiumModal";
 import { examDisplay } from "@/features/student/config/examDisplay";
 import { useMomentum } from "@/features/student/Context/MomentumContext";
@@ -138,7 +137,6 @@ const SpokenEnglishDashboardPage = () => {
   const cfg = examDisplay(profile?.examId);
   const examId = profile?.examId ?? "spoken_english";
 
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showPremium, setShowPremium] = useState(false);
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState<CefrResult | null>(null);
@@ -197,17 +195,8 @@ const SpokenEnglishDashboardPage = () => {
   const displayName = profile?.name || "there";
 
   return (
-    <div className="min-h-screen bg-brand-bg font-dm transition-colors duration-300">
-      <StudentSidebar
-        activeTab="dashboard" onTabChange={() => {}}
-        isCollapsed={isSidebarCollapsed} toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        isLocked={false} isNewStudent={false}
-      />
-
-      <div className="min-h-screen flex flex-col pl-0 md:pl-[116px]">
-        <StudentTopbar onUpgradeClick={() => setShowPremium(true)} />
-
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6">
+    <>
+    <StudentLayout activeTab="dashboard" onUpgradeClick={() => setShowPremium(true)} mainClassName="flex-1 p-4 sm:p-6 lg:p-8 space-y-6">
           {/* exam · batch · streak context */}
           <div className="flex flex-wrap items-center gap-2 text-[12px]">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-bg-alt px-3 py-1 font-medium text-brand-text">
@@ -354,11 +343,9 @@ const SpokenEnglishDashboardPage = () => {
               )}
             </>
           )}
-        </main>
-      </div>
-
-      {showPremium && <PremiumModal isOpen={showPremium} onClose={() => setShowPremium(false)} />}
-    </div>
+    </StudentLayout>
+    {showPremium && <PremiumModal isOpen={showPremium} onClose={() => setShowPremium(false)} />}
+    </>
   );
 };
 
