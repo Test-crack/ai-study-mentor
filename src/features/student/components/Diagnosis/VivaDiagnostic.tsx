@@ -15,7 +15,7 @@ import { cacheGetAll, cacheSet, cacheDelete, cacheClear } from "./vivaRecordingC
 import testcrackLogo from "@/assets/testcrack-logo.svg";
 import {
   Mic, Square, RotateCcw, ArrowRight, ArrowLeft, CheckCircle2,
-  AlertTriangle, Loader2, Volume2, Trophy, LogOut,
+  AlertTriangle, Loader2, Volume2, Trophy, LogOut, Ear, Waves, Sparkles,
 } from "lucide-react";
 import { cn } from "@/shared/utils";
 
@@ -86,16 +86,35 @@ const VivaDiagnostic = () => {
   useEffect(() => {
     if (profile && profile.isDiagnosed) { navigate("/student/dashboard", { replace: true }); return; }
     let cancelled = false;
+    // A crash or dropped connection during an earlier successful submit can leave
+    // this student server-side diagnosed but client-side still cached as not —
+    // refreshProfile() updates the shared context, which re-runs this effect with
+    // the corrected value and lets the check above catch it, instead of only
+    // finding out after they've re-recorded all 7 prompts and hit submit again.
+    if (profile && !profile.isDiagnosed) refreshProfile();
     (async () => {
       try {
         const data = await callBackend("/api/diagnostic/viva/prompts", { method: "GET" });
         if (cancelled) return;
         const ex = data.examId ?? profile?.examId ?? "spoken_english";
+        const servedPrompts: VivaPrompt[] = data.prompts ?? [];
         setExamId(ex);
-        setPrompts(data.prompts ?? []);
-        // Restore any recordings cached client-side so a refresh doesn't lose them.
+        setPrompts(servedPrompts);
+        // Restore any recordings cached client-side so a refresh doesn't lose them —
+        // but only ones matching THIS attempt's prompt ids. A prior withheld/failed
+        // attempt's recordings are deliberately never cleared (so a retry doesn't
+        // lose them), but if the backend serves a different prompt set on retry,
+        // those stale entries would otherwise sit in `recordings` forever, inflating
+        // "X of N prompts recorded" past N. Prune them from IndexedDB too so they
+        // don't keep piling up across repeated attempts.
+        const validIds = new Set(servedPrompts.map((p) => p.id));
         const cached = await cacheGetAll(ex);
-        if (!cancelled && Object.keys(cached).length) setRecordings(cached);
+        const current: Record<string, Blob> = {};
+        for (const [id, blob] of Object.entries(cached)) {
+          if (validIds.has(id)) current[id] = blob;
+          else cacheDelete(ex, id);
+        }
+        if (!cancelled && Object.keys(current).length) setRecordings(current);
         setPhase("intro");
       } catch (e: any) {
         if (cancelled) return;
@@ -190,11 +209,27 @@ const VivaDiagnostic = () => {
       setPhase("result");
     } catch (e: any) {
       const code = e?.statusCode;
+      // Backend error shapes aren't consistent across status codes — 422 sends
+      // both a short `error` code and a human `message`, but 409 (e.g. "already
+      // diagnosed") only ever sends `error`. Checking `.message` alone silently
+      // dropped every 409's real reason and always showed the generic fallback.
+      const serverMessage = e?.responseData?.message || e?.responseData?.error;
       if (code === 422) {
         // Withheld (too many silent/empty answers) or incomplete — allow a retake.
-        setError(e?.responseData?.message || "Diagnostic incomplete — please record your answers again.");
+        setError(serverMessage || "Diagnostic incomplete — please record your answers again.");
+      } else if (code === 409) {
+        // Already diagnosed server-side — happens when an earlier attempt
+        // actually succeeded but the client never found out (e.g. a crash
+        // during the wait meant refreshProfile() never ran, so this page's
+        // own isDiagnosed guard on mount was working off a stale profile).
+        // There is nothing to retry here — resync the profile and leave
+        // instead of stranding the student on a review screen whose submit
+        // button can only ever fail the same way again.
+        setError(serverMessage || "You've already completed this diagnostic — taking you to your dashboard.");
+        refreshProfile().finally(() => navigate("/student/dashboard", { replace: true }));
+        return;
       } else {
-        setError(e?.responseData?.message || "Submission failed. Please try again.");
+        setError(serverMessage || "Submission failed. Please try again.");
       }
       setPhase("review");
     }
@@ -376,7 +411,7 @@ const VivaDiagnostic = () => {
   }
 
   if (phase === "submitting") {
-    return <Centered><Loader2 className="h-8 w-8 animate-spin text-brand-teal-700" /><p className="mt-3 text-brand-text-mute">Scoring your answers — this can take a moment…</p></Centered>;
+    return <ScoringProgress />;
   }
 
   // review + running share the recorder shell; review just shows the submit panel.
@@ -627,5 +662,92 @@ const Centered = ({ children }: { children: React.ReactNode }) => (
 const Banner = ({ children }: { children: React.ReactNode }) => (
   <div className="mt-4 flex items-start gap-2 rounded-xl border border-brand-warm/30 bg-brand-warm-tint px-4 py-3 text-sm text-brand-warm"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />{children}</div>
 );
+
+// ─── Scoring wait screen ────────────────────────────────────────────────────
+// Grading runs every prompt through the AI grader in one blocking request with
+// no progress signal, and routinely takes 30s+ — a bare spinner over that long
+// reads as frozen/broken to a first-time student. Nothing here is a real
+// progress signal (there isn't one to show): the stage messages cycle on a
+// fixed clock and the bar is a purely cosmetic asymptotic fill that never
+// quite reaches 100 on its own — both exist only to make a long, unavoidable
+// wait feel like it's doing something, not to claim real progress.
+const SCORING_STAGES = [
+  { icon: Ear,     label: "Listening to your answers" },
+  { icon: Waves,   label: "Analyzing fluency and pacing" },
+  { icon: Volume2, label: "Checking pronunciation" },
+  { icon: Sparkles, label: "Reviewing range and coherence" },
+  { icon: Trophy,  label: "Placing your CEFR level" },
+] as const;
+
+const SCORING_STAGE_INTERVAL_MS = 4500;
+
+// Shown once every fixed stage above has already played but grading still
+// hasn't returned — keeps the screen visibly moving instead of sitting frozen
+// on the last stage for however much longer a slow request takes.
+const HOLDING_MESSAGES = [
+  "Almost there — finalizing your results",
+  "Just a little longer",
+  "Double-checking every answer",
+] as const;
+
+const ScoringProgress = () => {
+  const [elapsedMs, setElapsedMs] = useState(0);
+
+  useEffect(() => {
+    const start = performance.now();
+    let raf: number;
+    const tick = (now: number) => {
+      setElapsedMs(now - start);
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  const safeElapsed = Number.isFinite(elapsedMs) ? Math.max(0, elapsedMs) : 0;
+  const progress = Math.min(92, 92 * (1 - Math.exp(-safeElapsed / 12000)));
+  // Clamped to [0, length-1] both ends — a negative or NaN elapsed value (e.g. from
+  // an HMR remount resetting `start` mid-flight in dev) must never index past the
+  // array's bounds, which previously crashed the whole page with "Cannot read
+  // properties of undefined (reading 'icon')".
+  const stageIndex = Math.min(SCORING_STAGES.length - 1, Math.max(0, Math.floor(safeElapsed / SCORING_STAGE_INTERVAL_MS)));
+  const stage = SCORING_STAGES[stageIndex] ?? SCORING_STAGES[0];
+  // Once every fixed stage has played, grading is still genuinely running — cycle a
+  // second set of short reassurance lines instead of sitting static on the last
+  // stage, and pulse the icon badge so the screen visibly stays "alive" for
+  // however much longer the real request takes.
+  const isHolding = safeElapsed >= SCORING_STAGES.length * SCORING_STAGE_INTERVAL_MS;
+  const holdIndex = isHolding
+    ? Math.max(0, Math.floor((safeElapsed - SCORING_STAGES.length * SCORING_STAGE_INTERVAL_MS) / SCORING_STAGE_INTERVAL_MS)) % HOLDING_MESSAGES.length
+    : 0;
+
+  return (
+    <Centered>
+      <div className="w-full max-w-xs px-6 text-center">
+        <div
+          key={stageIndex}
+          className={cn(
+            "mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-teal-50 border border-brand-teal-200 animate-in fade-in zoom-in-95 duration-300",
+            isHolding && "animate-pulse"
+          )}
+        >
+          <stage.icon className="h-7 w-7 text-brand-teal-700" />
+        </div>
+        <p key={`label-${stageIndex}`} className="font-manrope font-bold text-brand-text animate-in fade-in duration-300">
+          {stage.label}…
+        </p>
+        <p key={`sub-${isHolding ? holdIndex : 'default'}`} className="mt-1.5 text-xs text-brand-text-mute animate-in fade-in duration-300">
+          {isHolding ? HOLDING_MESSAGES[holdIndex] : "Scoring can take up to a minute — please don't close this tab."}
+        </p>
+        <div className="mt-5 h-1.5 w-full overflow-hidden rounded-full bg-brand-bg-alt">
+          <div
+            className="h-full rounded-full bg-brand-teal-600 transition-[width] duration-500 ease-out"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+    </Centered>
+  );
+};
 
 export default VivaDiagnostic;

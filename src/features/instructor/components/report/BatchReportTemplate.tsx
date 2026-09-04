@@ -37,14 +37,10 @@ export interface BatchReportData {
     last_ia_date: string | null;
     is_at_risk: boolean;
     /**
-     * Not currently returned by GET .../dashboard-summary (batchDashboardQueries
-     * doesn't select or compute exam_id). Declared here — following the same
-     * isSpokenEnglish(examId) pattern as StudentReportTemplate — so this template
-     * can section IELTS vs Spoken English students the moment the backend sends
-     * it. Institute batches have no exam-type field constraining them to a single
-     * exam, so a batch can genuinely mix both; until exam_id arrives, every row
-     * is treated as IELTS (matching the DB column's own default), which is exactly
-     * today's — unchanged — behavior.
+     * Now populated by GET .../dashboard-summary (batchDashboardQueries selects
+     * and returns exam_id). Institute batches have no exam-type field
+     * constraining them to a single exam, so a batch can genuinely mix IELTS
+     * and Spoken English — this is what lets this template section them.
      */
     exam_id?: string | null;
   }>;
@@ -157,9 +153,7 @@ export function BatchReportTemplate({ data, onClose }: Props) {
 
   // A batch has no exam-type field constraining it to one exam, so it can genuinely
   // mix IELTS and Spoken English students. Section by exam rather than ever blending
-  // a CEFR ordinal into an IELTS band average. exam_id isn't sent by the backend yet
-  // (see the note on BatchReportData.band_overview), so seRows is always empty today
-  // and this renders exactly as before.
+  // a CEFR ordinal into an IELTS band average.
   const ieltsRows = sortedBandOverview.filter(r => !isSpokenEnglish(r.exam_id));
   const seRows    = sortedBandOverview.filter(r => isSpokenEnglish(r.exam_id));
   const hasSE     = seRows.length > 0;
@@ -287,6 +281,12 @@ export function BatchReportTemplate({ data, onClose }: Props) {
         {/* Assessment Performance */}
         <div>
           <h2 className="text-xs font-black uppercase tracking-widest text-brand-text-mute mb-3">Assessment Performance</h2>
+          {hasSE && (
+            <p className="text-[11px] text-brand-text-mute mb-2">
+              IELTS students only — the batch also has {seRows.length} Spoken English student{seRows.length === 1 ? '' : 's'}, whose CEFR
+              levels are not an IELTS band and are never averaged into these numbers.
+            </p>
+          )}
           <div className="grid grid-cols-2 gap-4">
             {/* IA Summary */}
             <div className="bg-white border border-brand-line rounded-xl p-5">
@@ -333,9 +333,8 @@ export function BatchReportTemplate({ data, onClose }: Props) {
         <h2 className="text-lg font-black text-brand-text mb-6">Student Performance Overview</h2>
 
         {/* IELTS students — band-scale table, unchanged from before this table was
-            sectioned by exam. Hidden only in the (currently unreachable, since
-            exam_id isn't sent yet) all-SE case, so an SE-only batch doesn't show
-            an empty IELTS table. */}
+            sectioned by exam. Hidden in the all-SE case, so an SE-only batch
+            doesn't show an empty IELTS table. */}
         {!allSE && (
           <>
             {hasSE && (
@@ -388,9 +387,10 @@ export function BatchReportTemplate({ data, onClose }: Props) {
 
         {/* Spoken English students — CEFR scale, kept in a separate section/table so
             a CEFR ordinal is never averaged or sorted together with an IELTS band.
-            No CEFR-shaped data reaches this component yet (dashboard-summary only
-            computes IELTS bands), so band/gap read as "—" rather than a fabricated
-            number; the split itself is what matters for when that data arrives. */}
+            band_overview itself carries no CEFR data (band_score there is
+            dashboard-summary's IELTS-shaped current_band), so the level shown
+            here comes from ia_overview's avg_ia_band — a CEFR ordinal for an SE
+            row — via the same cefrLevelLabel rounding used elsewhere. */}
         {hasSE && (
           <>
             <h3 className="text-[11px] font-black uppercase tracking-wider text-brand-text-mute mb-2">Spoken English Students</h3>
@@ -407,10 +407,11 @@ export function BatchReportTemplate({ data, onClose }: Props) {
               <tbody>
                 {seRows.map((row, i) => {
                   const ia = iaMap.get(row.student_id);
+                  const cefrLabel = cefrLevelLabel(ia?.avg_ia_band ?? null);
                   return (
                     <tr key={row.user_id} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
                       <td className="px-3 py-2 pl-0 font-medium text-brand-text">{row.name}</td>
-                      <td className="px-3 py-2 text-brand-text-mute">—</td>
+                      <td className="px-3 py-2 font-bold text-brand-text">{cefrLabel ?? '—'}</td>
                       <td className="px-3 py-2 text-brand-text">{ia?.ia_completed ?? '—'}</td>
                       <td className="px-3 py-2 text-rose-600">{ia?.ia_missed ?? '—'}</td>
                       <td className="px-3 py-2 text-brand-text-mute">{row.last_ia_date ?? '—'}</td>

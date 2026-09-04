@@ -13,6 +13,8 @@ export interface IAOverviewRow {
   avg_ia_band:  number | null;
   last_ia_date: string | null;   // "YYYY-MM-DD"
   ia_eligible:  boolean;
+  /** "ielts" | "spoken_english" | … — branch display with isSpokenEnglish(). */
+  exam_id:      string;
 }
 
 export interface MockOverviewRow {
@@ -24,6 +26,8 @@ export interface MockOverviewRow {
   latest_real_band: number | null;
   best_real_band:   number | null;
   target_band:      number | null;
+  /** "ielts" | "spoken_english" | … — branch display with isSpokenEnglish(). */
+  exam_id:          string;
 }
 
 export interface DiagnosticOverviewRow {
@@ -34,6 +38,13 @@ export interface DiagnosticOverviewRow {
   is_diagnosed:   boolean;
   baseline_bands: { L: number | null; R: number | null; W: number | null; S: number | null };
   diagnosed_at:   string | null;
+  /**
+   * Raw AssessmentHistory.sub_scores JSON from the diagnostic entry (Speaking,
+   * for Spoken English — its full CEFR profile: cefrLabel + per-subskill
+   * breakdown). Optional/untyped — shape is exam-specific and not modeled here;
+   * IELTS rows may carry a differently-shaped sub_scores or none at all.
+   */
+  sub_scores?:    unknown | null;
 }
 
 export interface BatchIASummary {

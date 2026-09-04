@@ -16,6 +16,7 @@ import { IAOverviewTab } from '@/features/instructor/components/assessments/IAOv
 import { MockOverviewTab } from '@/features/instructor/components/assessments/MockOverviewTab';
 import type { DiagnosticOverviewRow, IAOverviewRow, MockOverviewRow } from '@/features/instructor/components/assessments/types';
 import { CEFR_ORDER, cefrGaugeColor } from '@/features/student/config/cefrDisplay';
+import { isSpokenEnglish } from '@/features/student/utils/exam';
 
 export interface AssessmentOverviewData {
   ia_overview:         IAOverviewRow[];
@@ -168,6 +169,11 @@ export function AssessmentInsights({ data, loading, error, batches, batchFilter,
   const filteredIaRows = useMemo(() => {
     if (bandFilter === 'all') return iaRows;
     return iaRows.filter(r => {
+      // "Below band 5.0" / "Band 6.0+" are IELTS band language — a Spoken
+      // English row's avg_ia_band is a CEFR ordinal (0-6), not a band at all.
+      // Same rule as the diagnostic tab's isSpokenEnglishShape split, using the
+      // real exam_id field here since IAOverviewRow carries one.
+      if (isSpokenEnglish(r.exam_id)) return false;
       if (r.avg_ia_band === null) return false;
       return bandFilter === 'below5' ? r.avg_ia_band < 5.0 : r.avg_ia_band >= 6.0;
     });
@@ -176,6 +182,7 @@ export function AssessmentInsights({ data, loading, error, batches, batchFilter,
   const filteredMockRows = useMemo(() => {
     if (bandFilter === 'all') return mockRows;
     return mockRows.filter(r => {
+      if (isSpokenEnglish(r.exam_id)) return false;
       if (r.latest_real_band === null) return false;
       return bandFilter === 'below5' ? r.latest_real_band < 5.0 : r.latest_real_band >= 6.0;
     });
