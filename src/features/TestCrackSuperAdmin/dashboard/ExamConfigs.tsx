@@ -7,8 +7,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { SuperAdminSidebar } from '../Components/SuperadminSidebar';
 import {
   Search, Copy, Download, Loader2, Lock, ChevronDown, ChevronRight,
-  Headphones, BookOpen, PenLine, Mic,
+  Headphones, BookOpen, PenLine, Mic, Menu,
 } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger } from '@/shared/components/ui/sheet';
+import { Button } from '@/shared/components/ui/button';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { cn } from '@/shared/utils';
 import { fetchExamsForConfig, fetchExamConfig, type ExamConfigSummary } from '../services/superadminService';
@@ -181,13 +183,34 @@ export default function ExamConfigs() {
       <div className={`relative z-10 transition-all duration-300 flex flex-col min-h-screen ${collapsed ? 'lg:pl-24' : 'lg:pl-72'}`}>
 
         {/* Page-specific header — breadcrumb + config search + read-only badge */}
-        <header className="h-16 flex items-center justify-between px-4 sm:px-6 gap-4 border-b border-brand-line bg-white sticky top-0 z-30 shrink-0">
-          <div>
-            <p className="font-jetbrains text-[9px] font-bold uppercase tracking-[0.2em] text-brand-text-mute">Platform</p>
-            <h1 className="font-manrope text-sm font-black tracking-tight -mt-0.5">Exam Configs</h1>
+        <header className="h-16 flex items-center justify-between px-4 sm:px-6 gap-3 border-b border-brand-line bg-white sticky top-0 z-30 shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            {/* Mobile nav — the sidebar is lg-only, so without this there is no
+                way off this page on a phone. */}
+            <div className="lg:hidden">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-brand-text-mute hover:bg-brand-bg-alt">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="p-0 bg-brand-ink border-r border-brand-line-12 w-72">
+                  <SuperAdminSidebar
+                    activeTab="exam-configs"
+                    isCollapsed={false}
+                    toggleCollapse={() => {}}
+                    className="flex static w-full h-full rounded-none shadow-none border-none"
+                  />
+                </SheetContent>
+              </Sheet>
+            </div>
+            <div className="min-w-0">
+              <p className="font-jetbrains text-[9px] font-bold uppercase tracking-[0.2em] text-brand-text-mute">Platform</p>
+              <h1 className="font-manrope text-sm font-black tracking-tight -mt-0.5">Exam Configs</h1>
+            </div>
           </div>
           <div className="flex items-center gap-3 flex-1 justify-end">
-            <div className="relative w-full max-w-xs hidden sm:block">
+            <div className="relative w-full max-w-xs hidden md:block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-brand-text-mute" />
               <input
                 value={search}
@@ -196,8 +219,8 @@ export default function ExamConfigs() {
                 className="w-full pl-9 pr-3 py-2 text-sm bg-brand-bg-alt border border-brand-line rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-teal-500/30"
               />
             </div>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-brand-ink text-white">
-              <Lock className="h-3 w-3" /> Read only
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-brand-ink text-white shrink-0">
+              <Lock className="h-3 w-3" /> <span className="hidden sm:inline">Read only</span>
             </span>
             <div className="text-right hidden md:block">
               <p className="text-sm font-bold leading-none">{displayName}</p>
@@ -208,6 +231,19 @@ export default function ExamConfigs() {
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <div className="max-w-[1500px] mx-auto space-y-5">
+
+            {/* Search moves into the body below md, where the header has no room
+                for it — it was previously hidden outright, making config search
+                unreachable on phones. */}
+            <div className="relative md:hidden">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-brand-text-mute" />
+              <input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search configs, keys, values…"
+                className="w-full pl-9 pr-3 min-h-[40px] py-2 text-sm bg-white border border-brand-line rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-teal-500/30"
+              />
+            </div>
 
             {/* Exam picker */}
             <div className="flex flex-wrap gap-2">
@@ -258,7 +294,7 @@ export default function ExamConfigs() {
                         {overall.strategy?.replace(/_/g, ' ')} {overall.mode} across {components.length} equally weighted components.
                       </p>
 
-                      <div className="grid grid-cols-3 gap-2.5 mt-4 max-w-md">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mt-4 max-w-md">
                         <Tile label="Mode" value={overall.mode ?? '—'} />
                         <Tile label="Strategy" value={overall.strategy ?? '—'} />
                         <Tile label="Scale" value={overall.scale ?? '—'} />
@@ -278,9 +314,9 @@ export default function ExamConfigs() {
                         {components.map((c) => {
                           const Icon = COMPONENT_ICON[c.id] ?? BookOpen;
                           return (
-                            <div key={c.id} className="flex items-center gap-3">
+                            <div key={c.id} className="flex items-center gap-2 sm:gap-3">
                               <Icon className="h-4 w-4 text-white/50 shrink-0" />
-                              <span className="text-xs font-semibold w-16 shrink-0">{c.label}</span>
+                              <span className="text-xs font-semibold w-14 sm:w-16 shrink-0 truncate">{c.label}</span>
                               <div className="flex-1 h-1.5 rounded-full bg-white/10 overflow-hidden">
                                 <div
                                   className="h-full rounded-full bg-emerald-400"
@@ -315,25 +351,25 @@ export default function ExamConfigs() {
                         </span>
                       </div>
                       <dl className="text-sm space-y-2.5">
-                        <div className="flex justify-between gap-4">
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-4">
                           <dt className="font-jetbrains text-[10px] font-bold uppercase tracking-wider text-brand-text-mute shrink-0">Jurisdictions</dt>
-                          <dd className="font-semibold text-right">{(legal.jurisdictions ?? []).join(', ') || '—'}</dd>
+                          <dd className="font-semibold sm:text-right min-w-0 break-words">{(legal.jurisdictions ?? []).join(', ') || '—'}</dd>
                         </div>
-                        <div className="flex justify-between gap-4">
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-4">
                           <dt className="font-jetbrains text-[10px] font-bold uppercase tracking-wider text-brand-text-mute shrink-0">Rights holder</dt>
-                          <dd className="font-semibold text-right">{legal.rights_holder ?? '—'}</dd>
+                          <dd className="font-semibold sm:text-right min-w-0 break-words">{legal.rights_holder ?? '—'}</dd>
                         </div>
-                        <div className="flex justify-between gap-4">
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-4">
                           <dt className="font-jetbrains text-[10px] font-bold uppercase tracking-wider text-brand-text-mute shrink-0">Mark in name</dt>
                           <dd className={cn('font-black', legal.may_use_mark_in_product_name ? 'text-emerald-600' : 'text-rose-600')}>
                             {String(legal.may_use_mark_in_product_name ?? '—')}
                           </dd>
                         </div>
-                        <div className="flex justify-between gap-4">
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-4">
                           <dt className="font-jetbrains text-[10px] font-bold uppercase tracking-wider text-brand-text-mute shrink-0">Permission</dt>
                           <dd className="font-black text-amber-600">{legal.permission_status?.replace(/_/g, ' ') ?? '—'}</dd>
                         </div>
-                        <div className="flex justify-between gap-4">
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-4">
                           <dt className="font-jetbrains text-[10px] font-bold uppercase tracking-wider text-brand-text-mute shrink-0">Review contact</dt>
                           <dd className="text-brand-text-mute">{legal.review_contact ?? 'null'}</dd>
                         </div>

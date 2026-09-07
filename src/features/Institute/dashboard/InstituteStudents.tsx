@@ -16,8 +16,34 @@ import {
 import { fetchStudentsOverview } from "../services/instituteAdminService";
 import type { StudentRow } from "@/features/InstituteOwner/services/instituteOwnerService";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
+import { isSpokenEnglish } from "@/features/student/utils/exam";
+import { CEFR_ORDER, cefrBg, cefrColor } from "@/features/student/config/cefrDisplay";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/shared/components/ui/select";
 
 type RiskFilter = "all" | "at-risk" | "on-track";
+
+// current_band for a Spoken English row is a CEFR ordinal (0-6), not an IELTS
+// band (0-9) — BandPill's thresholds/colors are IELTS-only, so SE rows use this
+// instead. CEFR_ORDINAL (backend) and CEFR_ORDER (frontend) are the same ladder
+// in the same order, so rounding the ordinal and indexing CEFR_ORDER recovers
+// the real level label.
+function cefrLevelLabel(ordinal: number | null | undefined): string | null {
+  if (ordinal == null) return null;
+  const i = Math.max(0, Math.min(CEFR_ORDER.length - 1, Math.round(ordinal)));
+  return CEFR_ORDER[i];
+}
+
+function CefrPill({ ordinal }: { ordinal: number | null | undefined }) {
+  const label = cefrLevelLabel(ordinal);
+  if (label === null) return <span className="text-brand-text-mute text-sm font-semibold">—</span>;
+  return (
+    <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-bold ${cefrBg(label)} ${cefrColor(label)}`}>
+      {label}
+    </span>
+  );
+}
 
 function TrendIcon({ trend }: { trend: StudentRow["band_trend"] }) {
   if (trend === "up")   return <TrendingUp className="h-4 w-4 text-emerald-500" />;
@@ -77,8 +103,11 @@ export default function InstituteStudents() {
 
   const atRiskCount = students.filter(s => s.is_at_risk).length;
   const activeTodayCount = students.filter(s => s.drilled_today).length;
+  // IELTS-only average — a Spoken English student's current_band is a CEFR
+  // ordinal (0-6) on the same numeric field, and must never be blended into an
+  // IELTS 0-9 band average.
   const avgBand = (() => {
-    const withBand = students.filter(s => s.current_band != null);
+    const withBand = students.filter(s => s.current_band != null && !isSpokenEnglish(s.exam_id));
     if (!withBand.length) return null;
     return Math.round(withBand.reduce((sum, s) => sum + (s.current_band as number), 0) / withBand.length * 10) / 10;
   })();
@@ -140,14 +169,23 @@ export default function InstituteStudents() {
                 </button>
               ))}
               {batches.length > 0 && (
-                <select
-                  value={batchFilter}
-                  onChange={(e) => setBatchFilter(e.target.value)}
-                  className="px-3 py-2 min-h-[40px] rounded-xl text-xs font-bold bg-white text-brand-text border border-brand-line focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20"
-                >
-                  <option value="all">All batches</option>
-                  {batches.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
-                </select>
+                // Radix Select, not a native <select>: a native select's popup is
+                // drawn by the browser at the width of its longest option and
+                // ignores CSS, overflowing narrow mobile viewports. Radix renders
+                // the panel in a portal with collision detection, so it stays on
+                // screen and its width/positioning are CSS-controllable.
+                <Select value={batchFilter} onValueChange={setBatchFilter}>
+                  <SelectTrigger
+                    aria-label="Filter by batch"
+                    className="px-3 py-2 min-h-[40px] w-auto rounded-xl text-xs font-bold bg-white text-brand-text border border-brand-line focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="max-w-[calc(100vw-2rem)]">
+                    <SelectItem value="all">All batches</SelectItem>
+                    {batches.map((b) => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               )}
             </div>
           </div>
@@ -200,11 +238,17 @@ export default function InstituteStudents() {
                         <td className="px-4 py-3 text-sm text-brand-text-mute whitespace-nowrap">{s.batch_name || "—"}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1.5">
-                            <BandPill band={s.current_band} />
-                            <TrendIcon trend={s.band_trend} />
+                            {isSpokenEnglish(s.exam_id)
+                              ? <CefrPill ordinal={s.current_band} />
+                              : <BandPill band={s.current_band} />}
+                            {!isSpokenEnglish(s.exam_id) && <TrendIcon trend={s.band_trend} />}
                           </div>
                         </td>
-                        <td className="px-4 py-3"><BandPill band={s.target_band} /></td>
+                        <td className="px-4 py-3">
+                          {isSpokenEnglish(s.exam_id)
+                            ? <span className="text-brand-text-mute text-sm font-semibold">—</span>
+                            : <BandPill band={s.target_band} />}
+                        </td>
                         <td className="px-4 py-3">
                           <span className="inline-flex items-center gap-1 text-sm font-bold text-brand-text tabular-nums">
                             <Flame className={`h-3.5 w-3.5 ${s.daily_streak > 0 ? "text-orange-500" : "text-brand-text-mute"}`} />

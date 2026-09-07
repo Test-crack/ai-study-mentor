@@ -1,9 +1,20 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, Cpu, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/shared/utils';
+import { isSpokenEnglish } from '@/features/student/utils/exam';
+import { cefrColor } from '@/features/student/config/cefrDisplay';
 import type { IASession, SectionScore } from './types';
 
-interface Props { sessions: IASession[]; }
+interface Props {
+  sessions: IASession[];
+  /**
+   * The student's exam_id, when the caller has it (see StudentFullProgress.
+   * student.exam_id). Optional and defaults to the IELTS branch — every
+   * existing caller that doesn't pass this keeps today's IELTS-only output
+   * byte-identical.
+   */
+  examId?: string | null;
+}
 
 const STATUS_CONFIG = {
   COMPLETED:   { label: 'Completed',   cls: 'bg-emerald-100 text-emerald-700' },
@@ -12,11 +23,23 @@ const STATUS_CONFIG = {
   PENDING:     { label: 'Pending',     cls: 'bg-brand-bg-alt text-brand-text-mute' },
 } as const;
 
+// Guarded against non-array shapes: some historical Spoken English IA rows
+// stored scores as an object ({ sectionScores, cefrLevel }) instead of the
+// SectionScore[] array every reader (including this one) assumes — fixed at
+// the source in spokenEnglishIAController.ts, but old rows can still have it.
 function avgBand(scores: SectionScore[] | null): number | null {
-  if (!scores || scores.length === 0) return null;
+  if (!Array.isArray(scores) || scores.length === 0) return null;
   const bands = scores.map(s => s.band).filter((b): b is number => b !== null);
   if (bands.length === 0) return null;
   return Math.round((bands.reduce((a, b) => a + b, 0) / bands.length) * 10) / 10;
+}
+
+/** Most recent scored sub-skill's CEFR label — the SE counterpart of avgBand.
+ *  Never averages CEFR labels into a synthetic in-between level. */
+function latestCefrLabel(scores: SectionScore[] | null): string | null {
+  if (!Array.isArray(scores) || scores.length === 0) return null;
+  const labeled = scores.filter(s => s.cefr_label != null);
+  return labeled.length > 0 ? labeled[labeled.length - 1].cefr_label! : null;
 }
 
 function bandColorText(b: number | null): string {
@@ -24,6 +47,16 @@ function bandColorText(b: number | null): string {
   if (b >= 7.5) return 'text-emerald-600';
   if (b >= 6.0) return 'text-amber-600';
   return 'text-rose-600';
+}
+
+/** Renders either an IELTS band or a CEFR label for a section-score cell. */
+function ScoreValue({ isSE, band, cefrLabel, className }: {
+  isSE: boolean; band: number | null; cefrLabel?: string | null; className: string;
+}) {
+  if (isSE) {
+    return <span className={cn(className, cefrLabel ? cefrColor(cefrLabel) : 'text-brand-text-mute')}>{cefrLabel ?? '—'}</span>;
+  }
+  return <span className={cn(className, bandColorText(band))}>{band !== null ? band.toFixed(1) : '—'}</span>;
 }
 
 function skillLabel(skill: string, subSkill: string): string {
@@ -34,8 +67,8 @@ function skillLabel(skill: string, subSkill: string): string {
   return `${s} · ${ss}`;
 }
 
-function ScoreDetailPanel({ scores }: { scores: SectionScore[] }) {
-  const validScores = scores.filter(s => s.skill && s.sub_skill);
+function ScoreDetailPanel({ scores, isSE }: { scores: SectionScore[]; isSE: boolean }) {
+  const validScores = Array.isArray(scores) ? scores.filter(s => s.skill && s.sub_skill) : [];
 
   return (
     <div className="space-y-4">
@@ -49,7 +82,7 @@ function ScoreDetailPanel({ scores }: { scores: SectionScore[] }) {
             <thead>
               <tr className="border-b border-brand-line text-[10px] font-bold text-brand-text-mute font-jetbrains uppercase tracking-wider">
                 <th className="py-2 pl-3">Skill / Sub-skill</th>
-                <th className="py-2 text-center">Band</th>
+                <th className="py-2 text-center">{isSE ? 'Level' : 'Band'}</th>
                 <th className="py-2 text-center">MCQ</th>
                 <th className="py-2 pr-3 text-center">AI Graded</th>
               </tr>
@@ -61,9 +94,7 @@ function ScoreDetailPanel({ scores }: { scores: SectionScore[] }) {
                     {skillLabel(s.skill, s.sub_skill)}
                   </td>
                   <td className="py-2 text-center">
-                    <span className={cn('font-black text-sm', bandColorText(s.band))}>
-                      {s.band !== null ? s.band.toFixed(1) : '—'}
-                    </span>
+                    <ScoreValue isSE={isSE} band={s.band} cefrLabel={s.cefr_label} className="font-black text-sm" />
                   </td>
                   <td className="py-2 text-center text-xs text-brand-text-mute">
                     {s.total > 0 ? `${s.correct}/${s.total}` : '—'}
@@ -110,10 +141,11 @@ function ScoreDetailPanel({ scores }: { scores: SectionScore[] }) {
   );
 }
 
-function IARow({ session }: { session: IASession }) {
+function IARow({ session, isSE }: { session: IASession; isSE: boolean }) {
   const [expanded, setExpanded] = useState(false);
   const cfg = STATUS_CONFIG[session.status] ?? STATUS_CONFIG.PENDING;
   const band = avgBand(session.scores);
+  const cefrLabel = latestCefrLabel(session.scores);
   const subCount = session.selected_subskills?.length ?? 0;
   const cfCount  = session.carry_forward_subskills?.length ?? 0;
   const hasDetail = !!(session.scores && session.scores.length > 0);
@@ -134,8 +166,8 @@ function IARow({ session }: { session: IASession }) {
           <span className={cn('px-2 py-0.5 rounded-full text-[11px] font-bold', cfg.cls)}>{cfg.label}</span>
         </td>
         <td className="py-3">
-          {band !== null
-            ? <span className={cn('text-sm font-black', bandColorText(band))}>{band.toFixed(1)}</span>
+          {(isSE ? cefrLabel != null : band !== null)
+            ? <ScoreValue isSE={isSE} band={band} cefrLabel={cefrLabel} className="text-sm font-black" />
             : <span className="text-xs text-brand-text-mute">—</span>}
         </td>
         <td className="py-3 text-xs text-brand-text-mute">
@@ -182,7 +214,7 @@ function IARow({ session }: { session: IASession }) {
                   ))}
                 </div>
               )}
-              <ScoreDetailPanel scores={session.scores} />
+              <ScoreDetailPanel scores={session.scores} isSE={isSE} />
             </div>
           </td>
         </tr>
@@ -191,7 +223,8 @@ function IARow({ session }: { session: IASession }) {
   );
 }
 
-export function IASessionsTab({ sessions }: Props) {
+export function IASessionsTab({ sessions, examId }: Props) {
+  const isSE = isSpokenEnglish(examId);
   const completed = sessions.filter(s => s.status === 'COMPLETED').length;
   const missed    = sessions.filter(s => s.status === 'MISSED').length;
   const compRate  = sessions.length > 0 ? Math.round((completed / sessions.length) * 100) : 0;
@@ -233,13 +266,13 @@ export function IASessionsTab({ sessions }: Props) {
                 <th className="py-3 pl-5">IA</th>
                 <th className="py-3">Date</th>
                 <th className="py-3">Status</th>
-                <th className="py-3">Avg Band</th>
+                <th className="py-3">{isSE ? 'Level' : 'Avg Band'}</th>
                 <th className="py-3">Sub-skills</th>
                 <th className="py-3 pr-5">Momentum</th>
               </tr>
             </thead>
             <tbody>
-              {sessions.map(s => <IARow key={s.id} session={s} />)}
+              {sessions.map(s => <IARow key={s.id} session={s} isSE={isSE} />)}
             </tbody>
           </table>
         </div>

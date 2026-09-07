@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Search, Loader2, RefreshCw, ChevronDown, Download } from 'lucide-react';
+import { Search, Loader2, RefreshCw, Download, Menu } from 'lucide-react';
 import { SuperAdminSidebar } from '../Components/SuperadminSidebar';
+import { Sheet, SheetContent, SheetTrigger } from '@/shared/components/ui/sheet';
+import { Button } from '@/shared/components/ui/button';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/shared/components/ui/select';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { cn } from '@/shared/utils';
 import {
@@ -157,6 +162,41 @@ export default function Subscription() {
     { id: 'CANCELLED', label: 'Cancelled', count: summary.cancelled },
   ];
 
+  // Shared by the desktop table and the mobile card list below, so the billing
+  // status control behaves identically on both. Radix Select, not a native
+  // <select>: a native select's popup is drawn by the browser at the width of
+  // its longest option and ignores CSS, overflowing narrow mobile viewports —
+  // this control renders in the mobile card list too, so that bug was live
+  // here. Radix renders the panel in a portal with collision detection, so it
+  // stays on screen regardless of which context (table row / card) renders it.
+  const renderStatusSelect = (row: SubscriptionRecord) => (
+    <div className="inline-flex items-center gap-2">
+      {savingId === row.id && <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-teal-500" />}
+      <Select
+        value={row.billingStatus}
+        onValueChange={(v) => handleStatusChange(row, v as BillingStatus)}
+        disabled={savingId === row.id}
+      >
+        <SelectTrigger
+          aria-label={`Billing status for ${row.instituteName}`}
+          className={cn(
+            'h-auto w-auto gap-1 pl-2.5 pr-2 py-1.5 text-xs font-bold rounded-lg border shadow-none ring-offset-0 focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 disabled:opacity-50 cursor-pointer [&>svg]:h-3 [&>svg]:w-3 [&>svg]:opacity-60',
+            SELECT_PILL[row.billingStatus]
+          )}
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent align="end" collisionPadding={12}>
+          {BILLING_STATUSES.map((s) => (
+            <SelectItem key={s} value={s} className="text-xs font-bold">
+              {s.charAt(0) + s.slice(1).toLowerCase()}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+
   const exportCsv = () => {
     const csv = ['institute,exam,status,students,trial_ends'].concat(
       rows.map(r => `"${r.instituteName.replace(/"/g, '""')}",${EXAM_LABELS[r.examType]},${r.billingStatus},${r.studentCount},${r.trialEndsAt ?? ''}`)
@@ -184,9 +224,30 @@ export default function Subscription() {
 
         {/* Page-specific header — breadcrumb + institute search */}
         <header className="h-16 flex items-center justify-between px-4 sm:px-6 gap-4 border-b border-brand-line bg-white sticky top-0 z-30 shrink-0">
-          <div>
-            <p className="font-jetbrains text-[9px] font-bold uppercase tracking-[0.2em] text-brand-text-mute">Platform</p>
-            <h1 className="font-manrope text-sm font-black tracking-tight -mt-0.5">Subscriptions</h1>
+          <div className="flex items-center gap-2 min-w-0">
+            {/* Mobile nav — the sidebar is lg-only, so without this there is no
+                way off this page on a phone. */}
+            <div className="lg:hidden">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-brand-text-mute hover:bg-brand-bg-alt">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="p-0 bg-brand-ink border-r border-brand-line-12 w-72">
+                  <SuperAdminSidebar
+                    activeTab="superadmin-subscription"
+                    isCollapsed={false}
+                    toggleCollapse={() => {}}
+                    className="flex static w-full h-full rounded-none shadow-none border-none"
+                  />
+                </SheetContent>
+              </Sheet>
+            </div>
+            <div className="min-w-0">
+              <p className="font-jetbrains text-[9px] font-bold uppercase tracking-[0.2em] text-brand-text-mute">Platform</p>
+              <h1 className="font-manrope text-sm font-black tracking-tight -mt-0.5">Subscriptions</h1>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <button onClick={load} className="p-2 rounded-xl text-brand-text-mute hover:text-brand-teal-600 hover:bg-brand-bg-alt transition-colors" title="Refresh">
@@ -277,6 +338,9 @@ export default function Subscription() {
 
           {/* Filter tabs + search + export */}
           <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3">
+            {/* -mx-4 px-4 lets the pill row scroll edge-to-edge on phones instead
+                of being clipped by the page's overflow-x-hidden root. */}
+            <div className="-mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto no-scrollbar">
             <div className="bg-white rounded-xl border border-brand-line shadow-sm p-1 flex gap-1 w-fit">
               {filterTabs.map(tab => (
                 <button
@@ -294,22 +358,23 @@ export default function Subscription() {
                 </button>
               ))}
             </div>
+            </div>
 
             <div className="flex items-center gap-2">
-              <div className="relative w-64">
+              <div className="relative flex-1 sm:flex-none sm:w-64 min-w-0">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-brand-text-mute" />
                 <input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search institutes…"
-                  className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-brand-line rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-teal-500/30 text-brand-text placeholder:text-brand-text-mute"
+                  className="w-full pl-9 pr-3 min-h-[38px] py-2 text-sm bg-white border border-brand-line rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-teal-500/30 text-brand-text placeholder:text-brand-text-mute"
                 />
               </div>
               <button
                 onClick={exportCsv}
-                className="inline-flex items-center gap-2 min-h-[38px] px-3 rounded-xl border border-brand-line bg-white text-sm font-semibold hover:bg-brand-bg-alt"
+                className="inline-flex items-center gap-2 min-h-[38px] px-3 rounded-xl border border-brand-line bg-white text-sm font-semibold hover:bg-brand-bg-alt shrink-0"
               >
-                <Download className="h-4 w-4" /> Export
+                <Download className="h-4 w-4" /> <span className="hidden sm:inline">Export</span>
               </button>
             </div>
           </div>
@@ -326,7 +391,53 @@ export default function Subscription() {
                   {debouncedSearch ? `No subscriptions matching "${debouncedSearch}"` : 'No subscriptions yet. Create an institute with exams to get started.'}
                 </div>
               ) : (
-                <div className="w-full overflow-x-auto">
+                <>
+                {/* Mobile: one card per subscription. The table below forces a
+                    720px minimum, which meant permanent horizontal scrolling on
+                    a phone. */}
+                <ul className="md:hidden divide-y divide-brand-line">
+                  {rows.map((row) => {
+                    const d = daysLeft(row.trialEndsAt);
+                    return (
+                      <li key={row.id} className="p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="font-semibold text-[13.5px] text-brand-text break-words">{row.instituteName}</p>
+                            <p className="text-[11px] text-brand-text-mute">
+                              {EXAM_LABELS[row.examType]} · {formatSince(row.createdAt)}
+                            </p>
+                            {!row.instituteActive && (
+                              <span className="font-jetbrains text-[9px] font-bold text-rose-600">INACTIVE</span>
+                            )}
+                          </div>
+                          <span className={`font-jetbrains shrink-0 px-2 py-1 text-[10px] font-bold tracking-wider rounded ${STATUS_PILL[row.billingStatus]}`}>
+                            {row.billingStatus.charAt(0) + row.billingStatus.slice(1).toLowerCase()}
+                          </span>
+                        </div>
+
+                        <div className="flex items-end justify-between gap-3 mt-3">
+                          <div className="min-w-0">
+                            <p className="font-jetbrains text-[9px] font-bold uppercase tracking-wider text-brand-text-mute">Students</p>
+                            <p className="text-sm font-medium text-brand-text tabular-nums">{row.studentCount}</p>
+                          </div>
+                          {row.trialEndsAt && (
+                            <div className="w-28 shrink-0">
+                              <p className="font-jetbrains text-[9px] font-bold uppercase tracking-wider text-brand-text-mute">Trial ends</p>
+                              <span className="text-[12px] text-brand-text-mute whitespace-nowrap">{formatDate(row.trialEndsAt)}</span>
+                              <div className="h-1 rounded-full bg-brand-bg-alt overflow-hidden mt-1">
+                                <div className={cn('h-full rounded-full', urgencyColor(d))} style={{ width: `${d !== null ? Math.min(Math.max((d / 30) * 100, 6), 100) : 0}%` }} />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="mt-3">{renderStatusSelect(row)}</div>
+                      </li>
+                    );
+                  })}
+                </ul>
+
+                <div className="w-full overflow-x-auto hidden md:block">
                   <table className="w-full text-left border-collapse min-w-[720px]">
                     <thead>
                       <tr className="border-b border-brand-line">
@@ -372,25 +483,7 @@ export default function Subscription() {
                               ) : <span className="text-sm text-brand-text-mute">—</span>}
                             </td>
                             <td className="px-4 py-4 text-right pr-5">
-                              <div className="inline-flex items-center gap-2">
-                                {savingId === row.id && <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-teal-500" />}
-                                <div className="relative">
-                                  <select
-                                    value={row.billingStatus}
-                                    disabled={savingId === row.id}
-                                    onChange={(e) => handleStatusChange(row, e.target.value as BillingStatus)}
-                                    className={cn(
-                                      'appearance-none pl-2.5 pr-6 py-1.5 text-xs font-bold rounded-lg border focus:outline-none focus:ring-2 focus:ring-brand-teal-500/20 disabled:opacity-50 cursor-pointer',
-                                      SELECT_PILL[row.billingStatus]
-                                    )}
-                                  >
-                                    {BILLING_STATUSES.map((s) => (
-                                      <option key={s} value={s}>{s.charAt(0) + s.slice(1).toLowerCase()}</option>
-                                    ))}
-                                  </select>
-                                  <ChevronDown className="h-3 w-3 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-60" />
-                                </div>
-                              </div>
+                              {renderStatusSelect(row)}
                             </td>
                           </tr>
                         );
@@ -398,6 +491,7 @@ export default function Subscription() {
                     </tbody>
                   </table>
                 </div>
+                </>
               )}
             </div>
 

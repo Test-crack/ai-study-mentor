@@ -188,6 +188,8 @@ export interface StudentRow {
     is_diagnosed: boolean;
     /** "YYYY-MM-DD" — the student's own declared exam date, or null if unset. */
     exam_date: string | null;
+    /** "ielts" | "spoken_english" | … — branch display with isSpokenEnglish(). */
+    exam_id: string;
 }
 
 /**
@@ -244,7 +246,11 @@ export interface BatchComparisonRow {
  */
 export interface InstructorEffectivenessRow {
     user_id: string; name: string; avatar: string | null;
-    batch_count: number; student_count: number; avg_band_improvement: number | null;
+    batch_count: number; student_count: number;
+    /** IELTS-only (0-9 band scale) — Spoken English students are excluded, see avg_cefr_improvement. */
+    avg_band_improvement: number | null;
+    /** Spoken English-only (CEFR 0-6 ordinal scale) — null when the instructor has no SE students. */
+    avg_cefr_improvement: number | null;
     /** Percent, 0..100 — completed IAs / scheduled IAs. */
     ia_completion_rate: number;
     at_risk_count: number;

@@ -16,6 +16,8 @@ import { Flame, AlertTriangle, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/shared/utils';
 import type { BandOverviewRow } from './types';
+import { isSpokenEnglish } from '@/features/student/utils/exam';
+import { CEFR_ORDER, cefrColor } from '@/features/student/config/cefrDisplay';
 
 const PAGE_SIZE = 8; // 4 columns × 2 rows
 
@@ -50,6 +52,16 @@ function bandTextColor(band: number | null) {
   if (band >= 6.0)  return 'text-sky-600';
   if (band >= 5.0)  return 'text-amber-600';
   return 'text-rose-600';
+}
+
+// current_band for a Spoken English row is a CEFR ordinal (0-6), not an IELTS
+// band (0-9) — see the matching note in BandOverviewTable.tsx. CEFR_ORDINAL
+// (backend) and CEFR_ORDER (frontend) are the same ladder in the same order, so
+// rounding the ordinal and indexing CEFR_ORDER recovers the real level label.
+function cefrLevelLabel(ordinal: number | null): string | null {
+  if (ordinal === null) return null;
+  const i = Math.max(0, Math.min(CEFR_ORDER.length - 1, Math.round(ordinal)));
+  return CEFR_ORDER[i];
 }
 
 /** Drill dot indicator — shows 2 circles (required) filled proportionally. */
@@ -150,13 +162,19 @@ function StudentCard({ row, batchId }: { row: BandOverviewRow; batchId: string |
               />
             )}
           </div>
-          {/* Band */}
-          <p className={cn('text-[11px] sm:text-xs font-bold mt-0.5', bandTextColor(row.current_band))}>
-            {row.current_band !== null
-              ? `Band ${row.current_band.toFixed(1)}`
-              : <span className="text-brand-text-mute font-normal">No band</span>
-            }
-          </p>
+          {/* Band — CEFR level for Spoken English, IELTS band otherwise */}
+          {isSpokenEnglish(row.exam_id) ? (
+            <p className={cn('text-[11px] sm:text-xs font-bold mt-0.5', cefrLevelLabel(row.current_band) ? cefrColor(cefrLevelLabel(row.current_band)!) : 'text-brand-text-mute')}>
+              {cefrLevelLabel(row.current_band) ?? <span className="text-brand-text-mute font-normal">No level</span>}
+            </p>
+          ) : (
+            <p className={cn('text-[11px] sm:text-xs font-bold mt-0.5', bandTextColor(row.current_band))}>
+              {row.current_band !== null
+                ? `Band ${row.current_band.toFixed(1)}`
+                : <span className="text-brand-text-mute font-normal">No band</span>
+              }
+            </p>
+          )}
         </div>
 
         <ChevronRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-brand-text-mute group-hover:text-brand-teal-500 transition-colors shrink-0 mt-0.5" />
@@ -182,8 +200,10 @@ function StudentCard({ row, batchId }: { row: BandOverviewRow; batchId: string |
               {row.streak}
             </span>
           )}
-          {/* LexiGrid */}
-          <LexiPill done={row.lexigrid_done_today} words={row.lexigrid_words_today} />
+          {/* LexiGrid — Spoken English cohort 1 has no LexiGrid feature */}
+          {!isSpokenEnglish(row.exam_id) && (
+            <LexiPill done={row.lexigrid_done_today} words={row.lexigrid_words_today} />
+          )}
         </div>
       </div>
     </button>
@@ -242,7 +262,11 @@ export function StudentActivityGrid({ rows, batchId, loading }: StudentActivityG
   const drilledCount    = rows.filter(r => r.drills_count_today >= 2).length;
   const partialCount    = rows.filter(r => r.drills_count_today === 1).length;
   const notDrilledCount = rows.filter(r => r.drills_count_today === 0).length;
-  const lexiCount       = rows.filter(r => r.lexigrid_done_today).length;
+  // Spoken English cohort 1 has no LexiGrid feature — excluded from both the
+  // numerator and denominator so the chip doesn't read as "SE students missing
+  // a feature they don't have".
+  const lexiEligibleRows = rows.filter(r => !isSpokenEnglish(r.exam_id));
+  const lexiCount        = lexiEligibleRows.filter(r => r.lexigrid_done_today).length;
 
   return (
     <div className="bg-white rounded-2xl border border-brand-line shadow-sm p-4 sm:p-5 space-y-3 sm:space-y-4">
@@ -274,9 +298,11 @@ export function StudentActivityGrid({ rows, batchId, loading }: StudentActivityG
               {notDrilledCount} not started
             </span>
           )}
-          <span className="text-[11px] text-brand-text-mute whitespace-nowrap">
-            · LexiGrid {lexiCount}/{rows.length}
-          </span>
+          {lexiEligibleRows.length > 0 && (
+            <span className="text-[11px] text-brand-text-mute whitespace-nowrap">
+              · LexiGrid {lexiCount}/{lexiEligibleRows.length}
+            </span>
+          )}
         </div>
       </div>
 

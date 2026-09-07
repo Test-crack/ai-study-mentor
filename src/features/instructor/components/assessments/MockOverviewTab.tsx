@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Search, ArrowUpDown, ArrowUp, ArrowDown, ExternalLink } from 'lucide-react';
 import { cn } from '@/shared/utils';
 import type { MockOverviewRow } from './types';
+import { isSpokenEnglish } from '@/features/student/utils/exam';
+import { CEFR_ORDER, cefrBg, cefrColor } from '@/features/student/config/cefrDisplay';
 
 interface Props {
   rows:    MockOverviewRow[];
@@ -46,11 +48,39 @@ function SortIcon({ col, active, dir }: { col: SortKey; active: SortKey; dir: 'a
     : <ArrowDown className="h-3 w-3 text-brand-teal-500 ml-1 shrink-0" />;
 }
 
-export function MockOverviewTab({ rows, batchId, progressPathFor }: Props) {
+// latest_real_band/best_real_band for a Spoken English row is a CEFR ordinal
+// (0-6), not an IELTS band (0-9) — see the matching note in BandOverviewTable.tsx.
+// CEFR_ORDINAL (backend) and CEFR_ORDER (frontend) are the same ladder in the
+// same order, so rounding the ordinal and indexing CEFR_ORDER recovers the
+// level label.
+function cefrLevelLabel(ordinal: number | null): string | null {
+  if (ordinal === null) return null;
+  const i = Math.max(0, Math.min(CEFR_ORDER.length - 1, Math.round(ordinal)));
+  return CEFR_ORDER[i];
+}
+
+function CefrLevelPill({ ordinal }: { ordinal: number | null }) {
+  const label = cefrLevelLabel(ordinal);
+  if (label === null) return <span className="text-brand-text-mute text-xs">—</span>;
+  return (
+    <span className={cn('inline-block px-2 py-0.5 rounded-lg text-xs font-black border', cefrBg(label), cefrColor(label))}>
+      {label}
+    </span>
+  );
+}
+
+export function MockOverviewTab({ rows: allRows, batchId, progressPathFor }: Props) {
   const navigate = useNavigate();
   const [search,  setSearch]  = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('latest_real_band');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+
+  // A batch can genuinely mix IELTS and Spoken English students. latest/best
+  // real_band is a CEFR ordinal for SE rows, not an IELTS band — never gap'd
+  // against target_band or shown with IELTS band colors — so SE rows get their
+  // own compact section below instead.
+  const rows   = useMemo(() => allRows.filter(r => !isSpokenEnglish(r.exam_id)), [allRows]);
+  const seRows = useMemo(() => allRows.filter(r => isSpokenEnglish(r.exam_id)), [allRows]);
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -111,7 +141,7 @@ export function MockOverviewTab({ rows, batchId, progressPathFor }: Props) {
     </th>
   );
 
-  if (rows.length === 0) {
+  if (allRows.length === 0) {
     return (
       <div className="bg-white rounded-2xl border border-brand-line p-16 text-center">
         <p className="text-brand-text-mute text-sm">No students in this batch yet.</p>
@@ -122,10 +152,51 @@ export function MockOverviewTab({ rows, batchId, progressPathFor }: Props) {
   const noMockCount    = rows.filter(r => r.mock_count === 0).length;
   const atTargetCount  = enriched.filter(r => r.gap !== null && r.gap <= 0).length;
 
+  const seSection = seRows.length > 0 && (
+    <div className="bg-white rounded-2xl border border-brand-line shadow-sm overflow-hidden">
+      <div className="px-4 sm:px-5 py-3 border-b border-brand-line">
+        <p className="text-xs font-bold text-brand-text">Spoken English · {seRows.length} student{seRows.length === 1 ? '' : 's'}</p>
+        <p className="text-[11px] text-brand-text-mute mt-0.5">CEFR level, not an IELTS band — shown separately.</p>
+      </div>
+      <ul className="divide-y divide-brand-line">
+        {seRows.map(row => (
+          <li key={row.student_id} className="p-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <Avatar name={row.name} avatar={row.avatar} />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-brand-text truncate">{row.name}</p>
+                <p className="text-[11px] text-brand-text-mute">
+                  {row.mock_count === 0 ? 'No mocks yet' : `${row.mock_count} mock${row.mock_count !== 1 ? 's' : ''} taken`}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <CefrLevelPill ordinal={row.latest_real_band} />
+              <button
+                onClick={() => {
+                  const path = progressPathFor ? progressPathFor(row.user_id) : `/instructor/batches/${batchId}/students/${row.user_id}/progress`;
+                  navigate(path, { state: { studentId: row.user_id } });
+                }}
+                className="inline-flex items-center gap-1 text-xs font-bold text-brand-text-mute hover:text-brand-teal-600 transition-colors"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                View
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+
+  if (rows.length === 0) {
+    return <div className="space-y-3">{seSection}</div>;
+  }
+
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4 text-xs text-brand-text-mute">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-brand-text-mute">
           <span className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
             {atTargetCount} at or above target
@@ -137,7 +208,7 @@ export function MockOverviewTab({ rows, batchId, progressPathFor }: Props) {
             </span>
           )}
         </div>
-        <div className="relative w-64">
+        <div className="relative w-full sm:w-64 shrink-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-brand-text-mute" />
           <input
             value={search}
@@ -149,7 +220,72 @@ export function MockOverviewTab({ rows, batchId, progressPathFor }: Props) {
       </div>
 
       <div className="bg-white rounded-2xl border border-brand-line shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile: card per student. The table below needs 680px, which meant
+            constant horizontal scrolling on a phone. */}
+        <ul className="md:hidden divide-y divide-brand-line">
+          {filtered.length === 0 ? (
+            <li className="py-10 text-center text-sm text-brand-text-mute">No students match "{search}"</li>
+          ) : (
+            filtered.map(row => (
+              <li key={row.student_id} className="p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Avatar name={row.name} avatar={row.avatar} />
+                    <span className="text-sm font-semibold text-brand-text truncate">{row.name}</span>
+                  </div>
+                  <button
+                    onClick={() => goToStudent(row)}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-brand-text-mute hover:text-brand-teal-600 transition-colors shrink-0"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    View
+                  </button>
+                </div>
+
+                <dl className="grid grid-cols-3 gap-x-3 gap-y-2 mt-3">
+                  <div>
+                    <dt className="font-jetbrains text-[9px] font-bold uppercase tracking-wider text-brand-text-mute">Latest</dt>
+                    <dd className={cn('text-sm font-black', bandColor(row.latest_real_band))}>
+                      {row.latest_real_band !== null ? row.latest_real_band.toFixed(1) : '—'}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="font-jetbrains text-[9px] font-bold uppercase tracking-wider text-brand-text-mute">Best</dt>
+                    <dd className={cn('text-sm font-black', bandColor(row.best_real_band))}>
+                      {row.best_real_band !== null ? row.best_real_band.toFixed(1) : '—'}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="font-jetbrains text-[9px] font-bold uppercase tracking-wider text-brand-text-mute">Target</dt>
+                    <dd className="text-sm font-semibold text-brand-text-mute">
+                      {row.target_band !== null ? row.target_band.toFixed(1) : '—'}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="font-jetbrains text-[9px] font-bold uppercase tracking-wider text-brand-text-mute">Mocks</dt>
+                    <dd className={cn('text-sm font-bold', row.mock_count === 0 ? 'text-brand-text-mute' : 'text-brand-text')}>
+                      {row.mock_count === 0 ? '—' : row.mock_count}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="font-jetbrains text-[9px] font-bold uppercase tracking-wider text-brand-text-mute">Gap</dt>
+                    <dd>
+                      {row.gap !== null ? (
+                        <span className={cn('text-sm font-black', gapColor(row.gap))}>
+                          {row.gap <= 0 ? '✓ Met' : `+${row.gap.toFixed(1)}`}
+                        </span>
+                      ) : (
+                        <span className="text-brand-text-mute text-sm">—</span>
+                      )}
+                    </dd>
+                  </div>
+                </dl>
+              </li>
+            ))
+          )}
+        </ul>
+
+        <div className="overflow-x-auto hidden md:block">
           <table className="w-full text-left min-w-[680px]">
             <thead className="border-b border-brand-line">
               <tr>
@@ -235,6 +371,8 @@ export function MockOverviewTab({ rows, batchId, progressPathFor }: Props) {
           </table>
         </div>
       </div>
+
+      {seSection}
     </div>
   );
 }

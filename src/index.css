@@ -190,3 +190,14 @@ All colors MUST be HSL.
     animation: none;
   }
 }
+/* Horizontal scroll without a visible bar — used by pill/tab rows that scroll
+   on mobile. Referenced in several components but was never actually defined,
+   so those rows showed a scrollbar over the pills. */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

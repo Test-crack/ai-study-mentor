@@ -40,6 +40,8 @@ export interface BandOverviewRow {
   lexigrid_words_today: number | null;
   is_at_risk: boolean;
   risk_primary_flag: string | null;
+  /** "ielts" | "spoken_english" | … — branch display with isSpokenEnglish(). */
+  exam_id: string;
 }
 
 export interface PeriodSummary {

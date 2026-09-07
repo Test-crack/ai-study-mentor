@@ -2,6 +2,9 @@ import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import type { StudentFullProgress } from '../student-progress/types';
 import { bandFillPct } from '@/shared/utils/bandScale';
+import { isSpokenEnglish } from '@/features/student/utils/exam';
+import { CefrBadge, cefrColor, cefrGaugeColor, cefrOrdinal, CEFR_ORDER } from '@/features/student/config/cefrDisplay';
+import { examDisplay } from '@/features/student/config/examDisplay';
 
 interface Props {
   data: StudentFullProgress;
@@ -57,6 +60,14 @@ const SKILL_LABELS: Record<string, string> = {
 const DIAG_SKILLS = ['LISTENING', 'READING', 'WRITING', 'SPEAKING'] as const;
 
 const titleCase = (s: string) => s.charAt(0) + s.slice(1).toLowerCase();
+
+/** Null-safe average band, same pattern as IASessionsTab.tsx's avgBand(). */
+function avgBand(scores: { band: number | null }[] | null): number | null {
+  if (!scores || scores.length === 0) return null;
+  const bands = scores.map(s => s.band).filter((b): b is number => b !== null);
+  if (bands.length === 0) return null;
+  return Math.round((bands.reduce((a, b) => a + b, 0) / bands.length) * 10) / 10;
+}
 
 const fmtDiagDate = (iso: string) => {
   const d = new Date(iso);
@@ -167,6 +178,17 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
   };
   const lexigrid_stats   = data.lexigrid_stats ?? { games_last_14: 0, avg_words_solved: 0, bonus_rate: 0 };
 
+  const isSE = isSpokenEnglish(student.exam_id);
+  const disp = examDisplay(student.exam_id);
+
+  // SE has one competency row (SPEAKING); its CEFR result and 6-subskill
+  // profile live inside sub_scores, same shape used on the student side
+  // (AssessmentHistoryPage/Report/VivaDiagnostic).
+  const speakingSubScores: any = competency.find(c => c.skill.toUpperCase() === 'SPEAKING')?.sub_scores ?? null;
+  const speakingCefrLabel: string | undefined = speakingSubScores?.cefrLabel ?? undefined;
+  const speakingSubskillProfile: Array<{ id: string; label: string; level: string; score: number }> =
+    Array.isArray(speakingSubScores?.subskillProfile) ? speakingSubScores.subskillProfile : [];
+
   const initials = student.name
     .split(' ')
     .map(w => w[0])
@@ -217,7 +239,9 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
             </div>
             <div>
               <div className="font-bold text-brand-text text-base leading-tight">TestCrack</div>
-              <div className="text-brand-text-mute text-xs">IELTS Preparation Platform</div>
+              <div className="text-brand-text-mute text-xs">
+                {isSE ? 'Spoken English Practice Platform' : 'IELTS Preparation Platform'}
+              </div>
             </div>
           </div>
           <div className="text-right">
@@ -259,98 +283,163 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
         <div className="mb-8">
           <h2 className="text-xs font-black uppercase tracking-widest text-brand-text-mute mb-3">Progress Overview</h2>
 
-          {/* 4 stat cards */}
-          <div className="grid grid-cols-4 gap-4 mb-5">
-            {[
-              { label: 'Current Band', value: current_band ?? '—', accent: 'bg-brand-teal-500' },
-              { label: 'Target Band', value: target_band ?? '—', accent: 'bg-brand-blue-500' },
-              { label: 'Momentum Score', value: momentum_score, accent: 'bg-amber-500' },
-              { label: 'Daily Streak', value: `${daily_streak}d`, accent: 'bg-emerald-500' },
-            ].map(card => (
-              <div key={card.label} className="bg-white border border-brand-line rounded-xl overflow-hidden">
-                <div className={`h-1.5 w-full ${card.accent}`} />
-                <div className="p-4">
-                  <div className="text-2xl font-black text-brand-text">{card.value}</div>
-                  <div className="text-xs text-brand-text-mute mt-0.5">{card.label}</div>
+          {isSE ? (
+            <>
+              {/* CEFR headline — never a raw band number for Spoken English. */}
+              <div className="flex items-center gap-4 mb-5">
+                <CefrBadge label={speakingCefrLabel} />
+                <div>
+                  <div className="text-xs font-bold text-brand-text uppercase tracking-wide">{disp.headlineLabel}</div>
+                  {speakingSubScores?.scoredPromptCount != null && (
+                    <div className="text-xs text-brand-text-mute mt-0.5">
+                      Based on {speakingSubScores.scoredPromptCount} graded {speakingSubScores.scoredPromptCount === 1 ? 'answer' : 'answers'}.
+                    </div>
+                  )}
                 </div>
               </div>
-            ))}
-          </div>
-
-          {/* Band Progress Bar */}
-          {current_band !== null && (
-            <div className="bg-slate-50 rounded-xl border border-brand-line p-5 mb-3">
-              <div className="relative h-4 bg-slate-200 rounded-full mb-3">
-                {/* Current band marker */}
-                <div
-                  className="absolute top-0 h-full bg-brand-teal-500 rounded-full"
-                  style={{ width: `${bandFillPct(current_band)}%` }}
-                />
-                {/* Target band marker */}
-                {target_band !== null && (
-                  <div
-                    className="absolute top-0 h-full border-r-2 border-brand-blue-600"
-                    style={{ width: `${bandFillPct(target_band)}%` }}
-                  />
-                )}
-              </div>
-              <div className="flex justify-between text-xs text-brand-text-mute">
-                <span>0</span>
-                {[1,2,3,4,5,6,7,8,9].map(n => (
-                  <span key={n}>{n}</span>
+              <div className="grid grid-cols-2 gap-4 mb-5">
+                {[
+                  { label: 'Momentum Score', value: momentum_score, accent: 'bg-amber-500' },
+                  { label: 'Daily Streak', value: `${daily_streak}d`, accent: 'bg-emerald-500' },
+                ].map(card => (
+                  <div key={card.label} className="bg-white border border-brand-line rounded-xl overflow-hidden">
+                    <div className={`h-1.5 w-full ${card.accent}`} />
+                    <div className="p-4">
+                      <div className="text-2xl font-black text-brand-text">{card.value}</div>
+                      <div className="text-xs text-brand-text-mute mt-0.5">{card.label}</div>
+                    </div>
+                  </div>
                 ))}
               </div>
-              <div className="flex items-center gap-4 mt-3 text-xs">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-full bg-brand-teal-500 inline-block" />
-                  <span className="text-slate-600">Current: <strong>{current_band}</strong></span>
-                </span>
-                {target_band !== null && (
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-3 h-3 rounded-full bg-brand-blue-500 inline-block" />
-                    <span className="text-slate-600">Target: <strong>{target_band}</strong></span>
-                  </span>
-                )}
-                {gap !== null && (
-                  <span className={`font-bold ${gap >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                    Gap: {gap > 0 ? `+${gap}` : gap}
-                  </span>
-                )}
+              {disp.disclaimer && (
+                <p className="text-[10px] text-brand-text-mute italic mb-3">{disp.disclaimer}</p>
+              )}
+            </>
+          ) : (
+            <>
+              {/* 4 stat cards */}
+              <div className="grid grid-cols-4 gap-4 mb-5">
+                {[
+                  { label: 'Current Band', value: current_band ?? '—', accent: 'bg-brand-teal-500' },
+                  { label: 'Target Band', value: target_band ?? '—', accent: 'bg-brand-blue-500' },
+                  { label: 'Momentum Score', value: momentum_score, accent: 'bg-amber-500' },
+                  { label: 'Daily Streak', value: `${daily_streak}d`, accent: 'bg-emerald-500' },
+                ].map(card => (
+                  <div key={card.label} className="bg-white border border-brand-line rounded-xl overflow-hidden">
+                    <div className={`h-1.5 w-full ${card.accent}`} />
+                    <div className="p-4">
+                      <div className="text-2xl font-black text-brand-text">{card.value}</div>
+                      <div className="text-xs text-brand-text-mute mt-0.5">{card.label}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
+
+              {/* Band Progress Bar */}
+              {current_band !== null && (
+                <div className="bg-slate-50 rounded-xl border border-brand-line p-5 mb-3">
+                  <div className="relative h-4 bg-slate-200 rounded-full mb-3">
+                    {/* Current band marker */}
+                    <div
+                      className="absolute top-0 h-full bg-brand-teal-500 rounded-full"
+                      style={{ width: `${bandFillPct(current_band)}%` }}
+                    />
+                    {/* Target band marker */}
+                    {target_band !== null && (
+                      <div
+                        className="absolute top-0 h-full border-r-2 border-brand-blue-600"
+                        style={{ width: `${bandFillPct(target_band)}%` }}
+                      />
+                    )}
+                  </div>
+                  <div className="flex justify-between text-xs text-brand-text-mute">
+                    <span>0</span>
+                    {[1,2,3,4,5,6,7,8,9].map(n => (
+                      <span key={n}>{n}</span>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-4 mt-3 text-xs">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-3 h-3 rounded-full bg-brand-teal-500 inline-block" />
+                      <span className="text-slate-600">Current: <strong>{current_band}</strong></span>
+                    </span>
+                    {target_band !== null && (
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-3 h-3 rounded-full bg-brand-blue-500 inline-block" />
+                        <span className="text-slate-600">Target: <strong>{target_band}</strong></span>
+                      </span>
+                    )}
+                    {gap !== null && (
+                      <span className={`font-bold ${gap >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                        Gap: {gap > 0 ? `+${gap}` : gap}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
 
-        {/* Skill Breakdown */}
-        <div>
-          <h2 className="text-xs font-black uppercase tracking-widest text-brand-text-mute mb-3">Skill Breakdown</h2>
-          <div className="space-y-3">
-            {skillOrder.map(skill => {
-              const row = competency.find(c => c.skill.toUpperCase() === skill.toUpperCase());
-              const bandScore = row?.band_score ?? null;
-              const short = SKILL_LABELS[skill] ?? skill[0];
-              return (
-                <div key={skill} className="flex items-center gap-4">
-                  <div className="w-24 text-xs font-semibold text-brand-text flex-shrink-0">
-                    {short} — {skill}
+        {/* Skill Breakdown — IELTS is 4 skills (L/R/W/S); Spoken English is one skill
+            with 6 subskills, read from the SPEAKING row's sub_scores.subskillProfile. */}
+        {isSE ? (
+          <div>
+            <h2 className="text-xs font-black uppercase tracking-widest text-brand-text-mute mb-3">Subskill Breakdown</h2>
+            {speakingSubskillProfile.length > 0 ? (
+              <div className="space-y-3">
+                {speakingSubskillProfile.map(sub => (
+                  <div key={sub.id} className="flex items-center gap-4">
+                    <div className="w-40 text-xs font-semibold text-brand-text flex-shrink-0">{sub.label}</div>
+                    <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${cefrGaugeColor(sub.level)}`}
+                        style={{ width: `${(cefrOrdinal(sub.level) / (CEFR_ORDER.length - 1)) * 100}%` }}
+                      />
+                    </div>
+                    <div className={`w-10 text-right text-xs font-bold ${cefrColor(sub.level)}`}>
+                      {sub.level?.toUpperCase() ?? '—'}
+                    </div>
                   </div>
-                  <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full ${bandBgBar(bandScore)}`}
-                      style={{ width: bandScore !== null ? `${bandFillPct(bandScore)}%` : '0%' }}
-                    />
-                  </div>
-                  <div className={`w-10 text-right text-xs font-bold ${bandColor(bandScore)}`}>
-                    {bandScore ?? '—'}
-                  </div>
-                  <div className="w-16 text-right text-xs text-brand-text-mute">
-                    Target: {target_band ?? '—'}
-                  </div>
-                </div>
-              );
-            })}
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-xl bg-slate-50 border border-brand-line px-6 py-4 text-sm text-brand-text-mute">
+                No subskill data yet — the student has not completed a scored speaking diagnostic or assessment.
+              </div>
+            )}
           </div>
-        </div>
+        ) : (
+          <div>
+            <h2 className="text-xs font-black uppercase tracking-widest text-brand-text-mute mb-3">Skill Breakdown</h2>
+            <div className="space-y-3">
+              {skillOrder.map(skill => {
+                const row = competency.find(c => c.skill.toUpperCase() === skill.toUpperCase());
+                const bandScore = row?.band_score ?? null;
+                const short = SKILL_LABELS[skill] ?? skill[0];
+                return (
+                  <div key={skill} className="flex items-center gap-4">
+                    <div className="w-24 text-xs font-semibold text-brand-text flex-shrink-0">
+                      {short} — {skill}
+                    </div>
+                    <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${bandBgBar(bandScore)}`}
+                        style={{ width: bandScore !== null ? `${bandFillPct(bandScore)}%` : '0%' }}
+                      />
+                    </div>
+                    <div className={`w-10 text-right text-xs font-bold ${bandColor(bandScore)}`}>
+                      {bandScore ?? '—'}
+                    </div>
+                    <div className="w-16 text-right text-xs text-brand-text-mute">
+                      Target: {target_band ?? '—'}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ===== PAGE 2 ===== */}
@@ -371,9 +460,7 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
               </thead>
               <tbody>
                 {recentIAs.map((ia, i) => {
-                  const avgBand = ia.scores && ia.scores.length > 0
-                    ? (ia.scores.reduce((s, sc) => s + sc.band, 0) / ia.scores.length).toFixed(1)
-                    : null;
+                  const iaAvgBand = avgBand(ia.scores);
                   return (
                     <tr key={ia.id} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
                       <td className="px-3 py-2 pl-0 font-bold text-brand-text">#{ia.ia_number}</td>
@@ -390,8 +477,8 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
                               .join(', ')
                           : '—'}
                       </td>
-                      <td className={`px-3 py-2 font-bold ${bandColor(avgBand ? parseFloat(avgBand) : null)}`}>
-                        {avgBand ?? '—'}
+                      <td className={`px-3 py-2 font-bold ${bandColor(iaAvgBand)}`}>
+                        {iaAvgBand !== null ? iaAvgBand.toFixed(1) : '—'}
                       </td>
                       <td className="px-3 py-2 pr-0 text-amber-700 font-medium">
                         {ia.momentum_awarded ?? '—'}
@@ -478,8 +565,23 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
 
             Previously this rendered four band numbers — and in practice four
             dashes, because the lookup compared UPPERCASE skill keys against
-            title-case literals and never matched. */}
-        {diagnostic_results.length > 0 && (() => {
+            title-case literals and never matched.
+
+            IELTS-only: the 4-skill (L/R/W/S) shape below doesn't apply to Spoken
+            English's single-skill/6-subskill CEFR model, and this payload has no
+            CEFR-shaped diagnostic data to show yet either way — see the isSE
+            placeholder just below. */}
+        {isSE && (
+          <div className="mb-10">
+            <h2 className="text-xs font-black uppercase tracking-widest text-brand-text-mute mb-3">
+              Diagnostic Baseline
+            </h2>
+            <div className="rounded-xl bg-slate-50 border border-brand-line px-6 py-4 text-sm text-brand-text-mute">
+              Spoken English diagnostic baseline reporting is not yet available in the instructor report.
+            </div>
+          </div>
+        )}
+        {!isSE && diagnostic_results.length > 0 && (() => {
           // Oldest result per skill, case-insensitive — the baseline.
           // studentProgressQueries already sends one entry per skill (ordered
           // created_at asc, first-seen wins), so this is normally a no-op; it
@@ -625,21 +727,32 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
         })()}
 
         {/* Certificate of Progress */}
-        {current_band !== null && (
+        {(isSE || current_band !== null) && (
           <div className="mb-10">
             <div className="border-2 border-brand-teal-200 rounded-xl p-6 bg-brand-teal-50/30">
               <div className="text-center mb-4">
-                <div className="text-[10px] font-black uppercase tracking-widest text-brand-teal-400 mb-1">Certificate of Progress</div>
+                <div className="text-[10px] font-black uppercase tracking-widest text-brand-teal-400 mb-1">
+                  {isSE ? 'Certificate of Participation' : 'Certificate of Progress'}
+                </div>
                 <div className="w-12 h-0.5 bg-brand-teal-300 mx-auto" />
               </div>
               <p className="text-sm text-brand-text leading-relaxed text-center mb-4">
-                This report certifies that <strong>{student.name}</strong> has actively engaged in structured IELTS preparation
-                through the TestCrack platform. The scores and statistics presented reflect genuine performance data captured
-                during the preparation period.
+                This report certifies that <strong>{student.name}</strong> has actively engaged in structured{' '}
+                {isSE ? 'Spoken English practice' : 'IELTS preparation'} through the TestCrack platform. The scores and
+                statistics presented reflect genuine performance data captured during the preparation period.
               </p>
               <div className="text-center mb-6">
-                <span className="text-sm text-brand-text-mute">Current IELTS Band Estimate: </span>
-                <span className={`text-lg font-black ${bandColor(current_band)}`}>{current_band}</span>
+                {isSE ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="text-sm text-brand-text-mute">{disp.headlineLabel}: </span>
+                    <CefrBadge label={speakingCefrLabel} size="sm" />
+                  </div>
+                ) : (
+                  <>
+                    <span className="text-sm text-brand-text-mute">Current IELTS Band Estimate: </span>
+                    <span className={`text-lg font-black ${bandColor(current_band)}`}>{current_band}</span>
+                  </>
+                )}
               </div>
               <div className="border-t border-brand-teal-200 pt-4">
                 <div className="text-xs text-brand-text-mute mb-2">Instructor Verification:</div>
@@ -662,7 +775,7 @@ export function StudentReportTemplate({ data, batchName, instituteName, instruct
         {/* Footer */}
         <div className="border-t border-brand-line pt-6 mt-auto">
           <p className="text-xs text-brand-text-mute mb-0.5">
-            This report was generated by TestCrack IELTS Preparation Platform.
+            This report was generated by TestCrack {isSE ? 'Spoken English Practice Platform' : 'IELTS Preparation Platform'}.
           </p>
           <p className="text-xs text-brand-text-mute mb-0.5">
             Data reflects live performance as of report generation time.

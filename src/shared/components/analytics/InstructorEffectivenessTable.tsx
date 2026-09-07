@@ -50,7 +50,25 @@ function RiskBadge({ atRisk, studentCount }: { atRisk: number; studentCount: num
   );
 }
 
+function ImprovementCell({ value, suffix = '' }: { value: number | null; suffix?: string }) {
+  // null means "not enough data to compute a slope", which is a different fact
+  // from "no improvement". Never render 0.0.
+  if (value == null) return <span className="text-brand-text-mute">—</span>;
+  return (
+    <span className={value >= 0 ? 'text-emerald-600' : 'text-rose-600'}>
+      {value >= 0 ? '+' : ''}{value.toFixed(1)}{suffix}
+    </span>
+  );
+}
+
 export function InstructorEffectivenessTable({ rows }: { rows: InstructorEffectivenessRow[] }) {
+  // Spoken English uses a CEFR (0-6) scale, not an IELTS band (0-9) — the two are
+  // never averaged together server-side, so this table shows them as separate
+  // columns rather than one blended "Avg Improvement" number. The CEFR column is
+  // only shown when at least one row actually has SE students, so an
+  // IELTS-only institute sees exactly the table it saw before this field existed.
+  const hasAnySE = rows.some(r => r.avg_cefr_improvement != null);
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left border-collapse min-w-[720px]">
@@ -60,6 +78,7 @@ export function InstructorEffectivenessTable({ rows }: { rows: InstructorEffecti
             <th className="py-2 px-3 font-bold whitespace-nowrap">Batches</th>
             <th className="py-2 px-3 font-bold whitespace-nowrap">Students</th>
             <th className="py-2 px-3 font-bold whitespace-nowrap">Avg Improvement</th>
+            {hasAnySE && <th className="py-2 px-3 font-bold whitespace-nowrap">Avg CEFR Δ</th>}
             <th className="py-2 px-3 font-bold whitespace-nowrap">IA Completion</th>
             <th className="py-2 px-3 font-bold whitespace-nowrap">At Target</th>
             <th className="py-2 px-3 font-bold whitespace-nowrap">Avg Streak</th>
@@ -73,17 +92,13 @@ export function InstructorEffectivenessTable({ rows }: { rows: InstructorEffecti
               <td className="py-3 px-3 text-sm text-brand-text-mute tabular-nums">{r.batch_count}</td>
               <td className="py-3 px-3 text-sm text-brand-text-mute tabular-nums">{r.student_count}</td>
               <td className="py-3 px-3 text-sm font-bold tabular-nums">
-                {/* null means "not enough data to compute a slope", which is a
-                    different fact from "no improvement". Never render 0.0. */}
-                {r.avg_band_improvement == null ? (
-                  <span className="text-brand-text-mute">—</span>
-                ) : (
-                  <span className={r.avg_band_improvement >= 0 ? 'text-emerald-600' : 'text-rose-600'}>
-                    {r.avg_band_improvement >= 0 ? '+' : ''}
-                    {r.avg_band_improvement.toFixed(1)}
-                  </span>
-                )}
+                <ImprovementCell value={r.avg_band_improvement} />
               </td>
+              {hasAnySE && (
+                <td className="py-3 px-3 text-sm font-bold tabular-nums">
+                  <ImprovementCell value={r.avg_cefr_improvement} />
+                </td>
+              )}
               <td className="py-3 px-3 text-sm text-brand-text-mute tabular-nums">{pctOf(r.ia_completion_rate)}</td>
               <td className="py-3 px-3 text-sm text-brand-text-mute tabular-nums">
                 {r.students_at_target}
@@ -98,8 +113,10 @@ export function InstructorEffectivenessTable({ rows }: { rows: InstructorEffecti
         </tbody>
       </table>
       <p className="text-[11px] text-brand-text-mute mt-3">
-        Improvement is average band change across each instructor's students. "—" means too little data to
-        compute, not zero progress. Assignment is not attribution — treat these as prompts to look, not rankings.
+        Improvement is average band change across each instructor's students
+        {hasAnySE ? ' (IELTS students; Spoken English students are shown separately as CEFR level change)' : ''}.
+        "—" means too little data to compute, not zero progress. Assignment is not attribution — treat these as
+        prompts to look, not rankings.
       </p>
     </div>
   );

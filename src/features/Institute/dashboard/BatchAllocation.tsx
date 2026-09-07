@@ -16,6 +16,9 @@ import {
 } from '../services/batchService';
 import { fetchTutors, fetchStudents, TutorRecord, StudentRecord } from '../services/instituteAdminService';
 import { useToast } from '@/shared/hooks/use-toast';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/shared/components/ui/select';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -120,12 +123,27 @@ function BatchFormModal({ initial, onClose, onSaved }: BatchFormModalProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="font-jetbrains text-xs font-semibold text-brand-text-mute uppercase tracking-wider">Status</label>
-              <select value={form.status} onChange={e => setForm(p => ({ ...p, status: e.target.value as BatchStatus }))}
-                className="w-full bg-brand-bg-alt border border-brand-line rounded-lg px-3 py-2.5 min-h-[40px] text-sm text-brand-text focus:outline-none focus:border-brand-teal-500">
-                <option value="ACTIVE">Active</option>
-                <option value="INACTIVE">Inactive</option>
-                <option value="COMPLETED">Completed</option>
-              </select>
+              {/* Radix Select, not a native <select>: a native select's popup is
+                  drawn by the browser at the width of its longest option and
+                  ignores CSS, overflowing narrow mobile viewports. Radix renders
+                  the panel in a portal with collision detection, so it stays on
+                  screen and its width/positioning are CSS-controllable. */}
+              <Select
+                value={form.status}
+                onValueChange={(value) => setForm(p => ({ ...p, status: value as BatchStatus }))}
+              >
+                <SelectTrigger
+                  aria-label="Status"
+                  className="w-full bg-brand-bg-alt border border-brand-line rounded-lg px-3 py-2.5 min-h-[40px] text-sm text-brand-text focus:outline-none focus:border-brand-teal-500"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="max-w-[calc(100vw-2rem)]">
+                  <SelectItem value="ACTIVE">Active</SelectItem>
+                  <SelectItem value="INACTIVE">Inactive</SelectItem>
+                  <SelectItem value="COMPLETED">Completed</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <label className="font-jetbrains text-xs font-semibold text-brand-text-mute uppercase tracking-wider">Max Students</label>

@@ -674,11 +674,11 @@ export default function Assessment() {
               </div>
             ))}
           </div>
-          {iaStatus!.reasons.length > 0 && (
+          {(iaStatus!.reasons ?? []).length > 0 && (
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-8">
               <p className="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-2">What to do next</p>
               <ul className="space-y-1.5">
-                {iaStatus!.reasons.map(r => (
+                {(iaStatus!.reasons ?? []).map(r => (
                   <li key={r.key} className="flex items-start gap-2 text-sm text-amber-900 font-medium"><span className="mt-0.5 flex-shrink-0">•</span>{r.message}</li>
                 ))}
               </ul>

@@ -39,3 +39,35 @@ export const BAND_OPTIONS: number[] = Array.from(
   { length: Math.round(BAND_SPAN / 0.5) + 1 },
   (_, i) => Number((BAND_MIN + i * 0.5).toFixed(1))
 );
+
+// ─────────────────────────────────────────────────────────────────────────
+// Exam-aware addition (Spoken English / CEFR). Everything above this line is
+// the original IELTS-only [4,9] band-scale API and MUST stay untouched — the
+// governing rule for this codebase is "never rewrite an IELTS path, branch
+// instead". The helper below is additive: it lets a shared progress-bar /
+// gauge stay exam-agnostic by normalizing either an IELTS band OR a CEFR
+// label to the same 0-100 fill percentage, instead of every call site
+// re-deriving its own CEFR math next to bandFillPct.
+//
+// Cross-feature import is intentional and matches the pattern already
+// established for CEFR display (see src/features/student/config/cefrDisplay.tsx
+// and .../utils/exam.ts) — this file re-uses those rather than inventing a
+// parallel CEFR ladder here.
+import { isSpokenEnglish } from '@/features/student/utils/exam';
+import { cefrOrdinal, CEFR_ORDER } from '@/features/student/config/cefrDisplay';
+
+/**
+ * 0–100 fill percentage for either scale, keyed off examId. Pass `band` for
+ * an IELTS value and/or `cefrLabel` for a CEFR value — only the one that
+ * matches the exam is read. Falls back to 0 when the matching value is
+ * missing (e.g. CEFR data not yet returned by the backend for this surface).
+ */
+export function examAwareFillPct(
+  examId: string | null | undefined,
+  value: { band?: number | null; cefrLabel?: string | null }
+): number {
+  if (isSpokenEnglish(examId)) {
+    return (cefrOrdinal(value.cefrLabel ?? undefined) / (CEFR_ORDER.length - 1)) * 100;
+  }
+  return value.band != null ? bandFillPct(value.band) : 0;
+}

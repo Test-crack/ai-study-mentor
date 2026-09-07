@@ -107,6 +107,7 @@ export const StudentSidebar = ({
         { id: 'reading', icon: BookOpen, label: 'Reading', path: '/student/reading' },
         { id: 'writing', icon: PenTool, label: 'Writing', path: '/student/writing' },
         { id: 'speaking-assessment', icon: Mic, label: 'Speaking', path: '/student/speaking-assessment' },
+        { id: 'speaking-history', icon: History, label: 'Speaking History', path: '/student/speaking-history' },
         { id: 'speed', icon: Timer, label: 'Speed Reading', path: '/student/speed' },
       ]
     },
@@ -124,7 +125,7 @@ export const StudentSidebar = ({
 
   // Spoken English (cohort 1): hide the IELTS-only surfaces. Keep Dashboard, LexiGrid
   // (a standalone feature for SE), and How It Works.
-  const SE_ALLOWED = new Set(['dashboard', 'games', 'internal', 'how-it-works']);
+  const SE_ALLOWED = new Set(['dashboard', 'games', 'internal', 'how-it-works', 'speaking-history']);
 
   const filteredGroups = menuGroups.map(group => {
     if (isSpokenEnglish(examSlug)) {

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Cpu, CheckCircle2, FileSearch, RotateCcw, X } from 'lucide-react';
 import { cn } from '@/shared/utils';
+import { isSpokenEnglish } from '@/features/student/utils/exam';
+import { cefrColor, cefrBg } from '@/features/student/config/cefrDisplay';
 import type {
   DiagnosticSkillResult,
   DiagnosticSubScoresLR,
@@ -21,6 +23,13 @@ interface Props {
   // retakes, not per-skill — set false there to hide per-card Reset buttons
   // so the confirm copy never claims a per-skill reset that can't happen.
   perSkillReset?: boolean;
+  /**
+   * The student's exam_id, when the caller has it (see StudentFullProgress.
+   * student.exam_id). Optional and defaults to the IELTS branch — every
+   * existing caller that doesn't pass this keeps today's IELTS-only output
+   * byte-identical.
+   */
+  examId?: string | null;
 }
 
 const SKILL_ORDER = ['LISTENING', 'READING', 'WRITING', 'SPEAKING'];
@@ -373,7 +382,7 @@ function SkillCard({ result, history, onReset }: {
   );
 }
 
-export function DiagnosticTab({ results, studentName, onRequestReset, perSkillReset = true }: Props) {
+export function IeltsDiagnosticTab({ results, studentName, onRequestReset, perSkillReset = true }: Props) {
   const [resetSkill,   setResetSkill]   = useState<ResetSkill | null>(null);
   const [retakeLoading, setRetakeLoading] = useState(false);
   const [retakeError,   setRetakeError]   = useState<string | null>(null);
@@ -509,4 +518,224 @@ export function DiagnosticTab({ results, studentName, onRequestReset, perSkillRe
       )}
     </div>
   );
+}
+
+// ── Spoken English (CEFR) ──────────────────────────────────────────────────
+// SE has one skill (SPEAKING) with a CEFR label instead of a 0-9 band, so
+// "4 skills diagnosed" has no equivalent — the summary reads as a prompt
+// count instead. Reuses the shared FeedbackBlock/ResetConfirmModal helpers
+// above since their copy is skill-name-generic, not IELTS-specific.
+
+function CefrPromptCard({ result, onReset }: {
+  result:   DiagnosticSkillResult;
+  onReset?: (skill: ResetSkill) => void;
+}) {
+  const ss    = result.sub_scores as any;
+  const fb    = result.feedback_json;
+  // The backend doesn't send a top-level cefr_label field for this endpoint —
+  // the CEFR result lives in sub_scores (same shape VivaDiagnostic/Report use).
+  const label = result.cefr_label ?? ss?.cefrLabel ?? null;
+  const date  = new Date(result.created_at).toLocaleDateString('en-IN', {
+    day: 'numeric', month: 'short', year: 'numeric',
+  });
+
+  return (
+    <div className={cn('rounded-2xl border p-5 space-y-4', label ? cefrBg(label) : 'bg-brand-bg-alt border-brand-line')}>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-bold text-brand-text-mute font-jetbrains uppercase tracking-wider">
+            Speaking
+          </p>
+          <p className="text-[10px] text-brand-text-mute mt-0.5">{date}</p>
+          {onReset && (
+            <button
+              onClick={() => onReset('SPEAKING')}
+              className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-bold text-brand-text-mute hover:text-rose-600 transition-colors"
+            >
+              <RotateCcw className="h-3 w-3" />
+              Reset
+            </button>
+          )}
+        </div>
+        <div className="text-right shrink-0">
+          <p className={cn('text-3xl font-black leading-none', label ? cefrColor(label) : 'text-brand-text-mute')}>
+            {label ?? '—'}
+          </p>
+          <p className="text-[10px] text-brand-text-mute mt-0.5">CEFR Level</p>
+        </div>
+      </div>
+
+      {ss?.content_assessment && typeof ss.content_assessment === 'string' && (
+        <div className="bg-white/70 rounded-xl p-3">
+          <p className="text-[10px] font-bold text-brand-text-mute font-jetbrains uppercase tracking-wider mb-1">
+            Content Assessment
+          </p>
+          <p className="text-xs text-brand-text-mute leading-relaxed">
+            {ss.content_assessment}
+          </p>
+        </div>
+      )}
+
+      {Array.isArray(ss?.feedback) && ss.feedback.length > 0 ? (
+        // sub_scores.feedback for SE is an array of per-prompt entries
+        // ({ promptId, strengths, improvements }), not the flat
+        // skill-keyed object FeedbackBlock expects for IELTS — render it
+        // directly instead of routing it through that component (which
+        // would iterate array indices as if they were subskill keys).
+        <SeFeedbackList feedback={ss.feedback} />
+      ) : ss?.feedback && typeof ss.feedback === 'string' && ss.feedback.trim() ? (
+        <FeedbackBlock skill="SPEAKING" data={{ feedback: ss.feedback }} />
+      ) : fb && typeof fb === 'object' && !Array.isArray(fb) && Object.keys(fb).length > 0 ? (
+        <FeedbackBlock skill="SPEAKING" data={fb as Record<string, any>} />
+      ) : null}
+    </div>
+  );
+}
+
+function SeFeedbackList({ feedback }: {
+  feedback: Array<{ promptId?: string; strengths?: string; improvements?: string }>;
+}) {
+  const withContent = feedback.filter(f => f.strengths?.trim() || f.improvements?.trim());
+  if (withContent.length === 0) return null;
+
+  return (
+    <div className="rounded-xl border border-brand-teal-100 bg-brand-teal-50/50 p-3 space-y-3">
+      <div className="flex items-center gap-2">
+        <Cpu className="h-3.5 w-3.5 text-brand-teal-500 shrink-0" />
+        <p className="text-[10px] font-bold text-brand-teal-600 font-jetbrains uppercase tracking-wider">
+          AI Feedback — Speaking
+        </p>
+      </div>
+      {withContent.map((f, i) => (
+        <div key={f.promptId ?? i} className="space-y-1">
+          {withContent.length > 1 && (
+            <p className="text-[10px] font-bold text-brand-text-mute font-jetbrains uppercase tracking-wider">
+              Answer {i + 1}
+            </p>
+          )}
+          {f.strengths?.trim() && (
+            <p className="text-xs text-brand-text-mute leading-relaxed">{f.strengths.trim()}</p>
+          )}
+          {f.improvements?.trim() && (
+            <p className="text-xs text-brand-text-mute leading-relaxed">{f.improvements.trim()}</p>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function SpokenEnglishDiagnosticTab({ results, studentName, onRequestReset, perSkillReset = true }: Props) {
+  const [resetSkill,   setResetSkill]   = useState<ResetSkill | null>(null);
+  const [retakeLoading, setRetakeLoading] = useState(false);
+  const [retakeError,   setRetakeError]   = useState<string | null>(null);
+  const retakeOpen = resetSkill !== null;
+
+  const handleRetakeConfirm = async () => {
+    if (!onRequestReset || !resetSkill) return;
+    setRetakeLoading(true);
+    setRetakeError(null);
+    try {
+      await onRequestReset(resetSkill);
+      setResetSkill(null);
+    } catch (e: any) {
+      setRetakeError(e?.message ?? 'Failed to reset diagnostic.');
+    } finally {
+      setRetakeLoading(false);
+    }
+  };
+
+  if (results.length === 0) {
+    return (
+      <div className="bg-white rounded-2xl border border-brand-line p-12 text-center space-y-3">
+        <FileSearch className="h-8 w-8 text-brand-text-mute mx-auto" />
+        <p className="text-brand-text-mute text-sm">No diagnostic prompts scored yet.</p>
+        <p className="text-brand-text-mute text-xs">
+          The student has not completed the speaking diagnostic.
+        </p>
+      </div>
+    );
+  }
+
+  const sorted = [...results].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+  const latest = sorted[sorted.length - 1];
+  const latestLabel = latest.cefr_label ?? (latest.sub_scores as any)?.cefrLabel ?? null;
+
+  return (
+    <div className="space-y-5">
+      {/* Summary strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {[
+          {
+            label: 'Prompts Scored',
+            value: String(results.length),
+            cls: 'text-emerald-600',
+          },
+          {
+            label: 'Latest CEFR Level',
+            value: latestLabel ?? '—',
+            cls: latestLabel ? cefrColor(latestLabel) : 'text-brand-text-mute',
+          },
+          {
+            label: 'Completed',
+            value: new Date(latest.created_at).toLocaleDateString('en-IN', {
+              day: 'numeric', month: 'short', year: 'numeric',
+            }),
+            cls: 'text-brand-text',
+          },
+        ].map(c => (
+          <div
+            key={c.label}
+            className="bg-white rounded-xl border border-brand-line p-3 text-center"
+          >
+            <p className="text-[10px] font-bold text-brand-text-mute font-jetbrains uppercase tracking-wider">{c.label}</p>
+            <p className={cn('text-xl font-black mt-1', c.cls)}>{c.value}</p>
+          </div>
+        ))}
+      </div>
+
+      {onRequestReset && (
+        <div className="flex justify-end">
+          <button
+            onClick={() => { setRetakeError(null); setResetSkill('ALL'); }}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-brand-text-mute hover:text-rose-600 border border-brand-line hover:border-rose-200 transition-colors"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            {perSkillReset ? 'Reset All' : 'Request Retake'}
+          </button>
+        </div>
+      )}
+
+      {/* Prompt cards, most recent first */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {[...sorted].reverse().map((r, i) => (
+          <CefrPromptCard
+            key={`${r.created_at}-${i}`}
+            result={r}
+            onReset={onRequestReset && perSkillReset ? (skill) => { setRetakeError(null); setResetSkill(skill); } : undefined}
+          />
+        ))}
+      </div>
+
+      {retakeOpen && (
+        <ResetConfirmModal
+          studentName={studentName || 'this student'}
+          skill={resetSkill!}
+          otherScoredSkills={[]}
+          loading={retakeLoading}
+          error={retakeError}
+          onConfirm={handleRetakeConfirm}
+          onCancel={() => { if (!retakeLoading) setResetSkill(null); }}
+        />
+      )}
+    </div>
+  );
+}
+
+// ── dispatcher ────────────────────────────────────────────────────────────────
+
+export function DiagnosticTab(props: Props) {
+  return isSpokenEnglish(props.examId)
+    ? <SpokenEnglishDiagnosticTab {...props} />
+    : <IeltsDiagnosticTab {...props} />;
 }
