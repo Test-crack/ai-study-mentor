@@ -446,3 +446,168 @@ export async function fetchAllUsers(params: {
     const url = `${getBackendUrl()}/api/superadmin/users?${qs.toString()}`;
     return callBackend(url);
 }
+
+// ---------------------------------------------------------------------------
+// Loadout engine
+// ---------------------------------------------------------------------------
+//
+// The generic, config-driven Layer 1. Deliberately separate from the
+// verification endpoints above: those fan out to five hand-written forks, this
+// drives one engine from an authored loadout. Read-only — a loadout is a file.
+
+export interface LoadoutSummaryRow {
+    id: string;
+    label: string;
+    columnCount?: number;
+    hasBucket?: boolean;
+    hasSourceKey?: boolean;
+    hookCount?: number;
+    valid: boolean;
+    error?: string;
+}
+
+export interface LoadoutColumnView {
+    name: string;
+    kind: string;
+    required?: boolean;
+    members?: string[];
+    appliesWhen?: { column: string; in: string[] };
+    forbiddenWhen?: { column: string; in: string[] };
+    variants?: { when?: { column: string; in: string[] }; kind: string; allowed?: string[] }[];
+}
+
+export interface LoadoutDetail {
+    id: string;
+    label: string;
+    columns: LoadoutColumnView[];
+    bucket: string[] | null;
+    sourceKey: string | null;
+    conditionalColumns: { column: string; byColumn: string; allowed: Record<string, string[]> }[];
+    rowAllowList: { keyColumn: string; valueColumn: string; allowed: Record<string, string[]> } | null;
+    hooks: string[];
+    checkOrder: string[];
+    expectedRows: { fallback: number };
+}
+
+export interface LoadoutFinding {
+    code: string;
+    severity: 'fail' | 'warn';
+    scope: string;
+    message: string;
+    line?: number;
+    column?: string;
+}
+
+export interface LoadoutFileResult {
+    fileName: string;
+    outcome: 'pass' | 'warn' | 'fail';
+    expectedRowCount: number;
+    rowCount: number;
+    bucket: Record<string, string> | null;
+    fileFindings: LoadoutFinding[];
+    rowFindings: LoadoutFinding[];
+}
+
+export interface LoadoutVerifyResult {
+    loadout: { id: string; label: string };
+    expected: number;
+    outcome: 'pass' | 'warn' | 'fail';
+    runFindings: LoadoutFinding[];
+    files: LoadoutFileResult[];
+}
+
+export async function fetchLoadouts(): Promise<{ loadouts: LoadoutSummaryRow[]; knownHooks: string[] }> {
+    return callBackend(`${getBackendUrl()}/api/superadmin/loadouts`);
+}
+
+export async function fetchLoadoutDetail(id: string): Promise<{ summary: LoadoutDetail; raw: unknown }> {
+    return callBackend(`${getBackendUrl()}/api/superadmin/loadouts/${encodeURIComponent(id)}`);
+}
+
+// Returns the body as-is: uploadFileToBackend does not wrap it, and this
+// endpoint does not nest under `data` the way the older ones do.
+export async function verifyWithLoadout(
+    loadoutId: string,
+    files: File[],
+    expected?: number,
+    requireSourceKey?: boolean,
+): Promise<LoadoutVerifyResult> {
+    const form = new FormData();
+    form.append('loadoutId', loadoutId);
+    if (expected) form.append('expected', String(expected));
+    if (requireSourceKey) form.append('requireSourceKey', 'true');
+    for (const file of files) form.append('files', file);
+    return uploadFileToBackend(`${getBackendUrl()}/api/superadmin/loadouts/verify`, form, 'POST');
+}
+
+// --- Authoring a loadout in the panel ------------------------------------
+//
+// The admin describes columns and rules; the backend expands that into the
+// engine's real (much fussier) format. Only loadouts created here are editable —
+// the four reference ones are pinned by the parity suite and are refused.
+
+export type DraftColumnKind = 'text' | 'choice' | 'number' | 'options' | 'answer';
+
+export interface DraftColumn {
+    name: string;
+    kind: DraftColumnKind;
+    required?: boolean;
+    values?: string[];
+    min?: number;
+    max?: number;
+    optionKeys?: string[];
+    onlyWhen?: { column: string; values: string[] };
+}
+
+export interface LoadoutDraft {
+    id: string;
+    label: string;
+    columns: DraftColumn[];
+    expectedRows: number;
+    bucketColumns?: string[];
+    checkFilename?: boolean;
+    keyPrefix?: string;
+    keyColumns?: string[];
+}
+
+export async function previewLoadoutDraft(
+    draft: LoadoutDraft,
+): Promise<{ ok: boolean; message?: string; summary?: LoadoutDetail }> {
+    return callBackend(`${getBackendUrl()}/api/superadmin/loadouts/preview`, {
+        method: 'POST',
+        body: JSON.stringify({ draft }),
+    });
+}
+
+export async function createLoadout(draft: LoadoutDraft): Promise<{ id: string }> {
+    return callBackend(`${getBackendUrl()}/api/superadmin/loadouts`, {
+        method: 'POST',
+        body: JSON.stringify({ draft }),
+    });
+}
+
+export async function updateLoadout(id: string, draft: LoadoutDraft): Promise<{ id: string }> {
+    return callBackend(`${getBackendUrl()}/api/superadmin/loadouts/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        body: JSON.stringify({ draft }),
+    });
+}
+
+export async function deleteLoadout(id: string): Promise<{ deleted: string }> {
+    return callBackend(`${getBackendUrl()}/api/superadmin/loadouts/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+    });
+}
+
+/** POST /verify/report — the same run as a colour-coded .xlsx, pass or fail. */
+export async function downloadLoadoutReport(
+    loadoutId: string,
+    files: File[],
+    expected?: number,
+): Promise<{ blob: Blob; filename: string }> {
+    const form = new FormData();
+    form.append('loadoutId', loadoutId);
+    if (expected) form.append('expected', String(expected));
+    for (const file of files) form.append('files', file);
+    return downloadFileFromBackend(`${getBackendUrl()}/api/superadmin/loadouts/verify/report`, form, 'POST');
+}
