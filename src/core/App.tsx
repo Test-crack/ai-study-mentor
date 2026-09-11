@@ -21,6 +21,7 @@ import { toast } from "sonner"; // ← NEW
 
 // Landing page stays EAGER — this is the route we're optimizing.
 import LandingPage from "@/features/home/components/LandingPage";
+import HomeInstitute from "@/features/home/components/HomeInstitute";
 import AuthCallbackPage from "@/features/auth/components/AuthCallbackPage";
 
 // Everything else becomes its own chunk, downloaded only when its route is visited.
@@ -354,7 +355,8 @@ const AppRoutes = () => {
   return (
     <Suspense fallback={<RouteFallback />}>
     <Routes>
-      <Route path="/" element={<LandingPage />} />
+      <Route path="/" element={<HomeInstitute />} />
+      <Route path="/exams/ielts-preparation" element={<LandingPage />} />
       <Route path="/dashdemo" element={<Dashdemo />} />
       <Route path="/Contact" element={<Contactpage />} />
 

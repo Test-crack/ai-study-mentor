@@ -16,6 +16,8 @@ import { StudentReportTemplate } from './report/StudentReportTemplate';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+const BATCH_STORAGE_KEY = 'instructor_selected_batch_id';
+
 function makeReportId(prefix: 'B' | 'S', id: string): string {
   const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
   return `TC-${prefix}-${id.slice(0, 4)}-${dateStr}`;
@@ -82,7 +84,9 @@ export function InstructorReportPage() {
   // Batch list
   const [batches, setBatches] = useState<FullBatch[]>([]);
   const [batchesLoading, setBatchesLoading] = useState(true);
-  const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
+  const [selectedBatchId, setSelectedBatchId] = useState<string | null>(() => {
+    try { return localStorage.getItem(BATCH_STORAGE_KEY); } catch { return null; }
+  });
 
   // Dashboard summary
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
@@ -114,9 +118,12 @@ export function InstructorReportPage() {
         const res = await callBackend(`${BACKEND}/api/instructor/batches`);
         const list: FullBatch[] = res.data ?? res ?? [];
         setBatches(list);
-        // Auto-select first ACTIVE batch
-        const firstActive = list.find(b => b.status === 'ACTIVE') ?? list[0] ?? null;
-        if (firstActive) setSelectedBatchId(firstActive.id);
+        // Keep the persisted selection if it's still valid; otherwise fall back to the first ACTIVE batch.
+        setSelectedBatchId(prev => {
+          if (prev && list.some(b => b.id === prev)) return prev;
+          const firstActive = list.find(b => b.status === 'ACTIVE') ?? list[0] ?? null;
+          return firstActive ? firstActive.id : null;
+        });
       } catch (e) {
         toast({ title: 'Failed to load batches', variant: 'destructive' });
       } finally {
@@ -125,6 +132,13 @@ export function InstructorReportPage() {
     }
     fetchBatches();
   }, [BACKEND]);
+
+  // ── Persist batch selection across refreshes ─────────────────────────────
+  useEffect(() => {
+    try {
+      if (selectedBatchId) localStorage.setItem(BATCH_STORAGE_KEY, selectedBatchId);
+    } catch { /* ignore storage errors */ }
+  }, [selectedBatchId]);
 
   // ── Fetch dashboard summary when batch changes ───────────────────────────
   useEffect(() => {

@@ -32,12 +32,23 @@ export default function InstructorDashboardPage() {
     new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }),
   []);
 
-  const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
+  const BATCH_STORAGE_KEY = 'instructor_selected_batch_id';
+
+  const [selectedBatchId, setSelectedBatchId] = useState<string | null>(() => {
+    try { return localStorage.getItem(BATCH_STORAGE_KEY); } catch { return null; }
+  });
   const { batches, loading: batchesLoading } = useInstructorBatches();
 
+  const selectBatch = (id: string) => {
+    setSelectedBatchId(id);
+    try { localStorage.setItem(BATCH_STORAGE_KEY, id); } catch { /* ignore storage errors */ }
+  };
+
   useEffect(() => {
-    if (batches.length > 0 && selectedBatchId === null) {
-      setSelectedBatchId(batches[0].id);
+    if (batches.length === 0) return;
+    // Keep the persisted selection if it's still a valid batch; otherwise fall back to the first one.
+    if (!batches.some(b => b.id === selectedBatchId)) {
+      selectBatch(batches[0].id);
     }
   }, [batches, selectedBatchId]);
 
@@ -133,7 +144,7 @@ export default function InstructorDashboardPage() {
                   <BatchSelector
                     batches={batches}
                     selectedBatchId={selectedBatchId}
-                    onSelect={id => setSelectedBatchId(id)}
+                    onSelect={selectBatch}
                     loading={batchesLoading}
                   />
                 </div>

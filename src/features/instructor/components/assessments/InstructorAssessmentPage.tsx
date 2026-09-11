@@ -12,6 +12,8 @@ import { MockOverviewTab } from './MockOverviewTab';
 import { DiagnosticOverviewTab } from './DiagnosticOverviewTab';
 import { cn } from '@/shared/utils';
 
+const BATCH_STORAGE_KEY = 'instructor_selected_batch_id';
+
 type Tab = 'ia' | 'mock' | 'diagnostic';
 
 const TABS: Array<{ id: Tab; label: string; icon: React.ReactNode }> = [
@@ -38,15 +40,23 @@ function SkeletonTable() {
 
 export default function InstructorAssessmentPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [batchId,   setBatchId]   = useState<string | null>(null);
+  const [batchId,   setBatchIdState] = useState<string | null>(() => {
+    try { return localStorage.getItem(BATCH_STORAGE_KEY); } catch { return null; }
+  });
   const [activeTab, setActiveTab] = useState<Tab>('ia');
 
   const { batches, loading: batchesLoading } = useInstructorBatches();
   const { data, loading, error, refetch }    = useAssessmentOverview(batchId);
 
-  // Auto-select the first batch once loaded
+  const setBatchId = (id: string) => {
+    setBatchIdState(id);
+    try { localStorage.setItem(BATCH_STORAGE_KEY, id); } catch { /* ignore storage errors */ }
+  };
+
+  // Keep the persisted selection if it's still valid; otherwise fall back to the first batch.
   useEffect(() => {
-    if (batches.length > 0 && batchId === null) {
+    if (batches.length === 0) return;
+    if (!batches.some(b => b.id === batchId)) {
       setBatchId(batches[0].id);
     }
   }, [batches, batchId]);
