@@ -80,7 +80,11 @@ export const StudentSidebar = ({
 
   const isItemDisabled = (itemId: string) => {
     if (isActivelyDrilling) return true;
-    if (isLocked && itemId !== 'dashboard' && itemId !== 'how-it-works') return true;
+    // Items that stay open while the daily gate is locked. Spoken English's LexiGrid ('games') is a
+    // standalone feature — not part of its 3-drill gate — so it stays reachable for SE (for IELTS,
+    // LexiGrid is a gate step accessed from the dashboard, so it stays locked here).
+    const alwaysOpen = new Set(['dashboard', 'how-it-works', ...(isSpokenEnglish(examSlug) ? ['games'] : [])]);
+    if (isLocked && !alwaysOpen.has(itemId)) return true;
     return false;
   };
 
