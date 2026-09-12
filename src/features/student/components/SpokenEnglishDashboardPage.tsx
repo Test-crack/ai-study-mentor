@@ -13,9 +13,8 @@ import { examDisplay } from "@/features/student/config/examDisplay";
 import { useMomentum } from "@/features/student/Context/MomentumContext";
 import { seSubskillByEnum, nextCefr, withinLevelProgress, cefrToDrillLevel } from "@/features/student/config/spokenEnglishSubskills";
 import { cn } from "@/shared/utils";
-import { Mic, ArrowRight, AlertTriangle, Loader2, Compass, Flame, Lock, Puzzle, Wallet, Target, TrendingUp } from "lucide-react";
+import { Mic, ArrowRight, AlertTriangle, Loader2, Compass, Flame, Lock, Puzzle, Wallet, Target, TrendingUp, Trophy } from "lucide-react";
 import IAScheduleWidget from "./dashboard/IAScheduleWidget";
-import MockStatusWidget from "./dashboard/MockStatusWidget";
 
 interface SubskillRow { id: string; label: string; level: string; score: number; }
 interface CefrResult {
@@ -107,6 +106,52 @@ const StatRow = ({ label, value }: { label: string; value: string }) => (
     <span className="font-semibold text-brand-text">{value}</span>
   </div>
 );
+
+// Full Mock card — always visible (unlike the shared IELTS MockStatusWidget, which hides until the
+// first IA). Shows a lock + the internal-assessment requirement while locked; a Start link when eligible.
+const MockCard = ({ examId }: { examId: string }) => {
+  const navigate = useNavigate();
+  const [status, setStatus] = useState<any>(null);
+  useEffect(() => {
+    callBackend("/api/mock/status").then((r) => { if (r?.success) setStatus(r); }).catch(() => {});
+  }, []);
+  const done = status?.progress?.ia_completed ?? 0;
+  const req = status?.progress?.ia_required ?? 6;
+  const eligible = !!status?.can_start_mock;
+  return (
+    <div className="bg-white border border-brand-line rounded-2xl p-5 shadow-sm h-full flex flex-col">
+      <div className="flex items-center gap-2.5 mb-4">
+        <div className="w-8 h-8 rounded-xl bg-brand-teal-100 flex items-center justify-center flex-shrink-0"><Trophy className="w-4 h-4 text-brand-teal-600" /></div>
+        <div>
+          <p className="font-dm font-bold text-brand-text text-sm leading-tight">Full Mock Test</p>
+          <p className="text-xs text-brand-text-mute leading-tight">A complete CEFR speaking mock</p>
+        </div>
+      </div>
+      {eligible ? (
+        <>
+          <p className="text-sm text-brand-text-mute leading-relaxed mb-4">You've unlocked your full mock — take it to see where you stand.</p>
+          <button onClick={() => navigate(`/${examId}/mock`)} className="mt-auto w-full py-2.5 rounded-xl bg-brand-teal-600 hover:bg-brand-teal-700 text-white font-bold text-xs uppercase tracking-wide transition-colors flex items-center justify-center gap-1.5">
+            Start full mock <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </>
+      ) : (
+        <>
+          <div className="flex items-start gap-2 text-sm text-brand-text-mute mb-4">
+            <Lock className="w-4 h-4 shrink-0 mt-0.5 text-brand-text-mute" /> Complete {req} internal assessments to unlock your full mock.
+          </div>
+          <div className="mt-auto">
+            <div className="mb-1 flex items-center justify-between text-[11px] font-medium text-brand-text-mute">
+              <span>Internal assessments</span><span className="tabular-nums">{done}/{req}</span>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-brand-line">
+              <div className="h-full rounded-full bg-brand-teal-500 transition-all" style={{ width: `${Math.min(100, req ? (done / req) * 100 : 0)}%` }} />
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
 
 // Predicted readiness (CEFR) — white card matching the IELTS widget style.
 const PredictedReadiness = ({ cefrLabel, meanScore, examDate }: { cefrLabel?: string; meanScore?: number; examDate: string | null }) => {
@@ -208,7 +253,7 @@ const SpokenEnglishDashboardPage = () => {
   return (
     <>
     <StudentLayout activeTab="dashboard" onUpgradeClick={() => setShowPremium(true)} mainClassName="flex-1 p-4 sm:p-6 lg:p-8 space-y-6">
-          {/* exam · batch · streak context */}
+          {/* exam · batch context (streak lives in the topbar + This Week card — no duplicate chip) */}
           <div className="flex flex-wrap items-center gap-2 text-[12px]">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-bg-alt px-3 py-1 font-medium text-brand-text">
               <Compass className="h-3.5 w-3.5 text-brand-teal-600" /><span className="text-brand-text-mute">Exam</span><span className="font-semibold">{profile?.examLabel ?? "Spoken English"}</span>
@@ -216,11 +261,6 @@ const SpokenEnglishDashboardPage = () => {
             {profile?.batchName && (
               <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-bg-alt px-3 py-1 font-medium text-brand-text">
                 <span className="text-brand-text-mute">Batch</span><span className="font-semibold">{profile.batchName}</span>
-              </span>
-            )}
-            {meta.streak > 0 && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-bg-alt px-3 py-1 font-medium text-brand-text">
-                <Flame className="h-3.5 w-3.5 text-amber-500" /><span className="font-semibold">{meta.streak}-day streak</span>
               </span>
             )}
           </div>
@@ -388,7 +428,7 @@ const SpokenEnglishDashboardPage = () => {
                 {/* Internal assessment · Mock · Momentum wallet — shared IELTS widgets (exam-agnostic) */}
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 items-stretch">
                   <IAScheduleWidget />
-                  <MockStatusWidget />
+                  <MockCard examId={examId} />
                   <MomentumWallet momentum={meta.momentum} onRedeem={() => navigate(`/${examId}/dashboard`)} />
                 </div>
               </div>

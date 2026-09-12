@@ -108,6 +108,7 @@ const Diagnosis = lazy(() => import("@/features/student/components/Diagnosis/Dia
 const VivaDiagnostic = lazy(() => import("@/features/student/components/Diagnosis/VivaDiagnostic"));
 const SpokenEnglishDashboardPage = lazy(() => import("@/features/student/components/SpokenEnglishDashboardPage"));
 const SpokenEnglishIAPage = lazy(() => import("@/features/student/components/SpokenEnglishIAPage"));
+const SpokenEnglishMockPage = lazy(() => import("@/features/student/components/SpokenEnglishMockPage"));
 const DiagnosticRoadmap = lazy(() => import("@/features/student/components/Diagnosis/DiagnosticRoadmap"));
 const OnboardingWalkthrough = lazy(() => import("@/features/student/components/Onboarding/OnboardingWalkthrough"));
 const SpokenEnglishOnboarding = lazy(() => import("@/features/student/components/Onboarding/SpokenEnglishOnboarding"));
@@ -310,6 +311,13 @@ const InternalAssessmentDispatch = () => {
   return isSpokenEnglish(profile?.examId) ? <SpokenEnglishIAPage /> : <InternalAssessmentPage />;
 };
 
+// Full Mock by exam: Spoken English gets its own mock gate/page; IELTS keeps FullMockAssessment.
+const MockDispatch = () => {
+  const { profile, loading, profileLoading } = useAuth();
+  if ((loading || profileLoading) && !profile) return null;
+  return isSpokenEnglish(profile?.examId) ? <SpokenEnglishMockPage /> : <FullMockAssessment />;
+};
+
 // Onboarding by exam: Spoken English gets its own CEFR walkthrough (with the
 // full CEFR disclaimer, no target-band step); IELTS keeps OnboardingWalkthrough
 // completely untouched.
@@ -478,7 +486,7 @@ const AppRoutes = () => {
 
         <Route path="internal" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><InternalAssessmentDispatch /></StudentDrillLockGuard></RoleProtectedRoute>} />
         <Route path="assessment" element={<ExamNavigate to="internal" />} />
-        <Route path="mock" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><FullMockAssessment /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route path="mock" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><MockDispatch /></StudentDrillLockGuard></RoleProtectedRoute>} />
         {/* Deliberately NOT wrapped in StudentDrillLockGuard: How It Works must stay
             reachable even while the platform is drill-locked. */}
         <Route path="how-it-works" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><HowItWorks /></RoleProtectedRoute>} />
