@@ -1,13 +1,13 @@
-// Spoken English — Full Mock page. Separate page (routed via the mock dispatch) so the IELTS
-// FullMockAssessment is never touched. For now this is the mock GATE: it shows the unlock
-// requirement (internal assessments) while locked, and an eligible state when the student has
-// met it. The graded CEFR mock-taking flow (viva-scored, like the SE IA) is a follow-up build.
+// Spoken English — Full Mock. Routed via the mock dispatch so the IELTS FullMockAssessment is
+// untouched. Locked → the unlock gate (internal-assessment requirement). Eligible → the shared
+// record-and-submit runner against the SE mock endpoints (/api/mock/se/*), viva-graded to CEFR.
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { callBackend } from "@/features/auth/services/authClient";
 import StudentLayout from "./StudentLayout";
-import { Trophy, Lock, ArrowLeft, CheckCircle2, Loader2, ArrowRight } from "lucide-react";
+import SeSpeakingRunner from "./SeSpeakingRunner";
+import { Trophy, Lock, ArrowLeft, Loader2, ArrowRight } from "lucide-react";
 
 const SpokenEnglishMockPage = () => {
   const { profile } = useAuth();
@@ -27,6 +27,22 @@ const SpokenEnglishMockPage = () => {
   const req = status?.progress?.ia_required ?? 6;
   const eligible = !!status?.can_start_mock;
 
+  // Eligible → the full record-and-submit mock (shared runner, full-screen like the IA).
+  if (!loading && eligible) {
+    return (
+      <SeSpeakingRunner
+        questionsUrl="/api/mock/se/questions"
+        submitUrl="/api/mock/se/submit"
+        cacheKind="mock"
+        introTitle="Full mock test"
+        introBlurb={(n) => `A full CEFR speaking run-through — ${n} prompts across all six sub-skills. Speak naturally; this updates your overall level.`}
+        resultTitle="Mock complete"
+        notReadyMsg="Your full mock isn't ready yet — content is being prepared."
+      />
+    );
+  }
+
+  // Loading / locked → the unlock gate.
   return (
     <StudentLayout activeTab="full mock" mainClassName="flex-1 p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-2xl space-y-6">
@@ -34,7 +50,6 @@ const SpokenEnglishMockPage = () => {
           <ArrowLeft className="h-4 w-4" /> Back to Dashboard
         </button>
 
-        {/* Dark hero — matches the SE dashboard treatment */}
         <section className="relative overflow-hidden rounded-3xl bg-brand-ink-deep p-6 sm:p-8 text-white">
           <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-brand-teal-500/20 blur-2xl" />
           <div className="relative flex items-center gap-3 mb-3">
@@ -49,13 +64,6 @@ const SpokenEnglishMockPage = () => {
 
         {loading ? (
           <div className="flex items-center gap-3 py-16 text-brand-text-mute"><Loader2 className="h-6 w-6 animate-spin text-brand-teal-600" /> Loading…</div>
-        ) : eligible ? (
-          <section className="rounded-2xl border border-brand-teal-200 bg-white p-6 shadow-sm text-center">
-            <CheckCircle2 className="mx-auto h-10 w-10 text-brand-teal-600" />
-            <h2 className="mt-3 font-dm text-lg font-bold text-brand-text">You're eligible for your full mock</h2>
-            <p className="mx-auto mt-1 max-w-md text-sm text-brand-text-mute">Your full CEFR speaking mock is being finalised and will open here shortly. In the meantime, keep your streak going with daily drills and internal assessments.</p>
-            <button onClick={() => navigate(`/${examId}/dashboard`)} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-brand-teal-600 px-5 py-2.5 font-semibold text-white hover:bg-brand-teal-700">Back to dashboard</button>
-          </section>
         ) : (
           <section className="rounded-2xl border border-brand-line bg-white p-6 shadow-sm">
             <div className="flex items-center gap-3">
