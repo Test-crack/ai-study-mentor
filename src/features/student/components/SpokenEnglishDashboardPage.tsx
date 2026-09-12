@@ -13,7 +13,7 @@ import { examDisplay } from "@/features/student/config/examDisplay";
 import { useMomentum } from "@/features/student/Context/MomentumContext";
 import { seSubskill, seSubskillByEnum, nextCefr, withinLevelProgress, cefrToDrillLevel } from "@/features/student/config/spokenEnglishSubskills";
 import { cn } from "@/shared/utils";
-import { Mic, CheckCircle2, ArrowRight, AlertTriangle, Loader2, Compass, Flame, Zap, Lock, Puzzle, Dumbbell } from "lucide-react";
+import { Mic, CheckCircle2, ArrowRight, AlertTriangle, Loader2, Compass, Flame, Lock, Puzzle } from "lucide-react";
 
 interface SubskillRow { id: string; label: string; level: string; score: number; }
 interface CefrResult {
@@ -27,6 +27,8 @@ interface CefrResult {
 
 const LEVEL_LABEL: Record<string, string> = { BEGINNER: "Beginner", INTERMEDIATE: "Intermediate", ADVANCED: "Advanced" };
 const DRILLS_TO_UNLOCK = 3;
+// CEFR rungs for the Climb progress bar — the ordinal analogue of IELTS's band rungs.
+const CEFR_LADDER = ["a1", "a2", "b1", "b2", "c1", "c2"];
 
 const barColor = (level?: string) => {
   const l = (level || "").toLowerCase();
@@ -192,7 +194,12 @@ const SpokenEnglishDashboardPage = () => {
   }, [navigate, examId, result]);
 
   const seUnlocked = drillsToday >= DRILLS_TO_UNLOCK;
-  const displayName = profile?.name || "there";
+  // Today's gate as a numbered step list (parity with the IELTS hero) — 3 drills, no LexiGrid step.
+  const steps = Array.from({ length: DRILLS_TO_UNLOCK }, (_, i) => ({
+    label: i === 0 ? "Priority Drill" : i === 1 ? "Second Drill" : "Third Drill",
+    status: (i < drillsToday ? "done" : i === drillsToday ? "active" : "locked") as "done" | "active" | "locked",
+  }));
+  const stepOfLabel = seUnlocked ? "Session complete" : `Step ${Math.min(drillsToday + 1, DRILLS_TO_UNLOCK)} of ${DRILLS_TO_UNLOCK}`;
 
   return (
     <>
@@ -214,8 +221,6 @@ const SpokenEnglishDashboardPage = () => {
             )}
           </div>
 
-          <h1 className="font-dm text-2xl font-bold tracking-tight text-brand-text">Hi {displayName} 👋</h1>
-
           {loading ? (
             <div className="flex items-center gap-3 py-20 text-brand-text-mute"><Loader2 className="h-6 w-6 animate-spin text-brand-teal-600" /> Loading your results…</div>
           ) : !result || !result.cefrLabel ? (
@@ -227,44 +232,100 @@ const SpokenEnglishDashboardPage = () => {
             </div>
           ) : (
             <>
-              {/* THE CLIMB */}
-              <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-brand-ink-deep p-6 sm:p-8 text-white">
-                <div className="absolute top-0 right-0 h-40 w-40 bg-brand-mint/10 blur-[60px]" />
-                <div className="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-                  <div>
-                    <p className="font-jetbrains text-[11px] uppercase tracking-[0.18em] text-brand-mint">The Climb</p>
-                    <div className="mt-2 flex items-end gap-3">
-                      <span className="font-dm text-5xl font-bold leading-none">{result.cefrLabel}</span>
-                      {nextCefr(result.cefrLabel) && <span className="pb-1 text-sm text-brand-mint">{nextCefr(result.cefrLabel)} is your next level</span>}
+              {/* Unified hero — left: today's drill gate as a numbered step list; right: THE CLIMB.
+                  Mirrors the IELTS StudentDashboardPage hero for cross-exam design parity. */}
+              <section className="relative overflow-hidden rounded-3xl bg-brand-ink-deep text-white border border-brand-line-16 p-6 sm:p-8 shadow-sm">
+                {/* faint mint grid texture + ambient bloom (matches the IELTS hero treatment) */}
+                <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-[0.06]"
+                  style={{ backgroundImage: "linear-gradient(to right, #3EE0A0 1px, transparent 1px), linear-gradient(to bottom, #3EE0A0 1px, transparent 1px)", backgroundSize: "48px 48px" }} />
+                <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-brand-teal-500/20 blur-2xl" />
+
+                <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
+                  {/* ── Left: today's gate — headline + numbered step list ── */}
+                  <div className="lg:col-span-7 min-w-0">
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="h-px w-6 shrink-0 bg-brand-mint" aria-hidden="true" />
+                      <span className="font-jetbrains text-[10.5px] uppercase tracking-[0.18em] text-brand-mint">Today · {stepOfLabel}</span>
                     </div>
-                    <div className="mt-4 h-2 w-full max-w-md overflow-hidden rounded-full bg-white/10">
-                      <div className="h-full rounded-full bg-brand-mint transition-all" style={{ width: `${withinLevelProgress(result.cefrLabel, result.meanScore)}%` }} />
+                    <h1 className="font-dm text-2xl sm:text-[28px] font-bold tracking-tight mb-2 leading-[1.15]">
+                      {seUnlocked ? "Today's drills are done — the rest is yours" : "Start with your priority drill"}
+                    </h1>
+                    <p className="text-brand-on-ink-mute text-sm leading-[1.6] max-w-lg mb-5">
+                      {seUnlocked
+                        ? "Nice work. LexiGrid and everything below stay open for extra practice whenever you want them."
+                        : <>Three quick MCQ drills open the full dashboard. Next up: <strong className="text-white">{nextDrill ? nextDrill.label : "your weakest subskill"}</strong>.</>}
+                    </p>
+
+                    <div className="space-y-2.5">
+                      {steps.map((step, idx) => (
+                        <div key={step.label} className={cn(
+                          "rounded-2xl border px-4 py-3 flex items-center justify-between gap-4 transition-colors duration-300",
+                          step.status === "active" ? "bg-brand-teal-900/40 border-brand-mint/30" : "bg-white/5 border-brand-line-16",
+                        )}>
+                          <div className="flex items-center gap-3 min-w-0">
+                            <span className={cn(
+                              "flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-jetbrains text-[12px] font-bold",
+                              step.status === "done" ? "bg-brand-mint text-brand-ink-deep"
+                                : step.status === "active" ? "bg-brand-mint/20 text-brand-mint border border-brand-mint/40"
+                                : "bg-white/10 text-brand-on-ink-mute",
+                            )}>
+                              {step.status === "done" ? "✓" : idx + 1}
+                            </span>
+                            <div className="min-w-0">
+                              <p className={cn("font-semibold text-[14px] truncate", step.status === "locked" ? "text-brand-on-ink-mute" : "text-white")}>{step.label}</p>
+                              {step.status === "locked" && <p className="text-[11.5px] text-brand-on-ink-mute">Locked</p>}
+                            </div>
+                          </div>
+                          {step.status === "active" ? (
+                            <button onClick={() => startDrill(nextDrill?.subEnum)} disabled={!nextDrill}
+                              className="shrink-0 px-3.5 py-2 bg-brand-mint hover:bg-brand-teal-300 text-brand-ink-deep font-semibold text-[12.5px] rounded-lg transition-colors duration-150 whitespace-nowrap disabled:opacity-50">
+                              Start drill {Math.min(drillsToday + 1, DRILLS_TO_UNLOCK)} →
+                            </button>
+                          ) : step.status === "done" ? (
+                            <span className="shrink-0 font-jetbrains text-[10px] uppercase tracking-[0.12em] text-brand-mint">Done</span>
+                          ) : null}
+                        </div>
+                      ))}
                     </div>
-                    {result.scoredPromptCount != null && <p className="mt-2 text-xs text-white/50">Based on {result.scoredPromptCount} graded {result.scoredPromptCount === 1 ? "answer" : "answers"}</p>}
                   </div>
-                  <div className="flex gap-8">
-                    <div><p className="font-jetbrains text-[10px] uppercase tracking-[0.16em] text-white/50">Level</p><p className="mt-1 font-dm text-lg font-bold">{LEVEL_LABEL[cefrToDrillLevel(result.cefrLevel)]}</p></div>
-                    <div><p className="font-jetbrains text-[10px] uppercase tracking-[0.16em] text-white/50">Momentum</p><p className="mt-1 flex items-center gap-1 font-dm text-lg font-bold text-brand-mint"><Zap className="h-4 w-4" />{meta.momentum}</p></div>
+
+                  {/* ── Right: the climb — CEFR level, segmented progress, level/momentum ── */}
+                  <div className="lg:col-span-5 flex flex-col justify-center bg-white/5 border border-brand-line-16 rounded-2xl px-5 py-5">
+                    <p className="font-jetbrains text-[10px] uppercase tracking-[0.18em] text-brand-on-ink-mute mb-2">The Climb</p>
+                    <div className="flex items-baseline gap-3 mb-1">
+                      <span className="font-jetbrains text-5xl font-black text-white leading-none">{result.cefrLabel}</span>
+                      <span className="text-[13px] font-semibold leading-tight">
+                        <span className="text-brand-mint">{nextCefr(result.cefrLabel) ? `${nextCefr(result.cefrLabel)} is your next level` : "Top level reached 🎉"}</span>
+                        {result.scoredPromptCount != null && (<><br /><span className="text-brand-on-ink-mute">based on {result.scoredPromptCount} graded {result.scoredPromptCount === 1 ? "answer" : "answers"}</span></>)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 mt-4" role="img" aria-label={`Current level ${result.cefrLabel}`}>
+                      {CEFR_LADDER.map((lv, idx) => {
+                        const curIdx = CEFR_LADDER.indexOf((result.cefrLevel || "").toLowerCase());
+                        const reached = curIdx >= idx;
+                        const isNext = idx === curIdx + 1;
+                        return <span key={lv} title={lv.toUpperCase()} className={cn("h-2 flex-1 rounded-full transition-all duration-500", reached ? "bg-brand-mint" : isNext ? "bg-brand-teal-700" : "bg-white/10")} />;
+                      })}
+                    </div>
+                    <div className="flex items-center justify-between mt-2 text-[11px] font-medium text-brand-on-ink-mute">
+                      <span>{CEFR_LADDER[0].toUpperCase()}</span>
+                      <span>{nextCefr(result.cefrLabel) ? `next: ${nextCefr(result.cefrLabel)}` : "top level"}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between mt-5 pt-4 border-t border-brand-line-16">
+                      <div>
+                        <p className="font-jetbrains text-[9.5px] uppercase tracking-[0.14em] text-brand-on-ink-mute mb-0.5">Level</p>
+                        <p className="text-sm font-bold text-white">{LEVEL_LABEL[cefrToDrillLevel(result.cefrLevel)]}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-jetbrains text-[9.5px] uppercase tracking-[0.14em] text-brand-on-ink-mute mb-0.5">Momentum</p>
+                        <p className="text-sm font-bold text-brand-mint">+{meta.momentum.toLocaleString()}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </section>
-
-              {/* Daily-drill gate — 3 drills to unlock (no LexiGrid step) */}
-              {!seUnlocked && (
-                <section className="rounded-3xl border border-brand-teal-200 bg-brand-teal-wash p-6">
-                  <p className="font-jetbrains text-[11px] uppercase tracking-[0.16em] text-brand-teal-700">Today · {drillsToday} / {DRILLS_TO_UNLOCK} drills</p>
-                  <h2 className="mt-1 font-dm text-xl font-bold text-brand-teal-950">Warm up with {DRILLS_TO_UNLOCK} quick drills</h2>
-                  <p className="mt-1 text-sm text-brand-teal-800/80">Finish {DRILLS_TO_UNLOCK} short MCQ drills to open the full dashboard. Next up: <strong>{nextDrill ? nextDrill.label : "your weakest subskill"}</strong>.</p>
-                  <div className="mt-4 flex gap-2">
-                    {Array.from({ length: DRILLS_TO_UNLOCK }).map((_, i) => (
-                      <div key={i} className={cn("h-2 flex-1 rounded-full", i < drillsToday ? "bg-brand-teal-500" : "bg-brand-teal-200")} />
-                    ))}
-                  </div>
-                  <button onClick={() => startDrill(nextDrill?.subEnum)} disabled={!nextDrill} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-brand-teal-600 px-6 py-3 font-semibold text-white hover:bg-brand-teal-700 disabled:opacity-50">
-                    <Dumbbell className="h-4 w-4" /> Start drill {Math.min(drillsToday + 1, DRILLS_TO_UNLOCK)} <ArrowRight className="h-4 w-4" />
-                  </button>
-                </section>
-              )}
 
               {/* Standalone LexiGrid (not part of the gate) */}
               <section className="flex flex-col gap-4 rounded-2xl border border-brand-teal-200 bg-brand-bg-alt p-5 sm:flex-row sm:items-center sm:justify-between">

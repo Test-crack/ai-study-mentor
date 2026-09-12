@@ -281,7 +281,13 @@ const StudentDrillLockGuard = ({ children }: { children: React.ReactNode }) => {
   if ((loading || profileLoading) && !profile) return null;
   if (!profile) return <Navigate to="/login" replace />;
 
-  if (profile.role === 'STUDENT' && !isSpokenEnglish(profile.examId)) {
+  // Drill-lock applies to ALL students, including Spoken English — SE now has its own MCQ-drill
+  // gate and dashboard_unlocked is exam-agnostic (drills_completed_today >= 2). While locked, only
+  // the open routes (dashboard, drill, lexigrid, how-it-works) are reachable; guarded pages
+  // (internal, assessment-history, speaking-history, mock…) redirect back to the dashboard, exactly
+  // like IELTS. The redirect target /student/dashboard is rewritten to /{examId}/dashboard by
+  // StudentExamLayout, so SE lands on its own dashboard.
+  if (profile.role === 'STUDENT') {
     if (checking) return null;
     if (!dashboardUnlocked) return <Navigate to="/student/dashboard" replace />;
   }
