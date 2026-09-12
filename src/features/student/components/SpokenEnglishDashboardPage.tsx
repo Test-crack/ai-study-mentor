@@ -11,9 +11,11 @@ import StudentLayout from "./StudentLayout";
 import { PremiumModal } from "@/features/payment/components/PremiumModal";
 import { examDisplay } from "@/features/student/config/examDisplay";
 import { useMomentum } from "@/features/student/Context/MomentumContext";
-import { seSubskill, seSubskillByEnum, nextCefr, withinLevelProgress, cefrToDrillLevel } from "@/features/student/config/spokenEnglishSubskills";
+import { seSubskillByEnum, nextCefr, withinLevelProgress, cefrToDrillLevel } from "@/features/student/config/spokenEnglishSubskills";
 import { cn } from "@/shared/utils";
-import { Mic, CheckCircle2, ArrowRight, AlertTriangle, Loader2, Compass, Flame, Lock, Puzzle } from "lucide-react";
+import { Mic, ArrowRight, AlertTriangle, Loader2, Compass, Flame, Lock, Puzzle, Wallet, Target, TrendingUp } from "lucide-react";
+import IAScheduleWidget from "./dashboard/IAScheduleWidget";
+import MockStatusWidget from "./dashboard/MockStatusWidget";
 
 interface SubskillRow { id: string; label: string; level: string; score: number; }
 interface CefrResult {
@@ -39,38 +41,64 @@ const barColor = (level?: string) => {
   return "bg-amber-300";
 };
 
-// "This week" streak strip — parity with the IELTS WeeklyRhythmIndicator (streak-driven).
+// CEFR level → pill colour (bg tint + text).
+const levelPill = (level?: string) => {
+  const l = (level || "").toLowerCase();
+  if (l.startsWith("c")) return "bg-emerald-100 text-emerald-700";
+  if (l.startsWith("b2")) return "bg-brand-teal-100 text-brand-teal-700";
+  if (l.startsWith("b")) return "bg-brand-teal-50 text-brand-teal-700";
+  if (l.startsWith("a2")) return "bg-amber-100 text-amber-700";
+  return "bg-amber-50 text-amber-700";
+};
+
+// "This week" streak strip — white card matching the IELTS dashboard widgets.
 const WeeklyRhythm = ({ streak }: { streak: number }) => {
   const days = ["M", "T", "W", "T", "F", "S", "S"];
   const todayIdx = (new Date().getDay() + 6) % 7; // Mon=0 … Sun=6
   return (
-    <section className="rounded-2xl border border-brand-line bg-brand-bg-alt p-5 sm:p-6">
-      <p className="font-jetbrains text-[10px] uppercase tracking-[0.16em] text-brand-text-mute">This week</p>
-      <div className="mt-1 mb-3 flex items-baseline gap-2">
-        <span className="font-dm text-2xl font-bold text-brand-text">{streak}</span>
-        <span className="text-sm text-brand-text-mute">day streak · {Math.max(0, 7 - streak)} more to your 7-day goal</span>
+    <div className="bg-white border border-brand-line rounded-2xl p-5 shadow-sm h-full flex flex-col">
+      <div className="flex items-center gap-2.5 mb-4">
+        <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0"><Flame className="w-4 h-4 text-amber-600" /></div>
+        <div>
+          <p className="font-dm font-bold text-brand-text text-sm leading-tight">This Week</p>
+          <p className="text-xs text-brand-text-mute leading-tight">{streak}-day streak · {Math.max(0, 7 - streak)} to your 7-day goal</p>
+        </div>
       </div>
-      <div className="grid grid-cols-7 gap-1.5">
+      <div className="grid grid-cols-7 gap-1.5 mt-auto">
         {days.map((d, i) => (
           <div key={i} className={cn(
             "flex h-9 items-center justify-center rounded-lg font-jetbrains text-xs font-bold",
             i === todayIdx ? "bg-brand-ink-deep text-white"
               : i < todayIdx && todayIdx - i <= streak ? "bg-brand-mint text-brand-ink-deep"
-              : "bg-brand-line text-brand-text-mute",
+              : "bg-brand-bg-alt text-brand-text-mute",
           )}>{d}</div>
         ))}
       </div>
-    </section>
+    </div>
   );
 };
 
-// Momentum wallet — parity with the IELTS MomentumWalletCard (momentum is exam-agnostic).
-const MomentumWallet = ({ momentum }: { momentum: number }) => (
-  <section className="rounded-2xl border border-brand-line bg-brand-bg-alt p-5 sm:p-6">
-    <p className="font-jetbrains text-[10px] uppercase tracking-[0.16em] text-brand-text-mute">Momentum Wallet</p>
-    <p className="mt-1 font-dm text-3xl font-bold text-brand-text tabular-nums">{momentum} <span className="text-sm font-medium text-brand-text-mute">points</span></p>
-    <p className="mt-2 text-sm leading-relaxed text-brand-text-mute">Earned from drills &amp; streaks. Spend it on extra practice once you've used today's free drills.</p>
-  </section>
+// Momentum wallet — same design as the IELTS MomentumWalletCard (momentum is exam-agnostic).
+const MomentumWallet = ({ momentum, onRedeem }: { momentum: number; onRedeem: () => void }) => (
+  <div className="bg-white border border-brand-line rounded-2xl p-5 shadow-sm h-full flex flex-col">
+    <div className="flex items-center gap-2.5 mb-4">
+      <div className="w-8 h-8 rounded-xl bg-brand-teal-100 flex items-center justify-center flex-shrink-0"><Wallet className="w-4 h-4 text-brand-teal-600" /></div>
+      <div>
+        <p className="font-dm font-bold text-brand-text text-sm leading-tight">Momentum Wallet</p>
+        <p className="text-xs text-brand-text-mute leading-tight">Earned from drills &amp; streaks</p>
+      </div>
+    </div>
+    <p className="font-jetbrains text-4xl font-black text-brand-text tabular-nums leading-none">{momentum.toLocaleString()}</p>
+    <p className="text-xs text-brand-text-mute mt-1 mb-4">points</p>
+    <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-brand-bg-alt/60 border border-brand-line mb-4">
+      <div className="w-8 h-8 rounded-lg bg-brand-teal-100 flex items-center justify-center flex-shrink-0"><Target className="w-4 h-4 text-brand-teal-600" /></div>
+      <span className="flex-1 text-xs text-brand-text-mute">Extra practice drill</span>
+      <span className="font-jetbrains text-xs font-bold text-brand-teal-600">300</span>
+    </div>
+    <button onClick={onRedeem} className="mt-auto w-full py-2.5 rounded-xl border border-brand-teal-200 text-brand-teal-600 font-bold text-xs uppercase tracking-wide hover:bg-brand-teal-50 transition-colors flex items-center justify-center gap-1.5">
+      Redeem for extra practice <ArrowRight className="w-3.5 h-3.5" />
+    </button>
+  </div>
 );
 
 const StatRow = ({ label, value }: { label: string; value: string }) => (
@@ -80,55 +108,32 @@ const StatRow = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
-// CEFR analogue of the IELTS Predicted Readiness: current level, the next level as the target,
-// within-level progress, and (if an exam date is set) days remaining.
+// Predicted readiness (CEFR) — white card matching the IELTS widget style.
 const PredictedReadiness = ({ cefrLabel, meanScore, examDate }: { cefrLabel?: string; meanScore?: number; examDate: string | null }) => {
   const next = nextCefr(cefrLabel);
   const progress = withinLevelProgress(cefrLabel, meanScore);
   const daysLeft = examDate ? Math.ceil((new Date(examDate).getTime() - Date.now()) / 86400000) : null;
   return (
-    <section className="rounded-2xl border border-brand-line bg-brand-bg-alt p-5 sm:p-6">
-      <p className="font-jetbrains text-[10px] uppercase tracking-[0.16em] text-brand-text-mute">Predicted readiness</p>
-      <div className="mt-3 space-y-2">
+    <div className="bg-white border border-brand-line rounded-2xl p-5 shadow-sm h-full flex flex-col">
+      <div className="flex items-center gap-2.5 mb-4">
+        <div className="w-8 h-8 rounded-xl bg-brand-teal-100 flex items-center justify-center flex-shrink-0"><TrendingUp className="w-4 h-4 text-brand-teal-600" /></div>
+        <div>
+          <p className="font-dm font-bold text-brand-text text-sm leading-tight">Predicted Readiness</p>
+          <p className="text-xs text-brand-text-mute leading-tight">Toward your next CEFR level</p>
+        </div>
+      </div>
+      <div className="space-y-2">
         <StatRow label="Current level" value={cefrLabel ?? "—"} />
         <StatRow label="Target (next level)" value={next ?? "Top of scale"} />
-        {daysLeft != null && daysLeft > 0 && <StatRow label="Days to target date" value={String(daysLeft)} />}
-        {examDate && <StatRow label="Target date" value={examDate} />}
+        {daysLeft != null && daysLeft > 0 && <StatRow label="Days to target" value={String(daysLeft)} />}
       </div>
       <div className="mt-3 h-2 overflow-hidden rounded-full bg-brand-line">
         <div className="h-full rounded-full bg-brand-mint transition-all" style={{ width: `${progress}%` }} />
       </div>
-      <p className="mt-2 text-sm leading-relaxed text-brand-text-mute">
+      <p className="mt-auto pt-3 text-xs leading-relaxed text-brand-text-mute">
         {next ? `Keep drilling and completing assessments to move from ${cefrLabel} toward ${next}.` : "You're at the top of the scale — keep practising to stay sharp."}
       </p>
-    </section>
-  );
-};
-
-// Internal-assessment card — reads the shared IA schedule (getIAStatus, exam-agnostic).
-const IACard = ({ status, onStart }: { status: any; onStart: () => void }) => {
-  if (!status?.success) return null;
-  const next = status.next_ia;
-  return (
-    <section className="rounded-2xl border border-brand-line bg-brand-bg-alt p-5 sm:p-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="font-jetbrains text-[10px] uppercase tracking-[0.16em] text-brand-text-mute">Internal assessment</p>
-          {status.can_start_test ? (
-            <p className="mt-1 text-sm font-medium text-brand-text">Your assessment is ready — a few speaking prompts that update your CEFR sub-scores.</p>
-          ) : status.is_ia_day ? (
-            <p className="mt-1 text-sm text-brand-text-mute">Assessment day — finish today's drills to unlock it.</p>
-          ) : next ? (
-            <p className="mt-1 text-sm text-brand-text-mute">Next assessment: <span className="font-semibold text-brand-text">{next.date_formatted}</span> · in {next.days_away} day{next.days_away === 1 ? "" : "s"}</p>
-          ) : (
-            <p className="mt-1 text-sm text-brand-text-mute">Keep practising — assessments unlock as you build a streak.</p>
-          )}
-        </div>
-        {status.can_start_test && (
-          <button onClick={onStart} className="inline-flex items-center gap-2 self-start rounded-xl bg-brand-teal-600 px-5 py-2.5 font-semibold text-white hover:bg-brand-teal-700 sm:self-auto">Start assessment <ArrowRight className="h-4 w-4" /></button>
-        )}
-      </div>
-    </section>
+    </div>
   );
 };
 
@@ -148,19 +153,18 @@ const SpokenEnglishDashboardPage = () => {
   // The next drill to do — from the shared recommendation engine (getNextActionDrill), the
   // same one IELTS uses. It picks the weakest not-done-today subskill (rotates correctly).
   const [nextDrill, setNextDrill] = useState<{ subEnum: string; label: string } | null>(null);
-  const [iaStatus, setIaStatus] = useState<any>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const [comp, drillState, nextAction, ia] = await Promise.all([
+        // IA + Mock cards self-fetch (shared IAScheduleWidget / MockStatusWidget), so we don't
+        // fetch their status here.
+        const [comp, drillState, nextAction] = await Promise.all([
           callBackend("/api/student/competency-scores"),
           callBackend("/api/student/daily-drill-state").catch(() => null),
           callBackend("/api/student/next-action-drill").catch(() => null),
-          callBackend("/api/ia/status").catch(() => null),
         ]);
-        if (!cancelled) setIaStatus(ia);
         if (cancelled) return;
         const speaking = (comp.data ?? []).find((r: any) => r.skill === "SPEAKING");
         setResult((speaking?.sub_scores as CefrResult) ?? null);
@@ -349,54 +353,44 @@ const SpokenEnglishDashboardPage = () => {
                   </div>
                 )}
 
-                {/* 6-subskill profile with per-subskill practice */}
+                {/* Your speaking profile — 6 CEFR subskills, clean two-column read-out (no per-row buttons) */}
                 {result.subskillProfile && result.subskillProfile.length > 0 && (
-                  <section className="rounded-2xl border border-brand-line bg-brand-bg-alt p-5 sm:p-6">
-                    <h2 className="mb-4 font-dm text-sm font-bold uppercase tracking-[0.12em] text-brand-text-mute">Your speaking profile</h2>
-                    <div className="space-y-4">
+                  <section className="rounded-2xl border border-brand-line bg-white p-5 sm:p-6 shadow-sm">
+                    <div className="mb-5 flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-brand-teal-100 flex items-center justify-center flex-shrink-0"><Mic className="w-4 h-4 text-brand-teal-600" /></div>
+                      <div>
+                        <p className="font-dm font-bold text-brand-text text-sm leading-tight">Your Speaking Profile</p>
+                        <p className="text-xs text-brand-text-mute leading-tight">CEFR level across six sub-skills</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2">
                       {result.subskillProfile.map((s) => (
-                        <div key={s.id} className="flex items-center gap-4">
-                          <div className="min-w-0 flex-1">
-                            <div className="mb-1 flex items-center justify-between">
-                              <span className="text-sm font-medium text-brand-text">{s.label}</span>
-                              <span className="font-jetbrains text-xs font-bold uppercase text-brand-teal-700">{(s.level || "").toUpperCase()}</span>
-                            </div>
-                            <div className="h-2 w-full overflow-hidden rounded-full bg-brand-line">
-                              <div className={cn("h-full rounded-full", barColor(s.level))} style={{ width: `${Math.max(4, Math.min(100, s.score))}%` }} />
-                            </div>
+                        <div key={s.id}>
+                          <div className="mb-1.5 flex items-center justify-between">
+                            <span className="text-sm font-semibold text-brand-text">{s.label}</span>
+                            <span className={cn("font-jetbrains text-[11px] font-bold uppercase px-2 py-0.5 rounded-full", levelPill(s.level))}>{(s.level || "").toUpperCase()}</span>
                           </div>
-                          {seSubskill(s.id)?.drillable
-                            ? <button onClick={() => startDrill(seSubskill(s.id)?.drillSubskill)} className="shrink-0 rounded-lg border border-brand-line px-3 py-1.5 text-xs font-semibold text-brand-teal-700 hover:border-brand-teal-300">Practice</button>
-                            : <span className="shrink-0 text-[11px] text-brand-text-mute">Speaking only</span>}
+                          <div className="h-2 w-full overflow-hidden rounded-full bg-brand-line">
+                            <div className={cn("h-full rounded-full transition-all", barColor(s.level))} style={{ width: `${Math.max(4, Math.min(100, s.score))}%` }} />
+                          </div>
                         </div>
                       ))}
                     </div>
                   </section>
                 )}
 
-                {/* Weekly rhythm + predicted readiness + momentum wallet (parity with IELTS) */}
+                {/* This week + predicted readiness (parity with the IELTS dashboard) */}
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                   <WeeklyRhythm streak={meta.streak} />
                   <PredictedReadiness cefrLabel={result.cefrLabel} meanScore={result.meanScore} examDate={examDate} />
                 </div>
-                <MomentumWallet momentum={meta.momentum} />
 
-                <IACard status={iaStatus} onStart={() => navigate(`/${examId}/internal`)} />
-
-                {/* Coaching notes */}
-                {result.feedback && result.feedback.length > 0 && (
-                  <section className="rounded-2xl border border-brand-line bg-brand-bg-alt p-5 sm:p-6">
-                    <h2 className="mb-3 font-dm text-sm font-bold uppercase tracking-[0.12em] text-brand-text-mute">Coaching notes</h2>
-                    <div className="space-y-3">
-                      {result.feedback.map((f, i) => (
-                        <div key={f.promptId ?? i} className="rounded-xl border border-brand-line bg-brand-bg px-4 py-3">
-                          {f.strengths && <p className="flex gap-2 text-sm leading-relaxed text-brand-text"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand-teal-600" />{f.strengths}</p>}
-                          {f.improvements && <p className="mt-2 flex gap-2 text-sm leading-relaxed text-brand-text"><ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />{f.improvements}</p>}
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
+                {/* Internal assessment · Mock · Momentum wallet — shared IELTS widgets (exam-agnostic) */}
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 items-stretch">
+                  <IAScheduleWidget />
+                  <MockStatusWidget />
+                  <MomentumWallet momentum={meta.momentum} onRedeem={() => navigate(`/${examId}/dashboard`)} />
+                </div>
               </div>
 
               {cfg.disclaimer && (
