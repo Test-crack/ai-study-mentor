@@ -200,11 +200,75 @@ export default function DrillResultCard({
           </div>
         </div>
 
-        <div className="bg-white border border-brand-line rounded-3xl p-6 shadow-sm flex flex-col items-center gap-4 text-center sm:flex-row sm:justify-between sm:text-left">
-          <p className="text-sm font-medium text-brand-text-mute">Nice work — keep going to unlock your full dashboard.</p>
-          <button onClick={onUnlockNext} className="inline-flex items-center gap-2 rounded-xl bg-brand-teal-600 px-6 py-3 font-bold text-white transition-colors hover:bg-brand-teal-700">
-            Continue <ArrowRight className="w-4 h-4" />
-          </button>
+        {/* ── Recommended lesson (left) + breakdown / next (right) ── mirrors the IELTS drill-
+            complete, minus the IELTS-only video-watch gate + reflection (SE's gate is 3 drills). */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_0.5fr] gap-3.5 items-start">
+          <div className="flex flex-col gap-3.5 min-w-0">
+            {!recLoad && rec ? (
+              <div className="bg-white border border-brand-teal-100 rounded-3xl p-6 shadow-sm">
+                <h3 className="font-jetbrains text-sm font-bold text-brand-teal-600 uppercase tracking-[0.16em] mb-4 flex items-center gap-2">
+                  <PlayCircle className="w-5 h-5" /> Recommended Lesson
+                </h3>
+                <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-4 bg-brand-ink group">
+                  {thumbSrc
+                    ? <img src={thumbSrc} alt={recTitle} className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity duration-300" />
+                    : <div className="w-full h-full bg-gradient-to-br from-brand-teal-900 via-brand-ink to-brand-ink-deep" />}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <a href={rec.url} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-2 bg-brand-warm-danger text-white px-6 py-3 rounded-full font-bold hover:bg-brand-warm-danger/90 transition-transform hover:scale-105 shadow-lg">
+                      <PlayCircle className="w-5 h-5 fill-white" /> Watch on YouTube <ExternalLink className="w-4 h-4 ml-1" />
+                    </a>
+                  </div>
+                </div>
+                <div className="bg-brand-bg-alt p-4 rounded-2xl">
+                  <p className="font-bold text-brand-text text-base leading-snug mb-1.5">{recTitle}</p>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {targetTag && <span className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.14em] bg-brand-teal-100 text-brand-teal-700 px-2 py-0.5 rounded-full">{targetTag}</span>}
+                    {levelTag && <span className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.14em] bg-brand-bg text-brand-text-mute px-2 py-0.5 rounded-full">{levelTag}</span>}
+                    {durationTag && <span className="text-[10px] font-bold text-brand-text-mute flex items-center gap-0.5">⏱ {durationTag}</span>}
+                    {sourceTag && <span className="text-[10px] font-bold text-brand-text-mute">· {sourceTag}</span>}
+                  </div>
+                  {rec.description && <p className="text-xs text-brand-text-mute leading-relaxed line-clamp-2 mt-2">{rec.description}</p>}
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white border border-brand-line rounded-3xl p-6 shadow-sm">
+                <h3 className="font-jetbrains text-sm font-bold text-brand-text uppercase tracking-[0.16em] mb-2 flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-brand-teal-500" /> Session banked
+                </h3>
+                <p className="text-sm text-brand-text-mute leading-relaxed">Your answers are recorded and your CEFR sub-scores update at your next internal assessment. Keep completing today's drills to unlock the full dashboard.</p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-3.5 min-w-0">
+            {answerResults.length > 0 && (
+              <div className="bg-white border border-brand-line rounded-3xl p-6 shadow-sm">
+                <span className="font-jetbrains text-[10.5px] font-medium uppercase tracking-[0.14em] text-brand-text-mute">Question Breakdown</span>
+                <div className="flex flex-col gap-[7px] mt-3.5">
+                  {answerResults.map((ok, i) => (
+                    <div key={i} className="flex items-center gap-3 py-2.5 px-3 bg-brand-bg-alt/60 border border-brand-line rounded-[10px]">
+                      <span className={`w-[22px] h-[22px] flex-none rounded-[7px] flex items-center justify-center text-[11px] font-bold text-white ${ok ? 'bg-brand-teal-600' : 'bg-brand-warm-danger'}`}>{ok ? '✓' : '×'}</span>
+                      <span className="flex-1 min-w-0 text-[13px] text-brand-text-mute truncate">Question {i + 1}</span>
+                      <span className={`font-jetbrains text-[12.5px] font-bold ${ok ? 'text-brand-teal-600' : 'text-brand-text-mute'}`}>{ok ? '+10' : '+0'}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="bg-white border border-brand-teal-200 rounded-3xl p-6 shadow-sm">
+              <span className="font-jetbrains text-[10.5px] font-medium uppercase tracking-[0.14em] text-brand-teal-600">Next In Today's Session</span>
+              <div className="text-[17px] font-bold text-brand-text tracking-tight mt-2.5">Keep the streak moving</div>
+              <p className="text-[13.5px] leading-[1.6] text-brand-text-mute mt-1.5">Continue to your next drill to unlock the full dashboard — or play LexiGrid anytime to sharpen your Range.</p>
+              <button type="button" onClick={onUnlockNext} className="mt-4 w-full py-3 rounded-xl text-[14px] font-bold bg-brand-teal-600 hover:bg-brand-teal-700 text-white transition-colors flex items-center justify-center gap-2">
+                Continue <ArrowRight className="w-4 h-4" />
+              </button>
+              <button type="button" onClick={() => navigate(`/${profile?.examId ?? 'spoken_english'}/lexigrid`)} className="block w-full text-center mt-3 text-[13px] font-semibold text-brand-teal-600 hover:text-brand-teal-700 transition-colors">
+                Play LexiGrid
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
