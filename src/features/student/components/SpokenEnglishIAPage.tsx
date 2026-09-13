@@ -7,6 +7,7 @@ const SpokenEnglishIAPage = () => (
     questionsUrl="/api/ia/se/questions"
     submitUrl="/api/ia/se/submit"
     cacheKind="ia"
+    introEyebrow="Internal Assessment"
     introTitle="Internal assessment"
     introBlurb={(n) => `${n} short speaking prompts on the areas you've been working on. Speak naturally — this updates your CEFR sub-scores.`}
     resultTitle="Assessment complete"

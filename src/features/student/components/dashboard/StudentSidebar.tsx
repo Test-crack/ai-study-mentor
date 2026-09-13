@@ -127,9 +127,15 @@ export const StudentSidebar = ({
     }
   ];
 
-  // Spoken English (cohort 1): hide the IELTS-only surfaces. Keep Dashboard, LexiGrid
-  // (a standalone feature for SE), and How It Works.
-  const SE_ALLOWED = new Set(['dashboard', 'games', 'internal', 'full mock', 'how-it-works', 'speaking-history']);
+  // Spoken English (cohort 1): show Dashboard, LexiGrid, the CEFR assessments + History, How It
+  // Works, and the full Extra Practice group (Listening / Reading / Writing / Speaking / Speaking
+  // History / Speed Reading) — these are practice-only and mirror the IELTS practice hub exactly.
+  const SE_ALLOWED = new Set([
+    'dashboard', 'games',
+    'internal', 'full mock', 'assessment-history',
+    'listening', 'reading', 'writing', 'speaking-assessment', 'speaking-history', 'speed',
+    'roadmap', 'suggestion', 'how-it-works',
+  ]);
 
   const filteredGroups = menuGroups.map(group => {
     if (isSpokenEnglish(examSlug)) {

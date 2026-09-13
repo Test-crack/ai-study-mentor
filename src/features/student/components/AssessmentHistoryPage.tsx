@@ -1632,9 +1632,20 @@ const SeResultCard = ({ entry, title, dateLabel }: { entry: AssessmentEntry; tit
         <div className="pt-3 mt-3 border-t border-brand-line space-y-2">
           <p className="text-[10px] font-black text-brand-text-mute font-jetbrains uppercase tracking-[0.16em]">Feedback</p>
           {result.feedback.map((f, i) => (
-            <div key={f.promptId ?? i} className="bg-brand-bg-alt rounded-xl p-3 text-sm text-brand-text space-y-1">
-              {f.strengths && <p><span className="font-semibold text-emerald-600">Strengths: </span>{f.strengths}</p>}
-              {f.improvements && <p><span className="font-semibold text-amber-600">To improve: </span>{f.improvements}</p>}
+            <div key={f.promptId ?? i} className="bg-brand-bg-alt rounded-xl p-3.5 space-y-2">
+              <p className="font-jetbrains text-[10px] uppercase tracking-[0.14em] text-brand-text-mute">Prompt {i + 1}</p>
+              {f.strengths && (
+                <div className="flex gap-2 text-sm">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                  <p className="text-brand-text"><span className="font-semibold text-emerald-600">Strengths — </span>{f.strengths}</p>
+                </div>
+              )}
+              {f.improvements && (
+                <div className="flex gap-2 text-sm">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+                  <p className="text-brand-text"><span className="font-semibold text-amber-600">To improve — </span>{f.improvements}</p>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -1645,6 +1656,16 @@ const SeResultCard = ({ entry, title, dateLabel }: { entry: AssessmentEntry; tit
     </div>
   );
 };
+
+const SeHistoryEmpty = ({ icon: Icon, title, body }: { icon: React.ComponentType<{ className?: string }>; title: string; body: string }) => (
+  <div className="flex flex-col items-center rounded-2xl border border-dashed border-brand-line bg-white/60 px-4 py-12 text-center sm:py-16">
+    <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-bg-alt">
+      <Icon className="h-6 w-6 text-brand-text-mute opacity-70" />
+    </div>
+    <p className="font-semibold text-brand-text">{title}</p>
+    <p className="mt-1 max-w-xs text-sm text-brand-text-mute">{body}</p>
+  </div>
+);
 
 const SpokenEnglishAssessmentHistoryPage = () => {
   const [activeTab, setActiveTab] = useState<"ia" | "mock" | "diagnostic">("ia");
@@ -1756,11 +1777,7 @@ const SpokenEnglishAssessmentHistoryPage = () => {
           <div className="flex flex-col items-center py-12 sm:py-16 gap-3 text-brand-text-mute px-4 text-center"><AlertCircle className="h-8 w-8 text-rose-400" /><p className="text-sm font-semibold text-brand-text-mute">Failed to load assessment history</p></div>
         ) : activeTab === "ia" ? (
           iaEntries.length === 0 ? (
-            <div className="text-center py-12 sm:py-16 text-brand-text-mute px-4">
-              <BarChart2 className="h-10 w-10 mx-auto mb-3 opacity-40" />
-              <p className="font-semibold text-brand-text-mute">No completed assessments yet</p>
-              <p className="text-sm mt-1">Complete an Internal Assessment to see your CEFR level here.</p>
-            </div>
+            <SeHistoryEmpty icon={BarChart2} title="No completed assessments yet" body="Complete an Internal Assessment to see your CEFR level here." />
           ) : (
             <div className="space-y-4">
               {iaEntries.slice().reverse().map((e) => (
@@ -1770,11 +1787,7 @@ const SpokenEnglishAssessmentHistoryPage = () => {
           )
         ) : activeTab === "mock" ? (
           mockEntries.length === 0 ? (
-            <div className="text-center py-12 sm:py-16 text-brand-text-mute px-4">
-              <FileText className="h-10 w-10 mx-auto mb-3 opacity-40" />
-              <p className="font-semibold text-brand-text-mute">No mock tests yet</p>
-              <p className="text-sm mt-1">Mock tests for Spoken English aren't available for your cohort yet.</p>
-            </div>
+            <SeHistoryEmpty icon={FileText} title="No mock tests yet" body="Complete 6 internal assessments to unlock your full mock — your CEFR sitting will appear here." />
           ) : (
             <div className="space-y-4">
               {mockEntries.slice().reverse().map((e) => (
@@ -1783,11 +1796,7 @@ const SpokenEnglishAssessmentHistoryPage = () => {
             </div>
           )
         ) : diagnostic.length === 0 ? (
-          <div className="text-center py-12 sm:py-16 text-brand-text-mute px-4">
-            <Stethoscope className="h-10 w-10 mx-auto mb-3 opacity-40" />
-            <p className="font-semibold text-brand-text-mute">No diagnostic report found</p>
-            <p className="text-sm mt-1">Complete your diagnostic viva to see your baseline CEFR level here.</p>
-          </div>
+          <SeHistoryEmpty icon={Stethoscope} title="No diagnostic report found" body="Complete your diagnostic viva to see your baseline CEFR level here." />
         ) : (
           <div className="space-y-4">
             {diagnostic.map((e) => (

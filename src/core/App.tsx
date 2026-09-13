@@ -110,6 +110,8 @@ const SpokenEnglishDashboardPage = lazy(() => import("@/features/student/compone
 const SpokenEnglishIAPage = lazy(() => import("@/features/student/components/SpokenEnglishIAPage"));
 const SpokenEnglishMockPage = lazy(() => import("@/features/student/components/SpokenEnglishMockPage"));
 const DiagnosticRoadmap = lazy(() => import("@/features/student/components/Diagnosis/DiagnosticRoadmap"));
+const SpokenEnglishRoadmapPage = lazy(() => import("@/features/student/components/SpokenEnglishRoadmapPage"));
+const SpokenEnglishRecommendationsPage = lazy(() => import("@/features/student/components/SpokenEnglishRecommendationsPage"));
 const OnboardingWalkthrough = lazy(() => import("@/features/student/components/Onboarding/OnboardingWalkthrough"));
 const SpokenEnglishOnboarding = lazy(() => import("@/features/student/components/Onboarding/SpokenEnglishOnboarding"));
 const HowItWorks = lazy(() => import("@/features/student/components/HowItWorks"));
@@ -258,8 +260,11 @@ const StudentDrillLockGuard = ({ children }: { children: React.ReactNode }) => {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    // Spoken English has no IELTS drills — never drill-lock it; skip the check entirely.
-    if (!profile || profile.role !== 'STUDENT' || isSpokenEnglish(profile.examId)) {
+    // Daily drill-lock applies to every student, including Spoken English. daily-drill-state is
+    // exam-aware (dashboard_unlocked = drills_completed_today >= 3 for SE, >= 2 for IELTS), so we
+    // must fetch it for SE too — otherwise dashboardUnlocked stays null and every guarded page
+    // redirects even once the platform is unlocked.
+    if (!profile || profile.role !== 'STUDENT') {
       setChecking(false);
       return;
     }
@@ -282,12 +287,12 @@ const StudentDrillLockGuard = ({ children }: { children: React.ReactNode }) => {
   if ((loading || profileLoading) && !profile) return null;
   if (!profile) return <Navigate to="/login" replace />;
 
-  // Drill-lock applies to ALL students, including Spoken English — SE now has its own MCQ-drill
-  // gate and dashboard_unlocked is exam-agnostic (drills_completed_today >= 2). While locked, only
-  // the open routes (dashboard, drill, lexigrid, how-it-works) are reachable; guarded pages
-  // (internal, assessment-history, speaking-history, mock…) redirect back to the dashboard, exactly
-  // like IELTS. The redirect target /student/dashboard is rewritten to /{examId}/dashboard by
-  // StudentExamLayout, so SE lands on its own dashboard.
+  // Daily drill-lock applies to ALL students, including Spoken English. While locked, only the open
+  // routes (dashboard, drill, lexigrid, how-it-works) are reachable; guarded pages (internal,
+  // assessment-history, mock…) redirect back to the dashboard. Once the platform is unlocked
+  // (dashboard_unlocked true — SE needs 3 drills today, IELTS 2), guarded pages open normally. The
+  // redirect target /student/dashboard is rewritten to /{examId}/dashboard by StudentExamLayout, so
+  // SE lands on its own dashboard.
   if (profile.role === 'STUDENT') {
     if (checking) return null;
     if (!dashboardUnlocked) return <Navigate to="/student/dashboard" replace />;
@@ -309,6 +314,20 @@ const InternalAssessmentDispatch = () => {
   const { profile, loading, profileLoading } = useAuth();
   if ((loading || profileLoading) && !profile) return null;
   return isSpokenEnglish(profile?.examId) ? <SpokenEnglishIAPage /> : <InternalAssessmentPage />;
+};
+
+// My Roadmap by exam: Spoken English gets its CEFR/sub-skill roadmap; IELTS keeps DiagnosticRoadmap.
+const RoadmapDispatch = () => {
+  const { profile, loading, profileLoading } = useAuth();
+  if ((loading || profileLoading) && !profile) return null;
+  return isSpokenEnglish(profile?.examId) ? <SpokenEnglishRoadmapPage /> : <DiagnosticRoadmap />;
+};
+
+// Recommendations by exam: Spoken English gets engine-backed, sub-skill video recs; IELTS unchanged.
+const RecommendationsDispatch = () => {
+  const { profile, loading, profileLoading } = useAuth();
+  if ((loading || profileLoading) && !profile) return null;
+  return isSpokenEnglish(profile?.examId) ? <SpokenEnglishRecommendationsPage /> : <Suggestion />;
 };
 
 // Full Mock by exam: Spoken English gets its own mock gate/page; IELTS keeps FullMockAssessment.
@@ -446,7 +465,7 @@ const AppRoutes = () => {
         <Route index element={<ExamNavigate to="dashboard" />} />
         <Route path="onboarding" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><OnboardingDispatch /></RoleProtectedRoute>} />
         <Route path="diagnosis" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><DiagnosisDispatch /></RoleProtectedRoute>} />
-        <Route path="diagnostic/roadmap" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDiagnosisGuard><DiagnosticRoadmap /></StudentDiagnosisGuard></RoleProtectedRoute>} />
+        <Route path="diagnostic/roadmap" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDiagnosisGuard><RoadmapDispatch /></StudentDiagnosisGuard></RoleProtectedRoute>} />
 
         <Route
           path="dashboard"
@@ -478,7 +497,7 @@ const AppRoutes = () => {
         <Route path="assessment-history" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><AssessmentHistoryPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
         <Route path="suggestion-page" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><SuggestionsPage /></StudentDrillLockGuard></RoleProtectedRoute>} />
         <Route path="report" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><Report /></StudentDrillLockGuard></RoleProtectedRoute>} />
-        <Route path="suggestion" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><Suggestion /></StudentDrillLockGuard></RoleProtectedRoute>} />
+        <Route path="suggestion" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><RecommendationsDispatch /></StudentDrillLockGuard></RoleProtectedRoute>} />
         <Route path="speaking-practice" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><StudentDrillLockGuard><SpeakingPractice /></StudentDrillLockGuard></RoleProtectedRoute>} />
 
         <Route path="drill" element={<RoleProtectedRoute allowedRoles={['STUDENT']}><DrillScreen /></RoleProtectedRoute>} />

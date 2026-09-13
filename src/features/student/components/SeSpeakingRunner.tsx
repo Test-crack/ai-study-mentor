@@ -11,7 +11,7 @@ import { callBackend, uploadFileToBackend } from "@/features/auth/services/authC
 import { cacheGetAll, cacheSet, cacheDelete, cacheClear } from "./Diagnosis/vivaRecordingCache";
 import { seSubskill } from "@/features/student/config/spokenEnglishSubskills";
 import { cn } from "@/shared/utils";
-import { Mic, Square, RotateCcw, ArrowRight, ArrowLeft, CheckCircle2, AlertTriangle, Loader2, Volume2, Trophy } from "lucide-react";
+import { Mic, Square, RotateCcw, ArrowRight, ArrowLeft, CheckCircle2, AlertTriangle, Loader2, Volume2, Trophy, CalendarClock } from "lucide-react";
 
 interface RunnerPrompt {
   id: string;
@@ -27,13 +27,15 @@ interface RunnerResult {
   section_scores?: Array<{ subskill: string; level: string; previous_level: string | null }>;
   momentum_awarded?: number;
 }
-type Phase = "loading" | "intro" | "running" | "review" | "submitting" | "result" | "error";
+type Phase = "loading" | "intro" | "running" | "review" | "submitting" | "result" | "error" | "not_scheduled";
 type RecState = "idle" | "recording" | "recorded";
+interface NextIa { date_formatted?: string; days_away?: number; number?: number }
 
 export interface SeSpeakingRunnerProps {
   questionsUrl: string;
   submitUrl: string;
   cacheKind: string;                    // "ia" | "mock" — cache namespace suffix
+  introEyebrow: string;                 // small uppercase label above the intro title
   introTitle: string;
   introBlurb: (count: number) => string;
   resultTitle: string;
@@ -43,7 +45,7 @@ export interface SeSpeakingRunnerProps {
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 const subLabel = (id: string) => seSubskill(id)?.label ?? id;
 
-export default function SeSpeakingRunner({ questionsUrl, submitUrl, cacheKind, introTitle, introBlurb, resultTitle, notReadyMsg }: SeSpeakingRunnerProps) {
+export default function SeSpeakingRunner({ questionsUrl, submitUrl, cacheKind, introEyebrow, introTitle, introBlurb, resultTitle, notReadyMsg }: SeSpeakingRunnerProps) {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const examId = profile?.examId ?? "spoken_english";
@@ -55,6 +57,7 @@ export default function SeSpeakingRunner({ questionsUrl, submitUrl, cacheKind, i
   const [idx, setIdx] = useState(0);
   const [recordings, setRecordings] = useState<Record<string, Blob>>({});
   const [result, setResult] = useState<RunnerResult | null>(null);
+  const [nextIa, setNextIa] = useState<NextIa | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [recState, setRecState] = useState<RecState>("idle");
   const [remaining, setRemaining] = useState(0);
@@ -74,7 +77,9 @@ export default function SeSpeakingRunner({ questionsUrl, submitUrl, cacheKind, i
     let cancelled = false;
     (async () => {
       try {
-        const data = await callBackend(questionsUrl, { method: "GET" });
+        // silent: this call gates on the IA schedule and can legitimately 400 with `not_ia_day`;
+        // we render that in-UI, so suppress the generic error toast callBackend would otherwise fire.
+        const data = await callBackend(questionsUrl, { method: "GET" }, { silent: true });
         if (cancelled) return;
         if (!data.success || !(data.prompts?.length)) {
           setError(notReadyMsg);
@@ -88,7 +93,13 @@ export default function SeSpeakingRunner({ questionsUrl, submitUrl, cacheKind, i
         setPhase("intro");
       } catch (e: any) {
         if (cancelled) return;
-        setError(e?.responseData?.error || "Could not load your assessment. Please try again.");
+        // Not a scheduled IA day → a friendly "come back on <date>" screen, not an error.
+        if (e?.responseData?.error === "not_ia_day") {
+          setNextIa(e.responseData.next_ia ?? null);
+          setPhase("not_scheduled");
+          return;
+        }
+        setError(e?.responseData?.message || e?.responseData?.error || "Could not load your assessment. Please try again.");
         setPhase("error");
       }
     })();
@@ -173,39 +184,154 @@ export default function SeSpeakingRunner({ questionsUrl, submitUrl, cacheKind, i
     </Centered>
   );
 
-  if (phase === "intro") return (
+  if (phase === "not_scheduled") return (
     <Shell>
-      <div className="mx-auto max-w-xl text-center">
-        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-brand-teal-200 bg-brand-teal-100"><Mic className="h-8 w-8 text-brand-teal-600" /></div>
-        <h1 className="font-dm text-2xl font-bold tracking-tight text-brand-text">{introTitle}</h1>
-        <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-brand-text-mute">{introBlurb(prompts.length)}</p>
-        <p className="mt-3 text-sm font-medium text-brand-teal-700">Covers: {[...new Set(prompts.map((p) => subLabel(p.subskill)))].join(" · ")}</p>
-        <button onClick={() => { setPhase("running"); goToPrompt(0); }} className="mt-8 inline-flex items-center gap-2 rounded-xl bg-brand-teal-600 px-6 py-3 font-semibold text-white hover:bg-brand-teal-700">Start <ArrowRight className="h-4 w-4" /></button>
+      <div className="mx-auto max-w-xl space-y-6">
+        <button onClick={() => navigate(`/${examId}/dashboard`)} className="flex items-center gap-2 text-sm font-semibold text-brand-text-mute transition-colors hover:text-brand-teal-600">
+          <ArrowLeft className="h-4 w-4" /> Back to Dashboard
+        </button>
+
+        <section className="relative overflow-hidden rounded-3xl bg-brand-ink-deep p-6 text-white sm:p-8">
+          <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-brand-teal-500/20 blur-2xl" />
+          <div className="relative mb-3 flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10"><CalendarClock className="h-5 w-5 text-brand-mint" /></div>
+            <div>
+              <p className="font-jetbrains text-[10.5px] uppercase tracking-[0.18em] text-brand-mint">{introEyebrow}</p>
+              <h1 className="font-dm text-2xl font-bold leading-tight">Not scheduled for today</h1>
+            </div>
+          </div>
+          <p className="relative max-w-lg text-sm leading-[1.6] text-brand-on-ink-mute">
+            Internal assessments run on a fixed schedule so your CEFR level tracks real progress. Today isn't an assessment day — keep drilling and come back when your next one opens.
+          </p>
+        </section>
+
+        <section className="rounded-2xl border border-brand-line bg-white p-6 text-center shadow-sm">
+          {nextIa?.date_formatted ? (
+            <>
+              <p className="font-jetbrains text-[10px] uppercase tracking-[0.16em] text-brand-text-mute">Your next assessment</p>
+              <p className="mt-2 font-dm text-2xl font-bold text-brand-text">{nextIa.date_formatted}</p>
+              <p className="mt-1 text-sm text-brand-text-mute">
+                {typeof nextIa.days_away === "number" ? (nextIa.days_away <= 0 ? "Opens today" : `${nextIa.days_away} day${nextIa.days_away !== 1 ? "s" : ""} away`) : ""}
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-brand-text-mute">Your assessment schedule will appear on your dashboard once you've started drilling.</p>
+          )}
+          <button onClick={() => navigate(`/${examId}/dashboard`)} className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-teal-600 px-6 py-3.5 font-semibold text-white transition-colors hover:bg-brand-teal-700">
+            Back to dashboard <ArrowRight className="h-4 w-4" />
+          </button>
+        </section>
       </div>
     </Shell>
   );
+
+  if (phase === "intro") {
+    const covers = [...new Set(prompts.map((p) => subLabel(p.subskill)))];
+    const estMin = Math.max(1, Math.round(prompts.reduce((s, p) => s + p.speakSeconds + (p.prepSeconds || 0), 0) / 60));
+    const steps = [
+      { icon: Volume2, title: "Listen or read the prompt", body: "Each prompt is an audio question to answer or a short passage to read aloud." },
+      { icon: Mic, title: "Record your answer", body: "Speak naturally within the time limit — you can play it back and re-record before moving on." },
+      { icon: Trophy, title: "Get your CEFR level", body: "Every sub-skill is graded on the CEFR scale (A1–C2) and your speaking profile updates instantly." },
+    ];
+    return (
+      <Shell>
+        <div className="mx-auto max-w-2xl space-y-6">
+          <button onClick={() => navigate(`/${examId}/dashboard`)} className="flex items-center gap-2 text-sm font-semibold text-brand-text-mute transition-colors hover:text-brand-teal-600">
+            <ArrowLeft className="h-4 w-4" /> Back to Dashboard
+          </button>
+
+          <section className="relative overflow-hidden rounded-3xl bg-brand-ink-deep p-6 text-white sm:p-8">
+            <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-brand-teal-500/20 blur-2xl" />
+            <div className="relative mb-3 flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10"><Mic className="h-5 w-5 text-brand-mint" /></div>
+              <div>
+                <p className="font-jetbrains text-[10.5px] uppercase tracking-[0.18em] text-brand-mint">{introEyebrow}</p>
+                <h1 className="font-dm text-2xl font-bold leading-tight">{introTitle}</h1>
+              </div>
+            </div>
+            <p className="relative max-w-lg text-sm leading-[1.6] text-brand-on-ink-mute">{introBlurb(prompts.length)}</p>
+            <div className="relative mt-5 flex flex-wrap gap-2">
+              {[`${prompts.length} prompt${prompts.length !== 1 ? "s" : ""}`, `~${estMin} min`, "CEFR-graded"].map((m) => (
+                <span key={m} className="rounded-full bg-white/10 px-3 py-1 font-jetbrains text-[11px] font-semibold tracking-wide text-white/90">{m}</span>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-brand-line bg-white p-6 shadow-sm">
+            <p className="font-jetbrains text-[10px] uppercase tracking-[0.16em] text-brand-text-mute">How it works</p>
+            <div className="mt-4 space-y-4">
+              {steps.map((s, i) => (
+                <div key={i} className="flex gap-3.5">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-teal-50 text-brand-teal-600"><s.icon className="h-4 w-4" /></div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-brand-text">{s.title}</p>
+                    <p className="text-[13px] leading-relaxed text-brand-text-mute">{s.body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {covers.length > 0 && (
+              <div className="mt-5 border-t border-brand-line pt-4">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-brand-text-mute">Covers</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {covers.map((c) => (
+                    <span key={c} className="rounded-full bg-brand-teal-50 px-3 py-1 text-xs font-semibold text-brand-teal-700">{c}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <button onClick={() => { setPhase("running"); goToPrompt(0); }} className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-teal-600 px-6 py-3.5 font-semibold text-white transition-colors hover:bg-brand-teal-700">
+              Start <ArrowRight className="h-4 w-4" />
+            </button>
+            <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-brand-text-mute"><Mic className="h-3.5 w-3.5" /> We'll ask for microphone access when you start.</p>
+          </section>
+        </div>
+      </Shell>
+    );
+  }
 
   if (phase === "submitting") return <Centered><Loader2 className="h-8 w-8 animate-spin text-brand-teal-600" /><p className="mt-3 text-brand-text-mute">Scoring your answers…</p></Centered>;
 
   if (phase === "result" && result) return (
     <Shell>
-      <div className="mx-auto max-w-xl text-center">
-        <Trophy className="mx-auto h-12 w-12 text-brand-mint" />
-        <h1 className="mt-3 font-dm text-2xl font-bold text-brand-text">{resultTitle}</h1>
-        <p className="mt-1 text-brand-text-mute">Your level: <span className="font-bold text-brand-text">{result.cefrLabel}</span>{result.momentum_awarded ? ` · +${result.momentum_awarded} momentum` : ""}</p>
-        {result.section_scores && result.section_scores.length > 0 && (
-          <div className="mt-6 space-y-2 text-left">
-            {result.section_scores.map((s) => (
-              <div key={s.subskill} className="flex items-center justify-between rounded-xl border border-brand-line bg-brand-bg-alt px-4 py-2.5">
-                <span className="text-sm font-medium text-brand-text">{subLabel(s.subskill)}</span>
-                <span className="font-jetbrains text-xs font-bold uppercase text-brand-teal-700">
-                  {s.previous_level && s.previous_level !== s.level ? `${s.previous_level.toUpperCase()} → ` : ""}{(s.level || "").toUpperCase()}
-                </span>
-              </div>
-            ))}
+      <div className="mx-auto max-w-xl space-y-6">
+        <section className="relative overflow-hidden rounded-3xl bg-brand-ink-deep p-6 text-center text-white sm:p-8">
+          <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-brand-mint/20 blur-2xl" />
+          <div className="relative mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10"><Trophy className="h-7 w-7 text-brand-mint" /></div>
+          <h1 className="relative font-dm text-2xl font-bold">{resultTitle}</h1>
+          <div className="relative mt-4 inline-flex items-baseline gap-2 rounded-2xl bg-white/10 px-5 py-3">
+            <span className="font-jetbrains text-[10px] uppercase tracking-[0.16em] text-brand-mint">Your level</span>
+            <span className="font-dm text-3xl font-bold leading-none text-white">{result.cefrLabel ?? "—"}</span>
           </div>
+          {result.momentum_awarded ? <p className="relative mt-3 text-sm text-brand-on-ink-mute">+{result.momentum_awarded} momentum earned</p> : null}
+        </section>
+
+        {result.section_scores && result.section_scores.length > 0 && (
+          <section className="rounded-2xl border border-brand-line bg-white p-6 shadow-sm">
+            <p className="mb-4 font-jetbrains text-[10px] uppercase tracking-[0.16em] text-brand-text-mute">Sub-skill breakdown</p>
+            <div className="space-y-2">
+              {result.section_scores.map((s) => {
+                const improved = s.previous_level && s.previous_level !== s.level;
+                return (
+                  <div key={s.subskill} className="flex items-center justify-between rounded-xl border border-brand-line bg-brand-bg-alt px-4 py-2.5">
+                    <span className="text-sm font-medium text-brand-text">{subLabel(s.subskill)}</span>
+                    <span className="flex items-center gap-1.5 font-jetbrains text-xs font-bold uppercase">
+                      {improved && <span className="text-brand-text-mute">{s.previous_level!.toUpperCase()} →</span>}
+                      <span className="text-brand-teal-700">{(s.level || "").toUpperCase()}</span>
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
         )}
-        <button onClick={() => navigate(`/${examId}/dashboard`, { replace: true })} className="mt-8 w-full rounded-xl bg-brand-teal-600 px-5 py-3 font-semibold text-white hover:bg-brand-teal-700">Back to dashboard</button>
+
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <button onClick={() => navigate(`/${examId}/assessment-history`)} className="flex-1 rounded-xl border border-brand-line bg-white px-5 py-3 font-semibold text-brand-text transition-colors hover:border-brand-teal-300">View history</button>
+          <button onClick={() => navigate(`/${examId}/dashboard`, { replace: true })} className="flex-1 rounded-xl bg-brand-teal-600 px-5 py-3 font-semibold text-white transition-colors hover:bg-brand-teal-700">Back to dashboard</button>
+        </div>
       </div>
     </Shell>
   );
