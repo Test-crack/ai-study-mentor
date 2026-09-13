@@ -134,7 +134,7 @@ export const StudentSidebar = ({
     'dashboard', 'games',
     'internal', 'full mock', 'assessment-history',
     'listening', 'reading', 'writing', 'speaking-assessment', 'speaking-history', 'speed',
-    'roadmap', 'suggestion', 'how-it-works',
+    'roadmap', 'suggestion', 'Report', 'how-it-works',
   ]);
 
   const filteredGroups = menuGroups.map(group => {
