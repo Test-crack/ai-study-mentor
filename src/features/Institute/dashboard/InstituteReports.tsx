@@ -18,6 +18,8 @@ import { SectionCard, StatusBadge, BandPill, TableSkeleton, EmptyState, ErrorBan
 import { callBackend } from "@/features/auth/services/authClient";
 import { getBackendUrl } from "@/shared/utils";
 import { InstructorEffectivenessTable, pctOf } from "@/shared/components/analytics/InstructorEffectivenessTable";
+import { getSelectedExamId } from "@/shared/state/examContext";
+import { scoreAxis, resolveExam } from "@/shared/exam/examScale";
 import type {
   CohortProgressData, BatchComparisonRow, GoalAchievementData, SubskillHeatmapRow,
   EngagementWeek, InstructorEffectivenessRow,
@@ -54,6 +56,8 @@ function FailedState() {
 }
 
 export default function InstituteReports() {
+  const examId = getSelectedExamId();
+  const scoreLabel = resolveExam(examId).scoreLabel;
   const [cohort, setCohort] = useState<CohortProgressData | null>(null);
   const [comparison, setComparison] = useState<BatchComparisonRow[]>([]);
   const [goals, setGoals] = useState<GoalAchievementData | null>(null);
@@ -155,7 +159,7 @@ export default function InstituteReports() {
       ) : (
         <>
           {/* Cohort progress */}
-          <SectionCard title="Cohort Band Progress" icon={TrendingUp}>
+          <SectionCard title={`Cohort ${scoreLabel} Progress`} icon={TrendingUp}>
             {!cohort || cohort.monthly_points.length === 0 ? (
               failed.has("cohort-progress") ? <FailedState /> : <EmptyState title="Not enough data yet" hint="Band trends appear once students complete assessments across months." />
             ) : (
@@ -164,7 +168,7 @@ export default function InstituteReports() {
                   <LineChart data={cohort.monthly_points} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-brand-line" />
                     <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#94a3b8" />
-                    <YAxis domain={[4, 9]} tick={{ fontSize: 12 }} stroke="#94a3b8" />
+                    <YAxis {...scoreAxis(examId)} tick={{ fontSize: 12 }} stroke="#94a3b8" />
                     <Tooltip contentStyle={{ borderRadius: 12, fontSize: 12 }} />
                     <Legend wrapperStyle={{ fontSize: 12 }} />
                     <Line type="monotone" dataKey="avg_ia_band" name="Avg IA band" stroke="#12897C" strokeWidth={2.5} dot={{ r: 3 }} connectNulls />
@@ -208,7 +212,7 @@ export default function InstituteReports() {
                     <tr className="font-jetbrains text-[10px] uppercase tracking-[0.12em] text-brand-text-mute border-b border-brand-line">
                       <th className="py-2 pr-4 font-bold whitespace-nowrap">Batch</th>
                       <th className="py-2 px-3 font-bold whitespace-nowrap">Students</th>
-                      <th className="py-2 px-3 font-bold whitespace-nowrap">Avg Band</th>
+                      <th className="py-2 px-3 font-bold whitespace-nowrap">Avg {scoreLabel}</th>
                       <th className="py-2 px-3 font-bold whitespace-nowrap">Improvement</th>
                       <th className="py-2 px-3 font-bold whitespace-nowrap">IA Completion</th>
                       <th className="py-2 px-3 font-bold whitespace-nowrap">Engagement</th>
@@ -220,7 +224,7 @@ export default function InstituteReports() {
                       <tr key={b.batch_id} className="hover:bg-brand-bg-alt/60 transition-colors">
                         <td className="py-3 pr-4 text-sm font-semibold text-brand-text whitespace-nowrap">{b.batch_name}</td>
                         <td className="py-3 px-3 text-sm text-brand-text-mute tabular-nums">{b.student_count}</td>
-                        <td className="py-3 px-3"><BandPill band={b.avg_band} /></td>
+                        <td className="py-3 px-3"><BandPill band={b.avg_band} examId={examId} /></td>
                         <td className="py-3 px-3 text-sm font-bold tabular-nums">
                           {b.improvement_delta == null ? <span className="text-brand-text-mute">—</span> : (
                             <span className={b.improvement_delta >= 0 ? "text-emerald-600" : "text-rose-600"}>
