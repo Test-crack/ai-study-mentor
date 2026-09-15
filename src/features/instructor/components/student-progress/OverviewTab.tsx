@@ -5,6 +5,7 @@ import {
 } from 'recharts';
 import { cn } from '@/shared/utils';
 import { bandFillPct } from '@/shared/utils/bandScale';
+import { scoreDomain, formatScore, resolveExam, scoreFillPct } from '@/shared/exam/examScale';
 import { isSpokenEnglish } from '@/features/student/utils/exam';
 import { cefrColor, cefrGaugeColor, CEFR_ORDER, cefrOrdinal } from '@/features/student/config/cefrDisplay';
 import { SE_SUBSKILLS } from '@/features/student/config/spokenEnglishSubskills';
@@ -115,6 +116,9 @@ function BaselineComparison({ baseline, competency }: {
 }
 
 export function IeltsOverviewTab({ data }: Props) {
+  const examId              = data.student.exam_id;
+  const scoreLabel          = resolveExam(examId).scoreLabel;
+  const [, scaleMax]        = scoreDomain(examId);
   const competency          = data.competency         ?? [];
   const diagnostic_baseline = data.diagnostic_baseline ?? { L: null, R: null, W: null, S: null };
   const lexigrid_stats      = data.lexigrid_stats      ?? { games_last_14: 0, avg_words_solved: 0, bonus_rate: 0 };
@@ -122,7 +126,7 @@ export function IeltsOverviewTab({ data }: Props) {
 
   const radarData = competency
     .filter(r => r.band_score > 0)
-    .map(r => ({ skill: r.skill, band: r.band_score, fullMark: 9 }));
+    .map(r => ({ skill: r.skill, band: r.band_score, fullMark: scaleMax }));
 
   const eligOk = ia_eligibility.prerequisites_met;
 
@@ -164,12 +168,12 @@ export function IeltsOverviewTab({ data }: Props) {
                   />
                   <PolarRadiusAxis
                     angle={30}
-                    domain={[4, 9]}
+                    domain={scoreDomain(examId)}
                     tick={{ fontSize: 9, fill: '#94a3b8' }}
                     tickCount={4}
                   />
                   <Radar
-                    name="Band"
+                    name={scoreLabel}
                     dataKey="band"
                     stroke="#12897C"
                     fill="#12897C"
@@ -177,7 +181,7 @@ export function IeltsOverviewTab({ data }: Props) {
                     strokeWidth={2}
                   />
                   <Tooltip
-                    formatter={(v: number) => [`${v.toFixed(1)}`, 'Band']}
+                    formatter={(v: number) => [formatScore(examId, v), scoreLabel]}
                     contentStyle={{ borderRadius: '10px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: 12 }}
                   />
                 </RadarChart>
@@ -191,10 +195,10 @@ export function IeltsOverviewTab({ data }: Props) {
                   <div className="flex-1 h-2 bg-brand-bg-alt rounded-full overflow-hidden">
                     <div
                       className="h-full bg-brand-teal-500 rounded-full"
-                      style={{ width: `${bandFillPct(r.band)}%` }}
+                      style={{ width: `${scoreFillPct(examId, r.band)}%` }}
                     />
                   </div>
-                  <span className="text-xs font-black text-brand-text w-8 text-right">{r.band.toFixed(1)}</span>
+                  <span className="text-xs font-black text-brand-text w-8 text-right">{formatScore(examId, r.band)}</span>
                 </div>
               ))}
             </div>
