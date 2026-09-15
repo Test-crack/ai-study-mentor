@@ -10,45 +10,12 @@ import { InstituteOwnerTopbar } from '../components/InstituteOwnerTopbar';
 import { fetchStudents, StudentRow } from '../services/instituteOwnerService';
 import { useToast } from '@/shared/hooks/use-toast';
 import { isSpokenEnglish } from '@/features/student/utils/exam';
-import { CEFR_ORDER, cefrBg, cefrColor } from '@/features/student/config/cefrDisplay';
+import { ScorePill } from '@/shared/exam/ScorePill';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/shared/components/ui/select';
 
 const toSlug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function bandPill(band: number | null) {
-  if (band === null) return <span className="text-xs text-brand-text-mute">—</span>;
-  const b = Number(band);
-  let cls = 'inline-flex items-center justify-center text-xs font-bold tabular-nums px-2.5 py-0.5 rounded-full ring-1 ring-inset ';
-  if (b >= 7)      cls += 'bg-emerald-50 text-emerald-700 ring-emerald-600/20';
-  else if (b >= 6) cls += 'bg-brand-blue-50 text-brand-blue-600 ring-brand-blue-600/20';
-  else if (b >= 5) cls += 'bg-amber-50 text-amber-700 ring-amber-600/20';
-  else             cls += 'bg-rose-50 text-rose-700 ring-rose-600/20';
-  return <span className={cls}>{b.toFixed(1)}</span>;
-}
-
-// current_band for a Spoken English row is a CEFR ordinal (0-6), not an IELTS
-// band (0-9) — see computeCurrentBand in batchDashboardQueries.ts. CEFR_ORDINAL
-// (backend) and CEFR_ORDER (frontend) are the same ladder in the same order, so
-// rounding the ordinal and indexing CEFR_ORDER recovers the real level label.
-function cefrLevelLabel(ordinal: number | null): string | null {
-  if (ordinal === null) return null;
-  const i = Math.max(0, Math.min(CEFR_ORDER.length - 1, Math.round(ordinal)));
-  return CEFR_ORDER[i];
-}
-
-function cefrPill(ordinal: number | null) {
-  const label = cefrLevelLabel(ordinal);
-  if (label === null) return <span className="text-xs text-brand-text-mute">—</span>;
-  return (
-    <span className={`inline-flex items-center justify-center text-xs font-bold px-2.5 py-0.5 rounded-full border ${cefrBg(label)} ${cefrColor(label)}`}>
-      {label}
-    </span>
-  );
-}
 
 function trendIcon(trend: 'up' | 'flat' | 'down' | null) {
   if (trend === 'up')   return <TrendingUp className="h-4 w-4 text-emerald-500" />;
@@ -263,7 +230,7 @@ export default function InstituteStudentsPage() {
                             <span className="text-brand-text-mute text-xs">{row.batch_name}</span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
-                            {isSpokenEnglish(row.exam_id) ? cefrPill(row.current_band) : bandPill(row.current_band)}
+                            <ScorePill examId={row.exam_id} value={row.current_band} />
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             <span className="text-brand-text-mute text-xs tabular-nums">

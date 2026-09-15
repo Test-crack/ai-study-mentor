@@ -17,33 +17,11 @@ import { fetchStudentsOverview } from "../services/instituteAdminService";
 import type { StudentRow } from "@/features/InstituteOwner/services/instituteOwnerService";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { isSpokenEnglish } from "@/features/student/utils/exam";
-import { CEFR_ORDER, cefrBg, cefrColor } from "@/features/student/config/cefrDisplay";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/shared/components/ui/select";
 
 type RiskFilter = "all" | "at-risk" | "on-track";
-
-// current_band for a Spoken English row is a CEFR ordinal (0-6), not an IELTS
-// band (0-9) — BandPill's thresholds/colors are IELTS-only, so SE rows use this
-// instead. CEFR_ORDINAL (backend) and CEFR_ORDER (frontend) are the same ladder
-// in the same order, so rounding the ordinal and indexing CEFR_ORDER recovers
-// the real level label.
-function cefrLevelLabel(ordinal: number | null | undefined): string | null {
-  if (ordinal == null) return null;
-  const i = Math.max(0, Math.min(CEFR_ORDER.length - 1, Math.round(ordinal)));
-  return CEFR_ORDER[i];
-}
-
-function CefrPill({ ordinal }: { ordinal: number | null | undefined }) {
-  const label = cefrLevelLabel(ordinal);
-  if (label === null) return <span className="text-brand-text-mute text-sm font-semibold">—</span>;
-  return (
-    <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-bold ${cefrBg(label)} ${cefrColor(label)}`}>
-      {label}
-    </span>
-  );
-}
 
 function TrendIcon({ trend }: { trend: StudentRow["band_trend"] }) {
   if (trend === "up")   return <TrendingUp className="h-4 w-4 text-emerald-500" />;
@@ -238,16 +216,12 @@ export default function InstituteStudents() {
                         <td className="px-4 py-3 text-sm text-brand-text-mute whitespace-nowrap">{s.batch_name || "—"}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1.5">
-                            {isSpokenEnglish(s.exam_id)
-                              ? <CefrPill ordinal={s.current_band} />
-                              : <BandPill band={s.current_band} />}
-                            {!isSpokenEnglish(s.exam_id) && <TrendIcon trend={s.band_trend} />}
+                            <BandPill band={s.current_band} examId={s.exam_id} />
+                            <TrendIcon trend={s.band_trend} />
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          {isSpokenEnglish(s.exam_id)
-                            ? <span className="text-brand-text-mute text-sm font-semibold">—</span>
-                            : <BandPill band={s.target_band} />}
+                          <BandPill band={s.target_band} examId={s.exam_id} />
                         </td>
                         <td className="px-4 py-3">
                           <span className="inline-flex items-center gap-1 text-sm font-bold text-brand-text tabular-nums">

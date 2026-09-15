@@ -8,6 +8,7 @@
 // once on the layout wrapper, inherited from there).
 import { ReactNode } from "react";
 import { LucideIcon, Inbox } from "lucide-react";
+import { ScorePill } from "@/shared/exam/ScorePill";
 
 // ─── Page hero (dark ink banner — the top of every admin page) ────────────────
 
@@ -128,21 +129,16 @@ export function StatusBadge({
   );
 }
 
-// ─── Band pill (color-coded IELTS band) ───────────────────────────────────────
+// ─── Score pill (exam-aware) ──────────────────────────────────────────────────
+// Renders any exam's headline score in its own scale/colour via the shared ScorePill. Kept named
+// BandPill for its existing call sites; pass `examId` (+ `subScores`) for correct non-IELTS
+// rendering. Omitting examId falls back to IELTS, preserving legacy behaviour.
 
-export function BandPill({ band }: { band: number | null | undefined }) {
-  if (band == null) {
+export function BandPill({ band, examId, subScores }: { band: number | null | undefined; examId?: string | null; subScores?: Record<string, any> | null }) {
+  if (band == null && !subScores) {
     return <span className="text-brand-text-mute text-sm font-semibold">—</span>;
   }
-  const tone =
-    band >= 7 ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20"
-    : band >= 6 ? "bg-sky-50 text-sky-700 ring-sky-600/20"
-    : "bg-amber-50 text-amber-700 ring-amber-600/20";
-  return (
-    <span className={`inline-flex rounded-full ring-1 ring-inset px-2.5 py-0.5 text-xs font-bold ${tone}`}>
-      {band.toFixed(1)}
-    </span>
-  );
+  return <ScorePill examId={examId} value={band} subScores={subScores} />;
 }
 
 // ─── Skeletons ────────────────────────────────────────────────────────────────
