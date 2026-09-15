@@ -164,6 +164,7 @@ export interface AtRiskRow {
     flags: string[]; primary_flag: string;
     days_inactive: number; missed_ia_count: number;
     current_band: number | null; target_band: number | null;
+    exam_id: string;
 }
 
 /**

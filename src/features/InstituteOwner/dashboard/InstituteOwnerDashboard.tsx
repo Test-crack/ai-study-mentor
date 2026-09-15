@@ -13,21 +13,16 @@ import {
   fetchSummary, fetchAtRisk,
   type InstituteSummary, type AtRiskRow,
 } from '../services/instituteOwnerService';
+import { ScorePill } from '@/shared/exam/ScorePill';
 
 const toSlug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function BandPill({ band }: { band: number | null }) {
+// Exam-aware: renders each at-risk student's score in their own exam's scale/colour.
+function BandPill({ band, examId }: { band: number | null; examId?: string | null }) {
   if (band === null) return <span className="text-brand-text-mute text-sm">—</span>;
-  const color = band >= 7 ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
-    : band >= 6 ? 'bg-brand-blue-50 text-brand-blue-600 ring-brand-blue-600/20'
-    : 'bg-amber-50 text-amber-700 ring-amber-600/20';
-  return (
-    <span className={`inline-flex items-center justify-center text-xs font-bold tabular-nums px-2.5 py-0.5 rounded-full ring-1 ring-inset ${color}`}>
-      {band.toFixed(1)}
-    </span>
-  );
+  return <ScorePill examId={examId} value={band} />;
 }
 
 function TrendIcon({ trend }: { trend: 'up' | 'flat' | 'down' | null }) {
@@ -290,7 +285,7 @@ export default function InstituteOwnerDashboard() {
                                   <AlertTriangle className="w-3 h-3" /> {s.primary_flag}
                                 </span>
                               </td>
-                              <td className="px-4 py-3 text-center"><BandPill band={s.current_band} /></td>
+                              <td className="px-4 py-3 text-center"><BandPill band={s.current_band} examId={s.exam_id} /></td>
                               <td className="px-4 py-3 text-center text-xs tabular-nums text-brand-text-mute whitespace-nowrap">
                                 {s.days_inactive === -1 ? 'Never' : s.days_inactive === 0 ? 'Today' : `${s.days_inactive}d`}
                               </td>
