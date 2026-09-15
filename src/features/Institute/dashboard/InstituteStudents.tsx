@@ -17,6 +17,8 @@ import { fetchStudentsOverview } from "../services/instituteAdminService";
 import type { StudentRow } from "@/features/InstituteOwner/services/instituteOwnerService";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { isSpokenEnglish } from "@/features/student/utils/exam";
+import { getSelectedExamId } from "@/shared/state/examContext";
+import { resolveExam } from "@/shared/exam/examScale";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/shared/components/ui/select";
@@ -34,6 +36,7 @@ const PAGE_SIZE = 15;
 
 export default function InstituteStudents() {
   const navigate = useNavigate();
+  const scoreLabel = resolveExam(getSelectedExamId()).scoreLabel;
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -184,7 +187,7 @@ export default function InstituteStudents() {
                     <tr className="font-jetbrains text-[10px] uppercase tracking-[0.12em] text-brand-text-mute bg-brand-bg-alt/80 border-b border-brand-line">
                       <th className="px-4 sm:px-5 py-3 font-bold whitespace-nowrap">Student</th>
                       <th className="px-4 py-3 font-bold whitespace-nowrap">Batch</th>
-                      <th className="px-4 py-3 font-bold whitespace-nowrap">Band</th>
+                      <th className="px-4 py-3 font-bold whitespace-nowrap">{scoreLabel}</th>
                       <th className="px-4 py-3 font-bold whitespace-nowrap">Target</th>
                       <th className="px-4 py-3 font-bold whitespace-nowrap">Streak</th>
                       <th className="px-4 py-3 font-bold whitespace-nowrap">Momentum</th>

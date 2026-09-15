@@ -11,6 +11,8 @@ import { fetchStudents, StudentRow } from '../services/instituteOwnerService';
 import { useToast } from '@/shared/hooks/use-toast';
 import { isSpokenEnglish } from '@/features/student/utils/exam';
 import { ScorePill } from '@/shared/exam/ScorePill';
+import { getSelectedExamId } from '@/shared/state/examContext';
+import { resolveExam } from '@/shared/exam/examScale';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/shared/components/ui/select';
@@ -74,6 +76,7 @@ function TableSkeleton() {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function InstituteStudentsPage() {
+  const scoreLabel = resolveExam(getSelectedExamId()).scoreLabel;
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -209,7 +212,7 @@ export default function InstituteStudentsPage() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-brand-line bg-brand-bg-alt">
-                        {['Name', 'Batch', 'Band', 'Target', 'Gap', 'Streak', 'Drilled', 'Last Active', 'Flag'].map((h, i) => (
+                        {['Name', 'Batch', scoreLabel, 'Target', 'Gap', 'Streak', 'Drilled', 'Last Active', 'Flag'].map((h, i) => (
                           <th key={h} className={`font-jetbrains text-left text-[10px] font-bold text-brand-text-mute uppercase tracking-[0.15em] px-4 py-3 whitespace-nowrap ${i === 0 ? 'pl-4 sm:pl-6' : ''}`}>
                             {h}
                           </th>
