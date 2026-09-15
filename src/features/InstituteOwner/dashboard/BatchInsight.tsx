@@ -12,6 +12,8 @@ import { callBackend } from '@/features/auth/services/authClient';
 import { getBackendUrl } from '@/shared/utils';
 import { useToast } from '@/shared/hooks/use-toast';
 import { fetchSummary, type InstituteSummary } from '../services/instituteOwnerService';
+import { getSelectedExamId } from '@/shared/state/examContext';
+import { resolveExam, formatScore } from '@/shared/exam/examScale';
 
 
 // Map API status to colours
@@ -81,6 +83,8 @@ function BatchRowSkeleton() {
 export default function BatchInsight() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const examId = getSelectedExamId();
+  const scoreLabel = resolveExam(examId).scoreLabel;
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [loading, setLoading]   = useState(true);
   const [batches, setBatches]   = useState<any[]>([]);
@@ -112,7 +116,7 @@ export default function BatchInsight() {
   const topMetrics = [
     { title: 'Total Batches',   value: String(batches.length),                                    subtext: 'Across institute',                          icon: BookOpen,      accent: 'bg-brand-blue-50 text-brand-blue-600' },
     { title: 'Total Students',  value: String(summary?.total_students ?? '—'),                    subtext: `${summary?.active_today ?? 0} active today`, icon: Users,         accent: 'bg-brand-teal-50 text-brand-teal-600' },
-    { title: 'Avg Band Score',  value: summary?.avg_band != null ? summary.avg_band.toFixed(1) : '—', subtext: 'Across all students',                   icon: BarChart2,     accent: 'bg-emerald-50 text-emerald-600' },
+    { title: `Avg ${scoreLabel}`,  value: summary?.avg_band != null ? formatScore(examId, summary.avg_band) : '—', subtext: 'Across all students',                   icon: BarChart2,     accent: 'bg-emerald-50 text-emerald-600' },
     { title: 'At Risk',         value: String(summary?.at_risk_count ?? '—'),                     subtext: `IA completion: ${iaCompRate}% (7d)`,        icon: AlertTriangle, accent: 'bg-rose-50 text-rose-600' },
   ];
 
@@ -226,9 +230,9 @@ export default function BatchInsight() {
                                 <p className="text-2xl font-black tabular-nums text-brand-text">{enrolled}</p>
                               </div>
                               <div>
-                                <p className="font-jetbrains text-[10px] font-bold uppercase tracking-wider text-brand-text-mute mb-1">Avg Band</p>
+                                <p className="font-jetbrains text-[10px] font-bold uppercase tracking-wider text-brand-text-mute mb-1">Avg {scoreLabel}</p>
                                 <p className="text-2xl font-black tabular-nums text-brand-text">
-                                  {avgBand !== null ? avgBand.toFixed(1) : '—'}
+                                  {avgBand !== null ? formatScore(examId, avgBand) : '—'}
                                 </p>
                               </div>
                               <div>

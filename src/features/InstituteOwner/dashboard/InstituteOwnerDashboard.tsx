@@ -14,6 +14,8 @@ import {
   type InstituteSummary, type AtRiskRow,
 } from '../services/instituteOwnerService';
 import { ScorePill } from '@/shared/exam/ScorePill';
+import { getSelectedExamId } from '@/shared/state/examContext';
+import { resolveExam, formatScore } from '@/shared/exam/examScale';
 
 const toSlug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
@@ -72,6 +74,8 @@ function DashboardSkeleton() {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function InstituteOwnerDashboard() {
+  const examId = getSelectedExamId();
+  const scoreLabel = resolveExam(examId).scoreLabel;
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -167,8 +171,8 @@ export default function InstituteOwnerDashboard() {
                     accent="bg-brand-blue-50 text-brand-blue-600"
                   />
                   <KpiCard
-                    label="Avg Band Score" icon={BarChart2}
-                    value={summary?.avg_band !== null && summary?.avg_band !== undefined ? summary.avg_band.toFixed(1) : '—'}
+                    label={`Avg ${scoreLabel}`} icon={BarChart2}
+                    value={summary?.avg_band !== null && summary?.avg_band !== undefined ? formatScore(examId, summary.avg_band) : '—'}
                     sub={`${summary?.mock_completed_this_month ?? 0} mocks this month`}
                     accent="bg-emerald-50 text-emerald-600"
                   />

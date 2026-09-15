@@ -20,6 +20,8 @@ import { fetchBatches, BatchSummary } from "../services/batchService";
 import type { InstituteSummary, InstructorRow } from "@/features/InstituteOwner/services/instituteOwnerService";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { useToast } from "@/shared/hooks/use-toast";
+import { getSelectedExamId } from "@/shared/state/examContext";
+import { resolveExam, formatScore } from "@/shared/exam/examScale";
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 
@@ -29,6 +31,8 @@ import { useToast } from "@/shared/hooks/use-toast";
  */
 function HeroBanner({ summary }: { summary: InstituteSummary | null }) {
   const navigate = useNavigate();
+  const examId = getSelectedExamId();
+  const scoreLabel = resolveExam(examId).scoreLabel;
   return (
     <PageHero
       eyebrow="Admin Portal"
@@ -41,7 +45,7 @@ function HeroBanner({ summary }: { summary: InstituteSummary | null }) {
         summary
           ? `${summary.total_students} students across ${summary.total_batches} batches · ` +
             `${summary.instructor_count} tutors` +
-            (summary.avg_band != null ? ` · average band ${summary.avg_band}` : "")
+            (summary.avg_band != null ? ` · average ${scoreLabel.toLowerCase()} ${formatScore(examId, summary.avg_band)}` : "")
           : "Live operational overview across all batches"
       }
       actions={
