@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { SuperAdminSidebar } from '../Components/SuperadminSidebar';
 import {
   Search, Copy, Download, Loader2, Lock, ChevronDown, ChevronRight,
-  Headphones, BookOpen, PenLine, Mic, Menu,
+  Headphones, BookOpen, PenLine, Mic, Menu, Calculator, Layers,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/shared/components/ui/sheet';
 import { Button } from '@/shared/components/ui/button';
@@ -16,11 +16,16 @@ import { cn } from '@/shared/utils';
 import { fetchExamsForConfig, fetchExamConfig, type ExamConfigSummary } from '../services/superadminService';
 import { useToast } from '@/shared/hooks/use-toast';
 
-const COMPONENT_ICON: Record<string, React.ComponentType<{ className?: string }>> = {
+// Icon by component MODALITY (the config's stable, exam-neutral field) rather than by id, so any
+// exam's components — GRE/GMAT quantitative, integrated tasks, future exams — get a sensible icon
+// with a generic fallback, instead of assuming the 4 IELTS skill ids.
+const MODALITY_ICON: Record<string, React.ComponentType<{ className?: string }>> = {
   listening: Headphones,
   reading: BookOpen,
   writing: PenLine,
   speaking: Mic,
+  quantitative: Calculator,
+  integrated: Layers,
 };
 
 function StatusBadge({ status }: { status: string }) {
@@ -312,7 +317,7 @@ export default function ExamConfigs() {
                       </div>
                       <div className="space-y-2.5 bg-white/5 rounded-xl p-3 border border-white/10">
                         {components.map((c) => {
-                          const Icon = COMPONENT_ICON[c.id] ?? BookOpen;
+                          const Icon = MODALITY_ICON[String((c as any).modality ?? '').toLowerCase()] ?? MODALITY_ICON[c.id] ?? Layers;
                           return (
                             <div key={c.id} className="flex items-center gap-2 sm:gap-3">
                               <Icon className="h-4 w-4 text-white/50 shrink-0" />
