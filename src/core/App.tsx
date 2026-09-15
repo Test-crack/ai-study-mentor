@@ -9,6 +9,7 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet, useParams, useLocation 
 import { setSelectedExamId } from "@/shared/state/examContext";
 import { isSpokenEnglish } from "@/features/student/utils/exam";
 import { AuthProvider, useAuth } from "@/features/auth/hooks/useAuth";
+import { ExamConfigProvider } from "@/shared/exam/ExamConfigProvider";
 import { callBackend } from "@/features/auth/services/authClient";
 import { RoleProtectedRoute } from "@/shared/components/auth/ProtectedRoute";
 import { RequireActiveInstitute } from "@/features/auth/components/RequireActiveInstitute";
@@ -557,7 +558,9 @@ const App = () => (
               <NotificationsProvider>
                 <InstructorNotificationsProvider>
                   <WebSocketProvider>
-                    <AppRoutes />
+                    <ExamConfigProvider>
+                      <AppRoutes />
+                    </ExamConfigProvider>
                   </WebSocketProvider>
                 </InstructorNotificationsProvider>
               </NotificationsProvider>
