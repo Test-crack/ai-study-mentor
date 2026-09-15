@@ -7,6 +7,7 @@
 // never new colour thresholds.
 
 import { getPublicExamConfig, PublicScale } from "./examConfigStore";
+import { cefrColor, cefrBg, cefrGaugeColor } from "@/features/student/config/cefrDisplay";
 
 export interface ResolvedScale {
   kind: "numeric" | "ordinal";
@@ -117,38 +118,69 @@ export function formatScore(
   return value.toFixed(decimals(scale.step));
 }
 
-// One universal colour ramp keyed on fill %, so every exam gets sensible colours from its bounds
-// alone. Tuned so IELTS lands close to its historical cutoffs (7.5→emerald, 6→teal, 5→amber).
+// Colour is dispatched PER SCALE so the two live exams keep their exact historical palettes
+// (nothing stable shifts), while any new/unknown exam colours by a universal fill-% ramp derived
+// from its own scale bounds — so a new exam still gets sensible colours with zero code here.
 type Tone = "strong" | "good" | "developing" | "weak";
 function toneFor(pct: number): Tone {
-  if (pct >= 70) return "strong";
+  if (pct >= 60) return "strong";
   if (pct >= 40) return "good";
   if (pct >= 20) return "developing";
   return "weak";
 }
-
-const TEXT: Record<Tone, string> = {
-  strong: "text-emerald-600",
-  good: "text-brand-teal-600",
-  developing: "text-amber-600",
-  weak: "text-rose-600",
-};
-const BADGE: Record<Tone, string> = {
+const RAMP_TEXT: Record<Tone, string> = { strong: "text-emerald-600", good: "text-brand-teal-600", developing: "text-amber-600", weak: "text-rose-600" };
+const RAMP_BADGE: Record<Tone, string> = {
   strong: "bg-emerald-50 text-emerald-700 border-emerald-200",
   good: "bg-brand-teal-50 text-brand-teal-700 border-brand-teal-200",
   developing: "bg-amber-50 text-amber-700 border-amber-200",
   weak: "bg-rose-50 text-rose-700 border-rose-200",
 };
-const GAUGE: Record<Tone, string> = {
-  strong: "bg-emerald-500",
-  good: "bg-brand-teal-500",
-  developing: "bg-amber-500",
-  weak: "bg-rose-500",
-};
+const RAMP_GAUGE: Record<Tone, string> = { strong: "bg-emerald-500", good: "bg-brand-teal-500", developing: "bg-amber-500", weak: "bg-rose-500" };
 
-export const scoreTextColor = (examId: string | null | undefined, value: number | null | undefined) => TEXT[toneFor(scoreFillPct(examId, value))];
-export const scoreBadgeClass = (examId: string | null | undefined, value: number | null | undefined) => BADGE[toneFor(scoreFillPct(examId, value))];
-export const scoreGaugeColor = (examId: string | null | undefined, value: number | null | undefined) => GAUGE[toneFor(scoreFillPct(examId, value))];
+// IELTS band tiers, verbatim from the owner/admin pills (>=7 / >=6 / >=5) — preserved exactly.
+function ieltsTone(v: number): Tone {
+  if (v >= 7) return "strong";
+  if (v >= 6) return "good";
+  if (v >= 5) return "developing";
+  return "weak";
+}
+const IELTS_TEXT: Record<Tone, string> = { strong: "text-emerald-600", good: "text-sky-600", developing: "text-amber-600", weak: "text-rose-600" };
+const IELTS_BADGE: Record<Tone, string> = {
+  strong: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  good: "bg-sky-50 text-sky-700 border-sky-200",
+  developing: "bg-amber-50 text-amber-700 border-amber-200",
+  weak: "bg-rose-50 text-rose-700 border-rose-200",
+};
+const IELTS_GAUGE: Record<Tone, string> = { strong: "bg-emerald-500", good: "bg-sky-500", developing: "bg-amber-500", weak: "bg-rose-500" };
+
+// Which palette a given exam+value uses. Ordinal (CEFR) → the existing cefrDisplay palette
+// (Spoken English unchanged); IELTS band → its verbatim tiers; everything else → the universal ramp.
+type Palette = "cefr" | "ielts" | "ramp";
+function paletteOf(examId: string | null | undefined): Palette {
+  const { scale } = resolveExam(examId);
+  if (scale?.kind === "ordinal" && (scale.levels ?? []).includes("b1")) return "cefr";
+  if (examId === "ielts") return "ielts";
+  return "ramp";
+}
+
+export function scoreTextColor(examId: string | null | undefined, value: number | null | undefined): string {
+  const p = paletteOf(examId);
+  if (p === "cefr") return cefrColor(formatScore(examId, value));
+  if (p === "ielts") return IELTS_TEXT[ieltsTone(Number(value ?? 0))];
+  return RAMP_TEXT[toneFor(scoreFillPct(examId, value))];
+}
+export function scoreBadgeClass(examId: string | null | undefined, value: number | null | undefined): string {
+  const p = paletteOf(examId);
+  if (p === "cefr") return cefrBg(formatScore(examId, value)) + " " + cefrColor(formatScore(examId, value));
+  if (p === "ielts") return IELTS_BADGE[ieltsTone(Number(value ?? 0))];
+  return RAMP_BADGE[toneFor(scoreFillPct(examId, value))];
+}
+export function scoreGaugeColor(examId: string | null | undefined, value: number | null | undefined): string {
+  const p = paletteOf(examId);
+  if (p === "cefr") return cefrGaugeColor(formatScore(examId, value));
+  if (p === "ielts") return IELTS_GAUGE[ieltsTone(Number(value ?? 0))];
+  return RAMP_GAUGE[toneFor(scoreFillPct(examId, value))];
+}
 
 /** [min, max] for chart axes (recharts domain). Falls back to [0, 100] for per_component exams. */
 export function scoreDomain(examId: string | null | undefined): [number, number] {
