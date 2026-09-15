@@ -14,20 +14,17 @@ import {
   BandOverviewRow
 } from '../services/instituteOwnerService';
 import { useToast } from '@/shared/hooks/use-toast';
+import { ScorePill } from '@/shared/exam/ScorePill';
+import { resolveExam } from '@/shared/exam/examScale';
 
 const toSlug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function bandPill(band: number | null) {
+// Exam-aware: renders each student's score in their own exam's scale/colour.
+function bandPill(band: number | null, examId?: string | null) {
   if (band === null) return <span className="text-xs text-brand-text-mute">—</span>;
-  const b = Number(band);
-  let cls = 'text-xs font-semibold px-2 py-0.5 rounded-full ';
-  if (b >= 7)      cls += 'bg-emerald-100 text-emerald-700';
-  else if (b >= 6) cls += 'bg-sky-100 text-sky-700';
-  else if (b >= 5) cls += 'bg-amber-100 text-amber-700';
-  else             cls += 'bg-rose-100 text-rose-700';
-  return <span className={cls}>{b.toFixed(1)}</span>;
+  return <ScorePill examId={examId} value={band} size="sm" />;
 }
 
 function trendIcon(trend: 'up' | 'flat' | 'down' | null) {
@@ -107,7 +104,7 @@ function AtRiskList({ rows }: { rows: AtRiskRow[] }) {
           </div>
           <div className="text-right flex-shrink-0">
             <p className="text-xs text-rose-600 font-semibold">{r.days_inactive < 0 ? 'Never active' : `${r.days_inactive}d inactive`}</p>
-            {bandPill(r.current_band)}
+            {bandPill(r.current_band, r.exam_id)}
           </div>
         </div>
       ))}
@@ -126,7 +123,7 @@ function BandTable({ rows, onRowClick }: { rows: BandOverviewRow[]; onRowClick: 
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-brand-line bg-brand-bg-alt">
-            {['Name', 'Band', 'Target', 'Gap', 'Trend', 'Streak', 'Drilled', 'Last IA'].map(h => (
+            {['Name', resolveExam(rows[0]?.exam_id).scoreLabel, 'Target', 'Gap', 'Trend', 'Streak', 'Drilled', 'Last IA'].map(h => (
               <th key={h} className="text-left font-jetbrains text-[10px] font-bold text-brand-text-mute uppercase tracking-wider px-4 py-3 whitespace-nowrap">
                 {h}
               </th>
@@ -149,7 +146,7 @@ function BandTable({ rows, onRowClick }: { rows: BandOverviewRow[]; onRowClick: 
                   {row.is_at_risk && <AlertTriangle className="h-3.5 w-3.5 text-rose-500 flex-shrink-0" />}
                 </div>
               </td>
-              <td className="px-4 py-3 whitespace-nowrap">{bandPill(row.current_band)}</td>
+              <td className="px-4 py-3 whitespace-nowrap">{bandPill(row.current_band, row.exam_id)}</td>
               <td className="px-4 py-3 whitespace-nowrap">
                 <span className="text-xs text-brand-text-mute">{row.target_band ?? '—'}</span>
               </td>

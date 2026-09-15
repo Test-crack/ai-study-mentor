@@ -156,6 +156,7 @@ export interface BandOverviewRow {
     streak: number;
     lexigrid_done_today: boolean; lexigrid_words_today: number | null;
     is_at_risk: boolean; risk_primary_flag: string | null;
+    exam_id: string;
 }
 
 export interface AtRiskRow {
