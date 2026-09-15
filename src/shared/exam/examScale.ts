@@ -48,7 +48,9 @@ function resolveScale(raw: PublicScale | undefined | null): ResolvedScale | null
 
 /** Resolve an exam's display shape from the cached public config (with sensible fallbacks). */
 export function resolveExam(examId?: string | null): ResolvedExam {
-  const cfg = getPublicExamConfig(examId);
+  // Default a null/empty exam to IELTS — these dashboards were IELTS-only before, and a null
+  // selected-exam (e.g. before the switcher hydrates) must not degrade to a scale-less "—"/"Result".
+  const cfg = getPublicExamConfig(examId || "ielts");
   const id = cfg?.exam_id ?? examId ?? "ielts";
   const mode = (cfg?.overall?.mode ?? "aggregate") as "aggregate" | "per_component";
   const scaleId = cfg?.overall?.scale ?? null;
