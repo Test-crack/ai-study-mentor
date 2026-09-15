@@ -15,8 +15,9 @@ import { DiagnosticOverviewTab } from '@/features/instructor/components/assessme
 import { IAOverviewTab } from '@/features/instructor/components/assessments/IAOverviewTab';
 import { MockOverviewTab } from '@/features/instructor/components/assessments/MockOverviewTab';
 import type { DiagnosticOverviewRow, IAOverviewRow, MockOverviewRow } from '@/features/instructor/components/assessments/types';
-import { CEFR_ORDER, cefrGaugeColor } from '@/features/student/config/cefrDisplay';
+import { CEFR_ORDER, cefrGaugeColor, cefrColor } from '@/features/student/config/cefrDisplay';
 import { isSpokenEnglish } from '@/features/student/utils/exam';
+import { SE_SUBSKILLS } from '@/features/student/config/spokenEnglishSubskills';
 
 export interface AssessmentOverviewData {
   ia_overview:         IAOverviewRow[];
@@ -147,6 +148,21 @@ export function AssessmentInsights({ data, loading, error, batches, batchFilter,
   const seModalIdx = seLevelCounts.reduce((best, c, i) => (c > seLevelCounts[best] ? i : best), 0);
   const seModalLabel = seOrdinals.length > 0 ? CEFR_ORDER[seModalIdx] : null;
   const seNeedsSupportCount = seOrdinals.filter(v => Math.round(v) <= 2).length; // Below A1 / A1 / A2
+
+  // Spoken English — average CEFR level per sub-skill (the CEFR counterpart of avgBySkill), read
+  // from each diagnosed SE row's competency sub_scores.subskillProfile (already sent by the backend).
+  const cefrIdxOf = (lvl?: string) => CEFR_ORDER.findIndex(l => l.toLowerCase() === (lvl || '').toLowerCase());
+  const seAvgBySubskill = SE_SUBSKILLS.map(cfg => {
+    const idxs = seDiagnosed
+      .map(r => {
+        const prof = ((r as any).sub_scores?.subskillProfile ?? []) as Array<{ id: string; level?: string }>;
+        const found = prof.find(p => p.id === cfg.id);
+        return found ? cefrIdxOf(found.level) : -1;
+      })
+      .filter(i => i >= 0);
+    const avgIdx = idxs.length ? Math.round(idxs.reduce((a, b) => a + b, 0) / idxs.length) : null;
+    return { id: cfg.id, label: cfg.label, ordinal: avgIdx, level: avgIdx !== null ? CEFR_ORDER[avgIdx] : null };
+  });
 
   const missing2PlusIAs = data?.institute_ia_summary.high_miss_count ?? 0;
   const pendingDiagnostics = totalStudents - diagnosedCount;
@@ -505,26 +521,53 @@ export function AssessmentInsights({ data, loading, error, batches, batchFilter,
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl border border-brand-line p-4">
-            <p className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-mute mb-1">Average band by skill</p>
-            <p className="text-[11px] text-brand-text-mute mb-3">Across the {ieltsDiagnosed.length} diagnosed students.</p>
-            <div className="space-y-2.5">
-              {avgBySkill.map(s => (
-                <div key={s.key}>
-                  <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="font-semibold text-brand-text">{s.label}</span>
-                    <span className="font-black tabular-nums text-brand-text">{s.value ?? '—'}</span>
+          {/* Average by skill — IELTS bands per skill, or (for a Spoken English view) average CEFR
+              level per sub-skill. Shown per the exam that actually has diagnosed rows. */}
+          {ieltsDiagnosed.length > 0 && (
+            <div className="bg-white rounded-2xl border border-brand-line p-4">
+              <p className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-mute mb-1">Average band by skill</p>
+              <p className="text-[11px] text-brand-text-mute mb-3">Across the {ieltsDiagnosed.length} diagnosed students.</p>
+              <div className="space-y-2.5">
+                {avgBySkill.map(s => (
+                  <div key={s.key}>
+                    <div className="flex items-center justify-between text-xs mb-1">
+                      <span className="font-semibold text-brand-text">{s.label}</span>
+                      <span className="font-black tabular-nums text-brand-text">{s.value ?? '—'}</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-brand-bg-alt overflow-hidden">
+                      <div
+                        className={cn('h-full rounded-full', s.value !== null && s.value < 5.0 ? 'bg-rose-500' : 'bg-brand-teal-500')}
+                        style={{ width: `${s.value !== null ? Math.min((s.value / 9) * 100, 100) : 0}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="h-1.5 rounded-full bg-brand-bg-alt overflow-hidden">
-                    <div
-                      className={cn('h-full rounded-full', s.value !== null && s.value < 5.0 ? 'bg-rose-500' : 'bg-brand-teal-500')}
-                      style={{ width: `${s.value !== null ? Math.min((s.value / 9) * 100, 100) : 0}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
+
+          {ieltsDiagnosed.length === 0 && seDiagnosed.length > 0 && (
+            <div className="bg-white rounded-2xl border border-brand-line p-4">
+              <p className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-mute mb-1">Average CEFR by sub-skill</p>
+              <p className="text-[11px] text-brand-text-mute mb-3">Across the {seDiagnosed.length} diagnosed students.</p>
+              <div className="space-y-2.5">
+                {seAvgBySubskill.map(s => (
+                  <div key={s.id}>
+                    <div className="flex items-center justify-between text-xs mb-1">
+                      <span className="font-semibold text-brand-text">{s.label}</span>
+                      <span className={cn('font-black tabular-nums', s.level ? cefrColor(s.level) : 'text-brand-text-mute')}>{s.level ?? '—'}</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-brand-bg-alt overflow-hidden">
+                      <div
+                        className={cn('h-full rounded-full', s.level ? cefrGaugeColor(s.level) : 'bg-brand-bg-alt')}
+                        style={{ width: `${s.ordinal !== null ? Math.min((s.ordinal / (CEFR_ORDER.length - 1)) * 100, 100) : 0}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {seDiagnosed.length > 0 && (
             <div className="bg-white rounded-2xl border border-brand-line p-4">
