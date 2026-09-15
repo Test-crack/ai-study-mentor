@@ -195,3 +195,24 @@ export function scoreTick(examId: string | null | undefined, value: number): str
 
 /** Assessed skills/components for an exam (config-driven; replaces hardcoded L/R/W/S arrays). */
 export const skillsFor = (examId: string | null | undefined) => resolveExam(examId).skills;
+
+/**
+ * Recharts axis config for an exam's scale — replaces hardcoded `isSE ? [0,6] : [4,9]` branches.
+ * Ordinal (CEFR) gets integer ticks + a level-label formatter; numeric gets just the domain (so
+ * IELTS renders exactly as before — raw band ticks, no forced ".0"). New numeric exams work from
+ * their own bounds. Spread the return onto <YAxis {...scoreAxis(examId)} />.
+ */
+export function scoreAxis(examId: string | null | undefined): { domain: [number, number]; ticks?: number[]; tickFormatter?: (v: number) => string } {
+  const { scale } = resolveExam(examId);
+  if (!scale) return { domain: [0, 100] };
+  if (scale.kind === "ordinal") {
+    const ticks = Array.from({ length: scale.max - scale.min + 1 }, (_, i) => scale.min + i);
+    return { domain: [scale.min, scale.max], ticks, tickFormatter: (v: number) => formatScore(examId, v) };
+  }
+  return { domain: [scale.min, scale.max] };
+}
+
+/** Tooltip value formatter for an exam — ordinal maps index→label; numeric passes through (undefined). */
+export function scoreTooltipFormatter(examId: string | null | undefined): ((v: number) => string) | undefined {
+  return resolveExam(examId).scale?.kind === "ordinal" ? (v: number) => formatScore(examId, v) : undefined;
+}

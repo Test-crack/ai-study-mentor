@@ -20,6 +20,7 @@ import {
 } from '../services/instituteOwnerService';
 import { InstructorEffectivenessTable } from '@/shared/components/analytics/InstructorEffectivenessTable';
 import { getSelectedExamId } from '@/shared/state/examContext';
+import { scoreAxis, scoreTooltipFormatter, resolveExam, formatScore } from '@/shared/exam/examScale';
 import { isSpokenEnglish } from '@/features/student/utils/exam';
 import { CEFR_ORDER } from '@/features/student/config/cefrDisplay';
 import { seSubskillByEnum } from '@/features/student/config/spokenEnglishSubskills';
@@ -74,7 +75,9 @@ function cefrOrdinalToLabel(ordinal: number): string {
 
 // ─── Sub-panels ───────────────────────────────────────────────────────────────
 
-function CohortPanel({ data, isSE }: { data: CohortProgressData | null; isSE: boolean }) {
+function CohortPanel({ data }: { data: CohortProgressData | null }) {
+  const examId = getSelectedExamId();
+  const scoreLabel = resolveExam(examId).scoreLabel;
   if (!data) return <Skeleton />;
   const chartData = (data.monthly_points ?? []).map(m => ({
     name: m.month,
@@ -85,37 +88,24 @@ function CohortPanel({ data, isSE }: { data: CohortProgressData | null; isSE: bo
   return (
     <div className="bg-white border border-brand-line rounded-2xl p-4 sm:p-6 shadow-sm">
       <h3 className="font-jetbrains text-[11px] font-bold uppercase tracking-[0.15em] text-brand-text mb-1">
-        {isSE ? '6-Month CEFR Progress' : '6-Month Band Progress'}
+        {`6-Month ${scoreLabel} Progress`}
       </h3>
       <p className="text-xs text-brand-text-mute mb-5">
-        {isSE
-          ? 'Average CEFR level across all batches, tracked by IA sessions.'
-          : 'Average band scores across all batches, tracked by IA sessions.'}
+        {`Average ${scoreLabel} across all batches, tracked by IA sessions.`}
       </p>
       <div className="h-64 sm:h-80 lg:h-96 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={CHART_GRID} strokeOpacity={0.8} />
             <XAxis dataKey="name" tick={{ fontSize: 11, fill: CHART_AXIS }} axisLine={false} tickLine={false} />
-            {isSE ? (
-              <YAxis
-                domain={[0, 6]}
-                ticks={CEFR_TICKS}
-                tickFormatter={cefrOrdinalToLabel}
-                tick={{ fontSize: 11, fill: CHART_AXIS }}
-                axisLine={false}
-                tickLine={false}
-              />
-            ) : (
-              <YAxis domain={[4, 9]} tick={{ fontSize: 11, fill: CHART_AXIS }} axisLine={false} tickLine={false} />
-            )}
+            <YAxis {...scoreAxis(examId)} tick={{ fontSize: 11, fill: CHART_AXIS }} axisLine={false} tickLine={false} />
             <Tooltip
               contentStyle={CHART_TOOLTIP_STYLE}
-              formatter={isSE ? ((v: any) => cefrOrdinalToLabel(Number(v))) : undefined}
+              formatter={scoreTooltipFormatter(examId)}
             />
             <Legend wrapperStyle={{ fontSize: 12 }} />
-            <Line type="monotone" dataKey="avg"  name={isSE ? 'IA Avg CEFR' : 'IA Avg Band'}   stroke={CHART_PRIMARY} strokeWidth={3} dot={{ r: 4 }} connectNulls />
-            <Line type="monotone" dataKey="mock" name={isSE ? 'Mock Avg CEFR' : 'Mock Avg Band'} stroke={CHART_SECONDARY} strokeWidth={2} dot={{ r: 3 }} strokeDasharray="4 2" connectNulls />
+            <Line type="monotone" dataKey="avg"  name={`IA Avg ${scoreLabel}`}   stroke={CHART_PRIMARY} strokeWidth={3} dot={{ r: 4 }} connectNulls />
+            <Line type="monotone" dataKey="mock" name={`Mock Avg ${scoreLabel}`} stroke={CHART_SECONDARY} strokeWidth={2} dot={{ r: 3 }} strokeDasharray="4 2" connectNulls />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -123,8 +113,11 @@ function CohortPanel({ data, isSE }: { data: CohortProgressData | null; isSE: bo
   );
 }
 
-function BatchCompPanel({ rows, isSE }: { rows: BatchComparisonRow[]; isSE: boolean }) {
+function BatchCompPanel({ rows }: { rows: BatchComparisonRow[] }) {
   const [expanded, setExpanded] = useState<string | null>(null);
+  const examId = getSelectedExamId();
+  const scoreLabel = resolveExam(examId).scoreLabel;
+  const tooltipFmt = scoreTooltipFormatter(examId);
 
   if (rows.length === 0) {
     return (
@@ -143,30 +136,19 @@ function BatchCompPanel({ rows, isSE }: { rows: BatchComparisonRow[]; isSE: bool
     <div className="space-y-4">
       <div className="bg-white border border-brand-line rounded-2xl p-4 sm:p-6 shadow-sm">
         <h3 className="font-jetbrains text-[11px] font-bold uppercase tracking-[0.15em] text-brand-text mb-4">
-          {isSE ? 'Avg CEFR by Batch' : 'Avg Band by Batch'}
+          {`Avg ${scoreLabel} by Batch`}
         </h3>
         <div className="h-64 sm:h-80 lg:h-96 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={CHART_GRID} strokeOpacity={0.8} />
               <XAxis dataKey="name" tick={{ fontSize: 10, fill: CHART_AXIS }} axisLine={false} tickLine={false} />
-              {isSE ? (
-                <YAxis
-                  domain={[0, 6]}
-                  ticks={CEFR_TICKS}
-                  tickFormatter={cefrOrdinalToLabel}
-                  tick={{ fontSize: 11, fill: CHART_AXIS }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-              ) : (
-                <YAxis domain={[4, 9]} tick={{ fontSize: 11, fill: CHART_AXIS }} axisLine={false} tickLine={false} />
-              )}
+              <YAxis {...scoreAxis(examId)} tick={{ fontSize: 11, fill: CHART_AXIS }} axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={CHART_TOOLTIP_STYLE}
-                formatter={isSE ? ((v: any, name: any) => [cefrOrdinalToLabel(Number(v)), name]) : undefined}
+                formatter={tooltipFmt ? ((v: any, name: any) => [tooltipFmt(Number(v)), name]) : undefined}
               />
-              <Bar dataKey="band" name={isSE ? 'Avg CEFR' : 'Avg Band'} fill={CHART_PRIMARY} radius={[4, 4, 0, 0]} />
+              <Bar dataKey="band" name={`Avg ${scoreLabel}`} fill={CHART_PRIMARY} radius={[4, 4, 0, 0]} />
               <Bar dataKey="imp" name="Improvement" fill={CHART_SECONDARY} radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -183,7 +165,7 @@ function BatchCompPanel({ rows, isSE }: { rows: BatchComparisonRow[]; isSE: bool
               <tr className="font-jetbrains text-[10px] uppercase tracking-[0.12em] text-brand-text-mute border-b border-brand-line bg-brand-bg-alt">
                 <th className="px-4 sm:px-6 py-2.5 text-left font-bold">Batch</th>
                 <th className="px-4 py-2.5 text-center font-bold">Students</th>
-                <th className="px-4 py-2.5 text-center font-bold">{isSE ? 'Avg CEFR' : 'Avg Band'}</th>
+                <th className="px-4 py-2.5 text-center font-bold">{`Avg ${scoreLabel}`}</th>
                 <th className="px-4 py-2.5 text-center font-bold">Improvement</th>
                 <th className="px-4 py-2.5 text-center font-bold">IA Rate</th>
                 <th className="px-4 py-2.5 text-center font-bold">At Risk</th>
@@ -205,7 +187,7 @@ function BatchCompPanel({ rows, isSE }: { rows: BatchComparisonRow[]; isSE: bool
                     <td className="px-4 py-3 text-center font-bold tabular-nums text-brand-text">{b.student_count}</td>
                     <td className="px-4 py-3 text-center">
                       <span className="inline-flex items-center justify-center text-xs font-bold tabular-nums px-2.5 py-0.5 rounded-full bg-brand-teal-50 text-brand-teal-700 ring-1 ring-inset ring-brand-teal-600/20">
-                        {b.avg_band !== null ? (isSE ? cefrOrdinalToLabel(b.avg_band) : b.avg_band.toFixed(1)) : '—'}
+                        {b.avg_band !== null ? formatScore(examId, b.avg_band) : '—'}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">
@@ -499,8 +481,8 @@ export default function Performance() {
                 </div>
               ) : (
                 <>
-                  {activeTab === 'overview'   && <CohortPanel data={cohort} isSE={isSE} />}
-                  {activeTab === 'batches'    && <BatchCompPanel rows={batches} isSE={isSE} />}
+                  {activeTab === 'overview'   && <CohortPanel data={cohort} />}
+                  {activeTab === 'batches'    && <BatchCompPanel rows={batches} />}
                   {activeTab === 'engagement' && <EngagementPanel weeks={weeks} />}
                   {activeTab === 'goals'      && <GoalsPanel data={goals} />}
                   {activeTab === 'heatmap'    && <HeatmapPanel rows={heatmap} isSE={isSE} />}
