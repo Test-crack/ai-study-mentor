@@ -17,7 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '@/shared/utils';
 import type { BandOverviewRow } from './types';
 import { isSpokenEnglish } from '@/features/student/utils/exam';
-import { CEFR_ORDER, cefrColor } from '@/features/student/config/cefrDisplay';
+import { formatScore, scoreTextColor, resolveExam } from '@/shared/exam/examScale';
 
 const PAGE_SIZE = 8; // 4 columns × 2 rows
 
@@ -46,23 +46,6 @@ function avatarPalette(name: string) {
   return AVATAR_PALETTES[code % AVATAR_PALETTES.length];
 }
 
-function bandTextColor(band: number | null) {
-  if (band === null) return 'text-brand-text-mute';
-  if (band >= 7.5)  return 'text-emerald-600';
-  if (band >= 6.0)  return 'text-sky-600';
-  if (band >= 5.0)  return 'text-amber-600';
-  return 'text-rose-600';
-}
-
-// current_band for a Spoken English row is a CEFR ordinal (0-6), not an IELTS
-// band (0-9) — see the matching note in BandOverviewTable.tsx. CEFR_ORDINAL
-// (backend) and CEFR_ORDER (frontend) are the same ladder in the same order, so
-// rounding the ordinal and indexing CEFR_ORDER recovers the real level label.
-function cefrLevelLabel(ordinal: number | null): string | null {
-  if (ordinal === null) return null;
-  const i = Math.max(0, Math.min(CEFR_ORDER.length - 1, Math.round(ordinal)));
-  return CEFR_ORDER[i];
-}
 
 /** Drill dot indicator — shows 2 circles (required) filled proportionally. */
 function DrillDots({ count }: { count: number }) {
@@ -162,19 +145,15 @@ function StudentCard({ row, batchId }: { row: BandOverviewRow; batchId: string |
               />
             )}
           </div>
-          {/* Band — CEFR level for Spoken English, IELTS band otherwise */}
-          {isSpokenEnglish(row.exam_id) ? (
-            <p className={cn('text-[11px] sm:text-xs font-bold mt-0.5', cefrLevelLabel(row.current_band) ? cefrColor(cefrLevelLabel(row.current_band)!) : 'text-brand-text-mute')}>
-              {cefrLevelLabel(row.current_band) ?? <span className="text-brand-text-mute font-normal">No level</span>}
-            </p>
-          ) : (
-            <p className={cn('text-[11px] sm:text-xs font-bold mt-0.5', bandTextColor(row.current_band))}>
-              {row.current_band !== null
-                ? `Band ${row.current_band.toFixed(1)}`
-                : <span className="text-brand-text-mute font-normal">No band</span>
-              }
-            </p>
-          )}
+          {/* Headline score — rendered in each student's own exam scale (band / CEFR / …) */}
+          <p className={cn('text-[11px] sm:text-xs font-bold mt-0.5', row.current_band !== null ? scoreTextColor(row.exam_id, row.current_band) : 'text-brand-text-mute')}>
+            {row.current_band !== null
+              ? (resolveExam(row.exam_id).scale?.kind === 'numeric'
+                  ? `${resolveExam(row.exam_id).scoreLabel} ${formatScore(row.exam_id, row.current_band)}`
+                  : formatScore(row.exam_id, row.current_band))
+              : <span className="text-brand-text-mute font-normal">No score</span>
+            }
+          </p>
         </div>
 
         <ChevronRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-brand-text-mute group-hover:text-brand-teal-500 transition-colors shrink-0 mt-0.5" />
