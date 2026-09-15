@@ -260,8 +260,10 @@ export function AssessmentInsights({ data, loading, error, batches, batchFilter,
               {activeTab === 'diagnostic' && (
                 <>
                   <StatTile dark label="Diagnosed" value={`${diagnosedCount} of ${totalStudents}`} />
-                  <StatTile dark label="Avg band" value={avgBand !== null ? avgBand.toFixed(1) : '—'} />
-                  <StatTile dark label="At risk" value={atRiskCount} sub="below 5.0" />
+                  {/* Band avg / at-risk are IELTS-band concepts — shown only when there are band-shaped
+                      rows. A pure Spoken English (CEFR) view surfaces its stats in the section below. */}
+                  {ieltsDiagnosed.length > 0 && <StatTile dark label="Avg band" value={avgBand !== null ? avgBand.toFixed(1) : '—'} />}
+                  {ieltsDiagnosed.length > 0 && <StatTile dark label="At risk" value={atRiskCount} sub="below 5.0" />}
                 </>
               )}
               {activeTab === 'ia' && (
@@ -281,7 +283,7 @@ export function AssessmentInsights({ data, loading, error, batches, batchFilter,
             </div>
           </div>
 
-          {activeTab === 'diagnostic' && (
+          {activeTab === 'diagnostic' && ieltsDiagnosed.length > 0 && (
             <div className="lg:w-[360px] shrink-0">
               <div className="flex items-center justify-between mb-2">
                 <p className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.15em] text-white/40">Band distribution</p>
