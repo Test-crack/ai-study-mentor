@@ -683,7 +683,7 @@ const LandingPage = () => {
 
             {/* Email card */}
             <a
-              href="mailto:officialtestcrack@gmail.com"
+              href="mailto:blinkgrid@gmail.com"
               className="group flex items-start gap-5 p-7 border border-brand-line bg-white hover:border-brand-teal transition-colors duration-150"
             >
               <div className="p-3.5 rounded-[4px] bg-brand-teal-wash shrink-0" aria-hidden="true">
@@ -692,7 +692,7 @@ const LandingPage = () => {
               <div>
                 <p className="font-jetbrains text-[10.5px] text-brand-text-mute uppercase tracking-[0.16em] mb-1">{copy.contact.emailLabel}</p>
                 <p className="font-manrope text-[17px] font-bold text-brand-ink break-all">
-                  officialtestcrack@gmail.com
+                  blinkgrid@gmail.com
                 </p>
                 <p className="text-[14.5px] text-brand-text-mute mt-1.5 leading-[1.7]">
                   {copy.contact.emailNote}
@@ -762,11 +762,11 @@ const LandingPage = () => {
 
               {/* Contact info */}
               <div className="flex flex-col gap-3">
-                <a href="mailto:officialtestcrack@gmail.com" className="flex items-center gap-3 text-[14px] text-brand-on-ink hover:text-brand-bg transition-colors duration-150 group">
+                <a href="mailto:blinkgrid@gmail.com" className="flex items-center gap-3 text-[14px] text-brand-on-ink hover:text-brand-bg transition-colors duration-150 group">
                   <div className="w-7 h-7 rounded-[4px] bg-brand-ink border border-white/10 flex items-center justify-center group-hover:bg-brand-teal group-hover:border-brand-teal-dark transition-all" aria-hidden="true">
                     <Mail className="h-3.5 w-3.5" />
                   </div>
-                  officialtestcrack@gmail.com
+                  blinkgrid@gmail.com
                 </a>
                 <a href="https://wa.me/919995684689" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-[14px] text-brand-on-ink hover:text-brand-bg transition-colors duration-150 group">
                   <div className="w-7 h-7 rounded-[4px] bg-brand-ink border border-white/10 flex items-center justify-center group-hover:bg-brand-teal group-hover:border-brand-teal-dark transition-all" aria-hidden="true">
