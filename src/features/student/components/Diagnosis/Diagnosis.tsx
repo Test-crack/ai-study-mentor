@@ -330,6 +330,37 @@ async function submitSpeaking(
   } as SkillResult;
 }
 
+// ── OET role-play speaking (multi-role-play; one audio per scenario) ──────────
+interface OetRoleplayPrompt {
+  id: string;
+  order: number;
+  scenario: string;
+  setting?: string | null;
+  prepSeconds: number;
+  speakSeconds: number;
+  interlocutorAudioUrl?: string | null;
+}
+
+async function fetchOetSpeakingPrompts(): Promise<{ prompts: OetRoleplayPrompt[]; alreadyDiagnosed?: boolean }> {
+  const data = await callBackend(`/api/diagnostic/oet-speaking/prompts`, { method: "GET" });
+  return { prompts: (data?.prompts ?? []) as OetRoleplayPrompt[], alreadyDiagnosed: data?.alreadyDiagnosed };
+}
+
+// Submit one audio per role-play — each file's FIELD NAME is its promptId (the server
+// resolves the scenario from it; see submitOetSpeaking / upload.any()).
+async function submitOetSpeakingRecordings(recordings: { promptId: string; blob: Blob }[]): Promise<SkillResult> {
+  const fd = new FormData();
+  recordings.forEach((r, i) => fd.append(r.promptId, r.blob, `roleplay_${i + 1}.webm`));
+  const data = await uploadFileToBackend(`/api/diagnostic/oet-speaking/submit`, fd, "POST");
+  if (data?.bandScore === undefined) throw new Error("Speaking submission failed");
+  return {
+    band_score: data.bandScore,
+    level: getBandLevel(data.bandScore),
+    sub_scores: data.sub_scores,
+    feedback: data.sub_scores?.feedback,
+  } as SkillResult;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // TOP NAVIGATION BAR
 // ─────────────────────────────────────────────────────────────────────────────
@@ -553,6 +584,65 @@ function FeedbackAccordion({ title, children }: { title: string; children: React
   );
 }
 
+// Detect a per-component (OET-style) result from its stored sub_scores: a numeric 0–500
+// score + a letter grade. IELTS/SE results never carry both, so they keep the band/level UI.
+function oetResultView(subScores?: Record<string, any> | null): { score: number; grade: string; meetsB: boolean } | null {
+  if (!subScores) return null;
+  const { grade, score } = subScores;
+  if (typeof grade === "string" && grade && typeof score === "number") return { score, grade, meetsB: !!subScores.meets_grade_b };
+  return null;
+}
+
+const OET_GRADE_TONE: Record<string, string> = {
+  A: "bg-emerald-500/15 text-emerald-200 border-emerald-400/30",
+  B: "bg-brand-teal-500/15 text-brand-mint border-brand-teal-400/30",
+  "C+": "bg-amber-500/15 text-amber-200 border-amber-400/30",
+  C: "bg-amber-500/15 text-amber-200 border-amber-400/30",
+  D: "bg-rose-500/15 text-rose-200 border-rose-400/30",
+  E: "bg-rose-500/15 text-rose-200 border-rose-400/30",
+};
+
+function OetGradeBadge({ grade, meetsB }: { grade: string; meetsB?: boolean }) {
+  const tone = OET_GRADE_TONE[grade] ?? "bg-white/10 text-brand-on-ink border-brand-line-12";
+  return (
+    <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-bold", tone)}>
+      Grade {grade}{meetsB ? " · meets B" : ""}
+    </span>
+  );
+}
+
+// OET analytic-criteria breakdown board (Writing 6 / Speaking 9), rendered from the stored
+// sub_scores.criteria object. Each criterion carries {label, score, max, meets_b}.
+function OetCriteriaBoard({ criteria }: { criteria: Record<string, any> }) {
+  const rows = Object.values(criteria).filter((c: any) => c && typeof c.score === "number");
+  if (rows.length === 0) return null;
+  return (
+    <div className="w-full max-w-lg mt-2 mx-auto bg-white border border-brand-line rounded-2xl p-5 space-y-3 text-left">
+      <p className="font-jetbrains text-brand-text-mute text-[10px] uppercase tracking-[0.16em]">Criterion Breakdown</p>
+      {rows.map((c: any, i: number) => {
+        const max = Number(c.max) || 1;
+        const score = Number(c.score) || 0;
+        const pct = Math.min(100, Math.max(0, (score / max) * 100));
+        const bar = c.meets_b === false ? "bg-amber-500" : "bg-brand-teal-500";
+        return (
+          <div key={c.label ?? i}>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-brand-text-mute text-[13px] font-medium flex items-center gap-2">
+                {c.label}
+                {c.meets_b === false && <span className="text-amber-800 text-[10px] font-semibold border border-amber-200 bg-amber-50 px-1.5 py-0.5 rounded-full">below B</span>}
+              </span>
+              <span className="text-brand-ink text-[14px] font-bold tabular-nums">{score}/{max}</span>
+            </div>
+            <div className="h-1.5 w-full bg-brand-bg-alt rounded-full overflow-hidden">
+              <div className={cn("h-full rounded-full transition-all duration-700", bar)} style={{ width: `${pct}%` }} />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function InterimResultCard({
   skill,
   result,
@@ -566,12 +656,16 @@ function InterimResultCard({
 }) {
   const level = getBandLevel(result.band_score);
   const cfg = getLevelConfig(level);
+  const oet = oetResultView(result.sub_scores);
 
   const encouragements: Record<Level, string> = {
     A: "Great start — your foundation gives us a clear picture of what to strengthen.",
     B: "Solid performance. You're building toward a strong target score.",
     C: "Impressive result! You're in the upper band for this skill.",
   };
+  const oetEncouragement = oet?.meetsB
+    ? "Strong result — you're meeting the Grade B benchmark for this skill."
+    : "A clear picture of where to focus next to reach the Grade B benchmark.";
 
   return (
     <div className="flex flex-col items-center text-center gap-6 py-4 animate-fade-in">
@@ -596,15 +690,17 @@ function InterimResultCard({
               {SKILL_LABELS[skill]} · Section Complete
             </p>
             <div className="font-manrope text-[72px] font-extrabold text-brand-mint tabular-nums leading-none tracking-[-0.03em]">
-              {result.band_score.toFixed(1)}
+              {oet ? oet.score : result.band_score.toFixed(1)}
             </div>
-            <p className="font-jetbrains text-brand-on-ink-mute text-[10.5px] mt-2 uppercase tracking-[0.16em]">Band Score</p>
+            <p className="font-jetbrains text-brand-on-ink-mute text-[10.5px] mt-2 uppercase tracking-[0.16em]">
+              {oet ? "OET Score · out of 500" : "Band Score"}
+            </p>
           </div>
 
-          <LevelBadge level={level} size="lg" />
+          {oet ? <OetGradeBadge grade={oet.grade} meetsB={oet.meetsB} /> : <LevelBadge level={level} size="lg" />}
 
           <p className="text-brand-on-ink text-[14px] max-w-xs leading-[1.7]">
-            {encouragements[level]}
+            {oet ? oetEncouragement : encouragements[level]}
           </p>
         </div>
       </div>
@@ -701,6 +797,9 @@ function InterimResultCard({
           ))}
         </div>
       )}
+
+      {/* OET analytic criteria (Writing 6 / Speaking 9) — IELTS uses the boards above */}
+      {oet && result.sub_scores?.criteria && <OetCriteriaBoard criteria={result.sub_scores.criteria} />}
 
       {result.feedback && (
         <FeedbackAccordion title="AI Feedback & Insights">
@@ -1573,6 +1672,169 @@ function WritingPhase({
 // PHASE: SPEAKING
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ── OET role-play speaking phase: N scenarios, record one audio each, submit all ──
+function OetSpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => void }) {
+  const [prompts, setPrompts] = useState<OetRoleplayPrompt[]>([]);
+  const [idx, setIdx] = useState(0);
+  const [recordings, setRecordings] = useState<Record<string, Blob>>({});
+  const [state, setState] = useState<"loading" | "idle" | "recording" | "recorded" | "submitting" | "error">("loading");
+  const [elapsed, setElapsed] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    fetchOetSpeakingPrompts()
+      .then(({ prompts }) => {
+        if (!prompts.length) { setError("No role-play prompts available for this exam."); setState("error"); return; }
+        setPrompts([...prompts].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
+        setState("idle");
+      })
+      .catch((e) => { console.error("OetSpeakingPhase fetch error:", e); setError("Failed to load speaking prompts"); setState("error"); });
+  }, []);
+
+  const current = prompts[idx];
+  const maxDuration = current?.speakSeconds ?? 90;
+  const isLast = idx >= prompts.length - 1;
+  const recordedCount = Object.keys(recordings).length;
+
+  const stopTracks = () => { streamRef.current?.getTracks().forEach((t) => t.stop()); streamRef.current = null; };
+  const finishRecording = useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") mediaRecorderRef.current.stop();
+    if (timerRef.current) clearInterval(timerRef.current);
+  }, []);
+
+  useEffect(() => {
+    if (state === "recording" && elapsed >= maxDuration) {
+      setNotice(`Time's up — recording finished automatically at ${maxDuration}s.`);
+      finishRecording();
+    }
+  }, [elapsed, state, maxDuration, finishRecording]);
+
+  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); stopTracks(); }, []);
+
+  const startRecording = async () => {
+    setError(null); setNotice(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "audio/mp4";
+      const mr = new MediaRecorder(stream, { mimeType });
+      mediaRecorderRef.current = mr; chunksRef.current = [];
+      mr.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+      mr.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: mimeType });
+        setRecordings((prev) => ({ ...prev, [current.id]: blob }));
+        setState("recorded"); stopTracks();
+      };
+      mr.start(250); setState("recording"); setElapsed(0);
+      timerRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
+    } catch { setError("Microphone access denied. Please allow microphone access and try again."); }
+  };
+
+  const reRecord = () => { setState("idle"); setElapsed(0); };
+  const goNext = () => { setIdx((i) => i + 1); setState("idle"); setElapsed(0); setNotice(null); };
+
+  const submitAll = async () => {
+    setError(null); setState("submitting");
+    try {
+      const recs = prompts.map((p) => ({ promptId: p.id, blob: recordings[p.id] })).filter((r) => r.blob) as { promptId: string; blob: Blob }[];
+      if (recs.length === 0) { setError("Please record at least one role-play before submitting."); setState("recorded"); return; }
+      const result = await submitOetSpeakingRecordings(recs);
+      onComplete(result);
+    } catch (e: any) {
+      setError(e?.message ?? "Submission failed. Please try again."); setState("recorded");
+    }
+  };
+
+  if (state === "loading") {
+    return <div className="py-16 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-brand-teal-500" /></div>;
+  }
+  if (state === "error") {
+    return <div className="py-12 text-center text-brand-text-mute text-sm">{error ?? "Something went wrong."}</div>;
+  }
+
+  const mm = String(Math.floor(elapsed / 60)).padStart(2, "0");
+  const ss = String(elapsed % 60).padStart(2, "0");
+
+  return (
+    <div className="flex flex-col gap-5 animate-fade-in">
+      {/* progress */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="w-9 h-9 rounded-xl bg-brand-teal-wash border border-brand-teal-tint flex items-center justify-center text-lg">🎤</span>
+          <div>
+            <p className="font-semibold text-brand-text text-[15px] leading-tight">Speaking · Role-play {idx + 1} of {prompts.length}</p>
+            <p className="text-brand-text-mute text-[12px]">Read the scenario, then record your spoken response.</p>
+          </div>
+        </div>
+        <div className="flex gap-1.5">
+          {prompts.map((p, i) => (
+            <span key={p.id} className={cn("h-1.5 rounded-full transition-all", i === idx ? "w-6 bg-brand-teal-600" : recordings[p.id] ? "w-3 bg-brand-teal-400" : "w-3 bg-brand-line")} />
+          ))}
+        </div>
+      </div>
+
+      {/* scenario card */}
+      <div className="bg-brand-bg border border-brand-line rounded-2xl p-4">
+        {current?.setting && (
+          <p className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-mute mb-2">{current.setting}</p>
+        )}
+        <p className="text-brand-text text-[14.5px] leading-[1.7] whitespace-pre-line">{current?.scenario}</p>
+      </div>
+
+      {current?.interlocutorAudioUrl && (
+        <audio controls src={current.interlocutorAudioUrl} className="w-full" />
+      )}
+
+      {/* recorder */}
+      <div className="bg-white border border-brand-line rounded-2xl p-5 flex flex-col items-center gap-4">
+        <div className="font-manrope text-[40px] font-extrabold text-brand-ink tabular-nums tracking-[-0.02em]">
+          {mm}:{ss} <span className="text-[14px] font-semibold text-brand-text-mute">/ {Math.floor(maxDuration / 60)}:{String(maxDuration % 60).padStart(2, "0")}</span>
+        </div>
+
+        {state === "idle" && (
+          <button onClick={startRecording} className="px-8 py-3.5 bg-brand-teal-700 hover:bg-brand-teal-600 text-white font-semibold text-[15px] rounded-xl transition-colors active:scale-[0.98]">
+            ● Start recording
+          </button>
+        )}
+        {state === "recording" && (
+          <button onClick={finishRecording} className="px-8 py-3.5 bg-rose-600 hover:bg-rose-500 text-white font-semibold text-[15px] rounded-xl transition-colors active:scale-[0.98]">
+            ■ Stop recording
+          </button>
+        )}
+        {(state === "recorded" || state === "submitting") && (
+          <div className="w-full flex flex-col items-center gap-3">
+            {recordings[current.id] && <audio controls src={URL.createObjectURL(recordings[current.id])} className="w-full max-w-md" />}
+            <div className="flex items-center gap-2">
+              <button onClick={reRecord} disabled={state === "submitting"} className="px-4 py-2.5 border border-brand-line text-brand-text font-semibold text-[13.5px] rounded-xl hover:bg-brand-bg-alt disabled:opacity-50">
+                ↺ Re-record
+              </button>
+              {!isLast ? (
+                <button onClick={goNext} disabled={state === "submitting"} className="px-6 py-2.5 bg-brand-teal-700 hover:bg-brand-teal-600 text-white font-semibold text-[13.5px] rounded-xl active:scale-[0.98] disabled:opacity-50">
+                  Next role-play →
+                </button>
+              ) : (
+                <button onClick={submitAll} disabled={state === "submitting"} className="px-6 py-2.5 bg-brand-teal-700 hover:bg-brand-teal-600 text-white font-semibold text-[13.5px] rounded-xl active:scale-[0.98] disabled:opacity-60 inline-flex items-center gap-2">
+                  {state === "submitting" && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {state === "submitting" ? "Grading…" : `Submit Speaking (${recordedCount}/${prompts.length}) →`}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {notice && <p className="text-amber-600 text-[12.5px] text-center">{notice}</p>}
+        {error && <p className="text-rose-600 text-[12.5px] text-center">{error}</p>}
+      </div>
+    </div>
+  );
+}
+
 function SpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => void }) {
   const { profile } = useAuth();
   const studentId = profile?.id || profile?.student_id || "unknown-student";
@@ -1910,7 +2172,10 @@ function SpeakingResultCard({
 
   const band_score = Number(result.band_score) || 0;
   const subScores = result.sub_scores ?? {};
-  const subScoreEntries = Object.entries(subScores).filter(
+  const oet = oetResultView(subScores);
+  // OET stores numeric score/raw_score in sub_scores which would render as bogus "criteria"
+  // in the generic board below — OET gets the analytic-criteria board instead.
+  const subScoreEntries = oet ? [] : Object.entries(subScores).filter(
     ([, val]) => typeof val === "number" && !isNaN(val as number)
   );
   const maxSub = subScoreEntries.reduce(
@@ -1960,11 +2225,13 @@ function SpeakingResultCard({
           <div>
             <p className="font-jetbrains text-brand-mint text-[10.5px] uppercase tracking-[0.18em] mb-2">Speaking · Section Complete</p>
             <div className="font-manrope text-[68px] font-extrabold text-brand-mint tabular-nums leading-none tracking-[-0.03em]">
-              {band_score.toFixed(1)}
+              {oet ? oet.score : band_score.toFixed(1)}
             </div>
-            <p className="font-jetbrains text-brand-on-ink-mute text-[10.5px] mt-2 uppercase tracking-[0.16em]">Band Score</p>
+            <p className="font-jetbrains text-brand-on-ink-mute text-[10.5px] mt-2 uppercase tracking-[0.16em]">
+              {oet ? "OET Score · out of 500" : "Band Score"}
+            </p>
           </div>
-          <LevelBadge level={level} size="lg" />
+          {oet ? <OetGradeBadge grade={oet.grade} meetsB={oet.meetsB} /> : <LevelBadge level={level} size="lg" />}
         </div>
       </div>
 
@@ -2027,6 +2294,8 @@ function SpeakingResultCard({
         </div>
       )}
 
+      {oet && subScores.criteria && <OetCriteriaBoard criteria={subScores.criteria} />}
+
       {feedbackSource && (
         <FeedbackAccordion title="AI Detailed Feedback">
           <DetailedFeedbackDisplay feedback={feedbackSource} />
@@ -2064,11 +2333,29 @@ function DiagnosticSummaryScreen({
   const [breakdownOpen, setBreakdownOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
 
-  const radarData = skills.map((skill) => ({
-    skill: SKILL_LABELS[skill],
-    band: Number(results[skill]?.band_score) || 4,
-    target,
-  }));
+  // OET (per-component) has NO overall grade — report each skill on its own 0–500 scale +
+  // grade, not a single band. Detected from the stored sub_scores (see oetResultView).
+  const perComponent = skills.some((s) => !!oetResultView(results[s]?.sub_scores));
+  const examLabel = perComponent ? "Healthcare English" : "IELTS";
+  const radarDomain: [number, number] = perComponent ? [0, 500] : [4, 9];
+
+  const radarData = skills.map((skill) => {
+    const oetv = oetResultView(results[skill]?.sub_scores);
+    return {
+      skill: SKILL_LABELS[skill],
+      band: perComponent ? (oetv?.score ?? 0) : (Number(results[skill]?.band_score) || 4),
+      target: perComponent ? 350 : target, // OET Grade-B benchmark is 350/500
+    };
+  });
+
+  // Per-skill priority actions / summaries surfaced on the final preview.
+  const feedbackItems = skills
+    .map((skill) => {
+      const fb = results[skill]?.feedback ?? results[skill]?.sub_scores?.feedback;
+      const action = fb?.priority_action ?? fb?.overall_summary;
+      return action ? { skill, action: String(action) } : null;
+    })
+    .filter(Boolean) as { skill: Skill; action: string }[];
 
   const readinessMessages: Record<Level, string> = {
     A: "You're at the foundation stage. Our personalised plan will fast-track you toward your target band.",
@@ -2082,7 +2369,7 @@ function DiagnosticSummaryScreen({
         <div className="w-14 h-14 bg-brand-teal-wash border border-brand-teal-tint rounded-xl flex items-center justify-center text-2xl mx-auto">🎓</div>
         <h2 className="font-manrope text-[30px] font-extrabold text-brand-ink leading-[1.1] tracking-[-0.03em]">Diagnostic complete</h2>
         <p className="text-brand-text-mute text-[14.5px] max-w-sm mx-auto leading-[1.7]">
-          Here's your IELTS baseline. Your personalised learning path has been generated.
+          Here's your {examLabel} baseline. Your personalised learning path has been generated.
         </p>
       </div>
 
@@ -2096,21 +2383,43 @@ function DiagnosticSummaryScreen({
             backgroundSize: '48px 48px',
           }}
         />
-        <div className="relative space-y-3">
-          <p className="font-jetbrains text-brand-mint text-[10.5px] uppercase tracking-[0.18em]">Overall Band Score</p>
-          <div className="font-manrope text-[64px] font-extrabold tabular-nums text-brand-mint leading-none tracking-[-0.03em]">
-            {avgScore.toFixed(1)}
+        {perComponent ? (
+          <div className="relative space-y-4">
+            <p className="font-jetbrains text-brand-mint text-[10.5px] uppercase tracking-[0.18em]">Your Results · by skill</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {skills.map((skill) => {
+                const oetv = oetResultView(results[skill]?.sub_scores);
+                if (!oetv) return null;
+                return (
+                  <div key={skill} className="rounded-xl border border-brand-line-12 bg-white/[0.04] px-2 py-3">
+                    <p className="font-jetbrains text-brand-on-ink-mute text-[9px] uppercase tracking-[0.14em] mb-1">{SKILL_LABELS[skill]}</p>
+                    <div className="font-manrope text-[30px] font-extrabold text-brand-mint tabular-nums leading-none">{oetv.score}</div>
+                    <p className="text-brand-on-ink text-[11px] mt-1 font-semibold">Grade {oetv.grade}</p>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="text-brand-on-ink-mute text-[12px] max-w-sm mx-auto leading-[1.6]">
+              Healthcare English reports each skill separately on a 0–500 scale — there's no single overall grade.
+            </p>
           </div>
-          <div className="flex justify-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-brand-line-25 bg-white/10 font-semibold px-4 py-1.5 text-[14px] text-brand-bg">
-              <span className="w-2 h-2 rounded-full bg-brand-mint" />
-              Level {overallLevel} · {getLevelConfig(overallLevel).label}
-            </span>
+        ) : (
+          <div className="relative space-y-3">
+            <p className="font-jetbrains text-brand-mint text-[10.5px] uppercase tracking-[0.18em]">Overall Band Score</p>
+            <div className="font-manrope text-[64px] font-extrabold tabular-nums text-brand-mint leading-none tracking-[-0.03em]">
+              {avgScore.toFixed(1)}
+            </div>
+            <div className="flex justify-center">
+              <span className="inline-flex items-center gap-2 rounded-full border border-brand-line-25 bg-white/10 font-semibold px-4 py-1.5 text-[14px] text-brand-bg">
+                <span className="w-2 h-2 rounded-full bg-brand-mint" />
+                Level {overallLevel} · {getLevelConfig(overallLevel).label}
+              </span>
+            </div>
+            <p className="text-brand-on-ink text-[14px] max-w-xs mx-auto leading-[1.7]">
+              {readinessMessages[overallLevel]}
+            </p>
           </div>
-          <p className="text-brand-on-ink text-[14px] max-w-xs mx-auto leading-[1.7]">
-            {readinessMessages[overallLevel]}
-          </p>
-        </div>
+        )}
       </div>
 
       <div className="border border-brand-line bg-white rounded-2xl p-3 sm:p-4">
@@ -2119,9 +2428,9 @@ function DiagnosticSummaryScreen({
             <RadarChart data={radarData} margin={{ top: 8, right: 44, bottom: 8, left: 44 }}>
               <PolarGrid stroke="#D8E0E2" />
               <PolarAngleAxis dataKey="skill" tick={{ fill: '#17232B', fontSize: 10, fontWeight: 600 }} />
-              <PolarRadiusAxis domain={[4, 9]} tickCount={6} tick={{ fill: '#5E6B73', fontSize: 9 }} />
-              <Radar name={`Target (${target.toFixed(1)})`} dataKey="target" stroke="#8FA0A8" strokeDasharray="4 4" fill="#8FA0A8" fillOpacity={0.04} isAnimationActive={false} />
-              <Radar name="Your Band" dataKey="band" stroke="#0B6151" fill="#0B6151" fillOpacity={0.35} strokeWidth={2} />
+              <PolarRadiusAxis domain={radarDomain} tickCount={6} tick={{ fill: '#5E6B73', fontSize: 9 }} />
+              <Radar name={perComponent ? 'Grade B (350)' : `Target (${target.toFixed(1)})`} dataKey="target" stroke="#8FA0A8" strokeDasharray="4 4" fill="#8FA0A8" fillOpacity={0.04} isAnimationActive={false} />
+              <Radar name={perComponent ? 'Your Score' : 'Your Band'} dataKey="band" stroke="#0B6151" fill="#0B6151" fillOpacity={0.35} strokeWidth={2} />
               <Legend wrapperStyle={{ fontSize: 11, fontWeight: 600 }} />
             </RadarChart>
           </ResponsiveContainer>
@@ -2132,19 +2441,25 @@ function DiagnosticSummaryScreen({
         {skills.map((skill) => {
           const result = results[skill];
           if (!result) return null;
+          const oetv = oetResultView(result.sub_scores);
+          // OET colours by Grade-B pass; IELTS by band tiers.
           const score = Number(result.band_score) || 0;
-          const chipColor = score < 5.5
-            ? { bg: '#FFF1F2', border: '#FECDD3', text: '#9F1239' }
-            : score < 7.0
-            ? { bg: '#FFFBEB', border: '#FDE68A', text: '#92400E' }
-            : { bg: '#ECFDF5', border: '#A7F3D0', text: '#065F46' };
+          const chipColor = oetv
+            ? (oetv.meetsB
+                ? { bg: '#ECFDF5', border: '#A7F3D0', text: '#065F46' }
+                : { bg: '#FFFBEB', border: '#FDE68A', text: '#92400E' })
+            : (score < 5.5
+                ? { bg: '#FFF1F2', border: '#FECDD3', text: '#9F1239' }
+                : score < 7.0
+                ? { bg: '#FFFBEB', border: '#FDE68A', text: '#92400E' }
+                : { bg: '#ECFDF5', border: '#A7F3D0', text: '#065F46' });
           return (
             <span
               key={skill}
               className="inline-flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-full border"
               style={{ background: chipColor.bg, borderColor: chipColor.border, color: chipColor.text }}
             >
-              {SKILL_ICONS[skill]} {SKILL_LABELS[skill]} · {score.toFixed(1)}
+              {SKILL_ICONS[skill]} {SKILL_LABELS[skill]} · {oetv ? `${oetv.score} (${oetv.grade})` : score.toFixed(1)}
             </span>
           );
         })}
@@ -2243,11 +2558,56 @@ function DiagnosticSummaryScreen({
                   </div>
                 );
               }
+
+              // OET Writing/Speaking analytic criteria (no IELTS band-key match above)
+              if (sub.criteria && typeof sub.criteria === 'object') {
+                const rows = Object.values(sub.criteria).filter((c: any) => c && typeof c.score === 'number');
+                if (rows.length === 0) return null;
+                return (
+                  <div key={skill}>
+                    <p className="font-jetbrains text-[10px] uppercase tracking-[0.16em] text-brand-text-mute mb-2">{SKILL_LABELS[skill]}</p>
+                    <div className="space-y-1.5">
+                      {rows.map((c: any, i: number) => {
+                        const max = Number(c.max) || 1;
+                        const s = Number(c.score) || 0;
+                        return (
+                          <div key={c.label ?? i} className="flex items-center gap-2">
+                            <span className="text-[12px] font-medium text-brand-text-mute w-32 shrink-0 truncate">{c.label}</span>
+                            <div className="flex-1 h-1.5 bg-brand-bg-alt rounded-full overflow-hidden">
+                              <div className={cn('h-full rounded-full', c.meets_b === false ? 'bg-amber-500' : 'bg-brand-teal-500')} style={{ width: `${Math.min(100, (s / max) * 100)}%` }} />
+                            </div>
+                            <span className="text-[12px] font-bold text-brand-ink w-10 text-right tabular-nums">{s}/{max}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              }
               return null;
             })}
           </div>
         )}
       </div>
+
+      {feedbackItems.length > 0 && (
+        <div className="border border-brand-line bg-white rounded-2xl p-5 space-y-3">
+          <p className="font-jetbrains text-brand-text-mute text-[10px] uppercase tracking-[0.16em] flex items-center gap-1.5">
+            <Target className="w-3.5 h-3.5" /> What to focus on next
+          </p>
+          <div className="space-y-2.5">
+            {feedbackItems.map(({ skill, action }) => (
+              <div key={skill} className="flex gap-3">
+                <span className="text-lg shrink-0 leading-none mt-0.5">{SKILL_ICONS[skill]}</span>
+                <div>
+                  <p className="font-semibold text-brand-text text-[13px] leading-tight">{SKILL_LABELS[skill]}</p>
+                  <p className="text-brand-text-mute text-[13px] leading-[1.6]">{action}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-3">
         <button
@@ -2825,15 +3185,19 @@ function DiagnosisInner() {
             />
           )}
 
-          {phase === "speaking" && (
-            <SpeakingPhase
-              onComplete={(r) => {
-                setResults((prev) => ({ ...prev, speaking: r }));
-                setLastSpeakingResult(r);
-                setPhase("speaking_result");
-              }}
-            />
-          )}
+          {phase === "speaking" && (() => {
+            const onSpeakingDone = (r: SkillResult) => {
+              setResults((prev) => ({ ...prev, speaking: r }));
+              setLastSpeakingResult(r);
+              setPhase("speaking_result");
+            };
+            // IELTS uses the single-prompt viva-style flow; OET (and other role-play
+            // speaking exams) use the multi-role-play recorder. SE never reaches this
+            // component (it renders VivaDiagnostic upstream).
+            return profile?.examId && profile.examId !== "ielts"
+              ? <OetSpeakingPhase onComplete={onSpeakingDone} />
+              : <SpeakingPhase onComplete={onSpeakingDone} />;
+          })()}
 
           {phase === "speaking_result" && lastSpeakingResult && (
             <SpeakingResultCard
