@@ -12,7 +12,7 @@
  * is gone — that file was unrouted dead code and was deleted on 21 Aug 2026.)
  */
 
-export const EXAM_TYPES = ['ielts', 'spoken_english', 'oet', 'gre', 'gmat'] as const;
+export const EXAM_TYPES = ['ielts', 'spoken_english', 'oet_nursing', 'gre', 'gmat'] as const;
 
 export type ExamType = (typeof EXAM_TYPES)[number];
 
@@ -20,20 +20,22 @@ export type ExamType = (typeof EXAM_TYPES)[number];
 export const EXAM_LABELS: Record<ExamType, string> = {
   ielts: 'IELTS',
   spoken_english: 'Spoken English',
-  oet: 'Healthcare English',
+  oet_nursing: 'Healthcare English (Nursing)',
   gre: 'GRE',
   gmat: 'GMAT',
 };
 
 /**
- * Which exams are offerable today. IELTS + Spoken English are live; the rest are
- * in the registry but not content-ready, so the UI shows them as "coming soon"
- * rather than offering them for selection.
+ * Which exams are offerable today. IELTS, Spoken English + Healthcare English
+ * (Nursing) are live; GRE/GMAT are in the registry but not content-ready, so the
+ * UI shows them as "coming soon" rather than offering them for selection.
+ * NOTE: oet_nursing is offered under the non-OET name only (trademark counsel on
+ * the "OET" mark is still pending — never surface "OET" in public copy).
  */
 export const EXAM_AVAILABILITY: Record<ExamType, 'live' | 'soon'> = {
   ielts: 'live',
   spoken_english: 'live',
-  oet: 'soon',
+  oet_nursing: 'live',
   gre: 'soon',
   gmat: 'soon',
 };
