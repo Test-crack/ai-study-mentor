@@ -1350,6 +1350,11 @@ function ReadingPhase({
 // PHASE: WRITING
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Copy/paste/cut/drag in the writing box are blocked by default (exam integrity).
+// Set VITE_ALLOW_DIAGNOSTIC_PASTE=true in a local .env to allow paste — for dev
+// testing only. Unset (prod / the public dev site) keeps the guard on.
+const DIAGNOSTIC_PASTE_ALLOWED = import.meta.env.VITE_ALLOW_DIAGNOSTIC_PASTE === 'true';
+
 function WritingPhase({
   onComplete,
   initialText = "",
@@ -1403,12 +1408,14 @@ function WritingPhase({
     }
   };
 
-  // Copy/paste/cut/drag are always blocked in the writing answer field — exam integrity requirement
-  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => { e.preventDefault(); };
-  const handleCopy  = (e: React.ClipboardEvent<HTMLTextAreaElement>) => { e.preventDefault(); };
-  const handleCut   = (e: React.ClipboardEvent<HTMLTextAreaElement>) => { e.preventDefault(); };
-  const handleDrop  = (e: React.DragEvent<HTMLTextAreaElement>)      => { e.preventDefault(); };
-  const handleContextMenu = (e: React.MouseEvent<HTMLTextAreaElement>) => { e.preventDefault(); };
+  // Copy/paste/cut/drag are blocked in the writing answer field (exam integrity),
+  // unless VITE_ALLOW_DIAGNOSTIC_PASTE=true (dev testing — see DIAGNOSTIC_PASTE_ALLOWED).
+  const block = (e: { preventDefault: () => void }) => { if (!DIAGNOSTIC_PASTE_ALLOWED) e.preventDefault(); };
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => block(e);
+  const handleCopy  = (e: React.ClipboardEvent<HTMLTextAreaElement>) => block(e);
+  const handleCut   = (e: React.ClipboardEvent<HTMLTextAreaElement>) => block(e);
+  const handleDrop  = (e: React.DragEvent<HTMLTextAreaElement>)      => block(e);
+  const handleContextMenu = (e: React.MouseEvent<HTMLTextAreaElement>) => block(e);
 
   if (sectionState === "loading") {
     return (
@@ -1532,9 +1539,11 @@ function WritingPhase({
         </p>
       </div>
 
-      <p className="font-jetbrains text-brand-text-mute text-[10.5px] flex items-center gap-1.5 uppercase tracking-[0.14em]">
-        <span>🔒</span> Copy-paste disabled — all responses must be typed.
-      </p>
+      {!DIAGNOSTIC_PASTE_ALLOWED && (
+        <p className="font-jetbrains text-brand-text-mute text-[10.5px] flex items-center gap-1.5 uppercase tracking-[0.14em]">
+          <span>🔒</span> Copy-paste disabled — all responses must be typed.
+        </p>
+      )}
 
       {error && <ErrorBanner onRetry={handleSubmit} />}
 
