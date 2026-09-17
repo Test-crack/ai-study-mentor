@@ -74,11 +74,13 @@ export default function Subscription() {
     return () => clearTimeout(t);
   }, [searchQuery]);
 
+  // The status tabs filter the table CLIENT-SIDE (see visibleRows) — they must
+  // not refetch, so the summary counts + right-rail insights stay stable when you
+  // switch tabs. Only search hits the backend.
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetchSubscriptions({
-        status: statusFilter === 'ALL' ? undefined : statusFilter,
         search: debouncedSearch || undefined,
       });
       setRows(res.data);
@@ -88,7 +90,7 @@ export default function Subscription() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, debouncedSearch, toast]);
+  }, [debouncedSearch, toast]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -108,6 +110,13 @@ export default function Subscription() {
       setSavingId(null);
     }
   };
+
+  // The status tabs only narrow which rows the table shows — everything else
+  // (summary, insights, right rail) is derived from the full `rows`.
+  const visibleRows = useMemo(
+    () => statusFilter === 'ALL' ? rows : rows.filter(r => r.billingStatus === statusFilter),
+    [rows, statusFilter]
+  );
 
   // ─── Derived insights (computed client-side from the already-fetched rows —
   // no extra endpoints needed) ─────────────────────────────────────────────
@@ -199,7 +208,7 @@ export default function Subscription() {
 
   const exportCsv = () => {
     const csv = ['institute,exam,status,students,trial_ends'].concat(
-      rows.map(r => `"${r.instituteName.replace(/"/g, '""')}",${EXAM_LABELS[r.examType]},${r.billingStatus},${r.studentCount},${r.trialEndsAt ?? ''}`)
+      visibleRows.map(r => `"${r.instituteName.replace(/"/g, '""')}",${EXAM_LABELS[r.examType]},${r.billingStatus},${r.studentCount},${r.trialEndsAt ?? ''}`)
     ).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -386,9 +395,13 @@ export default function Subscription() {
                 <div className="py-16 flex justify-center">
                   <Loader2 className="w-6 h-6 animate-spin text-brand-teal-500" />
                 </div>
-              ) : rows.length === 0 ? (
+              ) : visibleRows.length === 0 ? (
                 <div className="py-12 text-center text-brand-text-mute text-sm">
-                  {debouncedSearch ? `No subscriptions matching "${debouncedSearch}"` : 'No subscriptions yet. Create an institute with exams to get started.'}
+                  {debouncedSearch
+                    ? `No subscriptions matching "${debouncedSearch}"`
+                    : statusFilter !== 'ALL'
+                      ? `No ${statusFilter.charAt(0) + statusFilter.slice(1).toLowerCase()} subscriptions.`
+                      : 'No subscriptions yet. Create an institute with exams to get started.'}
                 </div>
               ) : (
                 <>
@@ -396,7 +409,7 @@ export default function Subscription() {
                     720px minimum, which meant permanent horizontal scrolling on
                     a phone. */}
                 <ul className="md:hidden divide-y divide-brand-line">
-                  {rows.map((row) => {
+                  {visibleRows.map((row) => {
                     const d = daysLeft(row.trialEndsAt);
                     return (
                       <li key={row.id} className="p-4">
@@ -450,7 +463,7 @@ export default function Subscription() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-brand-line">
-                      {rows.map((row) => {
+                      {visibleRows.map((row) => {
                         const d = daysLeft(row.trialEndsAt);
                         return (
                           <tr key={row.id} className="hover:bg-brand-bg-alt transition-colors group">
