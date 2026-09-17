@@ -1,0 +1,49 @@
+/**
+ * Malayalam typography corrections for the landing page.
+ *
+ * The page's Latin type scale leans on tight tracking (-0.04em on headings,
+ * +0.14em to +0.2em on the uppercase eyebrow labels) and very tight leading
+ * (1.04 on the hero h1). Both are wrong for Malayalam:
+ *
+ *  - Letter-spacing splits Malayalam conjunct clusters. A word like
+ *    "സ്ഥാപനത്തിന്റെ" is a handful of glyphs that must sit together; spacing
+ *    them apart reads as broken text, not as elegant tracking. Malayalam also
+ *    has no case, so the paired `uppercase` is a no-op and the tracking is all
+ *    that survives — pure damage, no benefit.
+ *  - Malayalam glyphs carry taller ascenders and deeper descenders than Latin,
+ *    so 1.04 leading crowds consecutive lines.
+ *  - The JetBrains Mono captions have no Malayalam glyphs at all, so those
+ *    labels fall back mid-run; pointing them at the sans stack keeps each
+ *    caption in one typeface.
+ *
+ * Scoped to [data-landing-lang='ml'], so English is untouched. The attribute
+ * selector plus element/class gives these rules higher specificity than the
+ * single-class Tailwind utilities they override, so no !important is needed.
+ */
+
+[data-landing-lang='ml'] h1,
+[data-landing-lang='ml'] h2,
+[data-landing-lang='ml'] h3,
+[data-landing-lang='ml'] h4 {
+  letter-spacing: normal;
+}
+
+[data-landing-lang='ml'] h1 {
+  line-height: 1.25;
+}
+
+[data-landing-lang='ml'] h2,
+[data-landing-lang='ml'] h3,
+[data-landing-lang='ml'] h4 {
+  line-height: 1.35;
+}
+
+/* Every element the page gives an explicit tracking utility. */
+[data-landing-lang='ml'] [class*='tracking-'] {
+  letter-spacing: normal;
+}
+
+/* Mono captions carry Malayalam in this mode; keep them in the sans stack. */
+[data-landing-lang='ml'] .font-jetbrains {
+  font-family: 'IBM Plex Sans', 'Noto Sans Malayalam', sans-serif;
+}

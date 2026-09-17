@@ -24,9 +24,13 @@ export default {
 		extend: {
 			fontFamily: {
 				// Marketing site type. Loaded via Google Fonts in index.html.
-				manrope: ['Manrope', 'sans-serif'],
-				plex: ['"IBM Plex Sans"', 'sans-serif'],
-				jetbrains: ['"JetBrains Mono"', 'monospace'],
+				// 'Noto Sans Malayalam' trails each stack as a script fallback for the
+				// landing page's Malayalam mode — the Latin faces have no Malayalam
+				// glyphs, and a browser only reaches a later family for codepoints the
+				// earlier ones lack, so Latin text still renders in the intended face.
+				manrope: ['Manrope', '"Noto Sans Malayalam"', 'sans-serif'],
+				plex: ['"IBM Plex Sans"', '"Noto Sans Malayalam"', 'sans-serif'],
+				jetbrains: ['"JetBrains Mono"', '"Noto Sans Malayalam"', 'monospace'],
 			},
 			colors: {
 				/**

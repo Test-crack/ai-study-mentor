@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
@@ -7,6 +7,9 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
 import testcrackLogo from '@/assets/testcrack-logo.svg';
+import LanguageToggle from './LanguageToggle';
+import { useLandingLanguage } from '../hooks/useLandingLanguage';
+import '../styles/landingMalayalam.css';
 import {
   GraduationCap,
   Zap,
@@ -57,16 +60,103 @@ const DEMO_WHATSAPP_NUMBER = '919995684689';
  * as factual claims.
  */
 const HERO_METRICS = [
-  { value: '+2.0', label: 'avg band lift', accent: false },
-  { value: '18', label: 'institutes live', accent: false },
-  { value: '92%', label: 'streak retention', accent: true },
+  { key: 'bandLift', value: '+2.0', accent: false },
+  { key: 'institutesLive', value: '18', accent: false },
+  { key: 'streakRetention', value: '92%', accent: true },
+] as const;
+
+/**
+ * Non-text parts of the page, keyed to match src/features/home/i18n/landingCopy.ts.
+ * Icons, links, and statuses live here so English and Malayalam can never drift
+ * apart on where a link points or which icon a card gets — the copy file holds
+ * text and nothing else.
+ */
+const TAB_ICONS = {
+  students: [Target, Zap, Cpu, LineChart],
+  instructors: [AlertTriangle, LineChart, Users, MessageSquareText],
+  institutes: [LayoutDashboard, FileBarChart, ShieldCheck, Building2],
+} as const;
+
+const TAB_IDS = ['students', 'instructors', 'institutes'] as const;
+type TabId = (typeof TAB_IDS)[number];
+
+const TAB_NAV_ICONS: Record<TabId, typeof GraduationCap> = {
+  students: GraduationCap,
+  instructors: Users,
+  institutes: Building2,
+};
+
+const TOOL_META = [
+  { icon: Target, status: 'LIVE' },
+  { icon: Zap, status: 'LIVE' },
+  { icon: Cpu, status: 'LIVE' },
+  { icon: Laptop, status: 'LIVE' },
+  { icon: Mic, status: 'LIVE' },
+  { icon: LayoutDashboard, status: 'BETA' },
+] as const;
+
+const SKILL_KEYS = ['listening', 'reading', 'writing', 'speaking'] as const;
+
+const HOW_IT_WORKS_META = [
+  { step: '01', icon: Target },
+  { step: '02', icon: Flame },
+  { step: '03', icon: LineChart },
+] as const;
+
+const CTA_PILL_ICONS = { onboarding: Zap, outreach: MessageSquareText } as const;
+
+/**
+ * Footer link targets. Labels come from the copy file, matched by these keys.
+ */
+const FOOTER_SECTIONS = [
+  {
+    key: 'platform',
+    links: [
+      { key: 'diagnosticAssessment', href: '#' },
+      { key: 'dailyDrillEngine', href: '#' },
+      { key: 'lexigrid', href: '#' },
+      { key: 'adaptiveAssessments', href: '#' },
+      { key: 'mockTests', href: '#' },
+      { key: 'aiScoring', href: '#' },
+    ],
+  },
+  {
+    key: 'institutes',
+    links: [
+      { key: 'commandCenter', href: '#' },
+      { key: 'tutorDashboards', href: '#' },
+      { key: 'batchReports', href: '#' },
+      { key: 'atRiskDetection', href: '#' },
+      { key: 'pilotOnboarding', href: '#' },
+      { key: 'viewDemo', href: '/dashdemo' },
+    ],
+  },
+  {
+    key: 'company',
+    links: [
+      { key: 'about', href: '#' },
+      { key: 'forStudents', href: '#' },
+      { key: 'forTutors', href: '#' },
+      { key: 'forInstitutes', href: '#' },
+      { key: 'requestDemo', href: '#', isDemo: true },
+    ],
+  },
+] as const;
+
+const DEMO_FIELDS = [
+  { field: 'name', type: 'text' },
+  { field: 'institute', type: 'text' },
+  { field: 'city', type: 'text' },
+  { field: 'whatsapp', type: 'tel' },
+  { field: 'email', type: 'email' },
 ] as const;
 
 const LandingPage = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
+  const { lang, setLang, copy } = useLandingLanguage();
   const [processingAuth, setProcessingAuth] = useState(false);
-  const [activeTab, setActiveTab] = useState('students');
+  const [activeTab, setActiveTab] = useState<TabId>('students');
   const [demoModalOpen, setDemoModalOpen] = useState(false);
   const [demoSubmitted, setDemoSubmitted] = useState(false);
   const [demoForm, setDemoForm] = useState({
@@ -173,79 +263,28 @@ const LandingPage = () => {
       <div className="min-h-screen bg-brand-teal-wash flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-teal mx-auto"></div>
-          <p className="text-brand-text-mute">Verifying your account...</p>
+          <p className="text-brand-text-mute">{copy.authProcessing}</p>
         </div>
       </div>
     );
   }
 
-  const tabContent = {
-    students: [
-      { icon: Target, title: 'Diagnostic-First Start', description: 'A one-time, four-skill baseline assessment (Listening, Reading, Writing, Speaking) builds your personal competency matrix — so from day one, you only drill what is actually weak.' },
-      { icon: Zap, title: 'Daily Drill Loop + DCS', description: 'Three targeted micro-drills and the LexiGrid vocabulary game every day. Your Daily Competency Score gives you visible proof of progress before you even open a textbook.' },
-      { icon: Cpu, title: 'Adaptive Internal Assessments', description: 'Every three days, a 40-minute IA tests your two weakest sub-skills at your current band level. AI grades writing and speaking instantly — with feedback, not just a score.' },
-      { icon: LineChart, title: 'Real Band + Momentum', description: 'Monthly full-length mocks produce a Real Band score you can trust. Momentum points and daily streaks reward consistency — and unlock extra drills and earned mocks.' },
-    ],
-    instructors: [
-      { icon: AlertTriangle, title: 'At-Risk Auto Detection', description: 'Rule-based flags from real data — broken streaks, missed internal assessments, declining bands, students stuck before diagnostics. Intervene before they drop, not after.' },
-      { icon: LineChart, title: 'Live Band Score Table', description: 'Every student\'s current band vs. target band, gap-sorted, with trend arrows from their last two assessments. Know exactly who needs you this week.' },
-      { icon: Users, title: 'Student Deep Dive', description: 'IA history with sub-skill breakdowns, mock band progression, 14-day drill trends, and sub-skill coverage maps — one page per student, zero spreadsheets.' },
-      { icon: MessageSquareText, title: 'Zero Manual Marking', description: 'Nine AI scoring engines grade drills, writing tasks, and speaking responses against IELTS band descriptors. You review feedback and coach — the marking is done.' },
-    ],
-    institutes: [
-      { icon: LayoutDashboard, title: 'Institute Command Center', description: 'Cohort band averages, IA completion rates, engagement health, and goal-achievement segmentation across every batch — in one daily-updated view.' },
-      { icon: FileBarChart, title: 'Batch Snapshot Reports', description: 'One-page, printable batch performance summaries: engagement this week, IA results, mock outcomes, and the at-risk list. Ready for parents and stakeholders.' },
-      { icon: ShieldCheck, title: 'Diagnostic → Outcome Proof', description: 'Show measurable improvement from baseline diagnostic to current Real Band per student and per batch — the proof that sells your institute.' },
-      { icon: Building2, title: 'B2B Onboarding + WhatsApp Outreach', description: 'Built for Kerala\'s coaching ecosystem: structured institute onboarding, role-based access for your team, and WhatsApp nudges for disengaged students. (Outreach in build.)' },
-    ],
-  };
-
-  const toolsData = [
-    { icon: Target, title: "Diagnostic Assessment Engine", description: "Every student starts with a four-skill baseline. Band scores and sub-skill breakdowns seed a live competency matrix — so practice is targeted from day one, not generic.", status: "LIVE" },
-    { icon: Zap, title: "Daily Drill Engine + LexiGrid", description: "Three daily micro-drills targeting weak sub-skills, plus a daily vocabulary game. The Daily Competency Score gates progress and shows tutors exactly who practised today.", status: "LIVE" },
-    { icon: Cpu, title: "Adaptive Internal Assessments", description: "A 40-minute assessment every three days, auto-scheduled. Difficulty adapts to the student's current band; missed sessions carry forward so weak skills never slip through.", status: "LIVE" },
-    { icon: Laptop, title: "Monthly Mock Tests + Real Band", description: "Full IELTS simulations across all four skills, producing a Real Band score updated monthly. Motivated students can earn extra mocks with momentum points.", status: "LIVE" },
-    { icon: Mic, title: "AI Speaking & Writing Scoring", description: "Nine scoring engines grade fluency, WPM, filler words, grammar, coherence, task response, and vocabulary against IELTS band descriptors — instantly, with feedback rationale.", status: "LIVE" },
-    { icon: LayoutDashboard, title: "Tutor & Institute Dashboards", description: "Batch engagement pulse, at-risk detection, band overview tables, student deep dives, and institute-level outcome reports — currently in pilot build for partner institutes.", status: "BETA" },
-  ];
-
-  const footerLinks = {
-    Platform: [
-      { label: 'Diagnostic Assessment', href: '#' },
-      { label: 'Daily Drill Engine', href: '#' },
-      { label: 'LexiGrid Vocabulary', href: '#' },
-      { label: 'Adaptive Assessments', href: '#' },
-      { label: 'Mock Tests', href: '#' },
-      { label: 'AI Scoring Engines', href: '#' },
-    ],
-    Institutes: [
-      { label: 'Command Center', href: '#' },
-      { label: 'Tutor Dashboards', href: '#' },
-      { label: 'Batch Reports', href: '#' },
-      { label: 'At-Risk Detection', href: '#' },
-      { label: 'Pilot Onboarding', href: '#' },
-      { label: 'View Demo', href: '/dashdemo' },
-    ],
-    Company: [
-      { label: 'About TestCrack', href: '#' },
-      { label: 'For Students', href: '#' },
-      { label: 'For Tutors', href: '#' },
-      { label: 'For Institutes', href: '#' },
-      { label: 'Request Demo', href: '#', isDemo: true },
-    ],
-  };
-
   return (
-    <div className="min-h-screen bg-white font-plex text-brand-text antialiased">
+    <div
+      lang={lang}
+      data-landing-lang={lang}
+      className="min-h-screen bg-white font-plex text-brand-text antialiased"
+    >
 
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-brand-ink border-b border-brand-line-12 transform-gpu">
         <div className="w-full px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-16 gap-3">
             <div className="flex items-center space-x-2">
               <img src={testcrackLogo} alt="TestCrack" className="h-9 w-9 object-contain" />
               <span className="font-manrope text-xl font-extrabold tracking-[-0.03em] text-brand-bg">TestCrack</span>
             </div>
+            <LanguageToggle value={lang} onChange={setLang} groupLabel={copy.nav.languageGroupLabel} />
           </div>
         </div>
       </nav>
@@ -275,19 +314,19 @@ const LandingPage = () => {
               <div className="flex items-center gap-3 mb-7">
                 <span className="h-px w-7 shrink-0 bg-brand-mint" aria-hidden="true" />
                 <span className="font-jetbrains text-[11px] uppercase tracking-[0.2em] text-brand-mint">
-                  Diagnostic-First IELTS Prep for Institutes
+                  {copy.hero.eyebrow}
                 </span>
               </div>
 
               {/* Static headline, matching the approved mock. Renders on first
                   paint with no reserved-height trick and no layout shift. */}
               <h1 className="font-manrope text-[40px] sm:text-[52px] xl:text-[64px] font-extrabold leading-[1.04] tracking-[-0.03em] text-white mb-6">
-                Lift your institute's band score average{' '}
-                <span className="text-brand-mint">measurably.</span>
+                {copy.hero.headline}{' '}
+                <span className="text-brand-mint">{copy.hero.headlineAccent}</span>
               </h1>
 
               <p className="max-w-[540px] text-[16.5px] leading-[1.75] text-brand-on-ink mb-9">
-                A complete education ecosystem for Kerala's coaching institutes — daily drills students stick to, assessments every three days, and a Real Band score tutors can act on.
+                {copy.hero.subhead}
               </p>
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -295,7 +334,7 @@ const LandingPage = () => {
                   onClick={() => setDemoModalOpen(true)}
                   className="group h-auto rounded-md border-none bg-brand-teal px-6 py-3 text-[14.5px] font-semibold text-white shadow-none transition-colors duration-150 hover:bg-brand-teal-dark active:scale-95"
                 >
-                  Request Demo
+                  {copy.hero.requestDemo}
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5" aria-hidden="true" />
                 </Button>
                 <Button
@@ -304,7 +343,7 @@ const LandingPage = () => {
                   className="h-auto rounded-md border border-brand-line-25 bg-transparent px-6 py-3 text-[14.5px] font-semibold text-brand-bg shadow-none transition-colors duration-150 hover:border-brand-line-60 hover:bg-brand-wash-06 active:scale-95"
                 >
                   <Play className="mr-2 h-3.5 w-3.5 fill-current" aria-hidden="true" />
-                  View Demo
+                  {copy.hero.viewDemo}
                 </Button>
               </div>
 
@@ -312,11 +351,11 @@ const LandingPage = () => {
               <div className="mt-12 max-w-[560px] border-t border-brand-line-14 pt-7">
                 <dl className="grid grid-cols-3 gap-px bg-brand-line-14">
                   {HERO_METRICS.map((metric) => (
-                    <div key={metric.label} className="bg-brand-ink-deep px-4 first:pl-0">
+                    <div key={metric.key} className="bg-brand-ink-deep px-4 first:pl-0">
                       <dd className={`font-jetbrains text-[24px] font-bold tracking-[-0.02em] ${metric.accent ? 'text-brand-mint' : 'text-white'}`}>
                         {metric.value}
                       </dd>
-                      <dt className="mt-1.5 text-[12.5px] text-brand-on-ink-mute">{metric.label}</dt>
+                      <dt className="mt-1.5 text-[12.5px] text-brand-on-ink-mute">{copy.hero.metrics[metric.key]}</dt>
                     </div>
                   ))}
                 </dl>
@@ -336,8 +375,8 @@ const LandingPage = () => {
                     <User className="h-7 w-7 sm:h-8 sm:w-8 text-brand-teal-600" aria-hidden="true" />
                   </div>
                   <div>
-                    <p className="font-jetbrains text-[9px] sm:text-[10.5px] uppercase tracking-[0.14em] text-brand-teal-300">Diagnostic</p>
-                    <p className="mt-1 font-jetbrains text-[15px] sm:text-[18px] font-bold text-white whitespace-nowrap">Band 5.5</p>
+                    <p className="font-jetbrains text-[9px] sm:text-[10.5px] uppercase tracking-[0.14em] text-brand-teal-300">{copy.hero.diagnosticLabel}</p>
+                    <p className="mt-1 font-jetbrains text-[15px] sm:text-[18px] font-bold text-white whitespace-nowrap">{copy.hero.diagnosticBand}</p>
                   </div>
                 </div>
 
@@ -361,14 +400,14 @@ const LandingPage = () => {
                     <User className="h-7 w-7 sm:h-8 sm:w-8 text-brand-warm" aria-hidden="true" />
                   </div>
                   <div>
-                    <p className="font-jetbrains text-[9px] sm:text-[10.5px] uppercase tracking-[0.14em] text-brand-warm">Real Band</p>
-                    <p className="mt-1 font-jetbrains text-[15px] sm:text-[18px] font-bold text-white whitespace-nowrap">Band 7.5</p>
+                    <p className="font-jetbrains text-[9px] sm:text-[10.5px] uppercase tracking-[0.14em] text-brand-warm">{copy.hero.realBandLabel}</p>
+                    <p className="mt-1 font-jetbrains text-[15px] sm:text-[18px] font-bold text-white whitespace-nowrap">{copy.hero.realBand}</p>
                   </div>
                 </div>
 
               </div>
               <p className="mt-6 sm:mt-7 text-center font-jetbrains text-[10px] sm:text-[10.5px] uppercase tracking-[0.16em] text-brand-on-ink-mute">
-                via the TestCrack Engine
+                {copy.hero.engineCaption}
               </p>
             </div>
 
@@ -380,48 +419,37 @@ const LandingPage = () => {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-brand-bg relative z-10">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <span className="font-jetbrains text-[11px] text-brand-teal uppercase tracking-[0.18em]">The Industry Challenge</span>
+            <span className="font-jetbrains text-[11px] text-brand-teal uppercase tracking-[0.18em]">{copy.pains.eyebrow}</span>
             <h2 className="font-manrope text-4xl sm:text-5xl font-extrabold text-brand-ink mt-4 mb-6 leading-[1.1] tracking-[-0.04em]">
-              Hidden roadblocks limiting your <span className="text-brand-teal">growth.</span>
+              {copy.pains.headline} <span className="text-brand-teal">{copy.pains.headlineAccent}</span>
             </h2>
             <p className="text-[16.5px] text-brand-text-mute max-w-3xl mx-auto leading-[1.7]">
-              Traditional coaching methods are burning out tutors and capping student outcomes. Here is what is standing in the way of your institute's scale.
+              {copy.pains.subhead}
             </p>
           </div>
           <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-0">
-            <Card className="flex-1 w-full bg-white border border-brand-line rounded-none shadow-none transform-gpu z-10 group">
-              <CardContent className="p-8">
-                <div className="p-3 bg-brand-warm-tint rounded-[4px] w-fit mb-6" aria-hidden="true">
-                  <TrendingDown className="h-6 w-6 text-brand-warm" />
-                </div>
-                <h3 className="font-manrope text-[22px] font-bold text-brand-ink mb-3 leading-tight tracking-[-0.02em]">Band scores plateau — and nobody knows why</h3>
-                <p className="text-brand-text-mute text-[15px] leading-[1.7]">Without sub-skill data, tutors can't see whether a student is stuck on coherence, grammar, or fluency — so practice stays generic and scores stay flat.</p>
-              </CardContent>
-            </Card>
-            <div className="hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-brand-teal text-white shrink-0 z-20 -mx-4" aria-hidden="true">
-              <ArrowRight className="h-4 w-4" />
-            </div>
-            <Card className="flex-1 w-full bg-white border border-brand-line rounded-none shadow-none transform-gpu z-10 group">
-              <CardContent className="p-8">
-                <div className="p-3 bg-brand-blue-tint rounded-[4px] w-fit mb-6" aria-hidden="true">
-                  <Hourglass className="h-6 w-6 text-brand-blue" />
-                </div>
-                <h3 className="font-manrope text-[22px] font-bold text-brand-ink mb-3 leading-tight tracking-[-0.02em]">Tutors spend hours marking, not teaching</h3>
-                <p className="text-brand-text-mute text-[15px] leading-[1.7]">Manual essay and speaking corrections eat 40–60% of tutor time — time that could be spent on high-value coaching and intervention.</p>
-              </CardContent>
-            </Card>
-            <div className="hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-brand-teal text-white shrink-0 z-20 -mx-4" aria-hidden="true">
-              <ArrowRight className="h-4 w-4" />
-            </div>
-            <Card className="flex-1 w-full bg-white border border-brand-line rounded-none shadow-none transform-gpu z-10 group">
-              <CardContent className="p-8">
-                <div className="p-3 bg-brand-bg-alt rounded-[4px] w-fit mb-6" aria-hidden="true">
-                  <RefreshCw className="h-6 w-6 text-brand-ink" />
-                </div>
-                <h3 className="font-manrope text-[22px] font-bold text-brand-ink mb-3 leading-tight tracking-[-0.02em]">Students disengage silently before exam day</h3>
-                <p className="text-brand-text-mute text-[15px] leading-[1.7]">Without daily habits and visible progress, students drift away mid-course — and you find out only when they stop showing up. Lost revenue, lost referrals.</p>
-              </CardContent>
-            </Card>
+            {[
+              { icon: TrendingDown, iconWrap: 'bg-brand-warm-tint', iconColor: 'text-brand-warm' },
+              { icon: Hourglass, iconWrap: 'bg-brand-blue-tint', iconColor: 'text-brand-blue' },
+              { icon: RefreshCw, iconWrap: 'bg-brand-bg-alt', iconColor: 'text-brand-ink' },
+            ].map((meta, idx) => (
+              <Fragment key={idx}>
+                {idx > 0 && (
+                  <div className="hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-brand-teal text-white shrink-0 z-20 -mx-4" aria-hidden="true">
+                    <ArrowRight className="h-4 w-4" />
+                  </div>
+                )}
+                <Card className="flex-1 w-full bg-white border border-brand-line rounded-none shadow-none transform-gpu z-10 group">
+                  <CardContent className="p-8">
+                    <div className={`p-3 ${meta.iconWrap} rounded-[4px] w-fit mb-6`} aria-hidden="true">
+                      <meta.icon className={`h-6 w-6 ${meta.iconColor}`} />
+                    </div>
+                    <h3 className="font-manrope text-[22px] font-bold text-brand-ink mb-3 leading-tight tracking-[-0.02em]">{copy.pains.cards[idx].title}</h3>
+                    <p className="text-brand-text-mute text-[15px] leading-[1.7]">{copy.pains.cards[idx].description}</p>
+                  </CardContent>
+                </Card>
+              </Fragment>
+            ))}
           </div>
         </div>
       </section>
@@ -430,31 +458,30 @@ const LandingPage = () => {
       <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden bg-white">
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-16">
-            <h2 className="font-manrope text-4xl sm:text-5xl font-extrabold text-brand-ink mb-4 leading-[1.1] tracking-[-0.04em]">One Platform. Three Wins.</h2>
-            <p className="text-[16.5px] text-brand-text-mute max-w-2xl mx-auto leading-[1.7]">Students build a daily habit, tutors get actionable data, and institute owners get measurable outcomes.</p>
+            <h2 className="font-manrope text-4xl sm:text-5xl font-extrabold text-brand-ink mb-4 leading-[1.1] tracking-[-0.04em]">{copy.features.headline}</h2>
+            <p className="text-[16.5px] text-brand-text-mute max-w-2xl mx-auto leading-[1.7]">{copy.features.subhead}</p>
           </div>
           <div className="flex flex-col items-center gap-8 sm:gap-12 mb-12 px-2">
-            <div className="inline-flex p-1 bg-brand-bg-alt rounded-md border border-brand-line max-w-full transform-gpu" role="tablist" aria-label="Target Audience Features">
-              {[
-                { id: 'students', label: 'Students', icon: GraduationCap },
-                { id: 'instructors', label: 'Tutors', icon: Users },
-                { id: 'institutes', label: 'Institutes', icon: Building2 },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  id={`tab-${tab.id}`}
-                  role="tab"
-                  aria-selected={activeTab === tab.id}
-                  aria-controls={`panel-${tab.id}`}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2 sm:py-2.5 rounded-[4px] text-[11px] sm:text-[14.5px] font-semibold transition-colors duration-150 whitespace-nowrap ${
-                    activeTab === tab.id ? "bg-brand-teal text-white" : "text-brand-text-mute hover:text-brand-teal"
-                  }`}
-                >
-                  <tab.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" aria-hidden="true" />
-                  {tab.label}
-                </button>
-              ))}
+            <div className="inline-flex p-1 bg-brand-bg-alt rounded-md border border-brand-line max-w-full transform-gpu" role="tablist" aria-label={copy.features.tablistLabel}>
+              {TAB_IDS.map((tabId) => {
+                const TabIcon = TAB_NAV_ICONS[tabId];
+                return (
+                  <button
+                    key={tabId}
+                    id={`tab-${tabId}`}
+                    role="tab"
+                    aria-selected={activeTab === tabId}
+                    aria-controls={`panel-${tabId}`}
+                    onClick={() => setActiveTab(tabId)}
+                    className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2 sm:py-2.5 rounded-[4px] text-[11px] sm:text-[14.5px] font-semibold transition-colors duration-150 whitespace-nowrap ${
+                      activeTab === tabId ? "bg-brand-teal text-white" : "text-brand-text-mute hover:text-brand-teal"
+                    }`}
+                  >
+                    <TabIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" aria-hidden="true" />
+                    {copy.features.tabs[tabId]}
+                  </button>
+                );
+              })}
             </div>
             <div 
               id={`panel-${activeTab}`} 
@@ -462,21 +489,24 @@ const LandingPage = () => {
               aria-labelledby={`tab-${activeTab}`} 
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl"
             >
-              {tabContent[activeTab as keyof typeof tabContent].map((item, idx) => (
-                <Card
-                  key={`${activeTab}-${idx}`}
-                  className="group relative overflow-hidden border border-brand-line bg-white rounded-none shadow-none animate-in fade-in slide-in-from-bottom-3 transform-gpu"
-                  style={{ animationDelay: `${idx * 100}ms` }}
-                >
-                  <CardContent className="p-6 text-left relative z-10">
-                    <div className="p-2.5 bg-brand-teal-wash rounded-[4px] w-fit mb-4" aria-hidden="true">
-                      <item.icon className="h-5 w-5 text-brand-teal" />
-                    </div>
-                    <h4 className="font-manrope text-[17px] font-bold text-brand-ink mb-2 tracking-[-0.02em]">{item.title}</h4>
-                    <p className="text-brand-text-mute text-[14.5px] leading-[1.7]">{item.description}</p>
-                  </CardContent>
-                </Card>
-              ))}
+              {copy.features[activeTab].map((item, idx) => {
+                const ItemIcon = TAB_ICONS[activeTab][idx];
+                return (
+                  <Card
+                    key={`${activeTab}-${idx}`}
+                    className="group relative overflow-hidden border border-brand-line bg-white rounded-none shadow-none animate-in fade-in slide-in-from-bottom-3 transform-gpu"
+                    style={{ animationDelay: `${idx * 100}ms` }}
+                  >
+                    <CardContent className="p-6 text-left relative z-10">
+                      <div className="p-2.5 bg-brand-teal-wash rounded-[4px] w-fit mb-4" aria-hidden="true">
+                        <ItemIcon className="h-5 w-5 text-brand-teal" />
+                      </div>
+                      <h4 className="font-manrope text-[17px] font-bold text-brand-ink mb-2 tracking-[-0.02em]">{item.title}</h4>
+                      <p className="text-brand-text-mute text-[14.5px] leading-[1.7]">{item.description}</p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -486,33 +516,31 @@ const LandingPage = () => {
       <section className="py-24 px-4 sm:px-6 lg:px-8 bg-brand-bg-alt relative overflow-hidden">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <span className="font-jetbrains text-[11px] text-brand-teal uppercase tracking-[0.18em]">What TestCrack Delivers</span>
+            <span className="font-jetbrains text-[11px] text-brand-teal uppercase tracking-[0.18em]">{copy.tools.eyebrow}</span>
             <h2 className="font-manrope text-4xl sm:text-5xl font-extrabold text-brand-ink mt-4 mb-6 leading-[1.1] tracking-[-0.04em]">
-              Tools your institute can use <span className="text-brand-teal">today.</span>
+              {copy.tools.headline} <span className="text-brand-teal">{copy.tools.headlineAccent}</span>
             </h2>
-            <p className="text-[16.5px] text-brand-text-mute max-w-3xl mx-auto leading-[1.7]">Every feature exists for one reason: a daily learning loop students actually complete, with clear, trackable proof for tutors and owners.</p>
+            <p className="text-[16.5px] text-brand-text-mute max-w-3xl mx-auto leading-[1.7]">{copy.tools.subhead}</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-brand-line border border-brand-line">
-            {toolsData.map((tool, index) => (
+            {TOOL_META.map((meta, index) => (
               <Card key={index} className="border-0 bg-white rounded-none shadow-none transform-gpu flex flex-col h-full">
                 <CardContent className="p-8 flex flex-col h-full relative">
                   <div className="p-3 bg-brand-teal-wash rounded-[4px] w-fit mb-6" aria-hidden="true">
-                    <tool.icon className="h-6 w-6 text-brand-teal" />
+                    <meta.icon className="h-6 w-6 text-brand-teal" />
                   </div>
-                  <h3 className="font-manrope text-[20px] font-bold text-brand-ink mb-4 tracking-[-0.02em]">{tool.title}</h3>
-                  <p className="text-brand-text-mute text-[14.5px] leading-[1.7] mb-8 flex-grow">{tool.description}</p>
+                  <h3 className="font-manrope text-[20px] font-bold text-brand-ink mb-4 tracking-[-0.02em]">{copy.tools.items[index].title}</h3>
+                  <p className="text-brand-text-mute text-[14.5px] leading-[1.7] mb-8 flex-grow">{copy.tools.items[index].description}</p>
                   <div className="mt-auto">
                     <Badge
                       variant="secondary"
                       className={`px-3 py-1 font-jetbrains text-[10.5px] font-normal tracking-[0.14em] uppercase rounded-[4px] border ${
-                        tool.status === 'LIVE'
+                        meta.status === 'LIVE'
                           ? 'bg-brand-teal-wash text-brand-teal border-brand-teal-tint hover:bg-brand-teal-wash'
-                          : tool.status === 'BETA'
-                            ? 'bg-brand-warm-tint text-brand-warm border-[#F7D9C7] hover:bg-brand-warm-tint'
-                            : 'bg-brand-bg text-brand-text-mute border-brand-line hover:bg-brand-bg'
+                          : 'bg-brand-warm-tint text-brand-warm border-[#F7D9C7] hover:bg-brand-warm-tint'
                       }`}
                     >
-                      {tool.status}
+                      {meta.status}
                     </Badge>
                   </div>
                 </CardContent>
@@ -529,30 +557,27 @@ const LandingPage = () => {
             <div className="flex flex-col">
               <div className="inline-flex items-center gap-2 mb-6 w-fit font-jetbrains text-[11px] text-brand-teal uppercase tracking-[0.18em]">
                 <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-                Nine Scoring Engines
+                {copy.engines.eyebrow}
               </div>
               <h2 className="font-manrope text-4xl sm:text-5xl font-extrabold text-brand-ink leading-[1.1] tracking-[-0.04em] mb-6">
-                From Diagnostic <br />
-                <span className="text-brand-teal">to Real Band.</span>
+                {copy.engines.headline} <br />
+                <span className="text-brand-teal">{copy.engines.headlineAccent}</span>
               </h2>
               <p className="text-brand-text-mute text-[18px] leading-[1.7] max-w-xl">
-                Nine scoring engines grade every drill, assessment, and mock against <span className="text-brand-teal font-semibold">official IELTS band descriptors</span> — updating each student's live competency matrix after every attempt. No guesswork, no inflated scores.
+                {copy.engines.bodyBefore}
+                <span className="text-brand-teal font-semibold">{copy.engines.bodyHighlight}</span>
+                {copy.engines.bodyAfter}
               </p>
               <div className="mt-8 flex items-center gap-3 text-[13px] text-brand-text-mute">
-                <ShieldCheck className="h-5 w-5 text-brand-teal" aria-hidden="true" />
-                Scored against IELTS band descriptors, 0–9 scale, rounded to the nearest 0.5.
+                <ShieldCheck className="h-5 w-5 text-brand-teal shrink-0" aria-hidden="true" />
+                {copy.engines.note}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-px bg-brand-line border border-brand-line">
-              {[
-                { name: 'Listening', level: 'Accuracy Engine' },
-                { name: 'Reading', level: 'Accuracy Engine' },
-                { name: 'Writing', level: 'Grammar · Coherence · Task · Vocab' },
-                { name: 'Speaking', level: 'Fluency · WPM · Pronunciation' }
-              ].map((skill) => (
-                <div key={skill.name} className="p-6 bg-white transform-gpu">
-                  <h3 className="font-manrope text-[20px] font-bold text-brand-ink tracking-[-0.02em]">{skill.name}</h3>
-                  <p className="font-jetbrains text-[10.5px] text-brand-text-mute uppercase tracking-[0.14em] mt-1">{skill.level}</p>
+              {SKILL_KEYS.map((key) => (
+                <div key={key} className="p-6 bg-white transform-gpu">
+                  <h3 className="font-manrope text-[20px] font-bold text-brand-ink tracking-[-0.02em]">{copy.engines.skills[key].name}</h3>
+                  <p className="font-jetbrains text-[10.5px] text-brand-text-mute uppercase tracking-[0.14em] mt-1">{copy.engines.skills[key].level}</p>
                 </div>
               ))}
             </div>
@@ -565,32 +590,28 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto relative">
           <div className="text-center mb-20">
             <Badge className="mb-4 bg-transparent text-brand-teal hover:bg-transparent border-none px-0 py-1 rounded-none font-jetbrains text-[11px] font-normal uppercase tracking-[0.18em]">
-              The Learning Loop
+              {copy.howItWorks.badge}
             </Badge>
             <h2 className="font-manrope text-4xl sm:text-5xl font-extrabold text-brand-ink mb-6 leading-[1.1] tracking-[-0.04em]">
-              Band improvement, made <span className="text-brand-teal">systematic.</span>
+              {copy.howItWorks.headline} <span className="text-brand-teal">{copy.howItWorks.headlineAccent}</span>
             </h2>
             <p className="text-[16.5px] text-brand-text-mute max-w-2xl mx-auto leading-[1.7]">
-              Three connected stages take every student from baseline uncertainty to a Real Band score they — and you — can trust.
+              {copy.howItWorks.subhead}
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-12 relative">
-            {[
-              { step: '01', title: 'Diagnose', description: 'Every student takes a one-time, four-skill baseline assessment on joining. Band scores and sub-skill breakdowns seed their personal competency matrix — so the platform knows exactly where to focus before the first drill.', icon: Target },
-              { step: '02', title: 'Drill Daily', description: 'Each day, students complete targeted micro-drills on their weakest sub-skills plus the LexiGrid vocabulary game. Momentum points, daily streaks, and the Daily Competency Score turn practice into a habit — and show tutors who is engaged.', icon: Flame },
-              { step: '03', title: 'Assess & Prove', description: 'Adaptive Internal Assessments every three days and a full mock test every month keep the competency matrix honest. The Real Band score moves visibly toward the target — measurable proof of progress for students, parents, and your institute.', icon: LineChart },
-            ].map((item, index) => (
+            {HOW_IT_WORKS_META.map((meta, index) => (
               <div key={index} className="relative group">
                 <Card className="h-full bg-white border border-brand-line rounded-none shadow-none transform-gpu">
                   <CardContent className="p-8 pt-12 flex flex-col items-center text-center">
                     <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-14 h-14 rounded-md bg-brand-teal flex items-center justify-center text-white font-jetbrains text-xl font-bold z-20" aria-hidden="true">
-                      {item.step}
+                      {meta.step}
                     </div>
                     <div className="mb-6 p-4 rounded-[4px] bg-brand-teal-wash text-brand-teal" aria-hidden="true">
-                      <item.icon className="h-8 w-8" />
+                      <meta.icon className="h-8 w-8" />
                     </div>
-                    <h3 className="font-manrope text-[20px] font-bold text-brand-ink mb-4 tracking-[-0.02em]">{item.title}</h3>
-                    <p className="text-brand-text-mute text-[14.5px] leading-[1.7]">{item.description}</p>
+                    <h3 className="font-manrope text-[20px] font-bold text-brand-ink mb-4 tracking-[-0.02em]">{copy.howItWorks.steps[index].title}</h3>
+                    <p className="text-brand-text-mute text-[14.5px] leading-[1.7]">{copy.howItWorks.steps[index].description}</p>
                   </CardContent>
                 </Card>
               </div>
@@ -599,7 +620,7 @@ const LandingPage = () => {
           <div className="mt-20 text-center">
             <p className="font-jetbrains text-brand-text-mute text-[12px] uppercase tracking-[0.14em] flex items-center justify-center gap-2">
               <span className="h-4 w-4 text-brand-teal" aria-hidden="true" />
-              Diagnostic → Daily Loop → IA → Mock → Real Band. Every step measured.
+              {copy.howItWorks.footnote}
             </p>
           </div>
         </div>
@@ -612,31 +633,31 @@ const LandingPage = () => {
             <CardContent className="text-center space-y-8">
               <div className="space-y-4">
                 <Badge className="bg-transparent text-brand-teal-soft hover:bg-transparent border-none px-0 py-1 rounded-none font-jetbrains text-[11px] font-normal uppercase tracking-[0.18em]">
-                  Pilot Onboarding Open
+                  {copy.cta.badge}
                 </Badge>
                 <h2 className="font-manrope text-4xl sm:text-6xl font-extrabold text-brand-bg leading-[1.05] tracking-[-0.04em]">
-                  Ready to Lift Your <br />
-                  <span className="text-brand-teal-soft">Batch Averages?</span>
+                  {copy.cta.headline} <br />
+                  <span className="text-brand-teal-soft">{copy.cta.headlineAccent}</span>
                 </h2>
                 <p className="text-[18px] text-brand-on-ink max-w-2xl mx-auto leading-[1.7]">
-                  Join the Kerala coaching institutes piloting TestCrack — diagnostic-first IELTS prep with measurable outcomes from week one.
+                  {copy.cta.subhead}
                 </p>
               </div>
               <div className="flex flex-col items-center gap-6">
                 <Button size="lg" onClick={() => setDemoModalOpen(true)} className="px-7 py-[15px] h-auto rounded-md bg-brand-teal hover:bg-brand-teal-dark text-white font-semibold text-[15.5px] transition-colors duration-150 active:scale-95 border-none">
                   <MessageSquareText className="mr-2 h-5 w-5" aria-hidden="true" />
-                  Request Demo
+                  {copy.cta.requestDemo}
                 </Button>
                 <div className="flex flex-wrap justify-center gap-x-8 gap-y-2">
-                  {[
-                    { icon: Zap, text: 'Structured Institute Onboarding' },
-                    { icon: MessageSquareText, text: 'WhatsApp-First Outreach' }
-                  ].map((item, i) => (
-                    <div key={i} className="flex items-center gap-2 text-brand-on-ink-mute text-[13px]">
-                      <item.icon className="h-4 w-4" aria-hidden="true" />
-                      {item.text}
-                    </div>
-                  ))}
+                  {(['onboarding', 'outreach'] as const).map((pill) => {
+                    const PillIcon = CTA_PILL_ICONS[pill];
+                    return (
+                      <div key={pill} className="flex items-center gap-2 text-brand-on-ink-mute text-[13px]">
+                        <PillIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                        {copy.cta.pills[pill]}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </CardContent>
@@ -649,12 +670,12 @@ const LandingPage = () => {
         <div className="max-w-4xl mx-auto relative">
 
           <div className="text-center mb-14">
-            <span className="font-jetbrains text-[11px] text-brand-teal uppercase tracking-[0.18em]">Get in Touch</span>
+            <span className="font-jetbrains text-[11px] text-brand-teal uppercase tracking-[0.18em]">{copy.contact.eyebrow}</span>
             <h2 className="font-manrope text-4xl sm:text-5xl font-extrabold text-brand-ink mt-4 mb-4 leading-[1.1] tracking-[-0.04em]">
-              We'd love to <span className="text-brand-teal">hear from you.</span>
+              {copy.contact.headline} <span className="text-brand-teal">{copy.contact.headlineAccent}</span>
             </h2>
             <p className="text-[16.5px] text-brand-text-mute max-w-xl mx-auto leading-[1.7]">
-              Reach out directly — whether you have a question, want a walkthrough, or are ready to onboard your institute.
+              {copy.contact.subhead}
             </p>
           </div>
 
@@ -669,12 +690,12 @@ const LandingPage = () => {
                 <Mail className="h-6 w-6 text-brand-teal" />
               </div>
               <div>
-                <p className="font-jetbrains text-[10.5px] text-brand-text-mute uppercase tracking-[0.16em] mb-1">Email us</p>
+                <p className="font-jetbrains text-[10.5px] text-brand-text-mute uppercase tracking-[0.16em] mb-1">{copy.contact.emailLabel}</p>
                 <p className="font-manrope text-[17px] font-bold text-brand-ink break-all">
                   officialtestcrack@gmail.com
                 </p>
                 <p className="text-[14.5px] text-brand-text-mute mt-1.5 leading-[1.7]">
-                  For partnerships, onboarding queries, or general enquiries — we reply within one working day.
+                  {copy.contact.emailNote}
                 </p>
               </div>
             </a>
@@ -690,12 +711,12 @@ const LandingPage = () => {
                 <Phone className="h-6 w-6 text-emerald-600" />
               </div>
               <div>
-                <p className="font-jetbrains text-[10.5px] text-brand-text-mute uppercase tracking-[0.16em] mb-1">WhatsApp us</p>
+                <p className="font-jetbrains text-[10.5px] text-brand-text-mute uppercase tracking-[0.16em] mb-1">{copy.contact.whatsappLabel}</p>
                 <p className="font-manrope text-[17px] font-bold text-brand-ink">
                   +91 99956 84689
                 </p>
                 <p className="text-[14.5px] text-brand-text-mute mt-1.5 leading-[1.7]">
-                  Fastest way to reach us. Chat directly with the TestCrack team about demos or pilot onboarding.
+                  {copy.contact.whatsappNote}
                 </p>
               </div>
             </a>
@@ -709,7 +730,7 @@ const LandingPage = () => {
               className="px-7 py-[15px] h-auto rounded-md bg-brand-teal hover:bg-brand-teal-dark text-white font-semibold text-[15.5px] transition-colors duration-150 active:scale-95 border-none"
             >
               <MessageSquareText className="mr-2 h-4 w-4" aria-hidden="true" />
-              Or fill out the demo request form
+              {copy.contact.formNudge}
             </Button>
           </div>
 
@@ -730,13 +751,13 @@ const LandingPage = () => {
                 <img src={testcrackLogo} alt="TestCrack" className="h-9 w-9 object-contain" />
                 <div>
                   <span className="font-manrope text-[18px] font-extrabold tracking-[-0.03em] text-brand-bg">TestCrack</span>
-                  <span className="block font-jetbrains text-[10.5px] text-brand-teal-soft tracking-[0.16em] uppercase">for Institutes</span>
+                  <span className="block font-jetbrains text-[10.5px] text-brand-teal-soft tracking-[0.16em] uppercase">{copy.footer.tagline}</span>
                 </div>
               </div>
 
               {/* Short description */}
               <p className="text-[14px] text-brand-on-ink leading-[1.65] max-w-sm">
-                Diagnostic-first IELTS prep for Kerala's coaching institutes. Daily drills students stick to, adaptive assessments every three days, and a Real Band score your tutors can act on.
+                {copy.footer.description}
               </p>
 
               {/* Contact info */}
@@ -763,7 +784,7 @@ const LandingPage = () => {
                   <div className="w-7 h-7 rounded-[4px] bg-brand-ink border border-white/10 flex items-center justify-center" aria-hidden="true">
                     <MapPin className="h-3.5 w-3.5" />
                   </div>
-                  Kochi, Kerala
+                  {copy.footer.location}
                 </div>
               </div>
 
@@ -785,34 +806,40 @@ const LandingPage = () => {
             </div>
 
             {/* Links columns */}
-            {Object.entries(footerLinks).map(([heading, links]) => (
-              <div key={heading} className="flex flex-col gap-5">
-                <h4 className="font-jetbrains text-[10.5px] text-brand-teal-soft uppercase tracking-[0.16em]">{heading}</h4>
-                <ul className="flex flex-col gap-3">
-                  {links.map((link) => (
-                    <li key={link.label}>
-                      {link.isDemo ? (
-                        <button
-                          onClick={() => setDemoModalOpen(true)}
-                          className="text-[14px] text-brand-on-ink hover:text-brand-bg transition-colors duration-150 text-left flex items-center gap-1.5 group"
-                        >
-                          <MessageSquareText className="h-3.5 w-3.5 text-brand-teal opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
-                          {link.label}
-                        </button>
-                      ) : (
-                        <a
-                          href={link.href}
-                          className="text-[14px] text-brand-on-ink hover:text-brand-bg transition-colors duration-150 flex items-center gap-1.5 group"
-                        >
-                          <span className="w-1 h-1 rounded-full bg-brand-teal opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
-                          {link.label}
-                        </a>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+            {FOOTER_SECTIONS.map((section) => {
+              const column = copy.footer.columns[section.key];
+              return (
+                <div key={section.key} className="flex flex-col gap-5">
+                  <h4 className="font-jetbrains text-[10.5px] text-brand-teal-soft uppercase tracking-[0.16em]">{column.heading}</h4>
+                  <ul className="flex flex-col gap-3">
+                    {section.links.map((link) => {
+                      const label = (column.links as Record<string, string>)[link.key];
+                      return (
+                        <li key={link.key}>
+                          {'isDemo' in link && link.isDemo ? (
+                            <button
+                              onClick={() => setDemoModalOpen(true)}
+                              className="text-[14px] text-brand-on-ink hover:text-brand-bg transition-colors duration-150 text-left flex items-center gap-1.5 group"
+                            >
+                              <MessageSquareText className="h-3.5 w-3.5 shrink-0 text-brand-teal opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
+                              {label}
+                            </button>
+                          ) : (
+                            <a
+                              href={link.href}
+                              className="text-[14px] text-brand-on-ink hover:text-brand-bg transition-colors duration-150 flex items-center gap-1.5 group"
+                            >
+                              <span className="w-1 h-1 shrink-0 rounded-full bg-brand-teal opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
+                              {label}
+                            </a>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              );
+            })}
 
           </div>
         </div>
@@ -823,18 +850,18 @@ const LandingPage = () => {
 
             {/* Copyright */}
             <p className="text-[13px] text-brand-on-ink-mute text-center sm:text-left">
-              © 2026 TestCrack. Diagnostic-first IELTS prep for institutes. All rights reserved.
+              {copy.footer.copyright}
             </p>
 
             {/* Status badges */}
             <div className="flex items-center gap-3">
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] bg-[#0C2E2A] border border-[#12463F] font-jetbrains text-[10.5px] text-brand-teal-soft uppercase tracking-[0.14em]">
-                <span className="w-1.5 h-1.5 rounded-full bg-brand-teal-soft animate-pulse" aria-hidden="true" />
-                Platform Live
+                <span className="w-1.5 h-1.5 shrink-0 rounded-full bg-brand-teal-soft animate-pulse" aria-hidden="true" />
+                {copy.footer.badges.platformLive}
               </span>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] bg-[#12283A] border border-[#1D3A50] font-jetbrains text-[10.5px] text-brand-on-ink uppercase tracking-[0.14em]">
-                <MapPin className="h-3 w-3" aria-hidden="true" />
-                Kerala-first EdTech
+                <MapPin className="h-3 w-3 shrink-0" aria-hidden="true" />
+                {copy.footer.badges.keralaFirst}
               </span>
             </div>
 
@@ -852,9 +879,9 @@ const LandingPage = () => {
                 <div className="p-1.5 bg-brand-teal rounded-[4px]" aria-hidden="true">
                   <MessageSquareText className="h-4 w-4 text-white" />
                 </div>
-                <h3 id="demo-modal-title" className="font-manrope text-[18px] font-extrabold text-brand-ink tracking-[-0.02em]">Request a Demo</h3>
+                <h3 id="demo-modal-title" className="font-manrope text-[18px] font-extrabold text-brand-ink tracking-[-0.02em]">{copy.demoModal.title}</h3>
               </div>
-              <button onClick={closeDemoModal} className="p-1.5 rounded-[4px] text-brand-text-mute hover:text-brand-ink hover:bg-brand-bg-alt transition-colors duration-150" aria-label="Close demo request">
+              <button onClick={closeDemoModal} className="p-1.5 rounded-[4px] text-brand-text-mute hover:text-brand-ink hover:bg-brand-bg-alt transition-colors duration-150" aria-label={copy.demoModal.closeLabel}>
                 <X className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
@@ -863,28 +890,22 @@ const LandingPage = () => {
                 <div className="mx-auto w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center" aria-hidden="true">
                   <ShieldCheck className="h-7 w-7 text-emerald-500" />
                 </div>
-                <h4 className="font-manrope text-[20px] font-bold text-brand-ink tracking-[-0.02em]">Request sent!</h4>
-                <p className="text-[14.5px] text-brand-text-mute leading-[1.7]">We've opened WhatsApp with your details pre-filled. Hit send there and our team will get back to you within one working day.</p>
-                <Button onClick={closeDemoModal} className="rounded-md bg-brand-teal hover:bg-brand-teal-dark text-white font-semibold text-[15.5px] transition-colors duration-150">Done</Button>
+                <h4 className="font-manrope text-[20px] font-bold text-brand-ink tracking-[-0.02em]">{copy.demoModal.sentTitle}</h4>
+                <p className="text-[14.5px] text-brand-text-mute leading-[1.7]">{copy.demoModal.sentBody}</p>
+                <Button onClick={closeDemoModal} className="rounded-md bg-brand-teal hover:bg-brand-teal-dark text-white font-semibold text-[15.5px] transition-colors duration-150">{copy.demoModal.done}</Button>
               </div>
             ) : (
               <div className="px-6 py-6 space-y-4">
-                <p className="text-[14.5px] text-brand-text-mute leading-[1.7]">Tell us about your institute and we'll reach out on WhatsApp to schedule a walkthrough.</p>
-                {[
-                  { field: 'name' as const, label: 'Your Name *', placeholder: 'e.g. Priya Nair', type: 'text' },
-                  { field: 'institute' as const, label: 'Institute Name *', placeholder: 'e.g. Crest IELTS Academy, Kochi', type: 'text' },
-                  { field: 'city' as const, label: 'City', placeholder: 'e.g. Kochi', type: 'text' },
-                  { field: 'whatsapp' as const, label: 'WhatsApp Number *', placeholder: 'e.g. 9876543210', type: 'tel' },
-                  { field: 'email' as const, label: 'Email', placeholder: 'e.g. priya@crestielts.in', type: 'email' },
-                ].map((input) => (
+                <p className="text-[14.5px] text-brand-text-mute leading-[1.7]">{copy.demoModal.intro}</p>
+                {DEMO_FIELDS.map((input) => (
                   <div key={input.field} className="space-y-1.5">
-                    <label htmlFor={`demo-${input.field}`} className="font-jetbrains text-[10.5px] text-brand-text-mute uppercase tracking-[0.14em]">{input.label}</label>
+                    <label htmlFor={`demo-${input.field}`} className="font-jetbrains text-[10.5px] text-brand-text-mute uppercase tracking-[0.14em]">{copy.demoModal.fields[input.field].label}</label>
                     <input
                       id={`demo-${input.field}`}
                       type={input.type}
                       value={demoForm[input.field]}
                       onChange={(e) => handleDemoField(input.field, e.target.value)}
-                      placeholder={input.placeholder}
+                      placeholder={copy.demoModal.fields[input.field].placeholder}
                       className="w-full px-4 py-2.5 rounded-[4px] border border-brand-line text-[14.5px] text-brand-text placeholder:text-brand-text-mute focus:outline-none focus:border-brand-teal transition-colors duration-150"
                     />
                   </div>
@@ -895,9 +916,9 @@ const LandingPage = () => {
                   className="w-full py-[15px] h-auto rounded-md bg-brand-teal hover:bg-brand-teal-dark disabled:opacity-50 text-white font-semibold text-[15.5px] transition-colors duration-150 active:scale-[0.98]"
                 >
                   <MessageSquareText className="mr-2 h-5 w-5" aria-hidden="true" />
-                  Send via WhatsApp
+                  {copy.demoModal.submit}
                 </Button>
-                <p className="text-[12px] text-brand-text-mute text-center leading-[1.6]">Opens WhatsApp with your details pre-filled — nothing is sent until you press send there.</p>
+                <p className="text-[12px] text-brand-text-mute text-center leading-[1.6]">{copy.demoModal.disclaimer}</p>
               </div>
             )}
           </div>
