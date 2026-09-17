@@ -1487,7 +1487,17 @@ function WritingPhase({
         </div>
       )}
 
+      {data?.caseNotes && (
+        <div className="bg-white border border-brand-line rounded-2xl p-4 mb-3">
+          <p className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-mute mb-2">Case Notes</p>
+          <p className="text-brand-text text-[13.5px] leading-[1.7] whitespace-pre-line">{data.caseNotes}</p>
+        </div>
+      )}
+
       <div className="bg-brand-bg border border-brand-line rounded-2xl p-4">
+        {data?.caseNotes && (
+          <p className="font-jetbrains text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-mute mb-2">Task</p>
+        )}
         <p className="text-brand-text text-[14.5px] leading-[1.75]">{data?.topic}</p>
       </div>
 
