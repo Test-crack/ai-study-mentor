@@ -1,5 +1,5 @@
 "use client";
-import { LogOut, Target, ChevronDown, MessageSquareWarning, Trophy, TrendingDown, Download } from "lucide-react";
+import { LogOut, Target, ChevronDown, MessageSquareWarning, Trophy, TrendingDown, Download, Loader2 } from "lucide-react";
 import testcrackLogo from "@/assets/testcrack-logo.svg";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Legend } from "recharts";
 import { Link, useNavigate } from 'react-router-dom';
@@ -13,6 +13,7 @@ import React, {
 } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { callBackend, uploadFileToBackend } from "@/features/auth/services/authClient";
+import { cn } from "@/shared/utils";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES & INTERFACES
