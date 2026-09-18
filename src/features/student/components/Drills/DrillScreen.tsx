@@ -72,6 +72,7 @@ const normaliseSubSkillKey = (raw: string): string =>
 
 const toSubSkillLabel = (key: string) =>
   key.replace(/Score/gi, '').replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').trim()
+    .toLowerCase() // normalise camelCase keys AND ALL_CAPS enum values before title-casing
     .replace(/\b\w/g, c => c.toUpperCase());
 
 const DARK_HERO_GRID: React.CSSProperties = {
@@ -284,13 +285,14 @@ export default function DrillScreen() {
     const fetchScores = async () => {
       try {
         const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
-        const res = await callBackend(`${backendUrl}/api/student/competency-scores`);
-        if (!res.success || !res.data) return;
+        const targetSkillUp = skill.toUpperCase();
+        const targetSubNorm = normaliseSubSkillKey(subSkill);
 
         // Spoken English: the SPEAKING row's sub_scores is CEFR-shaped (subskillProfile
-        // array + levels), not the IELTS numeric band shape. Build the focus queue from it
-        // with the SE labels and CEFR levels.
+        // array + levels). Build the focus queue from it with the SE labels and CEFR levels.
         if (isSE) {
+          const res = await callBackend(`${backendUrl}/api/student/competency-scores`);
+          if (!res.success || !res.data) return;
           const speaking = res.data.find((r: any) => r.skill === 'SPEAKING');
           const prof: any[] = speaking?.sub_scores?.subskillProfile ?? [];
           const seEntries: QueueEntry[] = [];
@@ -313,29 +315,21 @@ export default function DrillScreen() {
           return;
         }
 
-        const targetSkillUp = skill.toUpperCase();
-        const targetSubNorm = normaliseSubSkillKey(subSkill);
-        const entries: QueueEntry[] = [];
-
-        for (const rec of res.data) {
-          const subs = rec.sub_scores || {};
-          for (const [key, val] of Object.entries(subs)) {
-            const numVal = Number(val);
-            if (isNaN(numVal) || numVal > 9.0) continue;
-            const kNorm = normaliseSubSkillKey(key);
-            if (kNorm.includes('count') || kNorm.includes('total') || kNorm.includes('correct')) continue;
-            entries.push({
-              name: toSubSkillLabel(key),
-              skill: rec.skill,
-              score: numVal,
-              isCurrent: rec.skill?.toUpperCase() === targetSkillUp && kNorm === targetSubNorm,
-            });
-          }
-        }
-
+        // Every other exam (IELTS, OET, and any future exam): the focus queue IS the backend
+        // recommender's weakness-ranked sub-skill list — the single config-aware source of truth.
+        // No scraping of competency sub_scores keys (which breaks per exam-specific JSON shape,
+        // e.g. OET's meta flags meets_grade_b/is_valid_attempt).
+        const res = await callBackend(`${backendUrl}/api/student/next-action-drill`);
+        const fq: any[] = res?.focus_queue ?? [];
+        const entries: QueueEntry[] = fq.map((it: any) => ({
+          name: toSubSkillLabel(it.sub_skill),
+          skill: it.skill,
+          score: Number(it.score) || 0,
+          isCurrent: String(it.skill).toUpperCase() === targetSkillUp && normaliseSubSkillKey(it.sub_skill) === targetSubNorm,
+        }));
         entries.sort((a, b) => a.score - b.score);
         setQueueEntries(entries.slice(0, 4));
-        setCurrentSubScore(entries.find(e => e.isCurrent)?.score ?? null);
+        setCurrentSubScore(entries.find((e) => e.isCurrent)?.score ?? null);
       } catch (err) {
         console.warn('[DrillScreen] competency-scores fetch failed:', err);
       }
