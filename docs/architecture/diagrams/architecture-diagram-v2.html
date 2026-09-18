@@ -1,0 +1,144 @@
+<title>Exam-Agnostic Architecture — TestCrack (v2)</title>
+<meta name="description" content="Hand-drawn sketch: production request path, a reusable assessment core, and exams as pluggable domain configuration.">
+<style>
+  body{margin:0;background:#17181c}
+  .stage{max-width:1100px;margin:0 auto;padding:8px}
+  svg{width:100%;height:auto;display:block}
+</style>
+
+<div class="stage"><svg id="d" viewBox="0 0 1100 900" role="img" aria-label="Exam-agnostic architecture sketch"></svg></div>
+
+<script>
+(function(){
+  const NS="http://www.w3.org/2000/svg";
+  const svg=document.getElementById("d");
+  let s=1337; const rnd=()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
+  const j=(a)=>(rnd()*2-1)*a;
+
+  const C={white:"#e7e7ea",dim:"#9aa0aa",faint:"#565b64",amber:"#e6a763",blue:"#7fb8ea",green:"#79cf95"};
+  const FONT="'Segoe Print','Bradley Hand','Comic Sans MS','Chalkboard SE',cursive";
+
+  function path(d,stroke,w,dash){
+    const p=document.createElementNS(NS,"path");
+    p.setAttribute("d",d);p.setAttribute("fill","none");
+    p.setAttribute("stroke",stroke);p.setAttribute("stroke-width",w||2);
+    p.setAttribute("stroke-linecap","round");p.setAttribute("stroke-linejoin","round");
+    if(dash)p.setAttribute("stroke-dasharray",dash);
+    svg.appendChild(p);return p;
+  }
+  function passRect(x,y,w,h,o,a){
+    return `M ${x+o+j(a)} ${y+j(a)} `
+    +`C ${x+w*0.5+j(a)} ${y+j(a)}, ${x+w*0.5+j(a)} ${y+j(a)}, ${x+w+j(a)} ${y+j(a)} `
+    +`C ${x+w+j(a)} ${y+h*0.5+j(a)}, ${x+w+j(a)} ${y+h*0.5+j(a)}, ${x+w+j(a)} ${y+h+j(a)} `
+    +`C ${x+w*0.5+j(a)} ${y+h+j(a)}, ${x+w*0.5+j(a)} ${y+h+j(a)}, ${x+o+j(a)} ${y+h+j(a)} `
+    +`C ${x+j(a)} ${y+h*0.5+j(a)}, ${x+j(a)} ${y+h*0.5+j(a)}, ${x+o+j(a)} ${y+j(a)} Z`;
+  }
+  function rect(x,y,w,h,stroke,sw){ path(passRect(x,y,w,h,0,1.8),stroke,sw||2); path(passRect(x,y,w,h,1.2,1.8),stroke,sw||2); }
+  function boundary(x,y,w,h,stroke){ path(passRect(x,y,w,h,0,2.6),stroke,1.4,"2 7"); }
+  function text(x,y,str,size,color,anchor,weight){
+    const t=document.createElementNS(NS,"text");
+    t.setAttribute("x",x);t.setAttribute("y",y);t.setAttribute("font-family",FONT);
+    t.setAttribute("font-size",size);t.setAttribute("fill",color);
+    t.setAttribute("text-anchor",anchor||"middle");if(weight)t.setAttribute("font-weight",weight);
+    t.textContent=str;svg.appendChild(t);return t;
+  }
+  function arrow(x1,y1,x2,y2,color,dash){
+    const mx=(x1+x2)/2+j(5), my=(y1+y2)/2+j(5);
+    path(`M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`,color,2,dash);
+    const ang=Math.atan2(y2-my,x2-mx),L=11;
+    path(`M ${x2} ${y2} L ${x2-L*Math.cos(ang-0.42)} ${y2-L*Math.sin(ang-0.42)}`,color,2);
+    path(`M ${x2} ${y2} L ${x2-L*Math.cos(ang+0.42)} ${y2-L*Math.sin(ang+0.42)}`,color,2);
+  }
+  function circle(cx,cy,r,color){
+    const c=document.createElementNS(NS,"circle");
+    c.setAttribute("cx",cx);c.setAttribute("cy",cy);c.setAttribute("r",r);
+    c.setAttribute("fill","#17181c");c.setAttribute("stroke",color);c.setAttribute("stroke-width",2);
+    svg.appendChild(c);
+  }
+  function cylinder(cx,topY,rx,h,color){
+    const ry=rx*0.34,a=1.4;
+    path(`M ${cx-rx} ${topY} C ${cx-rx} ${topY-ry}, ${cx+rx} ${topY-ry}, ${cx+rx} ${topY} C ${cx+rx} ${topY+ry}, ${cx-rx} ${topY+ry}, ${cx-rx} ${topY} Z`,color,2);
+    path(`M ${cx-rx} ${topY} L ${cx-rx+j(a)} ${topY+h}`,color,2);
+    path(`M ${cx+rx} ${topY} L ${cx+rx+j(a)} ${topY+h}`,color,2);
+    path(`M ${cx-rx} ${topY+h} C ${cx-rx} ${topY+h+ry}, ${cx+rx} ${topY+h+ry}, ${cx+rx} ${topY+h}`,color,2);
+    path(`M ${cx-rx} ${topY+h*0.42} C ${cx-rx} ${topY+h*0.42+ry}, ${cx+rx} ${topY+h*0.42+ry}, ${cx+rx} ${topY+h*0.42}`,color,1.3);
+  }
+  function aimodel(cx,cy,color){
+    const L1=cx-24,L2=cx,L3=cx+24, inp=[cy-15,cy,cy+15], hid=[cy-9,cy+9];
+    inp.forEach(iy=>hid.forEach(hy=>path(`M ${L1} ${iy} L ${L2} ${hy}`,C.dim,1)));
+    hid.forEach(hy=>path(`M ${L2} ${hy} L ${L3} ${cy}`,C.dim,1));
+    inp.forEach(iy=>circle(L1,iy,4.5,color)); hid.forEach(hy=>circle(L2,hy,4.5,color)); circle(L3,cy,5.5,color);
+  }
+  function node(x,y,w,h,col,title,ts,sub,ss){
+    rect(x,y,w,h,col,2);
+    if(sub){ text(x+w/2,y+h/2-3,title,ts,col); text(x+w/2,y+h/2+15,sub,ss,C.dim); }
+    else   { text(x+w/2,y+h/2+ts*0.34,title,ts,col); }
+  }
+
+  /* ---------- header ---------- */
+  text(60,30,"TESTCRACK",12,C.faint,"start");
+  text(60,58,"Exam-Agnostic Architecture",30,C.white,"start");
+  path("M 62 70 C 180 66, 300 66, 372 71",C.dim,2);
+  text(62,90,"one reusable core — many exams just plug in",15,C.dim,"start");
+
+  /* ---------- production boundary ---------- */
+  boundary(56,166,792,548,C.faint);
+  text(74,192,"PRODUCTION PLATFORM",12,C.faint,"start");
+
+  /* ---------- runtime request path (solid, neutral) ---------- */
+  node(572,100,180,48,C.white,"Web / Mobile Clients",15);
+  arrow(662,148,662,190,C.white);
+  node(560,190,200,50,C.white,"NGINX + Rate Limiting",15);
+  arrow(660,240,660,282,C.white);
+  node(560,282,200,50,C.white,"Application Servers",15);
+  arrow(660,332,665,388,C.white);
+
+  /* ---------- exams as domain configuration (left, amber) ---------- */
+  text(96,222,"EXAM LAYER · domain configs",11,C.amber,"start");
+  node(95,236,150,44,C.amber,"IELTS",17);
+  node(95,292,150,44,C.amber,"Other Exams",16);
+  rect(95,348,150,44,C.dim,2); text(170,375,"+ Next Exam",15,C.dim);
+  arrow(245,258,296,322,C.amber);
+  arrow(245,314,296,330,C.amber);
+  arrow(245,370,296,338,C.amber);
+
+  rect(296,300,176,74,C.amber,2);
+  text(384,325,"Exam Config",18,C.amber);
+  text(384,346,"registry · versioned",12.5,C.dim);
+  text(384,363,"scoring · rubrics",12.5,C.dim);
+  arrow(472,336,500,462,C.amber);
+  text(486,404,"plugs in",13,C.amber,"start");
+
+  /* ---------- reusable platform core (blue) ---------- */
+  rect(500,388,330,164,C.blue,2.4);
+  text(665,414,"Reusable Platform Core",19,C.blue,"middle","bold");
+  node(516,428,140,48,C.blue,"Assessment Engine",13);
+  node(664,428,140,48,C.blue,"Scoring & Evaluation",13);
+  node(516,486,140,48,C.blue,"Learning / Drills",13);
+  node(664,486,140,48,C.blue,"Diagnostics & Recs",13);
+
+  /* annotation (right of core) */
+  text(880,452,"Add an exam →",15,C.white,"start");
+  text(880,474,"configure, don't rebuild",15,C.white,"start");
+  arrow(876,464,834,476,C.dim);
+
+  /* ---------- data + AI (branches from core) ---------- */
+  arrow(620,552,592,586,C.dim);
+  cylinder(592,596,42,40,C.dim);
+  text(592,672,"PostgreSQL",15,C.dim);
+
+  arrow(712,552,748,588,C.dim);
+  aimodel(748,612,C.green);
+  text(748,672,"AI-Assisted Grading",14,C.green);
+
+  /* ---------- CI/CD (separate lane, dashed, outside boundary) ---------- */
+  text(250,752,"CI/CD · deployment path — not in the request path",12,C.faint,"start");
+  node(250,764,158,46,C.dim,"CI/CD Pipeline",14);
+  arrow(408,787,452,787,C.dim,"3 5");
+  node(452,764,146,46,C.dim,"Deployment",14);
+  arrow(598,787,624,787,C.dim,"3 5");
+  node(624,764,182,46,C.dim,"Application Servers",13);
+  arrow(525,764,525,716,C.faint,"3 6");
+  text(534,742,"deploys",11,C.faint,"start");
+})();
+</script>

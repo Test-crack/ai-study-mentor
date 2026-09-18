@@ -1,0 +1,131 @@
+<title>Exam-Agnostic Architecture — TestCrack</title>
+<meta name="description" content="Hand-drawn sketch: many exams plug into one reusable assessment & learning core.">
+<style>
+  body{margin:0;background:#EAEFEE}
+  .stage{max-width:1040px;margin:0 auto;padding:8px}
+  svg{width:100%;height:auto;display:block}
+  .hand{font-family:'Segoe Print','Bradley Hand','Comic Sans MS','Chalkboard SE','Comic Neue',cursive}
+</style>
+
+<div class="stage"><svg id="d" viewBox="0 0 1000 680" role="img" aria-label="Exam-agnostic architecture sketch"></svg></div>
+
+<script>
+(function(){
+  const NS="http://www.w3.org/2000/svg";
+  const svg=document.getElementById("d");
+  // deterministic wobble so the sketch looks identical every load / screenshot
+  let s=1337; const rnd=()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
+  const j=(a)=>(rnd()*2-1)*a;
+
+  const C={white:"#1b1b1b",dim:"#5c5c5c",amber:"#1b1b1b",blue:"#1b1b1b",green:"#1b1b1b"};
+  const FONT="'Segoe Print','Bradley Hand','Comic Sans MS','Chalkboard SE',cursive";
+
+  function path(d,stroke,w,dash){
+    const p=document.createElementNS(NS,"path");
+    p.setAttribute("d",d);p.setAttribute("fill","none");
+    p.setAttribute("stroke",stroke);p.setAttribute("stroke-width",w||2);
+    p.setAttribute("stroke-linecap","round");p.setAttribute("stroke-linejoin","round");
+    if(dash)p.setAttribute("stroke-dasharray",dash);
+    svg.appendChild(p);return p;
+  }
+  // wobbly rectangle, drawn twice for a sketchy double stroke
+  function rect(x,y,w,h,stroke,sw){
+    const pass=(o)=>{const a=1.8;
+      return `M ${x+o+j(a)} ${y+j(a)} `
+      +`C ${x+w*0.5+j(a)} ${y+j(a)}, ${x+w*0.5+j(a)} ${y+j(a)}, ${x+w+j(a)} ${y+j(a)} `
+      +`C ${x+w+j(a)} ${y+h*0.5+j(a)}, ${x+w+j(a)} ${y+h*0.5+j(a)}, ${x+w+j(a)} ${y+h+j(a)} `
+      +`C ${x+w*0.5+j(a)} ${y+h+j(a)}, ${x+w*0.5+j(a)} ${y+h+j(a)}, ${x+o+j(a)} ${y+h+j(a)} `
+      +`C ${x+j(a)} ${y+h*0.5+j(a)}, ${x+j(a)} ${y+h*0.5+j(a)}, ${x+o+j(a)} ${y+j(a)} Z`;};
+    path(pass(0),stroke,sw||2); path(pass(1.2),stroke,sw||2);
+  }
+  function text(x,y,str,size,color,anchor,weight){
+    const t=document.createElementNS(NS,"text");
+    t.setAttribute("x",x);t.setAttribute("y",y);
+    t.setAttribute("font-family",FONT);t.setAttribute("font-size",size);
+    t.setAttribute("fill",color);t.setAttribute("text-anchor",anchor||"middle");
+    if(weight)t.setAttribute("font-weight",weight);
+    t.textContent=str;svg.appendChild(t);return t;
+  }
+  function arrow(x1,y1,x2,y2,color){
+    const mx=(x1+x2)/2+j(6), my=(y1+y2)/2+j(6);
+    path(`M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`,color,2);
+    const ang=Math.atan2(y2-my,x2-mx),L=11;
+    path(`M ${x2} ${y2} L ${x2-L*Math.cos(ang-0.42)} ${y2-L*Math.sin(ang-0.42)}`,color,2);
+    path(`M ${x2} ${y2} L ${x2-L*Math.cos(ang+0.42)} ${y2-L*Math.sin(ang+0.42)}`,color,2);
+  }
+  function circle(cx,cy,r,color){
+    const c=document.createElementNS(NS,"circle");
+    c.setAttribute("cx",cx);c.setAttribute("cy",cy);c.setAttribute("r",r);
+    c.setAttribute("fill","#EAEFEE");c.setAttribute("stroke",color);c.setAttribute("stroke-width",2);
+    svg.appendChild(c);
+  }
+  // hand-drawn database cylinder
+  function cylinder(cx,topY,rx,h,color){
+    const ry=rx*0.34, a=1.4;
+    path(`M ${cx-rx} ${topY+j(a)} C ${cx-rx} ${topY-ry}, ${cx+rx} ${topY-ry}, ${cx+rx} ${topY+j(a)} C ${cx+rx} ${topY+ry}, ${cx-rx} ${topY+ry}, ${cx-rx} ${topY+j(a)} Z`,color,2);
+    path(`M ${cx-rx} ${topY} L ${cx-rx+j(a)} ${topY+h}`,color,2);
+    path(`M ${cx+rx} ${topY} L ${cx+rx+j(a)} ${topY+h}`,color,2);
+    path(`M ${cx-rx} ${topY+h} C ${cx-rx} ${topY+h+ry}, ${cx+rx} ${topY+h+ry}, ${cx+rx} ${topY+h}`,color,2);
+    path(`M ${cx-rx} ${topY+h*0.42} C ${cx-rx} ${topY+h*0.42+ry}, ${cx+rx} ${topY+h*0.42+ry}, ${cx+rx} ${topY+h*0.42}`,color,1.3);
+  }
+  // small neural-net "model" glyph
+  function aimodel(cx,cy,color){
+    const L1=cx-26,L2=cx,L3=cx+26, inp=[cy-16,cy,cy+16], hid=[cy-10,cy+10];
+    inp.forEach(iy=>hid.forEach(hy=>path(`M ${L1} ${iy} L ${L2} ${hy}`,C.dim,1)));
+    hid.forEach(hy=>path(`M ${L2} ${hy} L ${L3} ${cy}`,C.dim,1));
+    inp.forEach(iy=>circle(L1,iy,5,color));
+    hid.forEach(hy=>circle(L2,hy,5,color));
+    circle(L3,cy,6,color);
+  }
+  // labelled box helper
+  function node(x,y,w,h,col,title,ts,sub,ss){
+    rect(x,y,w,h,col,2);
+    if(sub){ text(x+w/2,y+h/2-3,title,ts,col); text(x+w/2,y+h/2+16,sub,ss,C.dim); }
+    else   { text(x+w/2,y+h/2+ts*0.34,title,ts,col); }
+  }
+
+  /* ---------- title ---------- */
+  text(60,34,"TestCrack",15,C.dim,"start");
+  text(60,68,"Exam-Agnostic Architecture",34,C.white,"start");
+  path("M 62 80 C 180 76, 300 76, 372 81",C.dim,2);
+  text(62,106,"one reusable core — many exams just plug in",16,C.dim,"start");
+
+  /* ---------- exams (fan-in) ---------- */
+  node(300,134,120,50,C.amber,"IELTS",18);
+  node(452,134,150,50,C.amber,"Other Exams",17);
+  rect(652,134,150,50,C.dim,2); text(727,165,"+ Next Exam",15,C.dim);
+
+  const cfgTop=262;
+  arrow(360,182,470,cfgTop, C.amber);
+  arrow(527,182,510,cfgTop, C.amber);
+  arrow(727,182,552,cfgTop, C.amber);
+
+  /* ---------- exam config ---------- */
+  node(360,cfgTop,300,66,C.amber,"Exam Config",20,"registry · versioned · scoring · rubrics",13);
+
+  arrow(510,328,510,386,C.white);
+  text(560,362,"plugs into",14,C.dim,"start");
+
+  /* ---------- reusable core ---------- */
+  rect(292,388,436,180,C.blue,2.4);
+  text(510,416,"Reusable Platform Core",20,C.blue,"middle","bold");
+  node(312,430,196,54,C.blue,"Assessment Engine",15);
+  node(516,430,192,54,C.blue,"Scoring & Evaluation",15);
+  node(312,496,196,54,C.blue,"Learning / Drills",15);
+  node(516,496,192,54,C.blue,"Diagnostics & Recs",15);
+
+  /* side note */
+  text(752,452,"add an exam →",15,C.white,"start");
+  text(752,474,"config, not a rebuild",15,C.white,"start");
+  arrow(748,466,730,478,C.dim);
+
+  /* ---------- foundation ---------- */
+  arrow(475,568,432,588,C.dim);
+  cylinder(432,598,42,40,C.dim);
+  text(432,672,"DB",18,C.dim);
+
+  arrow(552,568,600,590,C.dim);
+  aimodel(600,614,C.green);
+  text(600,672,"AI Grading",16,C.green);
+})();
+</script>
