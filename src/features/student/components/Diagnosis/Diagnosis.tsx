@@ -10,6 +10,7 @@ import React, {
   useEffect,
   useRef,
   useCallback,
+  useMemo,
 } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { callBackend, uploadFileToBackend } from "@/features/auth/services/authClient";
@@ -1673,6 +1674,21 @@ function WritingPhase({
 // PHASE: SPEAKING
 // ─────────────────────────────────────────────────────────────────────────────
 
+// MediaRecorder WebM/MP4 blobs carry no duration header, so <audio> reports duration=Infinity
+// and only plays/seeks the first buffered chunk (~10-20s) — the full clip IS recorded and uploaded,
+// this just fixes the PREVIEW. Seeking to the end once forces the browser to resolve the real
+// duration; we then reset to 0 so the whole recording plays and scrubs normally.
+function fixAudioDuration(el: HTMLAudioElement) {
+  if (el.dataset.durationFixed || (el.duration !== Infinity && !Number.isNaN(el.duration))) return;
+  el.dataset.durationFixed = "1";
+  const onUpdate = () => {
+    el.removeEventListener("timeupdate", onUpdate);
+    if (el.currentTime > 0) el.currentTime = 0;
+  };
+  el.addEventListener("timeupdate", onUpdate);
+  el.currentTime = 1e101;
+}
+
 // ── OET role-play speaking phase: N scenarios, record one audio each, submit all ──
 function OetSpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) => void }) {
   const [prompts, setPrompts] = useState<OetRoleplayPrompt[]>([]);
@@ -1702,6 +1718,11 @@ function OetSpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) =>
   const maxDuration = current?.speakSeconds ?? 90;
   const isLast = idx >= prompts.length - 1;
   const recordedCount = Object.keys(recordings).length;
+  // Stable object URL per current recording (avoids re-creating it — and undoing the duration
+  // fix — on every render). Revoked when the recording changes.
+  const currentBlob = current ? recordings[current.id] : undefined;
+  const currentUrl = useMemo(() => (currentBlob ? URL.createObjectURL(currentBlob) : null), [currentBlob]);
+  useEffect(() => () => { if (currentUrl) URL.revokeObjectURL(currentUrl); }, [currentUrl]);
 
   const stopTracks = () => { streamRef.current?.getTracks().forEach((t) => t.stop()); streamRef.current = null; };
   const finishRecording = useCallback(() => {
@@ -1810,7 +1831,7 @@ function OetSpeakingPhase({ onComplete }: { onComplete: (result: SkillResult) =>
         )}
         {(state === "recorded" || state === "submitting") && (
           <div className="w-full flex flex-col items-center gap-3">
-            {recordings[current.id] && <audio controls src={URL.createObjectURL(recordings[current.id])} className="w-full max-w-md" />}
+            {currentUrl && <audio controls src={currentUrl} onLoadedMetadata={(e) => fixAudioDuration(e.currentTarget)} className="w-full max-w-md" />}
             <div className="flex items-center gap-2">
               <button onClick={reRecord} disabled={state === "submitting"} className="px-4 py-2.5 border border-brand-line text-brand-text font-semibold text-[13.5px] rounded-xl hover:bg-brand-bg-alt disabled:opacity-50">
                 ↺ Re-record
