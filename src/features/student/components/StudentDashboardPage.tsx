@@ -419,6 +419,11 @@ const StudentDashboardPage = () => {
   const heroLexiDone   = dailyDrillState?.lexigrid_completed_today ?? false;
 
   const goToActiveDrill = useCallback(() => {
+    // focusData.skill is the "Overall" placeholder while the recommendation is still loading,
+    // or when there is no drillable recommendation ("General Practice" / "All Caught Up!").
+    // Never navigate with a non-enum skill/sub_skill — the drill API rejects it. No-op until a
+    // real drill (LISTENING/READING/WRITING/SPEAKING) is ready.
+    if (!["LISTENING", "READING", "WRITING", "SPEAKING"].includes(String(focusData.skill).toUpperCase())) return;
     const params = new URLSearchParams({
       skill: focusData.skill,
       sub_skill: focusData.sub_skill,
