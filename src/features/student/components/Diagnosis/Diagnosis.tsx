@@ -2681,11 +2681,19 @@ function DiagnosticReportModal({
   const attempted = skills.filter((s) => results[s]);
   const generatedAt = new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
 
-  const radarData = skills.map((skill) => ({
-    skill: SKILL_LABELS[skill],
-    band: Number(results[skill]?.band_score) || 4,
-    target: targetBand,
-  }));
+  // OET (per-component) report: 0–500 scores + grades, no overall band.
+  const perComponent = skills.some((s) => !!oetResultView(results[s]?.sub_scores));
+  const platformLabel = perComponent ? "Healthcare English Preparation" : "IELTS Preparation Platform";
+  const reportTitle = perComponent ? "Healthcare English Diagnostic Baseline" : "IELTS Diagnostic Baseline Assessment";
+
+  const radarData = skills.map((skill) => {
+    const o = oetResultView(results[skill]?.sub_scores);
+    return {
+      skill: SKILL_LABELS[skill],
+      band: perComponent ? (o?.score ?? 0) : (Number(results[skill]?.band_score) || 4),
+      target: perComponent ? 350 : targetBand,
+    };
+  });
 
   const weakest = attempted.length > 0
     ? attempted.reduce((min, s) => (Number(results[s]!.band_score) < Number(results[min]!.band_score) ? s : min), attempted[0])
@@ -2719,7 +2727,7 @@ function DiagnosticReportModal({
             </div>
             <div>
               <div className="font-manrope font-extrabold text-brand-ink text-base leading-tight tracking-[-0.02em]">TestCrack</div>
-              <div className="text-brand-text-mute text-xs">IELTS Preparation Platform</div>
+              <div className="text-brand-text-mute text-xs">{platformLabel}</div>
             </div>
           </div>
           <div className="text-right">
@@ -2730,23 +2738,43 @@ function DiagnosticReportModal({
 
         <div className="mb-8">
           <h1 className="font-manrope text-[22px] font-extrabold text-brand-ink tracking-[-0.02em]">{studentName}</h1>
-          <p className="text-[14px] text-brand-text-mute">IELTS Diagnostic Baseline Assessment</p>
+          <p className="text-[14px] text-brand-text-mute">{reportTitle}</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <div className="border border-brand-line rounded-2xl p-5 text-center">
-            <p className="font-jetbrains text-[10px] uppercase text-brand-text-mute tracking-[0.16em] mb-1">Overall Band</p>
-            <p className="font-manrope text-4xl font-extrabold text-brand-ink tabular-nums tracking-[-0.03em]">{avgScore.toFixed(1)}</p>
-            <p className="text-xs text-brand-text-mute mt-1">Level {overallLevel} · {getLevelConfig(overallLevel).label}</p>
+        {/* OET has no overall band — the per-skill scores below carry the result. */}
+        {perComponent ? (
+          <div className="border border-brand-line rounded-2xl p-5 mb-8">
+            <p className="font-jetbrains text-[10px] uppercase text-brand-text-mute tracking-[0.16em] mb-3">Your Results · by skill</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {skills.map((skill) => {
+                const o = oetResultView(results[skill]?.sub_scores);
+                if (!o) return null;
+                return (
+                  <div key={skill} className="text-center">
+                    <p className="text-[11px] text-brand-text-mute">{SKILL_LABELS[skill]}</p>
+                    <p className="font-manrope text-2xl font-extrabold text-brand-ink tabular-nums">{o.score}</p>
+                    <p className="text-[11px] font-semibold text-brand-text-mute">Grade {o.grade}</p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <div className="border border-brand-line rounded-2xl p-5 text-center">
-            <p className="font-jetbrains text-[10px] uppercase text-brand-text-mute tracking-[0.16em] mb-1">Target Band</p>
-            <p className="font-manrope text-4xl font-extrabold text-brand-ink tabular-nums tracking-[-0.03em]">{targetBand.toFixed(1)}</p>
-            <p className="text-xs text-brand-text-mute mt-1">
-              {avgScore >= targetBand ? "Target reached" : `Gap: ${(targetBand - avgScore).toFixed(1)}`}
-            </p>
+        ) : (
+          <div className="grid grid-cols-2 gap-4 mb-8">
+            <div className="border border-brand-line rounded-2xl p-5 text-center">
+              <p className="font-jetbrains text-[10px] uppercase text-brand-text-mute tracking-[0.16em] mb-1">Overall Band</p>
+              <p className="font-manrope text-4xl font-extrabold text-brand-ink tabular-nums tracking-[-0.03em]">{avgScore.toFixed(1)}</p>
+              <p className="text-xs text-brand-text-mute mt-1">Level {overallLevel} · {getLevelConfig(overallLevel).label}</p>
+            </div>
+            <div className="border border-brand-line rounded-2xl p-5 text-center">
+              <p className="font-jetbrains text-[10px] uppercase text-brand-text-mute tracking-[0.16em] mb-1">Target Band</p>
+              <p className="font-manrope text-4xl font-extrabold text-brand-ink tabular-nums tracking-[-0.03em]">{targetBand.toFixed(1)}</p>
+              <p className="text-xs text-brand-text-mute mt-1">
+                {avgScore >= targetBand ? "Target reached" : `Gap: ${(targetBand - avgScore).toFixed(1)}`}
+              </p>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="border border-brand-line rounded-2xl p-4 mb-8">
           <div style={{ width: '100%', height: 280 }}>
@@ -2754,9 +2782,9 @@ function DiagnosticReportModal({
               <RadarChart data={radarData} margin={{ top: 8, right: 44, bottom: 8, left: 44 }}>
                 <PolarGrid stroke="#D8E0E2" />
                 <PolarAngleAxis dataKey="skill" tick={{ fill: '#17232B', fontSize: 10, fontWeight: 600 }} />
-                <PolarRadiusAxis domain={[4, 9]} tickCount={6} tick={{ fill: '#5E6B73', fontSize: 9 }} />
-                <Radar name={`Target (${targetBand.toFixed(1)})`} dataKey="target" stroke="#8FA0A8" strokeDasharray="4 4" fill="#8FA0A8" fillOpacity={0.04} isAnimationActive={false} />
-                <Radar name="Your Band" dataKey="band" stroke="#0B6151" fill="#0B6151" fillOpacity={0.35} strokeWidth={2} isAnimationActive={false} />
+                <PolarRadiusAxis domain={perComponent ? [0, 500] : [4, 9]} tickCount={6} tick={{ fill: '#5E6B73', fontSize: 9 }} />
+                <Radar name={perComponent ? 'Grade B (350)' : `Target (${targetBand.toFixed(1)})`} dataKey="target" stroke="#8FA0A8" strokeDasharray="4 4" fill="#8FA0A8" fillOpacity={0.04} isAnimationActive={false} />
+                <Radar name={perComponent ? 'Your Score' : 'Your Band'} dataKey="band" stroke="#0B6151" fill="#0B6151" fillOpacity={0.35} strokeWidth={2} isAnimationActive={false} />
                 <Legend wrapperStyle={{ fontSize: 11, fontWeight: 600 }} />
               </RadarChart>
             </ResponsiveContainer>
@@ -2769,7 +2797,7 @@ function DiagnosticReportModal({
           <table className="w-full min-w-[480px] print:min-w-0 text-sm border-collapse">
             <thead>
               <tr className="border-b border-brand-line">
-                {['Skill', 'Band', 'Level', 'Feedback Summary'].map((h) => (
+                {['Skill', perComponent ? 'Score' : 'Band', perComponent ? 'Grade' : 'Level', 'Feedback Summary'].map((h) => (
                   <th key={h} className="text-left font-jetbrains text-[10px] uppercase tracking-[0.16em] text-brand-text-mute px-2 py-2 first:pl-0">{h}</th>
                 ))}
               </tr>
@@ -2786,6 +2814,7 @@ function DiagnosticReportModal({
                   );
                 }
                 const level = getBandLevel(result.band_score);
+                const o = oetResultView(result.sub_scores);
                 const feedbackSource = result.feedback ?? result.sub_scores?.feedback;
                 const summary = typeof feedbackSource === 'string'
                   ? feedbackSource
@@ -2793,8 +2822,8 @@ function DiagnosticReportModal({
                 return (
                   <tr key={skill} className="border-b border-brand-line">
                     <td className="px-2 py-3 pl-0 font-semibold text-brand-ink">{SKILL_LABELS[skill]}</td>
-                    <td className="px-2 py-3 font-bold text-brand-ink tabular-nums">{result.band_score.toFixed(1)}</td>
-                    <td className="px-2 py-3 text-brand-text-mute">{getLevelConfig(level).label}</td>
+                    <td className="px-2 py-3 font-bold text-brand-ink tabular-nums">{o ? o.score : result.band_score.toFixed(1)}</td>
+                    <td className="px-2 py-3 text-brand-text-mute">{o ? `Grade ${o.grade}` : getLevelConfig(level).label}</td>
                     <td className="px-2 py-3 text-brand-text-mute">{summary}</td>
                   </tr>
                 );
@@ -2808,8 +2837,11 @@ function DiagnosticReportModal({
           <div className="border border-brand-teal-tint bg-brand-teal-wash rounded-2xl p-5">
             <p className="font-jetbrains text-[10px] uppercase tracking-[0.16em] text-brand-teal-700 mb-2">Recommended Next Steps</p>
             <p className="text-[14px] text-brand-text leading-[1.75]">
-              Focus first on <strong>{SKILL_LABELS[weakest]}</strong> — it's currently the lowest-scoring skill at band {results[weakest]!.band_score.toFixed(1)}.
-              Consistent daily practice targeting this area will have the fastest impact on the overall band, before moving to a broader review across all four skills.
+              Focus first on <strong>{SKILL_LABELS[weakest]}</strong> — it's currently your lowest-scoring skill{(() => {
+                const o = oetResultView(results[weakest]!.sub_scores);
+                return o ? ` at ${o.score}/500 (Grade ${o.grade})` : ` at band ${results[weakest]!.band_score.toFixed(1)}`;
+              })()}.
+              Consistent daily practice targeting this area will have the fastest impact, before moving to a broader review across all four skills.
             </p>
           </div>
         )}

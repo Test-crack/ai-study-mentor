@@ -187,6 +187,25 @@ const scoreTier = (n: number): { label: string; tone: "low" | "mid" | "high" } =
 const overallBand = (bands: SkillBand[]) =>
   Math.round((bands.reduce((s, b) => s + b.score, 0) / bands.length) * 2) / 2;
 
+// Per-component (OET) detection from a skill's stored sub_scores: a numeric 0–500 score +
+// a letter grade. IELTS competency rows never carry both, so they keep the band UI. OET has
+// NO overall band — the dashboard suppresses band-ladder / readiness projection for it.
+function oetView(subScores?: Record<string, any> | null): { score: number; grade: string; meetsB: boolean } | null {
+  if (!subScores) return null;
+  const g = (subScores as any).grade, s = (subScores as any).score;
+  if (typeof g === "string" && g && typeof s === "number") return { score: s, grade: g, meetsB: !!(subScores as any).meets_grade_b };
+  return null;
+}
+
+const OET_GRADE_BADGE: Record<string, string> = {
+  A: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  B: "bg-brand-teal-50 text-brand-teal-700 border-brand-teal-200",
+  "C+": "bg-amber-50 text-amber-700 border-amber-200",
+  C: "bg-amber-50 text-amber-700 border-amber-200",
+  D: "bg-rose-50 text-rose-700 border-rose-200",
+  E: "bg-rose-50 text-rose-700 border-rose-200",
+};
+
 const getNextMilestone = (current: number, target: number) => {
   const next = Math.min(Math.round((current + 0.5) * 2) / 2, target);
   const reachedTarget = current >= target;
@@ -261,6 +280,8 @@ const StudentDashboardPage = () => {
 
   const displayName = profile?.name || user?.email?.split("@")[0] || "Student";
   const overall = overallBand(skillBands);
+  // OET (per-component) has no overall band — suppress band ladder / readiness / growth headline.
+  const perComponent = skillBands.some((b) => !!oetView(b.subScores));
 
   // Growth since the diagnostic. Derived at render rather than written into
   // skillBands state because competency-scores and diagnostic-report resolve
@@ -460,6 +481,7 @@ const StudentDashboardPage = () => {
           <ClimbHero
             displayName={displayName}
             streak={dailyDrillState?.daily_streak ?? 0}
+            perComponent={perComponent}
             overall={overall}
             milestone={milestone}
             target={dynamicReadiness.targetBand}
@@ -753,7 +775,7 @@ const StudentDashboardPage = () => {
               <section>
                 {/* Growth headline — the student's own baseline, which until now
                     only their tutor could see (instructor BaselineComparison). */}
-                {baselineOverall != null && overall > 0 && (
+                {!perComponent && baselineOverall != null && overall > 0 && (
                   <p className="text-sm font-medium text-brand-text-mute mb-3">
                     You started at{" "}
                     <span className="font-jetbrains font-bold text-brand-text">
@@ -778,9 +800,11 @@ const StudentDashboardPage = () => {
                 </div>
               </section>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Readiness projection is band + mock based (IELTS); OET has no overall band
+                  and mocks are Phase 2, so it shows the weekly rhythm alone for now. */}
+              <div className={cn("grid grid-cols-1 gap-6", !perComponent && "lg:grid-cols-2")}>
                 <WeeklyRhythmIndicator currentStreak={dailyDrillState?.daily_streak ?? 0} goal={7} />
-                <PredictedReadinessCard readiness={dynamicReadiness} />
+                {!perComponent && <PredictedReadinessCard readiness={dynamicReadiness} />}
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -997,6 +1021,7 @@ const useParticleField = (
 interface ClimbHeroProps {
   displayName: string;
   streak: number;
+  perComponent?: boolean;
   overall: number;
   milestone: { next: number; reachedTarget: boolean; pctToNext: number };
   target: number;
@@ -1020,7 +1045,7 @@ interface GateStep {
  * Inner stat cards stay translucent white so they pop off the dark surface.
  */
 const ClimbHero = ({
-  displayName, streak,
+  displayName, streak, perComponent,
   overall, milestone, target, momentum, isLocked,
   nextAction, lexiDone, onStartActiveDrill, onOpenLexiGrid,
 }: ClimbHeroProps) => {
@@ -1205,64 +1230,87 @@ const ClimbHero = ({
         </div>
 
         {/* ── Right: the climb — score, segmented progress, level/momentum ── */}
+        {/* OET has no overall band / target band, so the band ladder is suppressed and the
+            panel shows the daily-practice momentum instead. IELTS keeps the full climb. */}
         <div className="lg:col-span-5 flex flex-col justify-center bg-white/5 border border-brand-line-16 rounded-2xl px-5 py-5">
           <p className="font-jetbrains text-[10px] uppercase tracking-[0.18em] text-brand-on-ink-mute mb-2">
-            The Climb
+            {perComponent ? "Your Momentum" : "The Climb"}
           </p>
-          <div className="flex items-baseline gap-3 mb-1">
-            <span className="font-jetbrains text-5xl font-black text-white leading-none tabular-nums">
-              {animatedBand.toFixed(1)}
-            </span>
-            <span
-              className={cn(
-                "text-[13px] font-semibold leading-tight transition-all duration-500",
-                justLeveled && !reduced && "scale-[1.05]"
-              )}
-              aria-live="polite"
-            >
-              <span className="text-brand-mint">
-                {milestone.reachedTarget ? "Goal reached 🎉" : `Band ${milestone.next.toFixed(1)} is one step away`}
-              </span>
-              <br />
-              <span className="text-brand-on-ink-mute">goal band {target.toFixed(1)}</span>
-            </span>
-          </div>
 
-          <div className="flex items-center gap-1.5 mt-4" role="img" aria-label={`Current band ${overall.toFixed(1)} of goal ${target.toFixed(1)}`}>
-            {rungs.map((rung, idx) => {
-              const reached = overall >= rung - 0.001;
-              const isNext = !reached && Math.abs(rung - milestone.next) < 0.001;
-              return (
+          {perComponent ? (
+            <>
+              <div className="flex items-baseline gap-3 mb-1">
+                <span className="font-jetbrains text-5xl font-black text-brand-mint leading-none tabular-nums">
+                  +{Math.round(animatedPts).toLocaleString()}
+                </span>
+                <span className="text-[13px] font-semibold leading-tight text-brand-on-ink-mute">momentum<br />points</span>
+              </div>
+              <p className="text-[12.5px] text-brand-on-ink-mute leading-[1.6] mt-3">
+                Your baseline is set. Keep a daily streak of drills and LexiGrid to build momentum toward Grade&nbsp;B across your skills.
+              </p>
+              <div className="mt-5 pt-4 border-t border-brand-line-16">
+                <p className="font-jetbrains text-[9.5px] uppercase tracking-[0.14em] text-brand-on-ink-mute mb-0.5">Day streak</p>
+                <p className="text-sm font-bold text-white">{streak} day{streak === 1 ? "" : "s"}</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex items-baseline gap-3 mb-1">
+                <span className="font-jetbrains text-5xl font-black text-white leading-none tabular-nums">
+                  {animatedBand.toFixed(1)}
+                </span>
                 <span
-                  key={rung}
-                  title={`Band ${rung.toFixed(1)}`}
                   className={cn(
-                    "h-2 flex-1 rounded-full transition-all duration-500",
-                    reached ? "bg-brand-mint" : isNext ? "bg-brand-teal-700" : "bg-white/10"
+                    "text-[13px] font-semibold leading-tight transition-all duration-500",
+                    justLeveled && !reduced && "scale-[1.05]"
                   )}
-                />
-              );
-            })}
-          </div>
-          <div className="flex items-center justify-between mt-2 text-[11px] font-medium text-brand-on-ink-mute">
-            <span>{rungs[0]?.toFixed(1) ?? overall.toFixed(1)}</span>
-            <span>
-              {milestone.reachedTarget
-                ? "goal reached"
-                : `${rungsToGoal} step${rungsToGoal === 1 ? "" : "s"} to ${target.toFixed(1)}`}
-            </span>
-          </div>
+                  aria-live="polite"
+                >
+                  <span className="text-brand-mint">
+                    {milestone.reachedTarget ? "Goal reached 🎉" : `Band ${milestone.next.toFixed(1)} is one step away`}
+                  </span>
+                  <br />
+                  <span className="text-brand-on-ink-mute">goal band {target.toFixed(1)}</span>
+                </span>
+              </div>
 
-          <div className="flex items-center justify-between mt-5 pt-4 border-t border-brand-line-16">
-            <div>
-              <p className="font-jetbrains text-[9.5px] uppercase tracking-[0.14em] text-brand-on-ink-mute mb-0.5">Level</p>
-              <p className="text-sm font-bold text-white">{levelLabel}</p>
-            </div>
-            <div className="text-right">
-              <p className="font-jetbrains text-[9.5px] uppercase tracking-[0.14em] text-brand-on-ink-mute mb-0.5">Momentum</p>
-              <p className="text-sm font-bold text-brand-mint">+{Math.round(animatedPts).toLocaleString()}</p>
-            </div>
-          </div>
+              <div className="flex items-center gap-1.5 mt-4" role="img" aria-label={`Current band ${overall.toFixed(1)} of goal ${target.toFixed(1)}`}>
+                {rungs.map((rung) => {
+                  const reached = overall >= rung - 0.001;
+                  const isNext = !reached && Math.abs(rung - milestone.next) < 0.001;
+                  return (
+                    <span
+                      key={rung}
+                      title={`Band ${rung.toFixed(1)}`}
+                      className={cn(
+                        "h-2 flex-1 rounded-full transition-all duration-500",
+                        reached ? "bg-brand-mint" : isNext ? "bg-brand-teal-700" : "bg-white/10"
+                      )}
+                    />
+                  );
+                })}
+              </div>
+              <div className="flex items-center justify-between mt-2 text-[11px] font-medium text-brand-on-ink-mute">
+                <span>{rungs[0]?.toFixed(1) ?? overall.toFixed(1)}</span>
+                <span>
+                  {milestone.reachedTarget
+                    ? "goal reached"
+                    : `${rungsToGoal} step${rungsToGoal === 1 ? "" : "s"} to ${target.toFixed(1)}`}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between mt-5 pt-4 border-t border-brand-line-16">
+                <div>
+                  <p className="font-jetbrains text-[9.5px] uppercase tracking-[0.14em] text-brand-on-ink-mute mb-0.5">Level</p>
+                  <p className="text-sm font-bold text-white">{levelLabel}</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-jetbrains text-[9.5px] uppercase tracking-[0.14em] text-brand-on-ink-mute mb-0.5">Momentum</p>
+                  <p className="text-sm font-bold text-brand-mint">+{Math.round(animatedPts).toLocaleString()}</p>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </section>
@@ -1491,9 +1539,14 @@ const SkillBandCard = ({
   onDrill: (skill: string, guide: SubSkillGuide, score: number) => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
-  const pct = Math.round(bandFillPct(band.score));
+  const oet = oetView(band.subScores);
+  const pct = oet ? Math.round((oet.score / 500) * 100) : Math.round(bandFillPct(band.score));
 
-  const subEntries = band.subScores
+  // IELTS: numeric sub-scores (≤9). OET: the analytic criteria object {label,score,max}.
+  const oetCriteria: any[] = oet && (band.subScores as any)?.criteria
+    ? Object.values((band.subScores as any).criteria).filter((c: any) => c && typeof c.score === "number")
+    : [];
+  const subEntries = !oet && band.subScores
     ? Object.entries(band.subScores).filter(([key, val]) => {
         const numVal = Number(val);
         if (isNaN(numVal) || numVal > 9.0) return false;
@@ -1514,18 +1567,21 @@ const SkillBandCard = ({
         </div>
         <div className="flex items-baseline gap-2">
           <p className="font-jetbrains text-3xl font-bold text-brand-text tracking-tight">
-            {band.score.toFixed(1)}
+            {oet ? oet.score : band.score.toFixed(1)}
           </p>
-          {/* Growth since the diagnostic baseline. Rendered only when there is
-              real movement — a "+0.0" chip is noise, and a missing baseline
-              must not read as "no progress". */}
-          {band.delta !== 0 && (
+          {oet ? (
+            <span
+              className={cn("font-jetbrains text-[11px] font-bold px-1.5 py-0.5 rounded-md border", OET_GRADE_BADGE[oet.grade] ?? "bg-brand-bg-alt text-brand-text border-brand-line")}
+              title={oet.meetsB ? "Meets the Grade B benchmark" : "Below the Grade B benchmark"}
+            >
+              Grade {oet.grade}
+            </span>
+          ) : band.delta !== 0 && (
+            /* Growth since the diagnostic baseline — only when there's real movement. */
             <span
               className={cn(
                 "font-jetbrains text-xs font-bold px-1.5 py-0.5 rounded-md",
-                band.delta > 0
-                  ? "text-brand-teal-600 bg-brand-teal-50"
-                  : "text-amber-700 bg-amber-50"
+                band.delta > 0 ? "text-brand-teal-600 bg-brand-teal-50" : "text-amber-700 bg-amber-50"
               )}
               title="Change since your diagnostic assessment"
             >
@@ -1535,7 +1591,9 @@ const SkillBandCard = ({
         </div>
         <p className="text-sm font-medium text-brand-text-mute mt-1 mb-4">
           {band.skill}
-          {band.delta !== 0 && (
+          {oet ? (
+            <span className="text-brand-text-mute/70"> · out of 500</span>
+          ) : band.delta !== 0 && (
             <span className="text-brand-text-mute/70"> · since diagnostic</span>
           )}
         </p>
@@ -1546,6 +1604,18 @@ const SkillBandCard = ({
           />
         </div>
       </button>
+
+      {/* OET analytic criteria (Writing/Speaking); L/R have none and just show score+grade */}
+      {oetCriteria.length > 0 && (
+        <div className="mt-auto w-full grid grid-cols-2 gap-2">
+          {oetCriteria.map((c: any, i: number) => (
+            <div key={c.label ?? i} className="flex justify-between items-center gap-1 text-[10px] bg-brand-bg-alt px-2 py-1.5 rounded-lg border border-brand-line">
+              <span className="text-brand-text-mute truncate" title={c.label}>{c.label}</span>
+              <span className={cn("font-jetbrains font-bold shrink-0", c.meets_b === false ? "text-amber-600" : "text-brand-text")}>{c.score}/{c.max}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {subEntries.length > 0 && (
         <div className="mt-auto w-full">
@@ -1720,7 +1790,14 @@ const ModuleNavCard = ({ band, onNavigate }: any) => (
     </div>
     <div className="flex-1 min-w-0">
       <p className="text-sm font-bold text-brand-text">{band.skill}</p>
-      <p className="text-xs text-brand-text-mute mt-0.5">Band {band.score} → {band.target}</p>
+      {(() => {
+        const o = oetView(band.subScores);
+        return (
+          <p className="text-xs text-brand-text-mute mt-0.5">
+            {o ? `${o.score}/500 · Grade ${o.grade}` : `Band ${band.score} → ${band.target}`}
+          </p>
+        );
+      })()}
     </div>
   </button>
 );
