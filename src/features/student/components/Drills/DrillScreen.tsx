@@ -321,13 +321,14 @@ export default function DrillScreen() {
         // e.g. OET's meta flags meets_grade_b/is_valid_attempt).
         const res = await callBackend(`${backendUrl}/api/student/next-action-drill`);
         const fq: any[] = res?.focus_queue ?? [];
+        // Keep the backend's round-robin cycle order (current drill first) — do NOT re-sort by
+        // score, or exams whose sub-skills tie on the skill band (OET) pin one skill to the top.
         const entries: QueueEntry[] = fq.map((it: any) => ({
           name: toSubSkillLabel(it.sub_skill),
           skill: it.skill,
           score: Number(it.score) || 0,
           isCurrent: String(it.skill).toUpperCase() === targetSkillUp && normaliseSubSkillKey(it.sub_skill) === targetSubNorm,
         }));
-        entries.sort((a, b) => a.score - b.score);
         setQueueEntries(entries.slice(0, 4));
         setCurrentSubScore(entries.find((e) => e.isCurrent)?.score ?? null);
       } catch (err) {
