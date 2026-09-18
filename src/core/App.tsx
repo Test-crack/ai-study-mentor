@@ -76,6 +76,7 @@ const PricingConfig = lazy(() => import("@/features/TestCrackSuperAdmin/dashboar
 const ExamConfigs = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/ExamConfigs"));
 const QuestionVerification = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/QuestionVerification"));
 const LoadoutVerification = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/LoadoutVerification"));
+const QuestionBank = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/QuestionBank"));
 const SupportTicket = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/SupportTicket"));
 const PlatformAnalytics = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/PlatformAnalytics"));
 const AllUsers = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/AllUsers"));
@@ -448,6 +449,7 @@ const AppRoutes = () => {
       <Route path="/superadmin/examconfigs" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><ExamConfigs /></RoleProtectedRoute>} />
       <Route path="/superadmin/verification" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><QuestionVerification /></RoleProtectedRoute>} />
       <Route path="/superadmin/loadouts" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><LoadoutVerification /></RoleProtectedRoute>} />
+      <Route path="/superadmin/questionbank" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><QuestionBank /></RoleProtectedRoute>} />
       <Route path="/superadmin/supportickets" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><SupportTicket /></RoleProtectedRoute>} />
       <Route path="/superadmin/platform" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><PlatformAnalytics /></RoleProtectedRoute>} />
       <Route path="/superadmin/allusers" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><AllUsers /></RoleProtectedRoute>} />

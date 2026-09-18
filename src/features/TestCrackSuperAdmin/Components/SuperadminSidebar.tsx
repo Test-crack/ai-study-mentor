@@ -12,7 +12,8 @@ import {
   ShieldCheck,
   Coins,
   LifeBuoy,
-  Layers
+  Layers,
+  Library
 } from "lucide-react";
 import testcrackLogo from '@/assets/testcrack-logo.svg';
 import { cn } from "@/shared/utils";
@@ -31,12 +32,12 @@ export const SuperAdminSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
   const { signOut } = useAuth();
   const navigate = useNavigate();
   
- // Question Bank has no backend route yet — left commented out below until one exists.
  const menuItems = [
   { id: 'superadmin-dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/superadmin/dashboard' },
   { id: 'institutes', icon: Building2, label: 'Institutes', path: '/superadmin/institutes' },
   { id: 'superadmin-subscription', icon: CreditCard, label: 'Subscription', path: '/superadmin/subscription' },
   { id: 'exam-configs', icon: SlidersHorizontal, label: 'Exam Configs', path: '/superadmin/examconfigs' },
+  { id: 'question-bank', icon: Library, label: 'Question Bank', path: '/superadmin/questionbank' },
   { id: 'question-verification', icon: ShieldCheck, label: 'Question Verification', path: '/superadmin/verification' },
   { id: 'loadout-verification', icon: Layers, label: 'Loadout Engine', path: '/superadmin/loadouts' },
   { id: 'pricing-config', icon: Coins, label: 'Pricing-Config', path: '/superadmin/priceconfig' },

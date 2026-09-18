@@ -163,6 +163,59 @@ export async function fetchExamConfig(examId: string): Promise<{ data: any }> {
     return callBackend(`${getBackendUrl()}/api/superadmin/exams/${examId}/config`);
 }
 
+// ─── Question-bank inventory (read-only counts) ─────────────────────────────
+// Live counts of how many questions exist per exam, broken down by component
+// (Diagnostics / Daily Drills / Internal Assessment / Mock Test) and, within
+// each, by skill → sub-skill → level. Powers the Question Bank dashboard so an
+// admin can see which exam/skill/level is thin. Shape is uniform across
+// components; component metadata says which dimensions each actually has.
+
+export interface QBLevelCount {
+    key: string;
+    count: number;
+}
+export interface QBSubSkillNode {
+    key: string;
+    total: number;
+    levels: QBLevelCount[];
+}
+export interface QBSkillNode {
+    skill: string;
+    total: number;
+    levels: QBLevelCount[];
+    subSkills: QBSubSkillNode[];
+}
+export interface QBComponentBreakdown {
+    total: number;
+    setCount?: number; // diagnostics only
+    skills: QBSkillNode[];
+}
+export type QBComponentKey = 'diagnostic' | 'drill' | 'ia' | 'mock';
+export interface QBComponentMeta {
+    key: QBComponentKey;
+    label: string;
+    hasSubSkill: boolean;
+    hasLevel: boolean;
+    levelLabel: string | null;
+}
+export interface QBExam {
+    examId: string;
+    label: string;
+    status: string;
+    total: number;
+    components: Record<QBComponentKey, QBComponentBreakdown>;
+}
+export interface QuestionBankSummary {
+    generatedAt: string;
+    components: QBComponentMeta[];
+    exams: QBExam[];
+}
+
+/** GET /api/superadmin/question-bank/summary — full inventory tree. */
+export async function fetchQuestionBankSummary(): Promise<QuestionBankSummary> {
+    return callBackend(`${getBackendUrl()}/api/superadmin/question-bank/summary`);
+}
+
 // ─── Question-bank verification panel ───────────────────────────────────────
 // Thin wrapper around /api/superadmin/verification/*. Backend is forked per
 // exam/bank-type the same way the CLI tooling is (see CLAUDE.md) —
