@@ -2,6 +2,7 @@
 // Front end for the CLI verification/import pipeline (see backend CLAUDE.md).
 // Wired exam/bank-type combinations are decided server-side (SUPPORTED_FORKS).
 import { useEffect, useRef, useState } from 'react';
+import { usePersistentState } from '@/shared/hooks/usePersistentState';
 import { SuperAdminSidebar } from '../Components/SuperadminSidebar';
 import { SuperAdminTopbar } from '../Components/Superadmintopbar';
 import { useToast } from '@/shared/hooks/use-toast';
@@ -116,37 +117,40 @@ export default function QuestionVerification() {
     const [collapsed, setCollapsed] = useState(false);
 
     const [coverage, setCoverage] = useState<CoverageEntry[]>([]);
-    const [examId, setExamId] = useState('ielts');
-    const [bankType, setBankType] = useState('drill');
+    // Persisted across refresh (sessionStorage) so a run's config + results aren't lost on F5.
+    const [examId, setExamId] = usePersistentState('qv_examId', 'ielts');
+    const [bankType, setBankType] = usePersistentState('qv_bankType', 'drill');
 
+    // File handles can't be persisted — after a refresh the results below survive, but the raw
+    // files must be re-selected to re-run. That's expected; the expensive output is what's kept.
     const [files, setFiles] = useState<File[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // String, not number — coercing on every keystroke means the field can
     // never be empty, so backspacing jumps straight to "1".
-    const [expectedRowsInput, setExpectedRowsInput] = useState('200');
+    const [expectedRowsInput, setExpectedRowsInput] = usePersistentState('qv_expectedRows', '200');
     const expectedRows = Math.max(1, Number(expectedRowsInput) || 1);
 
     // Separate from the batch above — Import needs the tagged CSVs, not the raw ones.
     const [importFiles, setImportFiles] = useState<File[]>([]);
     const importFileInputRef = useRef<HTMLInputElement>(null);
 
-    const [stage, setStage] = useState<Stage>('idle');
-    const [layer1Results, setLayer1Results] = useState<Layer1FileResult[] | null>(null);
+    const [stage, setStage] = usePersistentState<Stage>('qv_stage', 'idle');
+    const [layer1Results, setLayer1Results] = usePersistentState<Layer1FileResult[] | null>('qv_layer1', null);
 
-    const [layer2JobId, setLayer2JobId] = useState<string | null>(null);
-    const [layer2Status, setLayer2Status] = useState<'pending' | 'done' | 'error' | null>(null);
-    const [layer2Result, setLayer2Result] = useState<unknown>(null);
-    const [layer2Error, setLayer2Error] = useState<string | null>(null);
-    const [layer2Reviewed, setLayer2Reviewed] = useState(false);
+    const [layer2JobId, setLayer2JobId] = usePersistentState<string | null>('qv_layer2JobId', null);
+    const [layer2Status, setLayer2Status] = usePersistentState<'pending' | 'done' | 'error' | null>('qv_layer2Status', null);
+    const [layer2Result, setLayer2Result] = usePersistentState<unknown>('qv_layer2Result', null);
+    const [layer2Error, setLayer2Error] = usePersistentState<string | null>('qv_layer2Error', null);
+    const [layer2Reviewed, setLayer2Reviewed] = usePersistentState('qv_layer2Reviewed', false);
 
-    const [importPlan, setImportPlan] = useState<ImportPlanFile[] | null>(null);
-    const [importResult, setImportResult] = useState<ImportConfirmFile[] | null>(null);
+    const [importPlan, setImportPlan] = usePersistentState<ImportPlanFile[] | null>('qv_importPlan', null);
+    const [importResult, setImportResult] = usePersistentState<ImportConfirmFile[] | null>('qv_importResult', null);
 
     // Diagnostic-only: update-in-place, not upsert-by-source_key.
-    const [diagnosticSetId, setDiagnosticSetId] = useState('');
-    const [diagnosticSourceSetId, setDiagnosticSourceSetId] = useState('');
-    const [diagnosticAudioUrlPrefix, setDiagnosticAudioUrlPrefix] = useState('/diagnostics/audio/');
+    const [diagnosticSetId, setDiagnosticSetId] = usePersistentState('qv_diagSetId', '');
+    const [diagnosticSourceSetId, setDiagnosticSourceSetId] = usePersistentState('qv_diagSourceSetId', '');
+    const [diagnosticAudioUrlPrefix, setDiagnosticAudioUrlPrefix] = usePersistentState('qv_diagAudioPrefix', '/diagnostics/audio/');
     const [diagnosticPlan, setDiagnosticPlan] = useState<DiagnosticImportPlanResult | null>(null);
     const [diagnosticConfirmResult, setDiagnosticConfirmResult] = useState<DiagnosticImportConfirmResult | null>(null);
 

@@ -10,6 +10,7 @@
 // works. Duplicate one to start from it instead.
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { usePersistentState } from '@/shared/hooks/usePersistentState';
 import { SuperAdminSidebar } from '../Components/SuperadminSidebar';
 import { SuperAdminTopbar } from '../Components/Superadmintopbar';
 import { useToast } from '@/shared/hooks/use-toast';
@@ -117,26 +118,27 @@ export default function LoadoutVerification() {
     const { toast } = useToast();
     const [isCollapsed, setIsCollapsed] = useState(false);
 
-    const [loadouts, setLoadouts] = useState<LoadoutSummaryRow[]>([]);
-    const [selectedId, setSelectedId] = useState<string>('');
-    const [detail, setDetail] = useState<LoadoutDetail | null>(null);
-    const [editable, setEditable] = useState(false);
-    const [savedDraft, setSavedDraft] = useState<LoadoutDraft | null>(null);
+    const [loadouts, setLoadouts] = useState<LoadoutSummaryRow[]>([]); // re-fetched on mount
+    // Persisted across refresh (sessionStorage) so an in-progress draft / verify result survives F5.
+    const [selectedId, setSelectedId] = usePersistentState<string>('lv_selectedId', '');
+    const [detail, setDetail] = usePersistentState<LoadoutDetail | null>('lv_detail', null);
+    const [editable, setEditable] = usePersistentState('lv_editable', false);
+    const [savedDraft, setSavedDraft] = usePersistentState<LoadoutDraft | null>('lv_savedDraft', null);
 
-    const [draft, setDraft] = useState<LoadoutDraft | null>(null);
-    const [draftIsNew, setDraftIsNew] = useState(false);
+    const [draft, setDraft] = usePersistentState<LoadoutDraft | null>('lv_draft', null);
+    const [draftIsNew, setDraftIsNew] = usePersistentState('lv_draftIsNew', false);
     // Raw text for the allowed-values inputs. Parsing straight into the draft on
     // every keystroke swallowed the comma the moment it was typed.
-    const [valuesText, setValuesText] = useState<Record<number, string>>({});
+    const [valuesText, setValuesText] = usePersistentState<Record<number, string>>('lv_valuesText', {});
     const [previewError, setPreviewError] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
 
-    const [files, setFiles] = useState<File[]>([]);
+    const [files, setFiles] = useState<File[]>([]); // File handles can't persist — re-select to re-run
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const [expected, setExpected] = useState<string>('');
+    const [expected, setExpected] = usePersistentState<string>('lv_expected', '');
     const [running, setRunning] = useState(false);
     const [downloading, setDownloading] = useState(false);
-    const [result, setResult] = useState<LoadoutVerifyResult | null>(null);
+    const [result, setResult] = usePersistentState<LoadoutVerifyResult | null>('lv_result', null);
 
     const refreshList = useCallback(async (selectAfter?: string) => {
         const r = await fetchLoadouts();

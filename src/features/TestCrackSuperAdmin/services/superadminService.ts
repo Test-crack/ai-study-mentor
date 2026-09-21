@@ -516,6 +516,7 @@ export interface LoadoutSummaryRow {
     hasSourceKey?: boolean;
     hookCount?: number;
     valid: boolean;
+    editable?: boolean; // API flags admin-owned loadouts ("YOURS"); built-ins are read-only
     error?: string;
 }
 

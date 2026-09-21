@@ -164,6 +164,21 @@ export default function ExamConfigs() {
   const needsReview = Boolean(naming?._naming_conflict);
   const clearedToRun = legal?.permission_status !== 'denied' && legal?.permission_status !== 'blocked';
 
+  // Config search: a section shows if its key OR any of its keys/values matches (case-insensitive).
+  const cfgQuery = search.trim().toLowerCase();
+  const matchesCfg = (k: string, v: any) =>
+    !cfgQuery || k.toLowerCase().includes(cfgQuery) || JSON.stringify(v ?? '').toLowerCase().includes(cfgQuery);
+  const cfgSections: [boolean, string, any][] = [
+    [!!identity, 'identity', identity],
+    [!!naming, 'naming', naming],
+    [!!legalCore, 'legal', legalCore],
+    [!!scoring, 'scoring', scoring],
+    [true, 'components', components],
+    [!!variants, 'variants', variantOptions],
+    [!!displayRules, 'display_rules', displayRules],
+  ];
+  const anyCfgMatch = cfgSections.some(([present, k, v]) => present && matchesCfg(k, v));
+
   const copyJson = async () => {
     try {
       await navigator.clipboard.writeText(JSON.stringify(config, null, 2));
@@ -437,13 +452,16 @@ export default function ExamConfigs() {
                     </div>
 
                     <div className="overflow-auto max-h-[52vh] pr-1 space-y-1">
-                      {identity && <JsonRow k="identity" v={identity} />}
-                      {naming && <JsonRow k="naming" v={naming} badge={needsReview ? 'Needs review' : undefined} />}
-                      {legalCore && <JsonRow k="legal" v={legalCore} />}
-                      {scoring && <JsonRow k="scoring" v={scoring} />}
-                      <JsonRow k="components" v={components} />
-                      {variants && <JsonRow k="variants" v={variantOptions} />}
-                      {displayRules && <JsonRow k="display_rules" v={displayRules} />}
+                      {identity && matchesCfg('identity', identity) && <JsonRow k="identity" v={identity} />}
+                      {naming && matchesCfg('naming', naming) && <JsonRow k="naming" v={naming} badge={needsReview ? 'Needs review' : undefined} />}
+                      {legalCore && matchesCfg('legal', legalCore) && <JsonRow k="legal" v={legalCore} />}
+                      {scoring && matchesCfg('scoring', scoring) && <JsonRow k="scoring" v={scoring} />}
+                      {matchesCfg('components', components) && <JsonRow k="components" v={components} />}
+                      {variants && matchesCfg('variants', variantOptions) && <JsonRow k="variants" v={variantOptions} />}
+                      {displayRules && matchesCfg('display_rules', displayRules) && <JsonRow k="display_rules" v={displayRules} />}
+                      {cfgQuery && !anyCfgMatch && (
+                        <p className="text-white/40 text-xs py-6 text-center">No config keys or values match "{search}".</p>
+                      )}
                     </div>
 
                     <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">

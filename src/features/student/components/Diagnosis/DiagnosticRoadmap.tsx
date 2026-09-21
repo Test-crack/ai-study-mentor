@@ -6,11 +6,14 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { callBackend } from "@/features/auth/services/authClient";
 import { getBackendUrl } from "@/shared/utils";
 import { StudentLayout } from "@/features/student/components/StudentLayout";
+import { resolveExam, formatScore } from "@/shared/exam/examScale";
+import { useExamConfigReady } from "@/shared/exam/ExamConfigProvider";
 
-type Skill = "Listening" | "Reading" | "Writing" | "Speaking";
-
+// Per-skill presentation, keyed by the exam config's component id (lowercase).
+// The assessed skills themselves come from the exam config (resolveExam), so an
+// exam with a different skill set still renders — this only supplies the icon /
+// practice route / colour for the skills we have art for.
 interface SkillMeta {
-  skill: Skill;
   icon: React.ReactNode;
   route: string;
   color: string;
@@ -18,24 +21,26 @@ interface SkillMeta {
   border: string;
 }
 
-const SKILL_META: SkillMeta[] = [
-  { skill: "Listening", icon: <Headphones className="w-5 h-5" />, route: "/student/listening", color: "text-brand-teal-700", bg: "bg-brand-teal-wash", border: "border-brand-teal-tint" },
-  { skill: "Reading",   icon: <BookOpen className="w-5 h-5" />,   route: "/student/reading",   color: "text-brand-blue-600", bg: "bg-brand-blue-tint", border: "border-brand-blue-200" },
-  { skill: "Writing",   icon: <PenLine className="w-5 h-5" />,    route: "/student/writing",   color: "text-brand-warm", bg: "bg-brand-warm-tint", border: "border-brand-warm/25" },
-  { skill: "Speaking",  icon: <Mic className="w-5 h-5" />,        route: "/student/speaking-assessment", color: "text-brand-ink", bg: "bg-brand-bg-alt", border: "border-brand-line" },
-];
+const SKILL_META: Record<string, SkillMeta> = {
+  listening: { icon: <Headphones className="w-5 h-5" />, route: "/student/listening", color: "text-brand-teal-700", bg: "bg-brand-teal-wash", border: "border-brand-teal-tint" },
+  reading:   { icon: <BookOpen className="w-5 h-5" />,   route: "/student/reading",   color: "text-brand-blue-600", bg: "bg-brand-blue-tint", border: "border-brand-blue-200" },
+  writing:   { icon: <PenLine className="w-5 h-5" />,    route: "/student/writing",   color: "text-brand-warm", bg: "bg-brand-warm-tint", border: "border-brand-warm/25" },
+  speaking:  { icon: <Mic className="w-5 h-5" />,        route: "/student/speaking-assessment", color: "text-brand-ink", bg: "bg-brand-bg-alt", border: "border-brand-line" },
+};
+const DEFAULT_META: SkillMeta = { icon: <Compass className="w-5 h-5" />, route: "/student/dashboard", color: "text-brand-ink", bg: "bg-brand-bg-alt", border: "border-brand-line" };
+const metaFor = (id: string): SkillMeta => SKILL_META[id.toLowerCase()] ?? DEFAULT_META;
 
-// Ranked-by-weakness improvement actions per criterion. Listening/Reading don't get
-// per-criterion diagnostic sub-scores (only accuracy + question-type breakdown), so
-// they use a fixed set of skill-level tips instead of a ranked pick.
+// Ranked-by-weakness improvement actions per criterion, keyed by component id.
+// Listening/Reading don't get per-criterion diagnostic sub-scores (only accuracy
+// + question-type breakdown), so they use a fixed set of skill-level tips.
 const CRITERION_ACTIONS: Record<string, Record<string, string>> = {
-  Writing: {
+  writing: {
     taskResponseScore: "Practice structuring responses that directly address every part of the prompt.",
     coherenceScore: "Work on paragraphing and linking devices to improve the flow between ideas.",
     vocabularyScore: "Build topic-specific vocabulary and reduce repetition of common words.",
     grammarScore: "Focus on complex sentence structures and reducing grammatical errors.",
   },
-  Speaking: {
+  speaking: {
     fluencyScore: "Practice speaking at a natural pace without long pauses or hesitation.",
     vocabularyScore: "Expand your range of idiomatic expressions and topic-specific vocabulary.",
     grammarScore: "Practice using a wider range of grammatical structures accurately.",
@@ -43,60 +48,78 @@ const CRITERION_ACTIONS: Record<string, Record<string, string>> = {
   },
 };
 
-const FALLBACK_ACTIONS: Record<Skill, string[]> = {
-  Listening: [
+const FALLBACK_ACTIONS: Record<string, string[]> = {
+  listening: [
     "Practice identifying keywords before the audio starts playing.",
     "Work on note-taking speed for detail-heavy questions.",
     "Review your most commonly missed question type (MCQ vs. True/False/Not Given).",
   ],
-  Reading: [
+  reading: [
     "Practice skimming for gist before reading passages in detail.",
     "Build a timing strategy so True/False/Not Given questions don't eat your clock.",
     "Expand academic vocabulary for unfamiliar passage topics.",
   ],
-  Writing: [
+  writing: [
     "Practice structuring responses that directly address every part of the prompt.",
     "Work on paragraphing and linking devices to improve flow.",
     "Build topic-specific vocabulary and reduce repeated phrasing.",
   ],
-  Speaking: [
+  speaking: [
     "Practice speaking at a natural pace without long pauses.",
     "Expand your range of idiomatic expressions.",
     "Focus on word stress, intonation, and pronunciation clarity.",
   ],
 };
+const GENERIC_ACTIONS = [
+  "Keep practising this skill through your daily drills.",
+  "Review your weakest questions and redo them.",
+  "Track your progress and revisit topics you find hardest.",
+];
 
 interface SkillRow {
-  skill: Skill;
+  id: string;
+  label: string;
   band: number | null;
   subScores: Record<string, any> | null;
 }
 
 function getImprovementActions(row: SkillRow): string[] {
-  const criteria = CRITERION_ACTIONS[row.skill];
-  if (!criteria || !row.subScores) return FALLBACK_ACTIONS[row.skill];
-
-  const entries = Object.keys(criteria)
-    .filter((key) => typeof row.subScores?.[key] === "number")
-    .map((key) => [key, Number(row.subScores![key])] as const)
-    .sort((a, b) => a[1] - b[1]);
-
-  if (entries.length === 0) return FALLBACK_ACTIONS[row.skill];
-  return entries.slice(0, 3).map(([key]) => criteria[key]);
+  const criteria = CRITERION_ACTIONS[row.id.toLowerCase()];
+  if (criteria && row.subScores) {
+    const entries = Object.keys(criteria)
+      .filter((key) => typeof row.subScores?.[key] === "number")
+      .map((key) => [key, Number(row.subScores![key])] as const)
+      .sort((a, b) => a[1] - b[1]);
+    if (entries.length > 0) return entries.slice(0, 3).map(([key]) => criteria[key]);
+  }
+  return FALLBACK_ACTIONS[row.id.toLowerCase()] ?? GENERIC_ACTIONS;
 }
 
-// Static formula per spec — 2 weeks per 0.5 band improvement. No historical-curve
-// modeling for this version.
-function weeksToTarget(current: number | null, target: number): number | null {
+// Static formula per spec — one scale-step improvement every 2 weeks. No
+// historical-curve modeling for this version. `step` comes from the exam scale
+// (IELTS = 0.5 band), so the estimate adapts to any numeric-scale exam.
+function unitsToTarget(current: number | null, target: number, step: number): number | null {
   if (current === null) return null;
   const gap = target - current;
   if (gap <= 0) return 0;
-  return Math.ceil((gap / 0.5)) * 2;
+  const s = step > 0 ? step : 0.5;
+  return Math.ceil(gap / s) * 2;
 }
 
 export default function DiagnosticRoadmap() {
   const navigate = useNavigate();
   const { profile } = useAuth();
+  // Wait for the exam config to hydrate before resolving — otherwise resolveExam falls back
+  // to the IELTS interim config and an OET student briefly gets an IELTS-shaped roadmap.
+  const cfgReady = useExamConfigReady();
+  const exam = resolveExam(profile?.examId);
+  // Target/timeline only make sense for a numeric-scale exam that actually has a
+  // target (IELTS band). Ordinal exams (CEFR) or targetless exams skip that UI.
+  const numericTarget = exam.hasTarget && exam.scale?.kind === "numeric";
+  const scoreWord = exam.scoreLabel.toLowerCase(); // "band" for IELTS
+  const step = exam.scale?.kind === "numeric" ? exam.scale.step : 0.5;
+  const fmt = (v: number | null, ss?: Record<string, any> | null) => formatScore(profile?.examId, v, ss);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [rows, setRows] = useState<SkillRow[]>([]);
@@ -113,10 +136,13 @@ export default function DiagnosticRoadmap() {
           const t = Number(res.target_band) || Number(profile?.targetBand) || 7.0;
           setTargetBand(t);
           setRows(
-            SKILL_META.map(({ skill }) => {
-              const record = res.data.find((m: any) => m.skill?.toUpperCase() === skill.toUpperCase());
+            // Skills come from the exam config (assessed components), not a
+            // hardcoded L/R/W/S list — so OET/other exams render their own set.
+            exam.skills.map(({ id, label }) => {
+              const record = res.data.find((m: any) => m.skill?.toUpperCase() === id.toUpperCase());
               return {
-                skill,
+                id,
+                label,
                 band: record ? Number(record.band_score) || null : null,
                 subScores: record?.sub_scores ?? null,
               };
@@ -132,9 +158,10 @@ export default function DiagnosticRoadmap() {
       }
     })();
     return () => { cancelled = true; };
-  }, [profile?.targetBand]);
+    // exam.skills identity is stable per exam; profile.examId drives it.
+  }, [profile?.targetBand, profile?.examId]);
 
-  if (loading) {
+  if (loading || !cfgReady) {
     return (
       <StudentLayout activeTab="roadmap" mainClassName="flex-1 flex items-center justify-center p-4">
         <div className="flex flex-col items-center gap-4 text-center">
@@ -163,8 +190,8 @@ export default function DiagnosticRoadmap() {
 
   const attempted = rows.filter((r) => r.band !== null);
   const priorityFocus = [...attempted].sort((a, b) => (a.band as number) - (b.band as number)).slice(0, 2);
-  const overallWeeks = attempted.length > 0
-    ? Math.max(...attempted.map((r) => weeksToTarget(r.band, targetBand) ?? 0))
+  const overallUnits = numericTarget && attempted.length > 0
+    ? Math.max(...attempted.map((r) => unitsToTarget(r.band, targetBand, step) ?? 0))
     : null;
 
   return (
@@ -186,15 +213,15 @@ export default function DiagnosticRoadmap() {
               <Compass className="w-6 h-6 text-brand-mint" />
             </div>
             <h1 className="font-manrope text-[28px] sm:text-[34px] font-extrabold text-white leading-[1.1] tracking-[-0.03em]">
-              Your personalised IELTS roadmap
+              Your personalised {exam.examLabel} roadmap
             </h1>
             <div className="flex flex-wrap items-center justify-center gap-2">
               {rows.map((row) => (
                 <span
-                  key={row.skill}
+                  key={row.id}
                   className="inline-flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-full border border-brand-line-25 bg-white/5 text-brand-on-ink"
                 >
-                  {row.skill} · <span className="tabular-nums text-brand-mint">{row.band !== null ? row.band.toFixed(1) : "—"}</span>
+                  {row.label} · <span className="tabular-nums text-brand-mint">{fmt(row.band, row.subScores)}</span>
                 </span>
               ))}
             </div>
@@ -210,10 +237,10 @@ export default function DiagnosticRoadmap() {
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
               {priorityFocus.map((row) => {
-                const meta = SKILL_META.find((m) => m.skill === row.skill)!;
+                const meta = metaFor(row.id);
                 return (
                   <div
-                    key={row.skill}
+                    key={row.id}
                     className="border border-brand-warm/30 rounded-2xl p-5 bg-brand-warm-tint flex flex-col gap-4"
                   >
                     <div className="flex items-center gap-3">
@@ -221,8 +248,8 @@ export default function DiagnosticRoadmap() {
                         {meta.icon}
                       </span>
                       <div>
-                        <p className="font-manrope font-bold text-brand-ink text-[15px] tracking-[-0.01em]">{row.skill}</p>
-                        <p className="text-[12.5px] text-brand-text-mute">Current band: <span className="tabular-nums font-semibold text-brand-text">{row.band?.toFixed(1)}</span></p>
+                        <p className="font-manrope font-bold text-brand-ink text-[15px] tracking-[-0.01em]">{row.label}</p>
+                        <p className="text-[12.5px] text-brand-text-mute">Current {scoreWord}: <span className="tabular-nums font-semibold text-brand-text">{fmt(row.band, row.subScores)}</span></p>
                       </div>
                     </div>
                     <button
@@ -246,25 +273,25 @@ export default function DiagnosticRoadmap() {
           </div>
           <div className="grid sm:grid-cols-2 gap-3">
             {rows.map((row) => {
-              const meta = SKILL_META.find((m) => m.skill === row.skill)!;
-              const gap = row.band !== null ? Math.max(0, targetBand - row.band) : null;
+              const meta = metaFor(row.id);
+              const gap = numericTarget && row.band !== null ? Math.max(0, targetBand - row.band) : null;
               const actions = getImprovementActions(row);
               return (
-                <div key={row.skill} className="border border-brand-line rounded-2xl p-5 bg-white flex flex-col gap-4">
+                <div key={row.id} className="border border-brand-line rounded-2xl p-5 bg-white flex flex-col gap-4">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <span className={`w-9 h-9 rounded-xl flex items-center justify-center border ${meta.border} ${meta.bg} ${meta.color}`}>
                         {meta.icon}
                       </span>
-                      <p className="font-manrope font-bold text-brand-ink text-[15px] tracking-[-0.01em]">{row.skill}</p>
+                      <p className="font-manrope font-bold text-brand-ink text-[15px] tracking-[-0.01em]">{row.label}</p>
                     </div>
                     <div className="text-right">
                       <p className="font-manrope text-[15px] font-extrabold text-brand-ink tabular-nums tracking-[-0.02em]">
-                        {row.band !== null ? row.band.toFixed(1) : "—"} <span className="text-brand-text-mute font-normal">→</span> {targetBand.toFixed(1)}
+                        {fmt(row.band, row.subScores)}{numericTarget && <> <span className="text-brand-text-mute font-normal">→</span> {fmt(targetBand)}</>}
                       </p>
                       {gap !== null && (
                         <p className="font-jetbrains text-[10px] text-brand-text-mute uppercase tracking-[0.14em]">
-                          {gap > 0 ? `Gap: ${gap.toFixed(1)}` : "Target reached"}
+                          {gap > 0 ? `Gap: ${fmt(gap)}` : "Target reached"}
                         </p>
                       )}
                     </div>
@@ -289,30 +316,32 @@ export default function DiagnosticRoadmap() {
           </div>
         </div>
 
-        {/* Estimated Timeline */}
-        <div className="relative overflow-hidden rounded-2xl border border-brand-line-12 bg-brand-ink px-6 py-8 text-center">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 opacity-[0.06]"
-            style={{
-              backgroundImage:
-                'linear-gradient(to right, #3EE0A0 1px, transparent 1px), linear-gradient(to bottom, #3EE0A0 1px, transparent 1px)',
-              backgroundSize: '48px 48px',
-            }}
-          />
-          <div className="relative flex flex-col items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/10 border border-brand-line-12 flex items-center justify-center">
-              <Clock className="w-5 h-5 text-brand-mint" />
+        {/* Estimated Timeline — only for exams with a numeric band target */}
+        {numericTarget && (
+          <div className="relative overflow-hidden rounded-2xl border border-brand-line-12 bg-brand-ink px-6 py-8 text-center">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 opacity-[0.06]"
+              style={{
+                backgroundImage:
+                  'linear-gradient(to right, #3EE0A0 1px, transparent 1px), linear-gradient(to bottom, #3EE0A0 1px, transparent 1px)',
+                backgroundSize: '48px 48px',
+              }}
+            />
+            <div className="relative flex flex-col items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/10 border border-brand-line-12 flex items-center justify-center">
+                <Clock className="w-5 h-5 text-brand-mint" />
+              </div>
+              <p className="font-jetbrains text-brand-mint text-[10.5px] uppercase tracking-[0.18em]">Estimated Timeline to Target</p>
+              <p className="font-manrope text-[40px] font-extrabold text-brand-mint tabular-nums leading-none tracking-[-0.03em]">
+                {overallUnits === null ? "—" : overallUnits === 0 ? "You're there!" : `~${overallUnits} weeks`}
+              </p>
+              <p className="text-brand-on-ink text-[13.5px] max-w-sm mx-auto leading-[1.7]">
+                Based on consistent practice at roughly {fmt(step)} {scoreWord} improvement every 2 weeks, across your weakest skill.
+              </p>
             </div>
-            <p className="font-jetbrains text-brand-mint text-[10.5px] uppercase tracking-[0.18em]">Estimated Timeline to Target</p>
-            <p className="font-manrope text-[40px] font-extrabold text-brand-mint tabular-nums leading-none tracking-[-0.03em]">
-              {overallWeeks === null ? "—" : overallWeeks === 0 ? "You're there!" : `~${overallWeeks} weeks`}
-            </p>
-            <p className="text-brand-on-ink text-[13.5px] max-w-sm mx-auto leading-[1.7]">
-              Based on consistent practice at roughly 0.5 band improvement every 2 weeks, across your weakest skill.
-            </p>
           </div>
-        </div>
+        )}
 
         <button
           onClick={() => navigate("/student/dashboard")}
