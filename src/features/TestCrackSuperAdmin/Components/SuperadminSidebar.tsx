@@ -13,7 +13,9 @@ import {
   Coins,
   LifeBuoy,
   Layers,
-  Library
+  Library,
+  FileCheck2,
+  PlusCircle
 } from "lucide-react";
 import testcrackLogo from '@/assets/testcrack-logo.svg';
 import { cn } from "@/shared/utils";
@@ -37,6 +39,8 @@ export const SuperAdminSidebar = ({ activeTab = 'dashboard', onTabChange, isColl
   { id: 'institutes', icon: Building2, label: 'Institutes', path: '/superadmin/institutes' },
   { id: 'superadmin-subscription', icon: CreditCard, label: 'Subscription', path: '/superadmin/subscription' },
   { id: 'exam-configs', icon: SlidersHorizontal, label: 'Exam Configs', path: '/superadmin/examconfigs' },
+  { id: 'config-verification', icon: FileCheck2, label: 'Config Verify', path: '/superadmin/examconfigs/verify' },
+  { id: 'add-exam', icon: PlusCircle, label: 'Add Exam', path: '/superadmin/examconfigs/new' },
   { id: 'question-bank', icon: Library, label: 'Question Bank', path: '/superadmin/questionbank' },
   { id: 'question-verification', icon: ShieldCheck, label: 'Question Verification', path: '/superadmin/verification' },
   { id: 'loadout-verification', icon: Layers, label: 'Loadout Engine', path: '/superadmin/loadouts' },

@@ -76,6 +76,8 @@ const PricingConfig = lazy(() => import("@/features/TestCrackSuperAdmin/dashboar
 const ExamConfigs = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/ExamConfigs"));
 const QuestionVerification = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/QuestionVerification"));
 const LoadoutVerification = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/LoadoutVerification"));
+const ConfigVerification = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/ConfigVerification"));
+const ConfigAuthoring = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/ConfigAuthoring"));
 const QuestionBank = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/QuestionBank"));
 const SupportTicket = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/SupportTicket"));
 const PlatformAnalytics = lazy(() => import("@/features/TestCrackSuperAdmin/dashboard/PlatformAnalytics"));
@@ -447,6 +449,8 @@ const AppRoutes = () => {
       <Route path="/superadmin/subscription" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><Subscription /></RoleProtectedRoute>} />
       <Route path="/superadmin/priceconfig" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><PricingConfig /></RoleProtectedRoute>} />
       <Route path="/superadmin/examconfigs" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><ExamConfigs /></RoleProtectedRoute>} />
+      <Route path="/superadmin/examconfigs/verify" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><ConfigVerification /></RoleProtectedRoute>} />
+      <Route path="/superadmin/examconfigs/new" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><ConfigAuthoring /></RoleProtectedRoute>} />
       <Route path="/superadmin/verification" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><QuestionVerification /></RoleProtectedRoute>} />
       <Route path="/superadmin/loadouts" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><LoadoutVerification /></RoleProtectedRoute>} />
       <Route path="/superadmin/questionbank" element={<RoleProtectedRoute allowedRoles={['SUPERADMIN']}><QuestionBank /></RoleProtectedRoute>} />

@@ -163,6 +163,110 @@ export async function fetchExamConfig(examId: string): Promise<{ data: any }> {
     return callBackend(`${getBackendUrl()}/api/superadmin/exams/${examId}/config`);
 }
 
+// ─── Config verification (Stage 0) ──────────────────────────────────────────────
+// Layer 1 = structural ("will the engine run it?"). Layer 2 = plain-English interpretation
+// (the SAME resolution the runtime uses, so admin + app never diverge).
+// Backend: src/Verification/config + exam-engine/interpret.
+
+export type ConfigSeverity = 'fail' | 'warn' | 'info';
+export type ConfigOutcome = 'pass' | 'warn' | 'fail';
+
+export interface ConfigFinding {
+    code: string;
+    severity: ConfigSeverity;
+    message: string;
+    path?: string;
+}
+export interface ConfigLayerResult {
+    outcome: ConfigOutcome;
+    findings: ConfigFinding[];
+}
+export interface ConfigInterpretationNote { severity: 'info' | 'warn'; message: string; }
+export interface ExamInterpretation {
+    examId: string;
+    status: string;
+    name: { public: string; short?: string; legal?: string };
+    oneLiner: string;
+    scoring: { model: string; headlineExists: boolean; scalePlain?: string; strategyPlain?: string; fromComponents?: string[]; plain: string };
+    components: Array<{
+        id: string; label: string; assessed: boolean; deliveryPlain?: string; scalePlain?: string;
+        timeLimitMinutes?: number; hasSubskills: boolean;
+        subskills: Array<{ id: string; label: string; max?: number; group?: string }>;
+    }>;
+    assessedCount: number;
+    practiceCount: number;
+    scales: Array<{ id: string; kind: string; plain: string }>;
+    target?: string;
+    variants?: string;
+    modules?: string[];
+    legal?: { rightsHolder?: string; disclaimerShort?: string; posture?: string };
+    notes: ConfigInterpretationNote[];
+}
+export interface ConfigLayer2Result extends ConfigLayerResult {
+    interpretation: ExamInterpretation | null;
+    plainEnglish: string;
+}
+export interface ConfigVerifyResult {
+    examId: string;
+    outcome: ConfigOutcome;
+    layer1: ConfigLayerResult;
+    layer2: ConfigLayer2Result;
+}
+
+/** GET /api/superadmin/exams/:id/verify — verify a loaded exam config. */
+export async function verifyExamConfig(examId: string): Promise<{ data: ConfigVerifyResult }> {
+    return callBackend(`${getBackendUrl()}/api/superadmin/exams/${encodeURIComponent(examId)}/verify`);
+}
+
+/** POST /api/superadmin/config/verify — verify a pasted candidate ({ exam, scales? } or a bare exam). */
+export async function verifyCandidateConfig(payload: unknown): Promise<{ data: ConfigVerifyResult }> {
+    return callBackend(`${getBackendUrl()}/api/superadmin/config/verify`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+    });
+}
+
+// ─── Exam authoring lifecycle (Stage 0/1) ────────────────────────────────────────
+// DRAFT → verify-gated PUBLISH → LIVE (immutable). Built-ins are file-locked (rejected).
+
+export interface AuthoredExamRow { exam_id: string; label: string; status: string; source: string; }
+interface DraftMutationResult { exam_id: string; status: string; verify: ConfigVerifyResult; }
+
+/** GET /api/superadmin/exams/authored — list dashboard-authored exams (incl. drafts). */
+export async function listAuthoredExams(): Promise<{ data: AuthoredExamRow[] }> {
+    return callBackend(`${getBackendUrl()}/api/superadmin/exams/authored`);
+}
+
+/** POST /api/superadmin/exams — create a draft. Body: an exam config (or { exam, scales }). */
+export async function createExamDraft(payload: unknown): Promise<{ data: DraftMutationResult }> {
+    return callBackend(`${getBackendUrl()}/api/superadmin/exams`, { method: 'POST', body: JSON.stringify(payload) });
+}
+
+/** GET /api/superadmin/exams/:id/draft — fetch a draft's config to resume editing. */
+export async function getExamDraft(examId: string): Promise<{ data: { exam_id: string; status: string; config: any } }> {
+    return callBackend(`${getBackendUrl()}/api/superadmin/exams/${encodeURIComponent(examId)}/draft`);
+}
+
+/** PUT /api/superadmin/exams/:id/draft — replace a draft's config. */
+export async function updateExamDraft(examId: string, payload: unknown): Promise<{ data: DraftMutationResult }> {
+    return callBackend(`${getBackendUrl()}/api/superadmin/exams/${encodeURIComponent(examId)}/draft`, { method: 'PUT', body: JSON.stringify(payload) });
+}
+
+/** POST /api/superadmin/exams/:id/publish — publish a draft (verify-gated server-side). */
+export async function publishExam(examId: string, status: 'live' | 'reserved' = 'live'): Promise<{ data: { exam_id: string; status: string; verify: ConfigVerifyResult } }> {
+    return callBackend(`${getBackendUrl()}/api/superadmin/exams/${encodeURIComponent(examId)}/publish`, { method: 'POST', body: JSON.stringify({ status }) });
+}
+
+/** POST /api/superadmin/exams/:id/disable — take a published authored exam out of service. */
+export async function disableExam(examId: string): Promise<{ data: { exam_id: string; status: string } }> {
+    return callBackend(`${getBackendUrl()}/api/superadmin/exams/${encodeURIComponent(examId)}/disable`, { method: 'POST', body: JSON.stringify({}) });
+}
+
+/** DELETE /api/superadmin/exams/:id — delete a draft. */
+export async function deleteExamDraft(examId: string): Promise<{ data: { exam_id: string; deleted: boolean } }> {
+    return callBackend(`${getBackendUrl()}/api/superadmin/exams/${encodeURIComponent(examId)}`, { method: 'DELETE' });
+}
+
 // ─── Question-bank inventory (read-only counts) ─────────────────────────────
 // Live counts of how many questions exist per exam, broken down by component
 // (Diagnostics / Daily Drills / Internal Assessment / Mock Test) and, within
