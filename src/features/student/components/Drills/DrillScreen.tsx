@@ -324,7 +324,7 @@ export default function DrillScreen() {
         // Keep the backend's round-robin cycle order (current drill first) — do NOT re-sort by
         // score, or exams whose sub-skills tie on the skill band (OET) pin one skill to the top.
         const entries: QueueEntry[] = fq.map((it: any) => ({
-          name: toSubSkillLabel(it.sub_skill),
+          name: it.label || toSubSkillLabel(it.sub_skill),
           skill: it.skill,
           score: Number(it.score) || 0,
           isCurrent: String(it.skill).toUpperCase() === targetSkillUp && normaliseSubSkillKey(it.sub_skill) === targetSubNorm,
